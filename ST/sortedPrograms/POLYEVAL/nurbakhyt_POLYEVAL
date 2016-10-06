@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+#define pd pair < int, ull >
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)3e5 + 123;
+const double eps = 1e-6;
+const int mod = 786433;
+
+using namespace std;
+
+int n;
+int a[MAX_N];
+
+inline int get(int x) {
+    int res = a[n];
+    for (int i = n - 1; i >= 0; i--)
+        res = (1ll * res * x + a[i]) % mod;
+    return res;
+}
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+    scanf("%d", &n);
+    for (int i = 0; i <= n; i++)
+        scanf("%d", &a[i]);
+    int query, x;
+    scanf("%d", &query);
+    while(query--) {
+        scanf("%d", &x);
+        printf("%d\n", get(x));
+    }
+    return 0;
+}

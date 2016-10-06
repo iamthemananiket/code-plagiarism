@@ -1,0 +1,44 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int T;
+int n,k;
+int l;
+bool volt[100];
+char s[100][6];
+char t[6];
+
+bool equals(char *a, char *b) {
+    int i;
+    for(i=0; (a[i]!='\0') && (b[i]!='\0') && (a[i] == b[i]); i++);
+    return (a[i] == b[i]);
+}
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n >> k;
+        fill(volt,volt+100,0);
+
+        for(int i=0; i<n; i++) cin >> s[i];
+        for(int i=0; i<k; i++) {
+            cin >> l;
+            for(int j=0; j<l; j++) {
+                cin >> t;
+                for(int m=0; m<n; m++) volt[m] |= equals(s[m],t);
+            }
+        }
+
+        for(int i=0; i<n; i++) {
+            if(volt[i]) {
+                cout << "YES";
+            } else cout << "NO";
+            if(i<n-1) cout << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}

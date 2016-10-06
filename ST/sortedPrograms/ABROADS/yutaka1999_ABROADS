@@ -1,0 +1,147 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <set>
+#define SIZE 500005
+
+using namespace std;
+typedef long long int ll;
+
+struct UF
+{
+	int par[SIZE],rank[SIZE];
+	ll sum[SIZE];
+	
+	void init(int n)
+	{
+		for(int i=0;i<n;i++)
+		{
+			par[i]=i;
+			rank[i]=0;
+			sum[i]=0;
+		}
+	}
+	int find(int x)
+	{
+		if(par[x]==x) return x;
+		return par[x]=find(par[x]);
+	}
+	void ins(int x,int k)
+	{
+		x=find(x);
+		sum[x]+=k;
+	}
+	void unite(int x,int y)
+	{
+		x=find(x);
+		y=find(y);
+		if(x==y) return;
+		if(rank[x]<rank[y])
+		{
+			par[x]=y;
+			sum[y]+=sum[x];
+			if(rank[x]==rank[y]) rank[x]++;
+		}
+		else
+		{
+			par[y]=x;
+			sum[x]+=sum[y];
+			if(rank[x]==rank[y]) rank[x]++;
+		}
+	}
+	bool same(int x,int y)
+	{
+		return find(x)==find(y);
+	}
+	bool is_root(int x)
+	{
+		return find(x)==x;
+	}
+	ll get(int x)
+	{
+		return sum[find(x)];
+	}
+};
+UF uf;
+int gt[SIZE];
+int left[SIZE],right[SIZE];
+bool use[SIZE],ch[SIZE];
+int tp[SIZE],fr[SIZE],sc[SIZE];
+ll ans[SIZE];
+multiset <ll> mx;
+multiset <ll>::iterator it;
+char str[SIZE];
+
+int main()
+{
+	int n,m,q;
+	scanf("%d %d %d",&n,&m,&q);
+	for(int i=0;i<n;i++) scanf("%d",&gt[i]);
+	for(int i=0;i<m;i++)
+	{
+		int a,b;
+		scanf("%d %d",&a,&b);a--;b--;
+		left[i]=a,right[i]=b;
+		use[i]=true;
+	}
+	for(int i=0;i<q;i++)
+	{
+		scanf("%s",&str);
+		if(str[0]=='D')
+		{
+			tp[i]=0;
+			scanf("%d",&fr[i]);fr[i]--;
+			ch[i]=use[fr[i]];
+			use[fr[i]]=false;
+		}
+		else
+		{
+			tp[i]=1;
+			scanf("%d %d",&fr[i],&sc[i]);
+			fr[i]--;
+			swap(gt[fr[i]],sc[i]);
+		}
+	}
+	uf.init(n+2);
+	for(int i=0;i<n;i++) uf.ins(i,gt[i]);
+	for(int i=0;i<m;i++)
+	{
+		if(use[i])
+		{
+			uf.unite(left[i],right[i]);
+		}
+	}
+	for(int i=0;i<n;i++) if(uf.is_root(i)) mx.insert(uf.get(i));
+	for(int i=q-1;i>=0;i--)
+	{
+		it=mx.end();it--;
+		ans[i]=*it;
+		if(tp[i]==0)
+		{
+			int v=fr[i];
+			if(ch[i]&&!uf.same(left[v],right[v]))
+			{
+				it=mx.lower_bound(uf.get(left[v]));
+				mx.erase(it);
+				it=mx.lower_bound(uf.get(right[v]));
+				mx.erase(it);
+				uf.unite(left[v],right[v]);
+				mx.insert(uf.get(left[v]));
+			}
+		}
+		else
+		{
+			//printf("%lld\n",uf.get(fr[i]));
+			it=mx.lower_bound(uf.get(fr[i]));
+			//printf("%lld\n",*it);
+			mx.erase(it);
+			uf.ins(fr[i],sc[i]-gt[fr[i]]);
+			mx.insert(uf.get(fr[i]));
+			gt[fr[i]]=sc[i];
+		}
+	}
+	for(int i=0;i<q;i++) printf("%lld\n",ans[i]);
+	return 0;
+}

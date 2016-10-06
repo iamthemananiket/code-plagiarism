@@ -1,0 +1,76 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 2000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll pw[maxs];
+vector<ll>v,v1;
+int main()
+{
+	ll t,i,j,n,d,carr,ans;
+	sc("%lld",&t);
+	pw[0]=1;
+	for(i=1;i<maxs;i++){
+		pw[i]=(pw[i-1]*23);
+		if(pw[i]>=N){
+			pw[i]%=N;
+		}
+	}
+	while(t--){
+		sc("%lld %lld",&n,&d);
+		for(i=0;i<n;i++){
+			v.pb(d*d*(i+1));
+		}
+		for(i=n-1;i>0;i--){
+			v.pb(d*d*i);
+		}
+		ans=0;
+		carr=0;
+		for(i=0;i<v.size();i++){
+			v1.pb((v[i]+carr)%10);
+			carr=(v[i]+carr)/10;
+		}
+		while(carr>0){
+			v1.pb(carr%10);
+			carr=carr/10;
+		}
+		ll len=v1.size();
+		for(i=len-1;i>=0;i--){
+			ans=ans+pw[len-1-i]*v1[i];
+			if(ans>=N){
+				ans%=N;
+			}
+		}
+		pr("%lld\n",ans);
+		v.clear();
+		v1.clear();
+	}
+	return 0;
+}

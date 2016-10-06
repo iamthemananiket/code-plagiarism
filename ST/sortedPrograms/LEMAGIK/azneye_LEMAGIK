@@ -1,0 +1,81 @@
+/*
+ * Codechef 2013 Ode2Code
+ * Chef and Magic
+ * File:   LEMAGIK.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 16, 2013, 11:08:11 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace LEMAGIK {
+char a[555], b[555];
+int dp[555][555];
+
+void solve(int test_num) {
+  scanf("%s %s", a + 1, b + 1);
+  const int A = strlen(a + 1), B = strlen(b + 1);
+  for (int i = 0; i <= A; i++)
+    dp[i][0] = i;
+  for (int j = 0; j <= B; j++)
+    dp[0][j] = j;
+  for (int i = 1; i <= A; i++) {
+    for (int j = 1; j <= B; j++) {
+      if (a[i] == b[j])
+        dp[i][j] = dp[i - 1][j - 1];
+      else {
+        dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1]);
+        dp[i][j] = min(dp[i][j], 1 + dp[i - 1][j - 1]);
+      }
+    }
+  }
+  printf("%d\n", dp[A][B]);
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  LEMAGIK::solve();
+  return 0;
+}

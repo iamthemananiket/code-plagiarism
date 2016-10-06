@@ -1,0 +1,74 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define mp make_pair
+#define fi first
+#define se second
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define sz(x) (int((x).size()))
+#define bit(x) (1 << (x))
+#define cnt1(x) (__builtin_popcount(x))
+
+template<class T, class U>
+inline void chkmax(T& x, U y) {
+	if (x < y) x = y;
+}
+
+template<class T, class U>
+inline void chkmin(T& x, U y) {
+	if (y < x) x = y;
+}
+
+typedef string SS;
+typedef vector<SS> V1;
+typedef vector<pair<SS, V1> > V2;
+typedef vector<pair<SS, V2> > V3;
+V3 v3;
+const int MX = 1005;
+char c[MX], e[MX], s[MX];
+
+int main() {
+	
+	int n, i, j, k;
+	
+	for (scanf("%d", &n); n--; ) {
+		scanf("%s%s%s", c, e, s);
+		for (i = 0; i < sz(v3); i++) {
+			if (v3[i].fi == c) break; 
+		}
+		if (i == sz(v3)) v3.pb(mp(c, V2()));
+		V2& v2 = v3[i].se;
+		for (i = 0; i < sz(v2); i++) {
+			if (v2[i].fi == e) break;
+		}
+		if (i == sz(v2)) v2.pb(mp(e, V1()));
+		v2[i].se.pb(s);
+	}
+	for (i = sz(v3) - 1; i >= 0; i--) {
+		puts(v3[i].fi.c_str());
+		V2& v2 = v3[i].se;
+		for (j = 0; j < sz(v2); j++) { 
+			puts(v2[j].fi.c_str());
+			V1& v1 = v2[j].se;
+			for (k = sz(v1) - 1; k >= 0; k--) puts(v1[k].c_str());
+		}
+	}
+	return 0;
+}

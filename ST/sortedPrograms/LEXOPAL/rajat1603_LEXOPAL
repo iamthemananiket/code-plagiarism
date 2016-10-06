@@ -1,0 +1,41 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+int t;
+char str[N];
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%s" , str);
+        int n = strlen(str);
+        int l = 0;
+        int r = n - 1;
+        bool rekt = 0;
+        while(l <= r){
+            if(str[l] != '.' && str[r] != '.'){
+                if(str[l] != str[r]){
+                    rekt = 1;
+                    break;
+                }
+            }
+            else if(str[l] == '.' && str[r] == '.'){
+                str[l] = 'a';
+                str[r] = 'a';
+            }
+            else if(str[l] == '.' && str[r] != '.'){
+                str[l] = str[r];
+            }
+            else{
+                str[r] = str[l];
+            }
+            ++l;
+            --r;
+        }
+        if(rekt){
+            printf("-1\n");
+        }
+        else{
+            printf("%s\n" , str);
+        }
+    }
+}

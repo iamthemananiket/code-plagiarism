@@ -1,0 +1,71 @@
+//Program: rbtree
+//Author: gary
+//Date: 07/11/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAX_N = ;
+
+int height(int x){
+  int h = 0;
+  while(x > 0){
+    x >>= 1;
+    h ++;
+  }
+  return h;
+}
+
+int main(){
+  int u, v;
+  int flag = 0;
+  char buf[10];
+  int Q;
+  
+  scanf("%d", &Q);
+  while(Q--){
+    scanf("%s", buf);
+    if(buf[1] == 'i') flag ^= 1;
+    else {
+      scanf("%d%d", &u, &v);
+      int hu = height(u), hv = height(v);
+      int c[2] = {};
+      if(hu < hv){
+	swap(u, v);
+	swap(hu, hv);
+      }
+      while(hu > hv){
+	c[hu & 1] ++;
+	u >>= 1;
+	hu --;
+      }
+      while(u != v){
+	c[hu & 1] += 2;
+	u >>= 1;
+	v >>= 1;
+	hu --;
+      }
+      c[hu & 1] ++;      
+      if(buf[1] == 'b') printf("%d\n", c[1 ^ flag]);
+      if(buf[1] == 'r') printf("%d\n", c[0 ^ flag]);
+    }
+  }
+  return 0;
+}

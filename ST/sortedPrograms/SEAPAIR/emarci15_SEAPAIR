@@ -1,0 +1,82 @@
+#include <cstdio>
+#include <algorithm>
+
+#define mod 1000000007
+#define mp make_pair
+#define fi first
+#define se second
+
+using namespace std;
+
+int T;
+int k,n;
+long long x,d;
+bool akt[100001];
+pair<long long, long long> b[100000];
+pair<long long, int> ub[100000];
+bool lakt[100001];
+pair<long long, int> lb[100001];
+
+pair<long long, long long> r[100000];
+long long sol;
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&k);
+        for(int i=0; i<n; i++) {
+            scanf("%lld%lld",&x,&d);
+            b[i].fi = x*d;
+            b[i].se = (x*(d+1ll))-1ll;
+
+            ub[i].fi = b[i].se;
+            ub[i].se = lb[i].se = i;
+            lb[i].fi = -b[i].fi;
+        }
+        lb[n] = mp(0ll,n);
+
+        if(k==n) {
+            printf("226732711\n"); // 10^100 % mod
+            continue;
+        }
+
+        fill(akt,akt+n,0);
+        fill(lakt,lakt+n,0);
+        sort(ub,ub+n); sort(lb,lb+n+1);
+        for(int i=0; i<n; i++) lb[i].fi *= -1;
+
+        for(int i=0; i<k; i++) akt[ub[i].se] = 1;
+        int ui = k-1;
+        int li = -1;
+
+        for(int i=k;;i--) {
+            while(akt[lb[li+1].se]) {
+                li++;
+                lakt[lb[li].se] = 1;
+            }
+            r[i] = mp(lb[li+1].fi,ub[ui+1].fi);
+            if(!i) break;
+            if(!lakt[ub[i-1].se]) {
+                akt[ub[i-1].se] = 0;
+
+                lakt[lb[li+1].se] = akt[lb[li+1].se] = 1;
+                li++;
+                if(!akt[ub[i-1].se]) ui = i-2;
+                while((ui>=0) && (!akt[ub[ui].se])) ui--;
+            }
+        }
+
+        long long v(0ll); sol = 0ll;
+        for(int i=0; i<=k; i++) {
+            long long ke(max(v,r[i].fi));
+            if(ke <= r[i].se) {
+                sol = (sol+(r[i].se+1ll-ke)) % mod;
+                v = r[i].se+1ll;
+            }
+        }
+
+        printf("%lld\n",sol);
+    }
+
+    return 0;
+}

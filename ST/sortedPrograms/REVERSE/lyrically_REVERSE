@@ -1,0 +1,83 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int N, M;
+int m, ptr[100010], nxt[200010], zu[200010], co[200010];
+int d[100010];
+
+int main() {
+	
+	
+	for (; ~scanf("%d%d", &N, &M); ) {
+		m = 0;
+		fill(ptr, ptr + N, -1);
+		for (int i = 0; i < M; ++i) {
+			const int u = in() - 1;
+			const int v = in() - 1;
+			nxt[m] = ptr[u]; ptr[u] = m; zu[m] = v; co[m] = 0; ++m;
+			nxt[m] = ptr[v]; ptr[v] = m; zu[m] = u; co[m] = 1; ++m;
+		}
+		deque<pint> q;
+		fill(d, d + N, N);
+		d[0] = 0;
+		q.emplace_back(0, 0);
+		for (; !q.empty(); ) {
+			const int c = q.front().first;
+			const int u = q.front().second;
+			q.pop_front();
+			if (d[u] != c) {
+				continue;
+			}
+			if (u == N - 1) {
+				break;
+			}
+			for (int i = ptr[u]; ~i; i = nxt[i]) {
+				const int cc = c + co[i];
+				const int v = zu[i];
+				if (d[v] > cc) {
+					d[v] = cc;
+					co[i] ? q.emplace_back(cc, v) : q.emplace_front(cc, v);
+				}
+			}
+		}
+		if (d[N - 1] >= N) {
+			puts("-1");
+		} else {
+			printf("%d\n", d[N - 1]);
+		}
+	}
+	
+	return 0;
+}
+

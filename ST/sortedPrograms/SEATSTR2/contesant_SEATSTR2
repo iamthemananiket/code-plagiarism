@@ -1,0 +1,151 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <cassert>
+#include <iostream>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#define eprintf(...) fprintf(stderr,__VA_ARGS__)
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+typedef vector<ii> vii;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+const int mod = 1e9 + 7;
+const int N = 2e5 + 100;
+
+int fact[N], ifact[N];
+
+inline int add(int x, int y) {
+  return (x + y >= mod)? x + y - mod : x + y;
+}
+
+inline int mul(int x, int y) {
+  return ll(x) * y % mod;
+}
+
+inline int mpow(int x, int n) {
+  int res = 1;
+  while (n > 0) {
+    if (n & 1)
+      res = mul(res, x);
+    x = mul(x, x);
+    n >>= 1;
+  }
+  return res;
+}
+
+inline int choose(int n, int k) {
+  if (k > n) return 0;
+  return mul(fact[n], mul(ifact[n - k], ifact[k]));
+}
+
+int stupid(string s) {
+  sort(all(s));
+  string a = s;
+  int res = 0;
+  do {
+    string b = s;
+    do {
+      int n = s.size();
+      bool bad = false;
+      for (int i1 = 0; i1 < n; i1++) {
+        for (int i2 = 0; i2 < n; i2++) {
+          for (int i3 = 0; i3 < n; i3++) {
+            for (int i4 = 0; i4 < n; i4++) {
+              swap(a[i1], a[i2]);
+              swap(b[i3], b[i4]);
+              if (a == b) {
+                bad = true;
+              }
+              swap(a[i1], a[i2]);
+              swap(b[i3], b[i4]);   
+            }
+          }
+        }
+      }
+      if (!bad) {
+        res += 1;
+      }
+    } while (next_permutation(all(b)));
+  } while (next_permutation(all(a)));
+  return res;
+}
+
+int main(){
+  fact[0] = 1;
+  for (int i = 1; i < N; i++) {
+    fact[i] = mul(fact[i - 1], i);
+  }
+  ifact[N - 1] = mpow(fact[N - 1], mod - 2);
+  for (int i = N - 2; i >= 0; i--) {
+    ifact[i] = mul(ifact[i + 1], i + 1);
+  }
+
+  int t = read();
+  for (int i = 0; i < t; i++) {
+    string s;
+    cin >> s;
+    vi cnt(26, 0);
+    for (char c : s) {
+      cnt[c - 'a'] += 1;
+    }
+      
+    int n = s.size();
+    int tot = n;
+    int allWays = 1;
+    for (int i = 0; i < 26; i++) {
+      allWays = mul(allWays, choose(tot, cnt[i]));
+      tot -= cnt[i];
+    }
+
+    eprintf("all = %d\n", allWays);
+
+    int ways = 0;
+    ways = add(ways, 1); //all same
+    for (int i1 = 0; i1 < 26; i1++) {
+      for (int i2 = i1 + 1; i2 < 26; i2++) {
+        int prod2 = mul(cnt[i1], cnt[i2]);
+        ways = add(ways, prod2);
+        // a b, a b
+        // a b, c d
+        // a b, a c
+        ways = add(ways, mul(choose(cnt[i1], 2), choose(cnt[i2], 2)));
+        for (int i3 = i2 + 1; i3 < 26; i3++) {
+          int prod3 = mul(prod2, cnt[i3]);
+          ways = add(ways, mul(prod3, 2));
+          ways = add(ways, mul(choose(cnt[i1], 2), mul(mul(cnt[i2], cnt[i3]), 2)));
+          ways = add(ways, mul(choose(cnt[i2], 2), mul(mul(cnt[i1], cnt[i3]), 2)));
+          ways = add(ways, mul(choose(cnt[i3], 2), mul(mul(cnt[i1], cnt[i2]), 2)));
+          for (int i4 = i3 + 1; i4 < 26; i4++) {
+            ways = add(ways, mul(mul(prod3, cnt[i4]), 3));
+          }
+        }
+      }
+    }
+
+    eprintf("ways = %d\n", ways);
+
+    ways = mul(ways, allWays);
+    int res = add(mul(allWays, allWays), mod - ways);
+    printf("%d\n", res);
+    //eprintf("stupid = %d\n", stupid(s));
+  }
+  return 0;
+}

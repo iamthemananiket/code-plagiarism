@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+#include <string.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef long double ld;
+typedef pair<ll, int> pll;
+
+vector<map<int, int> > t;
+vector<int> dom;
+vector<int> subtree;
+int n;
+vector<int> a;
+
+void update(int pos, int val)
+{
+    int i = pos + n;
+    for (; i; i >>= 1) {
+        --t[i][a[pos]];
+        if (!t[i][a[pos]]) {
+            t[i].erase(a[pos]);
+        }
+    }
+    pos += n;
+    t[pos][val] = 1;
+    dom[pos] = val;
+    for (i = (pos >> 1); i; i >>= 1) {
+        ++t[i][val];
+        if (t[i].count(dom[i * 2]) && t[i][dom[i * 2]] > subtree[i] / 2) {
+            dom[i] = dom[i * 2];
+        }
+        if (t[i].count(dom[i * 2 + 1]) && t[i][dom[i * 2 + 1]] > subtree[i] / 2) {
+            dom[i] = dom[i * 2 + 1];
+        }
+    }
+}
+
+vector<int> get(int l, int r)
+{
+    vector<int> ans;
+    for (l += n, r += n; l <= r; l = (l + 1) >> 1, r = (r - 1) >> 1) {
+        if (l & 1) {
+            ans.pb(l);
+        }
+        if (!(r & 1)) {
+            ans.pb(r);
+        }
+    }
+    return ans;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //freopen("input.txt", "r", stdin);
+
+    int q;
+    cin >> n >> q;
+
+    a.resize(n);
+    dom.resize(2 * n);
+    t.resize(2 * n);
+    subtree.resize(2 * n);
+    for (int i = 0; i < n; ++i) {
+        cin >> a[i];
+    }
+
+    for (int i = 0; i < n; ++i) {
+        dom[i + n] = a[i];
+        t[i + n][a[i]] = 1;
+        subtree[i + n] = 1;
+    }
+
+    for (int i = n - 1; i; --i) {
+        subtree[i] = subtree[i * 2] + subtree[i * 2 + 1];
+        t[i] = t[i * 2];
+        for (auto& it : t[i * 2 + 1]) {
+            t[i][it.first] += it.second;
+        }
+        if (t[i].count(dom[i * 2]) && t[i][dom[i * 2]] > subtree[i] / 2) {
+            dom[i] = dom[i * 2];
+        }
+        if (t[i].count(dom[i * 2 + 1]) && t[i][dom[i * 2 + 1]] > subtree[i] / 2) {
+            dom[i] = dom[i * 2 + 1];
+        }
+    }
+
+    while (q--) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            int pos, val;
+            cin >> pos >> val;
+            --pos;
+            update(pos, val);
+            a[pos] = val;
+        } else {
+            int l, r;
+            cin >> l >> r;
+            --l, --r;
+            vector<int> g = get(l, r);
+            int s = 0;
+            int ans = -1;
+            for (int x : g) {
+                s += subtree[x];
+            }
+            for (int x : g) {
+                int val = dom[x];
+                if (val == -1) {
+                    continue;
+                }
+                int cnt = 0;
+                for (int y : g) {
+                    if (t[y].count(val)) {
+                        cnt += t[y][val];
+                    }
+                }
+                if (cnt > s / 2) {
+                    ans = x;
+                    break;
+                }
+            }
+            cout << (ans == -1 ? "No\n" : "Yes\n");
+        }
+    }
+
+}

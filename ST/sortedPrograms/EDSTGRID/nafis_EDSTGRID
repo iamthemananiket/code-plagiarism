@@ -1,0 +1,131 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         2.0*acos(0.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     (A).begin(), (A).end()
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    if(e==0)return 1;
+    if(e%2==0){LL t=bigmod(p,e/2,M);return (T)((t*t)%M);}
+    return (T)(((LL)bigmod(p,e-1,M)*(LL)(p))%M);
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+char pp[101][101];
+int ar[101][101];
+pair < int, int > p1[10001], p2[10001];
+vector < pair < int, pair < pair < int, int >, pair < int, int > > > >vc;
+main()
+{
+    ios_base::sync_with_stdio(0); cin.tie(0);
+	LL a,b = 0,c,d,e = 0,f,g,h = 0,x = 0,y,z;
+    cin >> a;
+    while(a--){
+        cin >> b >> c >> d; cin >> d;
+        REP(i, b)cin >> pp[i];
+        e = 0;
+        REP(i, b)REP(j, c){
+            if(pp[i][j] == 'B')p1[e++] = mp(i, j);
+        }
+        f = 100000000; g = 0;
+        REP(i, e){
+            h = 0;
+            REP(j, e)h += abs(p1[i].xx - p1[j].xx) + abs(p1[i].yy - p1[j].yy);
+            if(h < f){
+                h = f;
+                g = i;
+            }
+        }
+        set0(ar);
+        f = 0;
+        REP(i, e){
+            ar[p1[i].xx][p1[i].yy] = 1;
+            p2[f++] = mp(abs(p1[i].xx - p1[g].xx) + abs(p1[i].yy - p1[g].yy), i);
+        }
+        sort(p2, p2 + f);
+        vc.clear();
+        for(int i = 1; i < e; i++){
+            f = p2[i].yy;
+            if(p2[i].xx >= d){
+                vc.pb(mp(3, mp(mp(p1[f].xx, p1[f].yy), mp(0, 0))));
+                ar[p1[f].xx][p1[f].yy] = 0;
+            }
+            else {
+                while(abs(p1[g].xx - p1[f].xx) > 0){
+                    if(p1[g].xx > p1[f].xx){
+                        if(ar[p1[f].xx + 1][p1[f].yy] == 1)goto ps;
+                        ar[p1[f].xx + 1][p1[f].yy] = 1;
+                        ar[p1[f].xx][p1[f].yy] = 0;
+                        vc.pb(mp(1, mp(mp(p1[f].xx, p1[f].yy), mp(p1[f].xx + 1, p1[f].yy))));
+                        p1[f].xx++;
+                    }
+                    else {
+                        if(ar[p1[f].xx - 1][p1[f].yy] == 1)goto ps;
+                        ar[p1[f].xx - 1][p1[f].yy] = 1;
+                        ar[p1[f].xx][p1[f].yy] = 0;
+                        vc.pb(mp(1, mp(mp(p1[f].xx, p1[f].yy), mp(p1[f].xx - 1, p1[f].yy))));
+                        p1[f].xx--;
+                    }
+
+                }
+                while(abs(p1[g].yy - p1[f].yy) > 0){
+                    if(p1[g].yy > p1[f].yy){
+                        if(ar[p1[f].xx][p1[f].yy + 1] == 1)goto ps;
+                        ar[p1[f].xx][p1[f].yy + 1] = 1;
+                        ar[p1[f].xx][p1[f].yy] = 0;
+                        vc.pb(mp(1, mp(mp(p1[f].xx, p1[f].yy), mp(p1[f].xx, p1[f].yy + 1))));
+                        p1[f].yy++;
+                    }
+                    else {
+                        if(ar[p1[f].xx][p1[f].yy - 1] == 1)goto ps;
+                        ar[p1[f].xx][p1[f].yy - 1] = 1;
+                        ar[p1[f].xx][p1[f].yy] = 0;
+                        vc.pb(mp(1, mp(mp(p1[f].xx, p1[f].yy), mp(p1[f].xx, p1[f].yy - 1))));
+                        p1[f].yy--;
+                    }
+
+                }
+                ps: continue;
+            }
+        }
+        cout << vc.size() << endl;
+        REP(i, vc.size()){
+            if(vc[i].xx == 1){
+                cout << vc[i].xx << " " << vc[i].yy.xx.xx + 1 << " " << vc[i].yy.xx.yy + 1 << " " << vc[i].yy.yy.xx + 1 << " " << vc[i].yy.yy.yy + 1 << endl;
+            }
+            else cout << vc[i].xx << " " << vc[i].yy.xx.xx + 1 << " " << vc[i].yy.xx.yy + 1 << endl;
+        }
+    }
+}

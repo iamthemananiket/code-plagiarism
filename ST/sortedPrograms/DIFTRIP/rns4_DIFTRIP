@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define N 100010
+
+const int L = N << 1;
+
+struct Node {
+
+	Node *link;
+	int len;
+	map<int, Node*> nxt;
+
+	void init() {
+		nxt.clear();
+		link = NULL;
+		len = 0;
+	}
+};
+
+Node *last;
+
+struct SuffixAutomaton {
+
+	Node sam[L], *head;
+	int SZ;
+
+	void init() {
+		sam[0].init();
+		head = last = &sam[0];
+		SZ = 1;
+	}
+
+	void insert(int x) {
+		Node *nx = last -> nxt[x];
+		if(!nx) {
+			Node *p = &sam[SZ ++], *u = last;
+			p->init();
+			p->len = last->len + 1;
+			last = p;
+			for (;u && !u->nxt[x]; u = u->link) u->nxt[x] = p;
+			if (!u) p->link = head;
+			else if (u->nxt[x]->len == u->len + 1) p->link = u->nxt[x];
+			else {
+				Node *r = &sam[SZ ++], *q = u->nxt[x];
+				*r = *q;
+				r->len = u->len + 1;
+				p->link = q->link = r;
+				for (; u && u->nxt[x] == q; u = u->link) u->nxt[x] = r;
+			}
+		} else {
+			if(nx->len == last->len + 1) last = nx;
+			else {
+				Node *p = nx, *u = last;
+				Node *r = &sam[SZ ++], *q = u->nxt[x];
+				*r = *q;
+				r->len = u->len + 1;
+				p->link = q->link = r;
+				for (; u && u->nxt[x] == q; u = u->link) u->nxt[x] = r;
+				last = r;
+			}
+		}
+	}
+} SAM;
+
+int to[N << 1], head[N], nxt[N << 1];
+int rr[N];
+
+void addEdge(int a, int b, int i) {
+	to[i] = b;
+	nxt[i] = head[a];
+	head[a] = i;
+}
+
+void dfs(int r, int pa, Node *en) {
+	last = en;
+	SAM.insert(rr[r]);
+	Node *tp = last;
+	for(int i = head[r]; i; i = nxt[i]) {
+		if(to[i] == pa) continue;
+		dfs(to[i], r, tp);
+	}
+}
+
+int n;
+
+int main() {
+	//freopen("in.txt", "r", stdin);
+	int siz = 256 << 20; // 256MB
+	char *_ = (char*)malloc(siz) + siz;
+	__asm__("movl %0, %%esp\n"::"r"(_));
+	SAM.init();
+	scanf("%d", &n);
+	for(int i = 1; i < n; i ++) {
+		int x, y;
+		scanf("%d%d", &x, &y);
+		rr[x] ++; rr[y] ++;
+		addEdge(x, y, i);
+		addEdge(y, x, i + n - 1);
+	}
+	dfs(1, 0, last);
+	long long rt = 0;
+	for(int i = 0; i < SAM.SZ; i ++) {
+		rt += SAM.sam[i].len;
+		if(SAM.sam[i].link) rt -= SAM.sam[i].link->len;
+	}
+	cout << rt << endl;
+	return 0;
+}

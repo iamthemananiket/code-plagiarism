@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, K;
+long long pref[1000001];
+
+void add(int l, int r)
+{
+    if(l>r)
+        return;
+    pref[l]++;
+    pref[r+1]--;
+}
+
+void _main()
+{
+    scanf("%d%d", &N, &K);
+    int a, b;
+    for(int i=0; i<N; i++)
+        pref[i]=0;
+    for(int i=0; i<N; i++)
+    {
+        scanf("%d%d", &a, &b);
+        add(0, a-1);
+        add(b+1, N-1);
+    }
+    for(int i=1; i<N; i++)
+        pref[i]+=pref[i-1];
+    for(int i=1; i<N; i++)
+        pref[i]+=pref[i-1];
+    long long ans=pref[K-1];
+    for(int i=K; i<N; i++)
+        ans=min(ans, pref[i]-pref[i-K]);
+    printf("%lld\n", ans);
+}
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

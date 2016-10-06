@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 2000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+double dp[mins][mins];
+int mark[mins][mins],price[mins],dis[mins];
+
+double fun(int n,int k){
+	if(n==0){
+		return 0;
+	}
+	if(mark[n][k]!=0){
+		return dp[n][k];
+	}
+	double ret=0;
+	double prob=(double)k/n;
+	if(k!=0){
+		ret=(double)(price[n]*dis[k])/100.0;
+		ret=ret*prob;
+		ret=ret+fun(n-1,k-1)*prob;
+	}
+	ret+=(1-prob)*fun(n-1,k);
+	mark[n][k]=1;
+	dp[n][k]=ret;
+	return ret;
+}
+
+int main()
+{
+	int t,n,k,i,j;
+	sc("%d",&t);
+	while(t--){
+		sc("%d %d",&n,&k);
+		for(i=1;i<=n;i++){
+			sc("%d",&price[i]);
+		}
+		for(i=1;i<=k;i++){
+			sc("%d",&dis[i]);
+		}
+		sort(price+1,price+n+1);
+		sort(dis+1,dis+k+1);
+		for(i=0;i<=n;i++){
+			for(j=0;j<=min(i,k);j++){
+				dp[i][j]=0;
+			}
+		}
+		for(i=1;i<=n;i++){
+			for(j=1;j<=min(i,k);j++){
+				double prob=(double)j/i;
+				dp[i][j]=prob*(price[i]*dis[j]+dp[i-1][j-1])+(1-prob)*dp[i-1][j];
+			}
+		}
+		double ans=dp[n][k]/100.0;
+		pr("%.3lf\n",ans);
+	}
+}

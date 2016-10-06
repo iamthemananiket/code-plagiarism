@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int a[50];
+int b[50];
+
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	 {
+	 	int n;
+	 	cin>>n;
+	 	
+	 	for(int i=0;i<n;i++)
+	 	{
+	 		cin>>a[i];
+		}
+	 	
+		 for(int i=0;i<n;i++)
+	 	 {
+	 		cin>>b[i];
+		 }
+	 	
+		sort(a,a+n);
+	 	sort(b,b+n);
+	 	
+	 	int c=0;
+	 	for(int rack=0,pie=0;rack<n && pie<n;)
+	 	{
+	 		if(a[pie]<=b[rack])
+	 			{
+	 				c++;
+	 				pie++;
+	 				rack++;
+				 }
+			else
+				rack++;
+		 }
+		 cout<<c<<endl;
+	 	
+	 }
+}

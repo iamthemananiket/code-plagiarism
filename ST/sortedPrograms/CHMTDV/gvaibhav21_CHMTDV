@@ -1,0 +1,332 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",&mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 510
+#define INF 3e14
+#define EPS 10000
+ll LOWER_BOUND;
+
+vector<int> v1;
+vector<int> v2;
+vector<int> minv1;
+vector<int> minv2;
+ll minscore=INF;
+int n,p,tt;
+ll a[N][N];
+ll pre1[N][N];
+ll pre2[N][N];
+ll b[N][N];
+ll prevans;
+clock_t start;
+vector<int> getv2(vector<int> v1,ll mid)
+{
+	vector<int> v2;
+	int i,j,k,l;
+	v2.clear();
+	v2.PB(0);
+	for(i=1;i<=p;++i)
+	{
+		ll Sum[N];
+		clr(Sum);
+		ll maxx=-1;
+		for(j=v2[i-1]+1;j<=n;++j)
+		{
+			for(k=1;k<=p;++k)
+			{
+				Sum[k]+=pre2[v1[k]][j]-pre2[v1[k-1]][j];
+				// for(l=v1[k-1]+1;l<=v1[k];++l)
+				// {
+				// 	Sum[k]+=a[l][j];
+				// 	maxx=max(maxx,Sum[k]);
+				// }
+				maxx=max(maxx,Sum[k]);
+			}
+			if(maxx > mid)
+				break;
+		}
+		v2.PB(j-1);
+	}
+	return v2;
+}
+vector<int> v1_to_v2(vector<int> v1,ll lim)
+{
+	vector<int> v2;
+	ll lo = LOWER_BOUND,hi = lim,mid;
+	while(lo+EPS<hi)
+	{
+		mid=(lo+hi)/2;
+		//int prev=0;
+		v2=getv2(v1,mid);
+		if(v2[p] >= n)
+			hi=mid;
+		else
+			lo=mid+1;
+	}
+	prevans=hi;
+	return getv2(v1,hi);
+}
+vector<int> getv1(vector<int> v2,ll mid)
+{
+	vector<int> v1;
+	int i,j,k,l;
+	v1.clear();
+	v1.PB(0);
+	for(i=1;i<=p;++i)
+	{
+		ll Sum[N];
+		clr(Sum);
+		ll maxx=-1;
+		for(j=v1[i-1]+1;j<=n;++j)
+		{
+			for(k=1;k<=p;++k)
+			{
+				Sum[k]+=pre1[j][v2[k]]-pre1[j][v2[k-1]];
+				// for(l=v2[k-1]+1;l<=v2[k];++l)
+				// {
+				// 	Sum[k]+=a[j][l];
+				// 	maxx=max(maxx,Sum[k]);
+				// }
+				maxx=max(maxx,Sum[k]);
+			}
+			if(maxx > mid)
+				break;
+		}
+		v1.PB(j-1);
+	}
+	return v1;
+}
+vector<int> v2_to_v1(vector<int> v2,ll lim)
+{
+	vector<int> v1;
+	ll lo = LOWER_BOUND,hi = lim,mid;
+	while(lo+EPS<hi)
+	{
+		mid=(lo+hi)/2;
+		//int prev=0;
+		v1=getv1(v2,mid);
+		if(v1[p] >= n)
+			hi=mid;
+		else
+			lo=mid+1;
+	}
+	prevans=hi;
+	return getv1(v2,hi);
+}
+ll getans(vector<int> v1,vector<int> v2)
+{
+	//debug(4);
+	int i,j,k,l;
+	ll maxx=-1;
+	for(i=1;i<=p;++i)
+	for(j=1;j<=p;++j)
+	{
+		ll s=0;
+		for(k=v1[i-1]+1;k<=v1[i];++k)
+		for(l=v2[j-1]+1;l<=v2[j];++l)
+			s+=a[k][l];
+		maxx=max(maxx,s);
+	}
+	return maxx;
+}
+void process(bool f0,bool f1,bool f2,bool Out)
+{
+	int i,j;
+	if(f1)
+	{
+		for(i=1;i<=n/2;++i)
+			for(j=1;j<=n;++j)
+				swap(a[i][j],a[n+1-i][j]);
+		if(Out)
+		{
+			for(i=0;i<=p;++i)
+				v1[i]=n-v1[i];
+			reverse(v1.begin(),v1.end());
+		}
+	}
+	if(f2)
+	{
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n/2;++j)
+				swap(a[i][j],a[i][n+1-j]);
+		if(Out)
+		{
+			for(i=0;i<=p;++i)
+				v2[i]=n-v2[i];
+			reverse(v2.begin(),v2.end());
+		}
+	}
+	if(f0)
+	{
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n;++j)
+				b[i][j]=a[j][i];
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n;++j)
+				a[i][j]=b[i][j];
+		if(Out)
+			swap(v1,v2);
+	}
+	for(i=1;i<=n;++i)
+	{
+		pre2[0][i]=pre1[i][0]=0;
+		for(j=1;j<=n;++j)
+		{
+			pre1[i][j]=pre1[i][j-1]+a[i][j];
+			pre2[j][i]=pre2[j-1][i]+a[j][i];
+		}
+	}
+
+}
+vector<int> getrandvec()
+{
+	int i;
+	vector<int> temp;
+	for(i=1;i<n;++i)
+		temp.PB(i);
+	random_shuffle(temp.begin(),temp.end());
+	vector<int> ret;
+	for(i=0;i<p;++i)
+		ret.PB(temp[i]);
+	ret.PB(0);
+	ret.PB(n);
+	sort(ret.begin(),ret.end());
+	return ret;
+}
+void calc(int f0,int f1,int f2)
+{
+	int i,j,k;
+	process(f0,f1,f2,0);
+	
+	//debug(1);
+	// ll lo=0,hi=INF,mid;
+	// while(lo<hi)
+	// {
+	// 	mid=(lo+hi)/2;
+	// 	v1.clear();
+	// 	v1.PB(0);
+	// 	for(i=1;i<=p;++i)
+	// 	{
+	// 		ll Sum=0;
+	// 		//ll Prevsum=0;
+	// 		for(j=v1[i-1]+1;j<=n;++j)
+	// 		{
+	// 			Sum+=pre1[j][n];
+	// 			// for(k=1;k<=n;++k)
+	// 			// 	Sum+=a[j][k];
+	// 			if(Sum > mid)
+	// 				break;
+	// 		}
+	// 		v1.PB(j-1);
+	// 	}
+	// 	if(v1[p] == n)
+	// 		hi=mid;
+	// 	else
+	// 		lo=mid+1;
+	// }
+	// mid=lo;
+	// //debug(2);
+	// v1.clear();
+	// v1.PB(0);
+	// for(i=1;i<=p;++i)
+	// {
+	// 	ll Sum=0;
+	// 	ll Prevsum=0;
+	// 	for(j=v1[i-1]+1;j<=n;++j)
+	// 	{
+	// 		Sum+=pre1[j][n];
+	// 		// for(k=1;k<=n;++k)
+	// 		// 	Sum+=a[j][k];
+	// 		if(Sum > mid)
+	// 			break;
+	// 	}
+	// 	v1.PB(j-1);
+	// }
+	// for(j=p-1;j>=1;--j)
+	// 	if(v1[j] >= v1[j+1])
+	// 		v1[j]=v1[j+1]-1;
+	v1=getrandvec();
+	prevans = INF;
+	for(i=0;i<40;++i)
+	{
+		clock_t end = clock();
+		if((double)(end-start)/CLOCKS_PER_SEC > 1.8)
+			break;
+		v2=v1_to_v2(v1,prevans);
+		for(j=p-1;j>=1;--j)
+			if(v2[j] >= v2[j+1])
+				v2[j]=v2[j+1]-1;
+		v1=v2_to_v1(v2,prevans);
+		for(j=p-1;j>=1;--j)
+			if(v1[j] >= v1[j+1])
+				v1[j]=v1[j+1]-1;
+	}
+	process(f0,f1,f2,1);
+	ll ans=getans(v1,v2);
+	if(ans < minscore)
+	{
+		minscore=ans;
+		minv1=v1;
+		minv2=v2;
+	}
+}
+int getrand(int lo,int hi)
+{
+	return rand()%(hi-lo+1) + lo;
+}
+int main()
+{
+	int t,i,j,k,l;
+	start = clock();
+	//srand(12345);
+	// freopen("CHMTDV.in","r",stdin);
+	// sd(t);
+	t=1;
+	double Sum=0;
+	for(tt=0;tt<t;tt++)
+	{
+		LOWER_BOUND = -1;
+		minscore=INF;
+		sd(n);sd(p);
+		ll element_Sum = 0;
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n;++j)
+			{
+				sl(a[i][j]);
+				element_Sum+=a[i][j];
+				LOWER_BOUND = max(LOWER_BOUND,a[i][j]);
+			}
+		double block = ((double)n)/p;
+		//debug(0);
+		for(i=0;i<1;++i)
+		{
+			clock_t end = clock();
+			if((double)(end-start)/CLOCKS_PER_SEC > 1.8)
+				break;
+			calc(0,0,0);
+		}	
+		v1=minv1;v2=minv2;
+		// double ans=((double)getans(v1,v2))/(block*block);
+		// printf("%lf-----------\n",ans);
+		// Sum+=ans;
+		for(i=1;i<p;++i)
+			printf("%d ",v1[i]);
+		printf("\n");
+		for(i=1;i<p;++i)
+			printf("%d ",v2[i]);
+		printf("\n");
+	}
+	// printf("Total: %lf\n",Sum);
+	// clock_t end = clock();
+	// cout <<"Time: " <<(double)(end-start)/CLOCKS_PER_SEC <<" seconds" <<endl;
+ 
+} 

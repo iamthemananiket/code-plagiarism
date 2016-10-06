@@ -1,0 +1,77 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int N,K,Q;
+long long a,b,c,d,e,f;
+int r,s,t,m;
+long long La,Lc,Da,Dc;
+int L1,D1,Lm,Dm;
+int A[10000013];
+int sq[10000013];
+int st[2][10000013];
+int low[10000013];
+int mLa[10000013];
+int mDa[10000013];
+
+const int MOD = 1000000007;
+
+int main() {
+    scanf("%d%d%d",&N,&K,&Q);
+    long long cur = 0;
+    low[1] = cur;
+    for (int i=2;i<=min(N,2*K);i++) {
+        if (i==(1<<(cur+1))) cur+=1;
+        low[i] = cur;
+    }
+    int k = low[K];
+    scanf("%lld%lld%lld%lld%lld%lld%d%d%d%d%d",&a,&b,&c,&d,&e,&f,&r,&s,&t,&m,&A[1]);
+    cur = t;
+    st[1][1] = A[1];
+    sq[1] = ((long long) A[1]*A[1])%m;
+    for (int x=2;x<=N;x++) {
+        cur = (cur*t)%s;
+        if (cur<=r) A[x] = (a*sq[x-1]+b*A[x-1]+c)%m;
+        else A[x] = (d*sq[x-1]+e*A[x-1]+f)%m;
+        sq[x] = ((long long) A[x]*A[x])%m;
+        st[1][x] = A[x];
+    }
+    int which = 1;
+    for (int i=0;i<=k;i++) {
+        for (int j=0;j<=N;j++) {
+            st[1-which][j] = st[which][j];
+            if (j+(1<<i)<=N) st[1-which][j] = min(st[1-which][j],st[which][j+(1<<i)]);
+        }
+        which = 1-which;
+    }
+    long long sum = 0;
+    long long product = 1;
+    scanf("%d%lld%lld%d%d%lld%lld%d",&L1,&La,&Lc,&Lm,&D1,&Da,&Dc,&Dm);
+    L1%=Lm;
+    D1%=Dm;
+    for (int i=1;i<=Lm;i++) {
+        mLa[i] = mLa[i-1]+La;
+        if (mLa[i]>=Lm) mLa[i]-=Lm;
+    }
+    for (int i=1;i<=Dm;i++) {
+        mDa[i] = mDa[i-1]+Da;
+        if (mDa[i]>=Dm) mDa[i]-=Dm;
+    }
+    for (int i=1;i<=Q;i++) {
+        L1 = mLa[L1]+Lc;
+        if (L1>=Lm) L1-=Lm;
+        D1 = mDa[D1]+Dc;
+        if (D1>=Dm) D1-=Dm;
+        int L = L1+1;
+        int R = min(L+K-1+D1,N);
+        int ind = low[R-L+1]-k;
+        if (which==0) ind = 1-ind;
+        int cur = min(st[ind][L],st[ind][R-(1<<low[R-L+1])+1]);
+        sum+=cur;
+        product = (product*cur)%MOD;
+    }
+    printf("%lld %lld\n",sum,product);
+
+    return 0;
+}

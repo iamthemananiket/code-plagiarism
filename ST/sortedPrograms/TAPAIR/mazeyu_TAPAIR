@@ -1,0 +1,116 @@
+#include<bits/stdc++.h>
+#define N 400010
+#define M 1200010
+#define S 12000010
+#define mod 1000000007
+#define ll long long
+using namespace std;
+int v[M],ne[M],head[N],l;
+int rs[M],ls[M],root[M],V[M],np,dis[M];
+int lc[S],rc[S],sum[S],cov[S],nep;
+int dep[N],dad[N],top[N],over[N],f[N],can[N],ss[N],g[N];
+int n,m,i,x,y;
+ll ans,tot;
+void add(int x,int y){v[++l]=y;ne[l]=head[x];head[x]=l;}
+int merge(int x,int y)
+{
+	if(!x||!y)return x?x:y;
+	if(V[x]<V[y])swap(x,y);
+	rs[x]=merge(rs[x],y);
+	if(dis[rs[x]]>dis[ls[x]])swap(rs[x],ls[x]);
+	dis[x]=dis[rs[x]]+1;
+	return x;
+}
+void build0(int l,int r,int &cur)
+{
+	cur=++nep;
+	sum[cur]=r-l+1;
+	if(l==r)return;
+	int mid=(l+r)>>1;
+	build0(l,mid,lc[cur]);
+	build0(mid+1,r,rc[cur]);
+}
+void cover(int l,int r,int L,int R,int &cur,int cur1)
+{
+	cur=++nep;
+	lc[cur]=lc[cur1];
+	rc[cur]=rc[cur1];
+	sum[cur]=sum[cur1];
+	cov[cur]=cov[cur1];
+	if(L<=l&&R>=r){cov[cur]=1,sum[cur]=0;return;}
+	int mid=(l+r)>>1;
+	if(L<=mid)cover(l,mid,L,R,lc[cur],lc[cur1]);
+	if(R>mid)cover(mid+1,r,L,R,rc[cur],rc[cur1]);
+	if(!cov[cur])sum[cur]=sum[lc[cur]]+sum[rc[cur]];
+}
+int count(int l,int r,int L,int R,int cur)
+{
+	//printf("count %d %d %d %d %d %d\n",l,r,L,R,sum[cur],cov[cur]);
+	if(cov[cur])return 0;
+	if(L<=l&&R>=r)return sum[cur];
+	int mid=(l+r)>>1,ans=0;
+	if(L<=mid)ans+=count(l,mid,L,R,lc[cur]);
+	if(R>mid)ans+=count(mid+1,r,L,R,rc[cur]);
+	return ans;
+}
+void dfs(int x)
+{
+	dep[x]=dep[dad[x]]+1;top[x]=ss[x]=f[x]=dep[x];
+	for(int i=head[x];i;i=ne[i])
+	{
+		if(!dep[v[i]])
+		{
+			dad[v[i]]=x;dfs(v[i]);
+			over[x]+=over[v[i]];
+			root[x]=merge(root[x],root[v[i]]);
+			if(ss[v[i]]<ss[x])f[x]=ss[x],ss[x]=ss[v[i]];
+			else if(ss[v[i]]<f[x])f[x]=ss[v[i]];
+		}
+		if(dep[v[i]]<dep[x]-1)
+		{
+			top[x]=min(dep[v[i]],top[x]);
+			over[v[i]]--;over[x]++;
+			V[++np]=dep[v[i]];
+			root[x]=merge(root[x],np);
+		}
+	}
+	if(top[x]<ss[x])f[x]=ss[x],ss[x]=top[x];
+	if(over[x]==1)ans++;
+	if(!over[x])tot++;
+	for(;V[root[x]]>=dep[x];)
+		root[x]=merge(ls[root[x]],rs[root[x]]);
+	can[x]=V[root[x]];
+	//printf("%d %d %d %d %d %d %d\n",x,dad[x],top[x],can[x],over[x],ss[x],f[x]);
+}
+void fff(int x,int y)
+{
+	//printf("fff %d %d %d %d\n",x,y,can[x],top[x]);
+	if(over[x]&&max(y,can[x]+1)<dep[x])
+		ans+=count(1,n,max(y,can[x]+1),dep[x]-1,root[x]);
+	if(top[x]<dep[x])cover(1,n,top[x]+1,dep[x],root[x],root[x]);
+	for(int i=head[x];i;i=ne[i])
+	if(dad[v[i]]==x)
+	{
+		root[v[i]]=root[x];
+		if(ss[x]==ss[v[i]]&&f[x]<dep[x])
+			cover(1,n,f[x]+1,dep[x],root[v[i]],root[x]);
+		if(ss[v[i]]>ss[x]&&ss[x]<dep[x])
+			cover(1,n,ss[x]+1,dep[x],root[v[i]],root[x]);
+		fff(v[i],y);
+	}
+}
+int main()
+{
+	scanf("%d%d",&n,&m);
+	for(i=1;i<=m;i++)
+	{
+		scanf("%d%d",&x,&y);
+		add(x,y);add(y,x);
+	}
+	tot=-1;dfs(1);
+	memset(root,0,sizeof(root));
+	build0(1,n,root[0]);
+	root[1]=root[0];
+	fff(1,2);
+	printf("%lld\n",ans+tot*m-(tot+1)*tot/2);
+}

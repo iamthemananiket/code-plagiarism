@@ -1,0 +1,29 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t;
+int T1 , T2 , t1 , t2;
+int main(){
+    cin >> t;
+    while(t--){
+        cin >> T1 >> T2 >> t1 >> t2;
+        if(t1 + t2 == 0){
+            cout << "0\n";
+            continue;
+        }
+        if(t1 == 0){
+            swap(T1 , T2);
+            swap(t1 , t2);
+        }
+        long double x = t1 + 1;
+        x *= T1;
+        long long y = t1 + T1 - T2;
+        y = max(y , 0LL);
+        y *= y + 1;
+        y /= 2;
+        x -= y;
+        x /= T1;
+        x /= T2;
+        x /= 2;
+        printf("%llf\n", x);
+    }
+}

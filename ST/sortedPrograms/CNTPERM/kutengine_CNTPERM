@@ -1,0 +1,87 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define fi first
+#define se second
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define sz(x) (int((x).size()))
+#define bit(x) (1 << (x))
+#define cnt1(x) (__builtin_popcount(x))
+
+template<class T>
+inline void chkmax(T& x, T y) {
+	if (x < y) x = y;
+}
+
+template<class T>
+inline void chkmin(T& x, T y) {
+	if (y < x) x = y;
+}
+
+typedef long long LL;
+typedef double DB;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+const int MX = bit(20) + 5;
+int n, p;
+LL inv[MX], f[MX], g[MX];
+
+void init() {
+	int i;
+	
+	inv[1] = 1;
+	for (i = 2; i <= n; i++) inv[i] = inv[p % i] * (p - p / i) % p;
+	f[0] = g[0] = 1;
+	for (i = 1; i <= n; i++) {
+		f[i] = f[i - 1] * i % p;
+		g[i] = g[i - 1] * inv[i] % p;
+	}
+}
+
+inline LL C(int n, int k) {
+	if (k < 0 || k > n) return 1;
+	return f[n] * g[k] % p * g[n - k] % p;
+}
+
+int main() {
+//	freopen("in.txt", "r", stdin);
+//	freopen("out.txt", "w", stdout);
+	
+	int m, c;
+	LL x, y, xx, yy;
+	
+	scanf("%d%d", &n, &p);
+	if (n < 3) {
+		printf("%d\n", n);
+		return 0;
+	}
+	
+	init();
+	x = y = 1;
+	for (m = 4; m <= n + 2; m *= 2) {
+		c = (m - 1) / 2;
+		xx = C(c * 2, c) * x % p * x % p;
+		yy = C(c * 2 - 1, c) * x % p * y % p * 2 % p;
+		x = xx, y = yy;
+	}
+	if (n & 1) printf("%lld\n", x);
+	else printf("%lld\n", y);
+	return 0;
+}

@@ -1,0 +1,103 @@
+# include <cstdio>
+# include <algorithm>
+
+using namespace std;
+
+const int MAX_N = 4e5;
+const long long INF = 1000000000000000000LL;
+
+int n;
+int a[MAX_N];
+int p[MAX_N];
+long long h[MAX_N];
+
+long long dp[MAX_N];
+
+void solve_n2 ()
+{
+	int i, j;
+	dp[1] = a[1];
+	for (i = 2; i <= n; i ++)
+	{
+		dp[i] = INF;
+		for (j = 1; j < i; j ++)
+			if (p[j] < p[i])
+				dp[i] = min (dp[i], dp[j] + (h[i] - h[j]) * (h[i] - h[j]) + a[i]);
+	}
+}
+
+pair <long long, long long> st[MAX_N];
+int st_sz;
+
+inline bool better (int ind)
+{
+        long long m1 = st[ind - 2].first, m2 = st[ind - 1].first, m3 = st[ind].first;
+        long long b1 = st[ind - 2].second, b2 = st[ind - 1].second, b3 = st[ind].second;
+        
+        return (m1 - m2) * (b3 - b1) > (m1 - m3) * (b2 - b1);
+        
+}
+
+
+void update (long long m, long long b)
+{
+        st[st_sz ++] = make_pair (m, b);
+        
+        while (st_sz > 2 && better (st_sz - 1))
+        {
+                st[st_sz - 2] = st[st_sz - 1];
+                st_sz --;
+        }
+}
+
+int pointer = 1;
+int find (long long s)
+{
+        for (; pointer < st_sz; pointer ++)
+        {
+                if (st[pointer].first * s + st[pointer].second > st[pointer - 1].first * s + st[pointer - 1].second)
+                        break;
+        }
+        return pointer - 1;
+}
+
+
+void solve_nlogn ()
+{
+	int i, ind;
+	dp[1] = a[1];
+	update (- 2 * h[1], dp[1] + h[1] * h[1]);
+	for (i = 2; i <= n; i ++)
+	{
+		dp[i] = a[i] + (h[i] - h[1]) * (h[i] - h[1]) + dp[1];
+		ind = find (h[i]);
+		///printf ("%lld\n", dp[i]);
+		///printf ("%d -> %lld %lld = %lld\n", ind, st[ind].first, st[ind].second, st[ind].first * h[i] + st[ind].second);
+		dp[i] = min (dp[i], (a[i] + h[i] * h[i]) + st[ind].first * h[i] + st[ind].second);
+		update (- 2 * h[i], dp[i] + h[i] * h[i]);
+	}
+}
+
+int main ()
+{
+	int i;
+	scanf ("%d", &n);
+	for (i = 1; i <= n; i ++)
+		scanf ("%d", &p[i]);	
+	for (i = 1; i <= n; i ++)
+		scanf ("%d", &a[i]);
+	for (i = 1; i <= n; i ++)
+		scanf ("%lld", &h[i]);
+	
+	if (n <= 5000)
+	{
+		solve_n2 ();
+		printf ("%lld\n", dp[n]);
+		return 0;
+	}
+	solve_nlogn ();
+	///for (i = 1; i < n; i ++)
+	///	printf ("%lld ", dp[i]);
+	printf ("%lld\n", dp[n]);
+	return 0;
+}

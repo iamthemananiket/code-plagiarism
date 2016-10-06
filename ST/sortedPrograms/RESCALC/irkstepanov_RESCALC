@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //ofstream cout("output.txt");
+    //freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        int n;
+        cin >> n;
+        int score_max = -1;
+        vector<int> players;
+        for (int i = 0; i < n; ++i) {
+            int score;
+            int k;
+            cin >> k;
+            score = k;
+            vector<int> cnt(6);
+            while (k--) {
+                int a;
+                cin >> a;
+                ++cnt[a - 1];
+            }
+            while (true) {
+                int diff = 0;
+                for (int j = 0; j < 6; ++j) {
+                    if (cnt[j]) {
+                        ++diff;
+                    }
+                }
+                if (diff == 6) {
+                    score += 4;
+                    for (int j = 0; j < 6; ++j) {
+                        --cnt[j];
+                    }
+                } else if (diff == 5) {
+                    score += 2;
+                    for (int j = 0; j < 6; ++j) {
+                        if (cnt[j]) {
+                            --cnt[j];
+                        }
+                    }
+                } else if (diff == 4) {
+                    ++score;
+                    for (int j = 0; j < 6; ++j) {
+                        if (cnt[j]) {
+                            --cnt[j];
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+            if (score > score_max) {
+                score_max = score;
+                players = {i};
+            } else if (score == score_max) {
+                players.pb(i);
+            }
+        }
+        if (sz(players) > 1) {
+            cout << "tie\n";
+        } else {
+            int p = players[0];
+            if (p == 0) {
+                cout << "chef\n";
+            } else {
+                cout << p + 1 << "\n";
+            }
+        }
+    }
+
+}

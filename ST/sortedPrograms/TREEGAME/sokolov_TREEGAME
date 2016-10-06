@@ -1,0 +1,78 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y123
+#define y1 y1234
+#define ll long long
+#define PI 3.1415926535897932384626433832795
+#define EPS 1e-9
+#define INF 2147483647
+
+
+int gcd(int a, int b) { return (!b) ? a : gcd(b, a % b); }
+int lcm(int a, int b) { return a / gcd(a,b) * b; }
+
+int nextInt() {
+	int n;
+	scanf("%d", &n);
+	return n;
+}
+
+vector<int> a[10005];
+multiset<int> s;
+
+void dfs(int node, int from, int len) {
+	s.insert(len);
+	for (int i = 0; i < a[node].size(); ++i) {
+		int to = a[node][i];
+		if (to != from) {
+			dfs(to, node, len + 1);
+		}
+	}
+}
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; ++tt) {
+		int n = nextInt();
+		for (int i = 1; i <= n; ++i) {
+			a[i].clear();
+		}
+		for (int i = 1; i <= n - 1; ++i) {
+			int u = nextInt();
+			int v = nextInt();
+			a[u].push_back(v);
+			a[v].push_back(u);
+		}
+		s.clear();
+		dfs(1, -1, 0);
+		int res = 0;
+		while (!s.empty()) {
+			if (res % 2 == 0) {
+				s.erase(*s.begin());
+			} else {
+				multiset<int> :: iterator it = s.end();
+				--it;
+				s.erase(it);
+			}
+			++res;
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}

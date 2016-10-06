@@ -1,0 +1,282 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+struct FastComplex
+{
+    long double r, i;
+    inline FastComplex(long double a=0.0, long double b=0.0):
+        r(a),
+        i(b)
+    {
+        //
+    }
+    inline long double& real()
+    {
+        return r;
+    }
+    inline long double& imag()
+    {
+        return i;
+    }
+    inline FastComplex& operator+= (const FastComplex& other)
+    {
+        r+=other.r;
+        i+=other.i;
+        return *this;
+    }
+    inline FastComplex operator+ (const FastComplex& other) const
+    {
+        FastComplex tmp=*this;
+        tmp+=other;
+        return tmp;
+    }
+    inline FastComplex& operator-= (const FastComplex& other)
+    {
+        r-=other.r;
+        i-=other.i;
+        return *this;
+    }
+    inline FastComplex operator- (const FastComplex& other) const
+    {
+        FastComplex tmp=*this;
+        tmp-=other;
+        return tmp;
+    }
+    inline FastComplex& operator*= (const FastComplex& other)
+    {
+        long double nr=r*other.r-i*other.i;
+        long double ni=r*other.i+i*other.r;
+        r=nr;
+        i=ni;
+        return *this;
+    }
+    inline FastComplex operator* (const FastComplex& other) const
+    {
+        FastComplex tmp=*this;
+        tmp*=other;
+        return tmp;
+    }
+    inline FastComplex& operator/= (const double other)
+    {
+        r/=other;
+        i/=other;
+        return *this;
+    }
+    inline FastComplex operator/ (const double other) const
+    {
+        FastComplex tmp=*this;
+        tmp/=other;
+        return tmp;
+    }
+};
+
+typedef FastComplex complex_t;
+
+const long double PI=acos(-1.0);
+int depth;
+vector<complex_t> scratch, cs_cache;
+
+template<bool invert>
+void fft(int N, vector<complex_t>& data, int add)
+{
+    if(N==1)
+        return;
+    complex_t k(1.0, 0.0), cs=cs_cache[depth];
+    const int mul=1<<depth;
+    const int half=N/2;
+    depth++;
+    fft<invert>(half, data, add);
+    fft<invert>(half, data, mul+add);
+    for(int i=0; i<half; i++)
+    {
+        complex_t v=data[(i*2)*mul+add], w=k*data[(i*2+1)*mul+add];
+        data[i*mul+add]=v+w;
+        scratch[(i+half)*mul+add]=v-w;
+        k*=cs;
+    }
+    for(int i=half; i<N; i++)
+        data[i*mul+add]=scratch[i*mul+add];
+    depth--;
+}
+
+void convolve(vector<long double>& _a, vector<long double>& _b, vector<long double>& c)
+{
+    // for(int i = 0; i < n; i++) {
+    //     c[i] = 0;
+    //     for(int j = 0; j < n; j++)
+    //         c[i] += a[j] * b[(i - j + n) % n];
+    // }
+    int n=_a.size();
+    int logn=0;
+    while((1<<logn)<n)
+        logn++;
+    vector<complex_t> a(1<<logn), b(1<<logn);
+    for(int i=0; i<n; i++)
+        a[i].real()=_a[i], b[i].real()=_b[i];
+    n=1<<logn;
+    c.resize(n);
+    scratch.resize(n);
+    cs_cache.resize(logn+1);
+    depth=0;
+    for(int i=0; i<=logn; i++)
+    {
+        long double t=-2.0*PI/(1<<i);
+        cs_cache[logn-i]=complex_t(cos(t), sin(t));
+    }
+    fft<false>(n, a, 0);
+    fft<false>(n, b, 0);
+    for(int i=0; i<n; i++)
+        a[i]*=b[i];
+    for(int i=0; i<=logn; i++)
+    {
+        long double t=2.0*PI/(1<<i);
+        cs_cache[logn-i]=complex_t(cos(t), sin(t));
+    }
+    fft<true>(n, a, 0);
+    for(int i=0; i<n; i++)
+        c[i]=a[i].real()/n;
+}
+
+int N, Q;
+vector<int> adj[50001];
+int sz[50001];
+bool bad[50001];
+int cnt[50001];
+vector<long double> V[50001];
+vector<long double> buf;
+int maxd[50001];
+int order[50001];
+long long ans[65537];
+
+void dfs(int u, int p)
+{
+    sz[u]=1;
+    for(size_t i=0; i<adj[u].size(); i++)
+    {
+        int v=adj[u][i];
+        if(v==p || bad[v])
+            continue;
+        dfs(v, u);
+        sz[u]+=sz[v];
+    }
+}
+
+int dfs2(int u, int p, int d)
+{
+    cnt[d]++;
+    int ret=d;
+    for(size_t i=0; i<adj[u].size(); i++)
+    {
+        int v=adj[u][i];
+        if(v==p || bad[v])
+            continue;
+        ret=max(ret, dfs2(v, u, d+1));
+    }
+    return ret;
+}
+
+bool cmpmaxd(int u, int v)
+{
+    return maxd[u]<maxd[v];
+}
+
+int round_up_pow2(int x)
+{
+    int ret=1;
+    while(ret<x)
+        ret*=2;
+    return ret;
+}
+
+void solve(int u)
+{
+    dfs(u, -1);
+    while(1)
+    {
+        int v=-1;
+        for(size_t i=0; i<adj[u].size(); i++)
+        {
+            int w=adj[u][i];
+            if(bad[w])
+                continue;
+            if(v==-1 || sz[w]>sz[v])
+                v=w;
+        }
+        if(sz[v]*2<=sz[u])
+            break;
+        sz[u]-=sz[v];
+        sz[v]+=sz[u];
+        u=v;
+    }
+    int children=0;
+    for(size_t i=0; i<adj[u].size(); i++)
+    {
+        int v=adj[u][i];
+        if(bad[v])
+            continue;
+        maxd[v]=dfs2(v, u, 1);
+        V[v].resize(maxd[v]+1);
+        for(int j=0; j<=maxd[v]; j++)
+            V[v][j]=cnt[j], cnt[j]=0;
+        order[children++]=v;
+    }
+    int sz=1;
+    V[u].resize(sz);
+    V[u][0]=1;
+    ans[0]++;
+    for(int i=0; i<children; i++)
+    {
+        int v=order[i];
+        sz=round_up_pow2(max(sz, (int)V[v].size()));
+        int nsz=sz*2;
+        int k=V[u].size();
+        V[u].resize(nsz);
+        for(int j=k; j<nsz; j++)
+            V[u][j]=0;
+        k=V[v].size();
+        V[v].resize(nsz);
+        for(int j=k; j<nsz; j++)
+            V[v][j]=0;
+        convolve(V[u], V[v], buf);
+        for(int j=0; j<nsz; j++)
+        {
+            ans[j]+=llround(buf[j]);
+            V[u][j]+=V[v][j];
+        }
+    }
+    bad[u]=true;
+    for(size_t i=0; i<adj[u].size(); i++)
+    {
+        int v=adj[u][i];
+        if(bad[v])
+            continue;
+        solve(v);
+    }
+}
+
+int main()
+{
+    scanf("%d", &N);
+    int a, b;
+    for(int i=2; i<=N; i++)
+    {
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    solve(1);
+    long long realans=0;
+    for(int i=2; i<=N; i++)
+    {
+        realans+=ans[i];
+        for(int j=i+i; j<=N; j+=i)
+            ans[j]=0;
+    }
+    printf("%.9Lf\n", realans/(N*(N-1LL)/2.0L));
+    return 0;
+}

@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	int t,n,i;
+	cin>>t;
+	while(t--)
+	{
+		cin>>n;
+		getchar();
+		string str[n];
+		for(i=0;i<n;i++)
+		{
+			getline(cin,str[i]);
+		}
+		if(str[n-1][0]=='L')
+			cout<<"Begin on "<<str[n-1].substr(8,str[n-1].size())<<endl;
+		else
+			cout<<"Begin on "<<str[n-1].substr(9,str[n-1].size())<<endl;
+		for(i=n-2;i>=0;i--)
+		{
+			if(str[i+1][0]=='L')
+			{
+				if(str[i][0]=='L')
+					cout<<"Right on "<<str[i].substr(8,str[i].size())<<endl;
+				else
+					cout<<"Right on "<<str[i].substr(9,str[i].size())<<endl;
+			}
+			else
+			{
+				if(str[i][0]=='L')
+					cout<<"Left on "<<str[i].substr(8,str[i].size())<<endl;
+				else
+					cout<<"Left on "<<str[i].substr(9,str[i].size())<<endl;
+			}
+		}
+		cout<<endl;	
+	}
+	return 0;
+}

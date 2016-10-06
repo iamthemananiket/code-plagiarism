@@ -1,0 +1,73 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+#define MAX_N 105
+
+int n,k,m;
+int choose[MAX_N][MAX_N];
+
+int dp[MAX_N][MAX_N];
+
+ll fpow(ll a, ll b)
+{
+	ll r=1;
+	for (;b;b/=2,a=(a*a)%m)
+		if (b&1)
+			r=(r*a)%m;
+	return r;
+}
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d %d %d",&n,&k,&m);
+		for (int i=1; i<=n; i++)
+		{
+			choose[i][0]=choose[i][i]=1;
+			for (int j=1; j<i; j++)
+			{
+				choose[i][j]=choose[i-1][j-1];
+				if (i-1>=j)
+					choose[i][j]=(choose[i][j]+choose[i-1][j])%m;
+			}
+		}
+		for (int i=1; i<=n; i++)
+		{
+			int cake=0;
+			for (int j=2; j<=i; j++)
+			{
+				dp[i][j]=0;
+				for (int k=1; k<i; k++)
+				{
+					int here=(dp[k][1]*1LL*dp[i-k][j-1])%m;
+					here=(here*1LL*choose[i-1][k-1])%m;
+					dp[i][j]=(dp[i][j]+here)%m;
+				}
+				cake=(cake+dp[i][j])%m;
+			}
+			dp[i][1]=(fpow(2,i*(i-1)/2)-cake+m)%m;
+		}
+		int ans=dp[n][k];
+		if (k==1)
+			ans=(ans-1+m)%m;
+		printf("%d\n",ans);
+	}
+	return 0;
+}

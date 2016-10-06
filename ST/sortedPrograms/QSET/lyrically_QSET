@@ -1,0 +1,121 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+struct Segment {
+	int sum;
+	int cnt[3];
+	Segment() {
+		sum = 0;
+		fill(cnt, cnt + 3, 0);
+	}
+	Segment(int val) {
+		sum = val;
+		fill(cnt, cnt + 3, 0);
+		++cnt[0];
+	}
+};
+ostream &operator<<(ostream &os, const Segment &a) {
+	return os << "(" << a.sum << "; " << a.cnt[0] << ", " << a.cnt[1] << ", " << a.cnt[2] << ")";
+}
+Segment operator*(const Segment &a, const Segment &b) {
+	Segment ret;
+	ret.sum = (a.sum + b.sum) % 3;
+	copy(a.cnt, a.cnt + 3, ret.cnt);
+	for (int j = 0; j < 3; ++j) {
+		ret.cnt[(a.sum + j) % 3] += b.cnt[j];
+	}
+	return ret;
+}
+
+int segN;
+Segment seg[400010];
+
+void update(int a, int val) {
+	a += segN;
+	seg[a] = Segment(val);
+	for (; a >>= 1; ) {
+		seg[a] = seg[a << 1] * seg[a << 1 | 1];
+	}
+}
+Segment rangeProduct(int a, int b) {
+	Segment retL, retR;
+	for (a += segN, b += segN; a < b; a >>= 1, b >>= 1) {
+		if (a & 1) retL = retL * seg[a++];
+		if (b & 1) retR = seg[--b] * retR;
+	}
+	return retL * retR;
+}
+
+int N, Q;
+char A[100010];
+
+int main() {
+	
+	
+	for (; ~scanf("%d%d", &N, &Q); ) {
+		scanf("%s", A);
+		for (segN = 1; segN < N + 1; segN <<= 1);
+		for (int i = 0; i < segN; ++i) {
+			seg[segN + i] = (i <= N) ? Segment((A[i] - '0') % 3) : Segment();
+		}
+		for (int a = segN; --a; ) {
+			seg[a] = seg[a << 1] * seg[a << 1 | 1];
+		}
+		for (int q = 0; q < Q; ++q) {
+// for(int a=1;a<segN*2;++a)cout<<seg[a]<<" ";cout<<endl;
+			switch (in()) {
+				case 1: {
+					const int x = in();
+					const int y = in();
+					update(x - 1, y % 3);
+				} break;
+				case 2: {
+					const int c = in();
+					const int d = in();
+					const Segment res = rangeProduct(c - 1, d + 1);
+// cout<<"res = "<<res<<endl;
+					Int ans = 0;
+					for (int j = 0; j < 3; ++j) {
+						ans += (Int)res.cnt[j] * (res.cnt[j] - 1) / 2;
+					}
+					printf("%lld\n", ans);
+				} break;
+				default: assert(false);
+			}
+		}
+	}
+	
+	return 0;
+}
+

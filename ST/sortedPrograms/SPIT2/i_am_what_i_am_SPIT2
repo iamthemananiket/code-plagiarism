@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t,n,m;
+	cin>>t;
+	while(t--)
+	{
+		cin>>m>>n;
+		long long dp[n+1][2];
+		dp[1][0]=dp[1][1]=1;
+		dp[0][0]=1;
+		
+		for(int len=2;len<=n;len++)
+		 {
+		 	dp[len][0]=dp[len][1]=0;
+		 	dp[len][0]=dp[len-1][1]+dp[len-1][0];
+		// 	dp[len][1]=dp[len-1][0];
+		 	for(int j=1;j<m && len-j>=0;j++)
+		 	{
+		 		dp[len][1]+=dp[len-j][0];
+			 }
+		 }
+		 cout<<dp[n][0]+dp[n][1]<<endl;
+	}
+}

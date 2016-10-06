@@ -1,0 +1,21 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	bool ok[256];
+	char a[2000],b[2000];
+	int t,i;
+	cin >> t;
+	while(t--) {
+		cin >> a >> b;
+		memset(ok,0,sizeof ok);
+		for(i=0;a[i];i++)
+			ok[a[i]]=1;
+		for(i=0;b[i];i++)
+			if(ok[b[i]])
+				break;
+		if(b[i])
+			puts("Yes");
+		else
+			puts("No");	
+	}
+}

@@ -1,0 +1,72 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+#include <unordered_map>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+string s;
+int a[656], k;
+ull all[2000 * 2011];
+void solve() {
+	cin >> s;
+	for (int i = 'a'; i <= 'z'; ++ i) {
+		char x;
+		cin >> x;
+		if (x == 'b') a[i] = 1;
+		else a[i] = 0;
+	}
+	cin >> k;
+
+	int n = (int)s.size();
+	int	sz = 0;
+	for (int i = 0; i < n; ++ i) {
+		ull hash = 0;
+		int cnt = 0;
+		for (int j = i; j < n; ++ j) {
+			cnt += a[s[j]];
+			hash = hash * 997 + s[j];
+			if (cnt > k) break;
+			all[sz++] = hash;
+		}
+	}
+	sort(all, all + sz);
+	sz = unique(all, all + sz) - all;
+	cout << sz << "\n";
+}
+
+int main() {
+	#ifndef ONLINE_JUDGE
+	freopen(fname"in", "r", stdin);
+	freopen(fname"out", "w", stdout);
+	#endif
+
+	ios_base::sync_with_stdio(0);
+	int test;
+	cin >> test;
+	while(test--) solve();
+
+	return 0;
+}

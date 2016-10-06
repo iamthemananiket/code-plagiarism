@@ -1,0 +1,146 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+vector<int> primes;
+vector<int> smallestPrimeFactor;
+void linearSieve(int n) {
+	if(n < 1) n = 1;
+	if((int)smallestPrimeFactor.size() >= n + 1) return;
+	int primePiBound = n < 20 ? n - 1 : (int)(n / (log(n * 1.) - 2) + 2);
+	primes.assign(primePiBound + 1, numeric_limits<int>::max());
+	int P = 0;
+	smallestPrimeFactor.assign(n + 1, 0);
+	smallestPrimeFactor[1] = 1;
+	int n2 = n / 2, n3 = n / 3, n5 = n / 5;
+	if(n >= 2)
+		primes[P ++] = 2;
+	if(n >= 3)
+		primes[P ++] = 3;
+	for(int q = 2; q <= n; q += 2)
+		smallestPrimeFactor[q] = 2;
+	for(int q = 3; q <= n; q += 6)
+		smallestPrimeFactor[q] = 3;
+	for(int q = 5; q <= n5; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+		int bound = smallestPrimeFactor[q];
+		for(int i = 2; ; ++ i) {
+			int p = primes[i];
+			if(p > bound) break;
+			int pq = p * q;
+			if(pq > n) break;
+			smallestPrimeFactor[pq] = p;
+		}
+	}
+	for(int q = (n5 + 1) | 1; q <= n; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+	}
+	primes.resize(P);
+}
+
+
+typedef int Val;
+struct Sum {
+	int max;
+	Sum() : max(-INF) {}
+	Sum(const Val &val) : max(smallestPrimeFactor[val]) {}
+	Sum &operator+=(const Sum &that) { amax(max, that.max); return *this; }
+	Sum operator+(const Sum &that) const { return Sum(*this) += that; }
+};
+
+struct SegmentTree {
+	vector<Val> leafs;
+	vector<Sum> nodes;
+	vector<int> leftpos, rightpos;
+	int n, n2;
+	void init(int n_, const Val &v = Val()) { init(vector<Val>(n_, v)); }
+	void init(const vector<Val> &u) {
+		n = 1; while(n < (int)u.size()) n *= 2;
+		n2 = (n - 1) / 2 + 1;
+		leafs = u; leafs.resize(n, Val());
+		nodes.resize(n);
+		for(int i = n - 1; i >= n2; -- i)
+			nodes[i] = Sum(leafs[i * 2 - n]) + Sum(leafs[i * 2 + 1 - n]);
+		for(int i = n2 - 1; i > 0; -- i)
+			nodes[i] = nodes[i * 2] + nodes[i * 2 + 1];
+		leftpos.resize(n); rightpos.resize(n);
+		for(int i = n - 1; i >= n2; -- i) {
+			leftpos[i] = i * 2 - n;
+			rightpos[i] = (i * 2 + 1 - n) + 1;
+		}
+		for(int i = n2 - 1; i > 0; -- i) {
+			leftpos[i] = leftpos[i * 2];
+			rightpos[i] = rightpos[i * 2 + 1];
+		}
+	}
+	Sum getRangeCommutative(int i, int j) {
+		Sum res = Sum();
+		for(int l = i + n, r = j + n; l < r; l >>= 1, r >>= 1) {
+			if(l & 1) res += sum(l ++);
+			if(r & 1) res += sum(-- r);
+		}
+		return res;
+	}
+	void decreaseAll(int i, int j) {
+		decreaseAllRec(1, i, j);
+	}
+private:
+	inline void merge(int i) {
+		if(i >= n) return;
+		nodes[i] = sum(i * 2) + sum(i * 2 + 1);
+	}
+	inline Sum sum(int i) {
+		return i < n ? nodes[i] : Sum(leafs[i - n]);
+	}
+private:
+	void decreaseAllRec(int i, int l, int r) {
+		if(sum(i).max == 1) return;
+		if(i >= n) {
+			if(l <= i - n && i - n < r)
+				leafs[i - n] /= smallestPrimeFactor[leafs[i - n]];
+			return;
+		}
+		amax(l, leftpos[i]);
+		amin(r, rightpos[i]);
+		if(l >= r) return;
+		decreaseAllRec(i * 2, l, r);
+		decreaseAllRec(i * 2 + 1, l, r);
+		merge(i);
+	}
+};
+
+int main() {
+	linearSieve(1000000);
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int N; int M;
+		scanf("%d%d", &N, &M);
+		vector<int> A(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &A[i]);
+		SegmentTree segt;
+		segt.init(A);
+		rep(ii, M) {
+			int type; int L; int R;
+			scanf("%d%d%d", &type, &L, &R), -- L;
+			if(type == 0) {
+				segt.decreaseAll(L, R);
+			} else if(type == 1) {
+				int ans = segt.getRangeCommutative(L, R).max;
+				printf("%d\n", ans);
+			} else {
+				abort();
+			}
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,43 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 25;
+
+char arr[N][N];
+int n, m, src_x, src_y;
+int dx[] = {1, -1, 0, 0}, dy[] = {0, 0, 1, -1};
+char dir[] = {'D', 'U', 'R', 'L'};
+int vis[N][N];
+string ans = "";
+
+inline void dfs(int x, int y){
+	for(int i = 0; i < 4; i++){
+		int nx = x + dx[i];
+		int ny = y + dy[i];
+		char c = dir[i];
+		if(arr[nx][ny] != '*' and !vis[nx][ny]){
+			vis[nx][ny] = true;
+			ans += c;
+			dfs(nx, ny);
+			if(i & 1) ans += dir[i - 1];
+			else ans += dir[i + 1];
+		}
+	}
+}
+
+
+int main(){
+	cin >> n >> m;
+	for(int i = 1; i <= n; i++){
+		for(int j = 1; j <= m; j++){
+			cin >> arr[i][j];
+			if(arr[i][j] == 'C'){
+				src_x = i;
+				src_y = j;
+			}
+		}
+	}
+	vis[src_x][src_y] = true;
+	dfs(src_x, src_y);
+	cout << ans << '\n';
+}

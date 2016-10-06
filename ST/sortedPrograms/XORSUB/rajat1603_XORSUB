@@ -1,0 +1,69 @@
+#include<bits/stdc++.h>
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+int xl;
+bool b[2000]={0};
+int a[1001];
+int n;
+bool repeat[2000];
+bool rec(int i){
+    if(i>xl){
+        return 0;
+    }
+    if(b[i]){
+        return 1;
+    }
+    if(repeat[i]){
+        return 0;
+    }
+    repeat[i]=1;
+    bool x;
+    for(int j=0;j<n;j++){
+        x=rec(i^a[j]);
+        if(x){
+            b[i]=1;
+            break;
+        }
+    }
+    return b[i];
+}
+int main(){
+   int t=scan();
+   while(t--){
+       memset(b,0,sizeof(b));
+       n=scan();
+       int k=scan();
+       b[0]=1;
+       xl=0;
+       for(int i=0;i<n;i++){
+           a[i]=scan();
+           xl|=a[i];
+           b[a[i]]=1;
+       }
+       if(xl>=1024){
+           xl=1023;
+       }
+       memset(repeat,0,sizeof(repeat));
+       for(int i=1;i<=xl;i++){
+           rec(i);
+       }
+       int ans=0;
+       for(int i=0;i<=xl;i++){
+           if(b[i]){
+               ans=max(ans,i^k);
+           }
+       }
+       printf("%d\n",ans);
+   }
+}  

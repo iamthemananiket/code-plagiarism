@@ -1,0 +1,62 @@
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include <string.h>
+using namespace std;
+const double pi=acos(-1.0);
+const double eps=1e-11;
+#define maxx(a,b) (a)>(b)?(a):(b)
+#define minn(a,b) (a)<(b)?(a):(b)
+#define ll long long int
+#define sc(x) scanf("%d",&x)
+#define scl(x) scanf("%lld",&x)
+#define printl(x) printf("%lld\n",x)
+#define print(x) printf("%d\n",x)
+#define printd(x) printf("%lf\n",x)
+#define mp(A,B) make_pair(A,B)
+#define pb(X) push_back(X)
+#define INF 1000000000
+#define MOD 1000000007
+#define SET(x,y) memset(x,y,sizeof(x));
+ll C(ll n, ll r)
+{
+	ll i,f=1;
+	ll mini=minn(r,n-r);
+	for(i=1;i<=mini;i++)
+	{
+		f*=(n-i+1);
+		f/=i;
+	}
+	return f;
+}
+int main()
+{
+	ll t,n,k,ans;
+	scl(t);
+	while(t--)
+	{
+		scl(n);scl(k);
+		ans=C(n-1,k-1);
+		printl(ans);
+	}
+	return 0;
+}

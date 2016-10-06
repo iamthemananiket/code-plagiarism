@@ -1,0 +1,34 @@
+#include <cstdio>
+
+using namespace std;
+
+int Q;
+long long x,a,b;
+unsigned long long y;
+
+unsigned long long s[33554432];
+long long sz;
+
+int main()
+{
+    scanf("%d%lld%lld%lld",&Q,&x,&a,&b);
+    for(;Q--;) {
+        y = x>>1;
+        if(x&1ull) {
+            if(!(s[y>>6] & (1ull<<(y&63ull)))) {
+                sz += y;
+                s[y>>6] |= (1ull<<(y&63ull));
+            }
+        } else {
+            if(s[y>>6] & (1ull<<(y&63ull))) {
+                sz -= y;
+                s[y>>6] ^= (1ull<<(y&63ull));
+            }
+        }
+        x = (x*a + b) % (1ll<<32);
+    }
+
+    printf("%lld\n",sz);
+
+    return 0;
+}

@@ -1,0 +1,61 @@
+// A union by rank and path compression based program to detect cycle in a graph
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main(){
+ int t;
+ int n,f,i;
+ int k=0;
+ cin>>t;
+ while(t--){
+    k++;
+    cin>>f>>n;
+    if(n==1||n==6){
+        i=4;
+
+    }
+    if(n==2)
+        i=11;
+    if(n==3)
+        i=7;
+    if(n==4)
+        i=2;
+    if(n==5)
+        i=9;
+ i=(i+f)%12;
+ n=i;
+  if(n==0)
+    cout<<"Case "<<k<<": "<<"C"<<endl;
+     if(n==1)
+        cout<<"Case "<<k<<": "<<"C#"<<endl;
+    if(n==2)
+        cout<<"Case "<<k<<": "<<"D"<<endl;
+    if(n==3)
+        cout<<"Case "<<k<<": "<<"D#"<<endl;
+
+    if(n==4)
+        cout<<"Case "<<k<<": "<<"E"<<endl;
+    if(n==5)
+        cout<<"Case "<<k<<": "<<"F"<<endl;
+     if(n==6)
+    cout<<"Case "<<k<<": "<<"F#"<<endl;
+    
+     if(n==7)
+        cout<<"Case "<<k<<": "<<"G"<<endl;
+    if(n==8)
+        cout<<"Case "<<k<<": "<<"G#"<<endl;
+    if(n==9)
+        cout<<"Case "<<k<<": "<<"A"<<endl;
+
+    if(n==10)
+        cout<<"Case "<<k<<": "<<"A#"<<endl;
+    if(n==11)
+        cout<<"Case "<<k<<": "<<"B"<<endl;
+ }
+}   

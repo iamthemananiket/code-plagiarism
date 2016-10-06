@@ -1,0 +1,47 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<set>
+#include<queue>
+#include<iostream>
+#include<map>
+#include<vector>
+using namespace std;
+#define long long long
+
+int rint() { int ret; scanf("%d", &ret); return ret; }
+int rlong() { long ret; scanf("%lld", &ret); return ret; }
+
+const int MAXN = 1000000;
+int a[MAXN];
+
+int main()
+{
+#ifdef _DEBUG
+	freopen("..\\input.txt", "r", stdin);
+#endif
+
+	for (int tt = rint(); tt > 0; tt--)
+	{
+		int n = rint();
+		for (int i = 0; i < n; i++)
+			a[i] = rint();
+		bool ans = true;
+		for (int i = n - 2; i >= 0; i--)
+			if (a[i] > a[i + 1])
+			{
+				if (i > 0 && a[i - 1] > a[i + 1] || i > 1 && a[i - 2] > a[i + 1])
+				{
+					ans = false;
+					break;
+				}
+			}
+
+		if (ans)
+			puts("YES");
+		else
+			puts("NO");
+	}
+
+	return 0;
+}

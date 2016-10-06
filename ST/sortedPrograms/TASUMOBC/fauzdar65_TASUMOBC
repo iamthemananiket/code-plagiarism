@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define mod 1000000007
+using namespace std;
+ 
+ll t,n;
+ll digits[100],len;
+
+ll dp[100][5],top;
+ 
+int calc (ll n,ll a[])
+{
+ 
+vector<int> temp;
+while(n>0)
+{
+	temp.push_back(n%3);
+	
+	n/=3;
+}
+int len=temp.size();
+for(int i=0;i<len;i++)
+{
+	digits[i]=temp[len-i-1];
+}
+return len;	
+}	
+ 
+int main() {
+	
+	
+	ios_base::sync_with_stdio(false);
+	cin>>t;
+	
+	
+	while(t--)
+	{
+		cin>>n;
+		memset(dp,0,sizeof(dp));	
+		
+		
+		len=calc(n,digits);
+	
+		//cout<<len<<" ";
+		
+		if(digits[0]==1){ dp[0][1]=1; }
+		if(digits[0]==2){ dp[0][1]=1; dp[0][2]=1; }
+		
+		//cout<<digits[0]<<" ";
+		for(int i=1;i<len;i++)
+		{
+		//cout<<digits[1]<<" ";
+		if(digits[i]==0)
+		{
+			dp[i][1]= dp[i-1][1];
+			dp[i][0]= (dp[i-1][0]*3 + dp[i-1][1]*2 + dp[i-1][2]*2)%mod;
+			dp[i][2]= dp[i-1][2];
+		}
+		
+		if(digits[i]==1){ dp[i][1]=(dp[i][1]+1)%mod;
+			dp[i][1]= (dp[i][1] + dp[i-1][1]*2)%mod;
+			dp[i][0]= (dp[i-1][0]*3 + dp[i-1][1] + dp[i-1][2])%mod;
+			dp[i][2]= (dp[i-1][2]*2)%mod;
+		}
+		
+		
+		if(digits[i]==2){ dp[i][1]=(dp[i][1]+1)%mod; dp[i][2]=(dp[i][2]+1)%mod; 
+			dp[i][1]= (dp[i][1] + dp[i-1][1]*2 + dp[i-1][2])%mod;
+			dp[i][0]= (dp[i-1][0]*3)%mod;
+			dp[i][2]= (dp[i][2] + dp[i-1][2]*2 + dp[i-1][1])%mod;
+		
+		
+		}
+		
+		
+		
+		
+			
+		}
+		//cout<<endl;
+	
+	//cout<<dp[1][1]<<" ";
+	cout<<(1+dp[len-1][1]+(dp[len-1][2]*2)%mod)%mod<<"\n";
+	}
+	
+	return 0;
+} 

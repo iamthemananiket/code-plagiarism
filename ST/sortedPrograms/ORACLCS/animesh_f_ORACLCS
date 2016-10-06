@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+const int MAX = 105;
+const int INF = (int)(1e9 + 7);
+int F[MAX][2];
+int T , N;
+string S;
+
+int main(){
+
+	cin.tie(0);
+	ios::sync_with_stdio(0);
+
+	cin >> T;
+
+	while(T--){
+		memset(F,0,sizeof F);
+		cin >> N;
+		int res1 = INF , res2 = INF;
+		for(int i = 1 ; i <= N ; i++){
+			cin >> S;
+			int len = S.size();
+			for(int j = 0 ; j < len ; j++){
+				F[i][S[j] - 'a']++;
+			}
+			res1 = min(res1 , F[i][0]);
+			res2 = min(res2 , F[i][1]);
+		}
+		cout << min(res1,res2) << endl;
+	}
+
+}

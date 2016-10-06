@@ -1,0 +1,298 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MAX 1000009
+#define NIL 0
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+#ifdef ONLINE_JUDGE
+	#define GETCHAR getchar_unlocked	
+	#define PUTCHAR putchar_unlocked
+#endif
+#ifndef ONLINE_JUDGE
+	#define GETCHAR getchar
+	#define PUTCHAR putchar
+#endif
+
+inline int readlong() 
+{
+	int flag=1;
+    int n = 0;
+    char c;
+    int sign=1;
+    while (1)
+    { 		
+		c=GETCHAR();
+    	if(c=='-')	sign=-1;
+        else if(c>='0'&&c<='9') {n = n * 10 + c - '0';flag=0;}
+        else if(flag!=1) break; 
+   }
+    return sign*n;
+}
+
+int grid[1005][1005]={{0}};
+list<int> G[MAX];
+//int cc[MAX]={0};
+
+int currentMax;
+
+struct node
+{
+	int parent;
+	int children;
+	node(int P=-1,int C=0)
+	{
+		parent=P;
+		children=C;
+	}
+};
+vector<node> a;
+class disjointSet
+{
+	private:
+	
+		int _size;
+		node &_root(int i)
+		{		
+			if(a[i].parent==i)
+				return a[i];
+			else // path compression algo
+			{
+				int temp_parent=a[i].parent;
+				a[i].parent=_root(a[i].parent).parent;
+				if(temp_parent!=a[i].parent)
+				a[temp_parent].children-=a[i].children;
+				return a[a[i].parent];
+			}
+		}
+		
+		public:
+		disjointSet(){}
+		
+		void init(int n)
+		{
+			assign(n);
+		}
+		
+		void assign(int n)
+		{
+			_size=n;
+			a.assign(n,node());
+			for(int i=0;i<a.size();i++)
+				a[i]=node(i,1);
+		}
+		
+		int root(int i)
+		{
+			return _root(i).parent;
+		}
+		int merge(int i,int j)
+		{
+			node &iroot=_root(i);
+			node &jroot=_root(j);
+			int netsize;
+			if(iroot.parent==jroot.parent)
+				return iroot.children;
+			else if(iroot.children<jroot.children)
+			{
+				iroot.parent=jroot.parent;
+				jroot.children+=iroot.children;
+				netsize=jroot.children;
+			}
+			else
+			{
+				jroot.parent=iroot.parent;
+				iroot.children+=jroot.children;
+				netsize=iroot.children;
+			}
+			_size--;
+			return netsize;
+		}
+		
+		int size()
+		{
+			return _size;
+		}
+		bool connected(int x,int y){
+        	return root(x)==root(y);
+    	}
+};
+disjointSet mysets;
+int components=0;
+
+void add(int a,int b) {
+	G[a].push_back(b);
+	G[b].push_back(a);
+}
+
+int toDoList[1000009]={0};
+int front=0;
+int rear=0;
+//queue<int> toDoList;
+int visited[1000009]={0};
+void dfs_visit() {
+	//assert(toDoList.size()<=5000000);
+	while(front!=rear)
+	{
+		//assert(toDoList.size()<=10000000);
+	 	int i=toDoList[front];
+			front++;
+	 //	toDoList.pop();
+	 //	color[i]=GRAY;
+
+		list<int>::iterator itr=G[i].begin();
+		for(;itr!=G[i].end();itr++){
+			if(visited[*itr]==0){
+				currentMax=max(currentMax,mysets.merge(*itr,i));
+				//cc[*itr]=cc[i];
+				//if(visited[*itr]==0){
+					visited[*itr]=1;
+					//toDoList.push(*itr);
+					toDoList[rear++]=*itr;	
+				//}
+			
+				//dfs_visit(G[*itr],*itr);
+			}
+		}
+		//color[i]=BLACK;
+   }
+}
+void dfs(int n){
+	for(int i=1;i<=n;i++){
+		visited[i]=0;
+	}
+	
+	for(int i=1;i<=n;i++){
+		if(visited[i]==0){
+			//assert(toDoList.size()<=5000000);
+					visited[i]=1;
+					toDoList[rear++]=i;	
+					dfs_visit();   	
+		}
+		
+	}
+
+}
+int main(){
+	//freopen("inn.txt","r",stdin);
+	//ios::sync_with_stdio(false);
+	int t;
+	t=readlong();
+	while(t--){
+		//Initialise variables
+		components=0;
+		rear=front=0;
+		
+		int N,M,Q;
+		N=readlong();
+		M=readlong();
+		Q=readlong();
+		pair<int,pair<int,int>> queries[Q];
+		int c=1;
+		for(int i=1;i<=N;i++){
+			for(int j=1;j<=M;j++){
+				grid[i][j]=c;
+				c++;
+			}
+		}
+		int mystore[c][2];
+		for(int i=0;i<c;i++){
+			mystore[i][0]=0;
+			mystore[i][1]=0;
+		}
+		//map<pair<int,int>,int> mutlipleWall;
+		for(int i=0;i<Q;i++){
+			int type;
+			type=readlong();
+			if(type==1){
+				int x,y;
+				x=readlong();
+				y=readlong();
+				pair<int,int> temp=make_pair(grid[x][y],grid[x][y+1]);
+				queries[i]=(make_pair(type,temp));
+				mystore[grid[x][y]][0]++;
+		
+				//mutlipleWall[temp]++;
+			}
+			else if(type==2){
+				int x,y;
+				x=readlong();
+				y=readlong();
+				pair<int,int> temp=make_pair(grid[x][y],grid[x+1][y]);
+				queries[i]=(make_pair(type,temp));
+				mystore[grid[x][y]][1]++;
+				//mutlipleWall[temp]++;
+			}
+			else if(type==3){
+				int x1,y1,x2,y2;
+				x1=readlong();
+				y1=readlong();
+				x2=readlong();
+				y2=readlong();
+				queries[i]=(make_pair(type,make_pair(grid[x1][y1],grid[x2][y2])));
+			}
+			else{
+				queries[i]=(make_pair(type,make_pair(0,0)));
+			}
+		}
+		int nodes=N*M;
+		for(int i=1;i<=N;i++){
+			for(int j=1;j<=M;j++){
+				//CURRENT TO FRONT
+				int u,v;
+				u=grid[i][j];
+				if(i+1<=N && mystore[u][1]==0){
+					
+					v=grid[i+1][j];
+					add(u,v);
+				}
+				//CURRENT TO BELOW
+				if(j+1<=M && mystore[u][0]==0){
+					
+					v=grid[i][j+1];
+					add(u,v);
+				}
+			}
+		}
+		
+		currentMax=1;
+		mysets.init(nodes+1);
+		dfs(nodes);
+		//cout<<"CURRENT MAX IS "<<currentMax<<"\n";
+		long long  queryAns=0;
+		for(int i=Q-1;i>=0;i--){
+			
+			if(queries[i].first==1){
+				if(mystore[queries[i].second.first][0]==1)
+					currentMax=max(currentMax,mysets.merge(queries[i].second.first,queries[i].second.second));
+				else
+					mystore[queries[i].second.first][0]--;
+					//mutlipleWall[make_pair(queries[i].second.first,queries[i].second.second)]--;
+			}
+			else if(queries[i].first==2){
+				if(mystore[queries[i].second.first][1]==1)
+					currentMax=max(currentMax,mysets.merge(queries[i].second.first,queries[i].second.second));
+				else
+					mystore[queries[i].second.first][1]--;
+					//mutlipleWall[make_pair(queries[i].second.first,queries[i].second.second)]--;
+			}
+			else if(queries[i].first==3){
+				if(mysets.connected(queries[i].second.first,queries[i].second.second)){
+					queryAns++;
+				}
+					
+			}
+			else{
+				queryAns+=currentMax;
+			}
+			//cout<<queryAns<<"\n";
+		}
+		printf("%lld\n",queryAns);
+		for(int i=0;i<=nodes;i++){
+				G[i].clear();
+				//cc[i]=0;
+			
+		}
+		
+	}
+}

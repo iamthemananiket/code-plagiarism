@@ -1,0 +1,336 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 555;
+const double TIME_LIMIT = 1.2;
+
+long long s[N][N];
+int a[N][N];
+int row[N];
+int col[N];
+
+long long curSumRow[N];
+long long curSumCol[N];
+
+int n;
+int p;
+
+struct Solution {
+    int row[N];
+    int col[N];
+    long long maxSum;
+
+    Solution() {
+        maxSum = 1e18;
+    }
+
+    Solution(int r[N], int c[N], long long maxSum) {
+        this->maxSum = maxSum;
+        for (int i = 0; i <= p; ++i) {
+            row[i] = r[i];
+            col[i] = c[i];
+        }
+    }
+} ans;
+
+long long sum(int x, int y, int u, int v) {
+    return s[u][v] - s[u][y - 1] - s[x - 1][v] + s[x - 1][y - 1];
+}
+
+void output() {
+    for (int i = 1; i < p; ++i) cout << row[i] << ' '; cout << endl;
+    for (int i = 1; i < p; ++i) cout << col[i] << ' '; cout << endl;
+}
+
+void readInput() {
+    ios::sync_with_stdio(false);
+    cin >> n >> p;
+    for (int i = 1; i <= n; ++i)
+        for (int j = 1; j <= n; ++j)
+            cin >> a[i][j];
+}
+
+void initSum() {
+    for (int i = 1; i <= n; ++i)
+        for (int j = 1; j <= n; ++j)
+            s[i][j] = s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1] + a[i][j];
+}
+
+void initCuts() {
+    for (int i = 1; i < p; ++i) {
+        row[i] = col[i] = n / p * i;
+    }
+}
+
+
+double getTime() { return (double)clock() / CLOCKS_PER_SEC; }
+bool TLE() { return getTime() + 0.05 > TIME_LIMIT; }
+
+
+long long sumRow(int r) {
+    long long ans = 0;
+    for (int i = 1; i <= p; ++i) {
+        ans = max(ans, sum(row[r - 1] + 1, col[i - 1] + 1, row[r], col[i]));
+        ans = max(ans, sum(row[r] + 1, col[i - 1] + 1, row[r + 1], col[i]));
+    }
+    return ans;
+}
+
+bool tryOptimizeRow(int i, int v) {
+    row[i] += v;
+    long long nxt = sumRow(i);
+    if (curSumRow[i] > nxt) {
+        curSumRow[i] = nxt;
+        if (i > 1)
+            curSumRow[i - 1] = sumRow(i - 1);
+        if (i + 1 < p)
+            curSumRow[i + 1] = sumRow(i + 1);
+        return true;
+    }
+    row[i] -= v;
+    return false;
+}
+
+bool optimizeRows() {
+    bool changed = false;
+    for (int i = 1; i < p; ++i) {
+        bool done = false;
+        if (row[i] - 1 > row[i - 1]) {
+            done = tryOptimizeRow(i, -1);
+            changed |= done;
+        }
+        if (!done && row[i] + 1 < row[i + 1]) {
+            changed |= tryOptimizeRow(i, +1);
+        }
+    }
+    return changed;
+}
+
+
+long long sumCol(int c) {
+    long long ans = 0;
+    for (int i = 1; i <= p; ++i) {
+        ans = max(ans, sum(row[i - 1] + 1, col[c - 1] + 1, row[i], col[c]));
+        ans = max(ans, sum(row[i - 1] + 1, col[c] + 1, row[i], col[c + 1]));
+    }
+    return ans;
+}
+
+bool tryOptimizeCol(int i, int v) {
+    col[i] += v;
+    long long nxt = sumCol(i);
+    if (curSumCol[i] > nxt) {
+        curSumCol[i] = nxt;
+        if (i > 1)
+            curSumCol[i - 1] = sumCol(i - 1);
+        if (i + 1 < p)
+            curSumCol[i + 1] = sumCol(i + 1);
+        return true;
+    }
+    col[i] -= v;
+    return false;
+}
+
+bool optimizeCols() {
+    bool changed = false;
+    for (int i = 1; i < p; ++i) {
+        bool done = false;
+        if (col[i] - 1 > col[i - 1]) {
+            done = tryOptimizeCol(i, -1);
+            changed |= done;
+        }
+        if (!done && col[i] + 1 < col[i + 1]) {
+            changed |= tryOptimizeCol(i, +1);
+        }
+    }
+    return changed;
+}
+
+void doSwap(int row[]) {
+    int pick = rand() % (p - 1) + 1;
+    int new_value = rand() % (n - p) + 1;
+    vector<bool> used (n);
+    for (int i = 1; i < p; ++i) {
+        used[row[i]] = true;
+    }
+    int count = 0;
+    for (int i = 1; i < n; ++i) {
+        if (!used[i]) {
+            count += 1;
+            if (count == new_value) {
+                row[pick] = i;
+                sort(row + 1, row + p);
+                break;
+            }
+        }
+    }
+}
+
+void doSwap() {
+    doSwap(row);
+    //doSwap(col);
+}
+
+double calcScore() {
+    long long maxSum = 0;
+    for (int i = 1; i <= p; ++i)
+        for (int j = 1; j <= p; ++j)
+            maxSum = max(maxSum, sum(row[i - 1] + 1, col[j - 1] + 1, row[i], col[j]));
+    //cerr << "maxSum = " << maxSum << endl;
+    //cerr << "Score = " << (double)maxSum / ((1.0 * n / p) * (1.0 * n / p)) << endl;
+    return maxSum;
+}
+
+void updateAns() {
+    long long maxSum = calcScore();
+    if (ans.maxSum > maxSum) ans = Solution(row, col, maxSum);
+}
+
+void optimize(double till = TIME_LIMIT) {
+    const int LIM = 5;
+    int tried_count = 0;
+
+    while (getTime() + 0.05 < till) {
+        bool changed = false;
+        changed |= optimizeRows();
+        changed |= optimizeCols();
+
+        if (!changed) {
+            updateAns();
+            if (tried_count < LIM) {
+                tried_count += 1;
+                doSwap();
+            } else {
+                return;
+            }
+        }
+    }
+
+    updateAns();
+}
+
+void randomPick(int a[]) {
+    for (int i = 1; i < n; ++i) a[i] = i;
+    random_shuffle(a + 1, a + n);
+    sort(a + 1, a + p);
+    a[0] = 0; a[p] = n;
+}
+
+void initCur() {
+    for (int i = 1; i < p; ++i) {
+        curSumRow[i] = sumRow(i);
+        curSumCol[i] = sumCol(i);
+    }
+}
+
+void randomPick() {
+    randomPick(row);
+    randomPick(col);
+}
+
+void solve() {
+    randomPick(); initCur();
+    optimize();
+
+    while (!TLE()) {
+        randomPick(); initCur();
+        optimize();
+    }
+}
+
+long long part[N];
+long long more[N];
+
+bool possible(long long limit) {
+    for (int i = 1; i <= p; ++i) part[i] = 0;
+    int count = 0;
+    for (int c = 1; c <= n; ++c) {
+        for (int i = 1; i <= p; ++i) {
+            more[i] = sum(row[i - 1] + 1, c, row[i], c);
+            if (more[i] > limit) return false;
+        }
+        bool exceed = false;
+        for (int i = 1; i <= p; ++i) {
+            if (part[i] + more[i] > limit) {
+                exceed = true;
+                break;
+            }
+        }
+        if (exceed || c == 1) {
+            col[count] = c - 1;
+            count += 1;
+            if (count > p) {
+                return false;
+            }
+            for (int i = 1; i <= p; ++i)
+                part[i] = more[i];
+        } else {
+            for (int i = 1; i <= p; ++i) {
+                part[i] += more[i];
+            }
+        }
+    }
+    set<int> used (col + 1, col + count);
+    vector<int> remain;
+    if (count < p) {
+        for (int i = 1; i < n; ++i) if (!used.count(i)) {
+            remain.push_back(i);
+        }
+    }
+    random_shuffle(remain.begin(), remain.end());
+    while (count < p) {
+        col[count] = remain.back();
+        remain.pop_back();
+        count += 1;
+    }
+    assert(count == p);
+    col[p] = n;
+    sort(col + 1, col + p);
+    return true;
+}
+
+void solve2() {
+    int minElement = 1e9;
+    for (int i = 1; i <= n; ++i)
+        minElement = min(minElement, *min_element(a[i] + 1, a[i] + 1 + n));
+
+    while (getTime() + 0.05 < 2.0) {
+        randomPick(row);
+        long long l = minElement;
+        long long r = ans.maxSum - 1;
+        while (l <= r) {
+            long long mid = l + r >> 1;
+            if (possible(mid)) {
+                ans = Solution(row, col, mid);
+                r = mid - 1;
+            } else {
+                l = mid + 1;
+            }
+        }
+        for (int i = 0; i <= p; ++i)
+            row[i] = ans.row[i], col[i] = ans.col[i];
+        //optimize(2.0);
+    }
+}
+
+void exportAnswer() {
+    for (int i = 0; i <= p; ++i) {
+        row[i] = ans.row[i];
+        col[i] = ans.col[i];
+        //cerr << row[i] << ' ' << col[i] << endl;
+    }
+}
+
+int main() {
+    //srand(time(0));
+    readInput();
+    initSum();
+    solve();
+    solve2();
+    exportAnswer();
+    output();
+
+    //cerr << "Score = " << calcScore() << endl;
+    return 0;
+}

@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 250100
+#define NSQ 520
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+typedef pair<pii,int> piii;
+
+set<int> S[MAXN];
+int C[MAXN];
+set<int> T[MAXN];
+int L[MAXN]; int R[MAXN];
+
+void consol(int x) {
+	rep(j,L[x],R[x]) {
+		for (set<int>::iterator it = T[x].begin(); it != T[x].end(); it++) {
+			S[j].insert(*it);
+		}
+	}
+	T[x] = *new set<int>();
+}
+
+void upd(int x,int l,int r,int v) {
+	if (l < 0) {
+		consol(x);
+	} else {
+		if ((l <= L[x]) and (R[x]<=r)) {
+			T[x].insert(v);
+		} else {
+			consol(x);
+			rep(j,MAX(l,L[x]),MIN(r,R[x])) {
+				S[j].insert(v);
+			}
+		}
+	}
+}
+
+				
+
+int main() {
+	int n,m; s(n); s(m);
+	rep(i,1,n) { S[i] = *new set<int>(); L[i] = 1e8; R[i] = -1e8; }
+	int col = 0;
+	repe(j,1,MAXN) {
+		if (j%NSQ == 1) {
+			col++;
+		}
+		C[j] = col; L[col] = MIN(L[col],j); R[col] = MAX(R[col],j);
+		T[col] = *new set<int>();
+	}
+	
+	int l,r,x;
+
+	while (m--) {
+		int op; s(op);
+		if (op == 0) {
+			s(l); s(r); s(x);
+			rep(j,C[l],C[r]) {
+				upd(j,l,r,x);
+			}
+		} else {
+			s(x); int v = C[x];
+			for (set<int>::iterator it = T[v].begin(); it != T[v].end(); it++) {
+				S[x].insert(*it);
+			}
+			pr(S[x].size()); endc;
+		}
+		if (m%NSQ == 0) {
+			rep(j,C[1],C[n]) {
+				upd(j,-1,-1,-1);
+			}
+		}
+	}
+
+}

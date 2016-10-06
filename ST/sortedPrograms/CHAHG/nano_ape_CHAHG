@@ -1,0 +1,83 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <set>
+#include <map>
+#include <cmath>
+#include <vector>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define travel(x) for(edge *p=fir[x]; p; p=p->n)
+#define all(x) (x).begin,(x).end
+#define pb push_back
+#define fi first
+#define se second
+#define l(x) Left[x]
+#define r(x) Right[x]
+#define lowbit(x) (x&-x)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> Pii;
+typedef long double ld;
+typedef unsigned long long ull;
+
+inline int read()
+{
+    int x=0; bool f=0; char ch=getchar();
+    while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+    while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+    return f?-x:x;
+}
+
+#define maxn 13
+
+int n, k[maxn], v[maxn], A, x[5], y[5]; double nowL, nowR;
+struct node{double l,r;} S[maxn], B[maxn];
+
+int main()
+{
+	int t=read(); while (t--)
+	{
+		n=read(); A=0;
+		rep(i, 1, n) k[i]=read(), v[i]=read();
+		if (n==1) {puts("1"); puts("0 Inf"); continue;}
+		rep(i, 1, n-1) if (v[i]>v[i+1])
+		{
+			S[i]=(node){-0.5,1.0*(k[i]-k[i+1])/(v[i+1]-v[i])};
+			B[i]=(node){1.0*(k[i]-k[i+1])/(v[i+1]-v[i]),2e9+0.5};
+		}
+		else if (v[i]<v[i+1])
+		{
+			S[i]=(node){1.0*(k[i]-k[i+1])/(v[i+1]-v[i]),2e9+0.5};
+			B[i]=(node){-0.5,1.0*(k[i]-k[i+1])/(v[i+1]-v[i])};
+		}
+		else if (k[i]<k[i+1]) S[i]=(node){-0.5,2e9+0.5}, B[i]=(node){2e9,0};
+		else if (k[i]>k[i+1]) S[i]=(node){2e9,0}, B[i]=(node){-0.5,2e9+0.5};
+		else S[i]=(node){2e9,0}, B[i]=(node){2e9,0};
+		nowL=-0.5, nowR=2e9+0.5;
+		rep(i, 1, n-1) nowL=max(nowL,(i&1?S[i].l:B[i].l)), nowR=min(nowR,(i&1?S[i].r:B[i].r));
+		if (nowL<nowR)
+		{
+			int L=(int)nowL; while (L<=nowL) L++;
+			int R=(int)nowR; while (nowR<=R) R--; 
+			if (L<=R) A++, x[A]=L, y[A]=R;
+		}
+		nowL=-0.5, nowR=2e9+0.5;
+		rep(i, 1, n-1) nowL=max(nowL,(i&1?B[i].l:S[i].l)), nowR=min(nowR,(i&1?B[i].r:S[i].r));
+		if (nowL<nowR)
+		{
+			int L=(int)nowL; while (L<=nowL) L++;
+			int R=(int)nowR; while (nowR<=R) R--; 
+			if (L<=R) A++, x[A]=L, y[A]=R;
+		}
+		if (A==2 && x[1]>x[2]) swap(x[1],x[2]), swap(y[1],y[2]);
+		if (A==2 && y[1]+1==x[2]) y[1]=y[2], A=1;
+		printf("%d\n", A);
+		rep(i, 1, A) if (y[i]==2e9) printf("%d Inf\n", x[i]); else printf("%d %d\n", x[i], y[i]);
+	}
+    return 0;
+}

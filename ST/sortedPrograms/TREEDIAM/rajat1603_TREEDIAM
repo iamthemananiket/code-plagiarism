@@ -1,0 +1,147 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int M = 1e4 + 4;
+const int LN = 17;
+const int mod = 1e9 + 7;
+int n;
+int arr[N];
+vector < int > v[N];
+int a[N] , b[N];
+int dist[N];
+int p[N];
+int add(int a , int b){
+    int res = a + b;
+    if(res >= mod){
+        return res - mod;
+    }
+    return res;
+}
+int mult(int a , int b){
+    long long res = a;
+    res *= b;
+    if(res >= mod){
+        return res % mod;
+    }
+    return res;
+}
+int power(int a , int b){
+    int res = 1;
+    while(b){
+        if(b & 1){
+            res = mult(res , a);
+        }
+        a = mult(a , a);
+        b >>= 1;
+    }
+    return res;
+}
+int ans[N];
+int depth[N];
+int dp[LN][N];
+void dfs(int node , int parent){
+    dp[0][node] = parent;
+    depth[node] = depth[parent] + 1;
+    dist[node] = dist[parent] + arr[node];
+    for(int next : v[node]){
+        if(next != parent){
+            dfs(next , node);
+        }
+    }
+}
+int lca(int a , int b){
+    if(depth[a] < depth[b]){
+        swap(a , b);
+    }
+    int dif = depth[a] - depth[b];
+    for(int i = 0 ; i < LN ; ++i){
+        if(dif & (1 << i)){
+            a = dp[i][a];
+        }
+    }
+    if(a != b){
+        for(int i = LN - 1 ; i >= 0 ; --i){
+            if(dp[i][a] != dp[i][b]){
+                a = dp[i][a];
+                b = dp[i][b];
+            }
+        }
+        a = dp[0][a];
+    }
+    return a;
+}
+int getd(int a , int b){
+    int lc = lca(a , b);
+    return dist[a] + dist[b] - dist[lc] - dist[dp[0][lc]];
+}
+int parent[N];
+int node1[N];
+int node2[N];
+int dia[N];
+int cur;
+int find(int node){
+    if(parent[node] == node){
+        return node;
+    }
+    return parent[node] = find(parent[node]);
+}
+int inv(int val){
+    return power(val , mod - 2);
+}
+void join(int a , int b){
+    int x = find(a);
+    int y = find(b);
+    cur = mult(cur , inv(dia[x]));
+    cur = mult(cur , inv(dia[y]));
+    pair < int , pair < int , int > > dis[6];
+    dis[0] = {getd(node1[x] , node1[y]) , {node1[x] , node1[y]}};
+    dis[1] = {getd(node1[x] , node2[y]) , {node1[x] , node2[y]}};
+    dis[2] = {getd(node2[x] , node1[y]) , {node2[x] , node1[y]}};
+    dis[3] = {getd(node2[x] , node2[y]) , {node2[x] , node2[y]}};
+    dis[4] = {dia[x] , {node1[x] , node2[x]}};
+    dis[5] = {dia[y] , {node1[y] , node2[y]}};
+    sort(dis , dis + 6);
+    parent[y] = x;
+    node1[x] = dis[5].second.first;
+    node2[x] = dis[5].second.second;
+    dia[x] = dis[5].first;
+    cur = mult(cur , dia[x]);
+}
+int main(){
+    scanf("%d" , &n);
+    for(int i = 1 ; i <= n ; ++i){
+        scanf("%d" , arr + i);
+    }
+    for(int i = 1 ; i < n ; ++i){
+        scanf("%d %d" , a + i , b + i);
+        v[a[i]].emplace_back(b[i]);
+        v[b[i]].emplace_back(a[i]);
+    }
+    for(int i = 1 ; i < n ; ++i){
+        scanf("%d" , p + i);
+    }
+    dfs(1 , 0);
+    for(int i = 1 ; i < LN ; ++i){
+        for(int j = 1 ; j <= n ; ++j){
+            dp[i][j] = dp[i - 1][dp[i - 1][j]];
+        }
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        parent[i] = i;
+        node1[i] = i;
+        node2[i] = i;
+        dia[i] = arr[i];
+    }
+    ans[n] = 1;
+    for(int i = 1 ; i <= n ; ++i){
+        ans[n] = mult(ans[n] , arr[i]);
+    }
+    cur = ans[n];
+    for(int i = n - 1 ; i >= 1 ; --i){
+        join(a[p[i]] , b[p[i]]);
+        ans[i] = cur;
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        printf("%d\n" , ans[i]);
+    }
+}

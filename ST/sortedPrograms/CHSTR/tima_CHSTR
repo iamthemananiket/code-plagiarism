@@ -1,0 +1,125 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <set>
+#include <cstring>
+#include <map>
+#include <cstdlib>
+#define f first
+#define s second
+#define ll long long
+#define ull unsigned long long
+#define mp make_pair
+#define pb push_back
+#define vi vector <int>
+#define pii pair<int, int>
+using namespace std;          
+const int N = 5005, base = 2017, base1 = 23431 , mod = int(1e9) + 7, p = 2030000521, p1 = 1030000523;
+const ll INF = (1ll<<62);
+int T,n,q,k,an,cur;
+int b[N];
+pair <ll,ll> h[N],po[N];
+ll q1,q2;
+pii a[N];
+char s[N];
+int c[N+3][N+3];
+ll ans[N];
+ull H[N],A[N],Po[N];
+
+pii hash(int l,int r){
+	 return  mp( (h[r].f - h[l-1].f * po[r-l+1].f + q2) % p, (h[r].s - h[l-1].s * po[r-l+1].s + q1) % p1);
+}
+
+ull Hash(int l,int r){
+	return H[r] - H[l-1] * Po[r-l+1];
+}
+
+int main () {
+	scanf("%d\n",&T);
+	q2 = 1ll*p*p;
+	q1 = 1ll*p1*p1;
+	c[0][0] = 1;
+	for(int i=1;i<N;i++){
+		c[i][0] = c[i][i] = 1;
+		for(int j=1;j<i;j++){
+			c[i][j] = c[i-1][j] + c[i-1][j-1];
+			if(c[i][j] >= mod) c[i][j] -= mod;
+		}
+	}
+	ll x;
+	while(T--){
+		scanf("%d%d\n",&n,&q);
+		scanf("%s",s+1);
+		if(n <= 4500){
+			po[0] = mp(1,1);
+			for(int i=1;i<=n;i++){
+				h[i].f = (h[i-1].f * base + s[i] - 'a') % p ;
+				h[i].s = (h[i-1].s * base1 + s[i]) % p1 ;
+				po[i].f = po[i-1].f * base % p;
+				po[i].s = po[i-1].s * base1 % p1;
+				b[i] = 0;
+			}
+			for(int l=1;l<=n;l++){
+				an = 0;
+				for(int i=1;i+l-1<=n;i++){
+					a[++an] = hash(i,i+l-1);
+				}
+				sort(a+1,a+an+1);
+				int j;
+				for(int i=1;i<=an;i++){
+					j = i;
+					while(j <= an && a[i] == a[j]) j++;
+					b[j-i]++;
+					i = j - 1;
+				}
+			}
+		}
+		else{
+			Po[0] = 1;
+			for(int i=1;i<=n;i++){
+				H[i] = H[i-1] * base + s[i] ;
+				Po[i] = Po[i-1] * base;
+				b[i] = 0;
+			}
+			for(int l=1;l<=n;l++){
+				an = 0;
+				for(int i=1;i+l-1<=n;i++){
+					A[++an] = Hash(i,i+l-1);
+				}
+				sort(A+1,A+an+1);
+				int j;
+				for(int i=1;i<=an;i++){
+					j = i;
+					while(j <= an && A[i] == A[j]) j++;
+					b[j-i]++;
+					i = j - 1;
+				}
+			}
+		}
+		for(int i=1;i<=n;i++){
+			x = 0;
+			for(int j=i;j<=n;j++) if(b[j] > 0){
+				x += (0ll+b[j]) * c[j][i];
+			}
+			ans[i] = x % mod;
+		}
+		
+		for(int i=1;i<=q;i++){
+			scanf("%d",&k);
+			if(k > n){
+				puts("0");
+			}
+			else{
+				printf("%d\n",int(ans[k]));
+			}
+		}
+		
+	}
+
+return 0;
+}

@@ -1,0 +1,160 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+#define endl '\n'
+typedef long long ll;
+
+const int MOD = 1000000007;
+
+const int MAX_LG_N = 31;
+
+int n, K;
+
+ll mod_pow(ll x, ll y) {
+  ll r = 1;
+  while (y > 0) {
+    if (y & 1) r = r * x % MOD;
+    x = x * x % MOD;
+    y >>= 1;
+  }
+  return r;
+}
+
+typedef vector<int> vec;
+typedef vector<vec> mat;
+
+mat mod_mul(const mat &a, const mat &b) {
+  const int n = a.size(), m = b[0].size(), L = b.size();
+  mat c(n, vec(m));
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      for (int k = 0; k < L; k++) {
+        c[i][j] = ((ll)c[i][j] + (ll)a[i][k] * b[k][j]) % MOD;
+      }
+    }
+  }
+  return c;
+}
+
+mat mod_pow(mat a, ll x) {
+  const int n = a.size();
+  mat r(n, vec(n));
+  for (int i = 0; i < n; i++) r[i][i] = 1;
+  while (x > 0) {
+    if (x & 1) r = mod_mul(a, r);
+    a = mod_mul(a, a);
+    x >>= 1;
+  }
+  return r;
+}
+
+const int ix[8] = {0, 1, 2, 5, 9, 14, 20, 26};
+const int SZ = 27;
+mat an[MAX_LG_N];
+
+ll comb(int n, int K) {
+  ll ans = 1, d = 1;
+  for (int i = 0; i < K; i++) {
+    ans *= n - i;
+    ans %= MOD;
+    d *= i + 1;
+  }
+  ans *= mod_pow(d, MOD - 2);
+  ans %= MOD;
+  return ans;
+}
+int main() {
+  ios_base::sync_with_stdio(false); cin.tie(0);
+  mat a(SZ, vec(SZ, 0));
+  
+
+  a[ix[0]][ix[0]] = 1;
+  
+  a[ix[1]][ix[1]] = 1;
+  a[ix[1]][ix[0]] = 1;
+
+  a[ix[2]][ix[2]] = 1;
+  a[ix[2]][ix[1]] = 1;
+
+  a[ix[3]][ix[3] - 1] = 1;
+  a[ix[3]][ix[2]] = 1;
+  a[ix[3] - 1][ix[3]] = 1;
+  a[ix[3] - 2][ix[3] - 1] = 1;
+
+  a[ix[4]][ix[4] - 2] = 1;
+  a[ix[4]][ix[3] - 2] = 1;
+  a[ix[4] - 1][ix[4]] = 1;
+  a[ix[4] - 2][ix[4] - 1] = 1;
+  a[ix[4] - 3][ix[4] - 2] = 1;
+
+  a[ix[5]][ix[5] - 3] = 1;
+  a[ix[5]][ix[4] - 3] = 1;
+  a[ix[5] - 1][ix[5]] = 1;
+  a[ix[5] - 2][ix[5] - 1] = 1;
+  a[ix[5] - 3][ix[5] - 2] = 1;
+  a[ix[5] - 4][ix[5] - 3] = 1;
+
+  a[ix[6]][ix[6] - 4] = 1;
+  a[ix[6]][ix[5] - 4] = 1;
+  a[ix[6] - 1][ix[6]] = 1;
+  a[ix[6] - 2][ix[6] - 1] = 1;
+  a[ix[6] - 3][ix[6] - 2] = 1;
+  a[ix[6] - 4][ix[6] - 3] = 1;
+  a[ix[6] - 5][ix[6] - 4] = 1;
+
+  a[ix[7]][ix[7] - 5] = 1;
+  a[ix[7]][ix[6] - 5] = 1;
+  a[ix[7] - 1][ix[7]] = 1;
+  a[ix[7] - 2][ix[7] - 1] = 1;
+  a[ix[7] - 3][ix[7] - 2] = 1;
+  a[ix[7] - 4][ix[7] - 3] = 1;
+  a[ix[7] - 5][ix[7] - 4] = 1;  
+  
+  for (int i = 0; i < MAX_LG_N; i++) {
+    an[i] = a;
+    a = mod_mul(a, a);
+  }
+  
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> n >> K;
+    mat b(SZ, vec(1));
+    b[ix[0]][0] = 1;
+    for (int i = 0; i < MAX_LG_N; i++) {
+      if (n & (1 << i)) {
+	b = mod_mul(an[i], b);
+      }
+    }
+    cout << (comb(n, K) - b[ix[K]][0] + MOD) % MOD << endl;
+  }
+}

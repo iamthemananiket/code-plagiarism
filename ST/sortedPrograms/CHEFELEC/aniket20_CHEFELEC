@@ -1,0 +1,89 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 100002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll x[maxs];
+vector<ll>V,front,rear;
+string s;
+
+int main()
+{
+	iosbase;
+	ll t,i,j,k,n;
+	cin>>t;
+	while(t--){
+		cin>>n;
+		cin>>s;
+		s="1"+s+"1";
+		x[0]=-llmax;
+		for(i=1;i<=n;i++){
+			cin>>x[i];
+		}
+		x[n+1]=llmax;
+		ll ans=0;
+		for(i=0;i<=n+1;i++){
+			if(s[i]=='1'){
+				for(j=i+1;j<=n+1;j++){
+					if(s[j]=='1'){
+						break;
+					}
+				}
+				if(j==(i+1)){
+					continue;
+				}
+				for(k=i+1;k<=j;k++){
+					V.pb(x[k]-x[k-1]);
+					front.pb(0);
+					rear.pb(0);
+				}
+				front[0]=V[0];
+				for(k=1;k<V.size();k++){
+					front[k]=front[k-1]+V[k];
+				}
+				rear[(ll)V.size()-1]=V[(ll)V.size()-1];
+				for(k=(ll)V.size()-2;k>=0;k--){
+					rear[k]=rear[k+1]+V[k];
+				}
+				ll t1=min(rear[1],front[(ll)V.size()-2]);
+				for(k=0;k<(ll)V.size()-2;k++){
+					t1=min(t1,front[k]+rear[k+2]);
+				}
+				V.clear();
+				front.clear();
+				rear.clear();
+				ans+=t1;
+				i=j-1;
+			}
+		}
+		pr("%lld\n",ans);
+	}
+	return 0;
+}

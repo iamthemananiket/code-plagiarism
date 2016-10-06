@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first 
+#define Y second 
+#define FOR(i,L,R) for(auto i=(L);i<=(R);i++)
+#define REP(i,L,R) for(auto i=(L);i<(R);i++)
+
+typedef pair<int,int> ii;
+typedef long long ll;
+
+const int MOD=1e9+7;
+const int inf=2e9+10;
+const int N=1e5+10;
+
+int n,a[N],gr[N];
+ii ans[2];
+ii cross(ii a,ii b){
+	return ii(max(a.X,b.X),min(a.Y,b.Y));
+}
+ii cal(int idx,int type){
+	if (type==0){
+		if (a[idx]>=a[idx+1]){
+			if (gr[idx]>=gr[idx+1]) return ii(-1,-1);
+			return ii((a[idx]-a[idx+1])/(gr[idx+1]-gr[idx])+1,inf);
+		}
+		if (gr[idx]<=gr[idx+1]) return ii(0,inf);
+		return ii(0,(a[idx+1]-a[idx]-1)/(gr[idx]-gr[idx+1]));
+	}
+	if (a[idx]>a[idx+1]){
+		if (gr[idx]>=gr[idx+1]) return ii(0,inf);
+		return ii(0,(a[idx]-a[idx+1]-1)/(gr[idx+1]-gr[idx]));
+	}
+	if (gr[idx]<=gr[idx+1]) return ii(-1,-1);
+	return ii((a[idx+1]-a[idx])/(gr[idx]-gr[idx+1])+1,inf);
+}
+void solve(){
+	if (n==1){
+		printf("1\n0 Inf\n");
+		return;
+	}
+	int nans=0;
+	for(int type=0;type<=1;type++){
+		ans[type]=ii(0,inf);
+		for(int i=1;i<n;i++) ans[type]=cross(ans[type],cal(i,type^(i&1)));
+		if (ans[type].X<=ans[type].Y) nans++;
+	}
+	if (ans[0].X>ans[1].X) swap(ans[0],ans[1]);
+	// for(int i=0;i<=1;i++) cout<<ans[i].X<<" "<<ans[i].Y<<'\n';
+	if (nans==2&&ans[1].X==ans[0].Y+1){
+		ans[0].Y=ans[1].Y;
+		ans[1]=ii(0,-1);
+		nans=1;
+	}
+	printf("%d\n",nans);
+	for(int i=0;i<=1;i++) if (ans[i].X<=ans[i].Y){
+		printf("%d ",ans[i].X);
+		if (ans[i].Y==inf) printf("Inf\n");
+		else printf("%d\n",ans[i].Y);
+	}
+}
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		scanf("%d",&n);
+		for(int i=1;i<=n;i++) scanf("%d%d",a+i,gr+i);
+		solve();
+	}
+}

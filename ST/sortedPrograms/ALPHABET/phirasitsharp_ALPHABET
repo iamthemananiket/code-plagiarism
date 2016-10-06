@@ -1,0 +1,35 @@
+#include <iostream>
+
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	std::string alpha;
+	std::cin >> alpha;
+
+	int hash = 0;
+	for ( const char ch : alpha ) {
+		hash |= 1 << ( ch - 'a' );
+	}
+
+	int n;
+	std::cin >> n;
+	for ( int i = 0 ; i < n ; ++i ) {
+
+		std::string str;
+		std::cin >> str;
+
+		int str_hash = 0;
+		for ( const char ch : str ) {
+			str_hash |= 1 << ( ch - 'a' );
+		}
+
+		if ( ( str_hash | hash ) == hash ) {
+			std::cout << "Yes\n";
+		} else {
+			std::cout << "No\n";
+		}
+	}
+	return 0;
+}

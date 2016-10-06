@@ -1,0 +1,64 @@
+#include<stdio.h>
+#include<algorithm>
+#include<vector>
+using namespace std;
+int n, m, Num[101000], deg[101000], Q[101000], P[101000], CC[101000];
+bool v[101000];
+vector<int>E[101000];
+struct A{
+	int a, b;
+}Ed[501000];
+void DFS(int a){
+	v[a] = true;
+	int i;
+	for (i = 0; i < E[a].size(); i++){
+		if (!v[E[a][i]])DFS(E[a][i]);
+	}
+}
+int main(){
+	int i, c = 0, h = 0, t = 0, x, y;
+	scanf("%d%d", &n, &m);
+	for (i = 1; i <= m; i++){
+		scanf("%d%d", &Ed[i].a, &Ed[i].b);
+		E[Ed[i].a].push_back(Ed[i].b);
+	}
+	DFS(1);
+	for (i = 1; i <= n; i++){
+		if (v[i]){
+			c++;
+			Num[i] = c;
+		}
+	}
+	for (i = 1; i <= n; i++)E[i].clear();
+	n = c;
+	for (i = 1; i <= m; i++){
+		if (!v[Ed[i].a] || !v[Ed[i].b])continue;
+		E[Num[Ed[i].a]].push_back(Num[Ed[i].b]);
+		deg[Num[Ed[i].b]]++;
+	}
+	for (i = 1; i <= n; i++)if (!deg[i])Q[++t] = i;
+	P[1] = 1;
+	while (h < t){
+		x = Q[++h];
+		for (i = 0; i < E[x].size(); i++){
+			y = E[x][i];
+			deg[y]--;
+			if (!deg[y])Q[++t] = y;
+			if (x == 1){
+				P[y] = y;
+			}
+			else{
+				if (P[y] && P[y] != P[x])P[y] = y;
+				else P[y] = P[x];
+			}
+		}
+	}
+	long long Res = (long long)n*(n - 1) / 2;
+	for (i = 1; i <= n; i++){
+		if (P[i] > 0)CC[P[i]]++;
+	}
+	for (i = 1; i <= n; i++){
+		Res -= (long long)CC[i] * (CC[i] - 1) / 2;
+	}
+	printf("%lld\n", Res);
+}

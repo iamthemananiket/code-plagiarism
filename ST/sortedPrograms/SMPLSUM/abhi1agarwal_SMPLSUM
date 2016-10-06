@@ -1,0 +1,212 @@
+/*
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+	ABHINANDAN AGARWAL
+	MNNIT ALLAHABAD
+	CSE
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+*/
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+int fs()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (c<'0'||c>'9')
+		c=getchar_unlocked();
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return x; 
+}
+void pps(const char *s)
+{
+	int i;
+	for (i=0;s[i]!='\0';i++)
+	{
+		putchar_unlocked(s[i]);
+	}
+}
+void _ppd(int a)
+{
+	if (a==0)
+		return ;
+	_ppd(a/10);
+	putchar_unlocked(a%10+'0');
+}
+void ppd(int a) // Printing integer using utchar unlocked!
+{
+	if (a==0)
+		pc('0');
+	else
+	_ppd(a);
+}
+void _pplld(ll a)
+{
+	if (a==0)
+		return ;
+	_pplld(a/10);
+	pc(a%10+'0');
+}
+void pplld(ll a)
+{
+	if (a==0)
+	{
+		pc('0');
+		return ;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_pplld(a);
+}
+int ggs(char *s) // String inputting
+{
+	int x=0;
+	char c=gc();
+	while (!('a'<=c&&c<='z')&&c!=-1) // change conditions to whatever strings can input !
+		c=gc();
+	while ('a'<=c&&c<='z')
+	{
+		s[x++]=c;
+		c=gc();
+	}
+	s[x]='\0';
+	return x;
+}
+
+int fsn()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (!('0'<=c&&c<='9'||c=='-'))
+		c=getchar_unlocked();
+	int neg=0;
+	if (c=='-'){
+		neg=1;
+		c=getchar_unlocked();
+	}
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return (neg==0?x:-x); 
+}
+static int A[10000001]={0};
+#define lim 10000000
+#define sqlim 3163
+void sieve()
+{
+	
+	int i,j;
+	A[1]=1;
+	A[2]=2;
+	for (i=3;i<=sqlim;i+=2)
+	{
+		if (A[i])
+			continue;
+//		A[i]=i; // No effect
+		for (j=i*i;j<=lim;j+=i)
+		{
+			if (!A[j])
+				A[j]=i;
+		}
+	}
+/*	for (;i<=lim;i++)
+	{
+		if (!A[i])
+			A[i]=i;
+	}
+*/	
+}
+long long ans=0,now;
+/*struct facs
+{
+	int p,no;
+};
+static facs ps[1000];
+int fno=0;
+
+void doit(int ind,int d,int phi)
+{
+	if (ind>=fno)
+	{
+		ans+=(long long)d*phi;
+		//printf("got d:%d phi:%d d*phi:%d ans now:%d\n",d,phi,d*phi,ans);
+		return ;
+	}
+	int c=1,i,phi_=1;
+	for (i=0;i<=ps[ind].no;i++)
+	{
+		doit(ind+1,c*d,phi*phi_);
+		c*=ps[ind].p;
+		if (i==0)
+			phi_=ps[ind].p-1;
+		else
+		{
+			phi_*=ps[ind].p;
+		}
+	}
+	
+}*/
+long long powd(ll a,ll b)
+{
+	if (b==0)
+		return 1;
+	ll ret=powd(a,b/2);
+	if (b&1)
+		return a*ret*ret;
+	else
+		return ret*ret;
+}
+int main()
+{
+	int t=fs();
+	sieve();
+	while (t--)
+	{
+		int n=fs(),i,j,tem,c,div,p_,e_;
+		ll p2e;
+		tem=n;
+		ans=1;
+		while (n>1)
+		{
+			c=0;
+			if ((n&1)==0)
+				div=2;
+			else if (A[n]==0)
+				div=n;
+			else
+				div=A[n];
+			p_=div;p2e=1;
+			//printf("A[n] is %d for n :%d\n",A[n],n);
+
+			while (n%div==0)
+			{
+				n/=div;
+				p2e*=(ll)div*div;
+				//printf("inside loop n:%d\n",n);
+			}
+			now=1+(long long)(p2e-1)/((ll)p_+1)*p_;
+			ans*=now;
+		}
+/*		for (i=0;i<fno;i++)
+			printf("%d comes %d times\n",ps[i].p,ps[i].no);
+*/
+		pplld(ans);
+		pc('\n');
+	}
+	return 0;
+}

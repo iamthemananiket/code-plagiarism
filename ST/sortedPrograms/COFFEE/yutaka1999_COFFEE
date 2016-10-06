@@ -1,0 +1,88 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#define SIZE 5005
+#define INF 100000000000000000LL
+
+using namespace std;
+typedef long long int ll;
+
+struct getmax
+{
+	ll que[SIZE];
+	int s,e;
+	
+	void init()
+	{
+		s=e=0;
+	}
+	void add(ll k)
+	{
+		while(s<e&&que[e-1]<k) e--;
+		que[e++]=k;
+	}
+	void rem(ll k)
+	{
+		if(s<e&&que[s]==k)
+		{
+			s++;
+		}
+	}
+	ll get()
+	{
+		return s==e?-INF:que[s];
+	}
+};
+getmax q1[SIZE],q2[SIZE];
+ll dp[SIZE][SIZE];
+ll A[SIZE],sum[SIZE];
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int n,k,d,m;
+		scanf("%d %d %d %d",&n,&k,&d,&m);
+		for(int i=0;i<=k;i++)
+		{
+			q1[i].init();
+			q2[i].init();
+		}
+		q2[0].add(0);
+		for(int i=0;i<n;i++)
+		{
+			scanf("%lld",&A[i]);
+			sum[i]=A[i];
+			if(i>0) sum[i]+=sum[i-1];
+		}
+		A[n]=0;sum[n]=sum[n-1];
+		for(int i=0;i<=n;i++)
+		{
+			for(int j=k+1;j>=1;j--)
+			{
+				dp[i][j]=q2[j-1].get()-A[i];
+				ll t=q1[j-1].get();
+				if(t!=INF) dp[i][j]=max(dp[i][j],t+sum[i]*(ll) (m-1)-A[i]*(ll) m);
+				if(dp[i][j]>-INF/2) q1[j].add(dp[i][j]-sum[i]*(ll) (m-1));
+				else dp[i][j]=-INF;
+			}
+			if(i-d>=0)
+			{
+				for(int j=k+1;j>=1;j--)
+				{
+					if(dp[i-d][j]!=-INF)
+					{
+						q1[j].rem(dp[i-d][j]-sum[i-d]*(ll) (m-1));
+						q2[j].add(dp[i-d][j]+(sum[i]-sum[i-d])*(ll) (m-1));
+					}
+				}
+			}
+		}
+		printf("%lld\n",dp[n][k+1]+sum[n]);
+	}
+	return 0;
+}

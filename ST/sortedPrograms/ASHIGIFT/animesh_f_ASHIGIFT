@@ -1,0 +1,99 @@
+#include<iostream>
+#include<cstdio>
+#include<cmath>
+#include<utility>
+#include<vector>
+#include<queue>
+#include<stack>
+#include<string>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+#define pb push_back
+#define mp make_pair
+const int N = 10001;
+unsigned long long x[N],y[N],q[N],r[N];
+unsigned long long p[N];
+vector<pair<bool,int> > dynVec;
+bool compare(pair<bool,int> a,pair<bool,int> b){
+    unsigned long long xx,yy;
+    if(a.first==0){
+        xx=x[a.second];
+    }
+    else{
+        xx=p[a.second];
+    }
+    if(b.first==0){
+        yy=x[b.second];
+    }
+    else{
+        yy=p[b.second];
+    }
+    return xx<yy;
+}
+int main(){
+    int t;
+    cin>>t;
+    while(t--){
+        int X,b;
+        cin>>X>>b;
+        dynVec.clear();
+        unsigned long long ans=1;
+        for(int i=1;i<=b;i++){
+            cin>>x[i]>>y[i];
+            ans+=y[i];
+            dynVec.pb(mp(0,i));
+        }
+        int c;
+        cin>>c;
+        for(int i=1;i<=c;i++){
+            cin>>p[i]>>q[i]>>r[i];
+            dynVec.pb(mp(1,i));
+        }
+        if(!c){
+            cout<<ans<<endl;
+            continue;
+        }
+        sort(dynVec.begin(),dynVec.end(),compare);
+        unsigned long long l=1,R=ans;
+        while(l<R){
+            bool f=1;
+            unsigned long long mid=l+R;
+            mid/=2;
+            unsigned long long MID = mid;
+            int sz=dynVec.size();
+            for(int i=0;i<sz;++i){
+                if(mid<=0){
+                    f=0;
+                    break;
+                }
+                if(mid>=ans)
+                    break;
+                if(dynVec[i].first==0){
+                    if(y[dynVec[i].second]>=mid){
+                        f=0;
+                        break;
+                    }
+                    else 
+                        mid-=y[dynVec[i].second];
+                }
+                else{
+                    if(mid>=q[dynVec[i].second]){
+                        mid+=r[dynVec[i].second];
+                    }
+                }
+                if(mid<=0){
+                    f=0;
+                    break;
+                }
+                if(mid>=ans)
+                    break;
+            }
+            if(f)
+                R=MID;
+            else
+                l=MID+1;
+        }
+        cout<<l<<endl;
+    }
+}

@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 100000;
+
+int tree[2 * MAX_N];
+string A;
+int N, Q;
+
+void build()
+{
+    for (int i = N - 1; i > 0; i--)
+        tree[i] = tree[2 * i] ^ tree[2 * i + 1];
+}
+
+void modify(int pos, int value)
+{
+    pos += N;
+    tree[pos] = value;
+
+    while (pos > 1)
+    {
+        tree[pos >> 1] = tree[pos] ^ tree[pos ^ 1];
+        pos >>= 1;
+    }
+}
+
+int query(int l, int r)
+{
+    l += N;
+    r += N;
+
+    int sol = tree[r];
+
+    while (l < r)
+    {
+        if (l & 1)
+        {
+            sol ^= tree[l];
+            l++;
+        }
+
+        if (r & 1)
+        {
+            r--;
+            sol ^= tree[r];
+        }
+
+        l >>= 1;
+        r >>= 1;
+    }
+
+    return sol;
+}
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    ios_base::sync_with_stdio(false);
+
+    cin >> N;
+    cin >> A;
+
+    for (int i = 0; i < N; ++i)
+    {
+        tree[i + N] = 1 << (A[i] - 'a');
+    }
+
+    build();
+
+    cin >> Q;
+
+    while (Q--)
+    {
+        int l, r, x, tip;
+        char k;
+
+        cin >> tip;
+
+        if (tip == 1)
+        {
+            cin >> x >> k;
+
+            modify(x - 1, 1 << (k - 'a'));
+        }
+        else
+        {
+            cin >> l >> r;
+
+            int sol = query(l - 1, r - 1);
+
+            if (__builtin_popcount(sol) > 1)
+                cout << "NO\n";
+            else
+                cout << "YES\n";
+        }
+    }
+
+    return 0;
+}

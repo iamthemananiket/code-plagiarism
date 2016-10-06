@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef double dd;
+vector<int> to;
+vector<bool> vis;
+
+int calc(int start) {
+  static stack<int> st;
+  while (!st.empty())
+    st.pop();
+  int at = start;
+  while (!vis[at]) {
+    vis[at] = true;
+    st.push(at);
+    at = to[at];
+  }
+  int res = 1;
+  while (!st.empty() && st.top() != at) {
+    st.pop();
+    ++res;
+  }
+  if (st.empty()) {
+    return 0;
+  }
+  return res;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N;
+    cin >> N;
+    to.resize(N);
+    for(int i = 0; i < N; ++i){
+      int a;
+      cin >> a;
+      to[i] = (i + a + 1) % N;
+    }
+    vis.clear();
+    vis.resize(N);
+    int res = 0;
+    for(int st=0;st<N;++st)
+      if (!vis[st])
+        res += calc(st);
+    cout << res << '\n';
+  }
+  return 0;
+}

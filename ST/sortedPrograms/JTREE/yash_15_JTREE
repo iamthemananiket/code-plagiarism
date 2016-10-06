@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define N 100005
+#define ll long long
+ll ans[N];
+bool vis[N];
+int arr[N];
+ll spt[N][20];
+vector< vector< pair<int,int> > > tkt;
+vector< vector<int> > g;
+
+void dfs(int node, int lvl){
+	arr[lvl]=node;
+	vis[node]=1;
+	int nxt,sz,idx,k;
+	ll val;
+	/*for(int i=0;i<arr.size();i++)
+			cout<<arr[i].first<<","<<arr[i].second<<" ";cout<<"\n";*/
+	for(int i=0;i<tkt[node].size();i++){
+		k=tkt[node][i].first;
+		for(sz=1,idx=0;sz<=k && sz<=lvl-1;sz+=sz,idx++);
+		sz>>=1;idx--;
+	//	cout<<" :Q "<<node<<" "<<lvl<<" "<<k<<" "<<sz<<" "<<idx<<"\n";
+		val=min(spt[arr[lvl-1]][idx],spt[arr[max(0,lvl-k-1)+sz]][idx]);
+		ans[node]=min(ans[node],tkt[node][i].second+val);
+	//	cout<<" ::QQ "<<lvl-tkt[node][i].first<<" "<<lvl<<"\n";
+	//	cout<<node<<" :: "<<pos<<" "<<ans[node]<<"\n";
+	}
+//	cout<<"  :: "<<node<<" : "<<ans[node]<<'\n';
+	spt[node][0]=ans[node];
+	for(idx=0,sz=1;sz<lvl;sz+=sz,idx++)
+		spt[node][idx+1]=min(spt[node][idx],spt[arr[max(sz,lvl-sz)]][idx]);
+	for(int i=0;i<g[node].size();i++){
+		nxt=g[node][i];
+		if(vis[nxt])
+			continue;
+		dfs(nxt,lvl+1);
+	}
+}
+
+int main(){
+	int n,m,i,u,v,k,w;
+	cin >> n >> m;
+	g.resize(n+1);
+	tkt.resize(n+1);
+	for(i=1;i<n;i++){
+		scanf("%d%d",&u,&v);
+		g[u].push_back(v);
+		g[v].push_back(u);
+		ans[i+1]=1e16;
+	}
+	while(m--){
+		scanf("%d%d%d",&v,&k,&w);
+		tkt[v].push_back(make_pair(k,w));
+	}
+	tkt[1].clear();
+	dfs(1,1);
+	cin >> m;
+	while(m--){
+		scanf("%d",&v);
+		printf("%lld\n",ans[v]);
+	}	
+}

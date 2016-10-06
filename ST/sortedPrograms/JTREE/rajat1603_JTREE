@@ -1,0 +1,101 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int SN = 1 << 18;
+const long long inf = 1e15;
+int n , m;
+int a , b , c;
+vector < int > v[N];
+int depth[N];
+vector < pair < int , int > > tickets[N];
+long long dp[N];
+long long segtree[SN];
+multiset < long long > ms[N];
+void dfs(int node){
+    for(int next : v[node]){
+        depth[next] = depth[node] + 1;
+        dfs(next);
+    }
+}
+void build(int l , int r , int node){
+    if(l == r){
+        segtree[node] = *ms[l].begin();
+    }
+    else{
+        int mid = l + r >> 1;
+        build(l , mid , node + node);
+        build(mid + 1 , r , node + node + 1);
+        segtree[node] = min(segtree[node + node] , segtree[node + node + 1]);
+    }
+}
+long long query(int l , int r , int node , int ql , int qr){
+    if(l > qr || r < ql){
+        return inf;
+    }
+    if(l >= ql && r <= qr){
+        return segtree[node];
+    }
+    int mid = l + r >> 1;
+    return min(query(l , mid , node + node , ql , qr) , query(mid + 1 , r , node + node + 1 , ql , qr));
+}
+void update(int l , int r , int node , int idx , long long val , bool b){
+    if(l == r){
+        if(b){
+            ms[l].insert(val);
+        }
+        else{
+            ms[l].erase(ms[l].find(val));
+        }
+        segtree[node] = *ms[l].begin();
+    }
+    else{
+        int mid = l + r >> 1;
+        if(idx <= mid){
+            update(l , mid , node + node , idx , val , b);
+        }
+        else{
+            update(mid + 1 , r , node + node + 1 , idx , val , b);
+        }
+        segtree[node] = min(segtree[node + node] , segtree[node + node + 1]);
+    }
+}
+void dfs1(int node){
+    dp[node] = inf;
+    for(auto it : tickets[node]){
+        int k = it.first;
+        int w = it.second;
+        dp[node] = min(dp[node] , w + query(1 , n , 1 , depth[node] - k , depth[node]));
+    }
+    update(1 , n , 1 , depth[node] , dp[node] , 1);
+    for(int next : v[node]){
+        dfs1(next);
+    }
+    update(1 , n , 1 , depth[node] , dp[node] , 0);
+}
+int main(){
+    scanf("%d %d" , &n , &m);
+    for(int i = 1 ; i < n ; ++i){
+        scanf("%d %d" , &a , &b);
+        v[b].emplace_back(a);
+    }
+    depth[1] = 1;
+    dfs(1);
+    for(int i = 1 ; i <= m ; ++i){
+        scanf("%d %d %d" , &a , &b , &c);
+        tickets[a].emplace_back(make_pair(b , c));
+    }
+    dp[1] = 0;
+    for(int i = 1 ; i <= n ; ++i){
+        ms[i].insert(inf);
+    }
+    ms[1].insert(0);
+    build(1 , n , 1);
+    for(int next : v[1]){
+        dfs1(next);
+    }
+    scanf("%d" , &n);
+    while(n--){
+        scanf("%d" , &m);
+        printf("%lld\n" , dp[m]);
+    }
+}

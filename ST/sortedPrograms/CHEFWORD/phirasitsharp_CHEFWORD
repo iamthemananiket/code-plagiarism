@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <string.h>
+
+#define N 26
+
+double arr[N][N];
+char begin[5], str[5];
+int cnt[N][N][N];
+
+double opt[N][N], tmp[N][N];
+
+void calc(int x) {
+	if(x == 1) {
+		for(int i = 0;i < N;i++) {
+			for(int j = 0;j < N;j++) {
+				opt[i][j] = arr[i][j];
+			}
+		}
+		return;
+	}
+	calc(x / 2);
+	for(int i = 0;i < N;i++) {
+		for(int j = 0;j < N;j++) {
+			tmp[i][j] = 0.0;
+			for(int k = 0;k < N;k++) {
+				tmp[i][j] += opt[i][k] * opt[k][j];
+			}
+		}
+	}
+	for(int i = 0;i < N;i++) {
+		for(int j = 0;j < N;j++) {
+			opt[i][j] = tmp[i][j];
+		}
+	}
+	if(x % 2) {
+		for(int i = 0;i < N;i++) {
+			for(int j = 0;j < N;j++) {
+				tmp[i][j] = 0.0;
+				for(int k = 0;k < N;k++) {
+					tmp[i][j] += opt[i][k] * arr[k][j];
+				}
+			}
+		}
+		for(int i = 0;i < N;i++) {
+			for(int j = 0;j < N;j++) {
+				opt[i][j] = tmp[i][j];
+			}
+		}
+	}
+}
+void evaluate(void) {
+	int n, k;
+	scanf("%d%d", &n, &k);
+	scanf("%s", begin);
+	for(int i = 0;i < N;i++) {
+		for(int j = 0;j < N;j++) {
+			scanf("%lf", &arr[i][j]);
+		}
+	}
+	calc(k);
+	for(int i = 0;i < N;i++) {
+		for(int j = 0;j < N;j++) {
+			for(int p = 0;p < N;p++) {
+				cnt[i][j][p] = 0;
+			}
+		}
+	}
+	for(int i = 0;i < n;i++) {
+		scanf("%s", str);
+		if(strlen(str) != strlen(begin)) {
+			continue;
+		}
+		int a = str[0] - 'a', b = str[1] - 'a', c = str[2] - 'a';
+		if(str[2] != 0) {
+			cnt[a][b][c] = 1;
+		}else if(str[1] != 0) {
+			cnt[a][b][0] = 1;
+		}else {
+			cnt[a][0][0] = 1;
+		}
+	}
+	double ans = 0.0;
+	for(int i = 0;i < N;i++) {
+		if(begin[1] == 0) {
+			if(cnt[i][0][0]) {
+				ans += opt[begin[0] - 'a'][i];
+			}
+		}else {
+			for(int j = 0;j < N;j++) {
+				if(begin[2] == 0) {
+					if(cnt[i][j][0]) {
+						ans += opt[begin[0] - 'a'][i] * opt[begin[1] - 'a'][j];
+					}
+				}else {
+					for(int x = 0;x < N;x++) {
+						if(cnt[i][j][x]) {
+							ans += opt[begin[0] - 'a'][i] * opt[begin[1] - 'a'][j] * opt[begin[2] - 'a'][x];
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("%.8lf\n", ans);
+}
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--) {
+		evaluate();
+	}
+	return 0;
+}

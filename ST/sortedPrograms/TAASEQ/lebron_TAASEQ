@@ -1,0 +1,114 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-7
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 100031;
+
+int tests;
+int n;
+int ar[N];
+int badpref[N], badsuf[N];
+int val[N];
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/input.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+
+	cin >> tests;
+	for (; tests; --tests)
+	{
+		cin >> n;
+		
+		for (int i = 1; i <= n; i++)
+		{
+			cin >> ar[i];
+		}
+
+		for (int i = 0; i <= n+5; i++)
+		{
+			badpref[i] = badsuf[i] = 0;
+		}
+
+		for (int i = 1; i < n; i++)
+		{
+			val[i] = ar[i + 1] - ar[i];
+		}
+
+		for (int i = n - 1; i >= 1; --i)
+		{
+			if (i < n - 1 && val[i] != val[i + 1])
+				badsuf[i] = 1;
+			else
+				badsuf[i] = badsuf[i + 1];
+		}
+
+		for (int i = 1; i < n; i++)
+		{
+			if (i>1 && val[i] != val[i - 1])
+				badpref[i] = 1;
+			else
+				badpref[i] = badpref[i - 1];
+		}
+
+		long long ans = 1e18;
+
+		for (int i = 1; i <= n; i++)
+		{
+			if (i > 2 && badpref[i - 2])
+				continue;
+			if (badsuf[i + 1])
+				continue;
+			int dif_rem = ar[i + 1] - ar[i - 1];
+			if (i>1&&i <= n - 2 && dif_rem != ar[n] - ar[n - 1])
+				continue;
+			if (i<n&&i > 2 && dif_rem != ar[2] - ar[1])
+				continue;
+			ans = min(ans, 1ll*ar[i]);
+		}
+		if (ans > 1e15)
+			ans = -1;
+		cout << ans << endl;
+	}
+
+	cin.get(); cin.get();
+	return 0;
+}

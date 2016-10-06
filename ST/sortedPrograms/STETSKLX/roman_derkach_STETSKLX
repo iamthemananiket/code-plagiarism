@@ -1,0 +1,143 @@
+///test my skill
+#include<bits/stdc++.h>
+
+///#define files freopen("input.txt","r",stdin);freopen("output.txt","w",stdout);
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ms(x) memset(x, 0, sizeof(x));
+#define p(x,n) fill(x+1,x+n+1,0);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+#define f first
+#define s second
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define piii pair<pii,int>
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+const int N = 1e5 + 3;
+const int M = 2e5 + 3;
+const int inf = 2e9 + 2;
+
+struct my
+{
+    int v,h;
+    int tt[50];
+};
+
+int a[M],b[M],c[M],last[N],mn,mnn,L,R,kol,n;
+
+inline void add(int v,int u,int len)
+{
+    ++kol;
+    a[kol]=u;
+    b[kol]=last[v];
+    last[v]=kol;
+    c[kol]=len;
+}
+
+inline void bfs(int v)
+{
+
+    my st[n];
+
+    char usd[N];
+     ms(usd);
+
+     st[0].v=v;
+     st[0].h=0;
+     memset(st[0].tt,0,sizeof(st[0].tt));
+
+     int l = 0;
+     int r = 0;
+
+      usd[v]=1;
+       while(l<=r)
+       {
+           if(st[l].h==R) break;
+           int x = last[st[l].v];
+            while(x)
+            {
+                if(!usd[a[x]])
+                {
+                    ++r;
+                    st[r]=st[l];
+                    st[r].v=a[x];
+                    usd[st[r].v]=1;
+                    st[r].h=st[l].h+1;
+                    st[r].tt[st[r].h]=c[x];
+                     int j = st[r].h;
+                      while( j>1 && st[r].tt[j]<st[r].tt[j-1])
+                      {
+                          swap(st[r].tt[j],st[r].tt[j-1]);
+                          --j;
+                      }
+                      if(st[r].h>=L && st[r].h<=R)
+                      {
+                          mn=min(mn,st[r].tt[(st[r].h>>1) + 1]);
+                          if(mn==mnn) return;
+                      }
+                }
+                x=b[x];
+            }
+            ++l;
+       }
+}
+
+int main()
+{
+
+ // fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+   int t;
+   cin>>t;
+    while(t--)
+    {
+        int v,u,len;
+        cin>>n>>L>>R;
+         if(n<=L)
+         {
+            for(int i=1;i<n;++i) cin>>v>>u>>len;
+            printf("-1");
+            writeln;
+         } else {
+        kol=0;
+        ms(last);
+        mnn=inf;
+         for(int i=1;i<n;++i)
+         {
+             cin>>v>>u>>len;
+             mnn=min(mnn,len);
+             add(v,u,len);
+             add(u,v,len);
+         }
+
+         mn=inf;
+          for(int i=n;i>0;--i)
+          {
+              bfs(i);
+              if(mn==mnn) break;
+          }
+
+          if(mn>=inf) printf("-1"); else printf("%d",mn);
+          writeln;
+
+         }
+    }
+
+    return 0;
+}

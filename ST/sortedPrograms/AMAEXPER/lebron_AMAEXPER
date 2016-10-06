@@ -1,0 +1,260 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 256
+
+using namespace std;
+
+const int N = 300031;
+
+int tests, n;
+vector<pair<int, int> > g[N];
+int ans[N];
+int used[N];
+int mdep[N], dep[N], dep_v[N], diam[N];
+pair<int, int> diam_v[N];
+vector<pair<int, int> > sons[N];
+int up_dist[N][20];
+int up[N][20];
+
+void dfs(int v, int p)
+{
+	used[v] = 1;
+	mdep[v] = dep[v];
+	dep_v[v] = v;
+	diam[v] = 0;
+	diam_v[v] = make_pair(v, v);
+	sons[v].clear();
+
+	for (int i = 1; i < 17; i++)
+	{
+		up[v][i] = up[up[v][i - 1]][i - 1];
+	}
+
+	for (int i = 0; i < g[v].size(); i++)
+	{
+		int to = g[v][i].first;
+		if (used[to])
+			continue;
+		up[to][0] = v;
+		up_dist[to][0] = g[v][i].second;
+		
+		dep[to] = dep[v] + g[v][i].second;
+		dfs(to, v);
+		if (mdep[to]>mdep[v])
+		{
+			mdep[v] = mdep[to];
+			dep_v[v] = dep_v[to];
+		}
+		sons[v].push_back(make_pair(mdep[to], to));
+	}
+
+}
+
+int rad[N];
+pair<int, int> rv[N];
+
+int get_below(int v, int dlim)
+{
+	for (int i = 16; i >= 0; --i)
+	{
+		int nw = up[v][i];
+		if (dep[nw] >= dlim)
+			v = nw;
+	}
+	return v;
+}
+
+void update_rad2(int v1, int v2, int v)
+{
+	rad[v] = 2e9;
+	int diam_len = dep[v1] + dep[v2] - 2 * dep[v];
+	rad[v] = max(dep[v1] - dep[v], dep[v2] - dep[v]);
+	int side1 = 0;
+	int side2 = diam_len;
+
+	//cout << v1 << " " << v2 << " " << v << "%" << diam_len << endl;
+	int mv1 = v1;
+	int mv2 = v2;
+
+	int mid = diam_len / 2;
+
+	int Q;
+
+	if (dep[v1] < dep[v2])
+		swap(v1, v2);
+
+	Q = get_below(v1, dep[v1] - mid);
+	rad[v] = min(rad[v], max(dep[v1] - dep[Q], dep[v2] - dep[v] + dep[Q] - dep[v]));
+	if (Q != v)
+	{
+		Q = up[Q][0];
+		rad[v] = min(rad[v], max(dep[v1] - dep[Q], dep[v2] - dep[v] + dep[Q] - dep[v]));
+	}
+
+	while (v1 != v)
+	{
+		//cout << "@" << side1 << "%" << side2 << endl;
+		rad[v] = min(rad[v], max(side1, side2));
+		side1 += dep[v1] - dep[up[v1][0]];
+		side2 -= dep[v1] - dep[up[v1][0]];
+		v1 = up[v1][0];
+	}
+
+	v1 = mv2;
+	v2 = mv1;
+	side1 = 0;
+	side2 = diam_len;
+	while (v1 != v)
+	{
+		//cout << "@" << side1 << "%" << side2 << endl;
+		rad[v] = min(rad[v], max(side1, side2));
+		side1 += dep[v1] - dep[up[v1][0]];
+		side2 -= dep[v1] - dep[up[v1][0]];
+		v1 = up[v1][0];
+	}
+}
+
+int valid[N];
+
+void update_rad(int v1, int v2, int v)
+{
+	rv[v] = make_pair(v1, v2);
+}
+void solve(int v, int p)
+{
+	used[v] = 1;
+	rad[v] = 0;
+	diam[v] = 0;
+	rv[v] = make_pair(v, v);
+	valid[v] = 1;
+
+	for (int i = 0; i < sons[v].size(); i++)
+	{
+		int to = sons[v][i].second;
+		solve(to, v);
+
+		if (diam[to] > diam[v])
+		{
+			diam[v] = diam[to];
+			diam_v[v] = diam_v[to];
+			rad[v] = rad[to];
+			valid[v] = 0;
+		}
+	}
+
+	sort(sons[v].begin(), sons[v].end());
+	reverse(sons[v].begin(), sons[v].end());
+
+	if (sons[v].size() > 0)
+	{
+		if (sons[v][0].first - dep[v] > diam[v])
+		{
+			diam[v] = sons[v][0].first - dep[v];
+			diam_v[v] = make_pair(sons[v][0].second, v);
+			update_rad(v, dep_v[sons[v][0].second], v);
+			valid[v] = 1;
+		}
+	}
+
+	if (sons[v].size() > 1)
+	{
+		if (sons[v][0].first + sons[v][1].first - 2 * dep[v] > diam[v])
+		{
+			diam[v] = sons[v][0].first + sons[v][1].first - 2 * dep[v];
+			diam_v[v] = make_pair(dep_v[sons[v][0].second], dep_v[sons[v][1].second]);
+			update_rad(dep_v[sons[v][0].second], dep_v[sons[v][1].second], v);
+			valid[v] = 1;
+		}
+	}
+
+	if (valid[v]) update_rad2(rv[v].first, rv[v].second, v);
+}
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/in.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	//ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+
+	//cin >> tests;
+	scanf("%d", &tests);
+
+	int cnt = 0;
+
+	for (; tests; --tests)
+	{
+		//cin >> n;
+		scanf("%d", &n);
+		if (n >= 50000)
+		{
+			++cnt;
+			if (cnt > 1)
+				return 0;
+		}
+		for (int i = 1; i <= n; i++)
+		{
+			g[i].clear();
+			used[i] = 0;
+		}
+
+		for (int i = 1; i < n; i++)
+		{
+			int a, b, c;
+//			cin >> a >> b >> c;
+			scanf("%d", &a);
+			scanf("%d", &b);
+			scanf("%d", &c);
+			g[a].push_back(make_pair(b, c));
+			g[b].push_back(make_pair(a, c));
+		}
+		dfs(1, 1);
+		for (int i = 1; i <= n; i++)
+			used[i] = 0;
+	
+		if (cnt > 0)
+			return 0;
+		solve(1, 1);
+
+		for (int i = 1; i <= n; i++)
+		{
+			printf("%d\n", rad[i]);
+//			cout << rad[i] << "\n";// " " << diam_v[i].first << " " << diam_v[i].second << " " << diam[i] << endl;
+		}
+	}
+	
+	cin.get(); cin.get();
+	return 0;
+}

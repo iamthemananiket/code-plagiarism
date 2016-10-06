@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 100005;
+int n, dis[N];
+bool vis[N], met;
+
+struct E {
+	int to, parity;
+};
+
+vector<E> g[N];
+
+void dfs(int v, int d) {
+	vis[v] = 1, dis[v] = d;
+	for (E e : g[v]) {
+		if (vis[e.to]) {
+			if ((dis[e.to] + e.parity + d) & 1) met = true;
+		}
+		else dfs(e.to, d + e.parity);
+	}
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int T, q, u, v, x;
+
+	cin >> T;
+	while (T--) {
+		cin >> n >> q;
+		REPU(i, 1, n) cin >> u >> v;
+		met = false;
+		REPU(i, 0, q) {
+			cin >> u >> v >> x;
+			if (u == v) {
+				if (x) met = true;
+				else continue;
+			}
+			g[u].push_back({v, x});
+			g[v].push_back({u, x});
+		}
+		fill(vis, vis + n + 1, 0);
+		fill(dis, dis + n + 1, 0);
+		dfs(1, 0);
+		int ans = 1;
+		REPU(i, 2, n + 1) if (!vis[i]) {
+			dfs(i, 0);
+			ans = ans * 2 % MOD;
+		}
+		REPU(i, 1, n + 1) g[i].clear();
+		if (met) ans = 0;
+		printf("%d\n", ans);
+	}
+	
+	return 0;
+}

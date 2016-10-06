@@ -1,0 +1,69 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+//#include <unordered_map>
+//#include <unordered_set>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const ll INF = (ll)1e18;
+
+char s[12349];
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		scanf("%s", s);
+		int l = 0;
+		int r = strlen(s) - 1;
+		bool isCorrect = true;
+		while (l <= r) {
+			if ('a' <= s[l] && s[l] <= 'z' && 'a' <= s[r] && s[r] <= 'z') {
+				if (s[l] != s[r]) {
+					isCorrect = false;
+					break;
+				}
+			} else if ('a' <= s[l] && s[l] <= 'z' && s[r] == '.') {
+				s[r] = s[l];
+			} else if (s[l] == '.' && 'a' <= s[r] && s[r] <= 'z') {
+				s[l] = s[r];
+			} else {
+				s[l] = s[r] = 'a';
+			}
+			++l;
+			--r;
+		}
+		if (isCorrect) {
+			printf("%s\n", s);
+		} else {
+			printf("-1\n");
+		}
+	}
+	return 0;
+}

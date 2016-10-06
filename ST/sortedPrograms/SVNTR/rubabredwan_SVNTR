@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(z,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<=b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			2000050
+#define INF			INT_MAX
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+int mat[160][160];
+
+ll sum[160][160];
+
+int main()
+{
+	int tc, n, m, s;
+	scanf("%d", &tc);
+	while(tc--){
+		scanf("%d %d %d", &n, &m, &s);
+		REPN(i, n){
+			REPN(j, m){
+				scanf("%d", &mat[i][j]);
+				sum[i][j] = sum[i-1][j] + sum[i][j-1] - sum[i-1][j-1] + mat[i][j];
+			}
+		}
+		
+		int ret = 0;
+		
+		//S[c][d] = S[a1][d]S[c][b1] +S[a1][b1]
+		
+		REPN(i,n){
+			REPN(j,m){
+				FOR(k, i, n){
+					FOR(l, j,  m){
+					//	cout << i << " " << j << " " << k << " " << l << " -> " << (sum[k][l] - sum[i-1][j] - sum[i][j-1]) + sum[i-1][j-1]<< endl;
+					//	cout << 
+						if( sum[k][l] - sum[i-1][l] - sum[k][j-1] + sum[i-1][j-1] <= s ) ret++;
+					}
+				}
+			}
+		}
+		
+//		1 2 3
+//		4 5 6
+		
+//		1
+		 
+//		12 21
+		
+		
+		cout << ret << endl;
+	}
+	return 0;
+}

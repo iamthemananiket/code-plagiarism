@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 200010
+#define X 19
+ 
+#define max(a, b) (a > b ? a : b)
+#define INF (1LL << 60)
+typedef long long LL;
+ 
+int T[M*X], a[M], id[M*X], N, rs[M*X], ls[M*X], n, b[M];
+ 
+bool cmp(int i, int j) {return a[i] < a[j];}
+ 
+struct dat{
+	LL mx, lsum, rsum, sum;
+	int cnt, l, r, len;
+} node[M*X];
+ 
+template <class T> inline void chkmax(T &x, T y) {if (x < y) x = y;}
+ 
+dat operator +(dat a, dat b) {
+	dat c;
+	c.mx = max(a.mx, b.mx);
+	c.l = a.l; c.r = b.r; c.lsum = a.lsum; c.rsum = b.rsum;
+	if (a.r && b.l) {
+		chkmax(c.mx, a.rsum + b.lsum);
+		if (a.l == a.len) c.l += b.l, chkmax(c.lsum, a.sum + b.lsum);
+    	if (b.r == b.len) c.r += a.r, chkmax(c.rsum, b.sum + a.rsum);
+    	c.sum = a.sum + b.sum;
+	}
+    c.len = a.len + b.len; c.cnt = a.cnt + b.cnt;
+    return c;
+}
+ 
+int build(int i, int l, int r, int k) {
+	int mid = (l + r) >> 1;
+	int j = ++N;
+	node[j] = node[i];
+	ls[j] = ls[i]; rs[j] = rs[i];
+	if (l == r) {
+		node[j] = dat{a[k], a[k], a[k], a[k], 1, 1, 1, 1};
+		return j;
+	}
+	if (k <= mid) ls[j] = build(ls[i], l, mid, k);
+	else	  rs[j] = build(rs[i], mid + 1, r, k);
+    node[j] = node[ls[j]] + node[rs[j]];
+    return j;
+}
+ 
+dat calc(int i, int l, int r, int st, int en) {
+    if (!i) return dat{-INF, 0, 0, 0, 0, 0, 0, 0};
+    if (st <= l && r <= en) return node[i];
+    int mid = (l + r) >> 1;
+    if (en <= mid) return calc(ls[i], l, mid, st, en);
+    if (mid < st)  return calc(rs[i], mid + 1, r, st, en);
+    return calc(ls[i], l, mid, st, en) + calc(rs[i], mid + 1, r, st, en);
+}
+ 
+int main() {
+//	freopen("P.in", "r", stdin); freopen("out.txt", "w", stdout);
+	int Q;
+ 
+	node[0] = dat{-INF, 0, 0, 0, 0, 0, 0, 0};
+ 
+	scanf("%d", &n); scanf("%d", &Q);
+	for (int i = 1; i <= n; i++) scanf("%d", &a[i]), id[i] = i, b[i] = a[i];
+	sort(id + 1, id + n + 1, cmp);
+	sort(b + 1, b + n + 1);
+	for (int i = 1; i <= n; i++) T[i] = build(T[i-1], 1, n, id[i]);
+	int st, en, w;
+	while (Q--) {
+		scanf("%d %d %d", &st, &en, &w);
+		w = upper_bound(b + 1, b + n + 1, w) - b - 1;
+		if (!w) {puts("xx"); continue;}
+		dat res = calc(T[w], 1, n, st, en);
+		if (!res.cnt) puts("xx");
+		else cout << res.mx << endl;
+	}
+}

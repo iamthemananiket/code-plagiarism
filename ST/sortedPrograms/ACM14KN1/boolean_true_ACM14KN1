@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int n,m;
+        ll s,e;
+        scanf("%lld%lld",&s,&e);
+        scanf("%d",&n);
+        bool flag=true;
+        while(n--)
+        {
+            ll p,q;
+            scanf("%lld%lld",&p,&q);
+            if((q>s&&q<=e)||(q>e&&p<e))
+                flag=false;
+        }
+        if(flag)
+            printf("YES\n");
+        else
+            printf("NO\n");
+    }
+    return 0;
+}

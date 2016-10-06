@@ -1,0 +1,125 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<unordered_map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y)-1;(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+#define eb emplace_back
+#define UNIQUE(X) (X).erase(unique(all(X)),(X).end())
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> using vv=vector<vector<T>>;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+#include<cassert>
+const ll MOD=1e9+7;
+struct UF{
+  vector<int> data;
+  vector<ll> sz;
+  multiset<ll> st;
+  UF(int size):data(size,-1),sz(size){
+  }
+  bool unite(int x,int y){
+    x=root(x); y=root(y);
+    if(x!=y){
+      if(data[y]<data[x]) swap(x,y);
+      st.erase(st.find(sz[x]));
+      st.erase(st.find(sz[y]));
+      sz[x]+=sz[y];
+      st.insert(sz[x]);
+      data[x]+=data[y]; data[y]=x;
+    }
+    return x!=y;
+  }
+  bool findSet(int x,int y){return root(x)==root(y);}
+  int root(int x){return data[x]<0?x:data[x]=root(data[x]);}
+  int size(int x) {return -data[root(x)];}
+};
+
+int main(){
+ios_base::sync_with_stdio(false);
+cout<<fixed<<setprecision(0);
+  int n,m,q;
+  cin>>n>>m>>q;
+  vector<ll> sz(n);
+  rep(i,n) cin>>sz[i];
+  vector<pii> es(m);
+  rep(i,m){
+    cin>>es[i].X>>es[i].Y;
+    --es[i].X;
+    --es[i].Y;
+  }
+  vector<string> qs(q);
+  vector<ll> as(q),bs(q),rem(m,1);
+  rep(i,q){
+    cin>>qs[i]>>as[i];
+    --as[i];
+    if(qs[i][0]=='P'){
+      cin>>bs[i];
+      swap(bs[i],sz[as[i]]);
+}else{
+    rem[as[i]]=0;
+}}
+
+  UF uf(n);
+  uf.sz=sz;
+  for(ll x:sz) uf.st.insert(x);
+  rep(i,m)
+    if(rem[i]) uf.unite(es[i].X,es[i].Y);
+  //  cout<<sz<<uf.data;
+  //for(ll x:uf.st)cout<<x<<",";cout<<endl;
+
+vector<ll> re(q);
+rrep(i,q){//cout<<i<<endl;
+//cout<<uf.sz;
+//for(ll x:uf.st)cout<<x<<",";cout<<endl;
+//multiset<ll> ast;
+//rep(j,n) if(uf.data[j]<0) ast.insert(uf.sz[j]);
+//  assert(uf.st==ast);
+    re[i]=*uf.st.rbegin();
+    if(qs[i][0]=='P'){
+      const int r=uf.root(as[i]);
+      uf.st.erase(uf.st.find(uf.sz[r]));
+      uf.sz[r]+=bs[i]-sz[as[i]];
+      uf.st.insert(uf.sz[r]);
+      sz[as[i]]=bs[i];
+    }else{
+      uf.unite(es[as[i]].X,es[as[i]].Y);
+}
+//for(ll x:uf.st)cout<<x<<",";cout<<endl;
+//cout<<uf.data<<uf.sz<<sz;
+  }
+
+  for(ll x:re)
+    cout<<x<<endl;
+
+  return 0;
+}

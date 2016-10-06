@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+const int LOG = 17;
+const int MAX = 100004;
+int arr[MAX], par[LOG][MAX], dep[MAX];
+vector<int> adj[MAX];
+
+void dfs(int at) {
+  for(const int to : adj[at]) {
+    if (to != par[0][at]) {
+      dep[to] = dep[at] + 1;
+      par[0][to] = at;
+      dfs(to);
+    }
+  }
+}
+
+int get_lca(int a, int b) {
+  if (dep[a]<dep[b])swap(a,b);
+  for(int i=LOG-1;i>=0;--i)
+    if(dep[par[i][a]] >= dep[b])
+      a=par[i][a];
+  if(a==b) return a;
+  for(int i=LOG-1;i>=0;--i)
+    if(par[i][a] != par[i][b])
+      a=par[i][a],b=par[i][b];
+  return par[0][a];
+}
+
+int get_path(int u, int v, int* path) {
+  const int lca = get_lca(u, v);
+  const int len = dep[u]+dep[v]-2*dep[lca]+1;
+  int i=0;
+  for(;u != lca;u=par[0][u])
+    path[i++] = u;
+  path[i++]=lca;
+  for(i=len-1;v!=lca;v=par[0][v])
+    path[i--]=v;
+  return len;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int N, Q;
+  cin >> N >> Q;
+  for(int v=1;v<=N;++v)
+    cin>>arr[v];
+  for(int e=0,a,b;e<N-1;++e){
+    cin>>a>>b;
+    adj[a].push_back(b);
+    adj[b].push_back(a);
+  }
+  par[0][1] =1;
+  dep[1]=0;
+  dfs(1);
+  for(int i=0;i+1<LOG;++i)
+    for(int v=1;v<=N;++v)
+      par[i+1][v]=par[i][par[i][v]];
+  for(int qq=0,ty,u,v,x,y;qq<Q;++qq){
+    static int path[MAX], p2[MAX], temp[MAX];
+    cin>>ty>>u>>v;
+    const int len=get_path(u,v,path);
+    /*cerr<<"path:";
+    for(int i=0;i<len;++i)
+      cerr<<path[i]<< " ";
+    cerr<<endl;*/
+    if(ty==1){
+      for(int i=0;i<len/2;++i)
+        swap(arr[path[i]], arr[path[len-i-1]]);
+    } else{
+      cin>>x>>y;
+      get_path(x,y,p2);
+      if(ty==2){
+        bool same=true;
+        for(int i=0;i<len;++i) {
+          same&=arr[path[i]]==arr[p2[i]];
+        }
+        if(same)cout<<"Yes\n";
+        else cout<<"No\n";
+      } else {
+        for(int i=0;i<len;++i)
+          temp[i]=arr[path[i]];
+        for(int i=0;i<len;++i)
+          arr[p2[i]]=temp[i];
+      }
+    }
+/*    for(int v=1;v<=N;++v)
+      cerr<<arr[v]<<" ";
+    cerr<<endl;*/
+  }
+  return 0;  
+}

@@ -1,0 +1,75 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 1010;
+
+bool err = false;
+int pass[ N ], color[ N ];
+int con[ N ][ N ];
+int n, m;
+
+void search( int u, int col );
+
+int main( void ) {
+    
+    cin.sync_with_stdio( false );
+    cin.tie( 0 );
+    
+    int test;
+    cin >> test;
+    while ( test-- ) {
+    
+        cin >> n >> m;
+        
+        for ( int i = 1 ; i <= n ; ++i ) {
+            pass[ i ] = 0;
+            for ( int j = 1 ; j <= n ; ++j ) {
+                con[ i ][ j ] = 0;
+            }
+        }
+        
+        for ( int i = 0 ; i < m ; ++i ) {
+            int u, v;
+            cin >> u >> v;
+            con[ u ][ v ] = con[ v ][ u ] = 1;
+        }
+        
+        for ( int i = 1 ; i <= n ; ++i ) {
+            for ( int j = 1 ; j <= n ; ++j ) {
+                if ( i == j ) con[ i ][ j ] = 0;
+                else con[ i ][ j ] = not con[ i ][ j ];
+            }
+        }
+        
+        err = false;
+        for ( int i = 1 ; i <= n ; ++i ) {
+            if ( not pass[i] ) {
+                search( i, 0 );
+            }
+        }
+        
+        cout << ( not err ? "YES" : "NO" ) << "\n";
+    }
+    
+	return 0;
+}
+
+void search( int u, int col ) {
+    if ( pass[ u ] ) {
+        if ( col != color[ u ] ) {
+            err = true;
+        }
+        return;
+    }
+    
+    pass[ u ] = true;
+    color[ u ] = col;
+    
+    for ( int v = 1 ; v <= n ; ++v ) {
+        if ( con[ u ][ v ] ) {
+            search( v, not col );
+        }
+    }
+}

@@ -1,0 +1,71 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+#define N 50005
+#define long long long
+#define boolean bool
+
+int nextInt() {
+	int n;
+	scanf("%d", &n);
+	return n;
+}
+
+vector<int> a[N];
+boolean isOpened[N], used[N];
+long cnt;
+int res2 = 0;
+
+boolean dfs(int node) {
+	used[node] = true;
+	if (isOpened[node]) {
+		cnt++;
+	}
+	boolean belongs = false;
+	for (int i = 0; i < a[node].size(); i++) {
+		if (!used[a[node][i]]) {
+			if (dfs(a[node][i]) == true) {
+				belongs = true;
+			}
+		}
+	}
+	if (belongs || isOpened[node]) {
+		res2++;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+int main() {
+	int n = nextInt();
+	int m = nextInt();
+	for (int i = 1; i <= n; i++) {
+		if (nextInt() == 1) {
+			isOpened[i] = true;
+		} else {
+			isOpened[i] = false;
+		}
+	}
+	for (int i = 1; i <= m; i++) {
+		int u = nextInt();
+		int v = nextInt();
+		a[u].push_back(v);
+		a[v].push_back(u);
+	}
+	long res1 = 0;
+	for (int i = 1; i <= n; i++) {
+		if (!used[i] && isOpened[i]) {
+			cnt = 0;
+			dfs(i);
+			res1 += cnt * (cnt-1) / 2;
+			if (cnt == 1) {
+				res2--;
+			}
+		}
+	}
+	printf("%lld %d\n", res1, res2);
+	return 0;
+}

@@ -1,0 +1,84 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define fi first
+#define se second
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define sz(x) (int((x).size()))
+#define bit(x) (1 << (x))
+#define cnt1(x) (__builtin_popcount(x))
+
+template<class T>
+inline void chkmax(T& x, T y) {
+	if (x < y) x = y;
+}
+
+template<class T>
+inline void chkmin(T& x, T y) {
+	if (y < x) x = y;
+}
+
+typedef long long LL;
+typedef double DB;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+
+const int MX = 305;
+int vis[MX][MX];
+int a[MX], b[MX], c[MX], m;
+int fst[MX], nxt[MX], n;
+int q[MX * MX * 2], hd, tl;
+void add_edge(int u, int v, int w) {
+	a[m] = u, b[m] = v, c[m] = w;
+	nxt[m] = fst[u], fst[u] = m++;
+}
+
+int main() {
+//	freopen("in.txt", "r", stdin);
+//	freopen("out.txt", "w", stdout);
+	
+	int i, k, u, v, w, e, ee, x, xx;
+	int ans = 0;
+	scanf("%d%d", &n, &k);
+	memset(fst, -1, sizeof fst);
+	for (i = 0; i < k; i++) {
+		scanf("%d%d%d", &u, &v, &w);
+		add_edge(u, v, w);
+		add_edge(v, u, w);
+	}
+	for (i = 0; i < m; i++) {
+		q[tl++] = i, q[tl++] = 0;
+		vis[i][0] = true;
+	}
+	while (hd < tl) {
+		e = q[hd++], x = q[hd++];
+		chkmax(ans, x);
+		u = b[e];
+		for (ee = fst[u]; ~ee; ee = nxt[ee]) {
+			xx = x ^ (c[e] & c[ee]);
+			if (vis[ee][xx]) continue;
+			vis[ee][xx] = true;
+			q[tl++] = ee, q[tl++] = xx;
+		}
+	}
+	
+	printf("%d\n", ans);
+	return 0;
+}

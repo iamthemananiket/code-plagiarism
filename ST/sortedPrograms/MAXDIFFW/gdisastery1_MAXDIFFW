@@ -1,0 +1,93 @@
+//Program: maxdiffw
+//Author: gary
+//Date: 03/07/2015
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+const int INF = 1e9;
+const int MAXN = 51;
+
+int N;
+int A[MAXN][MAXN];
+
+int haspath(int u)
+{
+    for(int v = 1; v <= N; v++)
+        if(A[u][v])
+            return 1;
+    return 0;
+}
+
+int possible(int u, int& bv)
+{
+    bv = -1;
+    int bcost = -INF;
+    for(int v = 1; v <= N; v++)
+    {
+        if(A[u][v] == 0)
+            continue;
+        int cost = 0;
+        for(int w = 1; w <= N; w++)
+        {
+            if(A[v][w] == 0)
+                continue;
+            cost = min(cost, -A[v][w]);
+        }
+        cost += A[u][v];
+        if(bv == -1 || bcost < cost)
+        {
+            bv = v;
+            bcost = cost;
+        }
+    }
+    return bv != -1;
+}
+
+int main()
+{
+    int u, v;
+
+    scanf("%d", &N);
+    for(int i = 1; i <= N; i++)
+        for(int j = 1; j <= N; j++)
+            scanf("%d", &A[i][j]);
+
+    u = 1;
+    int score = 0;
+    while(possible(u, v))
+    {
+        score += A[u][v];
+        A[u][v] = 0;
+        cout << u << " " << v << endl;
+
+        if(!haspath(v))
+            break;
+        scanf("%d%d", &v, &u);
+        score -= A[v][u];
+        A[v][u] = 0;
+    }
+
+    dbg(score);
+
+    return 0;
+}

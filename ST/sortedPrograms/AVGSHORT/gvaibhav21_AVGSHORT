@@ -1,0 +1,80 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",&mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 11
+#define INF 1000000000
+double minn[N];
+int dp[N][N][N];
+int g[N][N];
+
+int main()
+{
+	int t,n,m,i,j,k,l;
+	sd(t);
+	while(t--)
+	{
+		sd(n);sd(m);
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n;++j)
+				g[i][j]=INF;
+		for(i=0;i<m;++i)
+		{
+			int x,y,z;
+			sd(x);sd(y);sd(z);
+			g[x][y]=z;
+		}
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n;++j)
+				dp[1][i][j]=g[i][j];
+		for(i=2;i<=n;++i)
+		{
+			for(j=1;j<=n;++j)
+				for(k=1;k<=n;++k)
+					dp[i][j][k]=INF;
+
+			for(j=1;j<=n;++j)
+				for(k=1;k<=n;++k)
+					for(l=1;l<=n;++l)
+						dp[i][j][k]=min(dp[i][j][k],dp[i-1][j][l]+g[l][k]);	
+		}
+		for(i=1;i<=n;++i)
+		{
+			minn[i]=INF;
+			for(j=1;j<=n;++j)
+				minn[i]=min(minn[i],((double)dp[j][i][i])/j);
+		}
+		int A,B;
+		sd(A);sd(B);
+		double Min=INF;
+		for(i=1;i<=n;++i)
+			Min=min(Min,((double)dp[i][A][B])/i);
+
+		for(i=1;i<=n;++i)
+		{
+			int mina=INF,minb=INF;
+
+			for(j=1;j<=n;++j)
+			{
+				mina=min(mina,dp[j][A][i]);
+				minb=min(minb,dp[j][i][B]);
+			}
+			if(mina<INF && minb < INF)
+				Min=min(Min,minn[i]);
+		}
+		if(Min > 10000)
+			printf("-1\n");
+		else
+			printf("%.9lf\n",Min);
+	}
+
+}

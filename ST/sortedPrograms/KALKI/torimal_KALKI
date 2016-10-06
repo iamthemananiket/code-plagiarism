@@ -1,0 +1,105 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+const int MAX_N = 410;
+
+struct Edge {
+  int u, v, cost;
+  Edge() {}
+  Edge (int u, int v, int cost) : u(u), v(v), cost(cost) {}
+  bool operator<(const Edge &e) const {
+    return cost < e.cost;
+  }
+};
+
+struct UnionFind {
+  int n;
+  vector<int> par, rnk;
+  UnionFind(int n) : n(n), par(n), rnk(n) {
+    for (int i = 0; i < n; i++) par[i] = i;
+  }
+  int find(int x) {
+    return x == par[x] ? x : (par[x] = find(par[x]));
+  }
+  void unite(int x, int y) {
+    x = find(x);
+    y = find(y);
+    if (x == y) return;
+    if (rnk[x] < rnk[y]) {
+      par[x] = y;
+    } else {
+      par[y] = x;
+      if (rnk[x] == rnk[y]) rnk[x]++;
+    }
+  }
+  bool same(int x, int y) {
+    return find(x) == find(y);
+  }
+};
+
+
+int n;
+pii a[MAX_N];
+Edge es[MAX_N * MAX_N];
+bool used[MAX_N];
+
+inline ll dist(pii p, pii q) {
+  ll dx = p.first - q.first;
+  ll dy = p.second - q.second;
+  return dx * dx + dy * dy;
+}
+
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+      cin >> a[i].first >> a[i].second;
+    }
+    int m = 0;
+    for (int i = 0; i < n; i++) {
+      for (int j = i + 1; j < n; j++) {
+        es[m++] = Edge(i, j, dist(a[i], a[j]));
+      }
+    }
+    sort(es, es + m);
+    UnionFind uf(n);
+    for (int i = 0; i < m; i++) {
+      const Edge &e = es[i];
+      if (!uf.same(e.u, e.v)) {
+        uf.unite(e.u, e.v);
+        cout << e.u + 1 << ' ' << e.v + 1 << endl;
+      }
+    }
+  }
+}

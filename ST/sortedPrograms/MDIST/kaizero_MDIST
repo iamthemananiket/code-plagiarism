@@ -1,0 +1,56 @@
+#include<stdio.h>
+#include<algorithm>
+#define SZ 131072
+#define INF 2100000000
+using namespace std;
+struct IdxTree{
+	int s1, s2, s3, s4;
+}IT[SZ+SZ+1];
+int n, Q;
+void Ins(int a, int x, int y){
+	a += SZ;
+	IT[a].s1 = IT[a].s3 = x - y;
+	IT[a].s2 = IT[a].s4 = x + y;
+	while (a != 1){
+		a >>= 1;
+		IT[a].s1 = min(IT[a + a].s1, IT[a + a + 1].s1);
+		IT[a].s2 = min(IT[a + a].s2, IT[a + a + 1].s2);
+		IT[a].s3 = max(IT[a + a].s3, IT[a + a + 1].s3);
+		IT[a].s4 = max(IT[a + a].s4, IT[a + a + 1].s4);
+	}
+}
+long long Calc(int b, int e){
+	b += SZ, e += SZ;
+	IdxTree tp;
+	tp.s1 = tp.s2 = INF, tp.s3 = tp.s4 = -INF;
+	while (b <= e){
+		tp.s1 = min(tp.s1, min(IT[b].s1, IT[e].s1));
+		tp.s2 = min(tp.s2, min(IT[b].s2, IT[e].s2));
+		tp.s3 = max(tp.s3, max(IT[b].s3, IT[e].s3));
+		tp.s4 = max(tp.s4, max(IT[b].s4, IT[e].s4));
+		b = (b + 1) >> 1;
+		e = (e - 1) >> 1;
+	}
+	return max((long long)tp.s3 - tp.s1, (long long)tp.s4 - tp.s2);
+}
+int main(){
+	int i, x, y, a, b;
+	char pp[3];
+	scanf("%d", &n);
+	for (i = 0; i < n; i++){
+		scanf("%d%d", &x, &y);
+		Ins(i, x, y);
+	}
+	scanf("%d", &Q);
+	while (Q--){
+		scanf("%s", pp);
+		scanf("%d%d", &a, &b);
+		if (pp[0] == 'U'){
+			scanf("%d", &x);
+			Ins(a, b, x);
+		}
+		else{
+			printf("%lld\n", Calc(a, b));
+		}
+	}
+}

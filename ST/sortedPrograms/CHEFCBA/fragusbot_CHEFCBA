@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int gcd(int a, int b) {
+  while (a && b) {
+    if (a > b) a %= b; else b %= a;
+  }
+  return a + b;
+}
+
+int w[4];
+int p[4];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  scanf("%d %d %d %d", w + 0, w + 1, w + 2, w + 3);
+  for (int i = 0; i < 4; ++i) {
+    p[i] = i;
+  }
+  do {
+    int a = w[p[0]];
+    int b = w[p[1]];
+    if (a > b) swap(a, b);
+    int g = gcd(a, b);
+    a /= g;
+    b /= g;
+    int c = w[p[2]];
+    int d = w[p[3]];
+    if (c > d) swap(c, d);
+    g = gcd(c, d);
+    c /= g;
+    d /= g;
+    if (a * d == c * b) {
+      puts("Possible");
+      return 0;
+    }
+  } while (next_permutation(p, p + 4));
+  puts("Impossible");
+  return 0;
+}

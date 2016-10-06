@@ -1,0 +1,94 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+
+ll POWER[65];
+ll power(ll a, ll b) {ll ret=1;while(b) {if(b&1) ret*=a;a*=a;if(ret>=MOD) ret%=MOD;if(a>=MOD) a%=MOD;b>>=1;}return ret;}
+ll inv(ll x) {return power(x,MOD-2);}
+
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+const int MAXN = 25;
+int sum;
+int n;
+// map<vector<int> , bool > dp[1000003];
+vector<int> e[MAXN];
+int P[1000003];
+int num[MAXN];
+bool go(int idx, vector<int> poi) {
+	if(idx==sum+1) return true;
+	// if(dp[idx].find(poi)!=dp[idx].end()) return dp[idx][poi];
+	bool ret=false;
+	for(int i=0;i<n and !ret;i++) {
+		if(poi[i]==-1) continue;
+		if(e[i][poi[i]]==P[idx]) {
+			poi[i]--;
+			ret|=go(idx+1,poi);
+			poi[i]++;
+		}
+	}
+	// return dp[idx][poi]=ret;
+	return ret;
+}
+int main() {
+//	freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	precompute();
+	int t;
+	cin>>t;
+	while(t--) {
+		scanf("%d",&n);
+		sum=0;
+		vector<int> poi(n);
+		for(int i=0;i<n;i++) e[i].clear();
+		for(int i=0;i<n;i++) {
+			scanf("%d",&num[i]);
+			for(int j=0;j<num[i];j++) {
+				int x;
+				scanf("%d",&x);
+				e[i].pb(x);
+			}
+			poi[i]=num[i]-1;
+			sum+=num[i];
+		}
+		for(int i=1;i<=sum;i++) {
+			// dp[i].clear();
+			scanf("%d",&P[i]);
+		}
+		if(n==1) {
+			int p = num[0]-1;
+			bool is=true;
+			for(int j=1;j<=sum;j++) {
+				if(P[j]==e[0][p]) {
+					p--;
+					continue;
+				}
+				else {
+					is=false;
+					break;
+				}
+			}
+			if(is) printf("Yes\n");
+			else printf("No\n");
+			continue;
+		}
+		bool ans=go(1,poi);
+		if(ans) printf("Yes\n");
+		else printf("No\n");
+	}
+	return 0;
+}

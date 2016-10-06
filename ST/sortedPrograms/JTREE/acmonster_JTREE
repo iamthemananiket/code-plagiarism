@@ -1,0 +1,136 @@
+/*
+ * main.cpp
+ *
+ *  Created on: Sep 3, 2016
+ *      Author: ACMonster
+ */
+
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<algorithm>
+#include<vector>
+
+using namespace std;
+
+int getInt() {
+	char c;
+	while (c = getchar(), c < '0' || c > '9')
+		;
+	int x = c - '0';
+	while (c = getchar(), c >= '0' && c <= '9')
+		x = x * 10 + c - '0';
+	return x;
+}
+
+void putLong(long long x) {
+	if (x < 0) {
+		putchar('-');
+		x = -x;
+	}
+	int len = 0, digits[20];
+	while (x) {
+		digits[len++] = x % 10;
+		x /= 10;
+	}
+	if (!len)
+		digits[len++] = 0;
+	while (len--)
+		putchar(digits[len] + '0');
+	putchar('\n');
+}
+
+struct Node {
+	int left, right;
+	long long minDist;
+	Node *leftChild, *rightChild;
+};
+
+const int MAX = 100000;
+const long long INF = 1000000000000000LL;
+
+Node *root;
+vector<int> g[MAX];
+vector<pair<int, long long> > tickets[MAX];
+long long ans[MAX];
+
+Node *build(int l, int r) {
+	Node *p = new Node();
+	p->left = l;
+	p->right = r;
+	p->minDist = INF;
+	if (l == r)
+		p->leftChild = p->rightChild = NULL;
+	else {
+		int mid = (l + r) / 2;
+		p->leftChild = build(l, mid);
+		p->rightChild = build(mid + 1, r);
+	}
+	return p;
+}
+
+void update(Node *p, int x, long long val) {
+	if (p->left == p->right) {
+		p->minDist = val;
+		return;
+	}
+	if (x <= (p->left + p->right) / 2)
+		update(p->leftChild, x, val);
+	else
+		update(p->rightChild, x, val);
+	p->minDist = min(p->leftChild->minDist, p->rightChild->minDist);
+}
+
+long long getMin(Node *p, int l, int r) {
+	if (p->left == l && p->right == r)
+		return p->minDist;
+	int mid = (p->left + p->right) / 2;
+	if (r <= mid)
+		return getMin(p->leftChild, l, r);
+	if (l > mid)
+		return getMin(p->rightChild, l, r);
+	return min(getMin(p->leftChild, l, mid), getMin(p->rightChild, mid + 1, r));
+}
+
+void solve(int v, int last, int depth) {
+	if (!v)
+		ans[v] = 0;
+	else {
+		ans[v] = INF;
+		for (int i = 0; i < tickets[v].size(); i++) {
+			int length = tickets[v][i].first;
+			long long cost = tickets[v][i].second;
+			length = min(length, depth);
+			ans[v] = min(ans[v],
+					cost + getMin(root, depth - length, depth - 1));
+		}
+	}
+	update(root, depth, ans[v]);
+	for (int i = 0; i < g[v].size(); i++)
+		if (g[v][i] != last)
+			solve(g[v][i], v, depth + 1);
+}
+
+int main() {
+	int n = getInt();
+	int m = getInt();
+	for (int i = 1; i < n; i++) {
+		int x = getInt() - 1;
+		int y = getInt() - 1;
+		g[x].push_back(y);
+		g[y].push_back(x);
+	}
+	for (int i = 0; i < m; i++) {
+		int v = getInt() - 1;
+		int length = getInt();
+		int cost = getInt();
+		tickets[v].push_back(make_pair(length, cost));
+	}
+	root = build(0, n - 1);
+	solve(0, -1, 0);
+	int q = getInt();
+	while (q--)
+		putLong(ans[getInt() - 1]);
+	return 0;
+}

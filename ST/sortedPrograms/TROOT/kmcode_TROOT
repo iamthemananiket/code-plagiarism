@@ -1,0 +1,248 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+int n;
+int m;
+#define MAX 100002
+vector<int> v[MAX];
+int dep[MAX];
+#define MAX_LOG 20
+int lcc[MAX_LOG][MAX];
+int st[MAX];
+int sted[MAX];
+int en[MAX];
+int siz = 0;
+bool use[MAX];
+inline void dfs(int b, int h = 0, int pre = -1) {
+	st[b] = siz;
+	sted[siz] = b + 1;
+	siz++;
+	dep[b] = h;
+	lcc[0][b] = pre;
+	use[b] = true;
+	for (int i = 0;i < v[b].size();i++) {
+		if (use[v[b][i]]) {
+			continue;
+		}
+		dfs(v[b][i], h + 1, b);
+	}
+	en[b] = siz;
+}
+void init() {
+	for (int i = 0;i + 1 < MAX_LOG;i++) {
+		for (int j = 0;j < MAX;j++) {
+			if (lcc[i][j] == -1) {
+				lcc[i + 1][j] = -1;
+				continue;
+			}
+			lcc[i+1][j] = lcc[i][lcc[i][j]];
+		}
+	}
+}
+int lca(int a, int b) {
+	if (dep[a] > dep[b]) {
+		swap(a, b);
+	}
+	for (int i = 0;i < MAX_LOG;i++) {
+		if (((dep[b] - dep[a]) >> i) & 1) {
+			b = lcc[i][b];
+		}
+	}
+	if (a == b) {
+		return a;
+	}
+	for (int i = MAX_LOG - 1;i >= 0;i--) {
+		if (lcc[i][a] != lcc[i][b]) {
+			a = lcc[i][a];
+			b = lcc[i][b];
+		}
+	}
+	return lcc[0][a];
+}
+#define MOD 1000000007LL
+long long int ppow(long long int i, int j) {
+	long long int res = 1LL;
+	while (j) {
+		if ((j & 1)) {
+			res *= i;
+			if (res >= MOD) {
+				res %= MOD;
+			}
+		}
+		i *= i;
+		if (i >= MOD) {
+			i %= MOD;
+		}
+		j >>= 1;
+	}
+	return res;
+}
+struct ss {
+	int mint;
+	long long int val;
+	long long int inv;
+	ss() {
+		mint = INT_MAX;
+		val = 1LL;
+		inv = 1LL;
+	}
+};
+ss seg[MAX * 4];
+int lazy[MAX * 4];
+ss merge(ss a, ss b) {
+	ss r;
+	r.mint = min(a.mint, b.mint);
+	if (r.mint == a.mint) {
+		r.inv *= a.inv;
+		r.val *= a.val;
+		if (r.inv >= MOD) {
+			r.inv %= MOD;
+		}
+		if (r.val >= MOD) {
+			r.val %= MOD;
+		}
+	}
+	if (r.mint == b.mint) {
+		r.inv *= b.inv;
+		r.val *= b.val;
+		if (r.inv >= MOD) {
+			r.inv %= MOD;
+		}
+		if (r.val >= MOD) {
+			r.val %= MOD;
+		}
+	}
+	return r;
+}
+inline void init2(int b, int l, int r) {
+	if (l + 1 == r) {
+		seg[b].mint = 0;
+		seg[b].val = sted[l];
+		seg[b].inv = ppow(sted[l], MOD - 2);
+		return;
+	}
+	init2(b * 2 + 1, l, (l + r) >> 1);
+	init2(b * 2 + 2, (l + r) >> 1, r);
+	seg[b] = merge(seg[b * 2 + 1], seg[b * 2 + 2]);
+}
+void update(int b) {
+	seg[b].mint += lazy[b];
+	if (b * 2 + 2 < MAX * 4) {
+		lazy[b * 2 + 1] += lazy[b];
+		lazy[b * 2 + 2] += lazy[b];
+		lazy[b] = 0;
+	}
+	lazy[b] = 0;
+	return;
+}
+inline void add(int b, int l, int r, int ll, int rr, int x) {
+	if (l == r) {
+		return;
+	}
+	update(b);
+	if (r <= ll || rr <= l) {
+		return;
+	}
+	if (ll <= l&&r <= rr) {
+		lazy[b] += x;
+		update(b);
+		return;
+	}
+	add(b * 2 + 1, l, (l + r) >> 1, ll, rr, x);
+	add(b * 2 + 2, (l + r) >> 1, r, ll, rr, x);
+	seg[b] = merge(seg[b * 2 + 1], seg[b * 2 + 2]);
+}
+inline ss q(int b, int l, int r, int ll, int rr) {
+	update(b);
+	if (r <= ll || rr <= l) {
+		return ss();
+	}
+	if (ll <= l&&r <= rr) {
+		return seg[b];
+	}
+	return merge(q(b * 2 + 1, l, (l + r) >> 1, ll, rr), q(b * 2 + 2, (l + r) >> 1, r, ll, rr));
+}
+char s[3];
+int go(int b,int de) {
+	for (int i = 0;i < MAX_LOG;i++) {
+		if ((de >> i) & 1) {
+			b = lcc[i][b];
+		}
+	}
+	return b;
+}
+int main() {
+	scanf("%d%d", &n, &m);
+	for (int i = 1;i < n;i++) {
+		int a, b;
+		scanf("%d%d", &a, &b);
+		a--;
+		b--;
+		v[a].push_back(b);
+		v[b].push_back(a);
+	}
+	dfs(0);
+	init();
+	init2(0, 0, n);
+	while (m--) {
+		scanf("%s", s);
+		int add2 = 1;
+		if (s[0] == '-') {
+			add2 = -1;
+		}
+		int a, b;
+		scanf("%d%d", &a, &b);
+		a--;
+		b--;
+		if (a == b) {
+			continue;
+		}
+		if (dep[a] > dep[b]) {
+			swap(a, b);
+		}
+		int lc = lca(a, b);
+		if (lc == a) {
+			int aa = go(b, dep[b] - dep[a] - 1);
+			add(0, 0, n, st[aa] , en[aa], add2);
+			add(0, 0, n, st[b], en[b], -add2);
+		}
+		else {
+			add(0, 0, n, st[0], en[0], add2);
+			add(0, 0, n, st[a], en[a], -add2);
+			add(0, 0, n, st[b], en[b], -add2);
+		}
+		ss anss = q(0, 0, n, 0, n);
+		if (anss.mint) {
+			puts("-1");
+		}
+		else {
+			printf("%lld\n", anss.val);
+		}
+	}
+	return 0;
+}

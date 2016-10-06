@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+typedef struct mat {
+	ll M[2][2];
+} mat;
+
+const int maxn = 1e5 + 7;
+const ll md = 1e9 + 7;
+
+inline mat operator * (const mat A, const mat B) {
+	mat C = *new mat();
+	C.M[0][0] = (((A.M[0][0] * B.M[0][0])%md) + (A.M[0][1]*B.M[1][0])%md)%md;
+	C.M[0][1] = (((A.M[0][0] * B.M[0][1])%md) + (A.M[0][1]*B.M[1][1])%md)%md;
+	C.M[1][0] = (((A.M[1][0] * B.M[0][0])%md) + (A.M[1][1]*B.M[1][0])%md)%md;
+	C.M[1][1] = (((A.M[1][0] * B.M[0][1])%md) + (A.M[1][1]*B.M[1][1])%md)%md;
+	return C;
+}
+
+inline mat operator + (const mat A, const mat B) {
+	mat C = *new mat();
+	C.M[0][0] = (A.M[0][0] + B.M[0][0])%md;
+	C.M[0][1] = (A.M[0][1] + B.M[0][1])%md;
+	C.M[1][0] = (A.M[1][0] + B.M[1][0])%md;
+	C.M[1][1] = (A.M[1][1] + B.M[1][1])%md;
+	return C;
+}
+
+mat I,A;
+
+inline mat getfib(ll n) {
+	mat Z = I, cur = A;
+	while (n > 0) {
+		if (n&1ll == 1) {
+			Z = Z*cur;
+		}
+		n >>= 1ll; cur = cur * cur;
+	}
+	return Z;
+}
+
+
+mat S[8*maxn];
+ll W[maxn];
+
+void init(int x,int l,int r) {
+	if (l == r) { S[x] = I + getfib(W[l]); return ;}
+	int mid = (l+r)>>1;
+	init(x*2,l,mid); init(x*2 + 1,mid+1,r);
+	S[x] = S[x*2] * S[x*2 + 1];
+}
+
+void update(int x,int l,int r,int p) {
+	if (l == r) { S[x] = I + getfib(W[l]); return; }
+	int mid = (l+r)>>1;
+	if (p <= mid) {
+		update(x*2 , l, mid,p);
+	} else {
+		update(x*2 + 1,mid+1,r,p);
+	}
+	S[x] = S[x*2] * S[x*2 + 1];
+}
+
+mat query(int x,int l,int r,int i,int j) {
+	if (i <= l && r <= j) return S[x];
+	if (j < l || r < i) return I;
+	int mid = (l+r)>>1;
+	return query(x*2,l,mid,i,j) * query(x*2 + 1,mid+1,r,i,j);
+}
+
+int main() {
+
+	ios::sync_with_stdio(false); cin.tie(0);
+
+	I = *new mat(); A = *new mat();
+	I.M[0][0] = I.M[1][1] = 1; I.M[0][1] = I.M[1][0] = 0;
+	A.M[0][0] = A.M[1][0] = A.M[0][1] = 1; A.M[1][1] = 0;
+
+	int n,m; cin>>n>>m;
+
+	rep(i,1,n) {
+		cin>>W[i];
+	}
+
+	init(1,1,n);
+
+	while (m--) {
+		char typ;
+		cin>>typ;
+		if (typ == 'Q') {
+			int l,r; cin>>l>>r;
+			mat Z = query(1,1,n,l,r);
+			//cout<<Z.M[0][0]<<" "<<Z.M[0][1]<<endl<<Z.M[1][0]<<" "<<Z.M[1][1]<<endl;
+			cout<<query(1,1,n,l,r).M[0][1]<<endl;
+		} else {
+			int p; ll v; cin>>p>>v;
+			W[p] = v;
+			update(1,1,n,p);
+		}
+	}
+}

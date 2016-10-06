@@ -1,0 +1,132 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MaxV = 111;
+const int MaxE = 2111;
+const int inf = 1e9;
+const int M = 1111;
+const int N = 111;
+
+struct Goldberg_Tarjan {
+	int head[MaxV];
+	int cap[MaxE], to[MaxE], next[MaxE];
+	int ecnt;
+	int maxFlow;
+
+	int height[MaxV], C[MaxV];
+	int S, T, V;
+
+	void init() {
+		memset(head, -1, sizeof(head));
+		memset(height, 0, sizeof(height));
+		memset(C, 0, sizeof(C));
+		maxFlow = 0;
+		ecnt=0;
+	}
+
+	void add(int s, int e, int c) {
+		cap[ecnt]=c, to[ecnt]=e, next[ecnt]=head[s], head[s]=ecnt++;
+		cap[ecnt]=0, to[ecnt]=s, next[ecnt]=head[e], head[e]=ecnt++;
+	}
+
+	int ISAP(int x, int y) {
+		int mn=V-1, F=0, R=y, t;
+		if (x==T) return y;
+		for (int i=head[x]; i!=-1; i=next[i]) {
+			if (cap[i]>0) {
+				if (height[x]==height[to[i]]+1) {
+					t=ISAP(to[i], min(cap[i], R));
+					cap[i]-=t;
+					cap[i^1]+=t;
+					R-=t;
+					F+=t;
+					if (height[S]>=V) return F;
+					if (!R) break;
+				}
+				mn=min(mn, height[to[i]]);
+			}
+		}
+		if (!F) {
+			C[height[x]]--;
+			if (!C[height[x]]) height[S]=V;
+			height[x]=mn+1;
+			C[height[x]]++;
+		}
+		return F;
+	}
+
+	void GT(int src, int dst, int cnt) {
+		S=src, T=dst, V=cnt;
+        for(int i = 0; i <= V; i ++) C[i] = height[i] = 0;
+		C[0]=V;
+		while (height[S]<V) maxFlow+=ISAP(S, inf);
+	}
+}G, GG;
+
+int a[M], b[M], c[M];
+
+struct dat{
+    vector<int> v;
+    int x;
+    dat(vector<int> v, int x = 0):v(v), x(x){}
+};
+
+bool operator < (dat A, dat B) {
+    return A.x > B.x;
+}
+
+queue<dat> q;
+
+int sto[M], cnt;
+int n, m, k, s, t;
+
+
+bool ok(int val) {
+    while(!q.empty()) q.pop();
+    vector<int> v;
+    v.clear();
+    q.push(dat(v, G.maxFlow));
+    int step = 0, gas = 0;
+    while(!q.empty()) {
+        dat A = q.front(); q.pop();
+        if(A.v.size() == n - 2) {gas ++; continue;}
+        GG = G; v = A.v;
+        v.push_back(0);
+        int nn = v.size();
+        for(int i = 0; i < nn; i ++) {
+            if(v[i]) GG.add(s, sto[i], inf);
+            else GG.add(sto[i], t, inf);
+        }
+        GG.GT(s, t, n + 1);
+        if(GG.maxFlow <= val) q.push(dat(v, GG.maxFlow));
+        GG = G; v = A.v;
+        v.push_back(1);
+        nn = v.size();
+        for(int i = 0; i < nn; i ++) {
+            if(v[i]) GG.add(s, sto[i], inf);
+            else GG.add(sto[i], t, inf);
+        }
+        GG.GT(s, t, n + 1);
+        if(GG.maxFlow <= val) q.push(dat(v, GG.maxFlow));
+        if(q.size() + gas >= k) return 1;
+    }
+    return 0;
+}
+
+int main() {
+    //freopen("1.in", "r", stdin);
+    scanf("%d %d %d %d %d", &n, &m, &k, &s, &t);
+    for(int i = 1; i <= m; i ++) scanf("%d %d %d", &a[i], &b[i], &c[i]);
+    G.init();
+    for(int i = 1; i <= m; i ++) G.add(a[i], b[i], c[i]);
+    G.GT(s, t, n + 1);
+    cnt = 0;
+    for(int i = 1; i <= n; i ++) if(i != s && i != t) sto[cnt ++] = i;
+    int st = 0, en = inf;
+    while(en > st + 1) {
+        int mid = (en + st) / 2;
+        if(ok(mid)) en = mid;
+        else st = mid;
+    }
+    printf("%d\n", en);
+}

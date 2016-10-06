@@ -1,0 +1,122 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+//#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, x, y, d, c;
+const int N = 1e3 + 5;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+map <int, int> M;
+int A[N];
+bool used[N];
+vector <int> at[N];
+set <int> cur;
+set <int> rcur;
+ll sol = 0;
+inline void ins(ll a) {
+    ll x = *(rcur.lower_bound(-a));
+    x = -x;
+    if (x == a) return;
+    ll y = *(cur.lower_bound(a));
+    if (y == a) return;
+    sol -= (y - x) * (y - x - 1) / 2;
+    sol += (y - a) * (y - a - 1) / 2;
+    sol += (a - x) * (a - x - 1) / 2;
+    cur.insert(a);
+    rcur.insert(-a);
+}
+int main() {
+    csl;
+    cin >> t;
+    while (t--) {
+        M.clear();
+        cin >> n;
+        for (int i = 0; i < N; ++i) at[i].clear();
+        for (int i = 1; i <= n; ++i) {
+            cin >> A[i];
+            M[A[i]];
+        }
+        u = 0;
+        for (map <int, int>::iterator i = M.begin(); i != M.end(); ++i) {
+            i->snd = ++u;
+        }
+        for (int i = 1; i <= n; ++i) {
+            A[i] = M[A[i]];
+            at[A[i]].push_back(i);
+            used[i] = false;
+        }
+        sol = 0;
+        ll ans = 0;
+        for (int i = 1; i <= n; ++i) {
+            cur.clear(), rcur.clear();
+            cur.insert(n + 1), rcur.insert(-n - 1);
+            cur.insert(i), rcur.insert(-i);
+            sol = (n - i + 1) * (n - i) / 2;
+            used[A[i]] = true;
+            for (int j = upper_bound(at[A[i]].begin(), at[A[i]].end(), i) - at[A[i]].begin(); j < at[A[i]].size(); ++j) {
+                ins(at[A[i]][j]);
+            }
+            ans += sol;
+            //cout << sol << '\n';
+            for (int j = i + 1; j <= n; ++j) {
+                //if (used[A[j]]) continue;
+                ins(j);
+                if (!used[A[j]]) {
+                    used[A[j]] = true;
+                    for (int k = upper_bound(at[A[j]].begin(), at[A[j]].end(), j) - at[A[j]].begin(); k < at[A[j]].size(); ++k) {
+                        ins(at[A[j]][k]);
+                    }
+                }
+                //cout << sol << '\n';
+                ans += sol;
+            }
+            for (int j = i; j <= n; ++j) used[A[j]] = false;
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+
+

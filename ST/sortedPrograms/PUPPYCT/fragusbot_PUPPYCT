@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+const int N = 1234567;
+ 
+int fx[2][N];
+int fy[2][N];
+int wasx[N];
+int wasy[N];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  memset(wasx, 0, sizeof wasx);
+  memset(wasy, 0, sizeof wasy);
+  int st = 1;
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n, k;
+    scanf("%d %d", &n, &k);
+    for (int j = 0; j < 2; ++j) {
+      for (int i = 0; i <= n - 1; ++i) {
+        fx[j][i] = 0;
+        fy[j][i] = 0;
+      }
+    }
+    set < pair <int, int> > a, b;
+    long long ans = 0;
+    for (int i = 0; i < k; ++i) {
+      int x, y;
+      scanf("%d %d", &x, &y);
+      --x;
+      --y;
+      {
+        int by = min(x, y);
+        int nx = x - by, ny = y - by;
+        //printf("%d %d\n", nx, ny);
+        if (a.find({nx, ny}) == a.end()) {
+          ans += min(n - nx, n - ny);
+          a.insert({nx, ny});
+        }
+        if (nx == 0) {
+          fx[ny % 2][ny] = 1;
+        } else {
+          fy[nx % 2][nx] = 1;
+        }
+      }
+      {
+        int by = min(x, (n - 1) - y);
+        int nx = x - by, ny = y + by;
+        if (nx == 0) {
+          wasx[ny] = st;
+        } else {
+          wasy[nx] = st;
+        }
+        /*
+        if (b.find({nx, ny}) == b.end()) {
+          // ans += min(n - x, y + 1);
+          //b.insert({nx, ny});
+          if (nx == 0) {
+            wasx[ny] = st;
+          } else {
+            wasy[nx] = st;
+          }
+        }
+        */
+      }
+    }
+    for (int i = 1; i <= n - 1; ++i) {
+      for (int j = 0; j < 2; ++j) {
+        fx[j][i] += fx[j][i - 1];
+        fy[j][i] += fy[j][i - 1];
+      }
+    }
+    //printf("ans = %lld\n", ans);
+    for (int i = 0; i <= n - 1; ++i) {
+      int add = (i + 1) - (fx[i % 2][i] + fy[i % 2][i]);
+      //printf("add = %d\n", add);
+      if (wasx[i] == st) {
+      //if (b.find({0, i}) != b.end()) {
+        //printf("okok\n");
+        // {0, y}
+        ans += add;
+      }
+      if (i == n - 1) {
+        continue;
+      }
+      if (wasy[(n - 1) - i] == st) {
+      //if (b.find({(n - 1) - i, n - 1}) != b.end()) {
+        //printf("okok\n");
+        ans += add;
+      }
+    }
+    //cout << "ans = " << ans << endl;
+    printf("%lld\n", 1LL * n * n - ans);
+    ++st;
+  }
+  return 0;
+}

@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first 
+#define Y second 
+#define FOR(i,L,R) for(auto i=(L);i<=(R);i++)
+#define REP(i,L,R) for(auto i=(L);i<(R);i++)
+
+typedef pair<int,int> ii;
+typedef long long ll;
+
+const int MOD=1e9+7;
+const int N=1e5+10,maxval=1e5;
+
+int len,n;
+ii a[N];
+int w[N];
+struct segtree{
+	ll laz[N<<2],b[N<<2];
+	void build(){
+		memset(laz,0,sizeof(laz));
+		memset(b,0,sizeof(b));
+	}
+	void lazyupdate(int node,int L,int R){
+		b[node]+=laz[node];
+		if (L<R){
+			laz[node*2]+=laz[node];
+			laz[node*2+1]+=laz[node];
+		}
+		laz[node]=0;
+	}
+	void add(int node,int L,int R,int l,int r,int val){
+		lazyupdate(node,L,R);
+		if (L>r||R<l) return;
+		if (l<=L&&R<=r){
+			laz[node]+=val;
+			lazyupdate(node,L,R);
+			return;
+		}
+		add(node*2,L,(L+R)/2,l,r,val);
+		add(node*2+1,(L+R)/2+1,R,l,r,val);
+		b[node]=max(b[node*2],b[node*2+1]);
+	}
+	ll get(){
+		lazyupdate(1,1,maxval);
+		return b[1];
+	}
+}mseg;
+
+struct event{
+	int L,R,val;
+	event (int _L=0,int _R=0,int _val=0){
+		L=max(1,_L);
+		R=min(_R,maxval);
+		val=_val;
+	}
+};
+vector <event> vev[N];
+void addevent(int x,int L,int R,int val){
+	if (x>maxval) return;
+	vev[max(x,1)].push_back(event(L,R,val));
+}
+ll cal(int clen){
+	FOR(i,1,maxval) vev[i].clear();
+	for(int i=1;i<=n;i++){
+		addevent(a[i].X,a[i].Y-clen+1,a[i].Y,w[i]);
+		addevent(a[i].X+clen,a[i].Y-clen+1,a[i].Y,-w[i]);
+	}
+	mseg.build();
+	ll ans=0;
+	for(int i=1;i<=maxval;i++){
+		for(auto j:vev[i])
+			mseg.add(1,1,maxval,j.L,j.R,j.val);
+		ans=max(ans,mseg.get());
+	}
+	return ans;
+}
+void prepare(){
+	scanf("%d%d",&n,&len);
+	for(int i=1;i<=n;i++) scanf("%d%d%d",&a[i].X,&a[i].Y,w+i);
+}
+void solve(){
+	ll best=cal(len);
+	int L=1,R=len;
+	while (L<=R){
+		int mid=(L+R)/2;
+		if (cal(mid)==best) R=mid-1;
+		else L=mid+1;
+	}
+	cout<<best<<" "<<L;
+}
+int main(){
+	prepare();
+	solve();
+}

@@ -1,0 +1,97 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll;
+
+const ll  MOD = 1000000007 ;
+vector<vector<int>>  powers ;
+int  dpLCM[11][11] ;
+
+#define  gc  getchar_unlocked()
+#define  fr(X)  {  register char CC=gc;  while(CC<33)CC=gc;  X=0;  while(CC>47&&CC<58) { X=(X<<1)+(X<<3)+CC-48; CC=gc; }  }
+#define  fp(X)  {  int res=X, p=1;  register char O[12];  O[1]='\n';  if(!res) O[++p]='0'; while(res) O[++p] = 48+res-(res/=10)*10;  while(p) putchar(O[p--]);  }
+
+inline void pre()
+{
+        vector<bool>  isp( 100001, 1 );
+        for( int i=2; i<100001; i++ )
+        if( isp[i] )
+        {
+                for( int j=i*2; j<100001; j+=i )
+                        isp[j] = 0 ;
+                powers.push_back( {i} );
+                while( powers.back().back() < 100001 )
+                        powers.back().push_back( powers.back().back() * i );
+
+                for( int i=1; i<11; i++ )
+                {
+                        dpLCM[i][i] = i ;
+                        for( int j=i+1; j<11; j++ )
+                                dpLCM[i][j] = dpLCM[i][j-1] * j / __gcd( dpLCM[i][j-1], j ) ;
+                }
+        }
+}
+
+/*
+inline ll LCM( ll x, ll y )
+{
+        ll ans = 1 ;
+        for( ; x<=y; x++ )
+                ans = ans * ( x / __gcd(ans,x) );
+        return ans ;
+}
+*/
+
+inline int LCM( int x, int y )
+{
+        if( y < 11 )
+                return dpLCM[x+1][y] ;
+        ll ans = 1LL ;
+        for( auto &a: powers )
+        {
+                if( a[0] > y )   break ;
+
+                int  mx = 0 ;
+
+                for( auto &v: a )
+                if( y/v - x/v )  mx = v ;
+                else  break ;
+
+                if(  mx  &&  (ans *= mx) >= MOD  )
+                        ans -= (ans/MOD)*MOD ;
+        }
+        return (int)ans ;
+}
+
+int main()
+{
+        pre();
+
+        int  t, n, k, a, b, m, i, ans ;
+        vector<int>  c, d ;
+        ll  tmp;
+
+        fr(t)  fr(n)  fr(k)  fr(a)  fr(b)  fr(m)
+        c.resize(t);  d.resize(t);
+        for( i=1; i<t; i++ )  fr(c[i])
+        for( i=1; i<t; i++ )  fr(d[i])
+
+        ans = LCM( n-k, n );
+        fp(ans)
+
+        for( i=1; i<t; i++ )
+        {
+                tmp = a*1LL*ans + c[i] ;
+                if( tmp >= m )  tmp -= (tmp/m)*m ;
+                n = 1 + (int)tmp ;
+                tmp = b*1LL*ans + d[i] ;
+                if( tmp >= n )  tmp -= (tmp/n)*n ;
+                k = 1 + (int)tmp ;
+                ans = LCM( n-k, n );
+                fp(ans)
+        }
+
+        return 0;
+} 

@@ -1,0 +1,141 @@
+#include<cstdio>
+#include<cstring>
+#include<cassert>
+#include<vector>
+#include<list>
+#include<queue>
+#include<map>
+#include<set>
+#include<deque>
+#include<stack>
+#include<bitset>
+#include<algorithm>
+#include<functional>
+#include<numeric>
+#include<utility>
+#include<sstream>
+#include<iostream>
+#include<iomanip>
+#include<cmath>
+#include<cstdlib>
+#include<ctime>
+#include<fstream>
+#include<typeinfo>
+#include<locale>
+#include<iterator>
+#include<valarray>
+#include<complex>
+#include<climits>
+#include<unordered_set>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+
+char pp[22][22];
+vector < pair < int, int > > vc;
+int nxt[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
+string ss = "UDLR";
+
+queue < pair < int, int > >Q;
+int dis[22][22], pre[22][22][3];
+
+string go(int x, int y, int n, int m){
+    setinf(dis);
+    memset(pre, -1, sizeof pre);
+
+    Q.push(mp(x, y));
+    dis[x][y] = 0;
+    while(!Q.empty()){
+        pair < int, int > p = Q.front();
+        Q.pop();
+        REP(i, 4){
+            int px = p.xx + nxt[i][0];
+            int py = p.yy + nxt[i][1];
+            if(px < 0 || px >= n || py < 0 || py >= m || pp[px][py] == '*') continue;
+            if(dis[px][py] <= 1 + dis[p.xx][p.yy]) continue;
+            dis[px][py] = 1 + dis[p.xx][p.yy];
+            pre[px][py][0] = p.xx;
+            pre[px][py][1] = p.yy;
+            pre[px][py][2] = i;
+            Q.push(mp(px, py));
+//            cout << px << " " << py << " " << i << " " << p.xx << " " << p.yy << " " << x << " " << y << endl;
+        }
+    }
+
+
+    string ret = "";
+    REP(i, n){
+        REP(j, m){
+            if(pp[i][j] == 'C'){
+                int vx = i, vy = j;
+                while(vx != x || vy != y){
+                    ret.pb('0'+pre[vx][vy][2]);
+                    int tx = pre[vx][vy][0];
+                    int ty = pre[vx][vy][1];
+                    vx = tx; vy = ty;
+                }
+//                cout << ret << " " << x << " " << y << endl;
+                reverse(ret.begin(), ret.end());
+                return ret;
+            }
+        }
+    }
+    return ret;
+}
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    int n, m; cin >> n >> m;
+    REP(i, n){
+        cin >> pp[i];
+        REP(j, m) {
+            if(pp[i][j] == '*') continue;
+            vc.pb(mp(i, j));
+        }
+    }
+    string out = "";
+    REP(i, vc.size()){
+        string t = go(vc[i].xx, vc[i].yy, n, m);
+        for(int j = i; j < vc.size(); j++){
+            REP(k, t.size()){
+                int v = t[k] - '0';
+                int x = vc[j].xx + nxt[v][0];
+                int y = vc[j].yy + nxt[v][1];
+                if(x < 0 || x >= n || y < 0 || y >= m || pp[x][y] == '*') continue;
+                vc[j].xx = x;
+                vc[j].yy = y;
+            }
+        }
+        REP(k, t.size()){
+            out.pb(ss[t[k]-'0']);
+        }
+    }
+    cout << out << endl;
+}

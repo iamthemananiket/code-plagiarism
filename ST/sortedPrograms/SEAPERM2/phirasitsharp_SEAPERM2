@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <algorithm>
+ 
+#define N 310
+ 
+using namespace std;
+ 
+int arr[N], use[N];
+int tmp[N];
+ 
+int perm[N][N];
+int n;
+ 
+bool check(void) {
+	for(int i = 1;i <= n;i++) {
+		use[i] = 0;
+	}
+	for(int i = 1;i <= n;i++) {
+		int idx = 1;
+		for(int j = 1;j <= n;j++) {
+			if(arr[j] == i) {
+				continue;
+			}
+			tmp[idx++] = arr[j] - (arr[j] > i);
+		}
+		bool found = false;
+		int x;
+		for(int j = 1;j <= n;j++) {
+			bool err = false;
+			if(use[j]) {
+				continue;
+			}
+			for(int k = 1;k < n;k++) {
+				if(perm[j][k] != tmp[k]) {
+					err = true;
+				}
+			}
+			if(!err) {
+				found = true;
+				x = j;
+				break;
+			}
+		}
+		if(!found) {
+			return false;
+		}else {
+			use[x] = 1;
+		}
+	}
+	return true;
+}
+void evaluate(void) {
+	scanf("%d", &n);
+	for(int i = 1;i <= n;i++) {
+		for(int j = 1;j < n;j++) {
+			scanf("%d", &perm[i][j]);
+		}
+	}
+	int mn1 = perm[1][1],mn2 = perm[1][1], mx = perm[1][1];
+	for(int i = 2;i <= n;i++) {
+		int val = perm[i][1];
+		if(val < mn1) {
+			mn2 = mn1;
+			mn1 = val;
+		}else if(val < mn2) {
+			mn2 = val;
+		}
+		if(val > mx) {
+			mx = val;
+		}
+	}
+	int fs = mn2;
+	for(int i = 1;i <= n;i++) {
+		arr[1] = fs;
+		for(int j = 1;j < n;j++) {
+			arr[j+1] = perm[i][j] + (perm[i][j] >= fs);
+		}
+		if(check()) {
+			for(int j = 1;j <= n;j++) {
+				printf("%d ", arr[j]);
+			}
+			printf("\n");
+			return;
+		}
+	}
+	fs = mn2 + 1;
+	for(int i = 1;i <= n;i++) {
+		arr[1] = fs;
+		for(int j = 1;j < n;j++) {
+			arr[j+1] = perm[i][j] + (perm[i][j] >= fs);
+		}
+		if(check()) {
+			for(int j = 1;j <= n;j++) {
+				printf("%d ", arr[j]);
+			}
+			printf("\n");
+			return;
+		}
+	}
+	fs = mx;
+	for(int i = 1;i <= n;i++) {
+		arr[1] = fs;
+		for(int j = 1;j < n;j++) {
+			arr[j+1] = perm[i][j] + (perm[i][j] >= fs);
+		}
+		if(check()) {
+			for(int j = 1;j <= n;j++) {
+				printf("%d ", arr[j]);
+			}
+			printf("\n");
+			return;
+		}
+	}
+}
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--) {
+		evaluate();
+	}
+	return 0;
+} 

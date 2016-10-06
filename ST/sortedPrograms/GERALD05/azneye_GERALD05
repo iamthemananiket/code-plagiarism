@@ -1,0 +1,122 @@
+/*
+ * 2013 Codechef December Cookoff
+ * Chef and Combinatorics
+ * File:   GERALD05.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on 2013-12-22, 11:34:08 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace GERALD05 {
+typedef long long ll;
+const int mod = 1000000007;
+int a[4];
+ll f[111];
+ll invfact[111], fact[111];
+
+int func(int n) {
+  return a[0] + a[1] * n + a[2] * n * n + a[3] * n * n * n;
+}
+
+void add(ll& a, ll b) {
+  a = (a + b) % mod;
+}
+
+void solve(int test_num) {
+  for (int i = 0; i < 4; i++)
+    cin >> a[i];
+  int S;
+  cin >> S;
+  static ll dp[222], pre[111]; //pre[i] = C(fv+i-1,fv-1)
+  memset(dp, 0, sizeof(dp));
+  for (int i = 1; i <= S; i++)
+    f[i] = func(i);
+  //plnarr(pre, S, S);
+  dp[0] = 1;
+  //Correct slow version
+  for (int v = 1; v <= S; v++) {
+    memset(pre, 0, sizeof(pre));
+//    pre[0] = 1;
+//    for (int i = 0; i < f[v]; i++)
+//      for (int j = S; j >= 0; j--)
+//        for (int k = 1; j + k <= S; k++)
+//          add(pre[j + k], pre[j]);
+    for (int i = 0; i <= S; i++) {
+      pre[i] = invfact[i];
+      for (int x = f[v] + i - 1; x >= f[v]; x--)
+        pre[i] = pre[i] * x % mod;
+    }
+    //plnarr(pre, pre + S + 1);
+    for (int i = S; i >= 0; i--) {
+      for (int j = 1; i + j * v <= S; j++) {
+        add(dp[i + j * v], dp[i] * pre[j]);
+      }
+    }
+  }
+
+  cout << dp[S] << endl;
+}
+
+ll fpow(ll b, int e) {
+  ll res = 1;
+  for (; e > 0; e >>= 1) {
+    if (e & 1)
+      res = res * b % mod;
+    b = b * b % mod;
+  }
+  return res;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  fact[0] = invfact[0] = 1;
+  for (int i = 1; i <= 100; i++) {
+    fact[i] = fact[i - 1] * i % mod;
+    invfact[i] = fpow(fact[i], mod - 2);
+  }
+  int tests;
+  cin >> tests;
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  GERALD05::solve();
+  return 0;
+}

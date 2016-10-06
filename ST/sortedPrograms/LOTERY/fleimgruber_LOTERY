@@ -1,0 +1,190 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_TC 1000005
+#define MAX_N 100005
+#define MOD 1000000007
+
+int a,b,m;
+int ci[MAX_TC],di[MAX_TC];
+
+bool mark[MAX_N];
+int lp[MAX_N];
+
+void sieve()
+{
+	lp[2]=2;
+	for (int i=4; i<MAX_N; i+=2)
+		mark[i]=true,lp[i]=2;
+	for (int i=3; i<MAX_N; i+=2)
+		if (!mark[i])
+		{
+			lp[i]=i;
+			if (i*1LL*i<MAX_N)
+				for (int j=i*i; j<MAX_N; j+=i)
+					if (!mark[j])
+						mark[j]=true,lp[j]=i;
+		}
+}
+
+ll fpow(ll a, ll b)
+{
+	ll r=1;
+	for (;b;b/=2,a=(a*a)%MOD)
+		if (b&1)
+			r=(r*a)%MOD;
+	return r;
+}
+
+struct node
+{
+	node *l,*r;
+	int prod;
+	node():l(0),r(0){}
+};
+
+int get(node *n)
+{
+	return n?n->prod:1;
+}
+
+node *insert(node *n, int l, int r, int si, int v)
+{
+	node *nn=new node();
+	if (l==r)
+	{
+		nn->prod=v;
+		return nn;
+	}
+	if (n)
+		nn->l=n->l,nn->r=n->r;
+	if ((l+r)/2>=si)
+		nn->l=insert(nn->l,l,(l+r)/2,si,v);
+	else
+		nn->r=insert(nn->r,(l+r)/2+1,r,si,v);
+	nn->prod=(get(nn->l)*1LL*get(nn->r))%MOD;
+	return nn;
+}
+node *insert(node *n, int i, int v)
+{
+	return insert(n,1,m,i,v);
+}
+
+node *upd(node *n, int l, int r, int si, int v)
+{
+	node *nn=new node();
+	if (l==r)
+	{
+		nn->prod=(get(n)*1LL*v)%MOD;
+		return nn;
+	}
+	if (n)
+		nn->l=n->l,nn->r=n->r;
+	if ((l+r)/2>=si)
+		nn->l=upd(nn->l,l,(l+r)/2,si,v);
+	else
+		nn->r=upd(nn->r,(l+r)/2+1,r,si,v);
+	nn->prod=(get(nn->l)*1LL*get(nn->r))%MOD;
+	return nn;
+}
+node *upd(node *n, int i, int v)
+{
+	return upd(n,1,m,i,v);
+}
+
+int mul(node *n, int l, int r, int sl, int sr)
+{
+	if (!n||l>sr||r<sl)
+		return 1;
+	if (l>=sl&&r<=sr)
+		return n->prod;
+	return (mul(n->l,l,(l+r)/2,sl,sr)*1LL*mul(n->r,(l+r)/2+1,r,sl,sr))%MOD;
+}
+int mul(node *n, int l, int r)
+{
+	return mul(n,1,m,l,r);
+}
+
+node *root[MAX_N];
+vector<pint> primes[MAX_N];
+
+void sub(int i, int a, int p)
+{
+	while (a>0&&!primes[p].empty())
+	{
+		pint &x=primes[p].back();
+		int s=min(a,x.se);
+		root[i]=upd(root[i],x.fi,fpow(fpow(p,s),MOD-2));
+		a-=s;
+		x.se-=s;
+		if (x.se==0)
+			primes[p].pop_back();
+	}
+}
+
+void init()
+{
+	root[1]=insert(root[0],1,1);
+	for (int i=2; i<=m; i++)
+	{
+		root[i]=insert(root[i-1],i,i);
+		for (int p=lp[i],n=i; n!=1; p=lp[n])
+		{
+			int a=0;
+			do
+			{
+				a++;
+				n/=p;
+			} while (n%p==0);
+			sub(i,a,p);
+			primes[p].pb(mp(i,a));
+		}
+	}
+}
+
+int solve(int n, int k)
+{	
+	return mul(root[n],n-k+1,n);
+}
+
+int main()
+{
+	sieve();
+	int tc;
+	scanf("%d",&tc);
+	int n,k;
+	scanf("%d %d",&n,&k);
+	scanf("%d %d %d",&a,&b,&m);
+	init();
+	for (int i=2; i<=tc; i++)
+		scanf("%d",ci+i);
+	for (int i=2; i<=tc; i++)
+		scanf("%d",di+i);
+	int prev=solve(n,k);
+	printf("%d\n",prev);
+	for (int i=2; i<=tc; i++)
+	{
+		n=1+(a*1LL*prev+ci[i])%m;
+		k=1+(b*1LL*prev+di[i])%n;
+		prev=solve(n,k);
+		printf("%d\n",prev);
+	}
+	return 0;
+}

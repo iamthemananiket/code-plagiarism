@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+int n,q;
+int h[100013];
+vector<int> level[20];
+
+int counter = 0;
+int s[100013], e[100013];
+
+int next(int i, int a) {
+	return lower_bound(level[i].begin(),level[i].end(),a)-level[i].begin();
+}
+int prev(int i, int b) {
+	return --upper_bound(level[i].begin(),level[i].end(),b)-level[i].begin();
+}
+
+class ST {
+public:
+	ll has[1<<18];
+	int lazy[1<<18];
+	void push(int w, int L, int R) {
+		if (lazy[w]==-1) return;
+		has[w] = 1LL<<lazy[w];
+		if (L!=R) lazy[w*2] = lazy[w*2+1] = lazy[w];
+		lazy[w] = -1;
+	}
+	void updateI(int w, int L, int R, int a, int b, int v) {
+		push(w,L,R);
+		if (b<L || R<a) return;
+		if (a<=L && R<=b) lazy[w] = v, push(w,L,R);
+		else {
+			updateI(w*2,L,(L+R)/2,a,b,v), updateI(w*2+1,(L+R)/2+1,R,a,b,v);
+			has[w] = has[w*2]|has[w*2+1];
+		}
+	}
+	ll queryI(int w, int L, int R, int a, int b) {
+		push(w,L,R);
+		if (b<L || R<a) return 0;
+		if (a<=L && R<=b) return has[w];
+		return queryI(w*2,L,(L+R)/2,a,b)|queryI(w*2+1,(L+R)/2+1,R,a,b);
+	}
+	ST() {
+		memset(has,0,sizeof has);
+		memset(lazy,-1,sizeof lazy);
+	}
+	void update(int i, int a, int b, int v) { updateI(1,1,level[i].size()-2,next(i,a),prev(i,b),v); }
+	ll query(int i, int a, int b) { return queryI(1,1,level[i].size()-2,next(i,a),prev(i,b)); }
+};
+
+ST tree[20];
+
+void setup(int x, int d=0) {
+	h[x] = d;
+	s[x] = ++counter;
+	level[h[x]].push_back(s[x]);
+	if (x*2<=n) setup(x*2,d+1);
+	if (x*2+1<=n) setup(x*2+1,d+1);
+	e[x] = counter;
+}
+
+void go(int x, int c, int d) {
+	for (int i=h[x];i<20;i++) {
+		if (c+i-h[x]<=d) tree[i].update(i,s[x],e[x],c+i-h[x]);
+	}
+}
+void update(int x, int d) {
+	int on = 0;
+    go(x,on,d);
+    while (x/2) {
+		int y = x/2;
+		go(x^1,on+2,d);
+		if (on+1<=d) tree[h[y]].update(h[y],s[y],e[y],on+1);
+		x = y;
+		on+=1;
+    }
+}
+
+int query(int x, int y) {
+	ll has = 0;
+	while (x!=y) {
+		if (h[x]<h[y]) swap(x,y);
+		has|=tree[h[x]].query(h[x],s[x],s[x]);
+		x/=2;
+	}
+	has|=tree[h[x]].query(h[x],s[x],s[x]);
+	return __builtin_popcountll(has)-(has&1);
+}
+
+int query(int x) {
+	ll has = 0;
+	for (int i=h[x];i<20;i++) {
+		has|=tree[i].query(i,s[x],e[x]);
+	}
+	return __builtin_popcountll(has)-(has&1);
+}
+
+int main() {
+	scanf("%d%d",&n,&q);
+	for (int i=0;i<20;i++) level[i].push_back(0);
+	setup(1);
+	for (int i=0;i<20;i++) level[i].push_back(n+1);
+	while (q--) {
+		int type,x;
+		scanf("%d%d",&type,&x);
+		if (type==1) {
+			int k;
+			scanf("%d",&k);
+			update(x,k);
+		} else if (type==2) {
+			int y;
+			scanf("%d",&y);
+			printf("%d\n",query(x,y));
+		} else printf("%d\n",query(x));
+	}
+
+	return 0;
+}

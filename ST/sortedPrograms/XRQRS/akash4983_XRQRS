@@ -1,0 +1,290 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define sz size()
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+vi inp;
+int X[500001];
+set<int >::iterator sit;
+
+class PersistentSegmentTree {
+private:
+	int n, queryNumber;
+
+	struct node {
+		int val;
+		node* left;
+		node* right;
+	};
+
+	node **head;
+
+	node* newNode(int val) {
+		node* res = new node;
+		res->val = val;
+		res->left = NULL;
+		res->right = NULL;
+		return res;
+	}
+
+	node* insert(int b, int e, int idx, int val, node *itr) {
+
+		node* tmp = newNode(0);
+		if(b == e) {
+			tmp->val += val;
+			return tmp;
+		}
+
+		int m = (b + e) >> 1;
+
+		if(idx <= m) {
+			tmp->left = insert(b, m, idx, val, itr->left);
+			tmp->right = itr->right;
+		} else {
+			tmp->right = insert(m+1, e, idx, val, itr->right);
+			tmp->left = itr->left;
+		}
+		tmp->val = tmp->left->val + tmp->right->val;
+		return tmp;
+
+	}
+
+	node* dummy(int b, int e) {
+		node *tmp = newNode(0);
+		if(b != e) {
+			int m = (b + e) >> 1;
+			tmp->left = dummy(b, m);
+			tmp->right = dummy(m+1, e);
+		}
+		return tmp;
+	}
+
+	int KthMinimum(int b, int e, node *l, node *r, int k) {
+
+		if(b == e) {
+			return b;
+		}
+
+		int m = (b + e) >> 1;
+
+		int nums = r->left->val - l->left->val;
+		if(nums >= k) {
+			return KthMinimum(b, m, l->left, r->left, k);
+		} else {
+			return KthMinimum(m+1, e, l->right, r->right, k - nums);
+		}
+
+	}
+
+	int lessThanX(int b, int e, node *l, node *r, int x) {
+
+		if(b == e) {
+			return r->val - l->val;
+		}
+
+		int m = (b + e) >> 1;
+
+		int nums = r->left->val - l->left->val;
+		if(x <= m) {
+			return lessThanX(b, m, l->left, r->left, x);
+		} else {
+			return nums + lessThanX(m+1, e, l->right, r->right, x);
+		}
+	}
+
+public:
+	PersistentSegmentTree(int _n, int q) { // range size, number of queries
+		n = _n;
+		head = new node*[q];
+		queryNumber = 0;
+	}
+
+	void build(); // will do it later, not required in this question
+	void insert(int idx, int val);  // add val at idx
+	void removeLastK(int k); // remove last k insertions
+	int KthMinimum(int l, int r, int k); // find kth minimum number
+	int lessThanX(int l, int r, int x); // less than x in given range
+
+};
+
+void PersistentSegmentTree::insert(int idx, int val) {
+	if(!queryNumber) { // create a dummy tree
+		head[0] = dummy(1, n);
+		queryNumber = 1;
+	}
+	head[queryNumber] = insert(1, n, idx, val, head[queryNumber-1]);
+	queryNumber++;
+}
+
+void PersistentSegmentTree::removeLastK(int k) {
+	// memory leak!! will take care of it later
+	queryNumber -= k;
+}
+
+int PersistentSegmentTree::KthMinimum(int l, int r, int k) {
+	return KthMinimum(1, n, head[l-1], head[r], k);
+}
+
+int PersistentSegmentTree::lessThanX(int l, int r, int x) {
+	return lessThanX(1, n, head[l-1], head[r], x);
+}
+
+class Trie {
+private:
+	struct node {
+		vector<int > v;
+		node *left, *right;
+	};
+
+	node *head;
+
+	node* newNode() {
+		node *tmp = new node;
+		tmp->left = NULL;
+		tmp->right = NULL;
+
+		return tmp;
+	}
+
+public:
+
+	Trie() {
+		head = newNode();
+	}
+
+	void insert(int num, int idx); // insert number in qth query
+	void remove(int num, int idx); // remove number in qth query
+	int maxXxorY(int l, int r, int x); // find number in range with maximum xor with x
+
+};
+
+void Trie::insert(int num, int idx) {
+	node *itr;
+	itr = head;
+	itr->v.push_back(idx);
+	for(int i = 18; i >= 0; i--) {
+		if((num>>i)&1) {
+			if(itr->right == NULL)
+				itr->right = newNode();
+			itr = itr->right;
+		} else {
+			if(itr->left == NULL)
+				itr->left = newNode();
+			itr = itr->left;
+		}
+		itr->v.push_back(idx);
+	}
+}
+
+void Trie::remove(int num, int idx) {
+	node *itr;
+	itr = head;
+	itr->v.pop_back();
+	for(int i = 18; i >= 0; i--) {
+		if((num>>i)&1) {
+			itr = itr->right;
+		} else {
+			itr = itr->left;
+		}
+		itr->v.pop_back();
+	}
+}
+
+int Trie::maxXxorY(int l, int r, int x) {
+	int res = 0;
+	node *itr;
+	itr = head;
+	for(int i = 18; i >= 0; i--) {
+		if((x>>i)&1) {
+			if(itr->left == NULL) {
+				itr = itr->right;
+				continue;
+			}
+			int p = lower_bound(all(itr->left->v), l) - itr->left->v.begin();
+			if(p != (int)itr->left->v.size() && itr->left->v[p] <= r) {
+				res |= 1 << i;
+				itr = itr->left;
+			} else {
+				itr = itr->right;
+			}
+		} else {
+			if(itr->right == NULL) {
+				itr = itr->left;
+				continue;
+			}
+			int p = lower_bound(all(itr->right->v), l) - itr->right->v.begin();
+			if(p != (int)itr->right->v.size() && itr->right->v[p] <= r) {
+				res |= 1 << i;
+				itr = itr->right;
+			} else {
+				itr = itr->left;
+			}
+		}
+	}
+	return res;
+}
+
+int main() {
+	int m;
+	S(m);
+
+	PersistentSegmentTree pst(500000, m);
+	Trie trie;
+	inp.push_back(0);
+
+	while(m--) {
+		int type;
+		S(type);
+
+		if(type == 0) {
+			int x;
+			S(x);
+			X[x]++;
+			pst.insert(x, X[x]);
+			inp.push_back(x);
+			trie.insert(x, inp.size()-1);
+		} else if(type == 1) {
+			int l,r,x;
+			scanf("%d%d%d",&l,&r,&x);
+			P(trie.maxXxorY(l,r,x) ^ x);
+		} else if(type == 2) {
+			int k;
+			S(k);
+			pst.removeLastK(k);
+			while(k--) {
+				X[inp.back()]--;
+				trie.remove(inp.back(), inp.size()-1);
+				inp.pop_back();
+			}
+		} else if(type == 3) {
+			int l,r,x;
+			scanf("%d%d%d",&l,&r,&x);
+			printf("%d\n",pst.lessThanX(l,r,x));
+		} else {
+			int l,r,k;
+			scanf("%d%d%d",&l,&r,&k);
+			printf("%d\n",pst.KthMinimum(l,r,k));
+		}
+	}
+	return 0;
+}

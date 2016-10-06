@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+int cnt[10];
+int main() {
+	//freopen("in.txt", "r", stdin);
+  int T, n;
+  for (scanf("%d", &T); T--; ) {
+  	scanf("%d", &n);
+
+  	int fi = 0, se = 0, fid = -1, sid = -1;
+
+		for (int i = 1; i <= n; i++) {
+			int m, bit = 0, x;
+			scanf("%d", &m);
+			int sco = m;
+			for (int j = 1; j <= 6; j++) cnt[j] = 0;
+			for (int j = 0; j < m; j++) scanf("%d", &x), cnt[x]++;
+
+			while (1) {
+				int non = 0, mn = (1 << 20);
+				for (int j = 1; j <= 6; j++) {
+					if (cnt[j]) non++, mn = min(mn, cnt[j]);
+				}
+				if (non < 4) break;
+				if (non == 6) sco += 4 * mn; else if (non == 5) sco += 2 * mn; else if (non == 4) sco += mn;
+				for (int j = 1; j <= 6; j++) {
+					if (cnt[j]) cnt[j] -= mn;
+				}
+			}
+
+			if (sco >= fi) se = fi, sid = fid, fi = sco, fid = i;
+			else if (sco > se) se = sco, sid = i;
+		}
+		if (fi == se) puts("tie");
+		else {
+			if (fid == 1) puts("chef");
+			else printf("%d\n", fid);
+		}
+  }
+}

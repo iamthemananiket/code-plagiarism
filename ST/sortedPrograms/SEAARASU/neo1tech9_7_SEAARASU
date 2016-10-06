@@ -1,0 +1,94 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+ll t, n, u, v, m, q, r, ql, qr, k, l, s, x, y, w, h, c, z, d, b;
+const int N = 1e5 + 500;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 62LL;
+const bool JUDGE = false;
+int A[N];
+int gcd(int a, int b) {
+    while (a > 0 && b > 0) {
+        if (a > b) a %= b;
+        else b %= a;
+    }
+    return a + b;
+}
+int main() {
+    csl;
+    if (JUDGE) {
+        freopen("cricket.in", "r", stdin);
+        freopen("cricket.out", "w", stdout);
+    }
+    cin >> t;
+    while (t--) {
+    cin >> n;
+    int x = 0;
+    for (int i = 0; i < n; ++i) {
+        cin >> A[i];
+        x = gcd(x, A[i]);
+    }
+    ll sol = (ll)x * n;
+    cout << sol << '\n';
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

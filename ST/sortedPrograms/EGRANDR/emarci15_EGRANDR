@@ -1,0 +1,25 @@
+#include <iostream>
+
+using namespace std;
+
+int T,n;
+int sz;
+bool fail, grade5;
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    for(cin >> T; T--;) {
+        cin >> n;
+        sz = 0; fail = 0; grade5 = 0;
+        for(int i=0; i<n; i++) {
+            int x; cin >> x; sz += x;
+            if(x==2) fail=1;
+            if(x==5) grade5=1;
+        }
+
+        cout << (((!fail) && (grade5) && (sz >= 4*n))?"Yes":"No") << endl;
+    }
+
+    return 0;
+}

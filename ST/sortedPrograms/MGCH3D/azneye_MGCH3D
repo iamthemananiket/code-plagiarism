@@ -1,0 +1,71 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+
+int four(int x) {
+  return x * x * x * x;
+}
+
+void solve(int test_num) {
+  int N, Q;
+  cin >> N >> Q;
+  if (ll(N) * N * Q > 1e8) {
+    assert(false);
+  }
+  vector<int> x(N), y(N), z(N);
+  for (int i = 0; i < N; ++i) {
+    cin >> x[i] >> y[i] >> z[i];
+  }
+  for (int q = 0; q < Q; ++q) {
+    int A, B, C, D;
+    cin >> A >> B >> C >> D;
+    double res = 0.0;
+    for (int i = 0; i < N; ++i) {
+      for (int j = 0; j < N; ++j) {
+        if (i == j) {
+          continue;
+        }
+        res += abs(A * (x[i] - x[j]) + B * (y[i] - y[j]) + C * (z[i] - z[j]) + D)
+            / sqrt(four(x[i] - x[j]) + four(y[i] - y[j]) + four(z[i] - z[j]));
+      }
+    }
+    res /= N * (N - 1.0);
+    cout << fixed << setprecision(7) << res << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

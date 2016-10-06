@@ -1,0 +1,150 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+#define N 100005
+#define M 200005
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
+template <class T>
+inline void chkmax(T &a, T b) { if (a < b) a = b; }
+
+//////////// begin Link / Cut Tree ////////////
+int pa[N], son[N][2];
+int cnt[N][2], sz[N], col[N];
+int L[N][2], R[N][2], tot[N][2];
+
+#define lx son[x][0]
+#define rx son[x][1]
+
+void push_up(int x) {
+	sz[x] = sz[son[x][0]] + 1 + sz[son[x][1]];
+	cnt[x][0] = cnt[lx][0] + 1 - col[x] + cnt[rx][0];
+	cnt[x][1] = cnt[lx][1] + col[x] + cnt[rx][1];
+
+	L[x][0] = L[lx][0];
+	L[x][1] = L[lx][1];
+	if (cnt[lx][0] == sz[lx] && col[x] == 0) {
+		L[x][0] += tot[x][0] + 1 + L[rx][0];
+	} else if (cnt[lx][1] == sz[lx] && col[x] == 1) {
+		L[x][1] += tot[x][1] + 1 + L[rx][1];
+	}
+
+	R[x][0] = R[rx][0];
+	R[x][1] = R[rx][1];
+	if (sz[rx] == cnt[rx][0] && col[x] == 0) {
+		R[x][0] += R[lx][0] + 1 + tot[x][0];
+	} else if (sz[rx] == cnt[rx][1] && col[x] == 1) {
+		R[x][1] += R[lx][1] + 1 + tot[x][1];
+	}
+}
+
+bool isroot(int x) { return son[pa[x]][0] != x && son[pa[x]][1] != x; }
+
+void rot(int x, int d) {
+	int y = pa[x], z = pa[y];
+	son[y][!d] = son[x][d];
+	pa[son[x][d]] = y;
+	pa[x] = pa[y];
+	if (son[z][0] == y) son[z][0] = x;
+	else if (son[z][1] == y) son[z][1] = x;
+	pa[y] = x, son[x][d] = y;
+	push_up(y);
+}
+
+void splay(int x) {
+	while (!isroot(x)) {
+		if (isroot(pa[x])) rot(x, son[pa[x]][0] == x);
+		else {
+			int y = pa[x], z = pa[y];
+			int d = (son[z][0] == y);
+			son[y][d] == x ? rot(x, !d) : rot(y, d);
+			rot(x, d);
+		}
+	}
+	push_up(x);
+}
+
+void access(int x) {
+	for (int y = 0; x; x = pa[x]) {
+		splay(x);
+		if (rx) {
+			tot[x][0] += L[rx][0];
+			tot[x][1] += L[rx][1];
+		}
+		if (rx = y) {
+			tot[x][0] -= L[rx][0];
+			tot[x][1] -= L[rx][1];
+		}
+		push_up(y = x);
+	}
+}
+
+void modify(int x) {
+	access(x);
+	splay(x);
+	col[x] ^= 1;
+	push_up(x);
+}
+
+int query(int x) {
+	access(x);
+	splay(x);
+	return R[x][col[x]];
+}
+///////////// end Link / Cut Tree /////////////
+
+int head[N];
+int to[M], nxt[M];
+
+void AddEdge(int a, int b, int i) {
+	to[i] = b;
+	nxt[i] = head[a];
+	head[a] = i;
+}
+
+int Q[N];
+
+void BFS(int u, int p = 0) {
+	int h = 1, t = 0;
+	Q[++ t] = u;
+	while (h <= t) {
+		u = Q[h ++];
+		for (int i = head[u]; i; i = nxt[i]) {
+			int v = to[i];
+			if (v == pa[u]) continue;
+			pa[v] = u;
+			Q[++ t] = v;
+		}
+	}
+	for (int i = t; i; i --) {
+		u = Q[i];
+		L[u][0] = R[u][0] = 1;
+		for (int i = head[u]; i; i = nxt[i]) {
+			int v = to[i];
+			if (v == pa[u]) continue;
+			tot[u][0] += L[v][0];
+			tot[u][1] += L[v][1];
+		}
+		push_up(u);
+	}
+}
+
+main() {
+	int n, q;
+	scanf("%d", &n);
+	for (int i = 1; i < n; i ++) {
+		int a, b;
+		scanf("%d %d", &a, &b);
+		AddEdge(a, b, i);
+		AddEdge(b, a, i + n - 1);
+	}
+	BFS(1);
+	for (scanf("%d", &q); q --; ) {
+		int bf, x;
+		scanf("%d %d", &bf, &x);
+		if (bf == 1) modify(x);
+		else printf("%d\n", query(x));
+	}
+}

@@ -1,0 +1,32 @@
+# include <cstdio>
+
+using namespace std;
+
+int main ()
+{
+	int a, b, i, t, ans;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		scanf ("%d%d", &a, &b);
+		ans = 0;
+		while (a & (a - 1))
+		{
+			ans ++;
+			a = (a >> 1);
+		}
+		if (a > b)
+		{
+			i = a;
+			a = b;
+			b = i;
+		}
+		while (a != b)
+		{
+			ans ++;
+			a = (a << 1);
+		}
+		printf ("%d\n", ans);
+	}
+	return 0;
+}

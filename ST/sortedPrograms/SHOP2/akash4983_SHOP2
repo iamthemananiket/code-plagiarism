@@ -1,0 +1,625 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int MAXN = 1002;
+const int MAXK = 502;
+const int INF = 1000000000;
+
+int N,K,F;
+
+struct node {
+  int w,idx;
+};
+
+node items[MAXK];
+vector<pii > itemsCost[MAXK];
+vector<pii > g[MAXN];
+int G[MAXN][MAXN];
+int W[MAXN];
+int cost[MAXN][MAXK];
+
+bool isShopCleaned[MAXN], isItemPurchased[MAXK];
+vi itemFromShop[MAXN];
+int costInShop[MAXN];
+
+int from[MAXN][MAXN];
+int D[MAXN][MAXN];
+set<pii> pq;
+
+bool _cmp(const node &a, const node &b) {
+  return a.w < b.w;
+}
+
+vi getPath(int st, int nd) {
+  vi res;
+  while(nd != -1) {
+    assert(nd);
+    res.push_back(nd);
+    nd = from[st][nd];
+  }
+  reverse(all(res));
+  return res;
+}
+
+void dijkstra(int source) {
+  rep(i,1,N+1) D[source][i] = INF;
+
+  pq.insert(make_pair(0,source));
+  D[source][source] = 0;
+  from[source][source] = -1;
+  while(pq.size()) {
+    pii f = *pq.begin();
+    pq.erase(f);
+    int c = f.SS;
+    rep(i,0,g[c].size()) {
+      int u = g[c][i].FF;
+      if(D[source][u] > D[source][c] + g[c][i].SS) {
+        pq.erase(make_pair(D[source][u],u));
+        D[source][u] = D[source][c] + g[c][i].SS;
+        pq.insert(make_pair(D[source][u],u));
+        from[source][u] = c;
+      }
+    }
+  }
+}
+
+void cleanShop(vi &ans, int idx) {
+  rep(i,0,itemFromShop[idx].size()) {
+    if(!isItemPurchased[itemFromShop[idx][i]]) {
+      isItemPurchased[itemFromShop[idx][i]] = true;
+      ans.push_back(-itemFromShop[idx][i]);
+    }
+  }
+  isShopCleaned[idx] = true;
+}
+
+LL findScore(const vi v, bool x) {
+
+  int tmShop[MAXN];
+  memset(tmShop, 0, sizeof(tmShop));
+  LL _tm = 0;
+  int cur = N;
+  for(int i = (int)v.size() - 1; i >= 0; i--) {
+    if(v[i] > 0) {
+      _tm += G[cur][v[i]];
+      assert(G[cur][v[i]] == D[cur][v[i]]);
+      cur = v[i];
+      if(v[i] != N && !tmShop[v[i]]) {
+        tmShop[v[i]] = _tm;
+      }
+    }
+  }
+
+  LL res = 0;
+  int curShop = 1;
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      res += W[-v[i]] * 1LL * tmShop[curShop];
+      if(x) printf("%d %d %d\n",-v[i], W[-v[i]], tmShop[curShop]);
+    } else {
+      curShop = v[i];
+    }
+  }
+  return sqrt(res);
+}
+
+vi strategy1(int start) {
+  vector<int > ans;
+  memset(isShopCleaned, 0, sizeof(isShopCleaned));
+  memset(isItemPurchased, 0, sizeof(isItemPurchased));
+  int cur = N;
+  vi path = getPath(cur, start);
+  rep(i,0,(int)path.size()-1) ans.push_back(path[i]);
+  cur = start;
+  while(1) {
+    int nxt = -1;
+    rep(i,1,N+1) if(itemFromShop[i].size() && !isShopCleaned[i]) {
+      if(nxt == -1 || D[cur][i] * 1LL * costInShop[i] < D[cur][nxt] * 1LL * costInShop[nxt]) {
+        nxt = i;
+      }
+    }
+    if(nxt == -1) {
+      vi path = getPath(cur, 1);
+      rep(i,0,(int)path.size()-1) ans.push_back(path[i]);
+      break;
+    }
+    vi path = getPath(cur, nxt);
+    rep(i,0,(int)path.size()-1) ans.push_back(path[i]);
+    cleanShop(ans, nxt);
+    cur = nxt;
+  }
+  reverse(all(ans));
+  return ans;
+}
+
+vi pushAtLast(vi v) {
+  int occ[MAXN];
+  vector<int > inThisShop[MAXN];
+  memset(occ, 0, sizeof(occ));
+  int curShop = 1;
+  occ[1]++;
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      inThisShop[curShop].push_back(v[i]);
+    } else {
+      occ[v[i]]++;
+      curShop = v[i];
+    }
+  }
+
+  vi res;
+  occ[1]--;
+  if(!occ[1]) {
+    rep(i,0,inThisShop[1].size()) {
+      res.push_back(inThisShop[1][i]);
+    }
+  }
+  rep(i,0,v.size()) if(v[i] > 0) {
+    res.push_back(v[i]);
+    occ[v[i]]--;
+    if(!occ[v[i]]) {
+      rep(j,0,inThisShop[v[i]].size()) {
+        res.push_back(inThisShop[v[i]][j]);
+      }
+    }
+  }
+  return res;
+}
+
+vi pathCompression(vi v) {
+  int a = 1, b = 1;
+  vi res;
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      if(!i || v[i-1] > 0) {
+        vi path = getPath(b, a);
+        rep(j,1,path.size()) res.push_back(path[j]);
+        b = a;
+      }
+      res.push_back(v[i]);
+    } else {
+      a = v[i];
+    }
+  }
+  vi path = getPath(b, a);
+  rep(j,1,path.size()) res.push_back(path[j]);
+  return res;
+}
+
+vi clusterShops(vi v, int itr) {
+  int occ[MAXN], currentShop[MAXK], tmShop[MAXN], _cnt[MAXN];
+  vector<int > inThisShop[MAXN];
+  
+  int curShop = 1;
+  int costUsed = 0;
+
+  memset(occ, 0, sizeof(occ));
+  memset(currentShop, 0, sizeof(currentShop));
+  memset(tmShop, 0, sizeof(tmShop));
+  memset(_cnt, 0, sizeof(_cnt));
+  occ[1]++;
+
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      currentShop[-v[i]] = curShop;
+      costUsed += cost[curShop][-v[i]];
+      _cnt[curShop]++;
+    } else {
+      occ[v[i]]++;
+      curShop = v[i];
+    }
+  }
+
+  LL _tm = 0;
+  int cur = N;
+  for(int i = (int)v.size() - 1; i >= 0; i--) {
+    if(v[i] > 0) {
+      _tm += G[cur][v[i]];
+      cur = v[i];
+      if(v[i] != N && !tmShop[v[i]]) {
+        tmShop[v[i]] = _tm;
+      }
+    }
+  }
+
+  while(itr--) {
+    LL profit = 0;
+    int ii = -1, ss = -1;
+    rep(sss,1,N) if(_cnt[sss] == 1) {
+      int i = -1;
+      rep(j,1,K+1) if(currentShop[j] == sss) {
+        i = j;
+        break;
+      }
+      int mn = 1000000;
+      rep(j,0,itemsCost[i].size()) {
+        int s = itemsCost[i][j].FF;
+        int v = itemsCost[i][j].SS;
+        if(costUsed + v - cost[currentShop[i]][i] <= F
+            && (tmShop[currentShop[i]] - tmShop[s]) * 1LL * W[i] > profit
+            && (s == N || tmShop[s])
+            && v < mn
+            && _cnt[s] > 2) {
+          mn = v;
+          profit = (tmShop[currentShop[i]] - tmShop[s]) * 1LL * W[i];
+          ii = i;
+          ss = s;
+        }
+      }
+      // if(ii != -1) break;
+    }
+    if(ii == -1) break;
+    costUsed -= cost[currentShop[ii]][ii];
+    _cnt[currentShop[ii]]--;
+    currentShop[ii] = ss;
+    _cnt[currentShop[ii]]++;
+    costUsed += cost[currentShop[ii]][ii];
+  }
+  rep(i,1,K+1) {
+    inThisShop[currentShop[i]].push_back(-i);
+  }
+  vi res;
+  occ[1]--;
+  if(!occ[1]) {
+    rep(i,0,inThisShop[1].size()) {
+      res.push_back(inThisShop[1][i]);
+    }
+  }
+  rep(i,0,v.size()) if(v[i] > 0) {
+    res.push_back(v[i]);
+    occ[v[i]]--;
+    if(!occ[v[i]]) {
+      rep(j,0,inThisShop[v[i]].size()) {
+        res.push_back(inThisShop[v[i]][j]);
+      }
+    }
+  }
+  return res;
+}
+
+vi clusterShops2(vi v, int itr) {
+  int occ[MAXN], currentShop[MAXK], tmShop[MAXN], _cnt[MAXN];
+  vector<int > inThisShop[MAXN];
+  
+  int curShop = 1;
+  int costUsed = 0;
+
+  memset(occ, 0, sizeof(occ));
+  memset(currentShop, 0, sizeof(currentShop));
+  memset(tmShop, 0, sizeof(tmShop));
+  memset(_cnt, 0, sizeof(_cnt));
+  occ[1]++;
+
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      currentShop[-v[i]] = curShop;
+      costUsed += cost[curShop][-v[i]];
+      _cnt[curShop]++;
+    } else {
+      occ[v[i]]++;
+      curShop = v[i];
+    }
+  }
+
+  LL _tm = 0;
+  int cur = N;
+  for(int i = (int)v.size() - 1; i >= 0; i--) {
+    if(v[i] > 0) {
+      _tm += G[cur][v[i]];
+      cur = v[i];
+      if(v[i] != N && !tmShop[v[i]]) {
+        tmShop[v[i]] = _tm;
+      }
+    }
+  }
+
+  while(itr--) {
+    LL profit = 0;
+    int ii = -1, ss = -1;
+    rep(sss,1,N) if(_cnt[sss] == 2) {
+      int i = -1;
+      rep(j,1,K+1) if(currentShop[j] == sss) {
+        i = j;
+        break;
+      }
+      int mn = 1000000;
+      rep(j,0,itemsCost[i].size()) {
+        int s = itemsCost[i][j].FF;
+        int v = itemsCost[i][j].SS;
+        if(costUsed + v - cost[currentShop[i]][i] <= F
+            && (tmShop[currentShop[i]] - tmShop[s]) * 1LL * W[i] > profit
+            && (s == N || tmShop[s])
+            && v < mn
+            && _cnt[s] > 2) {
+          mn = v;
+          profit = (tmShop[currentShop[i]] - tmShop[s]) * 1LL * W[i];
+          ii = i;
+          ss = s;
+        }
+      }
+      // if(ii != -1) break;
+    }
+    if(ii == -1) break;
+    costUsed -= cost[currentShop[ii]][ii];
+    _cnt[currentShop[ii]]--;
+    currentShop[ii] = ss;
+    _cnt[currentShop[ii]]++;
+    costUsed += cost[currentShop[ii]][ii];
+  }
+  rep(i,1,K+1) {
+    inThisShop[currentShop[i]].push_back(-i);
+  }
+  vi res;
+  occ[1]--;
+  if(!occ[1]) {
+    rep(i,0,inThisShop[1].size()) {
+      res.push_back(inThisShop[1][i]);
+    }
+  }
+  rep(i,0,v.size()) if(v[i] > 0) {
+    res.push_back(v[i]);
+    occ[v[i]]--;
+    if(!occ[v[i]]) {
+      rep(j,0,inThisShop[v[i]].size()) {
+        res.push_back(inThisShop[v[i]][j]);
+      }
+    }
+  }
+  return res;
+}
+
+
+vi costPush(vi v, int itr) {
+  int occ[MAXN], currentShop[MAXK], tmShop[MAXN];
+  vector<int > inThisShop[MAXN];
+  
+  int curShop = 1;
+  int costUsed = 0;
+
+  memset(occ, 0, sizeof(occ));
+  memset(currentShop, 0, sizeof(currentShop));
+  memset(tmShop, 0, sizeof(tmShop));
+  occ[1]++;
+
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      currentShop[-v[i]] = curShop;
+      costUsed += cost[curShop][-v[i]];
+    } else {
+      occ[v[i]]++;
+      curShop = v[i];
+    }
+  }
+
+  LL _tm = 0;
+  int cur = N;
+  for(int i = (int)v.size() - 1; i >= 0; i--) {
+    if(v[i] > 0) {
+      _tm += G[cur][v[i]];
+      cur = v[i];
+      if(v[i] != N && !tmShop[v[i]]) {
+        tmShop[v[i]] = _tm;
+      }
+    }
+  }
+
+  while(itr--) {
+    LL profit = 0;
+    int ii = -1, ss = -1;
+    int mn = 1000000;
+    rep(i,1,K+1) {
+      rep(j,0,itemsCost[i].size()) {
+        int s = itemsCost[i][j].FF;
+        int v = itemsCost[i][j].SS;
+        if(costUsed + v - cost[currentShop[i]][i] <= F
+            && (tmShop[currentShop[i]] - tmShop[s]) * 1LL * W[i] > profit
+            && (s == N || tmShop[s])
+            && v < mn) {
+          profit = (tmShop[currentShop[i]] - tmShop[s]) * 1LL * W[i];
+          // mn = v;
+          ii = i;
+          ss = s;
+        }
+      }
+    }
+    if(ii == -1) break;
+    costUsed -= cost[currentShop[ii]][ii];
+    currentShop[ii] = ss;
+    costUsed += cost[currentShop[ii]][ii];
+  }
+  rep(i,1,K+1) {
+    inThisShop[currentShop[i]].push_back(-i);
+  }
+  vi res;
+  occ[1]--;
+  if(!occ[1]) {
+    rep(i,0,inThisShop[1].size()) {
+      res.push_back(inThisShop[1][i]);
+    }
+  }
+  rep(i,0,v.size()) if(v[i] > 0) {
+    res.push_back(v[i]);
+    occ[v[i]]--;
+    if(!occ[v[i]]) {
+      rep(j,0,inThisShop[v[i]].size()) {
+        res.push_back(inThisShop[v[i]][j]);
+      }
+    }
+  }
+
+  // int cnt = 0;
+  // rep(i,1,N+1) if(inThisShop[i].size() == 1) cnt++;
+  // cerr << cnt << "\n";
+
+  return res;
+}
+
+vector<pii > findCurrentPath(vi v) {
+  vector<pii > currentPath;
+
+  int curShop = 1;
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      if(!i || v[i-1] > 0) {
+        currentPath.push_back(make_pair(curShop, 0));
+      }
+      currentPath.back().SS += W[-v[i]];
+    } else {
+      curShop = v[i];
+    }
+  }
+
+  return currentPath;
+}
+
+vi pathShuffling(vi v) {
+  vector<int > inThisShop[MAXN];
+
+  int curShop = 1;
+  rep(i,0,v.size()) {
+    if(v[i] < 0) {
+      inThisShop[curShop].push_back(v[i]);
+    } else {
+      curShop = v[i];
+    }
+  }
+
+  vector<pii > currentPath = findCurrentPath(v);
+
+  // rep(i,0,currentPath.size()) printf("%d %d\n",currentPath[i].FF, currentPath[i].SS);
+
+  LL w1,w2,w3;
+  w1 = w2 = w3 = 0;
+  for(int i = (int)currentPath.size() - 3; i >= 0; i--) {
+    w1 += currentPath[i].SS;
+    w2 = currentPath[i+1].SS;
+    w3 = currentPath[i+2].SS;
+    LL curValue = w1 * (D[currentPath[i].FF][currentPath[i+1].FF] + D[currentPath[i+1].FF][currentPath[i+2].FF] + D[currentPath[i+2].FF][currentPath[i+3].FF])
+        + w2 * (D[currentPath[i+1].FF][currentPath[i+2].FF] + D[currentPath[i+2].FF][currentPath[i+3].FF])
+        + w3 * D[currentPath[i+2].FF][currentPath[i+3].FF];
+
+    w2 = currentPath[i+2].SS;
+    w3 = currentPath[i+1].SS;
+    LL shuffledValue = w1 * (D[currentPath[i].FF][currentPath[i+2].FF] + D[currentPath[i+2].FF][currentPath[i+1].FF] + D[currentPath[i+1].FF][currentPath[i+3].FF])
+        + w2 * (D[currentPath[i+2].FF][currentPath[i+1].FF] + D[currentPath[i+1].FF][currentPath[i+3].FF])
+        + w3 * D[currentPath[i+1].FF][currentPath[i+3].FF];
+    if(shuffledValue < curValue) {
+      swap(currentPath[i+1].FF, currentPath[i+2].FF);
+      swap(currentPath[i+1].SS, currentPath[i+2].SS);
+      break;
+    } 
+  }
+
+  vi res;
+  curShop = 1;
+  rep(i,0,currentPath.size()) {
+    int s = currentPath[i].FF;
+    vi path = getPath(curShop, s);
+    rep(j,1,path.size()) res.push_back(path[j]);
+    rep(j,0,inThisShop[s].size()) {
+      res.push_back(inThisShop[s][j]);
+    }
+    curShop = s;
+  }
+  vi path = getPath(curShop, N);
+  rep(j,1,path.size()) res.push_back(path[j]);
+  return res;
+}
+
+void solve() {
+  // dijkstra
+  rep(i,1,N+1) {
+    dijkstra(i);
+  }
+
+  vi ans = pushAtLast(strategy1(1));
+  ans = pathCompression(ans);
+  LL score = findScore(ans, 0);
+  rep(i,2,N+1) {
+    vi ans1 = pushAtLast(strategy1(i));
+    ans1 = pathCompression(ans1);
+    LL curScore = findScore(ans1, 0);
+    if(curScore < score) {
+      score = curScore;
+      swap(ans, ans1);
+    }
+  }
+  int itr = 100;
+  while(itr--) {
+    ans = clusterShops(ans, 100);
+    ans = clusterShops2(ans, 100);
+    ans = pathCompression(ans);
+  }
+  itr = 100;
+  while(itr--) {
+    ans = costPush(ans, 100);
+    ans = pathCompression(ans);
+  }
+  ans = pathShuffling(ans);
+  ans = pathCompression(ans);
+  ans = clusterShops(ans, 100);
+  ans = costPush(ans, 100);
+  // ans = randomMagic(ans);
+  assert(ans.size() < 3000);
+  P((int)ans.size());
+  rep(i,0,ans.size()) printf("%d ",ans[i]); printf("\n");
+
+  cerr << findScore(ans, 0) << "\n";
+}
+
+int main() {
+  int m;
+  scanf("%d%d%d%d",&N,&m,&K,&F);
+  rep(i,1,K+1) {
+    int p;
+    S2(p,items[i].w);
+    W[i] = items[i].w;
+    items[i].idx = i;
+    int id = 0;
+    rep(j,0,p) {
+      int x,y;
+      S2(x,y);
+      itemsCost[i].push_back(make_pair(x,y));
+      cost[x][i] = y;
+      if(itemsCost[i][id].SS > y) {
+        id = j;
+      }
+    }
+    itemFromShop[itemsCost[i][id].FF].push_back(i);
+    costInShop[itemsCost[i][id].FF] += itemsCost[i][id].SS;
+  }
+
+  while(m--) {
+    int x,y,z;
+    scanf("%d%d%d",&x,&y,&z);
+    g[x].push_back(make_pair(y,z));
+    g[y].push_back(make_pair(x,z));
+    G[x][y] = G[y][x] = z;
+  }
+
+  solve();
+  return 0;
+}

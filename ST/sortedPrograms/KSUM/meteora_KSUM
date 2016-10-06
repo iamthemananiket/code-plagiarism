@@ -1,0 +1,43 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#include <cstring>
+#include <cassert>
+#include <vector>
+
+#define NMAX 100010
+typedef long long lli;
+
+using namespace std;
+
+int ptr[NMAX];
+lli pref[NMAX];
+int A[NMAX];
+
+int N,K;
+
+priority_queue <pair<lli,int > > Q;
+
+int main(){
+	int i;
+
+	scanf("%d%d",&N,&K);
+
+	for(i = 0; i < N; ++i){
+		scanf("%d",&A[i]);
+		pref[i] = A[i];
+		if(i) pref[i] += pref[i-1];
+		Q.push(make_pair(pref[i],i));
+		ptr[i] = -1;
+	}
+
+	while(K--){
+		i = Q.top().second;
+		printf("%lld ",Q.top().first);
+		Q.pop();
+		Q.push(make_pair(-pref[++ptr[i]]+pref[i],i));
+	}
+
+	return 0;
+}

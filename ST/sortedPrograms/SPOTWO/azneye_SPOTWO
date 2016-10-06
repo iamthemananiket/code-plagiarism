@@ -1,0 +1,81 @@
+/*
+ * Codechef 2013 November Challenge
+ * Superpowers of 2
+ * File:   SPOTWO.cpp
+ * Author: Andy Y.F. Huang
+ * Created on 2013-11-04, 8:52:06 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace SPOTWO {
+typedef unsigned long long ll;
+const int mod = 1000000007;
+
+void solve(int test_num) {
+  int N;
+  ll e = 0;
+  scanf("%d", &N);
+  for (int b = 19; b >= 0; b--) {
+    e *= 10;
+    if (N >> b & 1)
+      e++;
+  }
+  e %= mod - 1;
+  e = (e + e) % (mod - 1);
+  ll res = 1, b = 2;
+  for (; e > 0; e >>= 1) {
+    if (e & 1)
+      res = res * b % mod;
+    b = b * b % mod;
+  }
+  printf("%d\n", (int) res);
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  SPOTWO::solve();
+  return 0;
+}

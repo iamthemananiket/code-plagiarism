@@ -1,0 +1,24 @@
+#include <bits/stdc++.h>
+#define ll long long
+ 
+using namespace std;
+ 
+int T;
+ll N , M , Z , L , R , B;
+ll seats , armrests , res , c1 , c2 , c3;
+int main(){
+  cin.tie(0); ios::sync_with_stdio(0);
+  cin >> T;
+  while(T--){
+    
+    cin >> M >> N >> Z >> L >> R >> B;
+    seats = N * M , armrests = M * (N + 1);
+
+    c1 = min(Z,seats); res  = c1;seats -= c1;
+    c2 = min(L,seats); res += c2;seats -= c2;
+    c3 = min(R,seats); res += c3;seats -= c3;
+
+    res += min( B , min( seats , min ( M * ( (N+1)/2 ) , (armrests - c2 - c3)/2 ) ) );
+    cout << res << endl;
+  }
+}

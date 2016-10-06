@@ -1,0 +1,35 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		ll n1,n2,m;
+		scanf("%lld %lld %lld",&n1,&n2,&m);
+		ll ans=abs(n1-n2);
+		ll n=min(n1,n2);
+		ll hi=m*1LL*(m+1)/2;
+		if (hi<n)
+			ans+=2*(n-hi);
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

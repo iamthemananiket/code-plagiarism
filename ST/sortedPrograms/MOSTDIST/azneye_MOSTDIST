@@ -1,0 +1,69 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+int x[555000], y[555000];
+
+void solve(int test_num) {
+  multiset<int> add, sub;
+  int Q, L = 0;
+  cin >> Q;
+  for (int q = 0, ans = 0, X, Y, N; q < Q; q++) {
+    char type;
+    cin >> type;
+    if (type == '+') {
+      cin >> X >> Y;
+      X ^= ans;
+      Y ^= ans;
+      add.insert(X + Y);
+      sub.insert(X - Y);
+      x[++L] = X;
+      y[L] = Y;
+    } else if (type == '?') {
+      cin >> X >> Y;
+      X ^= ans;
+      Y ^= ans;
+      ans = max(max(X + Y - *add.begin(), *add.rbegin() - (X + Y)),
+          max(X - Y - *sub.begin(), *sub.rbegin() - (X - Y)));
+      cout << ans << endl;
+    } else if (type == '-') {
+      cin >> N;
+      N ^= ans;
+      add.erase(add.find(x[N] + y[N]));
+      sub.erase(sub.find(x[N] - y[N]));
+    }
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

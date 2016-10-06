@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+int main() {
+	//freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	int t;
+	cin>>t;
+	while(t--) {
+		ll n,m;
+		cin>>n>>m;
+		ll ans;
+		ll x=n/2LL+1LL;
+		if(m<=n/2LL) ans=x+m-1;
+		else ans=m-n/2LL;
+		cout<<ans<<"\n";
+	}
+	return 0;
+}

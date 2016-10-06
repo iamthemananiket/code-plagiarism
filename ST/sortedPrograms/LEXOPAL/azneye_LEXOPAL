@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while (T-- > 0){
+    string s;
+    cin >> s;
+    const int N=s.size();
+    for(int i=0;i<N;++i){
+      if(s[i]=='.'){
+        if(s[N-i-1]=='.') s[i]='a';
+        else s[i]=s[N-i-1];
+      }
+    }
+    bool ok=true;
+    for(int i=0;i<N;++i)
+      ok&=s[i]==s[N-i-1];
+    if(!ok)cout<<"-1\n";
+    else cout<<s<<endl;
+  }
+  return 0;
+}

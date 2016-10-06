@@ -1,0 +1,40 @@
+#include <iostream>
+
+using namespace std;
+
+long long lca(long long x, long long y) {
+    while(x!=y) {
+        if(y<x) swap(x,y);
+        y >>= 1ll;
+    }
+    return x;
+}
+
+int Q,n;
+long long u,v,l;
+long long added,mult;
+
+void findl(long long x, long long l) {
+    if(x==l) return;
+    findl(x>>1ll,l);
+    mult *= 2ll;
+    added *= 2ll;
+    if(x!= ((x>>1ll)<<1ll)) added++;
+}
+
+int main()
+{
+
+    for(cin >> Q; Q--;) {
+        cin >> n >> u >> v;
+        l = lca(u,v);
+        mult = 1ll;
+        added = 0ll;
+        findl(max(u,v),l);
+
+        long long sol = (n-added)/mult;
+        cout << sol << endl;
+    }
+
+    return 0;
+}

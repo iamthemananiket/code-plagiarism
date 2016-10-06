@@ -1,0 +1,52 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 1005;
+
+bool adj_mat[N][N], is_bipartite;
+vector < int > adj[N];
+int color[N];
+
+inline void dfs(int u, int c){
+    color[u] = c;
+    for(int v : adj[u]){
+        if(color[v] == -1){
+            dfs(v, 1 - c);
+        }
+        else if(color[v] == c){
+            is_bipartite = false;
+        }
+    }
+}
+
+int main(){
+    ios :: sync_with_stdio(false);
+    int t; cin >> t;
+    while(t--){
+        int n, m; cin >> n >> m;
+        for(int i = 1; i <= n; i++){
+            adj[i].clear(); // Clear compliment graph
+            color[i] = -1; // Uncolored
+            for(int j = 1; j <= n; j++){
+                adj_mat[i][j] = false; // Clear adjacency matrix
+            }
+        }
+        for(int i = 1; i <= m; i++){
+            int u, v; cin >> u >> v;
+            adj_mat[u][v] = adj_mat[v][u] = true;
+        }
+        for(int i = 1; i <= n; i++){
+            for(int j = 1; j <= n; j++){
+                if(i == j) continue;
+                if(adj_mat[i][j] == false)
+                    adj[i].push_back(j);
+            }
+        }
+        is_bipartite = true;
+        for(int i = 1; i <= n; i++){
+            if(color[i] == -1) dfs(i, 0);
+        }
+        if(is_bipartite) cout << "YES\n";
+        else cout << "NO\n";
+    }
+}

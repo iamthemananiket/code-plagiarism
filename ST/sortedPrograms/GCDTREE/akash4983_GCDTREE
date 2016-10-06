@@ -1,0 +1,133 @@
+//#pragma comment(linker, "/STACK:16777216")
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int N = 100005;
+vector<pii > g[N];
+
+LL ans = 0;
+vector<pii > gcd[N];
+
+int trn;
+int T[N], idx[N], MX[N], P[N];
+
+int val[N];
+vector<int > V;
+
+void dfs(int c, int p, int v) {
+  val[c] = v;
+  P[c] = p;
+  rep(i,0,g[c].size()) {
+    int u = g[c][i].FF;
+    if(u == p) continue;
+    dfs(u, c, g[c][i].SS);
+  }
+  V.push_back(c);
+}
+
+void solve() {
+  rep(it,0,V.size()) {
+    int c = V[it];
+    trn++;
+    rep(i,0,g[c].size()) {
+      int u = g[c][i].FF;
+      if(u == P[c]) continue;
+      rep(j,0,gcd[u].size()) {
+        int gg = gcd[u][j].FF;
+        if(T[gg] != trn) {
+          ans = max(ans, gg * 1LL * gcd[u][j].SS);
+        } else {
+          ans = max(ans, gg * 1LL * (MX[gg] + gcd[u][j].SS));
+        }
+      }
+
+      rep(j,0,gcd[u].size()) {
+        int gg = gcd[u][j].FF;
+        if(T[gg] != trn) {
+          T[gg] = trn;
+          MX[gg] = gcd[u][j].SS;
+        } else {
+          MX[gg] = max(MX[gg], gcd[u][j].SS);
+        }
+      }
+    }
+
+    if(c == 1) return;
+
+    trn++;
+    rep(i,0,g[c].size()) {
+      int u = g[c][i].FF;
+      if(u == P[c]) continue;
+      rep(j,0,gcd[u].size()) {
+        int gg = __gcd(gcd[u][j].FF, val[c]);
+        if(T[gg] != trn) {
+          T[gg] = trn;
+          idx[gg] = gcd[c].size();
+          gcd[c].push_back(make_pair(gg, gcd[u][j].SS+1));
+        } else {
+          gcd[c][idx[gg]].SS = max(gcd[c][idx[gg]].SS, gcd[u][j].SS+1);
+        }
+      }
+    }
+    if(T[val[c]] != trn) {
+      gcd[c].push_back(make_pair(val[c], 1));
+      ans = max(ans, (LL)val[c]);
+    }
+  }
+}
+
+int main() {
+  int t;
+  S(t);
+  while(t--) {
+    int n;
+    S(n);
+
+    rep(i,1,n+1) {
+      g[i].clear();
+      gcd[i].clear();
+    }
+
+    rep(i,0,n-1) {
+      int u,v,c;
+      scanf("%d%d%d",&u,&v,&c);
+      g[u].push_back(make_pair(v,c));
+      g[v].push_back(make_pair(u,c));
+    }
+
+    ans = 0;
+    V.clear();
+    dfs(1,0,0);
+    solve();
+    printf("%lld\n",ans);
+
+    rep(i,1,n+1) {
+      g[i].clear();
+      gcd[i].clear();
+    }
+  }
+  return 0;
+}

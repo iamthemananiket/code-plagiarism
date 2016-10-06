@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int N;
+int A[15];
+bool M[1<<15];
+int dp[1<<15];
+int cnt[1<<15];
+vector<int> from[1<<15];
+
+int readint() {
+	char c;
+	while ((c=getchar_unlocked())<'0');
+	int res = c-'0';
+	while ((c=getchar_unlocked())>='0') res = res*10+c-'0';
+	return res;
+}
+
+int main() {
+	for (int i=1;i<(1<<15);i++) {
+		cnt[i] = __builtin_popcount(i);
+		vector<int> has;
+		for (int j=0;j<15;j++) if (i&(1<<j)) has.push_back(j);
+		for (int j=1;j<(1<<has.size());j++) {
+			int cur = 0;
+			for (int k=0;k<has.size();k++) if (j&(1<<k)) cur|=(1<<has[k]);
+			from[i].push_back(cur);
+		}
+	}
+	int T = readint();
+	for (int t=0;t<T;t++) {
+		for (int i=0;i<(1<<15);i++) {
+			M[i] = 0;
+			dp[i] = 1e9;
+		}
+		N = readint();
+		for (int i=0;i<N;i++) A[i] = readint();
+		sort(A,A+N,greater<int>());
+		for (int i=1;i<N;i++) A[i]+=A[i-1];
+		int offers = readint();
+		for (int i=0;i<offers;i++) {
+			int C = readint();
+			int cur = 0;
+			for (int j=0;j<C;j++) {
+				int x = readint();
+				cur|=(1<<(x-1));
+			}
+			M[cur] = 1;
+		}
+		for (int i=0;i<N;i++) M[1<<i] = 1;
+		dp[0] = 0;
+		for (int i=1;i<(1<<N);i++) {
+			for (int j: from[i]) {
+				if (!M[j]) continue;
+				int add = A[cnt[i^j]+max(0,cnt[j]-2)];
+				if (cnt[i^j]) add-=A[cnt[i^j]-1];
+				dp[i] = min(dp[i],dp[i^j]+add);
+			}
+		}
+		printf("%d\n",dp[(1<<N)-1]);
+	}
+
+	return 0;
+}

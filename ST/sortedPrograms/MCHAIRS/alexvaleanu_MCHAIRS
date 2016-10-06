@@ -1,0 +1,36 @@
+#include <iostream>
+
+using namespace std;
+
+const long long mod = 1000000007;
+
+long long putere( long long p )
+{
+    long long res = 1;
+    long long a = 2;
+
+    for ( int i = 0; ( 1LL << i ) <= p; ++i )
+    {
+        if ( ( 1LL << i ) & p )
+             res = ( res * a ) % mod;
+
+        a = ( a * a ) % mod;
+    }
+
+    res = ( res - 1 + mod ) % mod;
+
+    return res;
+}
+
+long long N, T;
+
+int main()
+{
+    for ( cin >> T; T; T-- )
+    {
+        cin >> N;
+        cout << putere( N ) << "\n";
+    }
+
+    return 0;
+}

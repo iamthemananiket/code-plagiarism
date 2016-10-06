@@ -1,0 +1,35 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+int n;
+char a[1000];
+char b[1000];
+long long w[1001];
+
+int main()
+{
+    ios::sync_with_stdio(0); cin.tie(NULL);
+    for(cin >> T; T--;) {
+        cin >> n;
+        for(int i=0; i<n; i++) cin >> a[i];
+        for(int i=0; i<n; i++) cin >> b[i];
+        for(int i=0; i<n+1; i++) cin >> w[i];
+
+        int ra(0);
+        for(int i=0; i<n; i++) if(a[i] == b[i]) ra++;
+
+        if(ra == n) {
+            cout << w[n] << endl;
+            continue;
+        }
+
+        long long sol(0ll);
+        for(int i=0; i<=ra; i++) sol = max(sol,w[i]);
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

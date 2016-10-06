@@ -1,0 +1,32 @@
+#include <cstdio>
+
+using namespace std;
+
+int n;
+
+int a[100000];
+
+int main()
+{
+    scanf("%d",&n);
+
+    for(int i=0; i<n; i++) {
+        scanf("%d",&a[i]);
+    }
+
+    long long sol = 0;
+
+    for(long long j=1; j<=1000000000; j<<=1) {
+        long long cnt = 0;
+        for(int i=0; i<n; i++) {
+            if(a[i] & j) {
+                cnt++;
+            }
+        }
+        sol += ((cnt*(cnt-1))/2)*j;
+    }
+
+    printf("%lld\n",sol);
+
+    return 0;
+}

@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int m;
+vector < int > f, s;
+int n, C;
+int cost[30], bomb[30], pen[30];
+
+void solve() {
+	cin >> n >> C;
+	for (int i = 0; i < n; i++)
+		cin >> cost[i];
+	for (int i = 0; i < n; i++)
+		cin >> bomb[i];
+	for (int i = 0; i < n; i++)
+		cin >> pen[i];
+	cout << "-1" << endl;
+	for (int i = 0; i < n; i++)
+		cout << rand() % m << ' ';
+	cout << endl;
+}
+
+void in(vector < int > &q) {
+	int n;
+	cin >> n;
+	q.resize(n);
+	for (int i = 0; i < n; i++)
+		cin >> q[i];
+}
+
+int main() {
+	srand(time(0));
+	cin >> m;
+	in(f);
+	in(s);
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

@@ -1,0 +1,10 @@
+#include <stdio.h>
+#include <math.h>
+
+long long n;
+
+int main() {
+    scanf("%lld", &n);
+    puts(n & 1 ? "1" : "2");
+    return 0;
+}

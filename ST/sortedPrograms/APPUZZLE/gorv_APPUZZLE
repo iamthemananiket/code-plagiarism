@@ -1,0 +1,24 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		long long int x,y,z;
+		cin>>x>>y>>z;
+		
+		long long int n = 2*z/(x+y);
+		long long int d = (x-y)/(5-n);
+		
+		long long int a = x-2*d;
+		
+		
+		cout<<n<<"\n";
+		for(long long int i=1;i<=n;i++){
+			long long b = a+((i-1)*d);
+			cout<<b<<" ";
+		}
+		cout<<"\n";
+	}
+}

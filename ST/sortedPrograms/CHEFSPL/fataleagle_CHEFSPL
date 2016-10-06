@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+char S[1000001];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%s", S);
+        int N=strlen(S);
+        if(N==1)
+            printf("NO\n");
+        else if(N%2==0)
+        {
+            bool good=true;
+            for(int i=0; i<N/2; i++)
+                good&=S[i]==S[i+N/2];
+            if(good)
+                printf("YES\n");
+            else
+                printf("NO\n");
+        }
+        else
+        {
+            int mis=0;
+            for(int i=0; i<N/2 && mis<=1; i++)
+                if(S[i]!=S[i+N/2+mis])
+                    mis++, i--;
+            if(mis<=1)
+                printf("YES\n");
+            else
+            {
+                mis=0;
+                for(int i=N-1; i>=(N+1)/2 && mis<=1; i--)
+                    if(S[i]!=S[i-N/2-mis])
+                        mis++, i++;
+                if(mis<=1)
+                    printf("YES\n");
+                else
+                    printf("NO\n");
+            }
+        }
+    }
+    return 0;
+}

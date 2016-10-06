@@ -1,0 +1,119 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+#include <unordered_map>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 1005000;
+vector <pair<int, int> > a[N];
+int n, m;
+int Up[N], Down[N], Right[N], Left[N];
+unordered_map <int, int> row, col;
+int calc(int id) {
+	int res = 0;
+	row.clear();
+	col.clear();
+	int xx = -1, yy = -1;
+	for (int i = 0; i < (int)a[id].size(); ++ i) {
+		row[a[id][i].F]++;
+		col[a[id][i].S]++;
+	}
+	for (int i = 0; i < (int)a[id].size(); ++ i) {
+		if (row[xx] < row[a[id][i].F]) xx = a[id][i].F;
+		if (col[yy] < col[a[id][i].S]) yy = a[id][i].S;
+	}
+
+	vector <int> rr, cc;
+
+	for (int i = 0; i < (int)a[id].size(); ++ i) {
+		if (row[a[id][i].F] == row[xx]) rr.pb(a[id][i].F);
+		if (col[a[id][i].S] == col[yy]) cc.pb(a[id][i].S);
+//		cout << a[id][i].F << " " << a[id][i].S << endl;
+	}
+	sort(rr.begin(), rr.end());
+	sort(cc.begin(), cc.end());
+	rr.resize((unique(rr.begin(), rr.end()) - rr.begin()));
+	cc.resize((unique(cc.begin(), cc.end()) - cc.begin()));
+	
+	int exist = 1;
+
+	for (int i = 0; i < (int)rr.size(); ++ i) {
+		for (int j = 0; j < (int)cc.size(); ++ j) {
+			if (!binary_search(a[id].begin(), a[id].end(), mp(rr[i], cc[j]))) {
+				exist = 0;
+				break;
+			}
+		}
+		if (!exist) break;
+	}
+//	cout << " : " << xx << " " << yy << endl;
+	return row[xx] + col[yy] - exist;
+}
+
+int id[N], vn, all[N];
+
+inline void solve() {
+	scanf("%d%d", &n, &m);
+	for (int i = 1; i <= n; ++ i) {
+		for (int j = 1; j <= m; ++ j) {
+			int x;
+			scanf("%d", &x);
+			if (!id[x]) {
+				all[++vn] = x;
+				id[x] = vn;
+			}
+//			cout << id[x] << " ";
+			a[id[x]].pb(mp(i, j));
+		}
+//		cout << endl;
+	}
+//	cout << endl;
+	int ans = 0;
+	for (int i = 1; i <= vn; ++ i) {
+		ans = max(ans, calc(i));
+	}
+	printf("%d\n", ans);
+
+	for (int i = 1; i <= vn; ++ i) {
+		id[all[i]] = 0;
+		a[i].clear();
+	}
+	vn = 0;
+}
+
+int main() {
+	#ifndef ONLINE_JUDGE
+	freopen(fname"in", "r", stdin);
+	freopen(fname"out", "w", stdout);
+	#endif
+
+	int test;
+	scanf("%d", &test);
+
+	while(test--) solve();
+
+	return 0;
+}

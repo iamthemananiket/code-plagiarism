@@ -1,0 +1,70 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+ {
+ 	
+ 	int t,n,m,i,j,x,y;
+ 	cin>>t;
+ 	while(t--)
+ 	 {
+ 	 	cin>>n>>m;
+ 	 	
+ 	 	vector<pair<int,int>> v;
+ 	 	vector<int> a(n+1);
+ 	 	for(i=1;i<=n;i++)
+ 	 	  {
+ 	 	    v.push_back(make_pair(i,i));
+			cin>>a[i];
+ 	 	 }
+ 		while(m--)
+ 	 	 {cin>>x>>y;
+		  v.push_back(make_pair(x,y));
+ 	 	 }
+ 	 	sort(v.begin(),v.end());
+ 	 	
+ 	 	stack<pair<int,int>> stk;
+ 	 	for(i=v.size()-1;i>=0;i--)
+ 	 	  stk.push(v[i]);
+ 	 	v.clear();
+ 	 	pair<int,int> c,d;
+ 	 	while(stk.size()>1)
+ 	 	  {
+ 	 	    c=stk.top();
+ 	 	    stk.pop();
+			d=stk.top();
+ 	 	    stk.pop();
+			if(c.second>=d.first)
+			  {stk.push(make_pair(min(c.first,d.first),max(c.second,d.second)));
+			  }	
+			else
+			  {v.push_back(c);
+			   stk.push(d);
+			  }
+		
+ 	 	  }
+ 	 	int flag=1;
+ 	 	if(stk.size())
+ 	 	  v.push_back(stk.top());
+ 	 	for(i=0;i<v.size();i++)
+ 	 	  {
+ 	 	    int front=v[i].first;
+ 	 	    int rear=v[i].second;
+ 	 		int count=0;
+ 	 	    for(j=front;j<=rear;j++)
+ 	 	      {
+ 	 	      	if(a[j]>=front && a[j]<=rear)
+ 	 	      	   count++;
+ 	 	      }
+ 	 	    if(count!=rear - front +1)
+ 	 	      flag=0;
+ 	 	      
+ 	 	    
+ 	 	  }
+ 	 	 	if(flag)
+ 	  	  cout<<"Possible"<<endl;
+ 	  	else
+ 	  	  cout<<"Impossible"<<endl;
+ 	 	
+ 	 }
+ }

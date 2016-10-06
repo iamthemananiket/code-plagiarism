@@ -1,0 +1,135 @@
+#include <iostream>
+#include <map>
+#include <cstring>
+#include <fstream>
+#include <cstdio>
+#include <math.h>
+#include <queue>
+#include <stack>
+#include <set>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <cassert>
+#include <algorithm>        
+#include <ctime>
+#include <vector>
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+#define mp make_pair
+#define pb push_back
+const int N = 1005000;
+int n, m;
+int L[N], R[N];
+stack <int> id;
+
+struct node {
+	int a;
+	ll cnt;
+	bool operator < (node T) const {
+		return a < T.a;
+	}
+}a[N];
+
+ll s[N];
+
+int FindSmall(int x) {
+	int l = 1, r = n, pos = 0;
+	while (l <= r) {
+		int mid = (l + r) >> 1;
+		if (a[mid].a < x) {
+			pos = mid;
+			l = mid + 1;
+		}
+		else r = mid - 1;
+	}
+	return pos;
+}
+
+int FindBig(int x) {
+	int l = 1, r = n, pos = n + 1;
+	while (l <= r) {
+		int mid = (l + r) >> 1;
+		if (a[mid].a > x) {
+			pos = mid;
+			r = mid - 1;
+		}
+		else l = mid + 1;
+	}
+	return pos;
+}
+
+ll get(int i, int j) {
+	if (i > j) return 0;
+	return s[j] - s[i - 1];
+}
+
+char obr(char c) {
+	if (c == 'C') return 'D';
+	return 'C';
+}
+
+int main () {
+	#ifndef ONLINE_JUDGE
+    freopen ("in", "r", stdin);
+    freopen ("out", "w", stdout);
+    #endif
+
+    scanf("%d%d", &n, &m);
+
+    for (int i = 1; i <= n; ++ i) {
+    	scanf("%d", &a[i].a);
+    }
+    scanf("\n");
+
+    for (int i = 1; i <= n; ++ i) {
+    	while (!id.empty() && a[id.top()].a < a[i].a) id.pop();
+    	if (id.empty()) L[i] = 1;
+    	else L[i] = id.top() + 1;
+    	id.push(i);
+    }
+
+	while (!id.empty()) id.pop();
+
+    for (int i = n; i > 0; -- i) {
+    	while (!id.empty() && a[id.top()].a <= a[i].a) id.pop();
+    	if (id.empty()) R[i] = n;
+    	else R[i] = id.top() - 1;
+    	id.push(i);
+    }
+
+    for (int i = 1; i <= n; ++ i) {
+    	a[i].cnt = (i - L[i] + 1) * 1ll * (R[i] - i + 1);
+    }
+
+    sort(a + 1, a + 1 + n);
+
+    for (int i = 1; i <= n; ++ i) {
+    	s[i] = s[i - 1] + a[i].cnt;
+    }
+
+    for (int i = 1; i <= m; ++ i) {
+    	char ch, c;
+    	int x;
+    	scanf("%c %d %c\n", &ch, &x, &c);
+    	ll cur = 0;
+    	if (ch == '<') {
+    		cur = get(1, FindSmall(x));
+    	}
+    	else if (ch == '>') {
+    		cur = get(FindBig(x), n);
+    	}
+    	else {
+    		cur = get(FindSmall(x) + 1, FindBig(x) - 1);
+    	}
+    	if (cur & 1) printf("%c", c);
+    	else printf("%c", obr(c));
+    }
+
+ 	return 0;
+}

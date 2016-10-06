@@ -1,0 +1,64 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+
+void solve(int test_num) {
+  int N;
+  string cor, ans;
+  cin >> N >> cor >> ans;
+  vector<int> win(N + 1);
+  for (int i = 0; i <= N; ++i) {
+    cin >> win[i];
+  }
+  int good = 0;
+  for (int i = 0; i < N; ++i) {
+    if (cor[i] == ans[i]) {
+      ++good;
+    }
+  }
+  int res = 0;
+  if (good == N) {
+    res = win[N];
+  } else {
+    for (int i = 0; i <= good; ++i) {
+      res = max(res, win[i]);
+    }
+  }
+  cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

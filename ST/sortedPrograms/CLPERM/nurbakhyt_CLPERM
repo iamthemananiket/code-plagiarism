@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+
+const int N = (int)1e5 + 123;
+typedef long long ll;
+
+using namespace std;
+
+int n, k;
+int a[N];
+ll p;
+
+ll sum(int l, int r) {
+	ll now = 1ll * r * (r + 1) / 2;
+	if (l > 2)
+		now -= (1ll * l * (l - 1) / 2);
+	return now;
+}
+
+void out(ll x) {
+	if (x % 2 == 0)
+		printf("Mom\n");
+	else
+		printf("Chef\n");
+}
+
+void solve() {
+	scanf("%d%d", &n, &k);
+	for (int i = 1; i <= k; i++)
+		scanf("%d", &a[i]);
+	sort(a + 1, a + k + 1);
+	a[k + 1] = n + 1;
+	p = sum(0, a[1] - 1);
+	for (int i = 1; i <= k; i++) {
+		int l = a[i] + 1, r = a[i + 1] - 1;
+		if (p + 1 < l) {
+			out(p + 1);
+			return;
+		}
+		p += sum(l, r);
+	}		
+	out(p + 1);
+	return;
+}
+
+int test;
+
+int main() {
+    scanf("%d", &test);
+    while(test--)
+    	solve();
+	return 0;
+}

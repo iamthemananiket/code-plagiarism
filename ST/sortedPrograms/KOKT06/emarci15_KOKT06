@@ -1,0 +1,63 @@
+#include <cstdio>
+
+#define mod 1000000007
+
+using namespace std;
+
+unsigned long long A[3];
+unsigned long long B[3][3];
+unsigned long long ID[3][3];
+
+unsigned long long T[3][3];
+unsigned long long R[3][3];
+
+void mul(unsigned long long a[3][3],unsigned long long b[3][3], unsigned long long c[3][3]) {
+    for(int i=0; i<3; i++) {
+        for(int j=0; j<3; j++) {
+            c[i][j] = 0ull;
+            for(int k=0; k<3; k++) c[i][j] += (a[i][k]*b[k][j])%mod;
+            c[i][j] %= mod;
+        }
+    }
+}
+
+void cpy(unsigned long long a[3][3], unsigned long long b[3][3]) {
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++) b[i][j] = a[i][j];
+}
+
+void pow(unsigned long long b[3][3], int p) {
+    if(p == 0) {
+        cpy(ID,b);
+        return;
+    }
+    unsigned long long t[3][3];
+    pow(t,p>>1);
+    mul(t,t,b);
+    if(p&1) {
+        mul(b,B,T);
+        cpy(T,b);
+    }
+}
+
+int TE;
+int Q,k;
+
+int main()
+{
+    ID[0][0] = ID[1][1] = ID[2][2] = 1ll;
+    for(scanf("%d",&TE); TE--;) {
+        B[1][0] = B[2][1] = 1ll;
+        scanf("%llu%llu%llu",&B[0][2],&B[0][1],&B[0][0]);
+        scanf("%llu%llu%llu",&A[2],&A[1],&A[0]);
+
+        scanf("%d",&Q);
+        for(int i=0; i<Q; i++) {
+            scanf("%d",&k);
+            pow(R,k);
+            unsigned long long res = ((A[0]*R[2][0])%mod + (A[1]*R[2][1])%mod + (A[2]*R[2][2])%mod)%mod;
+            printf("%llu\n",res);
+        }
+    }
+
+    return 0;
+}

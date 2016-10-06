@@ -1,0 +1,25 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define maxx(a,b) (a)>(b)>(a):(b)
+int main()
+{
+	int t;
+	char str[100];
+	scanf("%d",&t);
+	getchar();
+	while(t--)
+	{
+	//	fflush(stdin);
+		gets(str);
+		if(str[0]<='h'&&str[0]>='a'&&str[1]<='8'&&str[1]>='1'&&str[2]=='-'&&str[3]<='h'&&str[3]>='a'&&str[4]<='8'&&str[4]>='1'&&strlen(str)==5)
+		{
+			if((abs(str[0]-str[3])*abs(str[1]-str[4]))==2)
+				printf("Yes\n");
+			else
+				printf("No\n");
+		}
+		else
+			printf("Error\n");
+	}
+	return 0;
+}

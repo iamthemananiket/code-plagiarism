@@ -1,0 +1,93 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#define SIZE 100005
+#define BB 8939LL
+#define MOD 1000000007LL
+#define MX 505
+
+using namespace std;
+typedef long long int ll;
+typedef pair <ll,int> P;
+
+char S[SIZE],T[SIZE];
+ll gt[SIZE],rt[SIZE];
+int dp[SIZE][MX],ans[SIZE];
+
+ll get(int s,int t)
+{
+	return (gt[t]-(s==0?0:gt[s-1]*rt[t-s+1]%MOD)+MOD)%MOD;
+}
+int main()
+{
+	rt[0]=1;
+	for(int i=1;i<SIZE;i++) rt[i]=rt[i-1]*BB%MOD;
+	int TT;
+	scanf("%d",&TT);
+	while(TT--)
+	{
+		scanf("%s",&T);
+		int t=strlen(T);
+		vector <P> ht;
+		ll now=0;
+		int len=0;
+		for(int i=0;i<t;i++)
+		{
+			if(T[i]=='*')
+			{
+				ht.push_back(P(now,len));
+				now=0;
+				len=0;
+			}
+			else
+			{
+				now*=BB;
+				now+=T[i]-'a'+1;
+				now%=MOD;
+				len++;
+			}
+		}
+		ht.push_back(P(now,len));
+		while(!ht.empty()&&ht[ht.size()-1].second==0) ht.pop_back();
+		scanf("%s",&S);
+		int L=strlen(S);
+		for(int i=0;i<L;i++)
+		{
+			gt[i]=S[i]-'a'+1;
+			if(i>0)
+			{
+				gt[i]+=gt[i-1]*BB;
+				gt[i]%=MOD;
+			}
+		}
+		for(int i=0;i<=L;i++)
+		{
+			for(int j=0;j<=ht.size();j++)
+			{
+				dp[i][j]=j==ht.size()?i-1:L;
+			}
+		}
+		for(int i=L-1;i>=0;i--)
+		{
+			int start=0;
+			for(int j=((int) ht.size())-1;j>=0;j--)
+			{
+				dp[i][j]=dp[i+1][j];
+				P p=ht[j];
+				if(i+p.second<=L&&get(i,i+p.second-1)==p.first)
+				{
+					dp[i][j]=min(dp[i][j],dp[i+p.second][j+1]);
+				}
+				//else if(j==0) dp[i][0]=L;
+			}
+		}
+		for(int i=0;i<L;i++)
+		{
+			if(i!=0) printf(" ");
+			printf("%d",dp[i][0]==L?-1:max(i,dp[i][0])+1);
+		}puts("");
+	}
+	return 0;
+}

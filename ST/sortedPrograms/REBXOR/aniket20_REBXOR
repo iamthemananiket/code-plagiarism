@@ -1,0 +1,111 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 12800005
+#define mins 400005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int tot[2];
+int a[mins],b[mins],dp[mins],dp1[mins],c[mins];
+struct trie{
+	int flags[2];
+};
+trie tree[2][maxs];
+
+void insert(int val,int no,int pos,int curr){
+	if(pos==-1){
+		return ;
+	}
+	int foo=((val&(1<<pos))==0)?0:1;
+//	cout<<foo<<" "<<val<<" "<<pos<<endl;
+	if(tree[no][curr].flags[foo]==0){
+		tree[no][curr].flags[foo]=(++tot[no]);
+	}
+	insert(val,no,pos-1,tree[no][curr].flags[foo]);
+}
+
+int fun(int val,int no,int pos,int curr){
+	if(pos==-1){
+		return 0;
+	}
+	int foo=((val&(1<<pos))==0)?0:1;
+	int ret;
+//	cout<<foo<<" "<<val<<" "<<pos<<endl;
+	if(tree[no][curr].flags[foo^1]>0){
+		ret=((foo^1)<<pos)+fun(val,no,pos-1,tree[no][curr].flags[foo^1]);
+	}
+	else{
+		ret=((foo)<<pos)+fun(val,no,pos-1,tree[no][curr].flags[foo]);
+	}
+	return ret;
+}
+
+int main()
+{
+	int n,i,ans;
+	sc("%d",&n);
+	tot[0]=tot[1]=0;
+	for(i=0;i<n;i++){
+		sc("%d",&a[i]);
+		c[i]=a[i];
+	}
+	b[0]=a[0];
+	for(i=1;i<n;i++){
+		b[i]=a[i]^b[i-1];
+	}
+	insert(0,0,31,0);
+	insert(a[0],0,31,0);
+	dp[0]=a[0];
+	for(i=1;i<n;i++){
+		int can=fun(b[i],0,31,0);
+		dp[i]=b[i]^can;
+		insert(b[i],0,31,0);
+	}
+	for(i=n-2;i>=0;i--){
+		a[i]=a[i]^a[i+1];
+	}
+	dp1[n-1]=a[n-1];
+	insert(0,1,31,0);
+	insert(a[n-1],1,31,0);
+	for(i=n-2;i>=0;i--){
+		dp1[i]=a[i]^fun(a[i],1,31,0);
+		insert(a[i],1,31,0);
+	}
+	for(i=1;i<n;i++){
+		dp[i]=max(dp[i],dp[i-1]);
+	}
+	for(i=n-2;i>=0;i--){
+		dp1[i]=max(dp1[i],dp1[i+1]);
+	}
+	ans=0;
+	for(i=0;i<n-1;i++){
+		ans=max(ans,dp[i]+dp1[i+1]);
+	}
+	pr("%d\n",ans);
+	return 0;
+}

@@ -1,0 +1,41 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+pint f(int a, int b)
+{
+	int g=__gcd(a,b);
+	return mp(a/g,b/g);
+}
+
+int main()
+{
+	int a,b,c,d;
+	scanf("%d %d %d %d",&a,&b,&c,&d);
+	vi s;
+	s.pb(a),s.pb(b),s.pb(c),s.pb(d);
+	sort(all(s));
+	do
+		if (f(s[0],s[1])==f(s[2],s[3]))
+		{
+			printf("Possible\n");
+			return 0;
+		}
+	while (next_permutation(all(s)));
+	printf("Impossible\n");
+	return 0;
+}

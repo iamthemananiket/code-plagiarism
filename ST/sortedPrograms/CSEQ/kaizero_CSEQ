@@ -1,0 +1,31 @@
+#include<stdio.h>
+int n, L, R, TC, m, Mod = 1000003;
+long long InvF[1000003], F[1000003];
+long long G(long long a){
+	int b = Mod - 2;
+	long long r = 1;
+	while (b){
+		if (b & 1)r = r*a%Mod;
+		a = a*a%Mod;
+		b >>= 1;
+	}
+	return r;
+}
+int main(){
+	scanf("%d", &TC);
+	int i;
+	InvF[0] = F[0] = 1;
+	for (i = 1; i < Mod; i++){
+		F[i] = F[i - 1] * i%Mod;
+		InvF[i] = G(F[i]);
+	}
+	while (TC--){
+		scanf("%d%d%d", &n, &L, &R);
+		m = n + R - L + 1;
+		if (m / Mod != n / Mod + (m - n) / Mod){
+			printf("%d\n", Mod - 1);
+			continue;
+		}
+		printf("%lld\n", (F[m / Mod] * InvF[n / Mod] % Mod * InvF[(m - n) / Mod] % Mod * F[m%Mod] % Mod * InvF[n%Mod] % Mod * InvF[(m - n) % Mod] + Mod - 1) %Mod);
+	}
+}

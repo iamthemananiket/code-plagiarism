@@ -1,0 +1,94 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+
+int a[1009][1009];
+int getSum[1009][1009];
+int getMax[1009][1009];
+
+int sum(int x1, int y1, int x2, int y2) {
+	return getSum[x2][y2] - getSum[x2][y1 - 1] - getSum[x1 - 1][y2] + getSum[x1 - 1][y1 - 1];
+}
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int n, m;
+	scanf("%d %d", &n, &m);
+	for (int i = 1; i <= n; ++i) {
+		for (int j = 1; j <= m; ++j) {
+			scanf("%d", &a[i][j]);
+			getSum[i][j] = getSum[i - 1][j] + getSum[i][j - 1] - getSum[i - 1][j - 1] + a[i][j];
+		}
+	}
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int x, y;
+		scanf("%d %d", &x, &y);
+		for (int i = 1; i <= n; ++i) {
+			deque<int> q;
+			for (int j = 1; j <= m; ++j) {
+				if (j > y) {
+					if (!q.empty() && q.front() == a[i][j - y]) {
+						q.pop_front();
+					}
+				}
+				while (!q.empty() && q.back() < a[i][j]) {
+					q.pop_back();
+				}
+				q.push_back(a[i][j]);
+				if (j >= y) {
+					getMax[i][j - y + 1] = q.front();
+				}
+			}
+		}
+		int res = INF;
+		for (int j = 1; j + y - 1 <= m; ++j) {
+			deque<int> q;
+			for (int i = 1; i <= n; ++i) {
+				if (i > x) {
+					if (!q.empty() && q.front() == getMax[i - x][j]) {
+						q.pop_front();
+					}
+				}
+				while (!q.empty() && q.back() < getMax[i][j]) {
+					q.pop_back();
+				}
+				q.push_back(getMax[i][j]);
+				if (i >= x) {
+					res = min(q.front() * x * y - sum(i - x + 1, j, i, j + y - 1), res);
+				}
+			}
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}

@@ -1,0 +1,186 @@
+
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int N = 2007;
+
+using namespace std;
+
+int n,k;
+string st1,st2;
+int nxt1[N][27],nxt2[N][27];
+int dp[N][N];
+int ways[N][N];
+
+void add(int &a,int &b)
+{
+	a+=b;
+	if (a>=bs)
+		a=bs;	
+}
+
+int main(){
+//	freopen("path2.in","r",stdin);
+//	freopen("path2.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>n>>k;
+	
+	cin>>st1>>st2;
+	
+	for (int i=0;i<26;i++)
+	{
+		nxt1[st1.size()][i]=st1.size();
+		nxt2[st2.size()][i]=st2.size();
+	}
+	
+	for (int i=st1.size()-1;i>=0;--i)
+	{
+		for (int j=0;j<26;j++)
+			nxt1[i][j]=nxt1[i+1][j];
+		nxt1[i][st1[i]-'a']=i;
+	}
+	for (int i=st2.size()-1;i>=0;--i)
+	{
+		for (int j=0;j<26;j++)
+			nxt2[i][j]=nxt2[i+1][j];
+		nxt2[i][st2[i]-'a']=i;
+	}
+	
+	for (int i=0;i<=n;i++)
+		for (int j=0;j<=n;j++)
+			dp[i][j]=-1e9;
+	
+	int ans=0;
+	
+	for (int i=st1.size()-1;i>=0;--i)	
+		for (int j=st2.size()-1;j>=0;--j)
+		{
+			int bst=0;
+			if (st1[i]==st2[j])
+			{
+				int b2=0;
+				for (int q=0;q<26;q++)
+				{
+					int v1=nxt1[i+1][q];
+					int v2=nxt2[j+1][q];
+					b2=max(b2,dp[v1][v2]);
+				}
+				bst=max(bst,b2+1);
+				for (int q=0;q<26;q++)
+				{
+					int v1=nxt1[i+1][q];
+					int v2=nxt2[j+1][q];
+					if (v1<n&&v2<n&&dp[v1][v2]==b2)
+					{
+						add(ways[i][j],ways[v1][v2]);
+					}
+				}
+				if (b2==0)
+					ways[i][j]=1;
+			}
+			dp[i][j]=bst;
+			ans=max(ans,dp[i][j]);
+		}
+	
+//	cout<<ans<<endl;
+	
+	if (ans==0)
+	{
+		cout<<-1<<endl;
+		return 0;
+	}	
+	/*
+	for (int i=0;i<n;i++)
+	{
+		for (int j=0;j<n;j++)
+			if (dp[i][j]==ans)
+				cout<<i<<"!!"<<j<<" "<<ways[i][j]<<" ";
+		cout<<endl;
+	}
+	*/
+	int ttl=0;
+	for (int i=0;i<26;i++)
+	{
+		int a,b;
+		a=nxt1[0][i];
+		b=nxt2[0][i];
+		if (a<n&&b<n&&dp[a][b]==ans)
+		{
+			add(ttl,ways[a][b]);
+		}
+	}
+	
+	if (ttl<k)
+	{
+		cout<<-1<<endl;
+		return 0;
+	}
+	
+	int qi,qj;
+	qi=qj=-1;
+	
+	for (;ans;--ans)
+	{
+		int found=0;
+		for (int i=0;i<26;i++)
+		{
+			int v1=nxt1[qi+1][i];
+			int v2=nxt2[qj+1][i];
+			if (v1<n&&v2<n&&dp[v1][v2]==ans)
+			{
+			//	cout<<v1<<"@"<<v2<<" "<<dp[v1][v2]<<" "<<ways[v1][v2]<<endl;
+				if (k<=ways[v1][v2])
+				{
+					found=i;
+					break;
+				}
+				k-=ways[v1][v2];
+			}
+		}
+//		cout<<qi<<"%"<<qj<<" "<<found<<" "<<ans<<" "<<k<<endl;
+		cout<<char(found+'a');
+		int v1,v2;
+		v1=nxt1[qi+1][found];
+		v2=nxt2[qj+1][found];
+		qi=v1;
+		qj=v2;
+	}
+	cout<<endl;
+	
+	return 0;
+}

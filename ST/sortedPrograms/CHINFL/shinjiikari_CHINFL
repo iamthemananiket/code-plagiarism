@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 1010
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+	while(t>=48 && t<=57)
+	{
+		x=(x<<3)+(x<<1)+t-48;
+		t=getchar();
+	}
+	if (neg) x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+long double dp[N][N][2],a[N][N],b[N][N],x,lim;
+
+int main()
+{
+	ll n,m,d;
+	lim=log(INF);
+	n=input();
+	m=input();
+	d=input();
+	REP(i,m+1)
+		REP(j,n)
+			REP(k,2)
+				dp[i][j][k]=-INF;
+	REP(i,n) dp[0][i][0]=log(1.0*d);
+	REP(i,n)
+		REP(j,m)
+		{
+			a[j+1][i]=log(1.0*input());
+			b[j+1][i]=log(1.0*input());
+		}
+	REPP(i,1,m+1)
+		REP(j,n)
+			REP(k,2)
+			{
+				dp[i][j][k]=dp[i-1][j][k];
+				if (j!=0) dp[i][j][k]=max(dp[i-1][j-1][k],dp[i][j][k]);
+				if (j!=n-1) dp[i][j][k]=max(dp[i-1][j+1][k],dp[i][j][k]);
+				if (k%2) dp[i][j][k]=max(dp[i][j][1],dp[i-1][j][0]-a[i][j]);
+				else dp[i][j][k]=max(dp[i][j][0],dp[i-1][j][1]+b[i][j]);
+			}
+	x=log(d);
+	REP(i,n) x=max(x,dp[m][i][0]);
+	if (x>=lim) printf("Quintillionnaire\n");
+	else printf("%LF\n",exp(x)); 
+return 0;
+}

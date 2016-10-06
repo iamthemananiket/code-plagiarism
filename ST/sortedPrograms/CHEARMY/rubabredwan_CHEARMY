@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(ll i=0;i<n;i++)
+#define REPN(i, n)	for(ll i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+#define ALL(i)		i.begin(), i.end()
+
+#define MAX			1000050
+#define pb			insert
+#define cl 			clear
+#define INF			1e9
+
+using namespace std;
+
+typedef long long ll;
+
+ll n, q, S[MAX], DP[MAX];
+
+void init(){
+
+// DP[1] = 5 	= 5				S[I] = 5
+// DP[2] = 20  = 4 * S[I-1]	S[I] = 25
+// DP[3] = 100 = 4 * S[I-1] 	S[I] = 100
+// DP[4] = 500 = 4 * S[I-1]	S[I] = 
+
+
+// 5 - 20 - 100 - 500 - 2500
+
+// dp[i] = dp[i-1] * 4 + dp[i-2] * 5
+	S[0] = 1LL;
+	DP[1] = 5LL, S[1] = 5LL;
+	for(ll i=2;i<=20;i++){
+		DP[i] = S[i-1] * 4LL;
+		S[i] = S[i-1] + DP[i];		
+		// cout << DP[i] << ' ' << S[i] << endl;
+	}
+
+	
+
+}
+
+ll get(ll x){
+
+	ll pos;
+	for(ll i=1;i<=20;i++){
+		if(S[i] >= x){
+			pos = i;
+			break;
+		}
+	}
+
+	ll ret = 0LL;
+
+	// cout << "@ " << pos << endl;
+
+	for(ll i=pos;i>=1;i--){
+		ll b_pos = 5LL, sum = 0LL, past = 0LL;
+		for(ll j=1;j<=5;j++){
+			sum += S[i-1];
+			if(sum >= x){
+				b_pos = j;
+				break;
+			}
+			past = sum;
+		}
+		// cout << "@ " << past << endl;
+		// cout << "@ " << b_pos << endl;
+		// cout << pow(10, i) << " & \n";
+		ret += pow(10, i-1) * 2LL * (b_pos-1LL);
+		x -= past;
+	}
+	return ret;	
+}
+
+int main(){
+	init();
+	ll tc, x;
+	scanf("%lld", &tc);
+	while(tc--){
+		scanf("%lld", &x);
+		printf("%lld\n", get(x));
+	}
+	return 0;
+}

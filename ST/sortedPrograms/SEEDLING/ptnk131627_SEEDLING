@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("draft.inp","r",stdin)
+#define OUTPUT freopen("draft.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7,BASE=1000000000;
+const int N=1e2+10,M=1e4+10;
+
+int n,m;
+ii a[N];
+struct bnum{
+    int a[10];
+    bnum (int v=0){
+        memset(a,0,sizeof(a));
+        a[0]=1;
+        a[1]=v;
+    }
+    void print(){
+        printf("%d",a[a[0]]);
+        FORD(i,a[0]-1,1) printf("%09d",a[i]);
+    }
+};
+bnum f[N][M];
+void add(bnum &a,bnum b){
+    a.a[0]=max(a.a[0],b.a[0]);
+    FOR(i,1,a.a[0]){
+        int sum=a.a[i]+b.a[i];
+        a.a[i]=sum%BASE;
+        a.a[i+1]+=sum/BASE;
+    }
+    if (a.a[a.a[0]+1]) a.a[0]++;
+}
+void prepare(){
+    scanf("%d%d",&n,&m);
+    FOR(i,1,n){
+        int x,y;
+        scanf("%d%d%d",&a[i].Y,&x,&y);
+        a[i].X=max(-M,x-y);
+    }
+    sort(a+1,a+n+1);
+    reverse(a+1,a+n+1);
+}
+void solve(){
+    FOR(j,0,m)
+        REP(cost,0,M) f[j][cost]=bnum(0);
+    f[0][1]=bnum(1);
+    FOR(i,1,n)
+        FOR(j,0,m-a[i].Y)
+            REP(cost,0,M-max(a[i].X,0)) add(f[j+a[i].Y][max(cost+a[i].X,0)],f[j][cost]);
+    bnum ans=bnum(0);
+    FOR(j,0,m) add(ans,f[j][0]);
+    ans.print();
+    ENDL;
+}
+int main(){
+//    INPUT;
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        solve();
+    }
+}

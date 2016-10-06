@@ -1,0 +1,97 @@
+//Problem LFSTACK
+
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<algorithm>
+#include<cmath>
+#include<vector>
+#include<set>
+#include<queue>
+
+using namespace std;
+
+int get()
+{
+  char c;
+  while(c=getchar(),(c<'0'||c>'9')&&(c!='-'));
+  bool flag=(c=='-');
+  if(flag)
+    c=getchar();
+  int x=0;
+  while(c>='0'&&c<='9')
+    {
+      x=x*10+c-48;
+      c=getchar();
+    }
+  return flag?-x:x;
+}
+
+void output(int x)
+{
+  if(x<0)
+    {
+      putchar('-');
+      x=-x;
+    }
+  int len=0,data[10];
+  while(x)
+    {
+      data[len++]=x%10;
+      x/=10;
+    }
+  if(!len)
+    data[len++]=0;
+  while(len--)
+    putchar(data[len]+48);
+  putchar('\n');
+}
+
+int len[30],w[30],b[30];
+vector<int> a[30];
+int ans[1000000];
+bool flag[1000000];
+
+int main()
+{
+  int test=get();
+  while(test--)
+    {
+      int n=get(),m=0;
+      for(int i=0;i<n;i++)
+        {
+          m+=len[i]=get();
+          a[i].resize(len[i]);
+          for(int j=0;j<len[i];j++)
+            a[i][j]=get();
+        }
+      for(int i=m-1;i>=0;i--)
+        ans[i]=get();
+      int total=1;
+      for(int i=0;i<n;i++)
+        total*=a[i].size()+1;
+      w[0]=1;
+      for(int i=1;i<n;i++)
+        w[i]=w[i-1]*(len[i-1]+1);
+      memset(flag,0,sizeof(flag));
+      flag[0]=true;
+      for(int mask=0;mask<total;mask++)
+        {
+          if(!flag[mask])
+            continue;
+          int tmp=mask,sum=0;
+          for(int i=0;i<n;i++)
+            {
+              b[i]=tmp%(len[i]+1);
+              tmp/=len[i]+1;
+              sum+=b[i];
+            }
+          for(int i=0;i<n;i++)
+            if(b[i]!=len[i]&&ans[sum]==a[i][b[i]])
+              flag[mask+w[i]]=true;
+        }
+      printf(flag[total-1]?"Yes\n":"No\n");
+    }
+  return 0;
+}

@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int t,n;
+
+int x[50],y[50];
+
+int euc[50][50];
+bool visited[50];
+int key[50];
+void dfs()
+{
+	memset(visited,false,sizeof(visited));
+	memset(key,100000,sizeof(key));
+	
+	
+	int mi=100000;
+		
+	
+	key[0]=0;
+	
+	int don=0;
+	
+	int ans=0;
+	
+	while(don<n)
+	{
+		mi=1000000;
+		int curr;
+		
+	for(int i=0;i<n;i++)
+	{
+		if(!visited[i] && key[i]<mi)
+		{
+			curr=i;
+			mi=key[i];
+
+		}
+		
+	
+	}
+	
+	don++;
+	visited[curr]=true;
+	
+	ans=ans^(curr+1);
+	for(int i=0;i<n;i++)
+	{
+		if(!visited[i] && key[i]>euc[curr][i])key[i]=euc[curr][i];
+	}
+	
+	}
+	
+	
+	cout<<ans<<endl;
+}
+
+int main() {
+	cin.tie(0);
+	cin>>t;
+	
+	while(t--)
+	{
+		cin>>n;
+		
+		for(int i=0;i<n;i++)cin>>x[i]>>y[i];
+		
+		for(int i=0;i<n;i++)
+		{
+			for(int j=0;j<n;j++)
+			{
+				euc[i][j]=min(abs(x[i]-x[j]),abs(y[i]-y[j]));
+			}
+		}
+		
+		dfs();
+	}
+	return 0;
+}

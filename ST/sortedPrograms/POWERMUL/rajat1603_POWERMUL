@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+int t,n,mod,q;
+const int N = 100001;
+const int SN = N<<2;
+int segtree[SN];
+int tree[N];
+int ans[N];
+int pos[N];
+list< pair < int , int > > factors[N];
+void pre(){
+    for(int i = 2 ; i < N ; ++i ){
+        int temp = i;
+        for(int j = 2 ; j*j <= temp ; ++j ){   
+            int count = 0;
+            while(temp%j==0){
+                temp/=j;
+                count++;
+            }
+            if(count){
+                factors[i].pb(mp(j,count));
+            }
+        }
+        if(temp>1){
+            factors[i].pb(mp(temp,1));
+        }
+    }
+}
+int power(int aa,int b){
+    assert(b>=0);
+    long long a = aa , res = 1;
+    while(b){
+        if(b&1){
+            res*=a;
+            res%=mod;
+        }
+        a*=a;
+        a%=mod;
+        b>>=1;
+    }
+    return (int)res;
+}
+void build(int l,int r,int node){
+    segtree[node] = 1;
+    if(l==r){
+        tree[l] = 0;
+        pos[l] = node;
+        return;
+    }
+    int mid = (l + r)>>1;
+    int lc = node + node;
+    int rc = lc|1;
+    build(l,mid,lc);
+    build(mid+1,r,rc);
+}
+void update(int idx,int val){
+    int node = pos[idx];
+    tree[idx]+=val;
+    segtree[node] = power(idx,tree[idx]);
+    while(node){
+        node>>=1;
+        int lc = node + node;
+        int rc = lc|1;
+        long long temp = segtree[lc];
+        temp *= segtree[rc];
+        temp %= mod;
+        segtree[node] = temp;
+    }
+}
+int main(){
+    pre();
+    t = scan();
+    while(t--){
+        n = scan() , mod = scan() , q = scan();
+        build(1,n,1);
+        for(list<pair<int,int> >::iterator it = factors[n].begin() ; it != factors[n].end() ; ++it){
+            update(it->first,n*(it->second));
+        }
+        ans[1] = segtree[1];
+        for(int i = 2 ; i + i <= n ; ++i ){
+            int add = n - i + 1;
+            for(list<pair<int,int> >::iterator it = factors[add].begin() ; it != factors[add].end() ; ++it){
+                update(it->first,add*(it->second));
+            }
+            add = i;
+            for(list<pair<int,int> >::iterator it = factors[add].begin() ; it != factors[add].end() ; ++it){
+                update(it->first,-add*(it->second));
+            }
+            ans[i] = segtree[1];
+        }
+        while(q--){
+            int r = scan();
+            r = min ( r , n - r);
+            printf("%d\n",ans[r]);
+        }
+    }
+}

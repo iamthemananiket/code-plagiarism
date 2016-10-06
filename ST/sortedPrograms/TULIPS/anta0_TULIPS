@@ -1,0 +1,203 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+struct SegmentTreeUnion {
+	typedef int Val;
+	vector<Val> coeffSums;
+	vector<Val> nodes;
+	vector<Val> sums;
+	int n, n2;
+	void init(int n_) { init(vector<Val>(n_, Val(1))); }
+	void init(const vector<Val> &coeffs) {
+		n = 1; while(n < (int)coeffs.size()) n *= 2;
+		coeffSums.assign(n * 2, Val());
+		for(int i = 0; i < (int)coeffs.size(); ++ i)
+			coeffSums[n + i] = coeffs[i];
+		for(int i = n - 1; i > 0; -- i)
+			coeffSums[i] = coeffSums[i * 2] + coeffSums[i * 2 + 1];
+		nodes.assign(n * 2, Val());
+		sums.assign(n * 2, Val());
+	}
+	void addToRange(int i, int j, Val add) {
+		rec(1, 0, n, i, j, add);
+	}
+	Val getSum() const { return sums[1]; }
+private:
+	void rec(int node, int left, int right, int qi, int qj, Val qadd) {
+		if(qi <= left && right <= qj) {
+			nodes[node] += qadd;
+		} else {
+			int mid = (left + right) / 2;
+			if(qi < mid)
+				rec(node * 2, left, mid, qi, qj, qadd);
+			if(mid < qj)
+				rec(node * 2 + 1, mid, right, qi, qj, qadd);
+		}
+		update(node);
+	}
+	void update(int i) {
+		sums[i] =
+			nodes[i] > 0 ? coeffSums[i] :
+			i >= n ? 0 : sums[i * 2] + sums[i * 2 + 1];
+	}
+};
+
+
+struct UnionFind {
+	vector<int> data;
+	void init(int n) { data.assign(n, -1); }
+	bool unionSet(int x, int y) {
+		x = root(x); y = root(y);
+		if(x != y) {
+			if(data[y] < data[x]) swap(x, y);
+			data[x] += data[y]; data[y] = x;
+		}
+		return x != y;
+	}
+	bool findSet(int x, int y) { return root(x) == root(y); }
+	int root(int x) { return data[x] < 0 ? x : data[x] = root(data[x]); }
+	int size(int x) { return -data[root(x)]; }
+};
+
+struct MergeQuery {
+	int weight;
+	int i;
+	enum Type { Merge = 0, Query = 1 } type;
+	int x, y;
+	bool operator<(const MergeQuery &that) const {
+		return weight != that.weight ? weight < that.weight : i < that.i;
+	}
+};
+
+int offlineMergeQueryBuildTree(int N, int Q, const vector<MergeQuery> &queries, vector<int> &parent, vector<pair<int, int> > &children, vector<int> &subtree) {
+	UnionFind uf;
+	uf.init(N);
+	vector<int> root(N);
+	rep(i, N)
+		root[i] = i;
+	parent.assign(N * 2, -1);
+	children.assign(N * 2, mp(-1, -1));
+	int V = N;
+	subtree.assign(Q, -1);
+	rep(ii, queries.size()) {
+		const MergeQuery &q = queries[ii];
+		if(q.type == MergeQuery::Merge) {
+			int x = uf.root(q.x), y = uf.root(q.y);
+			uf.unionSet(x, y);
+			int z = uf.root(x);
+			parent[root[x]] = parent[root[y]] = V;
+			children[V] = mp(root[x], root[y]);
+			root[z] = V;
+			++ V;
+		} else {
+			subtree[q.i] = root[uf.root(q.x)];
+		}
+	}
+	parent.resize(V);
+	children.resize(V);
+	return V;
+}
+
+void offlineMergeQueryToRangeQuery(int N, int Q, const vector<int> &parent, const vector<pair<int, int> > &children, const vector<int> &subtree, vector<int> &ord, vector<pair<int, int> > &range) {
+	int V = (int)parent.size();
+	ord.clear(); ord.reserve(N);
+	vector<int> stk;
+	for(int i = V - 1; i >= 0; -- i) if(parent[i] == -1)
+		stk.push_back(i * 2);
+	vector<pair<int, int> > LRs(V, make_pair(-1, -1));
+	while(!stk.empty()) {
+		int ub = stk.back(); stk.pop_back();
+		int u = ub / 2;
+		if(ub % 2 == 0) {
+			LRs[u].first = (int)ord.size();
+			stk.push_back(u * 2 + 1);
+			if(u < N) {
+				ord.push_back(u);
+			} else {
+				stk.push_back(children[u].second * 2);
+				stk.push_back(children[u].first * 2);
+			}
+		} else {
+			LRs[u].second = (int)ord.size();
+		}
+	}
+	assert(ord.size() == N);
+	range.assign(Q, make_pair(-1, -1));
+	rep(i, Q) if(subtree[i] != -1)
+		range[i] = LRs[subtree[i]];
+}
+
+int main() {
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int N;
+		scanf("%d", &N);
+		vector<MergeQuery> mergeQueries;
+		for(int i = 0; i < N - 1; ++ i) {
+			int u, v, w;
+			scanf("%d%d%d", &u, &v, &w), -- u, -- v;
+			mergeQueries.push_back(MergeQuery {w, -1, MergeQuery::Merge, u, v});
+		}
+		int Q; int X;
+		scanf("%d%d", &Q, &X);
+		vector<int> ds(Q);
+		rep(i, Q) {
+			int d; int u; int k;
+			scanf("%d%d%d", &d, &u, &k), -- u;
+			mergeQueries.push_back(MergeQuery{ k, i, MergeQuery::Query, u, -1 });
+			ds[i] = d;
+		}
+		sort(all(mergeQueries));
+		vector<int> parent, subtree; vector<pii> children;
+		offlineMergeQueryBuildTree(N, Q, mergeQueries, parent, children, subtree);
+		vector<int> ord; vector<pii> range;
+		offlineMergeQueryToRangeQuery(N, Q, parent, children, subtree, ord, range);
+		SegmentTreeUnion segt; segt.init(N);
+		int qi = 0;
+		rep(i, Q) {
+			for(; qi < i && ds[qi] + X <= ds[i]; ++ qi)
+				segt.addToRange(range[qi].first, range[qi].second, -1);
+			int L = range[i].first, R = range[i].second;
+			int psum = segt.getSum();
+			segt.addToRange(L, R, 1);
+			int ans = segt.getSum() - psum;
+			printf("%d\n", ans);
+		}
+	}
+	return 0;
+}

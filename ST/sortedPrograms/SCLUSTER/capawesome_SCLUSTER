@@ -1,0 +1,185 @@
+# include <cstdio>
+# include <cstring>
+# include <queue>
+# include <algorithm>
+
+using namespace std;
+
+const int MAX_N = 64;
+const int MAX_K = 2048;
+
+int n, k;
+int a[MAX_N][MAX_N];
+int used_plc[MAX_N][MAX_N];
+int ans[MAX_N][MAX_N];
+int cans[MAX_N][MAX_N];
+double rans = 1e9;
+
+int l[MAX_K];
+
+pair <int, int> ind[MAX_K];	int ai;
+
+int aa[8] = {-1, -1, -1, 0, 1, 1, 1, 0};
+int bb[8] = {-1, 0, 1, 1, 1, 0, -1, -1};
+
+inline int manh (int a1, int b1, int a2, int b2)
+{
+	int xx, yy;
+	xx = a1 - a2;
+	yy = b1 - b2;
+	if (xx < 0)
+		xx = -xx;
+	if (yy < 0)
+		yy = -yy;
+	return xx + yy;
+}
+
+void rsolve ()
+{
+	int i, j, cx, cy, dist, p, mi, nx, ny;
+	double ch = 0.0;
+	memset (cans, 0, sizeof (cans));
+	for (p = 1; p <= k; p ++)
+	{
+		cx = cy = -1;
+		mi = 1e9;
+		for (i = 1; i <= n; i ++)
+			for (j = 1; j <= n; j ++)
+			{
+				if (used_plc[i][j] != 1)	
+					continue;
+				dist = manh (i, j, ind[p].first, ind[p].second);
+				if (dist >= mi)
+					continue;
+				mi = dist;
+				cx = i;
+				cy = j;
+			}
+		cans[cx][cy] = a[ind[p].first][ind[p].second];
+		used_plc[cx][cy] = 2;
+		
+		ch += double (double (mi) / double (l[a[ind[p].first][ind[p].second]]));
+		
+		for (i = 0; i < 8; i ++)
+		{
+			nx = cx + aa[i];
+			ny = cy + bb[i];
+			if (nx <= 0 || nx > n)
+				continue;
+			if (ny <= 0 || ny > n)
+				continue;
+			if (used_plc[nx][ny] == 2)
+				continue;
+			used_plc[nx][ny] = 1;
+		}
+	}
+	///printf ("%lf\n", ch);
+	if (ch - rans > 0.0000001)
+		return;
+	rans = ch;
+	
+	for (i = 1; i <= n; i ++)
+		for (j = 1; j <= n; j ++)
+			ans[i][j] = cans[i][j];
+
+}
+
+void solve ()
+{
+	int i, j, cx, cy;
+	rans = 1e9;
+	ai = 1;
+	scanf ("%d%d", &n, &k);
+	for (i = 1; i <= n; i ++)
+		for (j = 1; j <= n; j ++)
+		{
+			scanf ("%d", &a[i][j]);
+			if (a[i][j])
+			{
+				ind[ai] = make_pair (i, j);
+				ai ++;
+			}
+		}
+	for (i = 1; i <= k; i ++)
+		scanf ("%d", &l[i]);
+	
+	for (i = 1; i <= 3; i ++)
+	{
+		cx = (n + 1) >> 1;
+		cy = (n + 1) >> 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = n >> 1;
+		cy = (n + 1) >> 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = (n + 1) >> 1;
+		cy = n >> 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = 1;
+		cy = 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = 1;
+		cy = n;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = n;
+		cy = 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = (n + 1) >> 1;
+		cy = (n + 1) >> 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = n >> 1;
+		cy = (n + 1) >> 1;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+	
+		cx = n;
+		cy = n;
+		memset (used_plc, 0, sizeof (used_plc));
+		used_plc[cx][cy] = 1;
+		rsolve ();
+		random_shuffle (ind + 1, ind + k + 1);
+		random_shuffle (ind + 1, ind + k + 1);
+		random_shuffle (ind + 1, ind + k + 1);
+	}
+	
+		
+	for (i = 1; i <= n; i ++)
+	{
+		for (j = 1; j <= n; j ++)
+			printf ("%d ", ans[i][j]);
+		printf ("\n");
+	}
+	memset (ans, 0, sizeof (ans));
+
+	
+}
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+		solve ();
+	return 0;
+}

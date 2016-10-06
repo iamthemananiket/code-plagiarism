@@ -1,0 +1,32 @@
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+int T;
+
+int n;
+char s[100001];
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("\n%s",s);
+        n = strlen(s);
+
+        int i=0, j=n-1;
+
+        while(i<j) {
+            if(s[i] != s[j]) break;
+            i++; j--;
+        }
+
+        if(i<j) {
+            printf("2\n");
+        } else {
+            printf("1\n");
+        }
+}
+
+    return 0;
+}

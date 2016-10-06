@@ -1,0 +1,146 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%d",&x)
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli long long int
+#define ld long double
+#define sd(x) scanf("%ld",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+using namespace std;
+int num[1007][1007][10];
+int cs[1007][1007];
+int get_mx( int x1, int y1, int x2, int y2)
+{
+    int i,j,k,x,y,ans;
+    ans = -1;
+    x=1;
+    y=0;
+    while(((x1+x-1)<=x2) && ((y1+x-1)<=y2))
+    {
+        x<<=1;
+        y++;
+    }
+    x>>=1;
+    y--;
+    i = x1;
+    while((i+x-1)<=x2)
+        {
+            j = y1;
+            while((j+x-1)<=y2)
+            {
+                ans = max(ans,num[i][j][y]);
+                j+=x;
+            }
+            ans=max(ans,num[i][y2-(x-1)][y]);
+            i+=x;
+        }
+
+            i = x2-(x-1);
+            j = y1;
+            while((j+x-1)<=y2)
+            {
+                ans = max(ans,num[i][j][y]);
+                j+=x;
+            }
+            ans=max(ans,num[i][y2-(x-1)][y]);
+        return ans;
+}
+int prog()
+{
+     int i,j,k,x,y,z,n,m,q,mx,ans;
+     int x1,x2,y1,y2;
+    fl(i,0,1007)
+        fl(j,0,1007)
+            fl(k,0,10)
+                num[i][j][k]=cs[i][j]=0;
+    gi(n);gi(m);
+    fl(i,1,n+1)
+        fl(j,1,m+1)
+            {
+                gi(num[i][j][0]);
+                cs[i][j]=num[i][j][0];
+            }
+    fl(i,1,n+1)
+        fl(j,1,m+1)
+            cs[i][j]=(cs[i][j]+cs[i][j-1]);
+    fl(i,1,n+1)
+        fl(j,1,m+1)
+            cs[i][j]=(cs[i][j]+cs[i-1][j]);
+    x = 2;
+    y = 1;
+    fl(k,1,10)
+        {
+            fl(i,1,n+1)
+                fl(j,1,m+1)
+                    {
+                        if(in(i+x-1,1,n+1) && in(j+x-1,1,m+1))
+                        {
+                            num[i][j][k]=max(num[i][j][k-1],num[i+y][j][k-1]);
+                            num[i][j][k]=max(num[i][j][k]  ,num[i][j+y][k-1]);
+                            num[i][j][k]=max(num[i][j][k]  ,num[i+y][j+y][k-1]);
+                        }
+                    }
+            x<<=1;
+            y<<=1;
+        }
+    gi(q);
+    int ts;
+    while(q--)
+    {
+        ans = mod;
+        gi(x);gi(y);
+        fl(i,1,(n+1)-(x-1))
+            {
+                fl(j,1,(m+1)-(y-1))
+                {
+                    x1 = i,y1 = j,x2 = i+x-1,y2=j+y-1;
+                    ts  = cs[x2][y2];
+                    ts += cs[x1-1][y1-1];
+                    ts -= cs[x1-1][y2];
+                    ts -= cs[x2][y1-1];
+                    z = get_mx(x1,y1,x2,y2);
+                    //cout<<x1<<"  "<<y1<<"  "<<x2<<"  "<<y2<<" : "<<z<<endl;
+                    z*=x;
+                    z*=y;
+                    z-=ts;
+                    ans = min(ans,z);
+                }
+            }
+    printf("%d\n",ans);
+    }
+    r0;
+}
+int main()
+{
+    //f_in;
+    prog();
+    r0;
+}

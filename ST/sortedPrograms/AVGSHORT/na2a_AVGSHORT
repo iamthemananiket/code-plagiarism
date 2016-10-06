@@ -1,0 +1,126 @@
+/* GG */
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <string>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <climits>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <sstream>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+//#include <unordered_set>
+//#include <unordered_map>
+
+#define f first
+#define s second
+
+#define pb push_back
+#define mp make_pair
+
+template <class T = int> inline T readInt(); // skip spaces, read signed int
+
+using namespace std;
+
+typedef pair<int, int> pii;
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int N = (int) 3e3 + 7;
+const int MOD = (int) 1e9 + 7;
+
+int t;
+int n, m;
+
+int from;
+int to;
+
+vector<pii> g[N];
+
+int dist[N][N];
+int ndist[N][N];
+
+bool floyd[N][N];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  scanf("%d", &t);
+  while (t--) {
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++) {
+      for (int j = 1; j <= n; j++) {
+        dist[i][j] = ndist[i][j] = MOD;
+        floyd[i][j] = 0;
+      }
+    }
+    for (int i = 1; i <= m; i++) {
+      int x, y, z;
+      scanf("%d%d%d", &x, &y, &z);
+      dist[x][y] = z;
+      floyd[x][y] = 1;
+      g[x].pb(mp(y, z));
+    }
+    for (int k = 1; k <= n; k++)
+      for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+          floyd[i][j] |= (floyd[i][k] & floyd[k][j]);
+
+    scanf("%d%d", &from, &to);
+    double avpath = 101;
+    bool yes = 0;
+    for (int len = 1; len <= n; len++) {
+      if (dist[from][to] != MOD)
+        yes = 1;
+      avpath = min(avpath, double(dist[from][to]) / double(len));
+      for (int x = 1; x <= n; x++)
+        if (floyd[from][x] && floyd[x][to])
+          avpath = min(avpath, double(dist[x][x]) / double(len));
+      for (int x = 1; x <= n; x++) {
+        for (int y = 1; y <= n; y++) {
+          for (auto edge : g[y]) {
+            int to = edge.f;
+            int cost = edge.s;
+            ndist[x][to] = min(ndist[x][to], dist[x][y] + cost);
+          }
+        }
+      }
+      for (int x = 1; x <= n; x++) {
+        for (int y = 1; y <= n; y++) {
+          dist[x][y] = ndist[x][y];
+          ndist[x][y] = MOD;
+        }
+      }
+    }
+    if (!yes)
+      puts("-1");
+    else {
+      cout << fixed << setprecision(10) << avpath << "\n";
+    }
+    for (int i = 1; i <= n; i++) {
+      g[i].clear();
+    }
+  }
+
+  return 0;
+}

@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+using namespace std;
+int n, m, x, y;
+long long mod = 1e9 + 7;
+vector<int> g[510];
+bool visited[510];
+long long dp[510][20010];
+void dfs(int root) {
+	visited[root] = true;
+	int l;
+	for (int i = 0; i < (int)g[root].size(); i++) {
+		l = g[root][i];
+		if(visited[l]) continue;
+		dfs(l);
+		for (int j = 1; j <= m; j++) {
+			long long sum = 0;
+			for (int k = j; k <= m; k += j) sum += dp[l][k];
+			sum %= mod;
+			dp[root][j] *= sum;
+			dp[root][j] %= mod;
+		}
+	}
+} 
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		scanf("%d %d", &n, &m);
+		for (int i = 0; i < n; i++) g[i].clear(), visited[i] = false;
+		for (int i = 0; i < n; i++) for (int j = 1; j <= m; j++) dp[i][j] = 1; 
+		for (int i = 0; i < n - 1; i++) {
+			scanf("%d %d", &x, &y);
+			g[x - 1].push_back(y - 1);
+			g[y - 1].push_back(x - 1);
+		}
+		dfs(0);
+		long long ans = 0;
+		for (int i = 1; i <= m; i++) {
+			ans += dp[0][i];
+			if(ans >= mod) ans -= mod;
+		}
+		printf("%lld\n", ans);
+	}
+}

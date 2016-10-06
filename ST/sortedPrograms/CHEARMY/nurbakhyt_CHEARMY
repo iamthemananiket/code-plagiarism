@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-9;
+const ll inf = (ll)1e18;
+
+using namespace std;
+
+ll n;
+ll dp[24][10][2];
+
+void add(ll &a, const ll &b) {
+	a += b;
+	a = min(a, inf);
+}
+
+void init() {
+	dp[0][0][0] = 1;
+	for (int len = 1; len < 24; len++) {
+		for (int prev = 0; prev < 10; prev++) {
+			for (int mod = 0; mod < 2; mod++) {
+				if (!dp[len - 1][prev][mod])
+					continue;
+				for (int now = 0; now < 10; now++)
+					add(dp[len][now][(now + mod * now + mod) % 2], dp[len - 1][prev][mod]);
+			}
+		}
+	}
+}
+
+void solve() {
+	cin >> n;
+	int len = 1;
+	while(1) {
+		ll now = 0;
+		for (int dig = 0; dig < 10; dig++)
+			now += dp[len][dig][0];
+		if (n > now)
+			len++;
+		else
+			break;
+	}
+	string s = "";
+	int pref = 0;
+	for (int i = 1; i <= len; i++) {
+		bool found = 0;
+		for (int dig = 0; dig < 10; dig++) {
+			for (int mod = 0; mod < 2; mod++) {
+				if ((pref + mod + pref * mod) % 2 == 0) {
+					if (n > dp[len - i + 1][dig][mod]) {
+						n -= dp[len - i + 1][dig][mod];
+					}
+					else {
+						pref = (pref + pref * dig + dig) % 2;
+						found = 1;
+						s += char(dig + '0');
+						break;
+					}
+				}
+			}
+			if (found)
+				break;
+		}
+	}
+	cout << s << endl;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+	init();
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

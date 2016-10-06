@@ -1,0 +1,126 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%.12Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 1e3;
+const ll md = 1e9 + 7;
+const int tmx = 15000;
+
+vector<int> G[maxn];
+
+int n,m,k;
+
+ll f[maxn][tmx];
+ll A[maxn];
+
+void dfs1(int x,int pi) {
+	for (int y : G[x]) {
+		if (y == pi) continue;
+		dfs1(y,x);
+	}
+
+	rep(i,1,m+3) A[i] = 0;
+
+	rep(j,1,m) {
+		ll cur = 1;
+		for (int y : G[x]) {
+			if (y == pi) continue;
+			cur = (cur * f[y][j])%md;
+		}
+
+		//cout<<x<<","<<j<<" : "<<cur<<endl;
+
+		if (pi > 0 && k > 0) {
+			if (j-k >= 1) { A[1] = (A[1] + cur)%md; A[j-k+1] = (A[j-k+1] + md-cur)%md; } //cout<<1<<" : "<<cur<<endl; cout<<(j-k+1)<<" : "<<-cur<<endl;}
+			if (j+k <= m) { A[j+k] = (A[j+k] + cur)%md; A[m+1] = (A[m+1] + md-cur)%md; } //cout<<j+k<<" : "<<cur<<endl; cout<<(m+1)<<" : "<<-cur<<endl;}
+		} else {
+			A[1] = (A[1] + cur)%md; A[m+1] = (A[m+1] + cur)%md;
+		}
+	}
+
+	ll pref = 0;
+
+	rep(i,1,m) {
+		pref = (pref + A[i])%md;
+		f[x][i] = pref;
+	}
+
+}
+
+void calc1() {
+	dfs1(1,-1);
+	prl(f[1][1]); endc;
+}
+
+/*ll dp[maxn][tmx][2];
+
+void dfs(int x,int pi) {
+	for (int y : G[x]) {
+		if (y == pi) continue;
+		dfs(y,x);
+	}
+
+	rep(i,0,k) {
+		dp[x][i][0] = 0;
+		rep(j,1,min(i,k+k)) {
+			ll cur = 1;
+			for (int y : G[x]) {
+				if (y == pi) continue;
+				cur = (cur * dp[y][max(0,j-k)][0])%md;
+			}
+			dp[x][i][0] = (dp[x][i][0] + cur)%md;
+		}
+		rep(j,m) {
+			ll cur = 1;
+			for (int y : G[x]) {
+				if (y == pi) continue;
+				cur = (cur * dp[y][m-j+k+1]*/
+
+
+/*void calc2() {
+	dfs(1,-1);
+	prl(dp[1][1]); endc;
+}*/
+
+void solve() {
+	s(n); s(m); s(k);
+
+	rep(i,1,n) {
+		G[i].clear();
+	}
+
+	rep(i,2,n) {
+		int x,y; s(x); s(y); G[x].pb(y); G[y].pb(x);
+	}
+
+	calc1();
+
+	/*if (m <= 5*k) {
+		calc1();
+	} else {
+		calc2();
+	}*/
+}
+
+
+int main() {
+	int t; s(t); while (t--) solve();
+}

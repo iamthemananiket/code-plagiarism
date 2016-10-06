@@ -1,0 +1,48 @@
+// Queries on the String
+
+#include <stdio.h>
+
+int main() {
+  int N, M; scanf("%d %d", &N, &M);
+  int A[N];
+
+  for(int i = 0; i < N; i++){
+    char a; scanf(" %c", &a);
+    A[i] = a - '0';
+  }
+
+  getchar();
+
+  for(int i = 0; i < M; i++){
+    int type; scanf("%d", &type);
+
+    if(type == 1) {
+      int X, Y; scanf("%d %d", &X, &Y);
+      X--;
+      A[X] = Y;
+    }
+    else {
+      int C, D; scanf("%d %d", &C, &D);
+      C--; D--;
+      unsigned long long count_0 = 0, count_1 = 0, count_2 = 0;
+
+      count_0++;
+      int sum = 0;
+      for(int i = C; i <= D; i++){
+        sum = (sum + A[i]) % 3;
+        if(i >= C && i <= D) {
+          if(sum == 0) count_0++;
+          else if(sum == 1) count_1++;
+          else count_2++;
+        }
+      }
+
+      unsigned long long total_count = 0;
+      total_count += (count_0 * (count_0 - 1))/2;
+      total_count += (count_1 * (count_1 - 1))/2;
+      total_count += (count_2 * (count_2 - 1))/2;
+
+      printf("%llu\n", total_count);
+    }
+  }
+}

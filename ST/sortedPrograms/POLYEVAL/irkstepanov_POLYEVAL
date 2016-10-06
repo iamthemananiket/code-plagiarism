@@ -1,0 +1,229 @@
+#include <iostream>
+#include <vector>
+#include <string.h>
+#include <algorithm>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+ 
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+const int mod = 786433;
+
+void add(int& a, int b)
+{
+    a += b;
+    if (a >= mod) {
+        a -= mod;
+    }
+}
+
+void mul(int& a, int b)
+{
+    ll val = (ll)(a) * (ll)(b);
+    if (val >= (ll)(mod)) {
+        val %= mod;
+    }
+    a = val;
+}
+
+void sub(int& a, int b)
+{
+    a -= b;
+    if (a < 0) {
+        a += mod;
+    }
+}
+
+int binpow(int a, int n)
+{
+    int ans = 1;
+    while (n) {
+        if (n & 1) {
+            mul(ans, a);
+        }
+        n >>= 1;
+        if (n) {
+            mul(a, a);
+        }
+    }
+    return ans;
+}
+
+vector<int> fft(vector<int>& v, int root, int degroot) // root ^ (1 << degroot) = 1
+{
+    vector<int> a(1 << degroot);
+    int pos = 0;
+    for (int i = 0; i < sz(v); ++i) {
+        add(a[pos], v[i]);
+        ++pos;
+        if (pos == (1 << degroot)) {
+            pos = 0;
+        }
+    }
+    vector<int> rev(1 << degroot);
+    vector<int> curr(1 << degroot);
+    int oldest = -1;
+    for (int i = 1; i < (1 << degroot); ++i) {
+        if (!(i & (i - 1))) {
+            ++oldest;
+        }
+        rev[i] = (rev[i ^ (1 << oldest)] | (1 << (degroot - oldest - 1)));
+    }
+    for (int i = 0; i < (1 << degroot); ++i) {
+        curr[i] = a[rev[i]];
+    }
+    vector<int> degs(1 << degroot);
+    degs[0] = 1;
+    for (int i = 1; i < (1 << degroot); ++i) {
+        degs[i] = degs[i - 1];
+        mul(degs[i], root);
+    }
+    for (int len = 1; len < (1 << degroot); len <<= 1) {
+        vector<int> next(1 << degroot);
+        int step = (1 << degroot) / (len * 2);
+        for (int to = 0; to < (1 << degroot); to += 2 * len) {
+            for (int i = 0; i < len; ++i) {
+                int val = degs[i * step];
+                mul(val, curr[to + i + len]);
+                next[to + i] = next[to + i + len] = curr[to + i];
+                add(next[to + i], val);
+                sub(next[to + i + len], val);
+            }
+        }
+        curr.swap(next);
+    }
+    return curr;
+}
+
+int power_of_2(int val)
+{
+    for (int i = 0; ; ++i) {
+        if ((1 << i) == val) {
+            return i;
+        }
+    }
+}
+
+int main()
+{
+    
+    int deg;
+    scanf("%d", &deg);
+    vector<int> a(deg + 1);
+    for (int i = 0; i <= deg; ++i) {
+        scanf("%d", &a[i]);
+    }
+    
+    vector<int> ord;
+    for (int i = 0; i <= 18; ++i) {
+        ord.pb(1 << i);
+        ord.pb(3 * (1 << i));
+    }
+    sort(all(ord));
+    vector<int> root(sz(ord));
+    root[0] = 1;
+	root[1] = 786432;
+	root[2] = 392448;
+	root[3] = 100025;
+	root[4] = 392449;
+	root[5] = 241748;
+	root[6] = 91970;
+	root[7] = 74616;
+	root[8] = 56598;
+	root[9] = 41596;
+	root[10] = 19162;
+	root[11] = 60605;
+	root[12] = 3095;
+	root[13] = 44647;
+	root[14] = 12277;
+	root[15] = 2723;
+	root[16] = 3287;
+	root[17] = 724;
+	root[18] = 5810;
+	root[19] = 361;
+	root[20] = 726;
+	root[21] = 19;
+	root[22] = 67;
+	root[23] = 14;
+	root[24] = 173;
+	root[25] = 804;
+	root[26] = 144;
+	root[27] = 43;
+	root[28] = 12;
+	root[29] = 9;
+	root[30] = 68;
+	root[31] = 3;
+	root[32] = 16;
+	root[33] = 8;
+	root[34] = 4;
+	root[35] = 5;
+	root[36] = 2;
+	root[37] = 10;
+	
+	vector<pii> q(mod, mp(-1, -1)); // q[i] = (x, y) : root[x] ^ y == i
+	for (int x = 0; x < sz(ord); ++x) {
+	    int val = 1;
+	    for (int y = 0; y < ord[x]; ++y) {
+	        if (q[val] == mp(-1, -1)) {
+	            q[val] = mp(x, y);
+	        }
+	        mul(val, root[x]);
+	    }
+	}
+	
+	vector<vector<int> > b(3);
+	vector<vector<vector<int> > > b_values(3, vector<vector<int> >(sz(ord)));
+	for (int i = 0; i <= deg; ++i) {
+	    b[i % 3].pb(a[i]);
+	}
+	
+	vector<vector<int> > values(sz(ord));
+	for (int i = 0; i < sz(ord); ++i) {
+	    if (ord[i] % 3 == 0) {
+	        continue;
+	    }
+	    int degroot = power_of_2(ord[i]);
+	    values[i] = fft(a, root[i], degroot);
+	    for (int j = 0; j < 3; ++j) {
+	        b_values[j][i] = fft(b[j], root[i], degroot);
+	    }
+	}
+	
+	int qq;
+	scanf("%d", &qq);
+	
+	while (qq--) {
+	    int val;
+	    scanf("%d", &val);
+	    if (val == 0) {
+	        printf("%d\n", a[0]);
+	        continue;
+	    }
+	    int x = q[val].first, y = q[val].second;
+	    //printf("%d %d\n", x, y);
+	    if (ord[x] % 3 != 0) {
+	        printf("%d\n", values[x][y]);
+	        continue;
+	    }
+	    int num = val;
+	    mul(num, val);
+	    mul(num, val);
+	    //cout << val << " " << q[num].first << "\n";
+	    int ans = b_values[0][q[num].first][q[num].second];
+	    int tmp = b_values[1][q[num].first][q[num].second];
+	    mul(tmp, val);
+	    add(ans, tmp);
+	    tmp = b_values[2][q[num].first][q[num].second];
+	    mul(tmp, val);
+	    mul(tmp, val);
+	    add(ans, tmp);
+	    printf("%d\n", ans);
+	}
+
+}

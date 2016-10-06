@@ -1,0 +1,61 @@
+//Program: chcube
+//Author: gary
+//Date: 03/07/2015
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAXN = ;
+
+int main()
+{
+    int T;
+    ios_base::sync_with_stdio(false);
+    cin >> T;
+    while(T--)
+    {
+        // front, back, left, right, top and bottom
+        string f[6];
+        for(int i = 0; i < 6; i++)
+            cin >> f[i];
+        int a[4] = {0, 3, 1, 2};
+        int found = 0;
+        for(int i = 4; i <= 5; i++)
+        {
+            for(int j = 0; j < 4; j++)
+            {
+                int x = i;
+                int y = a[j];
+                int z = a[(j + 1) % 4];
+                if(f[x] == f[y] && f[y] == f[z])
+                    found = 1;
+            }
+        }
+        if(found)
+            cout << "YES\n";
+        else
+            cout << "NO\n";
+    }
+
+    return 0;
+}

@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define N 100100
+
+int t, n, m, col[N], color;
+vector <int> v[N];
+
+void dfs(int x) {
+	col[x] = color;
+	for (int i = 0; i < v[x].size(); i ++) {
+		int y = v[x][i];
+		if (!col[y]) dfs(y);
+	}
+}
+
+int main() {
+//	freopen("d.in", "r", stdin);
+	scanf("%d", &t);
+	while (t --) {
+		scanf("%d %d", &n, &m);
+		for (int i = 1; i <= n; i ++) v[i].clear();
+		for (int i = 1; i <= m; i ++) {
+			int a, b;
+			scanf("%d %d", &a, &b);
+			if (a == b) continue;
+			v[a].push_back(b), v[b].push_back(a);
+		}
+		color = 0;
+		for (int i = 1; i <= n; i ++) col[i] = 0;
+		for (int i = 1; i <= n; i ++) {
+			if (!col[i]) color ++, dfs(i);
+		}
+		if (n > 1 && color <= 3) puts("YES");
+		else puts("NO");
+		continue;
+		int cnt = 0;
+		for (int i = 1; i <= n; i ++) if (v[i].size() == 0) cnt ++, color --;
+		if (!color) {
+			if (cnt == 2 || cnt == 3) puts("YES");
+			else puts("NO");
+			continue;
+		}
+		if (!cnt) {
+			if (n >= 2) puts("YES");
+			else puts("NO");
+			continue;
+		}
+		if (cnt <= 2) puts("YES");
+		else puts("NO");
+	}
+	return 0;
+}

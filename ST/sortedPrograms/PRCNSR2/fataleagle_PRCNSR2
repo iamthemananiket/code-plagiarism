@@ -1,0 +1,142 @@
+#include <bits/stdc++.h>
+
+#ifdef getchar
+#undef getchar
+#endif
+#define getchar() (*_pinp?*_pinp++:(_inp[fread(_pinp=_inp, 1, 4096, stdin)]='\0', *_pinp++))
+char _inp[4097], *_pinp=_inp;
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+
+using namespace std;
+
+int N, M, MOD;
+int f[1001][1001];
+int adj[1001][1001];
+int bridge[1001][1001];
+int idx[1001];
+int low[1001];
+int now;
+int comp[1001], nc;
+int parent[1001];
+vector<int> members[1001];
+vector<int> stuff[1001][1001];
+
+void dfs(int u, int p)
+{
+    idx[u]=low[u]=++now;
+    for(int v=1; v<=N; v++) if(adj[u][v] && v!=p)
+    {
+        if(!idx[v])
+        {
+            dfs(v, u);
+            low[u]=min(low[u], low[v]);
+        }
+        else
+            low[u]=min(low[u], idx[v]);
+    }
+    for(int v=1; v<=N; v++) if(adj[u][v] && v!=p && low[v]>idx[u])
+        bridge[u][v]=bridge[v][u]=true;
+}
+
+void dfs2(int u)
+{
+    comp[u]=nc;
+    for(int v=1; v<=N; v++) if(adj[u][v] && !bridge[u][v] && !comp[v])
+        dfs2(v);
+}
+
+int find(int u)
+{
+    if(u!=parent[u])
+        parent[u]=find(parent[u]);
+    return parent[u];
+}
+
+void merge(int u, int v)
+{
+    u=find(u), v=find(v);
+    if(u==v)
+        return;
+    if(members[u].size()>members[v].size())
+        swap(u, v);
+    for(auto& it: members[u])
+        members[v].push_back(it);
+    members[u].clear();
+    parent[u]=v;
+}
+
+void _main()
+{
+    N=M=MOD=0;
+    memset(f, 0, sizeof f);
+    memset(adj, 0, sizeof adj);
+    memset(bridge, 0, sizeof bridge);
+    memset(idx, 0, sizeof idx);
+    memset(low, 0, sizeof low);
+    now=0;
+    memset(comp, 0, sizeof comp);
+    nc=0;
+    memset(parent, 0, sizeof parent);
+    scan(N);
+    scan(M);
+    scan(MOD);
+    for(int i=0; i<M; i++)
+    {
+        int a, b;
+        scan(a);
+        scan(b);
+        adj[a][b]=adj[b][a]=1;
+    }
+    dfs(1, 1);
+    for(int i=1; i<=N; i++) if(!comp[i])
+    {
+        nc++;
+        dfs2(i);
+    }
+    for(int i=1; i<=nc; i++)
+        members[i].clear(), parent[i]=i, members[i].push_back(i);
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=N; j++)
+            stuff[i][j].clear();
+    for(int i=1; i<=N; i++)
+    {
+        for(int j=1; j<=N; j++)
+        {
+            if(i==j)
+                f[i][j]=0;
+            else if(i==1 || j==1)
+                f[i][j]=1%MOD;
+            else
+                f[i][j]=(0LL+f[i-1][j]+f[i][j-1]+f[i-1][j-1])%MOD;
+            if(i<j && comp[i]!=comp[j])
+                stuff[comp[i]][comp[j]].push_back(f[i][j]);
+        }
+    }
+    vector<pair<int, pair<int, int>>> w;
+    for(int i=1; i<=N; i++)
+        for(int j=i+1; j<=N; j++) if(bridge[i][j])
+            w.push_back({f[i][j], {i, j}});
+    sort(w.rbegin(), w.rend());
+    int ans=0;
+    for(auto& it2: w)
+    {
+        int x=find(comp[it2.second.first]);
+        int y=find(comp[it2.second.second]);
+        for(auto& u: members[x])
+            for(auto& v: members[y])
+                for(auto& it: stuff[u][v])
+                    ans=max(ans, it-it2.first);
+        merge(x, y);
+    }
+    printf("%d\n", ans);
+}
+
+int main()
+{
+    int TEST;
+    scan(TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

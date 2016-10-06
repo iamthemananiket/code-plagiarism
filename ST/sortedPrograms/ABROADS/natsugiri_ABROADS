@@ -1,0 +1,116 @@
+#include<set>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+struct UnionFind {
+    vector<int>U;
+    int n;
+    UnionFind() {}
+    UnionFind(int n) :n(n) { U=vector<int>(n, -1); }
+    int root(int x) {
+	if (U[x]<0) return x;
+	return U[x]=root(U[x]);
+    }
+    int link(int x, int y) {
+	int p, q;
+	p=root(x); q=root(y);
+	if (p==q) return p;
+	if (U[q]<U[p]) swap(p, q);
+	U[p]+=U[q];
+	n--;
+	return U[q]=p;
+    }
+    bool same(int x, int y) { return root(x)==root(y); }
+    int size() { return n; }
+    int count(int x) { return -U[root(x)]; }
+};
+
+const int MAXN = 500111;
+int N, M, Q;
+int P[MAXN];
+LL PP[MAXN];
+int Ea[MAXN], Eb[MAXN], Ed[MAXN];
+char S[MAXN];
+int I[MAXN], X[MAXN], Y[MAXN];
+LL ans[MAXN];
+
+int main() {
+    scanf("%d%d%d", &N, &M, &Q);
+    REP (i, N) scanf("%d", P+i);
+    REP (i, M) {
+	scanf("%d%d", Ea+i, Eb+i);
+	Ea[i]--;
+	Eb[i]--;
+	Ed[i] = Q;
+    }
+    
+    REP (i, Q) {
+	scanf("%s%d", S+i, I+i);
+	I[i]--;
+	if (S[i] == 'D') {
+	    Ed[I[i]] = i;
+	} else {
+	    // Y[i] -> X[i]
+	    scanf("%d", X+i);
+	    Y[i] = P[I[i]];
+	    P[I[i]] = X[i];
+	}
+    }
+
+    REP (i, N) PP[i] = P[i];
+
+    UnionFind U(N);
+    REP (i, M) {
+	if (Ed[i] == Q) { // remaining
+	    int a = U.root(Ea[i]), b = U.root(Eb[i]);
+	    if (a == b) continue;
+	    int c = U.link(a, b);
+	    if (c == a) swap(a, b);
+	    PP[c] += PP[a]; PP[a] = 0;
+	}
+    }
+
+    multiset<LL> se;
+    
+    REP (i, N) if (U.root(i) == i) se.insert(PP[i]);
+
+    for (int q=Q; q--; ) {
+	ans[q] = *se.rbegin();
+	
+	if (S[q] == 'D') {
+	    int i = I[q];
+	    int a = U.root(Ea[i]), b = U.root(Eb[i]);
+	    if (a == b) continue;
+	    int c = U.link(a, b);
+	    if (c == a) swap(a, b);
+	    se.erase(se.find(PP[a]));
+	    se.erase(se.find(PP[b]));
+	    PP[c] += PP[a]; PP[a] = 0;
+	    se.insert(PP[c]);
+	} else {
+	    int a = U.root(I[q]);
+	    se.erase(se.find(PP[a]));
+	    PP[a] = PP[a] - X[q] + Y[q];
+	    se.insert(PP[a]);
+	}
+	// REP (i, N) eprintf("%d ", P[i]); eprintf("\n");
+    }
+
+    REP (q, Q) printf("%lld\n", ans[q]);
+    return 0;
+}

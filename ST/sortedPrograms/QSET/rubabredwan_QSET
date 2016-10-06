@@ -1,0 +1,149 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n)	for(ll i=0;i<n;i++)
+#define repn(i, n)	for(ll i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx			100050
+#define pb			emplace_back
+
+using namespace std;
+
+typedef long long ll;
+
+ll t[mx * 3][3];
+ll n, a[mx], bit[mx];
+ll p[mx], s[mx];
+
+void Sub(ll node){
+	swap(t[node][0], t[node][2]);
+	swap(t[node][0], t[node][1]);
+}
+
+void Add(ll node){
+	swap(t[node][0], t[node][2]);
+	swap(t[node][1], t[node][2]);
+}
+
+ll get(ll pos){
+	ll ret = 0;
+	while(pos){
+		ret += bit[pos];
+		ret %= 3;
+		pos -= pos & -pos;
+	}
+	return ret;
+}
+	
+void change(ll pos, ll val){
+	while(pos < n){
+		bit[pos] += val;
+		bit[pos] %= 3;
+		pos += pos & -pos;
+	}
+}
+
+void build(ll b, ll e, ll node){
+	if(b == e){
+		t[node][s[b]] = 1;
+		change(b, a[b]);
+		return;
+	}
+	ll l = 2 * node, h = l + 1, mid = (b + e) / 2;
+	build(b, mid, l);
+	build(mid+1,e,h);
+	rep(i, 3) t[node][i] = t[l][i] + t[h][i];
+}
+
+void prop(ll node){
+	ll diff = p[node];
+	ll l = 2 * node, h = l + 1;
+	if(diff < 0){
+		rep(i, abs(diff)){
+			Sub(l);
+			Sub(h);
+		}
+	}
+	else if(diff > 0){
+		rep(i, diff){
+			Add(l);
+			Add(h);
+		}
+	}
+	p[l] += diff;
+	p[h] += diff;
+	p[node] = 0;
+}
+	
+void upd(ll b, ll e, ll node, ll x, ll y, ll diff){
+	if(y < b || e < x) return;
+	if(b >= x && e <= y){
+		if(diff < 0){
+			rep(i, abs(diff)) Sub(node);
+		}
+		else if(diff > 0){
+			rep(i, diff) Add(node);
+		}
+		p[node] += diff;
+		return;
+	}
+	if(p[node] != 0) prop(node);
+	ll l = 2 * node, h = l + 1, mid = (b + e) / 2;
+	upd(b, mid, l, x, y, diff);
+	upd(mid+1,e,h, x, y, diff);
+	rep(i, 3) t[node][i] = t[l][i] + t[h][i];
+}
+			
+void update(ll pos, ll val){
+	ll v = get(pos - 1);
+	ll diff =-((v + a[pos]) % 3) + ((val + v) % 3);
+	upd(1, n, 1, pos, n, diff);
+	a[pos] = val % 3;
+	change(pos, val % 3);
+}
+
+ll query(ll b, ll e, ll node, ll x, ll y, ll v){
+	if(y < b || e < x) return 0;
+	if(b >= x && e <= y) return t[node][v];
+	if(p[node] != 0) prop(node);
+	ll mid = (b + e) /2, l = 2 * node, h = l + 1;
+	return query(b, mid, l, x, y, v) + query(mid+1, e, h, x, y, v);
+}
+
+ll nC2(ll val){
+	return val * (val - 1) / 2;
+}
+
+ll solve(ll x, ll y){
+	ll a = query(1, n, 1, x, y, 0);
+	ll b = query(1, n, 1, x, y, 1);
+	ll c = query(1, n, 1, x, y, 2);
+	ll d = get(x - 1);
+//	cout << "---> " << a << ' ' << b << " " << c << " " << d << endl;
+	if(d == 0) a++;
+	else if(d == 1) b++;
+	else if(d == 2) c++;
+	ll ret = nC2(a) + nC2(b) + nC2(c);
+	return ret;
+}
+
+int main(){
+	ll q;
+	ll tp, x, y;
+	scanf("%lld %lld", &n, &q);
+	char c;
+	repn(i, n){
+		scanf(" %c", &c);
+		a[i] = c - '0';
+		s[i] += s[i-1] + a[i];
+		s[i] %= 3;
+		a[i] %= 3;
+	}
+	build(1, n, 1);
+	while(q--){
+		scanf("%lld %lld %lld", &tp, &x, &y);
+		if(tp == 1) update(x, y);
+		else printf("%lld\n", solve(x, y));
+	}
+	return 0;
+}

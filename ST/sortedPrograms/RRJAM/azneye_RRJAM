@@ -1,0 +1,172 @@
+#include <bits/stdc++.h>
+ 
+#ifdef getchar
+#undef getchar
+#endif
+#define getchar() (*_pinp?*_pinp++:(_inp[fread(_pinp=_inp, 1, 4096, stdin)]='\0', *_pinp++))
+char _inp[4097], *_pinp=_inp;
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+#ifdef putchar
+#undef putchar
+#endif
+#define putchar(x) (*_pout++=(x), (_pout==_eout?(fwrite(_pout=_out, 1, 4096, stdout)):0))
+#define flush() fwrite(_out, 1, _pout-_out, stdout)
+char _out[4097], *_eout=_out+4096, *_pout=_out;
+#define print(x) do{if(!x)putchar('0');else{x=x<0?(putchar('-'), -x):x;for(;x;x/=10)*_p++='0'+x%10;do putchar(*--_p);while(_p!=_buf);}}while(0)
+char _buf[20], *_p=_buf;
+ 
+using namespace std;
+ 
+int N, M;
+int A[111000];
+enum {L, R};
+struct node
+{
+node *link[2];
+long long val, add, mul;
+} pool[16000000], *nextpool=pool, *nil, *tree[111000];
+ 
+inline node* alloc(node *orig)
+{
+*nextpool=*orig;
+return nextpool++;
+}
+ 
+node* init(int begin, int end)
+{
+node *root=nextpool++;
+int mid=(begin+end)/2;
+if(begin==end)
+root->link[L]=root->link[R]=nil;
+else
+{
+root->link[L]=init(begin, mid);
+root->link[R]=init(mid+1, end);
+}
+return root;
+}
+ 
+inline void down(node *root, int begin, int end)
+{
+if(root->add!=0 || root->mul!=0)
+{
+int mid=(begin+end)/2;
+root->link[L]=alloc(root->link[L]);
+if(begin==mid)
+root->link[L]->val+=root->add*(mid-begin+1)+1LL*(mid-begin)*(mid-begin+1)/2*root->mul;
+root->link[L]->add+=root->add;
+root->link[L]->mul+=root->mul;
+root->link[R]=alloc(root->link[R]);
+if(mid+1==end)
+root->link[R]->val+=root->add*(end-mid)+(1LL*(end-begin)*(end-begin+1)-1LL*(mid-begin)*(mid-begin+1))/2*root->mul;
+root->link[R]->add+=root->add+1LL*(mid-begin+1)*root->mul;
+root->link[R]->mul+=root->mul;
+root->add=root->mul=0;
+}
+}
+ 
+node* update(node *root, int begin, int end, int i, int j, int x, int y)
+{
+if(j<begin || end<i)
+return root;
+root=alloc(root);
+if(i<=begin && end<=j)
+{
+if(begin==end)
+root->val+=1LL*x*(end-begin+1)+(1LL*(end-i)*(end-i+1)-1LL*(begin-i-1)*(begin-i))/2*y;
+root->add+=x+1LL*(begin-i)*y;
+root->mul+=y;
+}
+else
+{
+down(root, begin, end);
+int mid=(begin+end)/2;
+root->link[L]=update(root->link[L], begin, mid, i, j, x, y);
+root->link[R]=update(root->link[R], mid+1, end, i, j, x, y);
+//root->val=root->link[L]->val+root->link[R]->val;
+}
+return root;
+}
+ 
+long long query(node *root, int begin, int end, int x)
+{
+root=alloc(root);
+while(begin!=end)
+{
+int mid=(begin+end)/2;
+if(mid>=x)
+{
+root->link[L]=alloc(root->link[L]);
+if(root->add!=0 || root->mul!=0)
+{
+if(begin==mid)
+root->link[L]->val+=root->add*(mid-begin+1)+1LL*(mid-begin)*(mid-begin+1)/2*root->mul;
+root->link[L]->add+=root->add;
+root->link[L]->mul+=root->mul;
+root->add=root->mul=0;
+}
+end=mid;
+root=root->link[L];
+}
+else
+{
+root->link[R]=alloc(root->link[R]);
+if(root->add!=0 || root->mul!=0)
+{
+if(mid+1==end)
+root->link[R]->val+=root->add*(end-mid)+(1LL*(end-begin)*(end-begin+1)-1LL*(mid-begin)*(mid-begin+1))/2*root->mul;
+root->link[R]->add+=root->add+1LL*(mid-begin+1)*root->mul;
+root->link[R]->mul+=root->mul;
+root->add=root->mul=0;
+}
+begin=mid+1;
+root=root->link[R];
+}
+}
+return root->val;
+}
+ 
+int main()
+{
+nil=nextpool++;
+nil->link[L]=nil->link[R]=nil;
+scan(N);
+for(int i=1; i<=N; i++)
+scan(A[i]);
+int a, b, c, d;
+for(int i=1; i<=N; i++)
+{
+scan(a);
+A[i]=a-A[i];
+}
+scan(M);
+tree[0]=init(1, N);
+for(int i=1; i<=M; i++)
+{
+scan(a);
+scan(b);
+scan(c);
+scan(d);
+tree[i]=update(tree[i-1], 1, N, a, b, c, d);
+}
+node *remember=nextpool;
+for(int i=1; i<=N; i++)
+{
+nextpool=remember;
+int lo=0, mid, hi=M+1;
+while(lo<hi)
+{
+mid=(lo+hi)/2;
+if(query(tree[mid], 1, N, i)>=A[i])
+hi=mid;
+else
+lo=mid+1;
+}
+int v=lo==M+1?-1:lo;
+print(v);
+putchar(" \n"[i==N]);
+}
+flush();
+return 0;
+}

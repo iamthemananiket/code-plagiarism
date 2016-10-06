@@ -1,0 +1,33 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+int T;
+char A[11111],B[11111];
+
+int main()
+{
+	scanf("%d",&T);
+	for(int i=0; i<T; i++)
+	{
+		int a[256]={0}, b[256]={0}, len=0, lstr;
+		scanf("%s",&A);
+		scanf("%s",&B);
+		lstr = strlen(A);
+		for(int j=0;j<lstr;j++)
+			a[A[j]]++;
+		len=0;
+		lstr = strlen(B);
+		for(int j=0;j<lstr;j++)
+			if(b[B[j]]<a[B[j]])
+			{
+				b[B[j]]++;
+				len++;
+			}
+		printf("%d\n",len);
+	}
+	return 0;
+}

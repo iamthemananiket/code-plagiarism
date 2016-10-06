@@ -1,0 +1,262 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, u, v, m, q, r, ql, qr, k, l, s, x, y, w, h, c, a, b, z;
+const int N = 1e5 + 1;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 57LL;
+const bool JUDGE = false;
+
+const int maxBufSize = (1 << 24);
+const int maxStrSize = (1 << 22);
+ 
+struct Input
+{
+        int bufSize, bufEnd, bufPos;
+        char buffer[maxBufSize];
+        void grabBuffer() {
+                bufSize = (maxBufSize); bufPos = 0;
+                bufEnd = fread(buffer, sizeof (char), bufSize, stdin);
+                buffer[bufEnd] = '\0';
+        }
+        bool bufEof() {return bufPos == bufEnd;}
+        int getChar() {return buffer[bufPos++];}
+        void skipWS() {
+                while ((buffer[bufPos] == '\n' ||
+                        buffer[bufPos] == ' ' || buffer[bufPos] == '\t')) 
+                        bufPos++;
+        }
+        int rUint() {
+                int n = 0; skipWS();
+                for (int x = getChar(); x <= '9' && x >= '0'; x = getChar())
+                        n = (n << 3) + (n << 1) + (x - '0');
+                return n;
+        }
+        int rInt() {
+                int sign = 0, n = 0, x; skipWS();
+                if (buffer[bufPos] == '-')
+                        sign = 1, getChar();
+                for (x = getChar(); x <= '9' && x >= '0'; x = getChar())
+                        n = (n << 3) + (n << 1) + (x - '0');
+                return sign == 0? n: -n;
+        }
+ 
+        inline bool isWhiteSpace(char x) {
+                return x == ' ' || x == '\n' || x == '\t';
+        }
+        string rStr() {
+                char result[maxStrSize]; skipWS();
+                int idx = 0, x;
+                for (x = getChar(); !isWhiteSpace(x); x = getChar())
+                        result[idx++] = x;
+                result[idx] = '\0';
+                return result;
+        }
+        char rChar() {skipWS(); return getChar();}
+};
+ 
+struct Output
+{
+        int bufSize, bufEnd, bufPos;
+        char buffer[maxBufSize];
+        Output() {bufPos = bufEnd = 0; bufSize = maxBufSize;}
+        void print(int x) {
+                if (x < 0) {
+                        print('-'); print(-x); return;
+                }
+                char temp[1 << 4]; int idx = 0;
+                do {
+                        temp[idx++] = '0' + (x % 10);
+                        x /= 10;
+                } while (x != 0);
+                temp[idx] = '\0';
+                reverse(temp, temp + idx);
+                print(temp);
+        }
+        inline void print(char ch) {buffer[bufEnd++] = ch;}
+        inline void print(const char* s) {while (*s) buffer[bufEnd++] = *s++;}
+        inline void print(const string& s) {print(s.c_str());}
+        inline void flushBuffer() {buffer[bufEnd] = '\0'; printf("%s", buffer); bufEnd = 0;}
+        template <class A, class B> 
+        void print(const A& a, const B& b) {print(a); print(b);}
+        template <class A, class B, class C> 
+        void print(const A& a, const B& b, const C& c) {print(a); print(b); print(c);}
+};
+ 
+Input input; Output output;
+
+vii pr;
+int P[66][20];
+int Val[N + 12];
+
+int C[10 * N], D[10 * N];
+int max_idx = 0;
+struct node{
+	int l, r;
+	ll val;
+	node (int l, int r, ll val) : l(l), r(r), val(val) { }
+	node () { l = r = 0; val = 1;} 
+	node (ll val) {
+		this -> val = val;
+		l = r = 0;
+	}
+	int insert(int l, int r, int x, bool k);
+	int query(int l, int r, int rl, int rr);
+}tree[8 * N * 24];
+int H[N];
+int last[N];
+int ct = 0;
+inline int node::insert(int l, int r, int x, bool k) {
+	if (l == r) {
+		if (k) {
+			tree[++max_idx]	= node(0, 0, Val[l]);
+			//if (Val[l] < 500 && l < 500) cout << Val[l] << '\n';
+		}
+		else tree[++max_idx] = node(0, 0, 1);
+		return max_idx;
+	}
+	else {
+		int mid = (l + r) >> 1;
+		int L = this -> l, R = this -> r;
+		if (mid >= x) {
+			L = tree[this -> l].insert(l, mid, x, k);
+		}
+		else R = tree[this -> r].insert(mid + 1, r, x, k);
+		tree[++max_idx] = node(L, R, (tree[L].val * tree[R].val) % mod);
+		return max_idx;
+	}
+}
+inline int node::query(int l, int r, int rl, int rr) {
+	if (rl <= l && r <= rr) return this -> val;
+	if (l > rr || rl > r) return 1;
+	int mid = (l + r) >> 1;
+	ll a = tree[this -> l].query(l, mid, rl, rr);
+	ll b = tree[this -> r].query(mid + 1, r, rl, rr);
+	return (a * b) % mod;
+}
+inline ll gcd(ll a, ll b) {
+	while (a > 0 && b > 0) {
+		if (a > b) a %= b;
+		else b %= a;
+	}
+	return a + b;
+}
+inline int get_id(int l, int r, int j) {
+	int lo = 0, hi = 19;
+	while (lo < hi) {
+		int mid = (lo + hi + 1) / 2;
+		if (P[j][mid] <= r && (r / P[j][mid]) * P[j][mid] >= l) lo = mid;
+		else hi = mid - 1;
+	}
+	return lo;
+}
+int main() {
+	input.grabBuffer();
+	if (JUDGE) {
+		freopen("cricket.in", "r", stdin);
+		freopen("cricket.out", "w", stdout);
+	}
+	for (int i = 2; i * i <= N; ++i) {
+		bool p = true;
+		for (int j = 2; j < i; ++j) {
+			if (i % j == 0) p = false;
+		}
+		if (p) {
+			pr.push_back(i);
+		}
+	}
+	for (int i = 0; i < pr.size(); ++i) {
+		P[i][0] = 1;
+		for (int j = 1; j < 20; ++j) {
+			P[i][j] = (P[i][j - 1] * pr[i]);
+			if (P[i][j] > N) P[i][j] = N + 1;
+		}
+	}
+	Val[0] = 1;
+	H[0] = 0;
+	for (int i = 1; i < N; ++i) {
+		Val[i] = i;
+		for (int j = 0; j < pr.size(); ++j) {
+			while (Val[i] % pr[j] == 0) Val[i] /= pr[j];
+		}
+		if (Val[i] > 1) {
+			H[i] = tree[tree[H[i - 1]].insert(1, N, last[Val[i]], false)].insert(1, N, i, true);
+			last[Val[i]] = i;
+		}
+		else H[i] = H[i - 1];
+	}
+	//cout << ct << '\n';
+	t = input.rInt();
+	n = input.rInt();
+	k = input.rInt();
+	a = input.rInt();
+	b = input.rInt();
+	m = input.rInt();
+	ll sol = 0;
+	for (int i = 1; i < t; ++i) C[i] = input.rInt();
+	for (int i = 1; i < t; ++i) D[i] = input.rInt();
+	for (int kk = 0; kk < t; ++kk) {
+		if (kk) {
+			n = 1 + (a * sol + C[kk]) % m;
+			k = 1 + (b * sol + D[kk]) % n;
+		}
+		sol = 1;
+		if (n <= 10) {
+			sol = n - k + 1;
+			//cout << n << ' ' << k << '\n';
+			for (ll i = n - k + 1; i <= n; ++i) {
+				sol = (sol * i) / gcd(sol, i);
+			}
+			sol %= mod;
+			output.print((int)sol);
+			output.print('\n');
+			continue;
+		}
+		for (int i = 0; i < pr.size(); ++i) {
+			int x = get_id(n - k + 1, n, i);
+			//cout << x << '\n';
+			if (sol >= LLONG_MAX / (ll)P[i][x]) sol %= mod;
+			sol = sol * (ll)P[i][x];
+		}
+		if (sol >= mod) sol %= mod;
+		sol = sol * tree[H[n]].query(1, N, n - k + 1, n);
+		sol %= mod;
+		output.print((int)sol);
+		output.print('\n');
+	}
+	output.flushBuffer();
+	return 0;
+}
+/*#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, u, v, m, q, r, ql, qr, k, d, l, w, c, x;
+const int N = 1e5 + 500;
+const ll mod = 1e9 + 7;
+const ll INF = 1LL << 57LL;
+struct {
+{
+}
+};*/

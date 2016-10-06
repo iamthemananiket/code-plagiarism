@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+const int N = 1111;
+const int mod = 1e9 + 7;
+
+int a[N], b[N];
+int f[N][N];
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input","r",stdin);
+  freopen("f.output","w",stdout);
+  freopen("error","w",stderr);
+#endif
+
+  int n = read();
+  int m = read();
+  int c = read();
+
+  for (int i = 0; i < n; i++) {
+    int x = read();
+    a[x] += 1;
+  }
+  for (int i = 0; i < m; i++) {
+    int x = read();
+    b[x] += 1;
+  }
+
+  f[0][0] = 1;
+  for (int r = 1; r <= c; r++) {
+    f[r][0] = 1;
+    for (int k = 1; k <= c; k++) {
+      f[r][k] = f[r - 1][k];
+      f[r][k] += ll(f[r - 1][k - 1]) * a[r] * b[r] % mod;
+      if (f[r][k] >= mod)
+        f[r][k] -= mod;
+    }
+  }
+
+  for (int i = 1; i <= c; i++)
+    printf("%d ", f[c][i + 1]);
+
+  return 0;
+}

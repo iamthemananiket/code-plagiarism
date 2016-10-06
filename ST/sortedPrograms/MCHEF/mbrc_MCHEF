@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (ll i = (x); i<=(y); i++)
+#define repe(i,x,y) for (ll i = (x); i < (y);i++)
+#define drep(i,x,y) for (ll i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<ll,ll> pii;
+
+ll dp[MAXN][550];
+vector<ll> C[MAXN];
+ll A[MAXN];
+multiset<ll> S;
+ll V[MAXN];
+ll B[MAXN];
+
+void solve() {
+	ll n,m; ll K; sl(n); sl(K); sl(m); ll x,y,c; ll sum = 0;
+
+	rep(i,1,n) { sl(A[i]); C[i] = *new vector<ll>(); sum+=A[i]; }
+
+	rep(i,1,m) {
+		sl(x); sl(y); sl(c);
+		C[x].pb(c); C[y+1].pb(-c);
+	}
+	
+	S = *new multiset<ll>();
+	ll idx = 0;
+
+	rep(i,1,n) {
+		repe(j,0,C[i].size()) {
+			if (C[i][j] > 0) {
+				S.insert(C[i][j]);
+			} else {
+				S.erase(S.find(-C[i][j]));
+			}
+		}
+		if (A[i] < 0) {
+			idx++; V[idx] = -A[i];
+			if (S.size() > 0) {
+				B[idx] = *S.begin();
+			} else {
+				B[idx] = 1e18;
+			}
+		}
+	}
+	
+	ll N = idx;
+	rep(j,0,K) {
+		dp[1][j] = (j >= B[1]) ? V[1] : 0;
+	}
+
+	rep(i,2,N) {
+		rep(j,0,K) {
+			dp[i][j] = dp[i-1][j];
+			if (j >= B[i]) {
+				dp[i][j] = MAX(dp[i][j], dp[i-1][j-B[i]] + V[i]);
+			}
+		}
+	}
+
+	prl(sum + dp[N][K]); endc;
+	
+}
+
+int main() {
+	int t; s(t); rep(i,1,t) solve();
+}

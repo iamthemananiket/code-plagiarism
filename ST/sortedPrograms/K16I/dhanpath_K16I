@@ -1,0 +1,33 @@
+#include <iostream>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+int main() 
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+        
+        int  n, q, v ;
+        set<int>  ms ;
+        set<int>::iterator  it ;
+        string str;
+        
+        cin >> n >> q ;
+        while(q--)
+        {
+                cin >> str >> v ;
+                if( str == "C" )   {
+                        it = ms.find(v) ; 
+                        if( it != ms.end() )  ms.erase(it);
+                        else  ms.insert(v);
+                }
+                else   {
+                        it = ms.lower_bound(v);
+                        if( it != ms.end() )  cout << *it << endl ;
+                        else   cout << -1 << endl ;
+                }
+        }
+        
+	return 0;
+}

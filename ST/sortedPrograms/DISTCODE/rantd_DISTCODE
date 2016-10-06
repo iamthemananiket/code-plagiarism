@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 150;
+int f[N][N];
+
+int main(int argc, char *argv[]) {
+    ios_base::sync_with_stdio(false);
+    
+    int ntest;
+    string s;
+
+    cin >> ntest;
+    while (ntest--) {
+        cin >> s;
+        MEM(f, 0);
+        REPU(i, 0, s.size() - 1) f[s[i]][s[i + 1]]++;
+        int ret = 0;
+        REPU(i, 0, N) REPU(j, 0, N) ret += f[i][j] > 0 ? 1 : 0;
+        printf("%d\n", ret);
+    }
+    
+    return 0;
+}

@@ -1,0 +1,152 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 100005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+vector<ll>adj[maxs];
+ll dp[maxs],value[maxs],depth[maxs],mark[maxs],sum[maxs],chains[maxs];
+ll MOD,cnt;
+set<ll>st[maxs];
+vector<pll>v;
+
+ll power(ll a,ll b,ll c){
+	ll t=1;
+	while(b>0){
+		if(b&1){
+			t=(t*a)%c;
+		}
+		a=(a*a)%c;
+		b>>=1;
+	}
+	return t;
+}
+
+void dfs(ll k){
+	mark[k]=1;
+	depth[k]=0;
+	for(ll i=0;i<adj[k].size();i++){
+		if(!mark[adj[k][i]]){
+			dfs(adj[k][i]);
+			if((depth[adj[k][i]]+1)>depth[k]){
+				depth[k]=depth[adj[k][i]]+1;
+				value[k]=adj[k][i];
+				chains[k]=chains[adj[k][i]];
+			}
+		}
+	}
+	if(depth[k]==0){
+		chains[k]=cnt++;
+	}
+}
+
+void dfs2(ll k){
+	mark[k]=1;
+	if(depth[k]==0){
+		dp[k]=0;
+		if(MOD==1){
+			sum[k]=0;
+		}
+		else{
+			sum[k]=1;
+		}
+		st[chains[k]].insert(dp[k]);
+	}
+	for(ll i=0;i<adj[k].size();i++){
+		if(!mark[adj[k][i]]){
+			dfs2(adj[k][i]);
+			if(adj[k][i]==value[k]){
+				dp[k]=sum[adj[k][i]];
+				sum[k]=sum[adj[k][i]];
+				if(st[chains[k]].find(dp[k])==st[chains[k]].end()){
+					sum[k]=sum[k]+(dp[k]+1)*power(2,dp[k],MOD);
+					if(sum[k]>=MOD){
+						sum[k]%=MOD;
+					}
+					st[chains[k]].insert(dp[k]);
+				}
+			}
+		}
+	}
+}
+
+int main()
+{
+	ll n,m,i,j,x,y,k;
+	sc("%lld %lld",&n,&m);
+	if(n>100000){
+		pr("0\n");
+		return 0;
+	}
+	MOD=m;
+	for(i=0;i<n-1;i++){
+		sc("%lld %lld",&x,&y);
+		adj[x].pb(y);
+		adj[y].pb(x);
+	}
+	for(i=0;i<=n;i++){
+		mark[i]=0;
+	}
+	cnt=0;
+	dfs(1);
+	for(i=1;i<=n;i++){
+		v.pb(make_pair(depth[i],i));
+	}
+	sort(v.begin(),v.end());
+	for(i=0;i<v.size();i++){
+		k=v[i].S;
+		if(depth[k]==0){
+			dp[k]=0;
+			if(MOD==1){
+				sum[k]=0;
+			}
+			else{
+				sum[k]=1;
+			}
+			st[chains[k]].insert(dp[k]);
+		}
+		for(ll j=0;j<adj[k].size();j++){
+				if(adj[k][j]==value[k]){
+					dp[k]=sum[adj[k][j]];
+					sum[k]=sum[adj[k][j]];
+					if(st[chains[k]].find(dp[k])==st[chains[k]].end()){
+						sum[k]=sum[k]+(dp[k]+1)*power(2,dp[k],MOD);
+						if(sum[k]>=MOD){
+							sum[k]%=MOD;
+						}
+						st[chains[k]].insert(dp[k]);
+					}
+				}
+			}
+	}
+	for(i=1;i<=n;i++){
+		pr("%lld\n",dp[i]);
+	}
+	return 0;
+}

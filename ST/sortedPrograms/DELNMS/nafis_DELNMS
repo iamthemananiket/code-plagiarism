@@ -1,0 +1,320 @@
+/********************************************************************************\
+   |--\        ---       /\        |-----------| -----       /-------|           |
+   |   \        |       /  \       |               |        /                    |
+   |    \       |      /    \      |               |       |                     |
+   |     \      |     /      \     |               |        \---\                |
+   |      \     |    / ------ \    |-------|       |             \---\           |
+   |       \    |   /          \   |               |                  |          |
+   |        \   |  /            \  |               |                  /          |
+  ---        \------            ------           -----     |---------/           |
+                                                                                 |
+                          _                                                      |
+  **copyrighted by nfssdq(R) :) (:                                               |
+                          ^                                                      |
+    codeforces = nfssdq                                                          |
+    topcoder = nafis007                                                          |
+    uva = nfssdq                                                                 |
+    spoj = nfssdq                                                                |
+    usaco = nfssdq1                                                              |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                           |
+    IIT,Jahangirnagar University(41)                                             |
+    Sorry for badly written code.  :(                                            |
+                                                                                 |
+*********************************************************************************/
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <cstdio>
+#include <locale>
+#include <string>
+#include <vector>
+#include <cassert>
+#include <climits>
+#include <complex>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <numeric>
+#include <sstream>
+#include <utility>
+#include <iostream>
+#include <iterator>
+#include <typeinfo>
+#include <valarray>
+#include <algorithm>
+#include <functional>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         2.0*acos(0.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL md=M;
+    if( e==0 )return 1;
+    if( e%2==0 ){
+        LL t = bigmod( p, e/2, M );
+        return (T)( ( t*t ) % md );
+    }
+    LL bm = bigmod( p, e-1, M );
+    bm = ( bm * (LL)p )%md;
+    return (T)bm;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+pair< int, int > pp[ 100001 ];
+vector < pair < int, int > > output, output1, output2;
+int ar[ 100001 ];
+int seg[ 400001 ];
+void insert( int idx, int s, int e, int p ,int v ){
+    if( s == e ){
+        seg[ idx ] += v;
+        return;
+    }
+    int mid = ( s+e )/2;
+    if( p <= mid )insert( idx*2+1, s, mid, p, v );
+    else insert( idx*2+2, mid+1, e, p, v );
+    seg[ idx ] += v;
+}
+// original -> new
+int query1( int idx, int s, int e, int p ){
+    if( s==e )return seg[ idx ];
+    int mid = ( s+e )/2;
+    if( p <= mid )return query1( idx*2+1, s, mid, p );
+    else return seg[ idx*2+1 ] + query1( idx*2+2, mid+1, e, p );
+}
+// new -> original
+int query( int idx, int s, int e, int p ){
+    if( seg[ idx ] < p )return -1;
+    if( p <= 0 )return -1;
+    if( s == e )return s;
+    int mid = ( s+e )/2;
+    if( p <= seg[ idx*2+1 ] )return query( idx*2+1, s, mid, p );
+    else return query( idx*2+2, mid+1, e, p - seg[ idx*2+1 ] );
+}
+
+int on[ 100001 ];
+vector < int > vc[ 100001 ];
+
+
+void  job1( int a ){
+    int b=1,c=1,d=1,e,f,g,h,x,y,z;
+    for( int i = 1; i <= 100000; i++ )
+        pp[ i ].yy = i, pp[ i ].xx = 0, vc[ i ].clear();
+    set0( seg );
+    set0( on );
+    REP( i, a ){
+        b = ar[ i+1 ];
+        pp[ b ].xx ++;
+        vc[ b ].push_back( i+1 );
+        insert( 0, 1, a, i+1, 1 );
+    }
+    sort( pp+1, pp+100001 );
+    e = 1; f = a;
+    for( int i = 100000; i >= 1; i-- ){
+        b = pp[ i ].yy;
+        for( int j = vc[ b ].size() - 1; j >= 0; j-- ){
+            if( on[ vc[ b ][ j ] ] == 1 )continue;
+            c = vc[ b ][ j ];
+            d = query1( 0, 1, a, vc[ b ][ j ] );
+            int col =ar[ vc[ b ][ j ] ];
+            e = f - d + 1;
+            g = e;
+            int mx = 0;
+            for( int k = e; k <= min( f, e+30 ); k ++ ){
+                int cc = 0;
+                REP( l, 20 ){
+                    y = d - k*( l+1 );
+                    h = query( 0, 1, a , y );
+                    if( on[ h ] == 1 )break;
+                    if( h == -1 )break;
+                    if( ar[ h ] != col )break;
+                    cc ++;
+                }
+                if( cc > mx ){
+                    mx = cc;
+                    g = k;
+                    break;
+                }
+            }
+            y = 0; x = d;
+            while( 1 ){
+                h = query( 0, 1, a, d - y*g );
+                if( h > 0 && on[ h ] == 0 && ar[ h ] == col ){
+                    on[ h ] = 1;
+                    insert( 0, 1, a, h, -1 );
+                    x = d - y*g;
+                    y ++;
+                    f --;
+                }
+                else break;
+            }
+            output.push_back( mp( x, g ) );
+        }
+    }
+
+}
+
+void job2( int a ){
+    int b=1,c=1,d=1,e,f,g,h,x,y,z;
+    for( int i = 1; i <= 100000; i++ )
+        pp[ i ].yy = i, pp[ i ].xx = 0, vc[ i ].clear();
+    set0( seg );
+    set0( on );
+    REP( i, a ){
+        b = ar[ i+1 ];
+        pp[ b ].xx ++;
+        insert( 0, 1, a, i+1, 1 );
+    }
+    d=e=0;
+    FOR( i, 1, 100001 ){
+        if( pp[ i ].xx > e ){
+            e = pp[ i ].xx;
+            d = i;
+        }
+    }
+    e = 1; f = a;
+    for( int i = a; i >= 1; i-- ){
+        if( on[ i ] == 1 ) {
+            continue;
+        }
+        b = query1( 0, 1, a, i );
+        g = e;
+        int mx = 0;
+        for( int j = e; j <= min( f, e+30 ); j ++ ){
+            int cc = 0;
+            REP( k, 20 ){
+                c = b - j*( k+1 );
+                h = query( 0, 1, a , c );
+                if( on[ h ] == 1 )break;
+                if( h == -1 )break;
+                if( ar[ h ] != ar[ i ] )break;
+                cc ++;
+            }
+            if( cc > mx ){
+                mx = cc;
+                g = j;
+                break;
+            }
+        }
+        c = 0; x = b;
+        while( 1 ){
+            h = query( 0, 1, a, b - c*g );
+            if( h > 0 && on[ h ] == 0 && ar[ h ] == ar[ i ] ){
+                on[ h ] = 1;
+                insert( 0, 1, a, h, -1 );
+                x = b - c*g;
+                c ++;
+                f --;
+            }
+            else break;
+        }
+        output1.push_back( mp( x, g ) );
+    }
+
+}
+
+void job3( int a ){
+    int b=1,c=1,d=1,e,f,g,h,x,y,z;
+    for( int i = 1; i <= 100000; i++ )
+    pp[ i ].yy = i, pp[ i ].xx = 0, vc[ i ].clear();
+    set0( seg );
+    set0( on );
+    REP( i, a ){
+        b = ar[ i+1 ];
+        pp[ b ].xx ++;
+        insert( 0, 1, a, i+1, 1 );
+    }
+    d=e=0;
+    FOR( i, 1, 100001 ){
+        if( pp[ i ].xx> e ){
+            e = pp[ i ].xx;
+            d = i;
+        }
+    }
+    e = 1; f = a;
+    for( int i = a; i >= 1; i-- ){
+        if( on[ i ] == 1 || ar[ i ] == d ) {
+            if( ar[ i ] == d ) e++;
+            continue;
+        }
+        b = query1( 0, 1, a, i );
+        g = e;
+        for( int j = e; j <= min( f, e+80 ); j ++ ){
+            c = b - j;
+            h = query( 0, 1, a , c );
+            if( on[ h ] == 1 )continue;
+            if( h == -1 )break;
+            if( ar[ h ] == ar[ i ] ){
+                g = j;
+                break;
+            }
+        }
+        c = 0; x = b;
+        while( 1 ){
+            h = query( 0, 1, a, b - c*g );
+            if( h > 0 && on[ h ] == 0 && ar[ h ] == ar[ i ] ){
+                on[ h ] = 1;
+                insert( 0, 1, a, h, -1 );
+                x = b - c*g;
+                c ++;
+                f --;
+            }
+            else break;
+        }
+        output2.push_back( mp( x, g ) );
+    }
+    output2.push_back( mp( 1, 1 ) );
+}
+
+
+main(){
+
+    int a,b=1,c=1,d=1,e,f,g,h,x,y,z;
+    scanf( "%d", &a );
+    for( int i = 1; i <= a; i++ )scanf( "%d", &ar[ i ] );
+    job1( a );
+    job2( a );
+    job3( a );
+    if( output.size() < output1.size() && output.size() < output2.size() ){
+        printf( "%d\n", output.size() );
+        REP( i, output.size() ){
+            printf( "%d %d\n", output[ i ].xx, output[ i ].yy );
+        }
+    }
+    if( output1.size() < output2.size() ){
+        printf( "%d\n", output1.size() );
+        REP( i, output1.size() ){
+            printf( "%d %d\n", output1[ i ].xx, output1[ i ].yy );
+        }
+    }
+    else {
+        printf( "%d\n", output2.size() );
+        REP( i, output2.size() ){
+            printf( "%d %d\n", output2[ i ].xx, output2[ i ].yy );
+        }
+    }
+}

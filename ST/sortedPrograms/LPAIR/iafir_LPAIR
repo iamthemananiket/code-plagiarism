@@ -1,0 +1,84 @@
+//iafir
+#include <iostream>
+#include <cstdio>
+#include <utility>
+using namespace std;
+
+long long  n, m[112345], f[112345], id[112345], intersect;
+
+void quicksort(int awal,int akhir)
+{
+	if(awal<akhir)
+	{
+		int a=awal,z=akhir;
+		long long pivot=m[id[(a+z)/2]];
+		while(a<=z)
+		{
+			while(m[id[a]]<pivot) a++;
+			while(m[id[z]]>pivot) z--;
+			if(a<=z)
+			{
+				swap(id[a],id[z]);
+				a++;
+				z--;
+			}
+		}
+		quicksort(awal,z);
+		quicksort(a,akhir);
+	}
+}
+void merges(int awal, int tengah, int akhir)
+{
+	int temp[112345],a=awal,b=tengah+1,c=awal;;
+	while(a<=tengah && b<=akhir)
+	{
+		if(f[id[a]]<f[id[b]])
+		{
+			temp[c]=id[a];
+			a++; c++;
+		}
+		else
+		{
+			temp[c]=id[b];
+			c++; b++;
+			intersect+=(tengah-a+1);
+		}
+	}
+	while(a<=tengah)
+	{
+		temp[c]=id[a];
+		a++; c++;
+	}
+	while(b<=akhir)
+	{
+		temp[c]=id[b];
+		b++; c++;
+	}
+	for(int i=awal; i<=akhir; i++)
+		id[i]=temp[i];
+}
+void mergesort(int awal,int akhir)
+{
+	if(awal<akhir)
+	{
+		int tengah=(awal+akhir)/2;
+		mergesort(awal,tengah);
+		mergesort(tengah+1,akhir);
+		
+		merges(awal,tengah,akhir);
+	}
+}
+int main()
+{
+	scanf("%lld",&n);
+	for(int i=0; i<n; i++)
+	{
+		scanf("%lld %lld",&m[i],&f[i]);
+		id[i]=i;
+	}
+	quicksort(0,n-1);
+	intersect = 0;
+	mergesort(0,n-1);
+	printf("%lld\n",intersect);
+	return 0;
+}

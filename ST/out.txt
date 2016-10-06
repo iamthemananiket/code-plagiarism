@@ -1,0 +1,2 @@
+('roman', 'ptnk131627', 'rajat1603', 'sokolov', 'anta0', 'gvaibhav21') ['TALAZY', 'TACNTSTR', 'TAASEQ', 'ALPHABET', 'DIVMAC', 'LFSTACK', 'CHFNFRN', 'RESCALC', 'LTM40AB', 'LONGSEQ', 'LEXOPAL']
+('na2a', 'ptnk131627', 'phirasitsharp', 'fauzdar65', 'sampritipanda') ['DISTCODE', 'ABROADS', 'ALPHABET', 'LFSTACK', 'STUDVOTE', 'ONEKING', 'CLOSEFAR', 'CLPERM', 'LUMPYBUS', 'QSET', 'SANSKAR', 'SEAVOTE']

@@ -1,0 +1,220 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+    #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+    #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+namespace randomizer{
+    uint32_t x = 89123812, y = 98731, z = 38173173, w = 7218461;
+
+    uint32_t mrand(void) {
+        uint32_t t = x ^ (x << 11);
+        x = y; y = z; z = w;
+        return w = w ^ (w >> 19) ^ t ^ (t >> 8);
+    }
+}
+
+const int tdelta = 15;
+const int N = 65;
+const int K = 2020;
+
+const int dx[] = {1, 1, -1, -1, 1, -1, 0, 0};
+const int dy[] = {1, -1, 1, -1, 0, 0, -1, 1};
+
+int n, k;
+bool was[N][N], occ[N][N];
+int a[N][N], res[N][N];
+int x[K], y[K];
+int tox[K], toy[K];
+int l[K];
+int id[N][N];
+double cur;
+bool done[K];
+
+bool inside(int x,int y){
+    return x >= 0 && y >= 0 && x < n && y < n;
+}
+
+bool check(int xx,int yy) {
+    if (was[xx][yy])
+        return false;
+    for (int i = 0; i < 8; i++) {
+        int nx = xx + dx[i];
+        int ny = yy + dy[i];
+        if (inside(nx, ny) && occ[nx][ny])
+            return true;
+    }
+    return false;
+}
+
+int calc(int xx,int yy) {
+    int res = 0;
+    for (int i = 0; i < 8; i++) {
+        int nx = xx + dx[i];
+        int ny = yy + dy[i];
+        if (inside(nx, ny) && occ[nx][ny])
+            res += abs(l[id[nx][ny]] - l[id[xx][yy]]);
+    }
+    return res;
+}
+
+int deg(int xx,int yy) {
+    int res = 0;
+    for (int i = 0; i < 8; i++) {
+        int nx = xx + dx[i];
+        int ny = yy + dy[i];
+        if (inside(nx, ny) && occ[nx][ny])
+            ++res;
+    }
+    return res;
+}
+
+int dist(int ax,int ay,int bx,int by) {
+    return abs(ax - bx) + abs(ay - by);
+}
+
+void bfs(int &ansx,int &ansy,int &best){
+    vector<vi> d(n, vi(n, -1));
+    vector<vector<ii>> from(n, vector<ii>(n, ii(-1, -1)));
+    vector<ii> q;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (was[i][j] && !occ[i][j]) {
+                q.push_back({i, j});
+                d[i][j] = 0;
+                from[i][j] = {i, j};
+            }
+        }
+    }
+    int dst = inf;
+    double bestone = longinf;
+    for (int it = 0; it < q.size(); it++) {
+        int x = q[it].first;
+        int y = q[it].second;
+        if (d[x][y] > dst + tdelta)
+            return;
+        if (a[x][y] > 0 && !done[a[x][y] - 1]) {
+            int cx = from[x][y].first;
+            int cy = from[x][y].second;
+            double now = (double)calc(cx, cy) / deg(cx, cy) * 10 + (double)d[x][y] / l[a[x][y] - 1] * 1000;
+            if (dst == inf || bestone > now) {
+                bestone = now;
+                dst = d[x][y];
+                best = a[x][y] - 1;
+                ansx = from[x][y].first;
+                ansy = from[x][y].second;
+            }
+        }
+        for (int i = 0; i < 8; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (inside(nx, ny) && d[nx][ny] == -1) {
+                d[nx][ny] = d[x][y] + 1;
+                from[nx][ny] = from[x][y];
+                q.push_back({nx, ny});
+            }
+        }
+    }
+}
+
+void doit(int sx,int sy) {
+    memset(done, 0, sizeof done);
+    memset(was, 0, sizeof was);
+    memset(occ, 0, sizeof occ);
+    was[sx][sy] = true;
+    for (int it = 0; it < k; it++) {
+        int xx, yy, best;
+        bfs(xx, yy, best);
+        done[best] = true;
+        tox[best] = xx;
+        toy[best] = yy;
+        occ[xx][yy] = true;
+        for (int i = 0; i < 8; i++) {
+            int nx = xx + dx[i];
+            int ny = yy + dy[i];
+            if (inside(nx, ny)) {
+                was[nx][ny] = true;
+            }
+        }
+    }
+    double A = 0, B = 0;
+    for (int i = 0; i < k; i++) {
+        A += (double)dist(x[i], y[i], tox[i], toy[i]) / l[i];
+        assert(deg(tox[i], toy[i]) > 0);
+        B += (double)calc(tox[i], toy[i]) / deg(tox[i], toy[i]);
+    }
+    if (A * 1000 + B * 10 < cur) {
+        cur = A * 1000 + B * 10;
+        memset(res, 0, sizeof res);
+        for (int i = 0; i < k; i++) {
+            res[tox[i]][toy[i]] = i + 1;
+        }
+    }
+}
+
+void solve() {
+    n = read();
+    k = read();
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            a[i][j] = read();
+            if (a[i][j]) {
+                x[a[i][j] - 1] = i;
+                y[a[i][j] - 1] = j;
+            }
+        }
+    }
+    for (int i = 0; i < k; i++) {
+        l[i] = read();
+    }
+    cur = longinf;
+    int mx = 0, my = 0;
+    for (int i = 0; i < k; i++) {
+        mx += x[i];
+        my += y[i];
+    }
+    doit(n / 2, n / 2);
+    eprintf("cur = %.3f\n", cur);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d%c", res[i][j], (j == n - 1)? '\n' : ' ');
+        }
+    }
+}
+
+int main(){
+
+#ifdef KAZAR
+    freopen("f.input","r",stdin);
+    freopen("f.output","w",stdout);
+    freopen("error","w",stderr);
+#endif
+
+    int t = read();
+
+    while (t--) {
+        solve();
+    }
+
+    return 0;
+}

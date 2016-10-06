@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define gc getchar_unlocked
+#define pc putchar_unlocked
+#define ll long long
+#define sci(x) {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define scll(x)  {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x =  (ll)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+char putnb[20];
+#define putn(n) {if(!n)pc('0');if(n<0)pc('-'),n=0-n;int pi=0;while(n)putnb[pi++]=(n%10)+'0',n/=10;while(pi)pc(putnb[--pi]);}
+using namespace std;
+const int inf=1e8;
+const ll infl=1e18;
+const int N=100000;
+
+
+int main()
+{
+  finp;
+ int t;
+ ll x,m;
+ cin>>t;
+ //t=500;
+ string win="ALICE\n";
+ string loss="BOB\n";
+ while(t--)
+ {
+  cin>>x>>m;
+  //x=rand()%(1000000000000000000);
+  //m=rand()%10000000;
+  /*
+  ll cx=0,cxx=x;
+  afor(i,1,m)
+  {
+  	cx^=cxx;
+  	cxx+=2;
+  }
+  
+  if(cx>1)cx=1;
+  */
+  ll cx2=1;
+  ll en= x + 2*m -2;
+	
+  if(!en || !m)
+  {
+    cx2=0;
+  }
+  //assert(en>=x);
+  else if(!x || x==2)
+  {
+    if(en>=6 && (en-6)%8==0)
+      {
+      	cx2=0;
+      }
+   }
+  else if(x%2==0)
+  {
+    if(!(x>4 && (x-6)%4==0))
+    {
+      if((en-x-6)>=0 && (en-x-6)%8==0)
+      {
+      cx2=0;
+      }
+    }
+  }
+
+  else if(x%2)
+  {
+    if(!(x>1 && (x-3)%4==0))
+    {
+      if((en-x-6)>=0 && (en-x-6)%8==0)
+      {
+        cx2=0;
+      }
+    }
+  }
+
+  //cout<<win;
+  //assert(cx2==cx);
+  if(cx2)cout<<win;
+  else cout<<loss;
+
+ } 
+return 0;
+}

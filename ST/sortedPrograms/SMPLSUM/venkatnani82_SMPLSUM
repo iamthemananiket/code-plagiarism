@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+const long long N = 1e7	 + 1;
+vector<int> pr; 
+int main(){
+	int ref = sqrt(N) + 1;
+	bool prime[ref];
+	for (int i = 0; i < ref; i++) prime[i]=true ;
+	for (int i = 2; i*i < ref; i++)  if(prime[i]) for (int j = i*i; j < ref; j+=i) prime[j]=false;
+	for (int i = 2; i < ref; i++) if(prime[i]) pr.push_back(i);
+	int test, n;
+	scanf("%d",&test);
+	while (test--){
+		scanf("%d", &n);
+		vector<pair<int, long long> > v; 
+		long long ans = 1;
+		for (int i = 0; i < (int)pr.size() && pr[i] * pr[i] <= n; i++) {
+			if(n % pr[i] == 0){
+				long long mul = 1;
+				while (n % pr[i] == 0){
+				    n /= pr[i];
+				    mul *= (pr[i] * 1LL);
+				}
+				ans *= (1 + (pr[i] * 1LL * ((mul * mul) - 1)) / (1LL * pr[i] + 1LL));
+			}
+		} 
+		if(n > 1) ans *= (1 + n * 1LL * (n - 1));
+		printf("%lld\n", ans);
+	}	
+}

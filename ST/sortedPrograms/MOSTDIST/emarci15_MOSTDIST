@@ -1,0 +1,85 @@
+#include <cstdio>
+#include <set>
+#include <cmath>
+
+using namespace std;
+
+struct jpont {
+    int x;
+    int y;
+    bool operator<(const jpont& j) const {
+        return (x-y) < (j.x-j.y);
+    }
+    jpont(int xx, int yy) {
+        x = xx;
+        y = yy;
+    }
+};
+
+struct bpont {
+    int x;
+    int y;
+    bool operator<(const bpont& j) const {
+        return (x+y) < (j.x+j.y);
+    }
+    bpont(int xx, int yy) {
+        x = xx;
+        y = yy;
+    }
+};
+
+set<jpont> jobb;
+set<bpont> bal;
+
+int x[500000];
+int y[500000];
+
+int q;
+int ans;
+
+int manhattan(int x1,int y1, int x2, int y2) {
+    return (abs(x2-x1) + abs(y2-y1));
+}
+
+int main()
+{
+    ans = 0;
+    int ad = 0;
+    for(scanf("%d",&q); q--;) {
+        char c;
+        scanf("\n%c",&c);
+        if(c == '+') {
+            int xv,yv;
+            scanf("%d%d",&xv,&yv);
+            ad++;
+            x[ad] = xv ^ ans;
+            y[ad] = yv ^ ans;
+            jobb.insert(jpont(x[ad],y[ad]));
+            bal.insert(bpont(x[ad],y[ad]));
+        } else if(c == '-') {
+            int n;
+            scanf("%d",&n);
+            n = n ^ ans;
+            jobb.erase(jpont(x[n],y[n]));
+            bal.erase(bpont(x[n],y[n]));
+        } else {
+            int x,y;
+            scanf("%d%d",&x,&y);
+            x = x ^ ans;
+            y = y ^ ans;
+
+            set<jpont>::iterator jit = jobb.end();
+            jit--;
+            set<bpont>::iterator bit = bal.end();
+            bit--;
+
+            ans = max(max(manhattan(x,y,jobb.begin()->x,jobb.begin()->y),
+                          manhattan(x,y,bal.begin()->x,bal.begin()->y)),
+                      max(manhattan(x,y,jit->x,jit->y),
+                          manhattan(x,y,bit->x,bit->y)));
+            printf("%d\n",ans);
+        }
+    }
+
+    return 0;
+}

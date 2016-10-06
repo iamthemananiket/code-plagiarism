@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef vector<int> VI;
+typedef vector<VI> VVI;
+VVI val;
+VI leftn, rightn;
+bool visited[110];
+int MinCostMatching() {
+  int n = int(val.size());
+  VI u(n);
+  VI v(n);
+  for (int i = 0; i < n; i++) {
+    u[i] = val[i][0];
+    for (int j = 1; j < n; j++) u[i] = min(u[i], val[i][j]);
+  }
+  for (int j = 0; j < n; j++) {
+    v[j] = val[0][j] - u[0];
+    for (int i = 1; i < n; i++) v[j] = min(v[j], val[i][j] - u[i]);
+  }
+  leftn = VI(n, -1);
+  rightn = VI(n, -1);
+  int mated = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (rightn[j] != -1) continue;
+      if (fabs(val[i][j] - u[i] - v[j]) < 1e-10) {
+	leftn[i] = j;
+	rightn[j] = i;
+	mated++;
+	break;
+      }
+    }
+  }
+  VI distance(n);
+  VI parent(n);
+  VI seen(n);
+  while (mated < n) {
+    int s = 0;
+    while (leftn[s] != -1) s++;
+    fill(parent.begin(), parent.end(), -1);
+    fill(seen.begin(), seen.end(), 0);
+    for (int k = 0; k < n; k++) 
+      distance[k] = val[s][k] - u[s] - v[k];
+    int j = 0;
+    while (true) {
+      j = -1;
+      for (int k = 0; k < n; k++) {
+	if (seen[k]) continue;
+	if (j == -1 || distance[k] < distance[j]) j = k;
+      }
+      seen[j] = 1;
+      if (rightn[j] == -1) break;
+      const int i = rightn[j];
+      for (int k = 0; k < n; k++) {
+	if (seen[k]) continue;
+	const int new_distance = distance[j] + val[i][k] - u[i] - v[k];
+	if (distance[k] > new_distance) {
+	  distance[k] = new_distance;
+	  parent[k] = j;
+	}
+      }
+    }
+    for (int k = 0; k < n; k++) {
+      if (k == j || !seen[k]) continue;
+      const int i = rightn[k];
+      v[k] += distance[k] - distance[j];
+      u[i] -= distance[k] - distance[j];
+    }
+    u[s] += distance[j];
+    while (parent[j] >= 0) {
+      const int d = parent[j];
+      rightn[j] = rightn[d];
+      leftn[rightn[j]] = j;
+      j = d;
+    }
+    rightn[j] = s;
+    leftn[s] = j;
+    
+    mated++;
+  }
+  int value = 0;
+  for (int i = 0; i < n; i++)
+    value += val[i][leftn[i]];
+  return value;
+}
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		val.clear();
+		int n, m, x, y;
+		cin>>n>>m;
+		val.resize(n);
+		for (int i = 0; i < n; i++) val[i].resize(n), visited[i] = false;
+		for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) val[i][j] = 1;
+		for (int i = 0; i < m; i++) {
+			scanf("%d %d", &x, &y);
+			val[x - 1][y - 1] = 0;
+		}
+		printf("%d\n", MinCostMatching());
+	}	
+}

@@ -1,0 +1,76 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+int main()
+{
+	ios_base::sync_with_stdio(false);
+	ll t;
+	ll n,m,i,j,val,minc,minc2;
+	cin>>t;
+	while(t--)
+	{
+		cin>>n>>m;
+		ll dp[n][m],arr[n][m],disc[n][m];
+		for(i=0;i<n;i++)
+		{
+			for(j=0;j<m;j++)
+			{
+				cin>>arr[i][j];
+			}
+		}
+		for(i=0;i<n;i++)
+		{
+			for(j=0;j<m;j++)
+			{
+				cin>>disc[i][j];
+			}
+		}
+		dp[0][0]=arr[0][0];
+		minc=dp[0][0];
+	//	cout<<minc<<endl;
+		for(i=1;i<m;i++)
+		{
+			dp[0][i]=arr[0][i];
+			if(minc>dp[0][i])
+			{
+				minc=dp[0][i];
+			}
+		}
+		for(i=1;i<n;i++)
+		{
+		//	minc2=INT_MAX;
+			for(j=0;j<m;j++)
+			{
+				dp[i][j]=minc+arr[i][j];
+				if((arr[i][j]-disc[i-1][j])<0)
+				{
+					val=0;
+				}
+				else
+				{
+					val=arr[i][j]-disc[i-1][j];
+				}
+				dp[i][j]=min(dp[i][j],dp[i-1][j]+val);
+				if(j==0)
+				{
+					minc2=dp[i][j];
+				}
+				else if(minc2>dp[i][j])
+				{
+					minc2=dp[i][j];
+				}
+			}
+			minc=minc2;
+		}
+		minc=dp[n-1][0];
+		for(i=1;i<m;i++)
+		{
+			if(dp[n-1][i]<minc)
+			{
+				minc=dp[n-1][i];
+			}
+		}
+		cout<<minc<<endl;
+	}
+	return 0;
+}

@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(int i=0;i<n;i++)
+#define REPN(i, n)	for(int i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+
+#define MAX			1010
+#define INF			(1 << 30)
+
+using namespace std;
+
+int n, m, q, A[MAX][MAX], a[MAX], b[MAX], lg2[MAX];
+int S[MAX][MAX][10][10], ret[MAX], M[MAX][MAX];
+
+int pw(int x){
+	return 1 << x;
+}
+
+void init(){
+	REPN(i, n){
+		REPN(j, m){
+			S[i][j][0][0] = A[i][j];
+		}
+	}
+	for(int i=0;(1 << i)<=n;i++){
+		for(int j=0;(1 << j)<=m;j++){
+			for(int x=1;x+pw(i)-1<=n;x++){
+				for(int y=1;y+pw(j)-1<=m;y++){
+					// it++;
+					// cout << i << " " << j << ' ' << x << " " << y << endl;
+					// if(it == 3) return;
+					if(i == 0 && j == 0);
+					else if(i == 0){
+						S[x][y][i][j] = max(S[x][y][i][j-1], S[x][y+pw(j-1)][i][j-1]);
+					}
+					else if(j == 0){
+						S[x][y][i][j] = max(S[x][y][i-1][j], S[x+pw(i-1)][y][i-1][j]);
+					}
+					else{
+						// cout << "HELLO\n";
+						int a = max(S[x][y][i-1][j-1], S[x+pw(i-1)][y][i-1][j-1]);
+						int b = max(S[x][y+pw(j-1)][i-1][j-1], S[x+pw(i-1)][y+pw(j-1)][i-1][j-1]);
+						S[x][y][i][j] = max(a, b);
+						// cout << "@!#!@ " << x << ' ' << y << ' ' << i << ' ' << j << " " ;
+						// cout << S[x][y][i][j] << '\n';
+					}
+				}
+				// cout << endl;
+			}
+		}
+	}
+}
+
+int get(int x, int y, int X, int Y){
+	int l1 = lg2[X - x + 1];
+	int l2 = lg2[Y - y + 1];
+	int p1 = (1 << l1);
+	int p2 = (1 << l2);
+	int a = S[x][y][l1][l2];
+	int b = S[X-p1+1][y][l1][l2];
+	int c = S[x][Y-p2+1][l1][l2];
+	int d = S[X-p1+1][Y-p2+1][l1][l2];
+	return max(max(a, b), max(c, d));
+}
+
+int sum(int x, int y, int X, int Y){
+	int r1 = M[X][Y];
+	int r2 = M[X][y-1];
+	int r3 = M[x-1][Y];
+	int r4 = M[x-1][y-1];
+	return r1 - r2 - r3 + r4;
+}
+
+int main(){
+	REP(i, MAX){
+		lg2[i] = log2(i);
+	}
+	int x, y, X, Y;
+	scanf("%d %d", &n, &m);
+	REPN(i, n){
+		REPN(j, m){
+			scanf("%d", &A[i][j]);
+			M[i][j] = A[i][j] + M[i-1][j] + M[i][j-1] - M[i-1][j-1];
+		}
+	}
+	init();
+	scanf("%d", &q);
+	REPN(i, q){
+		scanf("%d %d", &a[i], &b[i]);
+		ret[i] = INF;
+	}
+	int ans = 0;
+	REPN(i, n){
+		REPN(j, m){
+			REPN(k, q){
+				x = i, y = j;
+				X = i + a[k] - 1, Y = j + b[k] - 1;
+				if(X > n || Y > m) continue;
+				ans = (X - x + 1) * (Y - y + 1) * get(x, y, X, Y);
+				ans = ans - sum(x, y, X, Y);
+				ret[k] = min(ret[k], ans);
+			}
+		}
+	}
+	REPN(i, q){
+		printf("%d\n", ret[i]);
+	}
+	return 0;
+}

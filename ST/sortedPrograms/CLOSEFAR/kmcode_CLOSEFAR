@@ -1,0 +1,394 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+
+
+class MIN_SEG{
+public:
+	vector<long long int> seg;
+	int SIZE;
+
+private:
+	inline void add(int b, int l, int r, int ll, long long int x){
+		if (l <= ll&&ll < r){
+			if (l + 1 == r){
+				seg[b] = x;
+				return;
+			}
+			if (l + 1 < r){
+				add(b * 2 + 1, l, (l + r) >> 1, ll, x);
+				add(b * 2 + 2, (l + r) >> 1, r, ll, x);
+				seg[b] = min(seg[b * 2 + 1], seg[b * 2 + 2]);
+			}
+		}
+	}
+	inline long long int query(int b, int l, int r, int ll, int rr){
+		if (r <= ll || rr <= l){
+			return LLONG_MAX;
+		}
+		if (ll <= l&&r <= rr){
+			return seg[b];
+		}
+		return min(query(b * 2 + 1, l, (l + r) >> 1, ll, rr), query(b * 2 + 2, (l + r) >> 1, r, ll, rr));
+	}
+public:
+	void add(int l, int x){
+		add(0, 0, SIZE, l, x);
+	}
+	long long int query(int l, int r){
+		return query(0, 0, SIZE, l, r);
+	}
+	void init(int s){
+		SIZE = s;
+		seg.assign(SIZE * 4, LLONG_MAX);
+	}
+};
+
+class MAX_SEG{
+public:
+	vector<long long int> seg;
+	int SIZE;
+
+private:
+	inline void add(int b, int l, int r, int ll, long long int x){
+		if (l <= ll&&ll < r){
+			if (l + 1 == r){
+				seg[b] = x;
+				return;
+			}
+			if (l + 1 < r){
+				add(b * 2 + 1, l, (l + r) >> 1, ll, x);
+				add(b * 2 + 2, (l + r) >> 1, r, ll, x);
+				seg[b] = max(seg[b * 2 + 1], seg[b * 2 + 2]);
+			}
+		}
+	}
+	inline long long int query(int b, int l, int r, int ll, int rr){
+		if (r <= ll || rr <= l){
+			return LLONG_MIN;
+		}
+		if (ll <= l&&r <= rr){
+			return seg[b];
+		}
+		return max(query(b * 2 + 1, l, (l + r) >> 1, ll, rr), query(b * 2 + 2, (l + r) >> 1, r, ll, rr));
+	}
+public:
+	void add(int l, int x){
+		add(0, 0, SIZE, l, x);
+	}
+	long long int query(int l, int r){
+		return query(0, 0, SIZE, l, r);
+	}
+	void init(int s){
+		SIZE = s;
+		seg.assign(SIZE * 4, LLONG_MIN);
+	}
+};
+
+MIN_SEG mins;
+MAX_SEG maxs;
+
+#define MAX 35002*2
+
+#define SQ 1000
+
+vector<int> v[MAX];
+
+int w[MAX];
+int n;
+
+bool use[MAX];
+int dep[MAX];
+
+#define MAX_LOG 20
+int lcc[MAX_LOG][MAX];
+
+int star[MAX];
+int en[MAX];
+int ord;
+
+
+vector<int> ar;
+
+inline void dfs(int b, int d = 0, int pr = -1){
+	use[b] = true;
+	dep[b] = d;
+	lcc[0][b] = pr;
+	star[b] = ord;
+	ord++;
+	ar.push_back(b);
+	for (int i = 0; i < v[b].size(); i++){
+		if (use[v[b][i]] == false)dfs(v[b][i], d + 1, b);
+	}
+		ar.push_back(b);
+		en[b] = ord;
+		ord++;
+}
+
+void init(){
+	for (int i = 0; i + 1 < MAX_LOG; i++){
+		for (int j = 0; j < n; j++){
+			if (lcc[i][j] == -1){
+				lcc[i + 1][j] = -1;
+				continue;
+			}
+			lcc[i + 1][j] = lcc[i][lcc[i][j]];
+		}
+	}
+}
+int lca(int a, int b){
+	if (dep[a] < dep[b]){
+		swap(a, b);
+	}
+	for (int i = 0; i < MAX_LOG; i++){
+		if (((dep[a] - dep[b]) >> i) & 1){
+			a = lcc[i][a];
+		}
+	}
+	if (a == b){
+		return a;
+	}
+	for (int i = MAX_LOG - 1; i >= 0; i--){
+		if (lcc[i][a] != lcc[i][b]){
+			a = lcc[i][a];
+			b = lcc[i][b];
+		}
+	}
+	return lcc[0][a];
+}
+
+int ans[MAX];
+struct st{
+	int x;
+	int y;
+	int id;
+	st(int x_, int y_, int id_){
+		x = x_;
+		y = y_;
+		id = id_;
+	}
+};
+vector<st> q_f;
+vector<st > q_c;
+
+char buf[12];
+
+namespace F{
+	int MI[MAX];
+	int MA[MAX];
+	vector<pair<int, int> > ev[MAX];
+	inline void dfs3(int b){
+		mins.add(dep[b], w[b]);
+		maxs.add(dep[b], w[b]);
+		for (int j = 0; j < ev[b].size(); j++){
+			int tmp = mins.query(dep[ev[b][j].first], dep[b] + 1);
+			MI[ev[b][j].second] = min(MI[ev[b][j].second], tmp);
+			tmp = maxs.query(dep[ev[b][j].first], dep[b] + 1);
+			MA[ev[b][j].second] = max(MA[ev[b][j].second], tmp);
+		}
+		for (int i = 0; i < v[b].size(); i++){
+			if (dep[b]<dep[v[b][i]]){
+				dfs3(v[b][i]);
+			}
+		}
+	}
+	void solve(){
+		mins.init(MAX);
+		maxs.init(MAX);
+		for (int i = 0; i < MAX; i++){
+			MI[i] = 1000000000;
+			MA[i] = -1;
+		}
+		for (int i = 0; i < q_f.size(); i++){
+			int lc = lca(q_f[i].x, q_f[i].y);
+			ev[q_f[i].x].push_back(make_pair(lc, i));
+			ev[q_f[i].y].push_back(make_pair(lc, i));
+		}
+		dfs3(0);
+		for (int i = 0; i < q_f.size(); i++){
+			ans[q_f[i].id] = MA[i] - MI[i];
+		}
+	}
+}
+
+
+struct Q{
+	int l;
+	int r;
+	int id;
+	Q(int l_, int r_, int id_){
+		l = l_;
+		r = r_;
+		id = id_;
+	}
+};
+
+bool cmp(Q a, Q b){
+	if (a.l / SQ == b.l / SQ){
+		return a.r < b.r;
+	}
+	return a.l / SQ < b.l / SQ;
+}
+
+
+bool flag[MAX];
+map<int, int> mp;
+
+priority_queue<pair<int, pair<int, int> >, vector<pair<int, pair<int, int> > >, greater<pair<int, pair<int, int> > > > qq;
+
+
+namespace C{
+	vector<Q> q;
+	void add(int val){
+		if (flag[val] == false){
+			flag[val] = true;
+			mp[w[val]]++;
+			auto it = mp.find(w[val]);
+			if ((*it).second == 1){
+				if (it != mp.begin()){
+					auto itt = it;
+					itt--;
+					int a1 = (*itt).first;
+					int a2 = (*it).first;
+					qq.push(make_pair(a2 - a1, make_pair(a1, a2)));
+				}
+				auto ittt = it;
+				ittt++;
+				if (ittt != mp.end()){
+					int a1 = (*it).first;
+					int a2 = (*ittt).first;
+					qq.push(make_pair(a2 - a1, make_pair(a1, a2)));
+				}
+			}
+		}
+		else{
+			flag[val] = false;
+			mp[w[val]]--;
+			auto it = mp.find(w[val]);
+			if ((*it).second == 0){
+				mp.erase(it);
+			}
+			it = mp.lower_bound(w[val]);
+			if (it != mp.end() && it != mp.begin()){
+				int a1;
+				int a2 = (*it).first;
+				it--;
+				a1 = (*it).first;
+				qq.push(make_pair(a2 - a1, make_pair(a1, a2)));
+			}
+		}
+	}
+	void solve(){
+		for (int i = 0; i < q_c.size(); i++){
+			int x = q_c[i].x;
+			int y = q_c[i].y;
+			if (dep[x]>dep[y]){
+				swap(x, y);
+			}
+			int lc = lca(x, y);
+			if (lc == x){
+				q.push_back(Q(en[y], en[x], q_c[i].id));
+			}
+			else{
+				if (star[x] > star[y]){
+					swap(x, y);
+				}
+				q.push_back(Q(en[x], star[y], q_c[i].id));
+			}
+		}
+		sort(q.begin(), q.end(), cmp);
+		int lef = 0;
+		int rig = 1;
+		add(ar[0]);
+		add(ar[1]);
+		for (int i = 0; i < q.size(); i++){
+			while (lef>q[i].l){
+				add(ar[lef - 1]);
+				lef--;
+			}
+			while (rig < q[i].r){
+				add(ar[rig + 1]);
+				rig++;
+			}
+			while (lef < q[i].l){
+				add(ar[lef]);
+				lef++;
+			}
+			while (rig > q[i].r){
+				add(ar[rig]);
+				rig--;
+			}
+			int lc = lca(ar[q[i].l], ar[q[i].r]);
+			if (en[lc] != q[i].r){
+				add(ar[star[lc]]);
+			}
+			while (1){
+				int a = qq.top().second.first;
+				int b = qq.top().second.second;
+				if (mp.count(a) == 0 || mp.count(b) == 0)qq.pop();
+				else break;
+			}
+			if(en[lc]!=q[i].r)add(ar[star[lc]]);
+			ans[q[i].id] = qq.top().first;
+		}
+	}
+}
+
+
+
+#include<sys/resource.h>
+namespace STACK_INCREACE{
+	void INCREACE(rlim_t kStackSize = 256 * 1024 * 1024){
+		struct rlimit rl;
+		int result;
+		result = getrlimit(RLIMIT_STACK, &rl);
+		if (result == 0){
+			if (rl.rlim_cur < kStackSize){
+				rl.rlim_cur = kStackSize;
+				result = setrlimit(RLIMIT_STACK, &rl);
+				if (result)puts("error");
+			}
+		}
+	}
+	//http://stackoverflow.com/questions/2275550/change-stack-size-for-a-c-application-in-linux-during-compilation-with-gnu-com
+}
+
+int main(){
+	STACK_INCREACE::INCREACE();
+	cin >> n;
+	for (int i = 0; i < n; i++){
+		scanf("%d", &w[i]);
+	}
+	for (int i = 1; i < n; i++){
+		int u, vv;
+		scanf("%d%d", &u, &vv);
+		u--;
+		vv--;
+		v[u].push_back(vv);
+		v[vv].push_back(u);
+	}
+	dfs(0);
+	init();
+	int q;
+	cin >> q;
+	for (int i = 0; i < q; i++){
+		scanf("%s", buf);
+		int x, y;
+		scanf("%d%d", &x, &y);
+		x--;
+		y--;
+		if (buf[0] == 'F'){
+			q_f.push_back(st(x, y, i));
+		}
+		if (buf[0] == 'C'){
+			q_c.push_back(st(x, y, i));
+		}
+	}
+	F::solve();
+	C::solve();
+	for (int i = 0; i < q; i++){
+		printf("%d\n", ans[i]);
+	}
+	return 0;
+}

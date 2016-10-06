@@ -1,0 +1,62 @@
+#include <iostream>
+
+using namespace std;
+
+const int MAX_V = 10000;
+
+int grundy[MAX_V + 1];
+int visited[MAX_V + 1];
+
+int mex(int state)
+{
+    if (state < 2)
+        return 0;
+
+    if (grundy[state] != -1)
+        return grundy[state];
+
+    for (int i = 0; i <= state; ++i)
+    {
+        int j = state - i - 2;
+
+        if (j < 0)
+            continue;
+
+        if (i > j)
+            continue;
+
+        visited[ mex(i) ^ mex(j) ] = state;
+    }
+
+    grundy[state] = 0;
+
+    while (visited[ grundy[state] ] == state)
+        grundy[state]++;
+
+    return grundy[state];
+}
+
+int main()
+{
+    for (int i = 0; i <= MAX_V; ++i)
+    {
+        grundy[i] = -1;
+        visited[i] = 0;
+    }
+
+    int T, N;
+
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N;
+
+        if (mex(N))
+            cout << "Arjuna\n";
+        else
+            cout << "Bhima\n";
+    }
+
+    return 0;
+}

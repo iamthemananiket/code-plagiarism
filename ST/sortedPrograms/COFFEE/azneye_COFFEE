@@ -1,0 +1,105 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MAX = 5111;
+const ll INF = 1LL << 60;
+ll pr[MAX], dp[MAX]; //# of coffees, last_coffee
+int code[MAX];
+ll sum[MAX];
+
+void chmax(ll& a, ll b) {
+  if (b > a) {
+    a = b;
+  }
+}
+
+void solve(int test_num) {
+  int N, K, D, M;
+  cin >> N >> K >> D >> M;
+  for (int i = 1; i <= N; ++i) {
+    cin >> code[i];
+  }
+  sum[0] = 0;
+  for (int i = 1; i <= N; ++i) {
+    sum[i] = sum[i - 1] + code[i];
+  }
+  memset(pr, 0xC0, sizeof(pr));
+  for (int i = 1; i <= N; ++i) {
+    pr[i] = sum[i - 1];
+  }
+  for (int k = 2; k <= K; ++k) {
+    static ll val[MAX], best[MAX];
+    for (int j = 1; j <= N; ++j) {
+      val[j] = pr[j] - M * sum[j];
+    }
+    best[0] = -INF;
+    for (int j = 1; j + D <= N; ++j) {
+      best[j] = pr[j] + M * (sum[j + D] - sum[j]) - sum[j + D];
+      chmax(best[j], best[j - 1]);
+    }
+    static deque<int> deq;
+    deq.clear();
+    deq.push_back(k - 1);
+    memset(dp, 0xC0, sizeof(dp));
+    for (int j = k; j <= N; ++j) {
+      while (deq.front() < j - D) {
+        deq.pop_front();
+      }
+      if (j - D - 1 >= 1) {
+        chmax(dp[j], sum[j - 1] + best[j - D - 1]);
+      }
+      chmax(dp[j], M * sum[j - 1] + val[deq.front()]);
+      while (!deq.empty() && val[j] >= val[deq.back()]) {
+        deq.pop_back();
+      }
+      deq.push_back(j);
+    }
+    //plnarr(dp, dp + N + 1);
+    memcpy(pr, dp, sizeof(dp));
+  }
+  //plnarr(dp, K + 1, N + 1);
+  ll res = 0;
+  for (int i = K; i <= N; ++i) {
+    ll now = pr[i];
+    now += M * (sum[min(N, i + D)] - sum[i]);
+    now += sum[N] - sum[min(N, i + D)];
+    chmax(res, now);
+  }
+  cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

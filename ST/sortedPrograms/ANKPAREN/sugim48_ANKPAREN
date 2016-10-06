@@ -1,0 +1,88 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+int INF = INT_MAX / 3;
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+bool balanced(string& S) {
+	int x = 0;
+	for (int i = 0; i < S.length(); i++) {
+		if (S[i] == '(') x++;
+		else x--;
+		if (x < 0) return false;
+	}
+	return x == 0;
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		string S; cin >> S;
+		int K; cin >> K;
+		if (!balanced(S)) {
+			if (K == 1) cout << S << endl;
+			else cout << -1 << endl;
+			continue;
+		}
+		string s;
+		vector<int> a;
+		char c = ' ';
+		for (int i = 0; i < S.length(); i++)
+			if (S[i] != c) {
+				s.push_back(S[i]);
+				a.push_back(i);
+				c = S[i];
+			}
+		int x = 0, y = s.length() + 1;
+		int i = -1;
+		for (int j = 0; j < s.length(); j++) {
+			if (s[j] == '(') {
+				y--;
+				if (y == K) {
+					i = a[j];
+					break;
+				}
+			}
+			if (s[j] == ')') {
+				x++;
+				if (x == K) {
+					i = a[j];
+					break;
+				}
+			}
+		}
+		if (i == -1) {
+			cout << -1 << endl;
+			continue;
+		}
+		S.erase(S.begin() + i);
+		cout << S << endl;
+	}
+}

@@ -1,0 +1,38 @@
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+inline int ANG( int hh, int mm )
+{
+        int  ang = abs( 60*hh - 11*mm );
+        if( ang < 360 )  return ang ;
+        return 720-ang ;
+}
+
+int main()
+{
+        vector<pair<int,int>>  times[361] ;
+
+        for( int hh=0; hh<12; hh++ )
+        for( int mm=0; mm<60; mm++ )
+                times[ ANG(hh,mm) ].push_back( {hh,mm} );
+
+        for( int i=0; i<361; i++ )
+                sort( times[i].begin(), times[i].end() );
+
+        int  t, angle;
+        float  f ;
+
+        for( scanf("%d",&t) ;  t-- ;  )
+        {
+                scanf( "%f", &f );
+                f *= 2 ;
+                angle = (int)(f) ;
+                if( fabs(f-angle)*60 < 1 )
+                        for( auto &z: times[angle] )
+                                printf( "%02d:%02d\n", z.first, z.second );
+        }
+
+        return 0;
+} 

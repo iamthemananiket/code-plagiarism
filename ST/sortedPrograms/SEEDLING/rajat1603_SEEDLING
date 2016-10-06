@@ -1,0 +1,85 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 105;
+const int S = 105;
+const int COST = 105;
+const int mod = 1e9 + 7;
+int t;
+int n , s;
+int a[N];
+int b[N];
+int c[N];
+int dp[N][S][20001];
+int dp2[N][S];
+int add(int a , int b){
+    int res = a + b;
+    if(res >= mod){
+        return res - mod;
+    }
+    return res;
+}
+int solve2(int pos , int area);
+/*int solve(int pos , int area , int profit){
+    if(area < 0){
+        return 0;
+    }
+    if(!pos){
+        return (profit > 0);
+    }
+    if(profit > 10000){
+        return solve2(pos , area);
+    }
+    if(dp[pos][area][profit + 10000] != -1){
+        return dp[pos][area][profit + 10000];
+    }
+    return dp[pos][area][profit + 10000] = add(solve(pos - 1 , area , profit) , solve(pos , area - a[pos] , profit - b[pos] + c[pos]));
+}*/
+int solve2(int pos , int area){
+    if(area < 0){
+        return 0;
+    }
+    if(!pos){
+        return 1;
+    }
+    if(dp2[pos][area] != -1){
+        return dp2[pos][area];
+    }
+    return dp2[pos][area] = add(solve2(pos - 1 , area) , solve2(pos , area - a[pos]));
+}
+inline int get(int pos , int area , int profit){
+    if(area < 0){
+        return 0;
+    }
+    if(!pos){
+        return (profit > 0);
+    }
+    if(profit >= 10000){
+        return solve2(pos , area);
+    }
+    if(profit < -10000){
+        return 0;
+    }
+    return dp[pos][area][profit + 10000];
+}
+int solve(){
+    for(int i = 1 ; i <= n ; ++i){
+        for(int j = 0 ; j <= s ; ++j){
+            for(int k = -10000 ; k <= 10000 ; ++k){
+                dp[i][j][k + 10000] = add(get(i - 1 , j , k) , get(i , j - a[i] , k - b[i] + c[i]));
+            }
+        }
+    }
+    return dp[n][s][10000];
+}
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d %d" , &n , &s);
+        for(int i = 1 ; i <= n ; ++i){
+            scanf("%d %d %d" , a + i , b + i , c + i);
+        }
+        memset(dp2 , -1 , sizeof(dp2));
+        solve2(n , s);
+        printf("%d\n" , solve());
+    }
+} 

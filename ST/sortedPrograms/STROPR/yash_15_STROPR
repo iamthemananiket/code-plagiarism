@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define mod 1000000007
+
+ll a[100005];
+
+ll power(ll b, ll p, ll m) {
+	ll res=1;
+	while(p) {
+		if(p&1)
+			res=res*b%m;
+		b=b*b%m;
+		p>>=1;
+	}
+	return res;
+}
+
+ll inv(int z) {
+	return power(z,mod-2,mod);
+}
+int main() {
+	int t,n,x,i;
+	ll m,ans,fac;
+	cin >> t;
+	while (t--) {
+		cin >> n >> x >> m;
+		m%=mod;
+		for(i=1;i<=n;i++) {
+			scanf("%lld",a+i);
+			a[i]%=mod;
+		}
+		ans=0;fac=1;
+		for(i=0;x;x--,i++){
+			ans = (ans+a[x]*fac)%mod;
+			fac = fac*(m+i)%mod*inv(i+1)%mod;
+		}
+		cout<<ans<<"\n";
+	}
+	return 0;
+}

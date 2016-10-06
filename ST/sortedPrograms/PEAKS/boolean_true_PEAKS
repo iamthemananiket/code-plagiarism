@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+#define N 2000009
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+int A,B;
+bool check(int t[],int sz)
+{
+    int minm=0,maxm=0;
+    for(int i=1;i<sz-1;i++)
+    {
+        if(t[i]>t[i-1]&&t[i]>t[i+1])
+            maxm++;
+        if(t[i]<t[i-1]&&t[i]<t[i+1])
+            minm++;
+    }
+    if(minm==A&&maxm==B)
+        return true;
+    return false;
+}
+int arr[N];
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int n;
+        ll ans=0;
+        scanf("%d%d%d",&n,&A,&B);
+        for(int i=0;i<n;i++)
+            scanf("%d",&arr[i]);
+        int lim=(1<<n);
+        for(int i=1;i<lim;i++)
+        {
+            int tmp=i,ind=0;
+            int vec[n];
+            int k=0;
+            while(tmp!=0)
+            {
+                if(tmp%2==1)
+                    vec[k++]=arr[ind];
+                ind++;
+                tmp/=2;
+            }
+            if(check(vec,k))
+                ans++;
+        }
+        printf("%lld\n",ans);
+    }
+    return 0;
+}

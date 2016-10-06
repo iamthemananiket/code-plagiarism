@@ -1,0 +1,67 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int T;
+
+int n,m;
+
+long long dp[2][100000];
+
+long long price[1000000];
+long long coupon[1000000];
+
+long long* pprice(int x, int y) {
+    return price+(x*m)+y;
+}
+long long* pcoupon(int x, int y) {
+    return coupon+(x*m)+y;
+}
+
+long long fprice(int x, int y) {
+    return (*pprice(x,y));
+}
+long long fcoupon(int x, int y) {
+    return (*pcoupon(x,y));
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&m);
+
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                scanf("%lld",pprice(i,j));
+            }
+        }
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                scanf("%lld",pcoupon(i,j));
+            }
+        }
+
+        int mini = 0;
+
+        for(int j=0; j<m; j++) {
+            dp[0][j] = fprice(0,j);
+            if(dp[0][j] < dp[0][mini]) {
+                mini = j;
+            }
+        }
+
+        for(int i=1; i<n; i++) {
+            int amini = 0;
+            for(int j=0; j<m; j++) {
+                dp[i%2][j] = min(dp[!(i%2)][j]+max(0ll,fprice(i,j)-fcoupon(i-1,j)),dp[!(i%2)][mini]+fprice(i,j));
+                if(dp[i%2][j] < dp[i%2][amini]) amini = j;
+            }
+            mini = amini;
+        }
+
+        printf("%lld\n",dp[!(n%2)][mini]);
+
+    }
+    return 0;
+}

@@ -1,0 +1,14 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		long long n1, n2, m;
+ 		cin>>n1>>n2>>m;
+		if(n1 > n2) swap(n1, n2);
+		long long rem = (m * (m + 1)) / 2;
+		if(n1 >= rem) cout<<n1 + n2 - 2 * rem<<endl;
+		else cout<<n2 - n1<<endl;
+	}
+}

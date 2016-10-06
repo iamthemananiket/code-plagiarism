@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define long long long
+int rint() {int ret;scanf("%d", &ret);return ret;}
+int rlong() {long ret;scanf("%lld", &ret);return ret;}
+
+const int MAX = 2000;
+int cnt[MAX][MAX], rcnt[MAX][MAX];
+int a[MAX];
+
+int main()
+{
+#if _DEBUG
+    freopen("input.txt", "r", stdin);
+#endif
+
+	int n = rint();
+	int m = rint();
+	for (int i = 0; i < n; i++)
+		a[i] = rint();
+
+	//int n = 2000;
+	//int m = 100000;
+	//for (int i = 0; i < n; i++)
+		//a[i] = i % 10;
+
+	for (int i = 0; i < n; i++)
+	{
+		int c = 0;
+		for (int j = i + 1; j < n; j++)
+		{
+			cnt[i][j] = cnt[j][i] = c;
+			if (a[j] < a[i])
+				c++;
+		}
+	}
+
+	for (int i = n - 1; i >= 0; i--)
+	{
+		int c = 0;
+		for (int j = i - 1; j >= 0; j--)
+		{
+			if (a[i] < a[j])
+				cnt[j][i] = cnt[i][j] = c;
+			if (a[j] < a[i])
+				c++;
+		}
+	}
+
+	for (; m > 0; m--)
+	{
+		int l = rint() - 1;
+		int r = rint() - 1;
+		//int l = 0;
+		//int r = n - 1;
+		int ans = 0;
+		for (int i = l + 1; i + 1 < r; i++)
+			ans += cnt[l][i] * cnt[r][i];
+		printf("%d\n", ans);
+	}
+
+    return 0;
+}

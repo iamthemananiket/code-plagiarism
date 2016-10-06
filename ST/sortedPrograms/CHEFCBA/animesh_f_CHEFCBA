@@ -1,0 +1,19 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 1e5 + 5;
+int n, arr[N];
+
+int main(){
+	for(int i = 0; i < 4; i++){
+		cin >> arr[i];
+	}
+	sort(arr, arr + 4);
+	do{
+		if(arr[0] * arr[3] == arr[2] * arr[1]){
+			cout << "Possible\n";
+			return 0;
+		}
+	}while(next_permutation(arr, arr + 4));
+	cout << "Impossible\n";
+}

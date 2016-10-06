@@ -1,0 +1,45 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+
+int main()
+{
+	char s[105];
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		int n;
+		scanf("%d",&n);
+		int ma=1234,mb=1234;
+		while (n--)
+		{
+			scanf("%s",s);
+			int ca=0,cb=0;
+			for (int i=0; s[i]; i++)
+				if (s[i]=='a')
+					ca++;
+				else
+					cb++;
+			ma=min(ma,ca);				
+			mb=min(mb,cb);				
+		}
+		printf("%d\n",min(ma,mb));
+	}
+	return 0;
+}

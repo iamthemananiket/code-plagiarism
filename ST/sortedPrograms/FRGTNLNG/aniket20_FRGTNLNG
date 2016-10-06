@@ -1,0 +1,65 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 2000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+set<string>mp;
+string s[mins];
+string str;
+int main()
+{
+	int t,n,k,i,j,p;
+	sc("%d",&t);
+	while(t--){
+		sc("%d %d",&n,&k);
+		for(i=0;i<n;i++){
+			cin>>s[i];
+		}
+		for(i=0;i<k;i++){
+			sc("%d",&p);
+			for(j=0;j<p;j++){
+				cin>>str;
+			//	cout<<str<<" ";
+				mp.insert(str);
+			}
+		}
+		for(i=0;i<n;i++){
+			if(mp.find(s[i])!=mp.end()){
+				pr("YES ");
+			}
+			else{
+				pr("NO ");
+			}
+		}
+		pr("\n");
+		mp.clear();
+	}
+	return 0;
+}

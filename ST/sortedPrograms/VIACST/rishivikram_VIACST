@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+int x,y,z,k;
+vector<int> adj[100005];
+ll go(int idx, int lft, bool is) {
+	if(idx==z and is and lft==0) return 1;
+	if(lft==0) return 0;
+	ll ret=0;
+	for(auto it:adj[idx]) {
+		if(it==y) ret+=go(it,lft-1,true);
+		else ret+=go(it,lft-1,is);
+	}
+	return ret;
+}
+int main() {
+	// freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	int t;
+	cin>>t;
+	while(t--) {
+		int n,m;
+		scanf("%d%d",&n,&m);
+		for(int i=1;i<=n;i++) adj[i].clear();
+		for(int i=1;i<=m;i++) {
+			int x,y;
+			scanf("%d%d",&x,&y);
+			adj[x].pb(y);
+		}
+		scanf("%d%d%d%d",&x,&y,&z,&k);
+		printf("%lld\n",go(x,k,false));
+	}
+	return 0;
+}

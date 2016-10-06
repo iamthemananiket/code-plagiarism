@@ -1,0 +1,144 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 786433
+#define maxs 786450
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<ll>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+#define base complex<long double>
+
+vector<ll>f1,f2,res;
+ll arr[maxs],b[maxs];
+
+ll power(ll a,ll b){
+	ll t=1;
+	while(b>0){
+		if(b&1){
+			t=(t*a)%N;
+		}
+		a=(a*a)%N;
+		b>>=1;
+	}
+	return t;
+}
+
+void fft(vector<ll>& a){
+	ll len=a.size();
+	for(ll i=0;i<(len/3);i++){
+		f1.pb(i);
+	}
+	ll len1=(len/3);
+	for(ll i=1,j=0;i<len1;i++){
+		ll foo=(len1>>1);
+		for(;j>=foo;foo>>=1){
+			j-=foo;
+		}
+		j+=foo;
+		if(i<j){
+			swap(f1[i],f1[j]);
+		}
+	}
+	ll jmps=len/3;
+	for(ll i=0;i<(len/3);i++){
+		ll t1=f1[i];
+		f2.pb(a[t1]);
+		f2.pb(a[t1+jmps]);
+		f2.pb(a[t1+jmps*2]);
+	}
+	for(ll i=0;i<len;i++){
+		a[i]=f2[i];
+	}
+	ll temp=power(10ll, (N-1)/3);
+	for(ll i=0;i<len;i+=3){
+		ll t1=a[i],t2=a[i+1],t3=a[i+2];
+		a[i]=(t1+t2+t3)%N;
+		a[i+1]=(t1+t2*temp)%N+(t3*temp*temp)%N;
+		ll t4=(temp*temp)%N;
+		a[i+2]=(t1+t2*t4)%N+(t3*t4*t4)%N;
+	}
+	for(ll i=6;i<=len;i<<=1){
+		ll temp=power(10ll, (N-1)/i);
+		for(ll j=0;j<len;j+=i){
+			ll t2=1;
+			for(ll k=0;k<i/2;k++){
+				ll u=a[j+k],v=(a[j+k+i/2]*t2)%N;
+				a[j+k]=(u+v)%N;
+				a[j+k+i/2]=(u-v+N)%N;
+				t2*=temp;
+				if(t2>=N){
+					t2%=N;
+				}
+			}
+		}
+	}
+}
+ll ans[maxs];
+vector<ll>F;
+int main()
+{
+	ll n,i,j,k,q, a0,a1=0;
+	sc("%lld",&n);
+
+	for(i=0;i<=n;i++){
+		sc("%lld",&arr[i]);
+		a1+=arr[i];
+		if(a1>=N){
+			a1%=N;
+		}
+	}
+	a0=arr[0]%N;
+	sc("%lld",&q);
+	for(i=0;i<q;i++){
+		sc("%lld",&b[i]);
+	}
+	ll t1=(N-1)-(n+1);
+	for(i=0;i<=n;i++){
+		F.pb(arr[i]);
+	}
+	for(i=0;i<t1;i++){
+		F.pb(0);
+	}
+	fft(F);
+	ll t2=1;
+	for(i=0;i<N;i++){
+		ans[t2]=F[i];
+		t2=(t2*10)%N;
+	}
+//	cout<<F[N-1]<<" "<<power(10,N-1)<<" ";
+	for(i=0;i<q;i++){
+		if(b[i]==0){
+			pr("%lld\n",a0);
+		}
+		else if(b[i]==1){
+			pr("%lld\n",a1);
+		}
+		else{
+			pr("%lld\n", ans[b[i]]);
+		}
+	}
+	return 0;
+}

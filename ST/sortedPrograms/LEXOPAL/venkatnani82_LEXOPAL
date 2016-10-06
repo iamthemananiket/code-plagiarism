@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		string s;
+		cin >> s;
+		int len = s.length();
+		int l = 0, r = len - 1;
+		bool ok = true;
+		while(l <= r) {
+			if(s[l] == '.' && s[r] != '.') s[l] = s[r];
+			else if(s[l] != '.' && s[r] == '.') s[r] = s[l];
+			else if(s[l] == '.' && s[r] == '.') s[l] = s[r] = 'a';
+			else if(s[l] != s[r]) {
+				ok = false;
+				break;
+			}
+			l++, r--;
+		}
+		if(!ok) printf("-1\n");
+		else cout << s << endl;
+	}
+}

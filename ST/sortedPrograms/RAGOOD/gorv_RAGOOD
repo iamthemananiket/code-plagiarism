@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	ios::sync_with_stdio(false);
+	int t;
+	cin>>t;
+	while(t--){
+		int n;
+		cin>>n;
+		vector<int> starting;
+		vector<int> ending;
+		vector<pair<int,int>> intervals;
+		for(int i=0;i<n;i++){
+			int x;
+			cin>>x;
+			starting.push_back(x);
+		}
+		for(int i=0;i<n;i++){
+			int x;
+			cin>>x;
+			ending.push_back(x);
+			intervals.push_back(make_pair(ending[i],starting[i]));
+		}
+		sort(intervals.begin(),intervals.end());
+		int ans = 1;
+		int cursor=intervals[0].first;
+		for(int i=1;i<n;i++){
+    		if(intervals[i].second>=cursor){
+        		ans++;
+        		cursor=intervals[i].first;
+    		}
+		}
+		cout<<ans<<"\n";
+		
+	}
+}

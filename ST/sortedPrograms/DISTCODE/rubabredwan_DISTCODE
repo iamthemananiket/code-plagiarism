@@ -1,0 +1,64 @@
+/*
+__________           .___
+\______   \ ____   __| _/_  _  _______    ____
+ |       _// __ \ / __ |\ \/ \/ /\__  \  /    \
+ |    |   \  ___// /_/ | \     /  / __ \|   |  \
+ |____|_  /\___  >____ |  \/\_/  (____  /___|  /
+        \/     \/     \/              \/     \/
+
+handle	: rubabredwan (Codeforces/CodeChef/HackerRank)
+task 	: ...............
+
+*/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(x,"w",stdout)
+#define SF(x)		scanf("%d", &x)
+#define PF(x)		printf("%d", x)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			100050
+#define INF			1e9
+#define EPS			1e-9
+
+#define xx 			first
+#define yy	 		second
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+
+using namespace std;
+
+typedef long long 		ll;
+typedef unsigned long long	ull;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+char str[10010];
+
+int main(){
+    int tc;
+    scanf("%d", &tc);
+    while(tc--){
+        scanf("%s", str);
+        int s = strlen(str);
+        set<string>st;
+        for(int i=0,j=1;j<s;i++,j++){
+                string f = ""; f += str[i]; f+= str[j];
+                st.insert(f);
+
+        }
+        printf("%d\n", st.size());
+    }
+	return 0;
+}

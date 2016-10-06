@@ -1,0 +1,324 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-9
+//#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+#define right adsgasgadsg
+#define free adsgasdg
+ 
+using namespace std;
+ 
+long tests;
+long memo;
+string st[1<<10];
+long cnt[1<<10];
+long b[1<<10][1<<10];
+long val[1<<10];
+long sum[1<<10];
+vector<pair<double, int> > v;
+vector<long long> zr[1<<10];
+ 
+string temp;
+ 
+inline long get(vector<long long> &v,long id)
+{
+ long s=0;
+ for (int i=0;i<cnt[id];i++)
+ {
+  long long q=0;
+  for (int j=0;j<v.size();j++)
+  {
+   q=q*1000000000ll+v[j];
+   if (q>=b[id][i])q%=b[id][i];
+  }
+  s+=q;
+  if (s>=memo)break;
+ }
+ return s;
+}
+ 
+string zz[20];
+ 
+inline vector<long long> make(string st)
+{
+ reverse(st.begin(),st.end());
+ int need=0;
+ if (st.size()%9)need=9-st.size()%9;
+ st+=zz[need];
+ 
+ reverse(st.begin(),st.end());
+ vector<long long> res;
+ for (int i=0;i<st.size();i+=9)
+ {
+ long q=0;
+ for (int j=i;j<i+9;j++)
+  q=q*10+st[j]-48;
+ res.push_back(q);
+ }
+ return res;
+}
+ 
+long pw[105][1005][105],rem[1005][105];
+ 
+void do_precalc(long id)
+{
+ for (int i=0;i<100;i++)
+  rem[id][i]=0;
+ 
+ for (int i=st[id].size()-1;i+1;--i)
+ {
+  for (int j=0;j<100;j++)
+  {
+      if (i==st[id].size()-1)
+       pw[id][st[id].size()-1][j]=1%b[id][j];
+      else
+       pw[id][i][j]=(pw[id][i+1][j]*10)%b[id][j];
+       
+       rem[id][j]=rem[id][j]+pw[id][i][j]*(st[id][i]-48);
+       rem[id][j]%=b[id][j];
+  }
+ }
+}
+ 
+long orem[105];
+ 
+void tryy1(long id, long aa,long bb)
+{
+ for (int i=0;i<100;i++)
+  orem[i]=rem[id][i];
+ 
+ for (int i=0;i<100;i++)
+ {
+     rem[id][i]+=pw[id][aa][i]*(0+st[id][bb]-st[id][aa]);
+     rem[id][i]+=pw[id][bb][i]*(0+st[id][aa]-st[id][bb]);
+    // if (rem[id][i]<0||rem[id][i]>=b[id][i])
+      rem[id][i]%=b[id][i];
+     if (rem[id][i]<0)rem[id][i]+=b[id][i];
+ }
+ long s1,s2;
+ s1=s2=0;
+ for (int i=0;i<100;i++)
+ {
+  s1+=orem[i];
+  s2+=rem[id][i];
+ }
+ if(s1>s2)// improved
+ {
+  swap(st[id][aa],st[id][bb]);
+  val[id]=s2;
+ }
+ else
+ {
+  for (int i=0;i<100;i++)
+  rem[id][i]=orem[i];
+ }
+}
+ 
+void tryy2(long id, long aa,long bb,long cc)
+{
+ for (int i=0;i<100;i++)
+  orem[i]=rem[id][i];
+ 
+ for (int i=0;i<100;i++)
+ {
+     rem[id][i]+=pw[id][aa][i]*(0+st[id][bb]-st[id][aa]);
+     rem[id][i]+=pw[id][bb][i]*(0+st[id][cc]-st[id][bb]);
+     rem[id][i]+=pw[id][cc][i]*(0+st[id][aa]-st[id][cc]);
+  //   if (rem[id][i]<0||rem[id][i]>=b[id][i])
+     rem[id][i]%=b[id][i];
+     if (rem[id][i]<0)rem[id][i]+=b[id][i];
+ }
+ long s1,s2;
+ s1=s2=0;
+ for (int i=0;i<100;i++)
+ {
+  s1+=orem[i];
+  s2+=rem[id][i];
+ }
+ if(s1>s2)// improved
+ {
+  char temp=st[id][aa];
+  st[id][aa]=st[id][bb];
+  st[id][bb]=st[id][cc];
+  st[id][cc]=temp;
+  val[id]=s2;
+ }
+ else
+ {
+  for (int i=0;i<100;i++)
+  rem[id][i]=orem[i];
+ }
+}
+ 
+ int tries[1000];
+ 
+int main(){
+//freopen("alter.in","r",stdin);
+//freopen("alter.out","w",stdout);
+//freopen("C:/input.txt","r",stdin);
+//freopen("C:/output.txt","w",stdout);
+ios_base::sync_with_stdio(0);
+//cin.tie(0);
+ 
+zz[0]="";
+for (int i=1;i<10;i++)
+ zz[i]=zz[i-1]+"0";
+ 
+cin>>tests;
+getline(cin,st[0]);
+ 
+for (int test=1;test<=tests;test++)
+{
+ cin>>st[test];
+ zr[test]=make(st[test]);
+ cin>>cnt[test];
+/* for (int i=0;i<100;i++)
+  b[test][i]=1;
+  */
+ for (int i=0;i<cnt[test];i++)
+  {cin>>b[test][i];sum[test]+=b[test][i];}
+ sort(b[test],b[test]+cnt[test]);
+ reverse(b[test],b[test]+cnt[test]);
+}
+ 
+for (int test=1;test<=tests;test++)
+{
+    memo=1e9;
+    val[test]=get(zr[test],test);
+}
+ 
+int mag=37;
+ 
+ // step1 
+ v.resize(tests);
+ 
+for (int iter=1;iter<=220*tests;iter++)
+{
+ for (int i=1;i<=tests;i++)
+ v[i-1]=make_pair(1.0*val[i]/sum[i]+tries[i]*0.000,i);
+ sort(v.begin(),v.end());
+ reverse(v.begin(),v.end());
+ int ps=rand()%mag;//((tests+1)/2);
+ int id=v[ps].second;
+ tries[id]++;
+ string temp=st[id];
+ random_shuffle(temp.begin(),temp.end());
+ vector<long long> vv=make(temp);
+ memo=val[id];
+ long res=get(vv,id);
+ 
+ if (res<val[id])
+ {
+  val[id]=res;
+  st[id]=temp;
+  zr[id]=vv;
+ }
+}
+//cout<<"^"<<endl;
+// step2, swaps
+for (int i=1;i<=tests;i++)
+{
+ do_precalc(i);
+}
+//cout<<"#"<<endl;
+ 
+ // 1-2
+for (int iter=1;iter<=7000;iter++)
+{
+    /*
+ v.clear();
+ for (int i=1;i<=tests;i++)
+ v.push_back(make_pair(1.0*val[i]/sum[i],i));
+ sort(v.begin(),v.end());
+ reverse(v.begin(),v.end());
+ */
+ for (int ii=0;ii<tests;ii++)
+ {
+     int i=ii+1;
+     int a,b;
+     a=rand()%st[i].size();
+     b=rand()%st[i].size();
+    if (b==a){b=b+1;b%=st[i].size();}
+     if (st[i][a]==st[i][b])continue;
+     tryy1(i,a,b);
+ }
+}
+ 
+// 1-2-3
+ 
+ 
+for (int iter=1;iter<=7500;iter++)
+{
+    /*
+ v.clear();
+ for (int i=1;i<=tests;i++)
+ v.push_back(make_pair(1.0*val[i]/sum[i],i));
+ sort(v.begin(),v.end());
+ reverse(v.begin(),v.end());
+ */
+ for (int ii=0;ii<tests;ii++)
+ {
+     int i=ii+1;
+     int a,b,c;
+     a=rand()%st[i].size();
+     b=rand()%st[i].size();
+     c=rand()%st[i].size();
+     tryy2(i,a,b,c);
+ }
+}
+ 
+ 
+ // 1-2 again
+for (int iter=1;iter<=2300;iter++)
+{
+    /*
+ v.clear();
+ for (int i=1;i<=tests;i++)
+ v.push_back(make_pair(1.0*val[i]/sum[i],i));
+ sort(v.begin(),v.end());
+ reverse(v.begin(),v.end());
+ */
+ for (int ii=0;ii<tests;ii++)
+ {
+     int i=ii+1;
+     int a,b;
+     a=rand()%st[i].size();
+     b=rand()%st[i].size();
+    if (b==a){b=b+1;b%=st[i].size();}
+     if (st[i][a]==st[i][b])continue;
+     tryy1(i,a,b);
+ }
+}
+ 
+for (int i=1;i<=tests;i++)
+ cout<<st[i]<<endl;
+ 
+cin.get();cin.get();
+return 0;}

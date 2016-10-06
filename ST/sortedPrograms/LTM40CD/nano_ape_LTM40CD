@@ -1,0 +1,47 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <bitset>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define travel(x) for(edge *p=fir[x]; p; p=p->n)
+#define all(x) (x).begin,(x).end
+#define pb push_back
+#define fi first
+#define se second
+#define l(x) Left[x]
+#define r(x) Right[x]
+#define lowbit(x) (x&-x)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> Pii;
+typedef pair<ll,int> Pli;
+typedef long double ld;
+typedef unsigned long long ull;
+
+inline int read()
+{
+    int x=0; bool f=0; char ch=getchar();
+    while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+    while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+    return f?-x:x;
+}
+
+#define maxn 20009
+
+struct node{int A,B,C;} p[maxn];
+
+int main()
+{
+	int R=read(), cnt=0; R*=2;
+	rep(A, 1, 200) rep(B, A, 200) rep(C, B, 200) if ( 1LL*(+A+B-C)*(+A-B+C)*(-A+B+C) == 1LL*R*R*(A+B+C) ) p[++cnt]=(node){A,B,C};
+	printf("%d\n", cnt);
+	rep(i, 1, cnt) printf("%d %d %d\n", p[i].A, p[i].B, p[i].C);
+	
+    return 0;
+}

@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+ll gcd(ll a, ll b) {ll r; while (b != 0) {r = a % b; a = b; b = r;} return a;}
+ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+#define EPS 1e-9
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = 2 * acos((ld) 0);
+ 
+const int maxn = 100010;
+const int maxk = 30;
+int M;
+int U12, U23;
+int x[maxn];
+int y[maxn];
+int K, C;
+int c[maxk];
+int b[maxk];
+int p[maxk];
+int dmin[maxk];
+int dmax[maxk];
+int cnt[maxk];
+bool isprime[maxn];
+vi prime;
+ 
+void solve() {
+	ms(isprime, 1); FOR(i, 2, maxn) if (isprime[i]) {prime.pb(i); for (ll j = 1LL * i * i; j < maxn; j += i) isprime[j] = 0;}
+	double pro = 0.5 * (prime.back() - prime[0]) / sz(prime);
+	scanf("%d", &M);
+	scanf("%d", &U12);
+	FOR(i, 0, U12) scanf("%d", x + i);
+	scanf("%d", &U23);
+	FOR(i, 0, U23) scanf("%d", y + i);
+	pro = (pro + 1.0 + 1.0 * (x[U12 - 1] - x[0]) / U12 + 1.0 * (y[U23 - 1] - y[0]) / U23) / 4;
+	int T; scanf("%d", &T);
+	while (T--) {
+		ms(cnt, 0); ms(dmin, 0x3f); ms(dmax, 0);
+		scanf("%d%d", &K, &C);
+		FOR(i, 0, K) scanf("%d", c + i);
+		FOR(i, 0, K) scanf("%d", b + i);
+		ld psum = 0;
+		FOR(i, 0, K) {
+			scanf("%d", p + i);
+			psum += 1.0 * p[i] / K;
+		}
+		int flag = 0;
+		FOR(i, 0, K * sqrt(M)) {
+			printf("0\n"); fflush(stdout);
+			int t, id; scanf("%d%d", &t, &id);
+			if (!~t) {flag = 1; break;}
+			cnt[--t]++;
+			dmin[t] = min(dmin[t], id);
+			dmax[t] = max(dmax[t], id);
+		}
+		int tot = 0;
+		FOR(i, 0, K) tot += cnt[i];
+		int ok[maxk]; ms(ok, 0);
+		FOR(i, 0, K) {
+			while (cnt[i] < tot / K) {
+				printf("%d\n", i + 1); fflush(stdout);
+				int t, id; scanf("%d%d", &t, &id);
+				if (!~t) {ok[i] = 1; break;}
+				cnt[--t]++;
+				dmin[t] = min(dmin[t], id);
+				dmax[t] = max(dmax[t], id);
+			}
+		}
+		if (!flag) {
+			FOR(i, 0, K) {
+				int t = dmax[i] - dmin[i];
+				if (cnt[i] && !ok[i]) cnt[i] = min(M, (int) (t + t / cnt[i]));
+			}
+		}
+		printf("-1\n"); fflush(stdout);
+		FOR(i, 0, K) printf("%d ", cnt[i]);
+		printf("\n"); fflush(stdout);
+	}
+}
+ 
+int main() {
+	//ios_base::sync_with_stdio(0); cin.tie(NULL);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

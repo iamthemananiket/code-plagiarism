@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+
+const int N = (int)1e5 + 123;
+typedef long long ll;
+
+using namespace std;
+
+struct tree {
+	ll ans;
+	int sum;
+	int l[3], r[3];
+	tree() {}
+	tree(ll x) {
+		sum = 0;
+		ans = x;
+		for (int i = 0; i < 3; i++)
+			l[i] = r[i] = 0;
+	}
+} t[4 * N];
+
+int n, m;
+char s[N];
+int tp, l, r;
+
+tree tmerge(tree l, tree r) {
+    if (l.ans == -1) {
+		if (r.ans != -1)
+			return r;
+		return tree(-1);
+	}    	
+	if (r.ans == -1)
+		return l;
+	tree now = tree(l.ans + r.ans);
+	now.ans += 1ll * l.r[0] * r.l[0] + 1ll * l.r[1] * r.l[2] + 1ll * l.r[2] * r.l[1];
+	now.sum = (l.sum + r.sum) % 3;
+	for (int i = 0; i < 3; i++) {
+		now.l[i] += l.l[i];
+		now.l[(l.sum + i) % 3] += r.l[i];
+		now.r[i] += r.r[i];
+		now.r[(r.sum + i) % 3] += l.r[i];
+	}
+	return now;
+}
+
+void build(int v = 1, int tl = 0, int tr = n - 1) {
+	if (tl == tr) {
+		int now = (s[tl] - '0') % 3;
+		t[v].l[now]++, t[v].r[now]++;
+		t[v].ans += !now;
+		t[v].sum = now;
+		return;		
+	}
+	int tm = (tl + tr) / 2;
+	build(v * 2, tl, tm);
+	build(v * 2 + 1, tm + 1, tr);
+	t[v] = tmerge(t[v * 2], t[v * 2 + 1]);
+}
+
+void update(int x, int y, int v = 1, int tl = 0, int tr = n - 1) {
+	if (tl == tr) {
+		s[x] = char(y + '0');
+		int now = (s[tl] - '0') % 3;
+		t[v] = tree(0);
+		t[v].l[now]++, t[v].r[now]++;
+		t[v].ans += !now;
+		t[v].sum = now;
+		return;
+	}
+	int tm = (tl + tr) / 2;
+	if (x <= tm)
+		update(x, y, v * 2, tl, tm);
+	else
+		update(x, y, v * 2 + 1, tm + 1, tr);
+	t[v] = tmerge(t[v * 2], t[v * 2 + 1]);
+}
+
+tree get(int l, int r, int v = 1, int tl = 0, int tr = n - 1) {
+	if (tl >= l && tr <= r)
+		return t[v];
+	if (tl > r || l > tr)
+		return tree(-1);
+	int tm = (tl + tr) / 2;
+	return tmerge(get(l, r, v * 2, tl, tm), get(l, r, v * 2 + 1, tm + 1, tr));
+}
+
+int main() {
+    scanf("%d%d\n", &n, &m);
+	gets(s);
+	scanf("\n");
+	build();
+	for (int i = 1; i <= m; i++) {
+		scanf("%d%d%d", &tp, &l, &r);
+		if (tp == 1)
+			update(l - 1, r);
+		else
+			printf("%lld\n", get(l - 1, r - 1).ans);
+	}
+	return 0;
+}

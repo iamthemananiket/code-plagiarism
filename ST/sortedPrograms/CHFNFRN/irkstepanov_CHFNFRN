@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+vector<vector<int> > g;
+vector<int> color;
+
+bool dfs(int v, int c)
+{
+    color[v] = c;
+    for (int to : g[v]) {
+        if (color[to] == -1) {
+            if (!dfs(to, 1 - c)) {
+                return false;
+            }
+        } else if (color[to] != 1 - c) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //ofstream cout("output.txt");
+    //freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        int n, m;
+        cin >> n >> m;
+        g.resize(n);
+        color.assign(n, -1);
+        for (int i = 0; i < n; ++i) {
+            g[i].clear();
+        }
+        vector<vector<char> > e(n, vector<char>(n, false));
+        while (m--) {
+            int u, v;
+            cin >> u >> v;
+            --u, --v;
+            e[u][v] = e[v][u] = true;
+        }
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (!e[i][j] && i != j) {
+                    g[i].pb(j);
+                }
+            }
+        }
+        bool ok = true;
+        for (int i = 0; i < n; ++i) {
+            if (color[i] == -1) {
+                if (!dfs(i, 0)) {
+                    ok = false;
+                    break;
+                }
+            }
+        }
+        cout << (ok ? "YES\n" : "NO\n");
+    }
+
+}

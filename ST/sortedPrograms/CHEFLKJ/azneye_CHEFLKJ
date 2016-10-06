@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+#include <ext/pb_ds/assoc_container.hpp> 
+#include <ext/pb_ds/tree_policy.hpp>
+ 
+using namespace __gnu_pbds;
+ 
+typedef tree< 
+int, 
+int, 
+less<int>, 
+rb_tree_tag, 
+tree_order_statistics_node_update> map_t;
+ 
+typedef long long ll;
+
+const int MAX = 111000;
+unordered_map<int, map_t> pos;
+int arr[MAX];
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int N, Q;
+  cin >> N >> Q;
+  for(int i=1;i<=N;++i)
+    cin >> arr[i];
+  for(int i=1;i<=N;++i)
+    pos[arr[i]].insert({i,i});
+  for(int qq=0,ty;qq<Q;++qq) {
+    cin>>ty;
+    if(ty==1){
+      int x,y;
+      cin >> x >> y;
+      assert(pos[arr[x]].erase(x));
+      arr[x] = y;
+      pos[arr[x]].insert({x,x});
+    }else{
+      int l, r;
+      cin >> l >> r;
+      bool ok = false;
+      for(int its=0;its<50;++its) {
+        const int x = arr[l+rand() % (r-l+1)];
+        const int cnt = pos[x].order_of_key(r+1) - pos[x].order_of_key(l);
+        if (2*cnt>r-l+1) {
+          ok=true;
+          break;
+        }
+      }
+      if(ok) cout << "Yes\n";
+      else cout << "No\n";
+    }
+  }
+  return 0;
+}

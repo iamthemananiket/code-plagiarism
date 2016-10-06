@@ -1,0 +1,377 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+const unsigned int buffer_size = 1 << 16;
+char input_buffer[buffer_size + 1];
+unsigned int bytes_read = 0;
+unsigned int input_index = 0;
+
+inline char next_char() {
+  if (input_index == bytes_read) {
+    bytes_read = fread(input_buffer, sizeof(char), buffer_size, stdin);
+    input_buffer[bytes_read] = '\0'; //sentinel
+    input_index = 0;
+  }
+  return input_buffer[input_index++];
+}
+
+inline int next_int() {
+  char c = 0;
+  int ans = 0;
+  while (c < '-')
+    c = next_char();
+  for (; c >= '0'; c = next_char())
+    ans = (ans << 1) + (ans << 3) + c - '0';
+  return ans;
+}
+
+inline void next_str(char* str) {
+  char c = next_char();
+  while (c > ' ') {
+    *str++ = c;
+    c = next_char();
+  }
+  *str = '\0';
+}
+
+char output_buffer[buffer_size];
+unsigned int output_index = 0;
+
+inline void write_flush() {
+  fwrite(output_buffer, sizeof(char), output_index, stdout);
+  output_index = 0;
+}
+
+inline void write_char(char c) {
+  output_buffer[output_index++] = c;
+  if (output_index == buffer_size)
+    write_flush();
+}
+
+inline void write_int(int num) {
+  if (num >= 10)
+    write_int(num / 10);
+  write_char(num % 10 + '0');
+}
+
+template <class T> struct Treap {
+
+  struct Node {
+    T key;
+    int pri, cnt;
+    Node* left, *right;
+
+    void update() {
+      cnt = leftcnt() + 1 + rightcnt();
+    }
+
+    int leftcnt() {
+      return left ? left->cnt : 0;
+    }
+
+    int rightcnt() {
+      return right ? right->cnt : 0;
+    }
+  };
+  typedef Node* pNode;
+  pNode root = nullptr;
+
+  static pNode make(T val) {
+    pNode ptr = new Node();
+    ptr->key = val;
+    ptr->cnt = 1;
+    ptr->pri = rand();
+    ptr->left = ptr->right = NULL;
+    return ptr;
+  }
+
+  static pNode rotateRight(pNode node) {
+    static pNode temp;
+    temp = node->left;
+    node->left = temp->right;
+    temp->right = node;
+    node->update();
+    return temp;
+  }
+
+  static pNode rotateLeft(pNode node) {
+    static pNode temp;
+    temp = node->right;
+    node->right = temp->left;
+    temp->left = node;
+    node->update();
+    return temp;
+  }
+
+  pNode insert(pNode at, T val) {
+    if (!at)
+      return make(val);
+    else if (val < at->key) {
+      at->left = insert(at->left, val);
+      if (at->left->pri < at->pri)
+        at = rotateRight(at);
+    } else {
+      at->right = insert(at->right, val);
+      if (at->right->pri < at->pri)
+        at = rotateLeft(at);
+    }
+    at->update();
+    return at;
+  }
+
+  pNode erase(pNode at, T val) {
+    if (!at)
+      return NULL;
+    if (val < at->key)
+      at->left = erase(at->left, val);
+    else if (val > at->key)
+      at->right = erase(at->right, val);
+    else {
+      if (at->left == NULL)
+        return at->right;
+      else if (at->right == NULL)
+        return at->left;
+      else if (at->left->pri < at->right->pri) {
+        at = rotateRight(at);
+        at->right = erase(at->right, val);
+      } else {
+        at = rotateLeft(at);
+        at->left = erase(at->left, val);
+      }
+    }
+    at->update();
+    return at;
+  }
+  
+  void clear() {
+    root = nullptr;
+  }
+
+  void erase(T val) {
+    root = erase(root, val);
+  }
+
+  void insert(T val) {
+    root = insert(root, val);
+  }
+
+  T min() {
+    pNode at = root;
+    while (at->left)
+      at = at->left;
+    return at->key;
+  }
+
+};
+ 
+typedef long long ll;
+typedef double dd;
+typedef unsigned int uint;
+
+struct Query {
+  int l, r, lca, id;
+  bool is_down;
+  char type;
+  
+  bool operator<(const Query& q) const {
+    return r < q.r;
+  }
+};
+
+const int LOG = 16;
+const int MAX = 36000;
+int in[MAX], out[MAX];
+int par[LOG][MAX];
+int val[MAX], seq[2*MAX];
+vector<int> adj[MAX]; 
+int res[MAX];
+vector<Query> buckets[256];
+Treap<uint> diffs;
+int bit[MAX];
+vector<int> sorted;
+bool was[MAX];
+
+int get(int pos) {
+  int res = 0;
+  for(int i = pos; i > 0; i -= i&-i)
+    res += bit[i];
+  return res;
+}
+
+int lb(int val) {
+  int res = 0;
+  for(int i = 1 << 15; i > 0; i >>= 1) {
+    if (res + i < MAX && bit[res + i] < val) {
+      val -= bit[res += i];
+    }
+  }  
+  return ++res;
+}
+
+void update(int pos, int val){
+  for(int i = pos; i < MAX; i += i &-i)
+    bit[i] += val;
+}
+
+bool is_anc(int a, int b) {
+  return in[a] <= in[b] && out[b] <= out[a];
+}
+
+int get_lca(int a, int b) {
+  if (is_anc(a,b)) return a;
+  for(int i=LOG-1;i>=0;--i)
+    if(!is_anc(par[i][a],b))
+      a=par[i][a];
+  return par[0][a];
+}
+
+void dfs(int at) {
+  static int next_num = 0;
+  in[at] = next_num++;
+  seq[in[at]] = val[at];
+  for (const int to : adj[at]) {
+    if (to != par[0][at]) {
+      par[0][to] = at;
+      dfs(to);
+    }
+  }
+  out[at] = next_num++;
+  seq[out[at]] = val[at];
+}
+
+void add(int x);
+
+void rem(int x) {
+  if (!was[x]) {
+    add(x);
+    return;
+  }
+  was[x] = false;
+  const int rank = get(x);
+  const int pred = lb(rank - 1);
+  const int succ = lb(rank + 1);
+  update(x, -1);
+  diffs.insert(sorted[succ-1] - sorted[pred-1]);
+  diffs.erase(sorted[x-1] - sorted[pred-1]);
+  diffs.erase(sorted[succ-1] - sorted[x-1]);
+}
+
+void add(int x) {
+  if (was[x]) {
+    rem(x);
+    return;
+  }
+  was[x] = true;
+  update(x, 1);
+  const int rank = get(x);
+  const int pred = lb(rank - 1);
+  const int succ = lb(rank + 1);
+  diffs.erase(sorted[succ-1] - sorted[pred-1]);
+  diffs.insert(sorted[x-1] - sorted[pred-1]);
+  diffs.insert(sorted[succ-1] - sorted[x-1]);
+}
+
+int far() {
+  return sorted[lb(get(sorted.size())-1)-1] - sorted[lb(2) - 1];
+}
+
+int clo() {
+  return diffs.min();
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int N = next_int();
+  for(int v=1;v<=N;++v) {
+    val[v] = next_int();
+    sorted.push_back(val[v]);
+  }
+  sorted.push_back((int)-2e9);
+  sorted.push_back((int)2e9);
+  sort(sorted.begin(), sorted.end());
+  for(int e=0,a,b;e<N-1;++e) {
+    a = next_int();
+    b = next_int();
+    adj[a].push_back(b);
+    adj[b].push_back(a);
+  }
+  par[0][1] = 1;
+  dfs(1);
+  for(int i=0;i+1<LOG;++i)
+    for(int v=1;v<=N;++v)
+      par[i+1][v] = par[i][par[i][v]];
+      
+  for(int i=0;i<2*N;++i) {
+    seq[i] = lower_bound(sorted.begin(), sorted.end(), seq[i]) - sorted.begin() + 1;
+  }
+  int Q;
+  Q = next_int();
+  for(int qq=0,u,v;qq<Q;++qq) {
+    char ty;
+    ty = next_char();
+    while (!isalpha(ty))
+      ty = next_char();
+    u = next_int();
+    v = next_int();
+    if (in[u] > in[v]) {
+      swap(u, v);
+    }
+    const int lca = get_lca(u, v);
+    Query q;
+    q.id = qq;
+    q.type = ty;
+    if (lca == u) {
+      q.is_down = true;
+      q.l = in[u];
+      q.r = in[v];
+    } else {
+      q.is_down = false;
+      q.lca = in[lca];
+      q.l = out[u];
+      q.r = in[v];
+    }
+    buckets[q.l >> 8].push_back(q);
+  }
+  for(auto& bucket : buckets) {
+    if(bucket.empty()) continue;
+    sort(bucket.begin(), bucket.end());
+    memset(bit,0,sizeof(bit));
+    memset(was,false,sizeof(was));
+    diffs.clear();
+    update(1, 1);
+    update(sorted.size(), 1);
+    diffs.insert(uint(4e9));
+    int l = bucket.front().l, r = l;
+    for(const auto& q : bucket) {
+      while (r <= q.r) {
+        add(seq[r++]);
+      }
+      while (l > q.l) {
+        add(seq[--l]);
+      }
+      while (l < q.l) {
+        rem(seq[l++]);
+      }
+      if (!q.is_down) {
+        add(seq[q.lca]);
+      }
+      if (q.type == 'F') {
+        res[q.id] = far();
+      } else {
+        res[q.id] = clo();
+      }
+      if (!q.is_down) {
+        rem(seq[q.lca]); 
+      }
+    }
+  }
+  for(int q=0;q<Q;++q){ 
+    write_int(res[q]);
+    write_char('\n');
+  }
+  write_flush();
+  return 0;
+}

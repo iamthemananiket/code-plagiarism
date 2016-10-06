@@ -1,0 +1,96 @@
+/*
+ * 2013 Codechef December Challenge
+ * Chef and Codes
+ * File:   CHODE.cpp
+ * Author: Andy Y.F. Huang
+ * Created on 2013-12-06, 2:06:00 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace CHODE {
+char fr[33];
+char str[155000];
+int cnt[26], ord[26], rank[26];
+
+void solve(int test_num) {
+  scanf("%s", fr);
+  assert(getchar()=='\n');
+  gets(str);
+  memset(cnt, 0, sizeof(cnt));
+  const int N = strlen(str);
+  for (int i = 0; i < N; i++) {
+    if (islower(str[i])) {
+      cnt[str[i] - 'a']++;
+    }
+    if (isupper(str[i])) {
+      cnt[str[i] - 'A']++;
+    }
+  }
+  for (int c = 0; c < 26; c++)
+    ord[c] = c;
+  for (int i = 0; i < 26; i++)
+    for (int j = 1; j < 26; j++)
+      if (cnt[ord[j - 1]] > cnt[ord[j]])
+        swap(ord[j - 1], ord[j]);
+  for (int i = 0; i < 26; i++)
+    rank[ord[i]] = i;
+  //plnarr(ord, ord + 26);
+  for (int i = 0; i < N; i++) {
+    if (!isalpha(str[i]) && str[i] >= ' ')
+      putchar(str[i]);
+    else if (islower(str[i]))
+      putchar(fr[rank[str[i] - 'a']]);
+    else
+      putchar(toupper(fr[rank[str[i] - 'A']]));
+  }
+  puts("");
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  CHODE::solve();
+  return 0;
+}

@@ -1,0 +1,116 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-11
+//#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 256
+#define right adsgasgadsg
+#define free adsgasdg
+ 
+using namespace std;
+
+long n,k,root,a,b;
+vector<long> g[1<<14];
+long used[1<<14],was[1<<14],prod[1<<14];
+
+long tests,bst,bp;
+long p;
+
+void trace(long v)
+{
+     for (int i=0;i<g[v].size();i++)
+      {
+              int id=g[v][i];
+              if (used[id])continue;
+              used[id]=used[v]+1;
+              trace(id);
+      }
+}
+
+int itr;
+
+inline void solve(long v,long cls)
+{
+ if (prod[v]==p)
+ if (cls>bst||(cls==bst&&v<bp))
+ {
+  bst=cls;
+  bp=v;
+ }
+ 
+ if (cls<bst)return;
+ was[v]=itr;
+ for (int i=0;i<g[v].size();i++)
+ {
+     long q=g[v][i];
+     if (was[q]==itr)continue;
+     solve(q,min(cls,used[q]));
+ }
+}
+
+int main(){
+//freopen("lesson.in","r",stdin);
+//freopen("lesson.out","w",stdout);
+//freopen("C:/input.txt","r",stdin);
+//freopen("C:/output.txt","w",stdout);
+ios_base::sync_with_stdio(0);
+//cin.tie(0);
+
+cin>>n>>k;
+cin>>root;
+for (int i=1;i<n;i++)
+{
+    cin>>a>>b;
+    g[a].push_back(b);
+    g[b].push_back(a);
+}
+
+for (int i=1;i<=n;i++)
+ cin>>prod[i];
+
+used[root]=1;
+trace(root);
+
+cin>>tests;
+if (tests>10000||n>10000)return 1;
+for (;tests;--tests)
+{
+ cin>>a>>p;
+++itr;
+/* for (int i=1;i<=n;i++)
+  was[i]=0;*/
+ bst=-1;
+ bp=1e9;
+ solve(a,used[a]);
+ if (bst>=0)cout<<bp<<"\n";//endl;
+ else cout<<-1<<"\n";//endl;
+}
+
+cin.get();cin.get();
+return 0;}

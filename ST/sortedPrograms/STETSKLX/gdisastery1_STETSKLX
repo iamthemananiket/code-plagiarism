@@ -1,0 +1,164 @@
+//Program: stetsklx
+//Author: gary
+//Date: 07/08/2015
+#include <cstdio>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAXN = 1e5 + 10;
+const int MAXLEN = 51;
+
+
+int T;
+int N;
+int L, R;
+
+set<int> E[MAXN];
+
+int eu[MAXN], ev[MAXN], ew[MAXN], el[MAXN];
+int br[MAXN];
+
+int neighbor(int ei, int u)
+{
+    return eu[ei] == u ? ev[ei] : eu[ei];
+}
+
+// x <= m  --> +1
+// x >  m  --> -1
+
+int sz[MAXN];
+
+int dfs(int u, int p)
+{
+    sz[u] = 1;
+    for(int ei: E[u])
+    {
+        int v = neighbor(ei, u);
+        if(v != p)
+            sz[u] += dfs(v, u);
+    }
+    return sz[u];
+}
+
+int center(int u, int s, int p)
+{
+    for(int ei: E[u])
+    {
+        int v = neighbor(ei, u);
+        if(v != p && sz[v] * 2 > s)
+            return center(v, s, u);
+    }
+    return u;
+}
+
+int explore(int u, int len, int sum, int p, int addflag = 0)
+{
+    int res = -N;
+    for(int i = 0; i < MAXLEN; i++)
+        if(L <= i + len && i + len <= R)
+            res = max(res, br[i] + sum);
+
+    if(addflag)
+        br[len] = max(br[len], sum);
+    
+    for(int ei: E[u])
+    {
+        int v = neighbor(ei, u);
+        if(v != p)
+            res = max(res, explore(v, len + 1, sum + ew[ei], u, addflag));
+    }
+
+    return res;
+}
+
+int daq(int u)
+{
+    int res = -N;
+
+    for(int i = 0; i < MAXLEN; i++)
+        br[i] = -N;
+    br[0] = 0;
+
+    u = center(u, dfs(u, -1), -1);
+    for(int ei: E[u])
+    {
+        res = max(res, explore(neighbor(ei, u), 1, ew[ei], u, 0));
+        explore(neighbor(ei, u), 1, ew[ei], u, 1);
+    }
+
+    for(int ei: E[u])
+    {
+        E[neighbor(ei, u)].erase(ei);
+        res = max(res, daq(neighbor(ei, u)));
+    }
+
+    return res;
+}
+
+int check(int m)
+{
+    for(int i = 1; i <= N; i++)
+        E[i].clear();
+    for(int i = 0; i < N - 1; i++)
+    {
+        E[eu[i]].insert(i);
+        E[ev[i]].insert(i);
+        ew[i] = el[i] <= m ? +1 : -1;
+    }
+    return daq(1) >= 1;
+}
+
+int main()
+{
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%d%d", &N, &L, &R);
+
+        static int et[MAXN];
+        for(int i = 0; i < N - 1; i++)
+        {
+            scanf("%d%d%d", eu + i, ev + i, el + i);
+            et[i] = el[i];
+        }
+
+        sort(et, et + N - 1);
+
+        int lo = 0, hi = N;
+        while(lo < hi)
+        {
+            int mid = (lo + hi) / 2;
+            if(check(et[mid]))
+                hi = mid;
+            else
+                lo = mid + 1;
+        }
+        if(lo == N)
+            printf("%d\n", -1);
+        else
+            printf("%d\n", et[lo]);
+    }
+
+    return 0;
+}

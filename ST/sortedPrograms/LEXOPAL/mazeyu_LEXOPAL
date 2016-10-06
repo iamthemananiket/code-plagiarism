@@ -1,0 +1,29 @@
+#include<bits/stdc++.h>
+#include<iostream>
+#include<string>
+using namespace std;
+string s;
+bool b;
+int t,i,j,l;
+
+int main()
+{
+	cin>>t;
+	for (j=1;j<=t;++j)
+	{
+		cin>>s; 
+		l=s.length(); 
+		b=true;
+		if (l%2!=0 && s[l/2]=='.') s[l/2]='a';  
+		for (i=0;i<=(l/2-1);++i)
+		{
+	      if ((s[i]=='.')&&(s[l-i-1]=='.')){ s[i]='a'; s[l-i-1]='a';}
+	      if ((s[i]=='.')&&(s[l-i-1]!='.')) s[i]=s[l-i-1];
+	      if ((s[l-i-1]=='.')&&(s[i]!='.')) s[l-i-1]=s[i];
+		  if (s[i]!=s[l-i-1]) {b=false; break;}
+	    }
+		if (b) cout<<s<<endl; 
+		else cout<<-1<<endl;
+	}
+ } 
+ 

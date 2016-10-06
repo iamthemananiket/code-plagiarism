@@ -1,0 +1,39 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+
+using namespace std;
+
+int R[110];
+int L[110];
+
+int main(){
+
+	int i,mx,mxr,t,n;
+
+	cin >> t;
+
+
+	while(t--){
+		scanf("%d",&n);
+		mx = 0;
+		mxr = 101;
+
+		for(i = 0; i < n; ++i) scanf("%d",&L[i]);
+		for(i =0 ; i < n; ++i) scanf("%d",&R[i]);
+
+		for(i =0 ; i < n; ++i){
+			if(R[i]*L[i] > mx){
+				mx = R[i]*L[i];
+				mxr = i;
+			}
+
+			if(R[i]*L[i] == mx && R[i] > R[mxr]) mxr = i;
+		}
+
+		printf("%d\n",mxr+1);
+	}
+
+	return 0;
+}

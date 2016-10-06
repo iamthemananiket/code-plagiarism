@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+
+const int INF = 2000000000;
+const int MAX_N = 100005;
+
+int nextInt() {
+	int n;
+	scanf("%d", &n);
+	return n;
+}
+
+struct T {
+	int s, f, p;
+} a[MAX_N];
+
+bool cmp(T a, T b) {
+	if (a.p == b.p) {
+		if (a.s == b.s) {
+			return a.f < b.f;
+		} else {
+			return a.s < b.s;
+		}
+	} else {
+		return a.p < b.p;
+	}
+}
+
+int dp[MAX_N];
+
+int binsearch(int n, int v) {
+	int l = 1;
+	int r = n;
+	int res = 1;
+	while (l <= r) {
+		int m = (l+r) / 2;
+		if (dp[m] > v) {
+			res = m;
+			r = m-1;
+		} else {
+			l = m+1;
+		}
+	}
+	return res;
+}
+
+int main() {
+	int t = nextInt();
+	while (t--) {
+		int N = nextInt();
+		int k = nextInt();
+		for (int i = 0; i < N; i++) {
+			a[i].s = nextInt();
+			a[i].f = nextInt();
+			a[i].p = nextInt();
+		}
+		sort(a, a+N, cmp);
+		int res = 0;
+		for (int l = 0; l < N; l++) {
+			int r = l;
+			while (r+1 < N && a[r+1].p == a[r].p) {
+				r++;
+			}
+			int n = r-l+1;
+			dp[0] = -INF;
+			for (int i = 1; i <= n; i++) {
+				dp[i] = INF;
+			}
+			int maxV = 0;
+			for (int i = l; i <= r; i++) {
+				int j = binsearch(n, a[i].s);
+				if (dp[j-1] < a[i].s && a[i].f-1 < dp[j]) {
+					dp[j] = a[i].f-1;
+					maxV = max(j, maxV);
+				}
+			}
+			res += maxV;
+			l = r;
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}

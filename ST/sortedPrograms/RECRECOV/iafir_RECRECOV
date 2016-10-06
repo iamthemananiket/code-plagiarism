@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int n, m;
+vector< int > adj[105], match;
+bitset< 105 > mark;
+
+bool augmentpath(int v) {
+  if(mark[v])
+    return false;
+  mark[v] = 1;
+  for(int u : adj[v]) 
+    if(match[u] == -1 || augmentpath(match[u])) {
+      match[u] = v;
+      return true;
+    }
+  return false;
+}
+
+
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    scanf("%d%d", &n, &m);
+    for(int i = 0; i<n; i++)
+      adj[i].clear();
+    for(int i = 0; i<m; i++) {
+      int a, b;
+      scanf("%d%d", &a, &b);
+      a--; b--;
+      adj[a].push_back(b);
+    }
+    match.assign(n, -1);
+    for(int i = 0; i<n; i++) {
+      mark.reset();
+      augmentpath(i);
+    }
+    int ans = n;
+    for(int i = 0; i<n; i++) if(match[i] != -1)
+      ans--;
+    printf("%d\n", ans);
+
+  }
+  return 0;
+}

@@ -1,0 +1,160 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 110
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline int input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+	while(t>=48 && t<=57)
+	{
+		x=(x<<3)+(x<<1)+t-48;
+		t=getchar();
+	}
+	if (neg) x=-x;
+	return x;
+}
+
+inline void output(int x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int vis[3*N],par[3*N],dis[3*N],G[3*N][3*N];
+
+int bfs(int n)
+{
+	int i,v;
+	FILL(vis,0);
+	FILL(par,0);
+	FILL(dis,0);
+	deque <int> Q;
+	dis[0]=mod;
+	vis[0]=1;
+	Q.pb(0);
+	while(!Q.empty())
+	{
+		v=Q.front();
+		Q.pop_front();
+		for(i=0;i<n;i++)
+		{
+			if (G[v][i]&&!vis[i])
+			{
+				Q.pb(i);
+				vis[i]=1;
+				dis[i]=min(G[v][i],dis[v]);
+				par[i]=v;
+			}
+		}
+		if (vis[n-1]) break;
+	}
+	if (dis[n-1]==0) return 0;
+	i=n-1;
+	while(i)
+	{
+		G[par[i]][i]-=dis[n-1];
+		G[i][par[i]]+=dis[n-1];
+		i=par[i];
+	}
+	return dis[n-1];
+}
+
+int edmondskarp(int n)
+{
+	int curr=bfs(n),ans=0;
+	while(curr)
+	{
+		ans+=curr;
+		curr=bfs(n);
+	}
+	return ans;
+}
+
+int poss[N][N],n,m,k,c;
+
+bool make(int x)
+{
+	FILL(G,0);
+	REPP(i,1,n+1) G[0][i]=1;
+	REPP(i,n+1,n+2*m+1) G[i][n+2*m+1]=1;
+	REP(i,n)
+	{
+		REP(j,m)
+		{
+			if (poss[i][j]<=x-c) G[i+1][n+j+m+1]=1;
+			if (poss[i][j]<=x) G[i+1][n+j+1]=1;
+		}
+	}
+	// if (x==10)
+	// {
+	// 	REP(i,n+2*m+2)
+	// 	{
+	// 		REP(j,n+2*m+2) printf("%d ",G[i][j]);
+	// 		printf("\n");
+	// 	}
+	// }
+	if (edmondskarp(n+2*m+2)>=k) return true;
+	return false;
+}
+
+int main()
+{
+	int t,l,r,mid;
+	t=input();
+	while(t--)
+	{
+		n=input();
+		m=input();
+		k=input();
+		c=input();
+		REP(i,n) REP(j,m) poss[i][j]=input();
+		l=1,r=(2*1e7)+1;
+		while(l<r)
+		{
+			mid=(l+r)/2;
+			if (make(mid)) r=mid;
+			else l=mid+1;
+		}
+		mid=(l+r)/2;
+		output(mid);
+	}
+return 0;
+}

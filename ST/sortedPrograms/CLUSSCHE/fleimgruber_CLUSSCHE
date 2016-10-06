@@ -1,0 +1,94 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 505
+#define MAGIC 500
+
+int n,b,c,adjm[MAX_N][MAX_N];
+int from[MAX_N],to[MAX_N],cost[MAX_N];
+int load[MAX_N];
+
+pint cost_of(vi &to)
+{
+	for (int i=0; i<n; i++)
+		load[to[i]]+=cost[i+1];
+	int lo=load[1],hi=load[1],sum=0;
+	for (int i=1; i<=n; i++)
+	{
+		lo=min(lo,load[i]);
+		hi=max(hi,load[i]);
+		sum+=adjm[from[i]][to[i-1]];
+	}
+	for (int i=0; i<n; i++)
+		load[to[i]]-=cost[i+1];
+	return mp(hi-lo,sum);
+}
+
+void solve()
+{
+	//probably the most stupid algorithm one can possible come up with :D
+	vi v,best;
+	for (int i=1; i<=n; i++)
+	{
+		v.pb(i);
+		best.pb(from[i]);
+	}
+	pint bestc=cost_of(best);
+	for (int asdf=1; asdf<=MAGIC; asdf++)
+	{
+		random_shuffle(all(v));
+		pint here=cost_of(v);		
+		if (c-here.se<0)
+			continue;
+		if (bestc.fi>here.fi||(bestc.fi==here.fi&&bestc.se>here.se))
+		{
+			bestc=here;
+			best=v;
+		}
+	}
+	c-=bestc.se;
+	for (int i=1; i<=n; i++)
+	{
+		to[i]=best[i-1];
+		load[to[i]]+=cost[i];
+	}
+}
+
+int main()
+{
+	int m;
+	scanf("%d %d %d %d",&n,&m,&b,&c);
+	for (int i=1; i<=n; i++)
+		for (int j=1; j<=n; j++)
+			scanf("%d",&adjm[i][j]);
+/* u no write a reasonable statement O__o
+   for (int k=1; k<=n; k++)
+		for (int i=1; i<=n; i++)
+			for (int j=1; j<=n; j++)
+				adjm[i][j]=min(adjm[i][j],adjm[i][k]+adjm[k][j]); */
+	while (m--)
+	{
+		for (int i=1; i<=b; i++)
+			scanf("%d %d",from+i,cost+i);
+		solve();
+		for (int i=1; i<=b; i++)
+			printf("%d\n",to[i]);
+		fflush(stdout);
+	}
+	return 0;
+}

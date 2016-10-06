@@ -1,0 +1,64 @@
+#include<stdio.h>
+int TC, n, m, Q, par[1010000], SZ[1010000], MM;
+int E[1000010][2];
+long long Res;
+struct A{
+	int typ, x1, y1, x2, y2;
+}w[1010000];
+int Gap(int x, int y){
+	return (x - 1)*m + y;
+}
+int Find(int a){
+	return a == par[a] ? a : par[a] = Find(par[a]);
+}
+void Merge(int a, int b){
+	int x = Find(a), y = Find(b);
+	if (x != y){
+		par[x] = y;
+		SZ[y] += SZ[x];
+		if (MM < SZ[y])MM = SZ[y];
+	}
+}
+int main(){
+	int i, j, a, b;
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%d%d%d", &n, &m, &Q);
+		for (i = 1; i <= n*m; i++){
+			par[i] = i, SZ[i] = 1;
+		}
+		MM = 1;
+		for (i = 0; i < Q; i++){
+			scanf("%d", &w[i].typ);
+			if (w[i].typ != 4){
+				scanf("%d%d", &w[i].x1, &w[i].y1);
+				if (w[i].typ == 3){
+					scanf("%d%d", &w[i].x2, &w[i].y2);
+				}
+				else E[Gap(w[i].x1,w[i].y1)][w[i].typ - 1]++;
+			}
+		}
+		Res = 0;
+		for (i = 1; i <= n*m; i++){
+			if (i%m && !E[i][0])Merge(i, i + 1);
+			if (i <= (n - 1)*m && !E[i][1])Merge(i, i + m);
+		}
+		for (i = Q - 1; i >= 0; i--){
+			if (w[i].typ == 4)Res += MM;
+			a = Gap(w[i].x1, w[i].y1);
+			if (w[i].typ == 1){
+				E[a][0]--;
+				if (!E[a][0])Merge(a, a+1);
+			}
+			if (w[i].typ == 2){
+				E[a][1]--;
+				if(!E[a][1])Merge(a, a+m);
+			}
+			if (w[i].typ == 3){
+				a = Find(Gap(w[i].x1, w[i].y1)), b = Find(Gap(w[i].x2, w[i].y2));
+				if (a == b)Res++;
+			}
+		}
+		printf("%lld\n", Res);
+	}
+}

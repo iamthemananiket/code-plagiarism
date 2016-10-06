@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+
+#define int long long
+#define ll long long
+#define sqr(a) (a) * (a)
+#define all(a) (a).begin(), (a).end()
+#define mkp make_pair
+#define pb push_back
+
+ using namespace std;
+
+ int t,n,b,m,k,kol,ans;
+
+  //int
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>t;
+     while(t--)
+     {
+         cin>>n>>b>>m;
+         k = 1;
+         ans = 0;
+          while(n)
+          {
+              kol = (n + 1) >> 1;
+              ans+=k * m * kol;
+              n>>=1;
+              if(n>0) ans+=b;
+              k<<=1;
+          }
+          cout<<ans<<endl;
+     }
+
+
+  }

@@ -1,0 +1,454 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#define each(it,o) for(auto it= (o).begin(); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define inrep int t;cin>>t; while(t--)
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> pii;
+typedef vector<pii > vpii;
+typedef long long ll;
+typedef vector<ll> vll;
+typedef pair<ll,ll> pll;
+typedef vector<pll > vpll;
+typedef vector<string> vs;
+typedef long double ld;
+
+template<typename T> ostream& operator<< ( ostream &o,vector<T> v ) {
+    if ( v.size() >0 )
+        o<<v[0];
+    for ( unsigned   i=1; i<v.size(); i++ )
+        o<<" "<<v[i];
+    return o<<endl;
+}
+template<typename U,typename V> ostream& operator<< ( ostream &o,pair<U,V> p ) {
+    return o<<"("<<p.first<<", "<<p.second<<") ";
+}
+template<typename T> istream& operator>> ( istream &in,vector<T> &v ) {
+
+    for ( unsigned   i=0; i<v.size(); i++ )
+        in>>v[i];
+    return in;
+}
+
+template<typename T>
+struct Edge {
+    int first;
+    int second;
+    T cap;
+    T flow;
+    Edge ( int i, int j, T c, T f ) :first ( i ),second ( j ),cap ( c ),flow ( f ) {}
+    Edge ( int i, int j, T c ) :first ( i ),second ( j ),cap ( c ),flow() {}
+};
+template<typename T>
+ostream& operator<< ( ostream &os, const Edge<T>& e ) {
+    return os<<"("<<e.first<<"-["<<e.flow<<"/"<<e.cap<<"]->"<<e.second<<")";
+}
+
+template<typename T>
+struct EdgeList {
+    static inline bool comp ( const Edge<T> &e1, const Edge<T>&e2 ) {
+        return e1.second<e2.second;
+    }
+    vector<Edge<T>> v;
+    void prepare() {
+        sort ( all ( v ),comp );
+    }
+    Edge<T> inval=Edge<T> ( -1,-1,0 );
+    Edge<T>& find ( int i ) {
+        int ma=v.size();
+        int mi=0;
+        while ( ma-mi>1 ) {
+            int s= ( ma+mi ) >>1;
+            if ( v[s].second>i ) ma=s;
+            else if ( v[s].second<i ) mi=s;
+            else return v[s];
+        }
+        if ( v.empty() || v[mi].second!=i ) {
+            cout<<"did not find edge to "<<i<<endl;
+            cout<<v<<endl;
+            return inval;
+//             assert ( 0 );
+        }
+        return v[mi];
+
+    }
+};
+template<typename T>
+ostream& operator << ( ostream &os, const EdgeList<T> &e ) {
+    return os<<e.v;
+
+}
+// const int INFT=INF;
+template<typename T>
+struct BFSFinder {
+    vector<EdgeList<T>> &adj;
+    vector<EdgeList<T>> &backEdges;
+    int s,t;
+    vector<bool> visited;
+    vector<Edge<T>*> prec;
+    static constexpr T INFT=INF;
+    BFSFinder ( vector<EdgeList<T>> &_adj,vector<EdgeList<T>> &bE,int _s, int _t ) :adj ( _adj ),backEdges ( bE ),s ( _s ),t ( _t ),visited ( adj.size() ),prec ( adj.size(),0 ) {
+    }
+    T augment ( int v, T minEdge ) {
+        if ( v==s ) return minEdge;
+//         cout<<"augmenting from "<<v<<endl;
+        if ( prec[v] ) {
+            Edge<T> &e=*prec[v];
+            assert ( e.second==v );
+            T flow=augment ( e.first,min ( minEdge,e.cap-e.flow ) );
+            if ( flow!=T() ) {
+                e.flow=e.flow+flow;
+                if ( e.cap ) { //normal edge
+                    Edge<T> &back=backEdges[v].find ( e.first );
+                    back.flow=back.flow-flow;
+                } else { //backEdge
+                    Edge<T> &back=adj[v].find ( e.first );
+                    back.flow=back.flow-flow;
+                }
+            }
+            return flow;
+        }
+        return T();
+    }
+
+    int scnt=0;
+    T findAugment ( ) {
+        fill ( all ( visited ),0 );
+        fill ( all ( prec ), ( Edge<T>* ) 0 );
+        queue<int> q;
+//         scnt=0;
+        q.push ( s );
+        bool f=0;
+        while ( !q.empty() ) {
+
+            int u=q.front();
+            q.pop();
+            if ( u==t ) break;
+            for ( Edge<T> &e:adj[u].v ) {
+                if ( !visited[e.second] &&e.cap>e.flow ) {
+                    visited[e.second]=1;
+                    q.push ( e.second );
+                    prec[e.second]=&e;
+                    if ( e.second==t ) {
+                        f=1;
+                        break;
+                    }
+
+                }
+            }
+            if ( !f )
+                for ( Edge<T> &e:backEdges[u].v ) {
+                    if ( !visited[e.second] &&e.cap>e.flow ) {
+                        visited[e.second]=1;
+                        q.push ( e.second );
+                        prec[e.second]=&e;
+                        if ( e.second==t ) {
+                            f=1;
+                            break;
+                        }
+
+                    }
+                }
+            if ( f ) break;
+        }
+        T fl=augment ( t,INFT );
+        return fl;
+
+    }
+};
+
+template<typename F,typename T> struct FF {
+    vector<EdgeList<T>> &adj;
+    vector<EdgeList<T>> &backEdges;
+    int s,t;
+    static constexpr T zero=T();
+    F finder;
+    FF ( vector<EdgeList<T>> &_adj,vector<EdgeList<T>> &_be,int _s, int _t ) :adj ( _adj ),backEdges ( _be ),s ( _s ),t ( _t ),finder ( adj,backEdges,_s,_t ) {
+//         for ( auto &a: adj )
+//             a.prepare();
+    }
+
+    T cflow=T();
+    T run ( ) {
+//         T flow=T();
+        int cnt=0;
+//         ll scnt=0;
+//         vi scnt2;
+        while ( 1 ) {
+            cnt++;
+            T cap=finder.findAugment ( );
+//             scnt+=finder.scnt;
+//             scnt2.push_back ( finder.scnt );
+            if ( T() ==cap ) {
+//                 cout<<"finish with "<<cflow<<endl;
+                return cflow;
+            }
+            cflow=cflow+cap;
+        }
+        return cflow;
+    }
+};
+template<typename T>  void  toEl ( const vector<vector<pair<int,T>>> &adj,vector<EdgeList<T>>&el, vector<EdgeList<T>>&bel ) {
+    int n=adj.size();
+    el.resize ( n );
+    bel.resize ( n );
+
+    rep ( i,n ) {
+        for ( pii p: adj[i] ) {
+            el[i].v.push_back ( Edge<T> ( i,p.first, p.second ) );
+            bel[p.first].v.push_back ( Edge<T> ( p.first,i,0 ) );
+        }
+        el[i].prepare();
+        bel[i].prepare();
+    }
+
+}
+struct MinWCut {
+    int n;
+    int s,t;
+    vector<EdgeList<int>> el;
+    vector<EdgeList<int>> bel;
+    FF<BFSFinder<int>,int> ff;
+    MinWCut ( const vector<vpii> &adj, int _s, int _t ) :n ( adj.size() ),s ( _s ),t ( _t ),el ( n ),bel ( n ),ff ( el,bel,s,t ) {
+        toEl ( adj,el,bel );
+//         cout<<el<<bel<<endl;
+    }
+    MinWCut ( const MinWCut &mc ) :n ( mc.n ),s ( mc.s ),t ( mc.t ),el ( mc.el ),bel ( mc.bel ),ff ( el,bel,s,t ),Scomp ( mc.Scomp ),front ( mc.front ) {
+        ff.cflow=mc.ff.cflow;
+    }
+    int run() {
+        return ff.run();
+    }
+    vector<bool> Scomp;
+    vpii front;
+    vector<bool> inTight,outTight;
+
+    void dfsCut ( int i ) {
+        Scomp[i]=1;
+        for ( Edge<int> e: el[i].v ) {
+            if ( !Scomp[e.second] &&e.flow<e.cap ) {
+                dfsCut ( e.second );
+            }
+        }
+        for ( Edge<int> e: bel[i].v ) {
+            if ( !Scomp[e.second] &&e.flow<e.cap ) {
+                dfsCut ( e.second );
+            }
+        }
+    }
+    void clear() {
+        for ( EdgeList<int>&l:el )
+            for ( Edge<int> &e:l.v ) e.flow=0;
+
+        for ( EdgeList<int>&l:bel )
+            for ( Edge<int> &e:l.v ) e.flow=0;
+        ff.cflow=0;
+
+    }
+    int findCut() {
+        Scomp=vector<bool> ( n );
+        inTight=vector<bool> ( n,0 );
+        outTight=vector<bool> ( n,0 );
+        front.clear();
+        ff.run();
+        dfsCut ( s );
+        rep ( i,n ) {
+            if ( Scomp[i] ) inTight[i]=0;
+            else outTight[i]=0;
+        }
+        rep ( i,n ) {
+            for ( Edge<int> e: el[i].v ) {
+                if ( e.flow==e.cap &&e.cap>0 ) {
+//                     cout<<"tight edge: "<<e<<endl;
+                    inTight[e.second]=1;
+                    outTight[e.first]=1;
+                }
+
+            }
+//             for ( Edge<int> e: bel[i].v ) {
+//                 if ( e.flow==e.cap ) {
+//                     inTight[e.second]=1;
+//                     outTight[e.first]=1;
+//                 }
+//
+//             }
+
+        }
+        rep ( i,n ) {
+            if ( Scomp[i] ) inTight[i]=0;
+            else outTight[i]=0;
+        }
+
+        rep ( i,n ) {
+            if ( Scomp[i] ) {
+                for ( Edge<int> e: el[i].v ) if ( !Scomp[e.second] &&e.flow==e.cap ) {
+                        front.push_back ( mp ( i,e.second ) );
+                    }
+            }
+        }
+        return ff.cflow;
+    }
+
+
+};
+vector<bool> vis;
+void dfs ( int no, const vector<vpii> &adj, vector<bool> &vis ) {
+    vis[no]=1;
+    for ( pii p: adj[no] ) {
+        if ( !vis[p.first] ) dfs ( p.first,adj,vis );
+    }
+}
+
+const int infl=INF;
+void mergeBW ( int s, int t, vector<EdgeList<int>> &el ) {
+    el[s].find ( t ).cap=INF;
+//     for ( EdgeList<int>&l:el ) {
+//         for ( Edge<int> &e: l.v ) {
+//             if ( e.second==t ) {
+// //                 cout<<"update "<<e<<endl;
+//                 if ( e.first==s ) e.cap=INF;
+//                 else e.cap=0;
+//             }
+//         }
+//     }
+}
+void mergeFW ( int s, int t, vector<EdgeList<int>> &el ) {
+    el[s].find ( t ).cap=INF;
+//     edge &hi=el[s].find ( t );
+
+//     edge &zu=bel[t].find ( s );
+//     for ( Edge<int> &e: el[s].v ) {
+//         if ( e.second!=t ) e.cap=0;
+//         else e.cap=INF;
+//     }
+
+
+}
+void merge ( int s, int t, vector<vpii> &adj ) {
+//     edge &hi=el[s].find ( t );
+
+//     edge &zu=bel[t].find ( s );
+    for ( pii &p:adj[s] ) {
+        if ( p.first!=t ) p.second=0;
+        else p.second=INF;
+    }
+
+
+}
+int main() {
+    ios_base::sync_with_stdio ( false );
+    int n,m,k;
+    cin>>n>>m>>k;
+    int s,t;
+    cin>>s>>t;
+    s--;
+    t--;
+    vector<vpii> adj ( n ), adjt ( n );
+
+    vector<bool> se ( n );
+    vector<bool> te ( n );
+    rep ( i,m ) {
+        int u,v,w;
+        cin>>u>>v>>w;
+        u--;
+        v--;
+        adj[u].push_back ( mp ( v,w ) );
+        adjt[v].push_back ( mp ( u,w ) );
+        if ( u==s ) se[v]=1;
+        if ( v==t ) te[u]=1;
+    }
+
+
+//     if ( n>20 ) return 0;
+//     vi vals;
+//     rep ( i,1<<n ) {
+//         if ( ! ( i & ( 1<<s ) ) ) continue;
+//         if ( i& ( 1<<t ) ) continue;
+//         int su=0;
+//         rep ( j,n ) {
+//             if ( i& ( 1<<j ) ) {
+//                 for ( pii p: adj[j] ) {
+//                     if ( ! ( i& ( 1<<p.first ) ) ) su+=p.second;
+//                 }
+//             }
+//         }
+//         cout<<su<<" ";
+//         bitset<5> bs ( i );
+//         vector<bool> b ( 5 );
+//         rep ( i,5 ) b[i]=bs[i];
+// //         reverse(all(b));
+//         cout<<b <<endl;
+//         vals.push_back ( su );
+//     }
+//     sort ( all ( vals ) );
+// //         cout<<vals<<endl;
+//     cout<<vals[k-1]<<endl;
+
+    se[s]=1;
+    te[t]=1;
+    rep ( i,n ) {
+        if ( !se[i] ) adj[s].push_back ( mp ( i,0 ) );
+        if ( !te[i] ) adj[i].push_back ( mp ( t,0 ) );
+    }
+    rep ( i,n ) sort ( all ( adj[i] ) );
+
+    MinWCut mc ( adj,s,t );
+
+    int mcv=mc.findCut();
+    vector<pair<MinWCut,vector<bool>>> states;
+
+
+
+
+    priority_queue<pii>pq;
+    pq.push ( mp ( -mcv, states.size() ) );
+    states.push_back ( mp ( mc,vector<bool>() ) );
+
+    rep ( i,k-1 ) {
+//         cout<<"prop"<<pq.top() <<endl;
+        int ind=pq.top().second;
+        pq.pop();
+        MinWCut lowest=states[ind].first;
+        vector<bool> used=states[ind].second;
+//         cout<<"proc "<<endl<<lowest.Scomp<<used<<endl;
+        int fold=used.size();
+        reu ( i,used.size(),n ) {
+            if ( i==s || i==t ) {
+                used.push_back ( i==s );
+                continue;
+            }
+            bool conns=!lowest.Scomp[used.size()];
+            used.push_back ( conns );
+            MinWCut current ( lowest );
+            reu ( j,fold,used.size() ) {
+                if ( j==s || j==t ) continue;
+                if ( used[j] ) {
+                    mergeBW ( s,j,current.el );
+//                 cout<<"s-->"<<j<<endl;
+
+                } else {
+                    mergeFW ( j,t,current.el );
+//                     cout<<j<<"-->t"<<endl;
+                }
+            }
+            int nm= current.findCut();
+//             cout<<nm<<endl<<used<<current.Scomp<<endl;
+//             cout<<current.el<<endl;
+            pq.push ( mp ( -nm, states.size() ) );
+            states.push_back ( mp ( current,used ) );
+            used.back() =!used.back();
+        }
+    }
+
+    cout<<-pq.top().first<<endl;
+
+
+
+}

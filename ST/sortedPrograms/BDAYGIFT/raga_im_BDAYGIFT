@@ -1,0 +1,77 @@
+#include<iostream>
+#include<string>
+#include <set>
+ std::set<char> ms;
+std::string lex_min(const std::string&);
+ using namespace std;
+int main() {
+    
+int t;
+string s;
+cin>>t;
+while(t--){
+    cin>>s;
+    for(int i=0;i<s.length();i++)
+        ms.insert(s[i]);
+    if(ms.size()==1)
+        cout<<s<<endl;
+    else
+
+    std::cout<<lex_min(s)<<endl;
+    }
+    return 0;
+
+}
+
+std::string lex_min(const std::string& str) { 
+    
+    int size = str.size(); 
+    std::string input = str + str; 
+     
+    int offset = 0; 
+    int answer = -1; 
+    int in=-1;
+     
+    for (int i = 0; i < size * 2 && i-offset < size ; i++) { 
+        if(answer!=-1&&in!=-1&&input[i]==input[in]&&i-in==1)
+            in++;
+        if (answer == -1) 
+        { 
+            
+            answer = i; 
+        } 
+        else if (input[i] > input[answer]) { 
+          
+            answer = i; 
+
+            offset = 0; 
+        } 
+        else if (input[i] == input[answer + offset]) { 
+            if(offset==0)
+                in=i;
+            offset++; 
+        } 
+        else if (input[i] > input[answer + offset]) { 
+           
+            answer = i - offset; 
+            offset = 0; 
+            i=answer+1;
+            if(input[i] == input[answer]) ;
+                offset=1;
+        } 
+         else if (input[i] < input[answer + offset]&&offset==0){ 
+            //i=in; 
+            offset = 0;
+
+        } 
+        else if (input[i] < input[answer + offset]){ 
+            i=in; 
+            offset = 0;
+
+        } 
+        
+    } 
+     
+    return input.substr(answer, size); 
+    
+}

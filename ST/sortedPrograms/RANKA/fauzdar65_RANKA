@@ -1,0 +1,124 @@
+#include <iostream>
+using namespace std;
+
+/* ---- _/\_RANKA _/\_-----*/
+
+int bcx,bcy,wcx,wcy,blx,bly,wlx,wly;
+
+
+int n;
+int main() {
+    bcx=1; bcy=1;
+    wcx=9; wcy=9;
+    
+    cin>>n;
+    for(int ct=1;ct<=81;ct++)
+    {
+        if(!n)break;
+        
+       if(ct%2==1)
+       {
+           bool sec=false;
+         
+         
+         if(bcx==wcx && bcy==wcy)
+         {
+             bcy++;
+             
+             if(bcy==10){ bcy=1; bcx++; if(bcx==10)bcx=1; }
+         }
+         
+        for(int i=bcx,j=bcy;;)
+        {
+            if(!sec && i==wcx && j==wcy){ sec=true; j++; if(j==10){ i++; j=1; if(i==10)i=1;} }
+            if(sec && i==bcx && j==bcy)break;
+            
+            if(sec)
+            {
+            cout<<"0 0\n";
+            n--;
+            if(!n)break;
+            }
+            
+            cout<<i<<" "<<j<<endl;
+            n--;
+            if(!n)break;
+         
+            
+            
+            
+            j++;
+            if(j==10){ i++; j=1; if(i==10)i=1;}
+            if(!sec && i==wcx && j==wcy){ sec=true; j++; if(j==10){ i++; j=1; if(i==10)i=1;} }
+            
+            if(!sec)
+            {
+            cout<<"0 0\n";
+            n--;
+            if(!n)break;
+            }
+                
+        }
+      
+        bcy++;
+        
+        if(bcy==10){ bcy=1; bcx++; if(bcx==10)bcx=1;}
+        
+        
+    
+    }
+    
+    else
+    {
+       bool sec=false;
+         
+         
+         if(bcx==wcx && bcy==wcy)
+         {
+             wcy--;
+             
+             if(wcy==0){ wcy=9; wcx--; if(wcx==0)wcx=9; }
+         }
+         
+        for(int i=wcx,j=wcy;;)
+        {
+            if(!sec && i==bcx && j==bcy){ sec=true; j--; if(j==0){ i--; j=9; if(i==0)i=9;} }
+            if(sec && i==wcx && j==wcy)break;
+            
+            if(sec)
+            {
+            cout<<"0 0\n";
+            n--;
+            if(!n)break;
+            }
+            
+            cout<<i<<" "<<j<<endl;
+            n--;
+            if(!n)break;
+           
+            
+            
+            
+            j--;
+            if(j==0){ i--; j=9; if(i==0)i=9;}
+            if(!sec && i==bcx && j==bcy){ sec=true; j--; if(j==0){ i--;j=9;if(i==0)i=9;} }
+            
+            if(!sec)
+            {
+            cout<<"0 0\n";
+            n--;
+            if(!n)break;
+            }
+                
+        }
+      
+        wcy--;
+        if(wcy==0){ wcy=9; wcx--; if(wcx==0)wcx=9; } 
+    }
+        
+            
+        
+    }
+	
+	return 0;
+}

@@ -1,0 +1,79 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 2;
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		string s; cin >> s;
+		vector<int> a(N);
+		for (int i = 0; i < N; i++)
+			scanf("%d", &a[i]);
+		vector<ll> sum(N + 1);
+		for (int i = 1; i <= N; i++)
+			sum[i] = sum[i - 1] + a[i - 1];
+		int x = 0;
+		stack<char> st;
+		vector<ll> b(N + 1, LLONG_MAX);
+		b[0] = 0;
+		ll maxi = 0;
+		for (int i = 0; i < N; i++) {
+			char c = s[i];
+			if (c == '[' || c == '{' || c == '<' || c == '(') {
+				x++;
+				st.push(c);
+				b[x] = min(b[x], sum[i + 1]);
+				continue;
+			}
+			bool ok = false;
+			if (!st.empty()) {
+				char d = st.top();
+				if (d == '[' && c == ']' || d == '{' && c == '}' || d == '<' && c == '>' || d == '(' && c == ')')
+					ok = true;
+			}
+			if (ok) {
+				b[x] = LLONG_MAX;
+				x--;
+				st.pop();
+				maxi = max(maxi, sum[i + 1] - b[x]);
+				b[x] = min(b[x], sum[i + 1]);
+			}
+			else {
+				for (; x > 0; x--) b[x] = LLONG_MAX;
+				b[0] = sum[i + 1];
+				st = stack<char>();
+			}
+		}
+		cout << maxi << endl;
+	}
+}

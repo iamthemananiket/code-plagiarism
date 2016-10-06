@@ -1,0 +1,101 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+
+using namespace std;
+
+
+int pref[72];
+int N;
+int A[72][72];
+
+int xr[72];
+
+
+int child[35*72][2];
+
+int root,nodes;
+
+int create_node(){
+	child[nodes][0] = child[nodes][1] = -1;
+	return nodes++;
+}
+
+const int n = 30;
+void ins(int str){
+	int i,x,b;
+
+	x = root;
+	for(i = 30; i >= 0; --i){
+		b = !!(str&(1<<i));
+		if(child[x][b] < 0)child[x][b] = create_node();
+		x = child[x][b];
+	}
+}
+
+int query(int str){
+	int i,x,b,num;
+
+	x = root;
+	for(i = 30; i >= 0; --i){
+		b = !(str&(1<<i));
+		if(child[x][b] < 0) b^=1;
+		else num |= (1<<i);
+		x= child[x][b];
+	}
+
+	return num;
+}
+
+int compute(){
+
+	int i,k,j,mx;
+
+	mx =0 ;
+	for(i = 0; i < N; ++i){
+		memset(xr,0,sizeof(xr));
+
+		for(k = i; k < N; ++k){
+
+			for(j = 0; j < N; ++j) xr[j] ^= A[k][j];
+			pref[0] = xr[0];
+			for(j = 1; j < N; ++j) pref[j] = pref[j-1]^xr[j];
+
+			nodes = 0;
+			root = create_node();
+			ins(0);
+
+
+			for(j = 0; j < N; ++j){
+				mx = max(mx,query(pref[j]));
+				ins(pref[j]);
+			}
+
+		}
+	}
+
+	return mx;
+}
+
+int main(){
+
+	int t;
+	scanf("%d",&t);
+
+	int i,j;
+
+
+	while(t--){
+		scanf("%d",&N);
+		for(i =0 ; i < N; ++i){
+			for(j = 0; j < N; ++j){
+				scanf("%d",&A[i][j]);
+			}
+		}
+
+		printf("%d\n",compute());
+	}
+
+	return 0;
+}

@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int A[100000];
+int L[100000];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        int N, K;
+        scanf("%d%d", &N, &K);
+        int ans=0;
+        for(int i=0; i<K; i++)
+        {
+            scanf("%d", A+i);
+            ans+=A[i]&1;
+        }
+        sort(A, A+K);
+        while(K>0 && A[K-1]==N)
+            N--, K--;
+        long long bad=-1, sub=0;
+        if(K>0)
+        {
+            L[K-1]=A[K-1]+1;
+            for(int i=K-2; i>=0; i--)
+            {
+                if(A[i]+1!=A[i+1])
+                    L[i]=A[i]+1;
+                else
+                    L[i]=L[i+1];
+            }
+            for(int i=0; i<K; i++)
+            {
+                long long sum=1LL*A[i]*(A[i]-1)/2-sub;
+                if(L[i]>sum+1)
+                {
+                    bad=sum+1;
+                    break;
+                }
+                sub+=A[i];
+            }
+        }
+        if(bad==-1)
+            bad=1LL*N*(N+1)/2-sub+1;
+        if(bad&1)
+            printf("Chef\n");
+        else
+            printf("Mom\n");
+    }
+    return 0;
+}

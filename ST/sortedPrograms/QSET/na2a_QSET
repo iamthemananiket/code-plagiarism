@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+#define F first
+#define S second
+
+#define mp make_pair
+#define pb push_back
+
+#define llong long long
+
+using namespace std;
+
+const int MXN = (int) 4e5 + 7;
+const int INF = (int) 1e9 + 7;
+
+struct node {
+    llong pre[3], suf[3];
+    llong sum, cnt;
+    node() {
+        sum = cnt = 0;
+        for (int i = 0; i < 3; i++)
+            pre[i] = suf[i] = 0;
+    }
+};
+
+node get(char x) {
+    node res;
+    int cur = x - 48;
+    res.sum = cur % 3;
+    res.cnt = (cur % 3 == 0);
+    res.pre[res.sum]++;
+    res.suf[res.sum]++;
+    return res;
+}
+
+node combine(node a, node b) {
+    node res;
+    res.sum = (a.sum + b.sum) % 3;
+    res.cnt = a.cnt + b.cnt;
+    for (int x = 0; x < 3; x++) {
+        res.cnt += a.suf[x] * b.pre[(3 - x) % 3];
+        res.pre[x] = a.pre[x] + b.pre[(x - a.sum + 3) % 3];
+        res.suf[x] = b.suf[x] + a.suf[(x - b.sum + 3) % 3];
+    }
+    return res;
+}
+
+int n, m;
+node t[MXN];
+
+node zero;
+
+string s;
+
+void build(int v, int l, int r) {
+    if (l == r) t[v] = get(s[l - 1]);
+    else {
+        int m = (l + r) / 2;
+        build(v + v, l, m);
+        build(v + v + 1, m + 1, r);
+        t[v] = combine(t[v + v], t[v + v + 1]);
+    }
+}
+
+node get(int v, int tl, int tr, int l, int r) {
+    if (l > tr || r < tl) return zero;
+    if (l <= tl && tr <= r) return t[v];
+    int m = (tl + tr) / 2;
+    return combine(get(v + v, tl, m, l, r), get(v + v + 1, m + 1, tr, l, r));
+}
+
+void upd(int v, int tl, int tr, int pos, int val) {
+    if (tl == tr) t[v] = get(val + 48);
+    else {
+        int m = (tl + tr) / 2;
+        if (pos <= m) upd(v + v, tl, m, pos, val);
+        else upd(v + v + 1, m + 1, tr, pos, val);
+        t[v] = combine(t[v + v], t[v + v + 1]);
+    }
+}
+
+int main() {
+    cin >> n >> m >> s;
+    build(1, 1, n);
+    while (m--) {
+        int q, x, y;
+        scanf("%d%d%d", &q, &x, &y);
+        if (q == 1) upd(1, 1, n, x, y);
+        else {
+            node res = get(1, 1, n, x, y);
+            cout << res.cnt << "\n";
+        }
+    }
+    return 0;
+}

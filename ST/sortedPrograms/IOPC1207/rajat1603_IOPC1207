@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+const int N = 100001;
+class tree{
+	int segtree[N<<2];
+	bool lazy[N<<2];
+	int n;
+	void push(int l,int r,int node){
+		if(lazy[node]){
+			segtree[node] = r - l + 1 - segtree[node];
+			if(l^r){
+				int lc = node + node;
+				int rc = lc|1;
+				lazy[lc]^=1;
+				lazy[rc]^=1;
+			}
+			lazy[node] = 0;
+		}
+	}
+	void update(int l,int r,int node,int ql,int qr){
+		push(l,r,node);
+		if(l>qr||r<ql){
+			return;
+		}
+		if(l>=ql&&r<=qr){
+			lazy[node]^=1;
+			push(l,r,node);
+			return;
+		}
+		int mid = (l+r)>>1;
+		int lc = node + node;
+		int rc = lc|1;
+		update(l,mid,lc,ql,qr);
+		update(mid+1,r,rc,ql,qr);
+		segtree[node] = segtree[lc] + segtree[rc];
+	}
+	int query(int l,int r,int node,int ql,int qr){
+		push(l,r,node);
+		if(l>qr||r<ql){
+			return 0;
+		}
+		if(l>=ql&&r<=qr){
+			return segtree[node];
+		}
+		int mid = (l+r)>>1;
+		int lc = node + node;
+		int rc = lc|1;
+		return query(l,mid,lc,ql,qr) + query(mid+1,r,rc,ql,qr);
+	}
+public:
+	void init(int nn){
+		memset(segtree,0,sizeof(int)*(N<<2));
+		memset(lazy,0,sizeof(bool)*(N<<2));
+		n = nn;
+	}
+	void update(int l,int r){
+		l++;
+		r++;
+		update(1,n,1,l,r);
+	}
+	int query(int l,int r){
+		l++;
+		r++;
+		return query(1,n,1,l,r);
+	}
+};
+tree x,y,z;
+int main(){
+	int t = scan();
+	while(t--){
+		int nx=scan(),ny=scan(),nz=scan();
+		x.init(nx);
+		y.init(ny);
+		z.init(nz);
+		int q = scan();
+		while(q--){
+			int type=scan();
+			if(!type){
+				int l = scan(),r=scan();
+				x.update(l,r);
+			}
+			else if(type==1){
+				int l = scan(),r=scan();
+				y.update(l,r);
+			}
+			else if(type==2){
+				int l = scan(),r=scan();
+				z.update(l,r);
+			}
+			else{
+				int x1=scan(),y1=scan(),z1=scan(),x2=scan(),y2=scan(),z2=scan();
+				int r1 , g1 , r2 , g2 , r3 , g3 ;
+				long long ans = 0LL ;
+				r1 = x.query(x1,x2);
+				g1 = x2 - x1 + 1 - r1;
+				r2 = y.query(y1,y2);
+				g2 = y2 - y1 + 1 - r2;
+				r3 = z.query(z1,z2);
+				g3 = z2 - z1 + 1 - r3;
+				ans+=1LL*r1*r2*r3;
+				ans+=1LL*r1*g2*g3;
+				ans+=1LL*g1*r2*g3;
+				ans+=1LL*g1*g2*r3;
+				printf("%lld\n",ans);
+			}
+		}
+	}
+}

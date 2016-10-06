@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+#define forn(i, n) for (int (i) = 0; (i) < n; ++(i))
+#define ford(i, n) for (int (i) = (n) - 1; (i) >= 0; --(i))
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ld, ld> pll;
+
+const ld eps = 1e-9;
+
+bool lt(ld a, ld b)
+{
+    return b - a > eps;
+}
+
+bool eq(ld a, ld b)
+{
+    return abs(a - b) <= eps;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+
+    ios_base::sync_with_stdio(false);
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        ld h, s;
+        cin >> h >> s;
+        ld b = -sqrt(h * h + s * 4.0);
+        ld d2 = h * h - s * 4;
+        if (lt(d2, 0)) {
+            cout << "-1\n";
+            continue;
+        }
+        if (eq(d2, 0)) {
+            d2 = 0;
+        }
+        ld d = sqrt(d2);
+        ld x = (-b - d) / 2.0;
+        ld y = (-b + d) / 2.0;
+        cout << fixed;
+        cout.precision(12);
+        cout << x << " " << y << " " << h << "\n";
+    }
+
+}

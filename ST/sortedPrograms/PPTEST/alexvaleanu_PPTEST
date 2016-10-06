@@ -1,0 +1,48 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+using namespace std;
+
+const int Nmax = 102;
+const int Gmax = 102;
+
+int tests, N, W;
+int C[Nmax], P[Nmax], T[Nmax];
+
+int optim[Gmax];
+
+int main()
+{
+    for ( scanf("%d", &tests); tests; tests-- )
+    {
+        scanf("%d %d", &N, &W);
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            scanf("%d %d %d", &C[i], &P[i], &T[i]);
+
+            P[i] *= C[i];
+        }
+
+        int sol = 0;
+
+        for ( int i = 1; i <= N; ++i )
+                for ( int j = W - T[i]; j >= 0; j-- )
+                    if ( optim[j + T[i]] < optim[j] + P[i] )
+                    {
+                        optim[j + T[i]] = optim[j] + P[i];
+
+                        if ( optim[j + T[i]] > sol )
+                        {
+                            sol = optim[j + T[i]];
+                        }
+                    }
+
+        printf("%d\n", sol);
+
+        memset ( optim, 0, sizeof ( optim ) );
+    }
+
+    return 0;
+}

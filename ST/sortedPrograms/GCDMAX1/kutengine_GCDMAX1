@@ -1,0 +1,66 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define fi first
+#define se second
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define sz(x) (int((x).size()))
+#define bit(x) (1 << (x))
+#define cnt1(x) (__builtin_popcount(x))
+
+template<class T>
+inline void chkmax(T& x, T y) {
+	if (x < y) x = y;
+}
+
+template<class T>
+inline void chkmin(T& x, T y) {
+	if (y < x) x = y;
+}
+
+typedef long long LL;
+typedef double DB;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+typedef vector<PII> VII;
+VII v, tv;
+
+int main() {
+//	freopen("in.txt", "r", stdin);
+//	freopen("out.txt", "w", stdout);
+	int N, K;
+	scanf("%d%d", &N, &K);
+	int ans = 0;
+	int i, j, k, x;
+	for (i = 0; i < N; i++) {
+		scanf("%d", &x);
+		v.pb(PII(x, i));
+		for (k = 0; k < sz(v); k++) v[k].fi = __gcd(v[k].fi, x);
+		tv.clear();
+		for (k = 0; k < sz(v); k = j) {
+			for (j = k + 1; j < sz(v) && v[j].fi == v[k].fi; j++);
+			tv.pb(v[k]);
+			if (v[k].fi >= K) chkmax(ans, i - v[k].se + 1);
+		}
+		v = tv;
+	}
+	printf("%d\n", ans);
+	return 0;
+}

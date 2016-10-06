@@ -1,0 +1,230 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXN = 100013;
+
+#define MP make_pair
+#define A first
+#define B second
+
+const int MOD = 1e9+7;
+typedef long long ll;
+int add(int a, int b) { return (a+b)%MOD; }
+int sub(int a, int b) { return (a-b+MOD)%MOD; }
+int mult(int a, int b) { return ((ll) a*b)%MOD; }
+int inv(int x) {
+	assert(x>0);
+	int p = MOD-2;
+	int ans = 1;
+	while (p) {
+		if (p&1) ans = mult(ans,x);
+		x = mult(x,x);
+		p>>=1;
+	}
+	return ans;
+}
+
+struct Node {
+    int id,s[2],pr;
+    int val,sts,lazy;
+    Node *c[2];
+    Node(int i, int v=0) {
+    	id = s[0] = s[1] = i;
+    	pr = rand()*rand();
+    	val = sts = v;
+    	lazy = -1;
+    	c[0] = c[1] = 0;
+	}
+};
+
+void give(Node* x, int v) {
+	if (!x) return;
+	if (x->lazy==-1) x->lazy = 1;
+	x->lazy = mult(x->lazy,v);
+}
+void push(Node* x) {
+	if (!x) return;
+	if (x->lazy!=-1) {
+		x->val = mult(x->val,x->lazy);
+		x->sts = mult(x->sts,x->lazy);
+		for (int d=0;d<2;d++) if (x->c[d]) give(x->c[d],x->lazy);
+		x->lazy = -1;
+	}
+}
+void calc(Node* x) {
+    if (!x) return;
+    for (int d=0;d<2;d++) push(x->c[d]);
+    x->sts = x->val;
+    for (int d=0;d<2;d++) if (x->c[d]) x->sts = add(x->sts,x->c[d]->sts);
+    x->s[0] = x->s[1] = x->id;
+    if (x->c[0]) x->s[0] = x->c[0]->s[0];
+    if (x->c[1]) x->s[1] = x->c[1]->s[1];
+}
+void split(Node* t, int K, Node*& l, Node*& r) {
+	push(t);
+    if (!t) l = r = 0;
+    else if (K < t->id) split(t->c[0],K,l,t->c[0]), r = t;
+    else split(t->c[1],K,t->c[1],r), l = t;
+    calc(t);
+}
+void insert(Node*& t, Node* x) {
+	push(t);
+    if (!t) t = x;
+    else if (x->pr > t->pr) split(t,x->id,x->c[0],x->c[1]), t = x;
+    else insert(t->id > x->id ? t->c[0] : t->c[1], x);
+    calc(t);
+}
+
+void modify(Node* t, int K, int v) {
+	push(t);
+    if (t->id==K) t->val = add(t->val,v);
+    else if (t->id>K) modify(t->c[0],K,v);
+    else modify(t->c[1],K,v);
+    calc(t);
+}
+void add(Node*& head, int K, int v) {
+	if (abs(K)>1e9+1) return;
+	Node* f = head;
+	while (true) {
+		if (!f || f->id==K) break;
+		if (f->id>K) f = f->c[0];
+		else f = f->c[1];
+	}
+    if (!f) insert(head,new Node(K,v));
+    else modify(head,K,v);
+}
+
+void make(Node*& head) {
+    insert(head,new Node(-1.1e9));
+    insert(head,new Node(1.1e9));
+}
+
+int query(Node* cur, int a) {
+    if (!cur) return 0;
+    push(cur);
+    int L = cur->s[0], R = cur->s[1];
+    if (R<a) return 0;
+    if (a<=L) return cur->sts;
+    int ans = add(query(cur->c[0],a),query(cur->c[1],a));
+    if (cur->id >= a) ans = add(ans,cur->val);
+    return ans;
+}
+
+int N;
+vector<int> adj[MAXN];
+Node* head[MAXN];
+int ans[MAXN];
+int A[MAXN];
+int sum[MAXN];
+int s[MAXN];
+
+void reset() {
+	for (int i=0;i<=N;i++) {
+		adj[i].clear();
+		head[i] = 0;
+		ans[i] = A[i] = sum[i] = s[i] = 0;
+	}
+}
+
+void setup(int x, int p=0) {
+	if (p) adj[x].erase(find(adj[x].begin(),adj[x].end(),p));
+	sum[x] = A[x];
+	if (p) sum[x]+=sum[p];
+	s[x] = 1;
+	for (int i: adj[x]) {
+		setup(i,x);
+		s[x]+=s[i];
+	}
+}
+
+int dfsadd(Node* cur, Node* get, int x) {
+	if (!cur) return 0;
+	push(cur);
+	int res = mult(cur->val,query(get,2*sum[x]-A[x]-cur->id));
+	for (int d=0;d<2;d++) res = add(res,dfsadd(cur->c[d],get,x));
+	return res;
+}
+void dfsmerge(Node* cur, Node*& get) {
+	if (!cur) return;
+	push(cur);
+	add(get,cur->id,cur->val);
+	for (int d=0;d<2;d++) dfsmerge(cur->c[d],get);
+}
+
+void dfs(int x) {
+	for (int i: adj[x]) dfs(i);
+	if (adj[x].size()==0) {
+		make(head[x]);
+		add(head[x],sum[x],1);
+		if (A[x]>=0) ans[x] = 1;
+		return;
+	}
+	int big = 0;
+	for (int i=1;i<adj[x].size();i++) if (s[adj[x][i]]>s[adj[x][big]]) big = i;
+	swap(adj[x][big],adj[x][0]);
+
+	int prod = 1;
+	vector<int> zeros;
+	for (int i: adj[x]) {
+		if (ans[i]==0) zeros.push_back(i);
+		else prod = mult(prod,ans[i]);
+	}
+	if (zeros.size()>2) {
+		ans[x] = 0;
+		make(head[x]);
+	} else if (zeros.size()==2) {
+		ans[x] = add(ans[x],mult(prod,dfsadd(head[zeros[0]],head[zeros[1]],x)));
+		make(head[x]);
+	} else if (zeros.size()==1) {
+		ans[x] = add(ans[x],mult(prod,query(head[zeros[0]],sum[x]-A[x])));
+		if (adj[x].size()==1) {
+			head[x] = head[adj[x][0]];
+			return;
+		}
+		swap(adj[x][0],adj[x][1]);
+		for (int i=0;i<adj[x].size();i++) if (adj[x][i]==zeros[0]) swap(adj[x][i],adj[x][0]);
+		for (int i: adj[x]) if (i!=adj[x][0]) give(head[i],inv(ans[i]));
+		head[x] = head[adj[x][1]];
+		for (int i: adj[x]) if (i!=adj[x][0] && i!=adj[x][1]) {
+			dfsmerge(head[i],head[x]);
+		}
+		give(head[x],prod);
+		if (s[adj[x][0]]<s[adj[x][1]]) ans[x] = add(ans[x],dfsadd(head[adj[x][0]],head[x],x));
+		else ans[x] = add(ans[x],dfsadd(head[x],head[adj[x][0]],x));
+		head[x] = head[adj[x][0]];
+		give(head[x],prod);
+	} else if (zeros.size()==0) {
+		if (A[x]>=0) ans[x] = prod;
+		for (int i: adj[x]) {
+			give(head[i],inv(ans[i]));
+			ans[x] = add(ans[x],mult(prod,query(head[i],sum[x]-A[x])));
+		}
+		head[x] = head[adj[x][0]];
+		for (int i: adj[x]) if (i!=adj[x][0]) {
+			ans[x] = add(ans[x],mult(prod,dfsadd(head[i],head[x],x)));
+			dfsmerge(head[i],head[x]);
+		}
+		add(head[x],sum[x],1);
+		give(head[x],prod);
+	}
+}
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%d",&N);
+		reset();
+		for (int i=1;i<=N;i++) scanf("%d",&A[i]);
+		for (int i=1;i<N;i++) {
+			int a,b;
+			scanf("%d%d",&a,&b);
+			adj[a].push_back(b);
+			adj[b].push_back(a);
+		}
+		setup(1), dfs(1);
+		printf("%d\n",ans[1]);
+	}
+
+	return 0;
+}

@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 15;
+int h[N], m[N];
+typedef pair<ll, ll> P;
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest;
+
+	cin >> ntest;
+	while (ntest--) {
+		int n;
+		cin >> n;
+		REPU(i, 0, n) cin >> h[i] >> m[i];
+		vector<P> ans;
+		REPU(j, 0, 2) {
+			ll l = 0, r = INT_MAX;
+			bool bad = false;
+			REPU(i, 0, n - 1) {
+				ll a = m[i + 1] - m[i], b = h[i] - h[i + 1];
+				if (i % 2 == j) {
+					if (a == 0) {
+						if (b >= 0) bad = true;
+					}
+					else if (a < 0) {
+						if (b >= 0) bad = true;
+						else amin(r, (-b - 1) / (-a));
+					}
+					else if (a > 0) {
+						amax(l, (b + a) / a);
+					}
+				}
+				else {
+					if (a == 0) {
+						if (b <= 0) bad = true;
+					}
+					else if (a > 0) {
+						if (b <= 0) bad = true;
+						else amin(r, (b - 1) / a);
+					}
+					else if (a < 0) {
+						amax(l, (-b - a) / (-a));
+					}
+				}
+			}
+			if (!bad && l <= r) {
+				ans.push_back(P(l, r));
+			}
+		}
+		if (!ans.empty()) sort(ALL(ans));
+		if (ans.size() == 2) {
+			if (ans[1].first <= ans[0].second + 1) {
+				ans[0].second = tmax(ans[0].second, ans[1].second);
+				ans.resize(1);
+			}
+		}
+		printf("%d\n", (int) ans.size());
+		for (auto p : ans) {
+			printf("%lld ", p.first);
+			if (p.second == INT_MAX) puts("Inf");
+			else printf("%lld\n", p.second);
+		}
+	}
+	
+	return 0;
+}

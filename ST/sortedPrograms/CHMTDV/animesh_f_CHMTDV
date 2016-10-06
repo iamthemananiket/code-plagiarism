@@ -1,0 +1,111 @@
+#include "bits/stdc++.h"
+using namespace std;
+ 
+const int N = 505;
+const long long BASE = 501;
+const long long INF = (1LL << 45LL);
+ 
+int n, p;
+int arr[N][N], below[N];
+long long val[N][N], cur_val[N];
+vector < int > best_h, best_v;
+ 
+inline void generate(vector < int > &x){
+    x.push_back(0); x.push_back(n);
+    // picks (p - 1) random values in the range [1, n - 1] i.e the separators
+    vector < int > ok;
+    for(int i = 1; i <= n - 1; i++){
+        ok.push_back(i);
+    }
+    random_shuffle(ok.begin(), ok.end());
+    for(int i = 0; i < p - 1; i++){
+        x.push_back(ok[i]);
+    }
+    sort(x.begin(), x.end());
+}
+ 
+inline bool check(long long value, bool flagv){
+    for(int i = 1; i <= p; i++) cur_val[i] = 0;
+    vector < int > tmp;
+    tmp.clear();
+    for(int i = 1; i <= n; i++){
+        bool rekt = false;
+        for(int j = 1; j <= p; j++){
+            if(val[j][i] + cur_val[j] > value){
+                rekt = true;
+                break;
+            }
+        }
+        if(rekt){
+            tmp.push_back(i - 1);
+            for(int j = 1; j <= p; j++) cur_val[j] = 0;
+        }
+        for(int j = 1; j <= p; j++) cur_val[j] += val[j][i];
+    }
+    if((int) tmp.size() >= p) return false;
+    if(flagv){
+        while((int) tmp.size() < (p - 1))
+            tmp.push_back(n - 1);
+        for(int i = p - 2 ; i >= 1 ; i--){
+            while(tmp[i] <= tmp[i - 1])
+                --tmp[i - 1];
+        }
+        best_v = tmp;
+    }
+    return true;
+}
+ 
+int main(){
+    cin >> n >> p;
+    for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= n; j++){
+            cin >> arr[i][j];
+        }
+    }
+    clock_t st = clock();
+    double elapsed_secs;
+    long long best_score = INF;
+    vector < int > h(p + 1), v(p + 1);
+    do{
+        h.clear(); v.clear();
+       // h.resize(p + 1); v.resize(p + 1);
+        for(int i = 1; i <= n; i++){
+            for(int j = 1; j <= n; j++){
+                val[i][j] = 0;
+            }
+        }
+        generate(h);
+        long long cur_score = 0;
+        for(int i = 1; i <= p; i++)
+            for(int j = h[i - 1] + 1; j <= h[i]; j++)
+                below[j] = i;
+        long long l = 0, r = best_score;
+        for(int i = 1; i <= n; i++){
+            for(int j = 1; j <= n; j++){
+                val[below[i]][j] += arr[i][j];
+                l = max(l, val[below[i]][j]);
+            }
+        }
+        while(l < r){
+            long long mid = (l + r) / 2;
+            if(check(mid, 0)) r = mid;
+            else l = mid + 1;
+        }
+        // Take maximum!
+        if(l < best_score){
+            check(l, 1);
+            best_h = h;
+            best_score = l;
+        }
+        clock_t en = clock();
+        elapsed_secs = double(en - st) / CLOCKS_PER_SEC;
+    }while(elapsed_secs < 1.8);
+    for(auto h1 : best_h){
+        if(h1 != 0 and h1 != n) cout << h1 << ' ';
+    }
+    cout << '\n';
+    for(auto v1 : best_v){
+        if(v1 != 0 and v1 != n) cout << v1 << ' ';
+    }
+    cout << '\n';
+} 

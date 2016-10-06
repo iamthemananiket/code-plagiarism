@@ -1,0 +1,23 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+
+using namespace std;
+
+int main(){
+
+	char c,pr;
+
+	c = getchar();
+	while(c <= '9' && c >= '0'){
+		pr = c;
+		c = getchar();
+	}
+
+	c = pr;
+	c -= '0';
+
+	printf("%s\n",(c&1) ? "NO" : "YES");
+
+	return 0;
+}

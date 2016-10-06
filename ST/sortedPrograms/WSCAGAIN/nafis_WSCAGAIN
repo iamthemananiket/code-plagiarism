@@ -1,0 +1,113 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+pair < int, int > pp[122];
+int ar[14][14], deg[14], on[1<<13], vis[1<<13][2], dis[1<<13][2];
+vector < int > vc[1<<13];
+struct node {
+    int bp, cost, f;
+    node(int _bp, int _c, int _f){
+        bp = _bp; cost = _c; f = _f;
+    }
+};
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    LL a,b = 0,c,d = 0,e = 0,f = 0,g,h = 0,x,y,z = 0;
+    REP(i, 1<<13){
+        REP(j, i + 1){
+            if((i | j) == i){
+                vc[i].pb(j);
+                f++;
+            }
+        }
+    }
+    cin >> a;
+    while(a--){
+        cin >> b >> c >> z;
+        set0(ar); f = 0; set0(deg);
+        REP(i, c){
+            cin >> pp[i].xx >> pp[i].yy;
+            if(pp[i].xx > pp[i].yy) swap(pp[i].xx, pp[i].yy);
+            if(ar[ pp[i].xx ][ pp[i].yy ] == 0){
+                f++;
+                ar[ pp[i].xx ][pp[i].yy] = 1;
+                deg[pp[i].xx]++;
+                deg[pp[i].yy]++;
+            }
+            pp[i].xx--; pp[i].yy--;
+        }
+        REP(i, 1<<b){
+            on[i] = 1;
+            vis[i][0] = vis[i][1] = 0;
+            dis[i][0] = dis[i][1] = 100000000;
+            REP(j, c){
+                if((i & 1<<pp[j].xx) && (i & 1<<pp[j].yy)) on[i] = 0;
+            }
+        }
+        queue < node > pq;
+        pq.push(node((1<<b)-1, 0, 0));
+        dis[(1<<b)-1][0] = 0;
+        while(pq.size() > 0){
+            node pp = pq.front();
+            pq.pop();
+            if(vis[pp.bp][pp.f]) continue;
+            vis[pp.bp][pp.f] = 1;
+            int ot = ((1<<b)-1)^pp.bp;
+            REP(i, vc[pp.bp].size()){
+                if(__builtin_popcount(vc[pp.bp][i]) > z) continue;
+                if(on[ pp.bp^vc[pp.bp][i] ] == 0) continue;
+                d = ot|vc[pp.bp][i];
+                if(dis[d][pp.f^1] > pp.cost+1){
+                    dis[d][pp.f^1] = pp.cost + 1;
+                    pq.push(node(d,dis[d][pp.f^1], pp.f^1));
+                }
+            }
+        }
+        cout << dis[ (1<<b)-1 ][1] << endl;
+    }
+}

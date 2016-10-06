@@ -1,0 +1,16 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	ios::sync_with_stdio(false);
+	int t;
+	cin>>t;
+	while(t--){
+		int O,R,S;
+		cin>>O>>R>>S;
+		double ans=(double)((O*R)+S)/(double)(O+1);
+		printf("%.2f\n",ans);
+		
+		
+		
+	}
+}

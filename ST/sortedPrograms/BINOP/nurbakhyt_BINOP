@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-9;
+const ll inf = (ll)1e18;
+
+using namespace std;
+
+string a, b;
+
+void solve() {
+	cin >> a >> b;
+	if (a == b) {
+		cout << "Lucky Chef\n";
+		cout << "0\n";
+		return;
+	}
+	int f = 0, s = 0;
+	for (auto i : a)
+		f += (i - '0');
+	for (auto i : b)
+		s += (i - '0');
+	if (f == 0 || f == sz(a)) {
+		cout << "Unlucky Chef\n";
+		return;
+	}
+	int zero = 0, one = 0, sum = 0;
+	for (int i = 0; i < sz(a); i++) {
+		sum += (a[i] - '0');
+		if (a[i] != b[i]) {
+			if (a[i] == '0')
+				zero++;
+			else
+				one++;
+		}
+	}
+	cout << "Lucky Chef\n";
+	cout << max(zero, one) << '\n';
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+	ios_base :: sync_with_stdio(NULL), cin.tie(NULL);
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

@@ -1,0 +1,137 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+#define abs fabs
+
+using namespace std;
+
+const int N = 2e6 + 121;
+pair<int,int> a[N],b[N];
+int kol,l,r,m,La,Ra,Lb,Rb,mid;
+
+inline int f1(int x,int y)
+{
+    int mx1 = max(abs(a[1].f - x),max(abs(a[1].s - y),abs(a[La].s - y))),
+    mx2 = max(abs(a[kol].f - x),max(abs(a[kol].s - y),abs(a[Ra].s - y)));
+    return max(mx1,mx2);
+}
+
+inline int f2(int y,int x)
+{
+    int mx1 = max(abs(b[1].f - x),max(abs(b[1].s - y),abs(b[Lb].s - y))),
+    mx2 = max(abs(b[kol].f - x),max(abs(b[kol].s - y),abs(b[Rb].s - y)));
+    return max(mx1,mx2);
+}
+
+inline int f(int x,int y)
+{
+    return max(f1(x,y),f2(x,y));
+}
+
+ int main()
+ {
+    fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+      int t;
+     cin>>t;
+      while(t--)
+      {
+          int n,m;
+          cin>>n>>m;
+           kol=0;
+            for(int i=1;i<=n;++i)
+                for(int j=1;j<=m;++j)
+            {
+                char ch;
+                cin>>ch;
+                if(ch=='*')
+                {
+                    pair<int,int> p =make_pair(i,j);
+                    a[++kol] = p;
+                    swap(p.f,p.s);
+                    b[kol] = p;
+                }
+            }
+
+            if(!kol) cout<<0<<endl; else{
+
+            l = 1;
+            r = kol;
+             while(l+1<r)
+             {
+                mid = (l+r)>>1;
+                if(a[mid].f > a[1].f) r=mid; else l=mid;
+             }
+
+             if(a[r].f==a[1].f) l = r;
+
+             La = l;
+
+            l = 1;
+            r = kol;
+             while(l+1<r)
+             {
+                mid = (l+r)>>1;
+                if(a[mid].f < a[kol].f) l=mid; else r=mid;
+             }
+
+             if(a[l].f==a[kol].f) r = l;
+
+             Ra = r;
+
+            sort(b+1,b+kol+1);
+
+            l = 1;
+            r = kol;
+             while(l+1<r)
+             {
+                mid = (l+r)>>1;
+                if(b[mid].f > b[1].f) r=mid; else l=mid;
+             }
+
+             if(b[r].f==b[1].f) l = r;
+
+             Lb = l;
+
+            l = 1;
+            r = kol;
+             while(l+1<r)
+             {
+                mid = (l+r)>>1;
+                if(b[mid].f < b[kol].f) l=mid; else r=mid;
+             }
+
+             if(b[l].f==b[kol].f) r = l;
+
+             Rb = r;
+
+            int ans = 2e9;
+
+            for(int i=1;i<=n;++i)
+             for(int j=1;j<=m;++j)
+              ans=min(ans,f(i,j));
+
+              cout<<ans+1<<endl;
+            }
+      }
+
+ }

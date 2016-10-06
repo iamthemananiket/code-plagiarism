@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define N 1000010
+long long num[N << 2], add[N << 2];
+
+#define left(I) (I<<1)
+#define right(I) (I<<1|1)
+
+
+int n, c, runs;
+
+void push_down(int id){
+    add[left(id)] += add[id];
+    add[right(id)] += add[id];
+    add[id] = 0;
+}
+
+void build(int l, int r, int id) {
+    if (l == r) { add[id] = c; return; }
+    int m = (l + r) >> 1;
+    build(l, m, left(id));
+    build(m + 1, r, right(id));
+}
+
+long long find(int x, int l, int r, int id){
+    if(x == l && x == r) return add[id];
+    if(add[id]) push_down(id);
+    int m = (l + r) >> 1;
+    if(x <= m) return find(x, l, m, left(id));
+    return find(x, m + 1, r, right(id));
+}
+
+void update(int L, int R, int v, int l, int r, int id){
+    if(L <= l && r <= R){
+        add[id] += v;
+        return;
+    }
+    if(add[id]) push_down(id);
+    int m = (l + r) >> 1;
+    if(L <= m) update(L, R, v, l, m, left(id));
+    if(m < R) update(L, R, v, m + 1, r, right(id));
+}
+
+char s[10];
+int st, en, k, vv;
+
+int main(){
+    //freopen("gravel.in", "r", stdin);
+    scanf("%d %d %d", &n, &runs, &c);
+    build(1, n, 1);
+    for(int step = 1; step <= runs; step ++){
+        scanf("%s", s);
+        if(s[0] == 'Q'){
+            scanf("%d", &k);
+            printf("%lld\n", find(k, 1, n, 1)); continue;
+        }
+        scanf("%d %d %d", &st, &en, &vv);
+        update(st, en, vv, 1, n, 1);
+    }
+}

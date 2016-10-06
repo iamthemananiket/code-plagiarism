@@ -1,0 +1,178 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+#define NMAX 100010
+typedef pair<int,int> pii;
+
+const int mod1 = 1e9+7, mod2 = 1e9+9, base = 137;
+
+inline int mul(int a, int b, int mod){
+	return (1ll*a*b)%mod;
+}
+
+inline int add(int a, int b, int mod){
+	int c = a+b;
+	return c < mod? c : c-mod;
+}
+
+inline int sub(int a, int b, int mod){
+	int c = a-b;
+	return c >= 0? c : c+mod;
+}
+
+pii hsh[NMAX];
+pii revh[NMAX];
+
+pii pw[NMAX];
+
+int N;
+char str[NMAX];
+
+
+//str[i] should be <= mod1 and mod2;
+void init(){
+
+	int i;
+
+	pw[0] = make_pair(1,1);
+
+	for(i = 1; i <= N; ++i){
+		pw[i] =  make_pair( mul(pw[i-1].first,base,mod1) , mul(pw[i-1].second,base,mod2) );
+	}
+
+	hsh[0] = make_pair(str[0],str[0]);
+
+	for(i = 1; i < N; ++i){
+		hsh[i] = make_pair( add(mul(hsh[i-1].first,base,mod1),str[i],mod1), \
+				add(mul(hsh[i-1].second,base,mod2),str[i],mod2) );
+	}
+
+	revh[N] = make_pair(0,0);
+
+	for(i = N-1; i >= 0; --i){
+		revh[i] = make_pair( add(mul(revh[i+1].first,base,mod1),str[i],mod1), \
+				add(mul(revh[i+1].second,base,mod2),str[i],mod2));
+	}
+}
+
+pii substr_hsh(int i, int j){
+	if(!i) return hsh[j];
+	pii h;
+	h.first = sub(hsh[j].first , mul(hsh[i-1].first,pw[j-i+1].first,mod1),mod1);
+	h.second = sub(hsh[j].second , mul(hsh[i-1].second,pw[j-i+1].second,mod2),mod2);
+	return h;
+}
+
+pii revsub_hsh(int i, int j){
+	pii h;
+	h.first = sub(revh[i].first, mul(revh[j+1].first,pw[j-i+1].first,mod1),mod1);
+	h.second = sub(revh[i].second, mul(revh[j+1].second,pw[j-i+1].second,mod2),mod2);
+	return h;
+}
+
+pii concatenate_hsh(pii &h1, pii &h2, int n2){
+	pii h;
+	h.first = add(mul(h1.first,pw[n2].first,mod1),h2.first,mod1);
+	h.second = add(mul(h1.second,pw[n2].second,mod2),h2.second,mod2);
+	return h;
+}
+
+inline int is_palin(int i, int j){
+	return substr_hsh(i,j) == revsub_hsh(i,j);
+}
+
+pii z0 = make_pair(0,0);
+
+pii getval(int i, int j, int k, int l){
+	if(i > l || j < k) return substr_hsh(i,j);
+	if(i >= k && j <= l) return revsub_hsh(k+l-j,l-i+k);
+
+	pii h1,h2,h3,h;
+
+
+	if(k >= i && l <= j){
+		h1 = substr_hsh(i,k-1);
+		h2 = revsub_hsh(k,l);
+		h3 = substr_hsh(l+1,j);
+
+		h = concatenate_hsh(h1,h2,l-k+1);
+		h = concatenate_hsh(h,h3,j-l);
+		return h;
+	}
+
+	if(i < k){
+		h1 = substr_hsh(i,k-1);
+		h2 = revsub_hsh(l-j+k,l);
+
+		return concatenate_hsh(h1,h2,j-k+1);
+	}
+
+	assert(j > l);
+
+	h1 = revsub_hsh(k,k+l-i);
+	h2 = substr_hsh(l+1,j);
+
+	return concatenate_hsh(h1,h2,j-l);
+}
+
+pii getval2(int i, int j, int k, int l){
+	if(i > l || j < k) return revsub_hsh(i,j);
+	if(i >= k && j <= l) return substr_hsh(k+l-j,l-i+k);
+
+	pii h1,h2,h3,h;
+
+
+	if(k >= i && l <= j){
+		h1 = revsub_hsh(i,k-1);
+		h2 = substr_hsh(k,l);
+		h3 = revsub_hsh(l+1,j);
+
+		h = concatenate_hsh(h3,h2,l-k+1);
+		h = concatenate_hsh(h,h1,k-i);
+		return h;
+	}
+
+	if(i < k){
+		h1 = revsub_hsh(i,k-1);
+		h2 = substr_hsh(l-j+k,l);
+
+		return concatenate_hsh(h2,h1,k-i);
+	}
+
+	assert(j > l);
+
+	h1 = substr_hsh(k,k+l-i);
+	h2 = revsub_hsh(l+1,j);
+
+	return concatenate_hsh(h2,h1,l-i+1);
+}
+
+inline int check(int i, int j, int k, int l){
+	return getval(i,j,k,l) == getval2(i,j,k,l);
+}
+
+int Q;
+int main(){
+
+	int i,j,k,l;
+
+	scanf("%s",str);
+	N = strlen(str);
+
+	scanf("%d",&Q);
+
+	init();
+
+	while(Q--){
+		scanf("%d%d%d%d",&k,&l,&i,&j);
+		--i,--j,--k,--l;
+		printf("%s\n",check(i,j,k,l) ? "Yes" : "No");
+	}
+
+	return 0;
+}

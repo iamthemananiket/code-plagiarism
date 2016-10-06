@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int lca(int u, int v)
+{
+    while(u!=v)
+    {
+        if(u>v)
+            swap(u, v);
+        v/=2;
+    }
+    return u;
+}
+
+long long get(int u, int v, int base)
+{
+    if(u==v)
+        return base;
+    return 2*get(u, v/2, base)+v%2;
+}
+
+int main()
+{
+    int Q;
+    scanf("%d", &Q);
+    for(int i=0; i<Q; i++)
+    {
+        int u, v, n;
+        scanf("%d%d%d", &n, &u, &v);
+        if(u>v)
+            swap(u, v);
+        int w=lca(u, v);
+        int lo=1, mid, hi=n;
+        while(lo<hi)
+        {
+            mid=(lo+hi+1)/2;
+            if(get(w, u, mid)<=n && get(w, v, mid)<=n)
+                lo=mid;
+            else
+                hi=mid-1;
+        }
+        printf("%d\n", lo);
+    }
+    return 0;
+}

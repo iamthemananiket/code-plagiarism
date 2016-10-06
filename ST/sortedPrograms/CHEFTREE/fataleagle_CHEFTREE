@@ -1,0 +1,211 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, Q, A, B;
+vector<int> adj[100001];
+int C[100001];
+int level[100001];
+int sz[100001];
+int son[100001];
+int parent[100001];
+int top[100001];
+int oldid[100001];
+int newid[100001], nextid;
+int bit[100001];
+
+void add(int x, int v)
+{
+    for(; x<=N; x+=x&-x)
+        bit[x]+=v;
+}
+
+int ask(int x)
+{
+    int ret=0;
+    for(; x>0; x-=x&-x)
+        ret+=bit[x];
+    return ret;
+}
+
+int ask(int l, int r)
+{
+    return ask(r)-ask(l-1);
+}
+
+struct node
+{
+    long long maxi;
+    long long lazy;
+} seg[262144];
+
+void apply(int idx, long long val)
+{
+    seg[idx].maxi+=val;
+    seg[idx].lazy+=val;
+}
+
+void down(int idx)
+{
+    if(seg[idx].lazy)
+    {
+        apply(idx*2, seg[idx].lazy);
+        apply(idx*2+1, seg[idx].lazy);
+        seg[idx].lazy=0;
+    }
+}
+
+void build(int idx, int begin, int end)
+{
+    if(begin==end)
+        seg[idx].maxi=1LL*A*C[oldid[begin]]+B, seg[idx].lazy=0;
+    else
+    {
+        int mid=(begin+end)/2;
+        build(idx*2, begin, mid);
+        build(idx*2+1, mid+1, end);
+        seg[idx].maxi=max(seg[idx*2].maxi, seg[idx*2+1].maxi);
+        seg[idx].lazy=0;
+    }
+}
+
+void update(int idx, int begin, int end, int l, int r, long long v)
+{
+    if(r<begin || end<l)
+        return;
+    if(l<=begin && end<=r)
+        apply(idx, v);
+    else
+    {
+        down(idx);
+        int mid=(begin+end)/2;
+        update(idx*2, begin, mid, l, r, v);
+        update(idx*2+1, mid+1, end, l, r, v);
+        seg[idx].maxi=max(seg[idx*2].maxi, seg[idx*2+1].maxi);
+    }
+}
+
+int query(int idx, int begin, int end)
+{
+    if(seg[idx].maxi<0)
+        return -1;
+    if(begin==end)
+        return begin;
+    down(idx);
+    int mid=(begin+end)/2;
+    int res=query(idx*2, begin, mid);
+    if(res!=-1)
+        return res;
+    return query(idx*2+1, mid+1, end);
+}
+
+void dfs(int u, int p)
+{
+    sz[u]=1;
+    son[u]=0;
+    for(auto& v: adj[u]) if(v!=p)
+    {
+        parent[v]=u;
+        level[v]=level[u]+1;
+        dfs(v, u);
+        sz[u]+=sz[v];
+        if(sz[v]>sz[son[u]])
+            son[u]=v;
+    }
+}
+
+void dfs2(int u, int p)
+{
+    newid[u]=++nextid;
+    oldid[newid[u]]=u;
+    if(son[parent[u]]==u)
+        top[u]=top[parent[u]];
+    else
+        top[u]=u;
+    if(son[u])
+        dfs2(son[u], u);
+    for(auto& v: adj[u]) if(v!=p)
+    {
+        if(v!=son[u])
+            dfs2(v, u);
+    }
+}
+
+void hld_update(int u, int v, long long w)
+{
+    while(top[u]!=top[v])
+    {
+        if(level[top[u]]<level[top[v]])
+            swap(u, v);
+        update(1, 1, N, newid[top[u]], newid[u], w);
+        u=parent[top[u]];
+    }
+    if(level[u]>level[v])
+        swap(u, v);
+    update(1, 1, N, newid[u], newid[v], w);
+}
+
+int hld_query(int u, int v)
+{
+    int ans=0;
+    while(top[u]!=top[v])
+    {
+        if(level[top[u]]<level[top[v]])
+            swap(u, v);
+        ans+=ask(newid[top[u]], newid[u]);
+        u=parent[top[u]];
+    }
+    if(level[u]>level[v])
+        swap(u, v);
+    ans+=ask(newid[u], newid[v]);
+    return ans;
+}
+
+void _main()
+{
+    nextid=0;
+    scanf("%d%d%d%d", &N, &Q, &A, &B);
+    for(int i=1; i<=N; i++)
+        scanf("%d", C+i), adj[i].clear(), bit[i]=0;
+    int op, a, b, c;
+    for(int i=0; i<N-1; i++)
+    {
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    dfs(1, 1);
+    dfs2(1, 1);
+    build(1, 1, N);
+    for(int i=0; i<Q; i++)
+    {
+        scanf("%d", &op);
+        if(op==1)
+        {
+            scanf("%d%d%d", &a, &b, &c);
+            hld_update(a, b, 1LL*c*A);
+        }
+        else
+        {
+            scanf("%d%d", &a, &b);
+            while(1)
+            {
+                int idx=query(1, 1, N);
+                if(idx==-1)
+                    break;
+                add(idx, 1);
+                update(1, 1, N, idx, idx, -1500000000000000000LL);
+            }
+            printf("%d\n", hld_query(a, b));
+        }
+    }
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+        _main();
+    return 0;
+}

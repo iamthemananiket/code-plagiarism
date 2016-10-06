@@ -1,0 +1,47 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+
+pii p[MAX_N];
+int N, X, Y;
+int main(){
+  scanf("%d%d%d", &N, &X, &Y);
+  for(int i = 0; i < N; i++) scanf("%d", &p[i].fi);
+  for(int i = 0; i < N; i++) scanf("%d", &p[i].se);
+
+  sort(p, p + N, [&](const pii& lhs, const pii& rhs) -> bool { return lhs.fi - lhs.se < rhs.fi - rhs.se; });
+  int f = 0, s = 0;
+  for(int i = 0; i < N; i++){
+    //     printf("%d %d\n", p[i].fi, p[i].se);
+    f += p[i].fi;
+  }
+  int res = 0;
+  for(int i = 0; i < N; i++){
+    f -= p[i].fi;
+    s += p[i].se;
+    if(i + 1 <= Y && (N - i - 1) <= X){
+      res = max(res, f + s);
+    }
+  }
+  printf("%d\n", res);
+  return 0;
+}

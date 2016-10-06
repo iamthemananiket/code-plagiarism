@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+bool isPalim(string s)
+{
+	for(int i=0,j=s.size()-1;i<j;i++,j--)
+	 {
+	 	if(s[i]!=s[j])
+	 	 return false;
+	 }
+	 return true;
+}
+
+bool isPana(string s)
+{
+	set<char> valid;
+	for(int i=0;i<s.size();i++)
+		 valid.insert(s[i]);
+	return (valid.size()==26);
+	 
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+		{string s;
+			cin>>s;
+			bool flag1,flag2;
+			flag1 = isPalim(s);
+			flag2 = isPana(s);
+			if(flag1 && flag2)
+			 {
+			 	puts("palingram");
+			 }
+			else if(flag1)
+			{
+				puts("palindrome");
+			}
+			else if(flag2)
+			{
+				puts("pangram");
+			}
+			else
+			{
+				puts("none");
+			}
+		}
+}

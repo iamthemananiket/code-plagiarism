@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define N 1000000007
+#define si 10000001
+using namespace std;
+vector<ll>v;
+ll num[10000005];
+ll marked[10000005];
+ll powers[si+4];
+ll power(ll a,ll b)
+{
+	ll t=1;
+	while(b>0)
+	{
+		if(b&1)
+		{
+			t=(t*a)%N;
+		}
+		b>>=1;
+		a=(a*a)%N;
+	}
+	return t;
+}
+int main()
+{
+	ll i,k,pos,ans,final,j,p1,t,n,m,l,r,p,val,st;
+	scanf("%lld",&t);
+	while(t--)
+	{
+		ans=0;
+		scanf("%lld %lld %lld %lld",&n,&m,&l,&r);
+		marked[m+1]=0;
+			final=0;
+			for(i=1;i<=m;i++)
+            {
+                powers[i]=-1;
+            }
+			if(l==1)
+			{
+				for(i=m;i>=m/2+(!(m%2));i--)
+				{
+					num[i]=1;
+					marked[i]=(1+marked[i+1])%N;
+				}
+				ll cal=0;
+				for(i=m/2;i>=r;i--)
+				{
+				    cal=0;
+					if(powers[m/i]==-1)
+					{
+						powers[m/i]=power(m/i,n);
+					}
+					val=powers[m/i];
+					for(j=2;j*i<=m;j++)
+					{
+						val=(val-num[j*i]+N)%N;
+						cal=(cal+num[j*i])%N;
+					}
+				//	cout<<m/i<<" "<<cal<<endl;
+					num[i]=val;
+					marked[i]=(val+marked[i+1])%N;
+				}
+				final=(power(m,n)-marked[r+1]+N)%N;
+				printf("%lld\n",final);
+				continue;
+			}
+			for(i=m;i>=m/2+(!(m%2));i--)
+			{
+				num[i]=1;
+				marked[i]=(1+marked[i+1])%N;
+			}
+			ll cal=0;
+			for(i=m/2;i>=l;i--)
+			{
+			    cal=0;
+			    if(powers[m/i]==-1)
+			    {
+			    	powers[m/i]=power(m/i,n);
+			    }
+				val=powers[m/i];
+				for(j=2;j*i<=m;j++)
+				{
+					val=(val-num[j*i]+N)%N;
+					cal=(cal+num[j*i])%N;
+				}
+			//	cout<<m/i<<" "<<cal<<endl;
+				num[i]=val;
+			//	cout<<num[i]<<" "<<m/i<<endl;
+				marked[i]=(val+marked[i+1])%N;
+			}
+			final=(marked[l]-marked[r+1]+N)%N;
+			printf("%lld\n",final);
+	}
+	return 0;
+}

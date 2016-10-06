@@ -1,0 +1,62 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+int main() {
+	int n, m; cin >> n >> m;
+	vector<int> f(m);
+	f[0] = 1 % m;
+	for (int i = 1; i < m; i++)
+		f[i] = (ll)f[i - 1] * i % m;
+	f[0] = 0;
+	for (int i = 1; i < m; i++)
+		f[i] = (f[i - 1] + (ll)f[i] * i) % m;
+	ll sum = 0;
+	while (n--) {
+		ll p; scanf("%lld", &p);
+		int y = f[min(p, (ll)m - 1)];
+		ll x;
+		if (p % 2 == 0) {
+			x = p / 2 % m;
+			p %= m;
+			x = x * (p + 1) % m;
+			x = x * p % m;
+		}
+		else {
+			x = (p + 1) / 2 % m;
+			p %= m;
+			x = x * p % m;
+			x = x * p % m;
+		}
+		sum = (sum + x + y) % m;
+	}
+	cout << sum << endl;
+}

@@ -1,0 +1,42 @@
+#include<stdio.h>
+int T, n, f[101000], deg[101000], Q[101000], C[101000];
+long long D[101000], Res, S;
+bool v[101000];
+int main(){
+	int i, h, t, x;
+	scanf("%d", &T);
+	while (T--){
+		scanf("%d", &n);
+		for (i = 1; i <= n; i++){
+			scanf("%d", &f[i]);
+			deg[f[i]]++;
+		}
+		for (i = 1; i <= n; i++){
+			scanf("%d", &C[i]);
+		}
+		Res = 0;
+		h = t = 0;
+		for (i = 1; i <= n; i++) if (!deg[i])Q[++t] = i;
+		while (h < t){
+			x = Q[++h];
+			D[x] += C[x];
+			if (D[x] > 0)D[f[x]] += D[x];
+			deg[f[x]]--;
+			if (!deg[f[x]])Q[++t] = f[x];
+		}
+		for (i = 1; i <= n; i++){
+			if (deg[i] && !v[i]){
+				x = i;
+				S = 0;
+				while (!v[x]){
+					v[x] = true;
+					S += D[x] + C[x];
+					x = f[x];
+				}
+				if (S > 0)Res += S;
+			}
+		}
+		printf("%lld\n", Res);
+		for (i = 1; i <= n; i++)D[i] = 0, deg[i] = 0, v[i] = false;
+	}
+}

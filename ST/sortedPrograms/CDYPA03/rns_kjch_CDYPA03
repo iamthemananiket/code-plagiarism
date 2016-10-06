@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <assert.h>
+#include <memory.h>
+#include <algorithm>
+#include <string>
+#include <string.h>
+#include <iostream>
+using namespace std;
+
+#define M 110001
+
+char s[M];
+int val[M], id[M];
+
+int X, n, k;
+
+int FABS(int x) {
+    if(x < 0) return -x;
+    return x;
+}
+
+bool cmp(int x, int y) {
+    int a = FABS(X - val[x]), b = FABS(X - val[y]);
+    if(a != b) return a < b;
+
+    if(val[x] <= X && val[x] == val[y]) return x > y;
+    if(val[x] > X && val[x] == val[y]) return x < y;
+
+    return val[y] < val[x];
+}
+
+
+
+int main() {
+    ///freopen("A.in", "r", stdin);
+while (~scanf("%d %d", &n, &k)) {
+    assert(n >= k);
+    scanf("%s", s);
+    int ans = 1e9;
+    string ANS = "";
+    //int c = s[0] - '0';
+    for(int i = 0; i <= 9; i ++) {
+        for(int j = 1; j <= n; j ++) val[j] = s[j-1] - '0';
+        //val[1] = c;
+        //if (i == 0) val[1] = 100;
+        for(int j = 1; j <= n; j ++) id[j] = j;
+        X = i;
+        sort(id + 1, id + n + 1, cmp);
+        for(int j = 1; j <= k; j ++) val[id[j]] = i;
+        int pre = 0;
+        string A = "";
+        for(int j = 1; j <= n; j ++) A += '0' + val[j];
+        for(int j = 1; j <= n; j ++) pre += FABS(val[j] - (s[j-1] - '0'));
+        if(pre < ans) ans = pre, ANS = A;
+        else if(pre == ans && ANS > A) ANS = A;
+    }
+    printf("%d\n", ans);
+    assert(ans < 1e8);
+    cout << ANS << endl;
+}
+}

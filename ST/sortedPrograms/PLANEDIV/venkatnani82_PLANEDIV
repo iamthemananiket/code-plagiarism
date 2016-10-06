@@ -1,0 +1,24 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		int n;
+		cin>>n;
+		map<double, set<double> > m;
+		double a, b, c;
+		for (int i = 0; i < n; i++) {
+		 	scanf("%lf %lf %lf", &a, &b, &c);
+		 	if(b == 0) m[1e18].insert(c / a);
+		 	else m[-a / b].insert(c / b);
+		} 
+		map<double, set<double> > :: iterator it = m.begin();
+		int maxi = 0;
+		while (it != m.end()){
+			maxi = max(maxi, (int)(it -> second).size());
+			it++;
+		} 
+		cout<<maxi<<endl;
+	}
+}

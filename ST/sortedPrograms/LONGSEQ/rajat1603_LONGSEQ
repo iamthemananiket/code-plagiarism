@@ -1,0 +1,24 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+int t;
+char str[N];
+int a , b;
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%s" , str);
+        a = 0;
+        b = 0;
+        for(int i = 0 ; str[i] ; ++i){
+            a += (str[i] == '0');
+            b += (str[i] == '1');
+        }
+        if(min(a , b) == 1 || (a + b == 1)){
+            printf("Yes\n");
+        }
+        else{
+            printf("No\n");
+        }
+    }
+}

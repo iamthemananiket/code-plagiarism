@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+
+map<int,int> cnt;
+int uniq;
+
+void add(int x) {
+  if(++cnt[x]==1)++uniq;
+}
+
+void del(int x) {
+  if(--cnt[x]==0)--uniq;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N;
+    cin>>N;
+    vector<int>arr(N);
+    for(int& a:arr)
+      cin>>a;
+    cnt.clear();
+    uniq=0;
+    for(int i=1;i<N;++i)
+      add(arr[i]-arr[i-1]);
+    int res=2e9;
+    for(int i=0;i<N;++i) {
+      if(i>0)del(arr[i]-arr[i-1]);
+      if(i+1<N)del(arr[i+1]-arr[i]);
+      if(i>0&&i+1<N)add(arr[i+1]-arr[i-1]);
+      if(uniq<=1) {
+        res=min(res,arr[i]);
+      }
+      if(i>0)add(arr[i]-arr[i-1]);
+      if(i+1<N)add(arr[i+1]-arr[i]);
+      if(i>0&&i+1<N)del(arr[i+1]-arr[i-1]);
+    }
+    if(res>=2e9)res=-1;
+    cout<<res<<endl;
+  }
+  return 0;
+};

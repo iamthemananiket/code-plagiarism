@@ -1,0 +1,242 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)8e4 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+const int magic = 380;
+
+using namespace std;
+
+vector < int > st;
+int L[MAX_N], R[MAX_N];
+int n;
+vector < int > g[MAX_N];
+int a[MAX_N];
+int up[20][MAX_N];
+int lvl[MAX_N];
+
+void dfs(int v, int pr = -1) {
+  up[0][v] = (pr == -1 ? 1 : pr);
+  for (int i = 1; i < 20; i++)
+  	up[i][v] = up[i - 1][up[i - 1][v]];
+	lvl[v] = lvl[(pr == -1 ? 1 : pr)] + 1;
+	L[v] = sz(st);
+	st.pb(v);
+	for (auto to : g[v])
+		if (to != pr)
+			dfs(to, v);
+	R[v] = sz(st);
+	st.pb(v);
+}
+
+int get_lca(int a, int b) {
+	if (lvl[a] > lvl[b])
+		swap(a, b);
+	for (int it = 19; it >= 0; it--)
+		if (lvl[up[it][b]] >= lvl[a])
+			b = up[it][b];
+	if (a == b)
+		return a;
+	for (int it = 19; it >= 0; it--)
+		if (up[it][a] != up[it][b])
+			a = up[it][a], b = up[it][b];
+	return up[0][a];
+}
+
+struct num {
+	int l, r, tp, id, lca, u, v;
+	bool operator < (const num &b) const {
+		if (l / magic != b.l / magic)
+			return l / magic < b.l / magic;
+		return r < b.r;
+	}
+} t[MAX_N];
+
+int ans[MAX_N];
+
+int q;
+
+struct Magic {
+	bool inv[MAX_N];
+	set < int > q;
+	multiset < int > mini;
+	inline void Add(int x) {
+		auto it = q.lower_bound(x);
+		int r = inf, l = inf;
+		if (it != q.end()) {
+			mini.insert(*it - x);
+			r = *it;
+		}
+		if (it != q.begin()) {
+			it--;
+			mini.insert(x - *it);
+			l = *it;
+		}
+		if (l != inf && r != inf)
+			mini.erase(mini.find(r - l));
+		q.insert(x);
+	}
+	inline void Del(int x) {
+		auto it = q.upper_bound(x);
+		int l = inf, r = inf;
+		if (it != q.end()) {
+			mini.erase(mini.find(*it - x));
+			r = *it;
+		}
+		it--;
+		if (it != q.begin()) {
+		  it--;
+			mini.erase(mini.find(x - *it));
+			l = *it;
+		}
+		if (l != inf && r != inf)
+			mini.insert(r - l);
+		q.erase(x);
+	}
+	inline int Mini() {
+		return (mini.empty() ? inf : *mini.begin());
+	}
+	inline int Maxi() {
+		return (q.empty() ? 0 : *q.rbegin() - *q.begin());
+	}
+	inline int calc_mini(int x) {
+		auto it = q.lower_bound(x);
+		int res = inf;
+		if (it != q.end())
+			res = min(res, *it - x);
+		if (it != q.begin()) {
+			it--;
+			res = min(res, x - *it);
+		}
+		return res;
+	}
+	inline int calc_maxi(int x) {
+		int res = 0;
+		if (!q.empty()) {
+			res = max(res, abs(x - *q.begin()));
+			res = max(res, abs(x - *q.rbegin()));
+		}
+		return res;
+	}
+	inline void add(int x) {
+		if (!inv[x])
+			Add(a[x]);
+		else
+			Del(a[x]);
+		inv[x] ^= 1;
+	}
+} h;
+
+int _maxi[20][MAX_N], _mini[20][MAX_N];
+
+void Dfs(int v, int pr = -1) {
+	_maxi[0][v] = max(a[v], a[up[0][v]]);
+	for (int i = 1; i < 20; i++)
+		_maxi[i][v] = max(_maxi[i - 1][v], _maxi[i - 1][up[i - 1][v]]);
+	_mini[0][v] = min(a[v], a[up[0][v]]);
+	for (int i = 1; i < 20; i++)
+		_mini[i][v] = min(_mini[i - 1][v], _mini[i - 1][up[i - 1][v]]);
+	for (auto to : g[v])
+		if (to != pr)
+			Dfs(to, v);
+}
+
+pi get_path(int v, int lca) {
+	pi res = mp(-inf, inf);
+	for (int it = 19; it >= 0; it--)
+		if (lvl[up[it][v]] >= lvl[lca]) {
+			res.f = max(res.f, _maxi[it][v]);
+			res.s = min(res.s, _mini[it][v]);
+			v = up[it][v];
+		}
+	return res;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in", "r", stdin);
+	freopen(fname"out", "w", stdout);
+	#endif
+	scanf("%d\n", &n);         	
+	for (int i = 1; i <= n; i++)
+		scanf("%d ", &a[i]);
+	for (int i = 1, u, v; i < n; i++) {
+		scanf("\n%d %d", &u, &v);
+		g[u].pb(v), g[v].pb(u);
+	}
+	dfs(1);
+	scanf("\n%d", &q);
+	bool bad = 1;
+	for (int i = 1; i <= q; i++) {
+		char tp;
+		scanf("\n%c ", &tp);
+		t[i].tp = (tp == 'C');
+		if (tp == 'C')
+			bad = 0;
+		t[i].id = i;
+		scanf("%d %d", &t[i].l, &t[i].r);
+		t[i].lca = get_lca(t[i].l, t[i].r);
+		if (t[i].lca == t[i].r)
+			swap(t[i].l, t[i].r);
+		t[i].u = t[i].l, t[i].v = t[i].r;
+		if (t[i].lca == t[i].l)
+			t[i].l = L[t[i].l], t[i].r = L[t[i].r];
+		else {
+		  if (R[t[i].r] < L[t[i].l])
+		  	swap(t[i].r, t[i].l), 
+		  	swap(t[i].u, t[i].v);
+			t[i].l = R[t[i].l], t[i].r = L[t[i].r];
+		}
+		assert(t[i].l < t[i].r);
+		assert(t[i].lca > 0);
+	}
+	if (bad) {
+		Dfs(1);
+		for (int i = 1; i <= q; i++) {
+			printf("%d\n", max(get_path(t[i].u, t[i].lca).f, get_path(t[i].v, t[i].lca).f) - min(get_path(t[i].u, t[i].lca).s, get_path(t[i].v, t[i].lca).s));
+		}
+		return 0;
+	}
+	sort(t + 1, t + q + 1);
+	for (int i = 1, l = 0, r = -1; i <= q; i++) {
+		while(r < t[i].r)
+			h.add(st[++r]);
+		while(r > t[i].r)
+			h.add(st[r--]);
+		while(l < t[i].l)
+			h.add(st[l++]);
+		while(l > t[i].l)
+			h.add(st[--l]);
+		if (t[i].tp) {
+			ans[t[i].id] = h.Mini();
+			if (t[i].lca != t[i].u)
+				ans[t[i].id] = min(ans[t[i].id], h.calc_mini(a[t[i].lca]));
+		}
+		else {
+			ans[t[i].id] = h.Maxi();
+			if (t[i].lca != t[i].u)
+				ans[t[i].id] = max(ans[t[i].id], h.calc_maxi(a[t[i].lca]));
+		}
+	}
+	for (int i = 1; i <= q; i++)
+		printf("%d\n", ans[i]);
+	return 0;
+}

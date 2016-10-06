@@ -1,0 +1,39 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+int main() {
+  int nt;
+  scanf("%d", &nt);
+
+  for (int t = 0; t < nt; ++t) {
+    double angled;
+    scanf("%lf", &angled);
+    
+    int angle10000 = (int)round(angled * 10000.);
+    for (int h = 0; h < 12; ++h)
+      for (int m = 0; m < 60; ++m) {
+	int anglehx = 360 * (60*h + m);
+	int anglemx = m * 360 * 12;
+	int mi = min(anglehx, anglemx);
+	int ma = max(anglehx, anglemx);
+	int diff = min(abs(mi - ma), abs(mi - (ma - 360*60*12)));
+	if (abs(diff*10000 - angle10000*60*12) < 60000)
+	  printf("%02d:%02d\n", h, m);
+      }
+  }
+
+  return 0;
+}

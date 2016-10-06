@@ -1,0 +1,94 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+struct SegmentTree {
+    int n, m;
+    vector<int> d, mask;
+    SegmentTree(vector<int> a) : n(a.size()) {
+	m=1;
+	for (;m<n;) m*=2;
+	d = vector<int>(m*2, 1<<30);
+	REP (i, n) d[i+m] = a[i];
+	for (int i=m; --i; ) d[i] = min(d[i*2], d[i*2+1]);
+	mask = vector<int>(m * 2, -1);
+    }
+//    SegmentTree(int n_): n(n) {
+//	m=1;
+//	for (;m<n;) m*=2;
+//	d = vector<int>(m*2);
+//	mask = vector<int>(m * 2, -1);
+//    }
+    int update(int x, int y, int s) { return update(x, y, s, 1, 0, m); }
+    int update(int x, int y, int s, int k, int l, int r) {
+	if (r<=x || y<=l) return 1<<30;
+	if (x<=l && r<=y) {
+	    if ((mask[k] & ~s) == 0) {
+	    } else if (l + 1 == r) {
+		mask[k] &= s;
+		d[k] &= s;
+	    } else {
+		mask[k] &= s;
+		update(x, y, s, k*2, l, (l+r)/2);
+		update(x, y, s, k*2+1, (l+r)/2, r);
+		d[k] = min(d[k*2], d[k*2+1]);
+	    }
+	    return d[k];
+	}
+	if ((mask[k] & ~s) == 0) {
+	} else {
+	    update(x, y, s, k*2, l, (l+r)/2);
+	    update(x, y, s, k*2+1, (l+r)/2, r);
+	    mask[k] = mask[k*2] | mask[k*2+1];
+	    d[k] = min(d[k*2], d[k*2+1]);
+	}
+	return d[k];
+    }
+    int query(int x, int y) { return query(x, y, 1, 0, m); }
+    int query(int x, int y, int k, int l, int r) {
+	if (r<=x || y<=l) return 1<<30;
+	if (x<=l && r<=y) return d[k];
+	return min(query(x, y, k*2, l, (l+r)/2), query(x, y, k*2+1, (l+r)/2, r));
+    }
+    void show() {
+	REP (i, 2 * m) eprintf("%d ", d[i]); eprintf("\n");
+    }
+};
+
+int N, Q;
+int A[100111];
+
+int main() {
+    scanf("%d%d", &N, &Q);
+    REP (i, N) scanf("%d", A+i);
+    SegmentTree X(VI(A, A+N));
+    REP ($, Q) {
+	int ty;
+	int L, R;
+	scanf("%d%d%d", &ty, &L, &R);
+	L--;
+	if (ty == 0) {
+	    printf("%d\n", X.query(L, R));
+	} else {
+	    int p;
+	    scanf("%d", &p);
+	    X.update(L, R, p);
+	}
+    }
+    return 0;
+}
+

@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1e6 + 5;
+
+int n, k;
+bitset< N<<1 > c, r;
+int nc[N], nr[N];
+
+
+int main() {
+	int t; scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d", &n, &k);
+		c.reset(); r.reset();
+		while(k--) {
+			int x, y;
+			scanf("%d%d", &x, &y);
+			x--; y--;
+			r[x+y] = 1;
+			c[x+(n-1-y)] = 1;
+		}
+		long long ans = 0, sum[] = {0, 0};
+		for(int i = 0; i<n-1; i++) {
+			nc[i] = c[i] + c[2*n-2-i];
+			nr[i] = r[i] + r[2*n-2-i];
+			ans += 1LL*(nc[i] + nr[i])*(i+1);
+		}
+		nc[n-1] = c[n-1];
+		nr[n-1] = r[n-1];
+		ans += (nc[n-1]+nr[n-1])*n;
+		for(int i = 0; i<n; i++) {
+			sum[i&1] += nr[n-1-i];
+			ans -= sum[i&1]*nc[i];
+		}
+		printf("%lld\n", 1LL*n*n-ans);
+	}
+	return 0;
+}

@@ -1,0 +1,177 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cassert>
+#include <cstring>
+
+#define NMAX 100010
+
+using namespace std;
+
+struct node{
+	int left,right,sz,rev;
+};
+
+int N;
+
+
+node T[NMAX];
+const int mx = 100002;
+
+int create_node(){
+	T[N].left = T[N].right = mx;
+	T[N].rev = 0;
+	T[N].sz = 1;
+	return N++;
+}
+
+void down(int x){
+	if(!T[x].rev) return;
+	swap(T[x].left,T[x].right);
+	T[T[x].left].rev ^= 1;
+	T[T[x].right].rev ^= 1;
+	T[x].rev = 0;
+}
+
+void upd(int x){
+	T[x].sz = T[T[x].left].sz + T[T[x].right].sz+1;
+}
+
+int path[NMAX];
+int P;
+int root;
+
+int search(int rt, int k){
+	if(rt >= mx){
+		rt =  create_node();
+		path[P++] = rt;
+		return rt;
+	}
+
+	path[P++]= rt;
+	down(rt);
+
+	if(T[T[rt].left].sz > k){
+		T[rt].left = search(T[rt].left,k);
+		upd(rt);
+		return rt;
+	}
+	k -= T[T[rt].left].sz;
+	if(!k) return rt;
+	--k;
+	T[rt].right = search(T[rt].right,k);
+	upd(rt);
+	return rt;
+}
+
+void rotate(int x, int p, int dir){
+
+	if(dir){
+		T[p].right = T[x].left;
+		T[x].left = p;
+		upd(p);
+		upd(x);
+		return;
+	}
+
+	T[p].left = T[x].right;
+	T[x].right = p;
+	upd(p);
+	upd(x);
+}
+
+void zig(int x, int p, int dir){
+	rotate(x,p,dir);
+}
+
+void zigzig(int x, int p, int g, int dir){
+	rotate(p,g,dir);
+	rotate(x,p,dir);
+}
+
+void zigzag(int x, int p, int g, int dir){
+	rotate(x,p,dir^1);
+	rotate(x,g,dir);
+}
+
+int splay(int rt, int k){
+	int x,p,g;
+	P = 0;
+	search(rt,k);
+
+	x = path[P-1];
+	while(--P){
+		p = path[P-1];
+		if(T[p].right == path[P]) T[p].right = x;
+		else T[p].left = x;
+
+		if(P <= 1){
+			zig(x,p,T[p].right == x);
+			continue;
+		}
+		g = path[P-2];
+		if((T[p].right == x)^(T[g].right == p))	zigzag(x,p,g,T[g].right==p);
+		else zigzig(x,p,g,T[g].right==p);
+		--P;
+	}
+
+	return x;
+}
+
+int merge(int r1, int r2){
+	if(r1 >= mx) return r2;
+	r1 = splay(r1,T[r1].sz-1);
+	T[r1].right = r2;
+	upd(r1);
+	return r1;
+}
+
+int remove(int &rt, int x){
+	rt = splay(rt,x);
+	x = T[rt].left;
+	T[rt].left = mx;
+	upd(rt);
+	return x;
+}
+
+int shuffle(int A, int B, int C){
+	int a,b,c;
+
+	a = remove(root,A);
+
+	b = remove(root,B);
+
+	root = merge(a,root);
+
+	c= remove(root,C);
+
+	T[b].rev = 1;
+	root = merge(b,root);
+	root = merge(c,root);
+	return root;
+}
+
+int M;
+int main(){
+	int n,i;
+
+	scanf("%d%d",&n,&M);
+
+	root=  mx;
+	for(i = 0; i < n; ++i){
+		root=  splay(root,i);
+	}
+
+	int A,B,C;
+	while(M--){
+		scanf("%d%d%d",&A,&B,&C);
+		shuffle(A,B,C);
+	}
+
+	for(i = 0; i < n; ++i){
+		root=  splay(root,i);
+		printf("%d ",root+1);
+	}
+
+	return 0;
+}

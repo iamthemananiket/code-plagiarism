@@ -1,0 +1,88 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 200;
+
+int n, m, s;
+int a[MAX_N][MAX_N];
+long long sum[MAX_N][MAX_N];
+
+
+int p[MAX_N];
+int tree[MAX_N];
+pair <long long, int> ord[MAX_N];
+
+void update (int idx)
+{
+	for (; idx < MAX_N; idx += (idx & (-idx)))
+		tree[idx] ++;
+}
+
+int find (int idx)
+{
+	int ans = 0;
+	for (; idx; idx -= (idx & (-idx)))
+		ans += tree[idx];
+	return ans;
+}
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		int i, j, i1, j1, ans = 0, l, r, mid;
+		long long curr;
+		scanf ("%d%d%d", &n, &m, &s);
+		memset (sum, 0, sizeof (sum));
+		for (i = 1; i <= n; i ++)
+			for (j = 1; j <= m; j ++)
+			{
+				scanf ("%d", &a[i][j]);
+				sum[i][j] = a[i][j] + sum[i][j - 1] + sum[i - 1][j] - sum[i - 1][j - 1];
+			}
+		for (i = 1; i <= n; i ++)
+			for (i1 = i; i1 <= n; i1 ++)
+			{
+				memset (p, 0, sizeof (p));
+				memset (tree, 0, sizeof (tree));
+				ord[0] = make_pair (-0, 0);
+				for (j = 1; j <= m; j ++)
+					ord[j] = make_pair (-(sum[i1][j] - sum[i - 1][j]), j);
+				sort (ord, ord + m + 1);
+				for (j = 0; j <= m; j ++)
+					p[ord[j].second] = j;
+				update (p[0] + 1);
+				for (j = 1; j <= m; j ++)
+				{
+					curr = (sum[i1][j] - sum[i - 1][j]);
+					///printf ("%lld %d -> x >= %lld\n", curr, s, (curr - s));
+					l = - 1;
+					r = m + 1;
+					while (r - l > 1)
+					{
+						mid = (l + r) >> 1;
+						if ((-ord[mid].first) >= curr - s)
+							l = mid;
+						else
+							r = mid;
+					}
+					///printf ("* %d * %d %d %d -> %d=%lld %d\n", ans, i, i1, j, l, ord[l].first, find (l + 1));
+					ans += find (l + 1);
+					update (p[j] + 1);
+				}
+			}
+		printf ("%d\n", ans);
+	}
+	return 0;
+}

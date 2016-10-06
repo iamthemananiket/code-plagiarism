@@ -1,0 +1,108 @@
+#include <stdio.h>
+
+#define N 100010
+
+struct Node {
+	int a, b, sum;
+	long long lf[3], rg[3], total;
+};
+
+struct Node tree[4*N];
+char str[N];
+int n, q;
+
+void init(int idx, int a, int b) {
+	if(a < b) {
+		int mid = (a + b) / 2;
+		init(2*idx, a, mid);
+		init(2*idx+1, mid+1, b);
+		tree[idx].sum = (tree[2*idx].sum + tree[2*idx+1].sum) % 3;
+		for(int i = 0;i < 3;i++) {
+			tree[idx].lf[i] = tree[2*idx].lf[i] + tree[2*idx+1].lf[(3 + i - tree[2*idx].sum) % 3];
+			tree[idx].rg[i] = tree[2*idx+1].rg[i] + tree[2*idx].rg[(3 + i - tree[2*idx+1].sum) % 3];
+		}
+		tree[idx].total = tree[2*idx].total + tree[2*idx+1].total;
+		for(int i = 0;i < 3;i++) {
+			tree[idx].total += tree[2*idx].rg[i] * tree[2*idx+1].lf[(3-i) % 3];
+		}
+	}else {
+		int val = (str[a] - '0') % 3;
+		for(int i = 0;i < 3;i++) {
+			tree[idx].lf[i] = tree[idx].rg[i] = (val == i);
+		}
+		tree[idx].sum = val;
+		tree[idx].total = (val == 0);
+	}
+	tree[idx].a = a;
+	tree[idx].b = b;
+}
+void update(int idx, int id, int val) {
+	if(tree[idx].a >= tree[idx].b) {
+		for(int i = 0;i < 3;i++) {
+			tree[idx].lf[i] = tree[idx].rg[i] = (val == i);
+		}
+		tree[idx].sum = val;
+		tree[idx].total = (val == 0);
+		return;
+	}
+	int mid = (tree[idx].a + tree[idx].b) / 2;
+	if(id <= mid) {
+		update(2*idx, id, val);
+	}else {
+		update(2*idx+1, id, val);
+	}
+
+	tree[idx].sum = (tree[2*idx].sum + tree[2*idx+1].sum) % 3;
+	for(int i = 0;i < 3;i++) {
+		tree[idx].lf[i] = tree[2*idx].lf[i] + tree[2*idx+1].lf[(3 + i - tree[2*idx].sum) % 3];
+		tree[idx].rg[i] = tree[2*idx+1].rg[i] + tree[2*idx].rg[(3 + i - tree[2*idx+1].sum) % 3];
+	}
+	tree[idx].total = tree[2*idx].total + tree[2*idx+1].total;
+	for(int i = 0;i < 3;i++) {
+		tree[idx].total += tree[2*idx].rg[i] * tree[2*idx+1].lf[(3-i) % 3];
+	}
+}
+struct Node query(int idx, int a, int b) {
+	struct Node ans;
+	if(a <= tree[idx].a && tree[idx].b <= b) {
+		return tree[idx];
+	}
+	if(b < tree[idx].a || tree[idx].b < a) {
+		for(int i = 0;i < 3;i++) {
+			ans.lf[i] = ans.rg[i] = 0;
+		}
+		ans.sum = 0;
+		ans.total = 0;
+		return ans;
+	}
+	struct Node x = query(2*idx, a, b), y = query(2*idx+1, a, b);
+
+	ans.sum = (x.sum + y.sum) % 3;
+	for(int i = 0;i < 3;i++) {
+		ans.lf[i] = x.lf[i] + y.lf[(3 + i - x.sum) % 3];
+		ans.rg[i] = y.rg[i] + x.rg[(3 + i - y.sum) % 3];
+	}
+	ans.total = x.total + y.total;
+	for(int i = 0;i < 3;i++) {
+		ans.total += x.rg[i] * y.lf[(3-i) % 3];
+	}
+	return ans;
+}
+int main() {
+	scanf("%d%d%s", &n, &q, str+1);
+	init(1, 1, n);
+	while(q--) {
+		int c;
+		scanf("%d", &c);
+		if(c == 1) {
+			int idx, val;
+			scanf("%d%d", &idx, &val);
+			update(1, idx, val % 3);
+		}else {
+			int l, r;
+			scanf("%d%d", &l, &r);
+			printf("%lld\n", query(1, l, r).total);
+		}
+	}
+	return 0;
+}

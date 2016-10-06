@@ -1,0 +1,225 @@
+#include <bits/stdc++.h>
+#include <unordered_map>
+#define SZ(X) ((int)(X).size())
+#define ALL(X) (X).begin(), (X).end()
+#define REP(I, N) for (int I = 0; I < (N); ++I)
+#define REPP(I, A, B) for (int I = (A); I < (B); ++I)
+#define RI(X) scanf("%d", &(X))
+#define RII(X, Y) scanf("%d%d", &(X), &(Y))
+#define RIII(X, Y, Z) scanf("%d%d%d", &(X), &(Y), &(Z))
+#define DRI(X) int (X); scanf("%d", &X)
+#define DRII(X, Y) int X, Y; scanf("%d%d", &X, &Y)
+#define DRIII(X, Y, Z) int X, Y, Z; scanf("%d%d%d", &X, &Y, &Z)
+#define RS(X) scanf("%s", (X))
+#define CASET int ___T, case_n = 1; scanf("%d ", &___T); while (___T-- > 0)
+#define MP make_pair
+#define PB push_back
+#define MS0(X) memset((X), 0, sizeof((X)))
+#define MS1(X) memset((X), -1, sizeof((X)))
+#define LEN(X) strlen(X)
+#define PII pair<int,int>
+#define VPII vector<pair<int,int> >
+#define PLL pair<long long,long long>
+#define F first
+#define S second
+typedef long long LL;
+using namespace std;
+const int MOD = 1e9+7;
+const int SIZE = 1e6+1;
+int fac[SIZE][7],mul[SIZE],fac_n[SIZE];
+vector<int>all_fac[SIZE];
+void build_prime(){
+    MS1(fac);
+    REPP(i,1,SIZE)mul[i]=1;
+    REPP(i,2,SIZE){
+        if(!fac_n[i]){
+            for(int j=i;j<SIZE;j+=i){
+                mul[j]=-mul[j];
+                fac[j][fac_n[j]++]=i;
+            }
+        }
+    }
+}
+VPII e[100001];
+PII ee[100001][2];
+int id[128],ty[128];
+int qq[100001];
+unordered_map<int,int>H[100001],emp;
+LL an;
+int used[100001],from[100001];
+int dp[100001];
+int father[100001];
+LL base=0;
+void BFS(int N){
+    qq[0]=rand()%N+1;
+    from[qq[0]]=0;
+    int rr=1;
+    used[qq[0]]=1;
+    REP(i,rr){
+        int x=qq[i];
+        REP(j,SZ(e[x])){
+            int y=e[x][j].F;
+            if(used[y])continue;
+            father[y]=x;
+            used[y]=1;
+            from[y]=rr;
+            qq[rr++]=y;
+        }
+    }
+    for(int i=N-1;i>=0;i--){
+        int x=qq[i];
+        REP(i,SZ(e[x])){
+            int y=e[x][i].F;
+            if(from[y]<from[x])continue;
+            base+=(dp[y]+1LL)*(dp[x]+1);
+            dp[x]+=dp[y]+1;
+        }
+    }
+}
+LL tmp[100001];
+LL calc(int N,int me=-1){
+    if(me==-1){
+        an=base;
+        for(int k=N-1;k>=0;k--){
+            LL lt_an=an;
+            int x=qq[k];
+            H[x]=emp;
+            REP(i,SZ(e[x])){
+                int y=e[x][i].F;
+                if(from[y]<from[x])continue;
+                int v=e[x][i].S;
+                if(!SZ(all_fac[v])){
+                    int g=1;
+                    int n=1<<fac_n[v];
+                    REPP(j,1,n){
+                        if(ty[j]==0)g/=fac[v][id[j]];
+                        else g*=fac[v][id[j]];
+                        all_fac[v].PB(g);
+                        int me=1;
+                        unordered_map<int,int>::iterator it1=H[y].find(g);
+                        unordered_map<int,int>::iterator it2=H[x].find(g);
+                        if(it1!=H[y].end())me+=it1->S;
+                        if(it2!=H[x].end()){
+                            an+=me*(1LL+it2->S)*mul[g];
+                            it2->S+=me;
+                        }
+                        else{
+                            an+=me*mul[g];
+                            H[x][g]=me;
+                        }
+                    }
+                }
+                else{
+                    int n=1<<fac_n[v];
+                    REP(j,SZ(all_fac[v])){
+                        int g=all_fac[v][j];
+                        int me=1;
+                        unordered_map<int,int>::iterator it1=H[y].find(g);
+                        unordered_map<int,int>::iterator it2=H[x].find(g);
+                        if(it1!=H[y].end())me+=it1->S;
+                        if(it2!=H[x].end()){
+                            an+=me*(1LL+it2->S)*mul[g];
+                            it2->S+=me;
+                        }
+                        else{
+                            an+=me*mul[g];
+                            H[x][g]=me;
+                        }
+                    }
+                }
+            }
+            tmp[x]=an-lt_an;
+        }
+    }
+    else{
+        while(1){
+            int x=me;
+            an-=tmp[x];
+            LL lt_an=an;
+            H[x]=emp;
+            REP(i,SZ(e[x])){
+                int y=e[x][i].F;
+                if(from[y]<from[x])continue;
+                int v=e[x][i].S;
+                if(!SZ(all_fac[v])){
+                    int g=1;
+                    int n=1<<fac_n[v];
+                    REPP(j,1,n){
+                        if(ty[j]==0)g/=fac[v][id[j]];
+                        else g*=fac[v][id[j]];
+                        all_fac[v].PB(g);
+                        int me=1;
+                        unordered_map<int,int>::iterator it1=H[y].find(g);
+                        unordered_map<int,int>::iterator it2=H[x].find(g);
+                        if(it1!=H[y].end())me+=it1->S;
+                        if(it2!=H[x].end()){
+                            an+=me*(1LL+it2->S)*mul[g];
+                            it2->S+=me;
+                        }
+                        else{
+                            an+=me*mul[g];
+                            H[x][g]=me;
+                        }
+                    }
+                }
+                else{
+                    int n=1<<fac_n[v];
+                    REP(j,SZ(all_fac[v])){
+                        int g=all_fac[v][j];
+                        int me=1;
+                        unordered_map<int,int>::iterator it1=H[y].find(g);
+                        unordered_map<int,int>::iterator it2=H[x].find(g);
+                        if(it1!=H[y].end())me+=it1->S;
+                        if(it2!=H[x].end()){
+                            an+=me*(1LL+it2->S)*mul[g];
+                            it2->S+=me;
+                        }
+                        else{
+                            an+=me*mul[g];
+                            H[x][g]=me;
+                        }
+                    }
+                }
+            }
+            tmp[x]=an-lt_an;
+            if(me==qq[0])break;
+            me=father[me];
+        }
+    }
+    return an;
+}
+int main(){
+    {
+        int now=0;
+        REPP(i,1,128){
+            for(int j=0;;j++){
+                if((i>>j)&1){
+                    if(!((now>>j)&1))ty[i]=1;
+                    now^=1<<j;
+                    id[i]=j;
+                    break;
+                }
+            }
+        }
+    }
+    build_prime();
+    DRI(N);
+    REPP(i,1,N){
+        DRIII(x,y,v);
+        e[x].PB(MP(y,v));
+        e[y].PB(MP(x,v));
+        ee[i][0]=MP(x,SZ(e[x]));
+        ee[i][1]=MP(y,SZ(e[y]));
+    }
+    BFS(N);
+    tmp[N]=base;
+    printf("%lld\n",calc(N));
+    DRI(Q);
+    while(Q--){
+        DRII(id,v);
+        e[ee[id][0].F][ee[id][0].S-1].S=v;
+        e[ee[id][1].F][ee[id][1].S-1].S=v;
+        printf("%lld\n",calc(N,from[ee[id][1].F]<from[ee[id][0].F]?ee[id][1].F:ee[id][0].F));
+    }
+    return 0;
+}

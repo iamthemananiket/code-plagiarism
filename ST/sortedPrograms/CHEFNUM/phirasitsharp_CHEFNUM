@@ -1,0 +1,100 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const long long mod = 1000000007ll;
+const int B = 4;
+const int LB = 1 << (1 << B);
+const int DIGIT = 10;
+
+long long hashed_val[LB], hashed_sum[LB];
+long long dp[DIGIT][1 << B][LB];
+
+void init(void);
+long long calc(long long);
+
+int main() {
+	
+	init();
+
+	ios::sync_with_stdio(false);
+	int test_num;
+	cin >> test_num;
+
+	for(int case_id = 0;case_id < test_num;case_id++) {
+		long long l, r;
+		cin >> l >> r;
+		long long ans = calc(r) - calc(l-1);
+		ans = (ans % mod + mod) % mod;
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+
+void init(void) {
+
+	for(int i = 0;i < LB;i++) {
+		if(i == 0) {
+			hashed_val[i] = 0;
+			continue;
+		}
+		int idx = i & (-i);
+		int val = log2(idx);
+		hashed_val[i] = hashed_val[i ^ idx] + val;
+	}
+
+	for(int i = 0;i < LB;i++) {
+		int hashed = 0;
+		for(int j = 0;j < (1 << B);j++) {
+			for(int jj = j+1;jj < (1 << B);jj++) {
+				if(((i >> j) & 1) and ((i >> jj) & 1)) {
+					hashed |= 1 << (j ^ jj);
+				}
+			}
+		}
+		hashed_sum[i] = hashed_val[hashed];
+	}
+
+	for(int i = 0;i < DIGIT;i++) {
+		for(int lst = 0;lst < (1 << B);lst++) {
+			for(int j = 0;j < LB;j++) {
+				if(i == 0) {
+					dp[i][lst][j] = hashed_sum[j];
+				}else {
+					long long sum = 0ll;
+					for(int d = 0;d < DIGIT;d++) {
+						sum += dp[i-1][lst ^ d][j | (1 << (lst ^ d))];
+					}
+					dp[i][lst][j] = sum % mod;
+				}
+			}
+		}
+	}
+
+}
+
+long long calc(long long x) {
+
+	vector<int> data;
+	for(long long t = x;t > 0;t /= 10ll) {
+		data.push_back(t % 10ll);
+	}
+
+	long long ans = 0ll;
+
+	int hs = 1, lst = 0;
+	for(int i = data.size()-1;i >= 0;i--) {
+		for(int d = 0;d < data[i];d++) {
+			ans += dp[i][lst ^ d][hs | (1 << (lst ^ d))];
+		}
+		lst ^= data[i];
+		hs |= 1 << lst;
+	}
+
+	ans += dp[0][lst][hs];
+
+	return ans % mod;
+}

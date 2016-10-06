@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+char a[130005];
+int main(){
+	int t,i,j;
+	cin >> t;
+	while(t--){
+		cin>>a;
+		for(i=0,j=strlen(a)-1;i<=j;i++,j--)
+			if(a[i]=='.' && a[j]=='.')
+				a[i]=a[j]='a';
+			else if(a[i]=='.')
+				a[i]=a[j];
+			else if(a[j]=='.')
+				a[j]=a[i];
+			else if(a[i]!=a[j])
+				break;
+		if(i<j)
+			puts("-1");
+		else
+			puts(a);
+	}
+}

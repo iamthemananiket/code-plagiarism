@@ -1,0 +1,61 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+int r;
+
+int main ()
+{
+    int a, b, c, i, lb, rb, lc, rc;
+    vector <int> ansa, ansb, ansc;
+    long long s, ns, p;
+    scanf ("%d", &r);
+    ///r = 20;
+    for (a = 1; a <= 10000; a ++)
+        for (b = a; b <= a + 150; b ++)
+            for (c = max (b, b * 2 - 150); c <= b * 2 + 150; c ++)
+            {
+                if (a + b <= c)
+                    break;
+                p = a + b + c;
+                if (p & 1)
+                    continue;
+                p /= 2;
+                s = p * r;
+                s = s * s;
+                ns = p * (p - a) * (p - b) * (p - c);
+                if (s == ns)
+                {
+                    ansa.push_back (a);
+                    ansb.push_back (b);
+                    ansc.push_back (c);
+                    ///printf ("%d %d %d\n", a, b, c);
+                    break;
+                }
+            }
+    printf ("%d\n", (int) ansa.size ());
+    for (i = 0; i < (int) ansa.size (); i ++)
+    {
+        printf ("%d %d %d\n", ansa[i], ansb[i], ansc[i]);
+        /**
+        p = ansa[i] + ansb[i] + ansc[i];
+        p /= 2;
+        printf ("%d\n", p * r);
+        long long mm = 1;
+        mm = mm * p;
+        mm = mm * (p - ansa[i]);
+        mm = mm * (p - ansb[i]);
+        mm = mm * (p - ansc[i]);
+        printf ("%d\n", (int) sqrt (mm));
+        **/
+    }
+    return 0;
+}

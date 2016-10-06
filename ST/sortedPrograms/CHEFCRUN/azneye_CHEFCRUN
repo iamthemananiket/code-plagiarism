@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+typedef double dd;
+const int MAX = 1<<18;
+ll sum[2*MAX];
+ll pre[2*MAX], suf[2*MAX];
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N;
+    cin >> N;
+    sum[0] = 0;
+    for(int i = 1, x; i <= N; ++i) {
+      cin >> x;
+      sum[i] = sum[i - 1] + x;
+      sum[i + N] = sum[i];
+    }
+    for(int i = N + 1; i <= 2 * N; ++i) {
+      sum[i] += sum[N];
+    }
+    int st, ed;
+    cin >> st >> ed;
+    if (st > ed) swap(st, ed);
+    const ll inc = sum[ed - 1] - sum[st - 1];
+    const ll dec = sum[N] - inc;
+    ll res = min(inc, dec);
+    res = min(res, inc + sum[N]);
+    res = min(res, dec + sum[N]);
+    pre[st - 1] = 0;
+    suf[ed] = 0;
+    for(int i = st; i < ed; ++i) {
+      pre[i] = min(pre[i-1], sum[i] - sum[st - 1]);
+    }
+    for(int i = ed-1; i >= st; --i) {
+      suf[i] = min(suf[i+1], (sum[ed - 1] - sum[i-1]));
+      res = min(res, dec + 2*pre[i] + 2*suf[i+1]);
+    }
+    
+    pre[ed-1] = 0;
+    suf[st+N] = 0;
+    for(int i = ed; i < st + N; ++i) {
+      pre[i] = min(pre[i-1], (sum[i] - sum[ed - 1]));
+    }
+    for(int i = st + N - 1; i >= ed; --i) {
+      suf[i] = min(suf[i+1], (sum[st+N-1] - sum[i - 1]));  
+      res = min(res, inc + 2*pre[i] + 2*suf[i+1]);
+    }
+    cout << res << endl;
+  }
+  return 0;  
+} 

@@ -1,0 +1,50 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <ctime>
+#include <cstdlib>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+//not even trying :P
+int main()
+{
+	srand(time(NULL));
+	int m;
+	scanf("%d",&m);
+	for (int i=0; i<2; i++)
+	{
+		int x;
+		scanf("%d",&x);
+		while (x--)
+			scanf("%*d");
+	}
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		int k;
+		scanf("%d %*d",&k);
+		for (int i=0; i<3; i++)
+			for (int j=1; j<=k; j++)
+				scanf("%*d");
+		printf("-1\n");
+		for (int i=1; i<=k; i++)
+			printf("%d ",(rand()%m)+1);
+		printf("\n");
+		fflush(stdout);
+	}
+	return 0;
+}

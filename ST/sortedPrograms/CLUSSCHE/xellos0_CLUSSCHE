@@ -1,0 +1,296 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+int cc1 =5000, cc2 =2000;
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	int N,M,B,C;
+	cin >> N >> M >> B >> C;
+	vector< vector<int> > dst(N,vector<int>(N));
+	for(int i =0; i < N*N; i++) //dst[i/N][i%N] =rand()%1000+1;
+		cin >> dst[i/N][i%N];
+	for(int i =0; i < N; i++) for(int j =0; j < N; j++) dst[i][j] =(i == j)?0:dst[j][i];
+	for(int k =0; k < N; k++)
+		for(int i =0; i < N; i++) for(int j =0; j < N; j++) 
+			dst[i][j] =min(dst[i][j],dst[i][k]+dst[k][j]);
+	int score =0;
+
+	set< pair<int,int> > nodes;
+	vector<int> nodesv(N,0);
+	for(int i =0; i < N; i++) nodes.insert(make_pair(0,i));
+	for(int i =0; i < M; i++) {
+		vector<int> inn(B),proc(B);
+		vector< pair<int,int> > T(B);
+		for(int j =0; j < B; j++) {
+//			inn[j] =rand()%N+1;
+//			T[j].ff =rand()%1000+1;
+			cin >> inn[j] >> T[j].ff;
+			proc[j] =T[j].ff;
+			inn[j]--;
+			T[j].ss =j;}
+		sort(begin(T),end(T));
+		int c =C;
+		int c0 =c;
+		vector<int> ans(B);
+		for(int j =B-1; j >= 0; j--) {
+			int v =nodes.begin()->ss, x =T[j].ss;
+			int v2 =(nodes.begin()++)->ss;
+			if(dst[inn[x]][v] > c) {
+				if(dst[inn[x]][v2] > c) ans[x] =inn[x];
+				else {
+					ans[x] =v2;
+					c -=dst[inn[x]][v2];}
+				}
+			else {
+				ans[x] =v;
+				c -=dst[inn[x]][v];}
+			nodes.erase(make_pair(nodesv[ans[x]],ans[x]));
+			nodesv[ans[x]] +=T[j].ff;
+			nodes.insert(make_pair(nodesv[ans[x]],ans[x]));}
+		C -=c0-c;
+
+		int cur =nodes.rbegin()->ff-nodes.begin()->ff;
+		long long sumsq =0, sumt =0, sumq =0;
+		for(int j =0; j < N; j++) {
+			sumsq +=1LL*nodesv[i]*nodesv[i];
+			sumt +=1LL*nodesv[i]*nodesv[i]*nodesv[i];
+			sumq +=1LL*nodesv[i]*nodesv[i]*nodesv[i]*nodesv[i];}
+		for(int j =0; j < B; j++) if(ans[j] == nodes.begin()->ss || ans[j] == nodes.rbegin()->ss || B <= 100) for(int k =0; k < B; k++) {
+			if(ans[j] == ans[k]) continue;
+			int a =nodesv[ans[j]], b =nodesv[ans[k]];
+			a +=proc[k]-proc[j];
+			b +=proc[j]-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == ans[j] || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == ans[j] || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			long long sumq_nw =sumq-1LL*nodesv[ans[j]]*nodesv[ans[j]]*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a*a*a+1LL*b*b*b*b;
+			if(sumsq_nw < sumsq) continue;
+			if(sumq_nw < sumq) continue;
+			nodes.erase(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[ans[j]] +=proc[k]-proc[j];
+			nodesv[ans[k]] +=proc[j]-proc[k];
+			nodes.insert(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.insert(make_pair(nodesv[ans[k]],ans[k]));
+			sumsq =sumsq_nw;
+			sumq =sumq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			swap(ans[j],ans[k]);}
+		srand(M-i+C);
+		for(int x =0; x < ((B == 100)?cc1:cc2)-500; x++) {
+			int k =rand()%B, j =rand()%B;
+			if(ans[k] == ans[j]) continue;
+			int a =nodesv[ans[j]], b =nodesv[ans[k]];
+			a +=proc[k]-proc[j];
+			b +=proc[j]-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == ans[j] || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == ans[j] || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			long long sumq_nw =sumq-1LL*nodesv[ans[j]]*nodesv[ans[j]]*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a*a*a+1LL*b*b*b*b;
+			if(sumsq_nw < sumsq) continue;
+			if(sumq_nw < sumq) continue;
+			nodes.erase(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[ans[j]] +=proc[k]-proc[j];
+			nodesv[ans[k]] +=proc[j]-proc[k];
+			nodes.insert(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.insert(make_pair(nodesv[ans[k]],ans[k]));
+			sumsq =sumsq_nw;
+			sumq =sumq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			swap(ans[j],ans[k]);}
+		for(int j =0; j < B; j++) if(ans[j] == nodes.begin()->ss || ans[j] == nodes.rbegin()->ss || B <= 100) for(int k =0; k < B; k++) {
+			if(ans[k] == ans[j]) continue;
+			int a =nodesv[ans[j]], b =nodesv[ans[k]];
+			a +=proc[k]-proc[j];
+			b +=proc[j]-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == ans[j] || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == ans[j] || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			if(sumsq_nw < sumsq) continue;
+			nodes.erase(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[ans[j]] +=proc[k]-proc[j];
+			nodesv[ans[k]] +=proc[j]-proc[k];
+			nodes.insert(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.insert(make_pair(nodesv[ans[k]],ans[k]));
+			sumsq =sumsq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			swap(ans[j],ans[k]);}
+		for(int x =0; x < ((B == 100)?cc1:cc2)-500; x++) {
+			int k =rand()%B, j =rand()%B;
+			if(ans[k] == ans[j]) continue;
+			int a =nodesv[ans[j]], b =nodesv[ans[k]];
+			a +=proc[k]-proc[j];
+			b +=proc[j]-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == ans[j] || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == ans[j] || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			if(sumsq_nw < sumsq) continue;
+			nodes.erase(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[ans[j]] +=proc[k]-proc[j];
+			nodesv[ans[k]] +=proc[j]-proc[k];
+			nodes.insert(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.insert(make_pair(nodesv[ans[k]],ans[k]));
+			sumsq =sumsq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			swap(ans[j],ans[k]);}
+		for(int j =0; j < B; j++) if(ans[j] == nodes.begin()->ss || ans[j] == nodes.rbegin()->ss || B <= 100) for(int k =0; k < B; k++) {
+			if(ans[j] == ans[k]) continue;
+			int a =nodesv[ans[j]], b =nodesv[ans[k]];
+			a +=proc[k]-proc[j];
+			b +=proc[j]-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == ans[j] || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == ans[j] || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[ans[j]]*nodesv[ans[j]]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			if(sumsq_nw < sumsq) continue;
+			nodes.erase(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[ans[j]] +=proc[k]-proc[j];
+			nodesv[ans[k]] +=proc[j]-proc[k];
+			nodes.insert(make_pair(nodesv[ans[j]],ans[j]));
+			nodes.insert(make_pair(nodesv[ans[k]],ans[k]));
+			sumsq =sumsq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			swap(ans[j],ans[k]);}
+
+		for(int x =0; x < ((B == 100)?cc1:cc2)+1000; x++) {
+			int k =rand()%B, j =rand()%N;
+			if(ans[k] == j) continue;
+			int a =nodesv[j], b =nodesv[ans[k]];
+			a +=proc[k];
+			b +=-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == j || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == j || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[j]*nodesv[j]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			if(sumsq_nw < sumsq) continue;
+			nodes.erase(make_pair(nodesv[j],j));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[j] =a;
+			nodesv[ans[k]] =b;
+			nodes.insert(make_pair(a,j));
+			nodes.insert(make_pair(b,ans[k]));
+			sumsq =sumsq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			ans[k] =j;}
+		for(int x =0; x < 2*B; x++) {
+			int k =x/2, j =x%2;
+			if(j == 0) j =nodes.rbegin()->ss;
+			else j =nodes.begin()->ss;
+			if(ans[k] == j) continue;
+			int a =nodesv[j], b =nodesv[ans[k]];
+			a +=proc[k];
+			b +=-proc[k];
+			int mx =max(a,b), mi =min(a,b);
+			if(mx-mi > cur) continue;
+			auto it =nodes.end(); it--;
+			while(it->ss == j || it->ss == ans[k]) it--;
+			mx =max(mx,it->ff);
+			it =nodes.begin();
+			while(it->ss == j || it->ss == ans[k]) it++;
+			mi =min(mi,it->ff);
+			if(mx-mi > cur) continue;
+			long long sumsq_nw =sumsq-1LL*nodesv[j]*nodesv[j]-1LL*nodesv[ans[k]]*nodesv[ans[k]]+1LL*a*a+1LL*b*b;
+			if(sumsq_nw < sumsq) continue;
+			nodes.erase(make_pair(nodesv[j],j));
+			nodes.erase(make_pair(nodesv[ans[k]],ans[k]));
+			nodesv[j] =a;
+			nodesv[ans[k]] =b;
+			nodes.insert(make_pair(a,j));
+			nodes.insert(make_pair(b,ans[k]));
+			sumsq =sumsq_nw;
+			cur =nodes.rbegin()->ff-nodes.begin()->ff;
+			ans[k] =j;}
+
+//		score +=cur;
+//		if(i%10 == 0) cout << sumsq/(i+1)/(i+1) << "\n";}
+//	cout << score << "\n";
+
+		for(int j =0; j < B; j++) cout << ans[j]+1 << " ";
+		cout << endl;}
+
+	return 0;}
+
+// look at my code
+// my code is amazing

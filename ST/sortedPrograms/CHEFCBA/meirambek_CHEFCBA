@@ -1,0 +1,51 @@
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+int a[6];
+int n = 4;
+int main() {
+	#ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+	#endif
+
+	cin >> a[1] >> a[2] >> a[3] >> a[4];
+
+	sort(a + 1, a + 5);
+
+	do {
+		if (a[2] * a[3] == a[1] * a[4]) {
+			cout << "Possible";
+			return 0;
+		}
+	}while(next_permutation(a + 1, a + 5));
+
+	cout << "Impossible";
+
+    return 0;
+}

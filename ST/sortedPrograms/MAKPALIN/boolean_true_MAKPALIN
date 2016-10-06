@@ -1,0 +1,46 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+ll arr[100009];
+bool checkpalin(char str[],int n)
+{
+    for(int i=0;i<n;i++)
+    {
+        if(str[i]!=str[n-i-1])
+            return false;
+    }
+    return true;
+}
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int n,m,ans=0;
+        char str[2009];
+        scanf("%s",str);
+        n=strlen(str);
+        for(int i=0;i<=n;i++)
+        {
+            char tmp[2009];
+            for(int j=0;j<n;j++)
+                tmp[j]=str[j];
+            for(int j=n;j>i;j--)
+            {
+                tmp[j]=tmp[j-1];
+            }
+            for(char q='a';q<='z';q++)
+            {
+                tmp[i]=q;
+                if(checkpalin(tmp,n+1))
+                {
+                    ans++;
+                    break;
+                }
+            }
+        }
+        printf("%d\n",ans);
+    }
+    return 0;
+}

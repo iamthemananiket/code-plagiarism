@@ -1,0 +1,185 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+LL base1 = 31, base2 = 37;
+LL md1 = mod, md2 = mod + 2;
+LL pp[2][300001], inv[2][300001], hsh[2][2][300001];
+string s, t;
+
+inline bool hash_val(int l1, int r1, int l2, int r2){
+    LL vl1 = 0, vl2 = 0, vr1 = 0, vr2 = 0;
+    {
+        vr1 = hsh[0][0][r2];
+        vr2 = hsh[0][1][r2];
+        if(l2 > 0){
+            vr1 = (vr1 + md1 - hsh[0][0][l2-1]);
+            vr2 = (vr2 + md2 - hsh[0][1][l2-1]);
+            if(vr1 >= md1) vr1 -= md1;
+            if(vr2 >= md2) vr2 -= md2;
+        }
+
+    }
+    {
+        vl1 = hsh[1][0][l1];
+        vl2 = hsh[1][1][l1];
+        if(r1 < s.size() - 1){
+            vl1 = (vl1 + md1 - hsh[1][0][r1+1]);
+            vl2 = (vl2 + md2 - hsh[1][1][r1+1]);
+            if(vl1 >= md1) vl1 -= md1;
+            if(vl2 >= md2) vl2 -= md2;
+        }
+
+    }
+
+    int p = s.size()-1-r1, q = l2;
+    if(p >= q){
+        vr1 = (vr1 * pp[0][p-q]) % md1;
+        vr2 = (vr2 * pp[1][p-q]) % md2;
+    } else {
+        vl1 = (vl1 * pp[0][q-p]) % md1;
+        vl2 = (vl2 * pp[1][q-p]) % md2;
+    }
+
+    return vl1==vr1 && vl2==vr2;
+}
+
+inline LL go(int l, int r){
+    if(s[l] == '#') {
+        l++; r--;
+    }
+    if(l > r) return 0;
+    l /= 2; r /= 2;
+//    cout << l << " " <<r << endl;
+    LL len = r - l + 1;
+    LL v = (len + 1) / 2;
+    if(len % 2 == 1) return v*v;
+    else {
+        return v * (v + 1);
+    }
+}
+
+int vc[7];
+int main() {
+//    freopen("a.in", "r", stdin);
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    pp[0][0] = pp[1][0] = 1;
+    for(int i = 1; i < 300001; i++){
+        pp[0][i] = (pp[0][i-1] * base1) % md1;
+        pp[1][i] = (pp[1][i-1] * base2) % md2;
+    }
+
+    REP(i, 300001) {
+        inv[0][i] = modinverse(pp[0][i], md1);
+        inv[1][i] = modinverse(pp[1][i], md2);
+    }
+
+    int T; cin >> T;
+    while(T--){
+        int n, m; cin >> n >> m;
+        cin >> t;
+        s = "";
+        for(int i = 0; i < n; i++){
+            s.pb('#');
+            s.pb(t[i]);
+        }
+        s.pb('#');
+        for(int i = 0; i < s.size(); i++){
+            LL v = s[i] - 'a';
+            if(s[i] == '#') v = 27;
+
+            hsh[0][0][i] = (pp[0][i] * v) % md1;
+            if(i > 0) hsh[0][0][i] = (hsh[0][0][i] + hsh[0][0][i-1]) % md1;
+            hsh[0][1][i] = (pp[1][i] * v) % md2;
+            if(i > 0) hsh[0][1][i] = (hsh[0][1][i] + hsh[0][1][i-1]) % md2;
+        }
+
+
+        for(int i = s.size()-1; i >= 0; i--){
+            LL v = s[i] - 'a';
+            if(s[i] == '#') v = 27;
+
+            hsh[1][0][i] = (pp[0][s.size()-1-i] * v) % md1;
+            if(i < s.size() - 1)hsh[1][0][i] = (hsh[1][0][i] + hsh[1][0][i+1]) % md1;
+            hsh[1][1][i] = (pp[1][s.size()-1-i] * v) % md2;
+            if(i < s.size() - 1)hsh[1][1][i] = (hsh[1][1][i] + hsh[1][1][i+1]) % md2;
+        }
+//        pair < LL, LL > p1 = hash_val(0, 6, 0);
+//        pair < LL, LL > p2 = hash_val(6, 12, 1);
+//        cout << s << " " << p1.xx << " " << p1.yy << " " << p2.xx << " " << p2.yy << endl;
+//        cout << s << endl;
+        LL res = 0;
+        for(int i = 0; i < s.size(); i++){
+            vc[0] = 0;
+            for(int j = 1; j <= m+1; j++){
+                int lo = vc[j-1] + 1, hi = 2*n, mid = (lo + hi) / 2;
+                if(i-vc[j-1] < 0 || i + vc[j-1] >= s.size()){
+                    vc[j] = vc[j-1];
+                    continue;
+                }
+                while(lo < mid){
+                    int fl = 0;
+                    if(i - mid < 0 || i + mid >= s.size()) fl = 1;
+                    else if(hash_val(i-mid, i-vc[j-1]-1, i+vc[j-1]+1, i+mid) == 0) fl = 1;
+                    if(fl) hi = mid;
+                    else lo = mid + 1;
+                    mid = (lo + hi) / 2;
+                }
+
+                int fl = 0;
+                if(i-mid < 0 || i+mid >= s.size()) fl = 1;
+                else if(hash_val(i-mid, i-vc[j-1]-1, i+vc[j-1]+1, i+mid) == 0) fl = 1;
+                if(fl == 0) mid++;
+
+                vc[j] = mid;
+//                if(i == 5) cout << mid << " pppp" << endl;
+            }
+            res += go((i-vc[m+1]+1), (i+vc[m+1]-1));
+//            cout << i << " " << vc[m+1] << " " << res << endl;
+        }
+        cout << res << endl;
+    }
+}

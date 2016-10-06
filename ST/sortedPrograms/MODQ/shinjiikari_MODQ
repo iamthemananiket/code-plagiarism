@@ -1,0 +1,164 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 10010
+#define mod 1000000007
+#define all(a) a.begin(),a.end()
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+const ll INF = 1e18+1;
+
+inline int input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(int x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+vector <int> change[N],curr[N];
+int answer[100][N],t,a[N],n,m,ans;
+
+void make()
+{
+	int i;
+	change[1].pb(1);
+	change[1].pb(2);
+	REPP(n,2,N)
+	{
+		for(i=1;i*i<=n;i++)
+		{
+			change[n].pb(i);
+			change[n].pb(n/i+1);
+		}
+		i--;
+		if (i*i<n&&(i+1)!=n/i+1) change[n].pb(i+1);
+		sort(all(change[n]));
+	}
+	/*REPP(i,1,N)
+	{
+		int k=1;
+		REPP(j,2,N+2)
+		{
+			if (i/j!=i/(j-1))
+			{
+				if (j!=change[i][k])
+				{
+					printf("%d %d\n",i,j);
+					return;
+				}
+				else k++;
+			}
+		}
+	}*/
+}
+
+void preprocess(int blck)
+{
+	int l=blck*100,r=min(blck*100+100,n),sum=0;
+	answer[blck][1]=0;
+	REP(i,N) curr[i].clear();
+	REPP(i,l,r)
+	{
+		answer[blck][1]+=a[i];
+		sum+=a[i];
+		REP(j,change[a[i]].size())
+			curr[change[a[i]][j]].pb(i);
+	}
+	REPP(i,2,N)
+	{
+		answer[blck][i]=answer[blck][i-1];
+		REP(j,curr[i].size()) answer[blck][i]+=(a[curr[i][j]]/i-a[curr[i][j]]/(i-1));
+	}
+	REPP(i,1,N) answer[blck][i]=sum-answer[blck][i]*i;
+}
+
+int main()
+{
+	int l,r,x,start;
+	t=input();
+	make();
+	while(t--)
+	{
+		n=input();
+		REP(i,n) a[i]=input();
+		REP(i,n/100) preprocess(i);
+		m=input();
+		while(m--)
+		{
+			ans=0;
+			l=input();
+			r=input();
+			l--;
+			r--;
+			x=input();
+			if (x>=N) x=N-1;
+			if (r-l<=200) REPP(i,l,r+1) ans+=a[i]%x;
+			else
+			{
+				while(l%100!=0)
+				{
+					ans+=a[l]%x;
+					l++;
+				}
+				start=l/100;
+				while(start<r/100)
+				{
+					//printf("%d %d\n",start+1,answer[start][x]);
+					ans+=answer[start][x];
+					start++;
+				}
+				start=start*100;
+				while(start<=r)
+				{
+					ans+=a[start]%x;
+					start++;
+				}
+			}
+			output(ans);
+		}
+	}
+return 0;
+}

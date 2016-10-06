@@ -1,0 +1,96 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y123
+#define y1 y1234
+#define ll unsigned long long
+#define PI 3.1415926535897932384626433832795
+#define INF 2147483647
+#define N 105
+
+int gcd(int a, int b) { return (!b) ? a : gcd(b, a % b); }
+int lcm(int a, int b) { return a / gcd(a,b) * b; }
+
+int nextInt() { int n; scanf("%d", &n); return n; }
+
+int a[7], q[7][6], tmp[7];
+bool used[7];
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; ++tt) {
+		int n = nextInt();
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j < n; ++j) {
+				q[i][j] = nextInt();
+			}
+		}
+		for (int i = 1; i <= n; ++i) {
+			a[i] = i;
+		}
+		do {
+			for (int i = 1; i <= n; ++i) {
+				used[i] = false;
+			}
+			for (int i = 1; i <= n; ++i) {
+				int pos = 1;
+				for (int j = 1; j <= n; ++j) {
+					if (a[j] == i) {
+						continue;
+					}
+					if (a[j] > i) {
+						tmp[pos] = a[j] - 1;
+					} else {
+						tmp[pos] = a[j];
+					}
+					++pos;
+				}
+				for (int j = 1; j <= n; ++j) {
+					if (!used[j]) {
+						bool ok = true;
+						for (int k = 1; k < n; ++k) {
+							if (q[j][k] != tmp[k]) {
+								ok = false;
+								break;
+							}
+						}
+						if (ok) {
+							used[j] = true;
+							break;
+						}
+					}
+				}
+			}
+			bool ok = true;
+			for (int i = 1; i <= n; ++i) {
+				if (!used[i]) {
+					ok = false;
+					break;
+				}
+			}
+			if (ok) {
+				break;
+			}
+		} while(next_permutation(a + 1, a + n + 1));
+		for (int i = 1; i < n; ++i) {
+			printf("%d ", a[i]);
+		}
+		printf("%d\n", a[n]);
+	}
+	return 0;
+}

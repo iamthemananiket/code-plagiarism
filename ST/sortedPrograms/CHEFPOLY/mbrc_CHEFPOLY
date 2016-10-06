@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 3100;
+
+inline int ccw(pii A,pii B,pii C) {
+	int x = (B.first - A.first)*(C.second - A.second) - (C.first - A.first)*(B.second - A.second);
+	if (x == 0) return 0;
+	if (x < 0) return -1;
+	return 1;
+}
+
+const int sz1 = 1e2 + 4;
+
+bitset<maxn> okay[sz1][sz1];
+pii A[sz1];
+pii B[maxn];
+int idx[sz1];
+
+int main() {
+	int n; s(n); int m; s(m);
+	rep(i,1,n) {
+		s(A[i].first); s(A[i].second);
+	}
+	rep(i,1,m) {
+		s(B[i].first); s(B[i].second);
+	}
+
+	rep(i,1,n) {
+		rep(j,1,n) {
+			okay[i][j].reset();
+			rep(k,1,m) {
+				if (ccw(A[i],A[j],B[k]) > 0) {
+					okay[i][j].set(k);
+				}
+			}
+		}
+	}
+
+	int q; s(q); while (q--) {
+		int k; s(k);
+		rep(i,1,k) {
+			s(idx[i]);
+		}
+		bitset<maxn> cur = okay[idx[k]][idx[k-1]];
+		drep(j,k-1,2) {
+			cur &= okay[idx[j]][idx[j-1]];
+		}
+		cur &= okay[idx[1]][idx[k]];
+
+		pr(cur.count()); endc;
+	}
+}

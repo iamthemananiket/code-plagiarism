@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+#define count_bits(x) __builtin_popcount(x)
+#define count_bitsll(x) __builtin_popcountll(x)
+
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 100005;
+int odd[N], even[N];
+
+void manacher(string &s) {
+	int n = s.size();
+	int l = -1, r = -1;
+	for (int i = 0; i < n; i++) {
+		int cur = 1;
+		if (i < r)
+			cur = min(r - i + 1, odd[l + r - i]);
+		while (i + cur < n && i - cur >= 0 && s[i - cur] == s[i + cur])
+			cur++;
+		odd[i] = cur;
+		if (i + cur - 1 > r) {
+			l = i - cur + 1; 
+			r = i + cur - 1;
+		}
+	}
+
+	l = r = -1;
+	for (int i = 0; i < n; i++) {
+		int cur = 0;
+		if (i < r) 
+			cur = min(r - i + 1, even[l + r - i + 1]);
+		while (i + cur < n && i - 1 - cur >= 0 && s[i - 1 - cur] == s[i + cur])
+			cur++;
+		even[i] = cur;
+		if (i + cur - 1 > r) {
+			l = i - cur;
+			r = i + cur - 1;
+		}
+	}
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest;
+	string s;
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> s;
+		mem(odd, 0); mem(even, 0);
+		int n = s.size();
+		manacher(s);
+		
+		//repu(i, 0, n) printf("%d %d\n", even[i], odd[i]);
+		
+		vector<bool> ok(n, false);
+		repu(i, 0, n / 2 + 1) {
+			if (s[i] != s[n - 1 - i]) break;
+			ok[i] = true;
+		}
+		
+		int ret = 0;
+		if (n & 1) {
+			if (even[n / 2] >= n / 2) ret++;
+			if (even[n / 2 + 1] >= n / 2) ret++;
+			repu(i, 0, n / 2) {
+				if (even[n / 2] >= n / 2 - i - 1 && ok[i]) ret++;
+			}
+			if (n > 1 && ok[n / 2 - 1]) ret++;
+			repu(i, n / 2 + 1, n - 1) {
+				if (even[n / 2 + 1] >= i - n / 2 && ok[n - 2 - i]) ret++;
+			}
+		}
+		else {
+			if (odd[n / 2 - 1] >= n / 2) ret++;
+			if (odd[n / 2] >= n / 2) ret++;
+			repu(i, 0, n / 2 - 1) {
+				if (odd[n / 2 - 1] >= n / 2 - i - 1 && ok[i]) ret++;
+			}
+			if (ok[n / 2 - 1]) ret++;
+			repu(i, n / 2, n - 1) {
+				if (odd[n / 2] >= i - n / 2 + 1 && ok[n - 2 - i]) ret++;
+			}
+		}
+		
+		printf("%d\n", ret);
+	}
+	
+	
+	return 0;
+}

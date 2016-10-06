@@ -1,0 +1,129 @@
+#include <bits/stdc++.h>
+#include <string.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef long double ld;
+typedef pair<int, ll> data;
+
+const int nmax = 2e5 + 10;
+
+struct pt
+{
+    int x, y;
+    ll c;
+};
+
+struct event
+{
+    int x;
+    int yl, yr;
+    ll c;
+    bool operator<(const event& other) const
+    {
+        return x < other.x;
+    }
+};
+
+struct node
+{
+    ll maxx;
+    ll promise;
+    node() : maxx(0), promise(0) {}
+};
+
+vector<node> t(4 * nmax);
+
+void push(int v)
+{
+    ll val = t[v].promise;
+    t[v].promise = 0;
+    t[v * 2].promise += val;
+    t[v * 2].maxx += val;
+    t[v * 2 + 1].promise += val;
+    t[v * 2 + 1].maxx += val;
+}
+
+void update(int v, int tl, int tr, int l, int r, ll val)
+{
+    if (tl == l && tr == r) {
+        t[v].maxx += val;
+        t[v].promise += val;
+        return;
+    }
+    push(v);
+    int tm = (tl + tr) >> 1;
+    if (l <= tm) {
+        update(v * 2, tl, tm, l, min(r, tm), val);
+    }
+    if (r > tm) {
+        update(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, val);
+    }
+    t[v].maxx = max(t[v * 2].maxx, t[v * 2 + 1].maxx);
+}
+
+vector<pt> p;
+int n;
+
+ll solve(int k)
+{
+    for (int i = 0; i < 4 * nmax; ++i) {
+        t[i].maxx = t[i].promise = 0;
+    }
+    vector<event> events(2 * n);
+    for (int i = 0; i < n; ++i) {
+        events[i * 2] = {p[i].x, p[i].y, p[i].y + k - 1, p[i].c};
+        events[i * 2 + 1] = {p[i].x + k, p[i].y, p[i].y + k - 1, -p[i].c};
+    }
+    stable_sort(all(events));
+    ll ans = 0;
+    for (int i = 0; i < 2 * n; ++i) {
+        if (i && events[i].x != events[i - 1].x) {
+            ans = max(ans, t[1].maxx);
+        }
+        //cout << events[i].x << " " << events[i].yl << " " << events[i].yr << " " << events[i].c << "\n";
+        update(1, 0, nmax - 1, events[i].yl, events[i].yr, events[i].c);
+    }
+    ans = max(ans, t[1].maxx);
+    return ans;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //ofstream cout("output.txt");
+    //freopen("input.txt", "r", stdin);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    int l;
+    scanf("%d%d", &n, &l);
+
+    p.resize(n);
+    for (int i = 0; i < n; ++i) {
+        scanf("%d%d%lld", &p[i].x, &p[i].y, &p[i].c);
+    }
+
+    ll ans = solve(l);
+    printf("%lld ", ans);
+    int lf = 0, rg = l;
+    while (rg - lf > 1) {
+        int md = (lf + rg) >> 1;
+        if (solve(md) == ans) {
+            rg = md;
+        } else {
+            lf = md;
+        }
+    }
+    printf("%d\n", rg);
+
+}

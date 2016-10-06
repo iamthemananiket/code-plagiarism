@@ -1,0 +1,268 @@
+#include <bits/stdc++.h>
+#include <string.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef double ld;
+typedef pair<ll, int> pll;
+
+const int rmax = 16;
+const int magic = 1094;
+const int inf = 1e9 + 10;
+
+vector<int> oldest, youngest;
+
+bool bit(int mask, int pos)
+{
+    return (mask >> pos) & 1;
+}
+
+struct my_bitset
+{
+    unsigned int b[magic];
+    my_bitset()
+    {
+        memset(b, 0, 1094 * sizeof(unsigned int));
+    }
+    void set(int pos)
+    {
+        int i = (pos >> 5);
+        int j = 31 - (pos & 31);
+        b[i] |= (1 << j);
+    }
+    void my_or(const my_bitset& x, const my_bitset& y)
+    {
+        for (int i = 0; i < magic; ++i) {
+            b[i] = (x.b[i] | y.b[i]);
+        }
+    }
+    void my_xor(const my_bitset& x)
+    {
+        for (int i = 0; i < magic; ++i) {
+            b[i] ^= x.b[i];
+        }
+    }
+    int get(int i, int j)
+    {
+        if (j == 0) {
+            return b[i] >> 24;
+        }
+        if (j == 3) {
+            return b[i] & ((1 << 8) - 1);
+        }
+        if (j == 2) {
+            return (b[i] & ((1 << 16) - (1 << 8))) >> 8;
+        }
+        if (j == 1) {
+            return (b[i] & ((1 << 24) - (1 << 16))) >> 16;
+        }
+    }
+};
+
+vector<vector<int> > g;
+vector<vector<int> > parent;
+vector<vector<int> > minn, maxx;
+vector<my_bitset> bits;
+int n;
+vector<int> t_in, t_out;
+int timer = 0;
+vector<int> a;
+vector<int> a_pos;
+vector<int> sorted;
+
+void dfs(int v, int p)
+{
+    parent[v][0] = p;
+    minn[v][0] = min(a[v], a[p]);
+    maxx[v][0] = max(a[v], a[p]);
+    bits[v] = bits[p];
+    bits[v].set(a_pos[v]);
+    t_in[v] = timer++;
+    for (int to : g[v]) {
+        if (to != p) {
+            dfs(to, v);
+        }
+    }
+    t_out[v] = timer++;
+}
+
+bool ancestor(int u, int v)
+{
+    return t_in[u] <= t_in[v] && t_out[u] >= t_out[v];
+}
+
+int lca(int u, int v)
+{
+    if (ancestor(u, v)) {
+        return u;
+    }
+    for (int r = rmax - 1; r >= 0; --r) {
+        if (!ancestor(parent[u][r], v)) {
+            u = parent[u][r];
+        }
+    }
+    return parent[u][0];
+}
+
+pii get_minn_maxx(int u, int w)
+{
+    if (u == w) {
+        return mp(a[u], a[u]);
+    }
+    int maxim = -inf, minim = inf;
+    for (int r = rmax - 1; r >= 0; --r) {
+        if (!ancestor(parent[u][r], w)) {
+            maxim = max(maxim, maxx[u][r]);
+            minim = min(minim, minn[u][r]);
+            u = parent[u][r];
+        }
+    }
+    maxim = max(maxim, maxx[u][0]);
+    minim = min(minim, minn[u][0]);
+    return mp(minim, maxim);
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //freopen("input.txt", "r", stdin);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    oldest.resize(1 << 8);
+    youngest.resize(1 << 8);
+
+    oldest[0] = youngest[0] = -1;
+    for (int mask = 1; mask < (1 << 8); ++mask) {
+        for (int b = 7; b >= 0; --b) {
+            if (bit(mask, b)) {
+                youngest[mask] = b;
+            }
+        }
+        for (int b = 0; b < 8; ++b) {
+            if (bit(mask, b)) {
+                oldest[mask] = b;
+            }
+        }
+    }
+
+    scanf("%d", &n);
+    g.resize(n);
+    parent.resize(n);
+    maxx.resize(n);
+    minn.resize(n);
+    bits.resize(n);
+    for (int i = 0; i < n; ++i) {
+        parent[i].resize(rmax);
+        maxx[i].resize(rmax);
+        minn[i].resize(rmax);
+    }
+    t_in.resize(n);
+    t_out.resize(n);
+
+    a.resize(n);
+    for (int i = 0; i < n; ++i) {
+        scanf("%d", &a[i]);
+    }
+    sorted = a;
+    sort(all(sorted));
+    a_pos.resize(n);
+    for (int i = 0; i < n; ++i) {
+        a_pos[i] = lower_bound(all(sorted), a[i]) - sorted.begin();
+    }
+
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        scanf("%d%d", &u, &v);
+        --u, --v;
+        g[u].pb(v);
+        g[v].pb(u);
+    }
+
+    dfs(0, 0);
+
+    for (int r = 1; r < rmax; ++r) {
+        for (int i = 0; i < n; ++i) {
+            int t = parent[i][r - 1];
+            parent[i][r] = parent[t][r - 1];
+            maxx[i][r] = max(maxx[i][r - 1], maxx[t][r - 1]);
+            minn[i][r] = min(minn[i][r - 1], minn[t][r - 1]);
+        }
+    }
+
+    vector<vector<vector<int> > > dp(magic, vector<vector<int> >(4, vector<int>(1 << 8, inf)));
+    for (int i = 0; i < magic; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            for (int mask = 0; mask < (1 << 8); ++mask) {
+                int start = (i << 5) + (j << 3);
+                for (int x = 0; x < 8; ++x) {
+                    if (!bit(mask, 7 - x)) {
+                        continue;
+                    }
+                    for (int y = x + 1; y < 8; ++y) {
+                        if (!bit(mask, 7 - y)) {
+                            continue;
+                        }
+                        if (start + y < n) {
+                            dp[i][j][mask] = min(dp[i][j][mask], sorted[start + y] - sorted[start + x]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    int q;
+    scanf("%d", &q);
+
+    while (q--) {
+        char type;
+        scanf("%c", &type);
+        while (type != 'C' && type != 'F') {
+            scanf("%c", &type);
+        }
+        int u, v;
+        scanf("%d%d", &u, &v);
+        --u, --v;
+        int w = lca(u, v);
+        if (type == 'F') {
+            pii p = get_minn_maxx(u, w);
+            pii q = get_minn_maxx(v, w);
+            printf("%d\n", max(p.second, q.second) - min(p.first, q.first));
+        } else {
+            my_bitset b;
+            b.my_or(bits[u], bits[v]);
+            if (w != parent[w][0]) {
+                b.my_xor(bits[parent[w][0]]);
+            }
+            int ans = inf;
+            int prev = -1;
+            for (int i = 0; i < magic; ++i) {
+                for (int j = 0; j < 4; ++j) {
+                    int mask = b.get(i, j);
+                    if (mask) {
+                        //cout << i << " " << j << " " << mask << "\n";
+                        ans = min(ans, dp[i][j][mask]);
+                        if (prev != -1) {
+                            int y = 7 - oldest[mask];
+                            //cout << "!" << mask << " " << y << " " << prev << "\n";
+                            ans = min(ans, sorted[y + (i << 5) + (j << 3)] - sorted[prev]);
+                        }
+                        prev = 7 - youngest[mask] + (i << 5) + (j << 3);
+                    }
+                }
+            }
+            printf("%d\n", ans);
+        }
+    }
+
+}

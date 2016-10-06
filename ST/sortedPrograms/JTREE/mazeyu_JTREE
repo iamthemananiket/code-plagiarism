@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+#define rep(i,a,b) for (int i=a;i<=b;++i)
+#define dep(i,a,b) for (int i=a;i>=b;--i)
+#define For(i,u) for (int i=H[u];i;i=nxt[i])
+#define re(i,a,b) for (int i=a;i<b;++i)
+#define mp make_pair
+#define pb push_back
+#define mod 1000000007
+#define X first
+#define Y second
+using namespace std;
+template<class T> inline void read(T&x){bool fu=0;char c;for(c=getchar();c<=32;c=getchar());if(c=='-')fu=1,c=getchar();for(x=0;c>32;c=getchar())x=x*10+c-'0';if(fu)x=-x;};
+template<class T> inline void read(T&x,T&y){read(x);read(y);}
+template<class T> inline void read(T&x,T&y,T&z){read(x);read(y);read(z);}
+typedef long long ll;
+typedef pair<int,int> pii;
+const int N=222222;
+const ll INF=1e16;
+//head
+int cnt,H[N],to[N],nxt[N];
+void ins(int x,int y){to[++cnt]=y;nxt[cnt]=H[x];H[x]=cnt;}
+vector<pii> V[N];
+int f[N][18];
+void dfs(int u){
+	int v;
+	For(i,u)if((v=to[i])!=f[u][0]){
+		f[v][0]=u;
+		dfs(v);
+	}
+}
+ll Min[N][18],dp[N];
+ll ask(int x,int st){
+	ll tmp=INF;int u=x;
+	dep(i,17,0)if((st>>i)&1){
+		tmp=min(tmp,Min[u][i]);
+		u=f[u][i];
+	}
+	return tmp;
+}
+void dfs2(int u){
+	Min[u][0]=dp[f[u][0]];
+	rep(i,1,17)
+		Min[u][i]=min(Min[u][i-1],Min[f[u][i-1]][i-1]);
+	re(i,0,V[u].size()){
+		//printf("%d %d\n",V[u][i].X,V[u][i].Y);
+		dp[u]=min(dp[u],ask(u,V[u][i].Y)+V[u][i].X);
+	}
+	int v;
+	For(i,u)if((v=to[i])!=f[u][0])dfs2(v);
+}
+int n,m,q;
+int main() {
+	//freopen("a.in","r",stdin);
+	read(n,m);
+	rep(i,1,n-1){
+		int x,y;
+		read(x,y);
+		ins(x,y);ins(y,x);
+	}
+	rep(i,1,m){
+		int x,y,z;
+		read(x,y,z);
+		V[x].pb(mp(z,y));
+	}
+	dfs(1);
+	rep(j,1,17)
+		rep(i,1,n)f[i][j]=f[f[i][j-1]][j-1];
+	//
+	rep(i,1,n)dp[i]=INF;
+	dp[1]=0;
+	For(i,1)dfs2(to[i]);
+	read(q);
+	while(q--){
+		int x;
+		read(x);
+		printf("%lld\n",dp[x]);
+	}
+	return 0;
+}

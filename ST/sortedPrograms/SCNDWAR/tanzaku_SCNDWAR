@@ -1,0 +1,31 @@
+#include <cstdio>
+
+const int MAX = 20000;
+
+int T;
+char cs[63];
+int map[256];
+
+int main() {
+	scanf("%d", &T);
+	while(T--) {
+		static int id = 0; id++;
+		scanf("%s", cs);
+		for(int i = 0; i < 256; i++) map[i] = -1;
+		int n = 0;
+		for(int i = 0; cs[i]; i++) {
+			if(map[cs[i]] == -1) {
+				map[cs[i]] = n++;
+			}
+		}
+		for(int i = 0; i < 256; i++) if(map[i] == 0 || map[i] == 1) map[i] = 1 - map[i];
+		if(n == 1) n = 2;
+		long long x = 0;
+		for(int i = 0; cs[i]; i++) {
+			x = x * n + map[cs[i]];
+		}
+		// printf("%I64d\n", x);
+		printf("%lld\n", x);
+	}
+	return 0;
+}

@@ -1,0 +1,39 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main() {
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		int n;
+		cin>>n;
+		map<string,int> degree;
+		map<string,string> graph;
+		for(int i=0;i<n;i++)
+		{
+			string a,b;
+			cin>>a>>b;
+			degree[a]++;
+			degree[b]++;
+			graph[a]=b;
+		}
+		string source,destination;
+		for(map<string,int>::iterator it=degree.begin();it!=degree.end();++it)
+    	{
+    		if(it->second==1)
+    		{
+    			if(graph.find(it->first)!=graph.end())
+    				source=it->first;
+    			else
+    				destination=it->first;
+    		}
+    	}
+    	for (int i=0;i<n;i++)
+    	{
+    		string currentdestination = (graph.find(source))->second;
+			cout<<source<<"-"<<currentdestination<<" ";
+			source=currentdestination;
+    	}
+		cout<<"\n";
+	}
+}

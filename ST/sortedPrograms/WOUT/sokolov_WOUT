@@ -1,0 +1,66 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const ll INF = (ll)1e18;
+
+ll cnt[(int)1e6 + 9];
+
+int main() {
+	//freopen("input.in", "rt", stdin);
+	//freopen("output.out", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	for (int tt = 0; tt < t; ++tt) {
+		int n, h;
+		scanf("%d %d", &n, &h);
+		for (int i = 2; i <= n; ++i) {
+			cnt[i] = 0;
+		}
+		cnt[1] = n;
+		for (int i = 0; i < n; ++i) {
+			int l, r;
+			scanf("%d %d", &l, &r);
+			++l;
+			++r;
+			--cnt[l];
+			++cnt[r + 1];
+		}
+		for (int i = 1; i <= n; ++i) {
+			cnt[i] += cnt[i - 1];
+		}
+		for (int i = 1; i <= n; ++i) {
+			cnt[i] += cnt[i - 1];
+		}
+		ll res = INF;
+		for (int i = h; i <= n; ++i) {
+			res = min(cnt[i] - cnt[i - h], res);
+		}
+		printf("%lld\n", res);
+	}
+	return 0;
+}

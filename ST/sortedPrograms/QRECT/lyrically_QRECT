@@ -1,0 +1,167 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+bool cmpY(const pint &a, const pint &b) {
+	return ((a.second != b.second) ? (a.second < b.second) : (a.first < b.first));
+}
+
+const int INF = 1001001001;
+
+int Q;
+char typ[100010];
+int XA[100010], YA[100010], XB[100010], YB[100010];
+int IDX[100010];
+int qsLen;
+int qs[100010];
+
+int bitN;
+pint ps[4][100010];
+pint xs[4][100010];
+int *bits[4][100010];
+int *yss[4][100010];
+
+void addThem(int q, int val) {
+// cout<<"add "<<q<<" "<<val<<endl;
+	for (int s = 0; s < 4; ++s) {
+		const int x = (s & 2) ? -XA[q] : +XB[q];
+		const int y = (s & 1) ? -YA[q] : +YB[q];
+		const int xPos = lower_bound(xs[s] + 1, xs[s] + 1 + bitN, mp(x, y)) - xs[s];
+		for (int i = xPos; i <= bitN; i += i & -i) {
+			const int len = i & -i;
+			const int yPos = lower_bound(yss[s][i] + 1, yss[s][i] + 1 + len, y) - yss[s][i];
+// cout<<"  "<<s<<" ("<<x<<", "<<y<<") "<<i<<" "<<yPos<<endl;
+assert(1<=yPos&&yPos<=len&&yss[s][i][yPos]==y);
+			for (int j = yPos; j <= len; j += j & -j) {
+				bits[s][i][j] += val;
+			}
+		}
+	}
+}
+
+//	<= x, <= y
+int getSum(int s, int x, int y) {
+// cout<<"getSum "<<s<<" "<<x<<" "<<y<<endl;
+	int ret = 0;
+	const int xPos = upper_bound(xs[s] + 1, xs[s] + 1 + bitN, mp(x, INF)) - xs[s] - 1;
+	for (int i = xPos; i > 0; i &= i - 1) {
+		const int len = i & -i;
+// cout<<"  ("<<i-len<<", "<<i<<"]"<<endl;
+		const int yPos = upper_bound(yss[s][i] + 1, yss[s][i] + 1 + len, y) - yss[s][i] - 1;
+		for (int j = yPos; j > 0; j &= j - 1) {
+			ret += bits[s][i][j];
+		}
+	}
+// cout<<"  ret = "<<ret<<endl;
+	return ret;
+}
+
+int main() {
+	char buf[10];
+	
+	for (; ~scanf("%d", &Q); ) {
+		for (int q = 0; q < Q; ++q) {
+			scanf("%s", buf);
+			typ[q] = buf[0];
+			switch (typ[q]) {
+				case 'I': case 'Q': {
+					XA[q] = in();
+					YA[q] = in();
+					XB[q] = in();
+					YB[q] = in();
+				} break;
+				case 'D': {
+					IDX[q] = in() - 1;
+				} break;
+				default: assert(false);
+			}
+		}
+		
+		bitN = count(typ, typ + Q, 'I');
+		for (int s = 0; s < 4; ++s) {
+			int pos = 0;
+			for (int q = 0; q < Q; ++q) {
+				if (typ[q] == 'I') {
+					const int x = (s & 2) ? -XA[q] : +XB[q];
+					const int y = (s & 1) ? -YA[q] : +YB[q];
+					ps[s][++pos] = mp(x, y);
+				}
+			}
+			assert(pos == bitN);
+			sort(ps[s] + 1, ps[s] + 1 + bitN);
+			copy(ps[s] + 1, ps[s] + 1 + bitN, xs[s] + 1);
+// cout<<"xs["<<s<<"] : ";for(int i=1;i<=bitN;++i)cout<<"("<<xs[s][i].first<<", "<<xs[s][i].second<<") ";cout<<endl;
+			for (int i = 1; i <= bitN; ++i) {
+				const int len = i & -i;
+				bits[s][i] = new int[1 + len];
+				fill(bits[s][i], bits[s][i] + 1 + len, 0);
+				yss[s][i] = new int[1 + len];
+				for (int k = i - len + 1; k <= i; ++k) {
+					yss[s][i][k - (i - len)] = ps[s][k].second;
+				}
+				sort(yss[s][i] + 1, yss[s][i] + 1 + len);
+// cout<<"yss["<<s<<"]["<<i<<"] : ";pv(yss[s][i]+1,yss[s][i]+1+len);
+			}
+		}
+		
+		qsLen = 0;
+		for (int q = 0; q < Q; ++q) {
+			switch (typ[q]) {
+				case 'I': {
+					qs[qsLen++] = q;
+					addThem(q, +1);
+				} break;
+				case 'D': {
+					addThem(qs[IDX[q]], -1);
+					// addThem(IDX[q], -1);
+				} break;
+				case 'Q': {
+					int ans = 0;
+					ans += getSum(0, INF, INF);
+					ans -= getSum(0, +XA[q] - 1, INF);
+					ans -= getSum(2, -XB[q] - 1, INF);
+					ans -= getSum(0, INF, +YA[q] - 1);
+					ans -= getSum(1, INF, -YB[q] - 1);
+					ans += getSum(0, +XA[q] - 1, +YA[q] - 1);
+					ans += getSum(1, +XA[q] - 1, -YB[q] - 1);
+					ans += getSum(2, -XB[q] - 1, +YA[q] - 1);
+					ans += getSum(3, -XB[q] - 1, -YB[q] - 1);
+					printf("%d\n", ans);
+				} break;
+				default: assert(false);
+			}
+		}
+	}
+	
+	return 0;
+}

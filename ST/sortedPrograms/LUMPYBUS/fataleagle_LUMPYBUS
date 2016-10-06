@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N;
+long long P, Q;
+
+int get(vector<long long>& v, long long x)
+{
+    return upper_bound(v.begin(), v.end(), x)-v.begin();
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%lld%lld", &N, &P, &Q);
+        vector<long long> even, odd;
+        int a;
+        for(int i=0; i<N; i++)
+        {
+            scanf("%d", &a);
+            if(a%2==0)
+                even.push_back(a);
+            else
+                odd.push_back(a);
+        }
+        sort(even.begin(), even.end());
+        for(int i=1; i<(int)even.size(); i++)
+            even[i]+=even[i-1];
+        sort(odd.begin(), odd.end());
+        int ans=get(even, P+2*Q);
+        for(int i=0; i<(int)odd.size(); i++)
+        {
+            if(P==0)
+                break;
+            P--;
+            int amt=odd[i]-1;
+            if(2*Q>=amt)
+                Q-=amt/2;
+            else
+            {
+                amt-=2*Q;
+                Q=0;
+                if(amt>P)
+                    break;
+                P-=amt;
+            }
+            ans=max(ans, i+1+get(even, P+2*Q));
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}

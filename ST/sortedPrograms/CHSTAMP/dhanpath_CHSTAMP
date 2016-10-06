@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+vector<bool>  vis(50001,0) ;
+vector<int>  a(200000), cur, tmp, edges[50001] ;
+vector<vector<int>>  q( 50002, vector<int>(3) ) ;
+long long  mx, dp[50001] ;
+
+inline void dfs( int u )
+{
+        vis[u] = 1 ;
+        tmp.push_back(u) ;
+        if( mx < dp[u] )
+                mx = dp[u] ;
+        for( auto &z: edges[u] )
+                if( ! vis[z] )
+                        dfs(z) ;
+}
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  t, n, m, i ;
+        for(  cin >> t ;  t-- ;  )
+        {
+                cin >> n >> m ;
+                for( i=0; i<n; i++ )
+                        cin >> a[i] ;
+                for( i=1; i<=m; i++ )
+                        cin >> q[i][0] >> q[i][1] >> q[i][2] ;
+
+                sort( q.begin()+1, q.begin()+1+m );
+                q[0][0] = 0 ;
+                q[m+1][0] = 1<<30 ;
+                for( i=0; i<50001; i++ )
+                        dp[i] = i ;
+                for( i=m; i>=0; i-- )
+                {
+                        if( q[i+1][0] != q[i][0] )
+                        {
+                                for( auto &z: cur )
+                                if( ! vis[z] ) {
+                                        tmp.clear();
+                                        mx = dp[z] ;
+                                        dfs(z);
+                                        for( auto &zz: tmp )
+                                                dp[zz] = mx ;
+                                }
+                                for( auto &z: cur ) {
+                                        vis[z] = 0 ;
+                                        edges[z].clear() ;
+                                }
+                                cur.clear();
+                                if(!i)break;
+                        }
+                        cur.push_back(q[i][1]);
+                        cur.push_back(q[i][2]);
+                        edges[q[i][1]].push_back(q[i][2]);
+                        edges[q[i][2]].push_back(q[i][1]);
+                }
+
+                long long  ans = 0LL ;
+                for( i=0; i<n; i++ )
+                        ans += dp[ a[i] ] ;
+                cout << ans << endl ;
+        }
+
+        return 0;
+} 

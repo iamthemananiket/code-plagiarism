@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	ios::sync_with_stdio(false);
+	int t;
+	cin>>t;
+	while(t--){
+		int n,k;
+		cin>>n>>k;
+		vector<int> penalty(n);
+		for(int i=0;i<n;i++){
+			cin>>penalty[i];
+		}
+		vector<long long> countItems(n);
+		for(int i=0;i<n;i++){
+			countItems[i]=k/penalty[i];
+		}
+		vector<long long> profitPerItem(n);
+		for(int i=0;i<n;i++){
+			cin>>profitPerItem[i];
+		}
+		long long  ans=-1;
+		for(int i=0;i<n;i++){
+			ans=max(ans,countItems[i]*profitPerItem[i]);
+		}
+		cout<<ans<<"\n";
+	}
+} 

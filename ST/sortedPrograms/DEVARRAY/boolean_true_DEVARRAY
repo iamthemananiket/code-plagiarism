@@ -1,0 +1,26 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int n,q;
+    cin>>n>>q;
+    int minm=INT_MAX,maxm=INT_MIN;
+    for(int i=0;i<n;i++)
+    {
+        int p;
+        cin>>p;
+        minm=min(minm,p);
+        maxm=max(maxm,p);
+    }
+    while(q--)
+    {
+        int k;
+        cin>>k;
+        if(k>maxm||k<minm)
+            cout<<"No";
+        else
+            cout<<"Yes";
+        cout<<endl;
+    }
+}
+

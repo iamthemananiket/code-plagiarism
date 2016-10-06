@@ -1,0 +1,168 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef double dd;
+ 
+const int BLOCK = 1564;
+
+struct Bitset {
+  typedef unsigned long long ull;
+  ull mask[BLOCK];
+  
+  inline void set(int pos) {
+    mask[pos >> 6] |= 1ULL << (pos & 63);
+  }
+  
+  inline int bit_cnt(ull val) {
+    return __builtin_popcountll(val);
+  }
+  
+  int count(int lef, int rig) {
+    /*int res = 0;
+    for(int at=lef;at<=rig;++at) {
+      if (mask[at>>6] >> (at&63)&1) {
+        ++res;
+      }
+    }
+    return res;*/    
+    if ((lef >> 6) == (rig >> 6)) {
+      if (rig % 64 == 63) {
+        return bit_cnt(~((1ULL << (lef&63))-1) & mask[lef>>6]);
+      }
+      return bit_cnt((((1ULL << ((rig&63)+1))-1) ^ ((1ULL << (lef&63))-1))&mask[lef>>6]);
+    }
+    int res = bit_cnt(mask[lef >> 6] & ~((1ULL << (lef&63))-1));
+    lef += 64;
+    while ((lef >> 6) != (rig >> 6)) {
+      res += bit_cnt(mask[lef >> 6]);
+      lef += 64;
+    }
+    if (rig % 64 == 63) {
+      res += bit_cnt(mask[rig >> 6]);
+    } else {
+      res += bit_cnt(mask[rig >> 6] & ((1ULL << ((rig&63)+1))-1));
+    }
+    return res;
+  }
+  
+  void all_ones(int lef, int rig) {
+    while ((lef >> 6) <= (rig >> 6)) {
+      mask[lef >> 6] = (ull)(-1);
+      lef += 64;
+    }
+  }
+  
+  void intersect(const Bitset& b, int lef, int rig) {
+    while ((lef >> 6) <= (rig >> 6)) {
+      mask[lef >> 6] &= b.mask[lef >> 6];
+      lef += 64;
+    }
+  }
+};
+ 
+const int MAX = 111000;
+const int LOG = 14;
+const int MAXV = 1 << LOG;
+vector<int> pos[MAXV];
+int arr[MAX];
+pair<int,int> ord[MAX];
+Bitset has[2][LOG];
+ 
+int get_btw(int val, int l, int r) {
+  return upper_bound(pos[val].begin(), pos[val].end(), r) - lower_bound(pos[val].begin(), pos[val].end(), l);
+}
+
+void vera(int N) {
+  ll res = 0;
+  for(int i=0;i<N;++i) {
+    int hig = arr[i];
+    for(int j=i+1;j<N;++j) {
+      hig = max(hig, arr[j]);
+      if ((arr[i] & arr[j]) == arr[i] || (arr[i] & arr[j]) == arr[j]) {
+      res += hig;
+      }
+    }
+  }
+  cerr << "actual: " << res << endl;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int N;
+  cin >> N;
+  memset(has, 0, sizeof(has));
+  for(int i=0;i<N;++i) {
+    cin >> arr[i];
+    for(int b=0;b<LOG;++b) {
+      has[arr[i] >> b & 1][b].set(i); 
+    }
+    ord[i] = {arr[i], i};
+    pos[arr[i]].push_back(i);
+  }
+  #ifdef AZN
+  vera(N);
+  #endif
+  sort(ord,ord+N);
+  reverse(ord,ord+N);
+  set<int> marked;
+  marked.insert(-1);
+  marked.insert(N);
+  ll res = 0;
+  vector<int> vals;
+  Bitset now;
+  for(int o=0;o<N;++o) {
+    const int m = ord[o].second;
+    const int l = *(--marked.lower_bound(m)) + 1;
+    const int r = *marked.upper_bound(m) - 1;
+    vals.clear();
+    int oth_l, oth_r;
+    if (m-l <= r-m) {
+      oth_l = m;
+      oth_r = r;
+      for(int i=l;i<=m;++i){
+        vals.push_back(arr[i]);
+      }
+    } else {
+      oth_l = l;
+      oth_r = m;
+      for(int i=m;i<=r;++i){
+        vals.push_back(arr[i]);
+      }
+    }
+    sort(vals.begin(), vals.end());
+    //cerr << "l,m,r: " << l << " " << m << " " << r << endl;
+    for(int i =0,j;i<(int)vals.size();i=j) {
+      for(j=i;j<(int)vals.size() && vals[i] == vals[j];) {
+        ++j;
+      }
+      const int cnt = j-i;
+      now.all_ones(oth_l, oth_r);
+      //cerr << "vals[i]: " << vals[i] << " " << cnt << endl;
+      // subset
+      for(int b=0;b<LOG;++b)
+        if (1<<b&~vals[i])
+          now.intersect(has[0][b], oth_l, oth_r);     
+      res += ll(arr[m]) * cnt * now.count(oth_l, oth_r);
+      //cerr << "subset_cnt: " << now.count(oth_l, oth_r) << " " << now.mask[0] << endl;
+      
+      // superset
+      now.all_ones(oth_l, oth_r);
+      for(int b=0;b<LOG;++b)
+        if (vals[i]>>b&1)
+          now.intersect(has[1][b], oth_l, oth_r);
+      res += ll(arr[m]) * cnt * now.count(oth_l, oth_r);
+      
+      //double counted same val
+      res -= ll(arr[m]) * cnt * get_btw(vals[i], oth_l, oth_r);
+    }
+    marked.insert(m);
+  }
+  for(int i=0;i<N;++i)
+    res -= arr[i];
+  cout << res << endl;
+  return 0;
+} 

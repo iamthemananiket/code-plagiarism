@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		int n;
+		cin >> n;
+		int x;
+		vector<pair<int, int> > v;
+		for(int i = 0; i < n; i++) {
+			scanf("%d", &x);
+			int cnt[6];
+			for(int j = 0; j < 6; j++) cnt[j] = 0;
+			int y, ans = x;
+			for(int j = 0; j < x; j++) scanf("%d", &y), cnt[y - 1]++;
+			sort(cnt, cnt + 6);
+			ans += cnt[0] * 4;
+			for(int j = 1; j < 6; j++) cnt[j] -= cnt[0];
+			ans += cnt[1] * 2;
+			for(int j = 2; j < 6; j++) cnt[j] -= cnt[1];
+			ans += cnt[2];
+			v.push_back(make_pair(ans, i + 1));
+		}
+		sort(v.rbegin(), v.rend());
+		if(n == 1) cout << "chef\n";
+		else if(v[0].first == v[1].first) cout << "tie\n";
+		else if(v[0].second == 1) cout << "chef\n";
+		else cout << v[0].second << endl;
+	}
+}

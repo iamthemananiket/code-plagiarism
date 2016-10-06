@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+
+#define llong long long
+
+using namespace std;
+
+const int INF = (int) 1e9 + 7;
+const int MXN = (int) 2e3 + 7;
+
+int t, k, n;
+
+llong sum;
+llong a[MXN];
+
+vector<int> v;
+
+bool rec(int pos, int cur, int amount) {
+    if (amount >= k)
+        return true;
+
+    if (pos == v.size()) return false;
+    if ((cur & v[pos]) == 0) {
+        if (rec(pos + 1, cur + v[pos], amount + 1))
+            return true;
+    }
+    return rec(pos + 1, cur, amount);
+}
+
+int main() {
+    scanf("%d", &t);
+    while (t--) {
+        sum = 0;
+
+        scanf("%d%d", &n, &k);
+        for (int i = 0; i < n; i++) {
+            scanf("%lld", &a[i]);
+            sum += a[i];
+        }
+        if (sum % k) {
+            puts("no");
+            continue;
+        }
+        sum /= k;
+
+        v.clear();
+        for (int m = 1; m < (1 << n); m++) {
+            llong cur = 0;
+            for (int i = 0; i < n; i++)
+                if ((m >> i) & 1) cur += a[i];
+
+            if (cur == sum) v.push_back(m);
+        }
+        if (rec(0, 0, 0)) puts("yes");
+        else puts("no");
+    }
+    return 0;
+}

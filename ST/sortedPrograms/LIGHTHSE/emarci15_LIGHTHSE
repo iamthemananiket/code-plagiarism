@@ -1,0 +1,60 @@
+#include <cstdio>
+
+using namespace std;
+
+int T;
+int n;
+int x[100000],y[100000];
+int minx,miny,maxx,maxy;
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d",&n);
+
+        minx=miny=maxx=maxy = 0;
+        for(int i=0; i<n; i++) {
+            scanf("%d%d",&x[i],&y[i]);
+            if(x[i]<x[minx]) minx = i;
+            if(y[i]<y[miny]) miny = i;
+            if(x[i]>x[maxx]) maxx = i;
+            if(y[i]>y[maxy]) maxy = i;
+        }
+
+        bool t1(0);
+        for(int i=0; (i<n) && (!t1); i++) {
+            if((x[i] == x[minx]) && (y[i] == y[miny])) {
+                printf("1\n%d NE\n",i+1);
+                t1 = 1;
+                break;
+            }
+            if((x[i] == x[minx]) && (y[i] == y[maxy])) {
+                printf("1\n%d SE\n",i+1);
+                t1 = 1;
+                break;
+            }
+            if((x[i] == x[maxx]) && (y[i] == y[miny])) {
+                printf("1\n%d NW\n",i+1);
+                t1 = 1;
+                break;
+            }
+            if((x[i] == x[maxx]) && (y[i] == y[maxy])) {
+                printf("1\n%d SW\n",i+1);
+                t1 = 1;
+                break;
+            }
+        }
+        if(t1) continue;
+
+        printf("2\n");
+        if(y[minx] <= y[maxx]) {
+            printf("%d NE\n",minx+1);
+            printf("%d SW\n",maxx+1);
+        } else {
+            printf("%d SE\n",minx+1);
+            printf("%d NW\n",maxx+1);
+        }
+    }
+
+    return 0;
+}

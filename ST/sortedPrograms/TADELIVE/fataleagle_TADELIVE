@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, X, Y;
+pair<int, int> A[100000];
+priority_queue<int> profit;
+
+int main()
+{
+    scanf("%d%d%d", &N, &X, &Y);
+    int sum=0;
+    for(int i=0; i<N; i++)
+        scanf("%d", &A[i].first);
+    for(int i=0; i<N; i++)
+        scanf("%d", &A[i].second);
+    for(int i=0; i<N; i++)
+    {
+        profit.push(A[i].first-A[i].second);
+        sum+=A[i].second;
+    }
+    int ans=0;
+    for(int i=0; i<N; i++)
+    {
+        if(N-i<=Y && i<=X)
+            ans=max(ans, sum);
+        sum+=profit.top();
+        profit.pop();
+    }
+    if(N<=X)
+        ans=max(ans, sum);
+    printf("%d\n", ans);
+    return 0;
+}

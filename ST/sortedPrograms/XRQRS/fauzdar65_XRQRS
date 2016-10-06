@@ -1,0 +1,260 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define ull unsigned long long
+#define pb push_back
+#define mp make_pair
+using namespace std;
+
+inline void scanint(int* x)
+{
+	register char c = getchar_unlocked();
+	*x = 0;
+	for(; (c<48)||(c>57);c = getchar_unlocked());
+	for(; (c>47)&&(c<58);c = getchar_unlocked())
+		*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+}
+
+/*Xor Queries --- Jan Long Contest --- Persistent Trie,Tree*/
+
+string conv( int n )
+  {
+  string result;
+  for(int i=1;i<=20;i++)
+  {
+  result.push_back( '0' + (n & 1) );
+  n >>= 1;
+  }
+
+  reverse( result.begin(), result.end() );
+  return result;
+ }
+  
+struct nodex
+{
+	int stamp;
+	int val;
+	nodex *zero, *one;
+ 
+	nodex(int stamp, nodex *zero, nodex *one):
+		stamp(stamp), zero(zero), one(one) {}
+ 
+	
+};
+ 
+void insertx(nodex *a,int x,int pos)
+{
+    string s=conv(x);
+    a->stamp=pos;
+    nodex *t=a;
+    for(int i=0;i<20;i++)
+    {
+        if(s[i]=='1')
+        {
+            if(t->one==NULL)
+            {
+                t->one=new nodex(pos,NULL,NULL);
+                
+            }
+            else
+            {
+                t->one=new nodex(pos,t->one->zero,t->one->one);
+            }
+        
+            t=t->one;
+        }
+        else
+        {
+            if(t->zero==NULL)
+            {
+                t->zero=new nodex(pos,NULL,NULL);
+                
+            }
+            else
+            {
+                t->zero=new nodex(pos,t->zero->zero,t->zero->one);
+            }
+            t=t->zero;
+        }
+       
+    }
+    t->val=x;
+}
+
+int queryx(nodex *a, int x,int l)
+{
+string s=conv(x);
+
+nodex *t=a;
+for(int i=0;i<20;i++)
+{
+    if(t->zero==NULL)t=t->one;
+    else if(t->one==NULL)t=t->zero;
+    
+    else
+    {
+        if((t->zero->stamp)<l)t=t->one;
+        else if((t->one->stamp)<l)t=t->zero;
+        else
+        {
+            if(s[i]=='0')t=t->one;
+            else t=t->zero;
+        }
+    }
+}
+
+return t->val;
+}
+ 
+ 
+nodex *rt[500005];
+
+struct node
+{
+	int count;
+	node *left, *right;
+ 
+	node(int count, node *left, node *right):
+		count(count), left(left), right(right) {}
+ 
+	node* insert(int l, int r, int w);
+};
+ 
+ 
+node * node::insert(int l, int r, int w)
+{
+	
+	if(l>r || l>w || r<w)return this;
+	
+	if(l == r)
+		{
+			return new node(this->count+1, NULL, NULL);
+		}
+	if(l <= w && w <= r)
+	{
+		
+ 
+		int m = (l+r)>>1;
+		
+		if(this->left==NULL)this->left=new node(0,NULL,NULL);
+		if(this->right==NULL)this->right=new node(0,NULL,NULL);
+ 
+		return new node(this->count+1, this->left->insert(l, m, w), this->right->insert(m+1,r,w));
+	}
+	
+	return this;
+}
+ 
+int queryct(node *a,node *b,int l, int r, int x)
+{
+	if(a==NULL || l>r || l>x )return 0;
+	
+	int bc=0;
+	if(b!=NULL)bc=b->count;
+	
+	if(r<=x)return a->count - bc;
+	
+    
+ 
+	int m = (l+r)>>1;
+	
+    int bd=0;
+    
+    if(b!=NULL && b->left!=NULL)bd=b->left->count;
+    
+    int act=0;
+	
+	if(a->left!=NULL){ act= a->left->count; }
+	
+	node *bl=NULL,*br=NULL;
+	
+	if(b!=NULL){ bl=b->left; br=b->right; }
+	
+	if(m >= x)
+		return queryct(a->left,bl,l, m, x);
+    
+	return queryct(a->right,br,m+1, r, x)+ act - bd;
+}
+
+
+int querykth(node *a,node *b,int l, int r, int k)
+{
+	if(a==NULL || l>r)return -1;
+	
+	
+	if(l == r)
+	{
+		return l;
+	}
+ 
+	int m = (l+r)>>1;
+	
+	int bd=0;
+	
+	if(b!=NULL && b->left!=NULL)bd=b->left->count;
+	
+	node *bl=NULL,*br=NULL;
+	
+	if(b!=NULL){ bl=b->left; br=b->right; }
+	
+	int act=0;
+	
+	if(a->left!=NULL){ act= a->left->count; }
+	
+	if((act - bd) >= k)
+		return querykth(a->left,bl,l, m, k);
+ 
+	return querykth(a->right,br,m+1, r, k- act + bd);
+}
+ 
+ 
+node *root[500005];
+
+
+
+int main() {
+    
+    int m,a,b,c,d,cur=0;
+    rt[0]=new nodex(0,NULL,NULL);
+    root[0]=new node(0,NULL,NULL);
+    scanint(&m);
+    
+    
+    while(m--)
+    {
+        scanint(&a);
+        
+        if(a==0)
+        {
+            scanint(&b);
+            cur++;
+            rt[cur]=new nodex(cur,rt[cur-1]->zero,rt[cur-1]->one);
+            insertx(rt[cur],b,cur);
+            root[cur]=root[cur-1]->insert(1,500000,b);
+        }
+        else if(a==1)
+        {
+            scanint(&b); scanint(&c); scanint(&d);
+            
+            printf("%d\n",queryx(rt[c],d,b));
+        }
+        else if(a==2)
+        {
+            scanint(&b);
+            cur-=b;
+        }
+        else if(a==3)
+        {
+            scanint(&b); scanint(&c); scanint(&d);
+            printf("%d\n",queryct(root[c],root[b-1],1,500000,d));
+        }
+        else if(a==4)
+        {
+            scanint(&b); scanint(&c); scanint(&d);
+          
+            printf("%d\n",querykth(root[c],root[b-1],1,500000,d));
+        }
+    }
+
+	
+	return 0;
+}

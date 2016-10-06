@@ -1,0 +1,55 @@
+# include <cstdio>
+
+using namespace std;
+
+const int MAX_N = 1e6 + 10;
+
+int used[MAX_N];
+int ans[MAX_N];
+long long n, h;
+
+int s, e;
+
+int main ()
+{
+	int t, i;
+	long long curr = 0, bestans;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		scanf ("%lld%lld", &n, &h);
+		for (i = 1; i <= n; i ++)
+		{
+			scanf ("%d%d", &s, &e);
+			used[s] ++;
+			used[e + 1] --;
+		}
+		curr = 0;
+		for (i = 0; i <= n + 1; i ++)
+		{
+			curr += used[i];
+			ans[i] = curr;
+		}
+		bestans = 0;
+		curr = 0;
+		
+		for (i = 0; i < h; i ++)
+			curr += ans[i];
+			
+		if (bestans < curr)
+			bestans = curr;
+		
+		for (i = h; i <= n + 1; i ++)
+		{
+			curr += ans[i];
+			curr -= ans[i - h];
+			if (bestans < curr)
+				bestans = curr;
+		}
+		
+		printf ("%lld\n", n * h - bestans);
+		for (i = 0; i <= n + 1; i ++)
+			used[i] = ans[i] = 0;
+	}
+	return 0;
+}

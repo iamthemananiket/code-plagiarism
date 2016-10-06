@@ -1,0 +1,57 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    int n;
+    cin >> n;
+    vector<int> a;
+    int ans = 0;
+    for (int i = 1; i <= n; i++) {
+      int p;
+      cin >> p;
+      if (p == 0) {
+	a.insert(a.begin(), i);
+      } else {
+	auto it = find(a.begin(), a.end(), p);
+	assert(it != a.end());
+	ans += min(it - a.begin() + 1, a.end() - it - 1);
+	a.insert(it + 1, i);
+      }
+    }
+    cout << ans << endl;
+  }
+}

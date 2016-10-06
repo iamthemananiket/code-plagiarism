@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+
+int main()
+{
+	int t;
+	scanf("%d",&t);
+	while(t--)
+	{
+	
+		int yr;
+		cin>>yr;
+		int offset=0;
+		for(int i=1900;i<yr;i++)
+		 {
+		 	int days=365;
+		 	if((i%4==0 && i%100!=0 ) || i%400==0) days++;
+		 	offset=(offset+days)%7;
+		 }
+		 
+		vector<string> v={"monday","tuesday","wednesday","thursday","friday","saturday","sunday"};
+		cout<<v[offset]<<endl;
+		
+	}
+}

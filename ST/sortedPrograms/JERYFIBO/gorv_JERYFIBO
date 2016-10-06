@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+bool isFib(unsigned long long a){
+  unsigned long long t1;
+  t1 = 5*a*a;
+  double x = floor(sqrt(t1+4)),y= floor(sqrt(t1-4));
+  if((x*x == t1+4) || (y*y == t1-4))
+    return true;
+  return false;
+
+}
+
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		unsigned long long int a;
+		cin>>a;
+		if(isFib(a)){
+			cout<<"is fibo\n";
+		}
+		else{
+			cout<<"not fibo\n";
+		}
+	}
+  
+
+}

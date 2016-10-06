@@ -1,0 +1,117 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",&mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 100010
+#define mod 1000000007
+
+vector<int> v[N];
+pair<int,int> e[N];
+int w[N];
+
+int parent[N];
+int Rank[N];
+int maxx[N];
+int maxd;
+int order[N];
+ll out[N];
+int find(int cur)
+{
+	if(parent[cur]==cur)
+		return cur;
+	return parent[cur]=find(parent[cur]);
+}
+
+void Union(int x,int y)
+{
+	int xroot=find(x);
+	int yroot=find(y);
+
+	if(Rank[xroot]<Rank[yroot])
+		parent[xroot]=yroot;
+	else if(Rank[xroot]>Rank[yroot])
+		parent[yroot]=xroot;
+	else
+	{
+		Rank[xroot]++;
+		parent[yroot]=xroot;
+	}
+}
+void init(int n)
+{
+	int i;
+	for(i=0;i<=n;++i)
+	{
+		Rank[i]=0;
+		parent[i]=i;
+		maxx[i]=w[i];
+	}
+}
+void go(int cur,int d,int par)
+{
+	d+=w[cur];
+	maxd=max(maxd,d);
+	for(auto u:v[cur])
+		if(u!=par)
+			go(u,d,cur);
+}
+ll pow1(ll a,ll b)
+{
+	if(b==0)	return 1;
+	ll ret=pow1(a,b/2);
+	ret=(ret*ret)%mod;
+	if(b&1)	ret=(a*ret)%mod;
+	return ret;
+}
+int main()
+{
+	int n,i;
+	sd(n);
+	for(i=1;i<=n;++i)
+		sd(w[i]);
+	for(i=1;i<=n-1;++i)
+	{
+		sd(e[i].F);
+		sd(e[i].S);
+	}
+	for(i=1;i<=n-1;++i)
+		sd(order[i]);
+	ll ans=1;
+	for(i=1;i<=n;++i)
+		ans=ans*w[i]%mod;
+	out[n]=ans;
+	init(n);
+	for(i=n-1;i>=1;--i)
+	{
+		int x=e[order[i]].F,y=e[order[i]].S;
+		int xr=find(x),yr=find(y);
+		ans=ans*pow1(maxx[xr],mod-2)%mod;
+		ans=ans*pow1(maxx[yr],mod-2)%mod;
+		int max1,max2;
+		maxd=0;
+		go(x,0,0);
+		max1=maxd;
+		maxd=0;
+		go(y,0,0);
+		max2=maxd;
+		//cout<<maxx[xr]<<' '<<maxx[yr]<<' '<<(max1+max2)<<'\n';
+		int Max=max({max1+max2,maxx[xr],maxx[yr]});
+		Union(x,y);
+		maxx[find(x)]=Max;
+		ans=ans*Max%mod;
+		out[i]=ans;
+		v[x].PB(y);
+		v[y].PB(x);
+	}
+	for(i=1;i<=n;++i)
+		printf("%lld\n",out[i]);
+}

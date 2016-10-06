@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int M = 5e4 + 5, N = 2e5 + 6;
+
+int n, m;
+int a[M], st[N], p[N];
+pair< int, pair< int, int > > exch[M];
+
+int find(int x) {
+  if(p[x] < 0) return x;
+  return p[x] = find(p[x]);
+}
+
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    scanf("%d%d", &n, &m);
+    for(int i = 0; i<n; i++) 
+      scanf("%d", st+i);
+    for(int i = 0; i<M; i++)
+      a[i] = i;
+    for(int i = 0; i<m; i++) {
+      int tm , from, to;
+      scanf("%d%d%d", &tm, &from, &to);
+      if(from > to)
+        swap(from, to);
+      exch[i] = make_pair(tm, make_pair(from, to));
+    }
+    sort(exch, exch + m);
+    for(int i= m-1; i>= 0; i--) {
+      int last = i;
+      while(i>0 && exch[i-1].first == exch[last].first) i--;
+      // cout << i << " \t" << last << endl;
+      for(int j = i; j<=last; j++) {
+        p[exch[j].second.first] = p[exch[j].second.second] = -1;
+      }
+      for(int j = i; j<= last; j++) {
+        int u = find(exch[j].second.first), v = find(exch[j].second.second);
+        if(u != v) {
+          if(a[u] > a[v])
+            swap(u, v);
+          p[u] = v;
+        }
+      }
+      for(int j = i; j<= last; j++) {
+        int v = find(exch[j].second.first);
+        // cout << exch[j].second.first << " find " << v << " "  <<a[exch[j].second.first] <<"  "  <<  a[v] << endl;
+        a[exch[j].second.first] = max(a[exch[j].second.first], a[v]);
+        v = find(exch[j].second.second);
+        // cout << exch[j].second.second << " find " << v << " "  <<a[exch[j].second.second] <<"  "  <<  a[v] << endl;
+        a[exch[j].second.second] = max(a[exch[j].second.second], a[v]);
+      }
+    }
+    long long ans = 0;
+    for(int i= 0; i<n; i++) {
+      // cout << st[i] << " " << a[st[i]] << endl;
+      ans += a[st[i]];
+    }
+    printf("%lld\n", ans);
+  }
+  return 0;
+}

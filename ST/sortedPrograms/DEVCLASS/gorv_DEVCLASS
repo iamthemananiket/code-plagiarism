@@ -1,0 +1,150 @@
+#include<bits/stdc++.h>
+using namespace std;
+// G ZERO
+//B ONE
+int countZeroes;
+int countOnes;
+int solve1(string x){
+	long long cost=LLONG_MAX;
+	int counter=0;
+	int N=x.size();
+	if(countZeroes>=countOnes){
+		//start with zero
+		for(int i=0;i<N;i+=2){
+			if(x[i]!='G'){
+				counter++;
+			}
+		}
+		if(counter<cost)
+			cost=counter;
+	}
+	counter=0;
+	if(countOnes>=countZeroes){
+		for(int i=0;i<N;i+=2){
+			if(x[i]!='B'){
+				counter++;
+			}
+		}
+		if(counter<cost)
+			cost=counter;
+	}
+	return cost;
+}
+/*
+int solve2(string x){
+	long long cost=LLONG_MAX;
+	int N=x.size();
+	if(countZeroes>=countOnes){
+		//start with zero
+		for(int i=0;i<N;i+=2){
+			if(x[i]!='G'){
+				counter++;
+			}
+		}
+		if(counter<cost)
+			cost=counter;
+	}
+
+	if(countOnes>=countZeroes){
+		for(int i=0;i<N;i+=2){
+			if(x[i]!='B'){
+				counter++;
+			}
+		}
+		if(counter<cost)
+			cost=counter;
+	}
+	return cost;
+	
+}
+*/
+int solve3(string x){
+	long long cost=LLONG_MAX;
+	int N=x.size();
+	vector<set<int>> positionsSet(2);
+	vector<set<int>> positionsSetCopy(2);
+	for(int i=0;i<N;i++){
+		if(x[i]=='G'){
+			positionsSet[0].insert(i);
+			positionsSetCopy[0].insert(i);
+		}
+			
+		else{
+			positionsSet[1].insert(i);
+			positionsSetCopy[1].insert(i);
+		}
+			
+	}
+	
+	if(countZeroes>=countOnes){
+		//start with zero
+		long long tempCost=0;	
+		for(int i=0;i<N;i++){
+			int currentType=i%2;
+			int currentPos=*(positionsSet[currentType].begin());
+			positionsSet[currentType].erase(currentPos);
+			if(currentPos!=i){	
+				int toogled=1-currentType;
+				positionsSet[toogled].erase(i);
+				positionsSet[toogled].insert(currentPos);
+				tempCost+=abs(currentPos-i);
+			}
+		}
+		if(tempCost<cost)
+			cost=tempCost;
+	}
+	
+	if(countOnes>=countZeroes){
+		long long tempCost=0;	
+		for(int i=0;i<N;i++){
+			int currentType=i%2;
+			currentType=1-currentType;
+			int currentPos=*(positionsSetCopy[currentType].begin());
+			positionsSetCopy[currentType].erase(currentPos);
+			if(currentPos!=i){	
+				int toogled=1-currentType;
+				positionsSetCopy[toogled].erase(i);
+				positionsSetCopy[toogled].insert(currentPos);
+				tempCost+=abs(currentPos-i);
+			}
+		}
+		if(tempCost<cost)
+			cost=tempCost;
+	}
+	return cost;
+}
+int main(){
+	//freopen("in.txt","r",stdin);
+	int t;
+	cin>>t;
+	while(t--){
+		int type;
+		cin>>type;
+		string x;
+		cin>>x;
+		countZeroes=0;
+		countOnes=0;
+		
+		for(int i=0;i<x.size();i++){
+			if(x[i]=='G'){
+				countZeroes++;
+			}
+			else{
+				countOnes++;
+			}
+		}
+		if(abs(countOnes-countZeroes)>1){
+			cout<<"-1\n";
+			continue;
+		}
+		if(type==0){
+			cout<<solve1(x)<<"\n";
+		}
+		else if(type==1){
+			cout<<solve3(x)<<"\n";
+		}
+		else{
+			cout<<solve3(x)<<"\n";
+		}
+	}
+}

@@ -1,0 +1,70 @@
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+#include <map>
+#include <cstring>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define travel(x) for(edge *p=fir[x]; p; p=p->n)
+#define l(x) Left[x]
+#define r(x) Right[x]
+#define lowbit(x) (x&-x)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> Pii;
+
+inline int read()
+{
+	int x=0; bool f=0; char ch=getchar();
+	while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+	while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+	return f?-x:x;
+}
+
+#define Q 1000000007
+
+int c[1<<16], g[1<<16][16], k[1<<16], f[11][16][1<<16];
+
+inline int Cal(int x)
+{
+	int A=0, l=1, l0=0; while (x/10>=l) l*=10, l0++;
+	int now=0; while (l)
+	{
+		int v=x/l;
+		rep(a, 0, 15) rep(S, 0, (1<<16)-1) if (f[l0][a][S]) rep(i, 0, v-1) 
+			(A+=1LL*f[l0][a][S]*c[k[g[g[now][i]][a]|S]]%Q)%=Q;
+		now=g[now][v];
+		x%=l, l/=10, l0--;
+	}
+	(A+=c[k[now]])%=Q;
+	return A;
+}
+
+int main()
+{
+	f[0][0][0]=1; rep(o, 1, 10) rep(a, 0, 15) rep(S, 0, (1<<16)-1) if (f[o-1][a][S]) 
+		rep(i, 0, 9) (f[o][a^i][S|(1<<(a^i))]+=f[o-1][a][S])%=Q;
+	rep(i, 0, 15) c[1<<i]=i;
+	rep(o, 1, (1<<16)-1) c[o]=c[o-lowbit(o)]+c[lowbit(o)];
+	rep(o, 0, 15)
+	{
+		rep(i, 0, 15) g[1<<i][o]=1<<(i^o);
+		rep(i, 0, (1<<16)-1) g[i][o]=g[i-lowbit(i)][o]|g[lowbit(i)][o]|(1<<o);
+	}
+	rep(S, 0, (1<<16)-1)
+	{
+		k[S]=S;
+		rep(i, 0, 15) if (S&(1<<i)) rep(j, i+1, 15) if (S&(1<<j)) k[S]|=1<<(i^j);
+	}
+	
+	int t=read(); while (t--)
+	{
+		int x=read(), y=read();
+		printf("%d\n", (Cal(y)-Cal(x-1)+Q)%Q);
+	}
+	return 0;
+}

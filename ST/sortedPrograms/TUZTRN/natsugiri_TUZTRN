@@ -1,0 +1,252 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+#include<complex>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+typedef long double Double;
+const Double EPS = 1e-8; // 0 ~~ [-EPS, EPS]
+// const LL EPS = 0;
+const Double INF = 1e12;
+const Double PI = acos((Double)-1);
+
+typedef complex<Double> Point;
+const Point I(0, 1);
+
+// abs(P a) ::= sqrt(a.x^2 + a.y^2);
+// norm(P a) ::= a.x^2 + a.y^2;
+// Point polar(rho, theta=0)
+
+int sign(Double x) {
+    if (x < -EPS) return -1;
+    if (EPS < x) return 1;
+    return 0;
+}
+
+namespace std {
+    bool operator<(const Point &x, const Point &y) {
+	return real(x) != real(y)? real(x) < real(y): imag(x) < imag(y);
+    }
+}
+
+Double cross(const Point &x, const Point &y) {
+    return imag(conj(x)*y);
+}
+Double dot(const Point &x, const Point &y) {
+    return real(conj(x)*y);
+}
+Point normal(const Point &a) { return a / abs(a); }
+
+
+typedef vector<Point> Polygon;
+Double area2(const vector<Point> &g) {
+    Double r = 0;
+    for (int i=0; i<(int)g.size(); i++)
+	r += cross(g[i], g[(i+1)%g.size()]);
+    return r;
+}
+
+int ccw(Point a, Point b, Point c) {
+    b-=a; c-=a;
+    if (cross(b, c) > EPS) return 1; // counter clockwise
+    if (cross(b, c) < -EPS) return -1; // clockwise
+    if (dot(b, c) < -EPS) return 2; // c--a--b on line
+    if (norm(b) < norm(c)) return -2; // a--b--c on line
+    return 0;
+}
+
+Polygon A, B, Q;
+Double angle_a[3], angle_b[3], angle_q[4];
+Double len_a[3], len_b[3], len_q[4];
+
+Polygon get_poly(int n) {
+    Polygon a(n);
+    REP (i, n) {
+	int x, y;
+	scanf("%d%d", &x, &y);
+	a[i] = Point(x, y);
+    }
+    if (sign(area2(a)) < 0) {
+	reverse(a.begin(), a.end());
+    }
+    return a;
+}
+
+
+bool sep(int I) {
+    int r = (I+1)%4;
+    int d = (I+2)%4;
+    int l = (I+3)%4;
+    return ccw(Q[I], Q[r], Q[d]) == 1 && ccw(Q[I], Q[d], Q[l]) == 1;
+}
+
+bool fit(int I, Polygon a) {
+    Double G[3], H[3];
+    int ida[] = { 0, 1, 2, 0 };
+    int idx[] = { I, (I+1)%4, (I+2)%4 , I};
+    REP (i, 3) {
+	G[i] = abs(a[ida[i]] - a[ida[i+1]]);
+	H[i] = abs(Q[idx[i]] - Q[idx[i+1]]);
+    }
+
+    sort(G, G+3);
+    sort(H, H+3);
+
+    REP (i, 3) if (sign(G[i] - H[i]) != 0) return false;
+    return true;
+}
+
+double angle(Point a, Point b, Point c) { // angle b
+    Double A = abs(a-b);
+    Double B = abs(c-b);
+    Double C = abs(a-c);
+    return acos( (A*A + B*B - C*C) / (2 * A * B));
+}
+
+bool touch() {
+    REP (i, 3) {
+	angle_a[i] = angle(A[(i+2)%3], A[i], A[(i+1)%3]);
+	angle_b[i] = angle(B[(i+2)%3], B[i], B[(i+1)%3]);
+	len_a[i] = abs(A[i] - A[(i+1)%3]);
+	len_b[i] = abs(B[i] - B[(i+1)%3]);
+    }
+
+    REP (i, 3) REP (j, 3) {
+	if (sign(angle_a[i] + angle_b[j] - PI) == 0) {
+	    Double len[4], ang[4];
+
+	    int s = sign(len_a[(i+2)%3] - len_b[j]);
+	    if (s > 0) {
+		ang[0] = angle_b[(j+2)%3];
+		len[0] = len_b[(j+2)%3] + len_a[i];
+
+		ang[1] = angle_a[(i+1)%3];
+		len[1] = len_a[(i+1)%3];
+
+		ang[2] = angle_a[(i+2)%3];
+		len[2] = len_a[(i+2)%3] - len_b[j];
+
+		ang[3] = angle_b[(j+1)%3] + PI;
+		len[3] = len_b[(j+1)%3];
+
+	    } else if (s < 0) {
+		ang[0] = angle_b[(j+2)%3];
+		len[0] = len_b[(j+2)%3] + len_a[i];
+
+		ang[1] = angle_a[(i+1)%3];
+		len[1] = len_a[(i+1)%3];
+
+		ang[2] = angle_a[(i+2)%3] + PI;
+		len[2] = len_b[j] - len_a[(i+2)%3];
+
+		ang[3] = angle_b[(j+1)%3];
+		len[3] = len_b[(j+1)%3];
+
+	    } else {
+		len[0] = len_a[i] + len_b[(j+2)%3];
+		len[1] = len_a[(i+1)%3];
+		len[2] = len_b[(j+1)%3];
+
+		int s = -1;
+		REP (t, 4) if (sign(angle_q[t] - PI) == 0) s = t;
+
+		if (s != -1) {
+		    Double len_p[3] = { len_q[s] + len_q[(s+3)%4], len_q[(s+1)%4], len_q[(s+2)%4] };
+		    sort(len, len+3);
+		    sort(len_p, len_p+3);
+		    bool ok = true;
+		    REP (t, 3) if (sign(len[t] - len_p[t]) != 0) ok = false;
+		    if (ok) return true;
+		}
+	    }
+
+	    if (s != 0) {
+//		REP (t, 4) eprintf("%Lf ", len[t]);
+//		REP (t, 4) eprintf("%Lf ", ang[t]);
+//		eprintf(" ##\n");
+		REP (r, 2) {
+		    REP (t, 4) {
+			bool ok = true;
+			REP (k, 4) {
+			    if (sign(ang[k] - angle_q[(t+k)%4]) != 0 && sign(ang[k] - (2*PI - angle_q[(t+k)%4]))) ok = false;
+			    if (sign(len[k] - len_q[(t+k)%4]) != 0) ok = false;
+			}
+			if (ok) return true;
+		    }
+		    reverse(ang+1, ang+4);
+		    swap(len[0], len[3]); swap(len[1], len[2]);
+		}
+	    }
+	}
+    }
+    return false;
+}
+
+void MAIN() {
+    A = get_poly(3);
+    B = get_poly(3);
+    Q = get_poly(4);
+
+    REP (i, 4) {
+	angle_q[i] = angle(Q[(i+3)%4], Q[i], Q[(i+1)%4]);
+	len_q[i] = abs(Q[i] - Q[(i+1)%4]);
+
+//	eprintf("%Lf ", len_q[i]);
+    }
+//    REP (i, 4) eprintf("%Lf ", angle_q[i]);
+//    eprintf("\n");
+
+    bool yes = false;
+    REP (i, 4) {
+	if (sep(i) && fit(i, A) && fit((i+2)%4, B)) {
+	    yes = true;
+	    break;
+	}
+    }
+
+
+    REP (swap_ab, 2) {
+	REP (flip_a, 2) {
+	    REP (flip_b, 2) {
+
+		if (touch()) {
+		    yes = true;
+		    goto END;
+		}
+
+		REP (i, 3) B[i].real() = -B[i].real();
+		reverse(B.begin(), B.end());
+	    }
+	    REP (i, 3) A[i].real() = -A[i].real();
+	    reverse(A.begin(), A.end());
+	}
+	swap(A, B);
+    }
+
+END:;
+
+    puts(yes? "Yes": "No");
+}
+
+
+int main() {
+    int T;
+    scanf("%d", &T);
+    REP (i, T) MAIN();
+
+
+    return 0;
+}

@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-9;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, mini, maxi;
+
+void solve() {
+	cin >> n;
+	int query;
+	cin >> query;
+	mini = inf, maxi = -1;
+	for (int i = 1, x; i <= n; i++) {
+		cin >> x;
+		mini = min(mini, x);
+		maxi = max(maxi, x);
+	}
+	for (int i = 1, x; i <= query; i++) {
+		cin >> x;
+		if (x >= mini && x <= maxi)
+			cout << "Yes\n";
+		else
+			cout << "No\n";
+	}
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+	ios_base :: sync_with_stdio(NULL), cin.tie(NULL);
+	solve();
+	return 0;
+}

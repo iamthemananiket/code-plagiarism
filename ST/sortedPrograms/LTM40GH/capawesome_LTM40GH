@@ -1,0 +1,97 @@
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<cmath>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+const int MAX_N=100005;
+
+int n;
+int arr[MAX_N];
+int xr[MAX_N];
+int ans[MAX_N];
+int lvl[MAX_N];
+vector <int> v[MAX_N];
+
+void level (int x, int par, int clvl)
+{
+    int i, sz = v[x].size ();
+    lvl[x] = clvl;
+    for (i = 0; i < sz; i ++)
+    {
+        if (v[x][i] == par)
+            continue;
+        level (v[x][i], x, clvl + 1);
+    }
+}
+
+int st;
+
+void dfs (int x, int cxor, int par, int clca)
+{
+    int i, sz = v[x].size ();
+    cxor ^= arr[x];
+    if (lvl[clca] > lvl[x])
+        clca = x;
+    ///printf ("%d %d %d %d\n", st, x, clca, cxor);
+    ans[clca] = max (ans[clca], cxor);
+    for (i = 0; i < sz; i ++)
+    {
+        if (v[x][i] == par)
+            continue;
+        dfs (v[x][i], cxor, x, clca);
+    }
+}
+
+void rans (int x, int par)
+{
+    int i, sz = v[x].size (), bans = 0;
+    for (i = 0; i < sz; i ++)
+    {
+        if (v[x][i] == par)
+            continue;
+        rans (v[x][i], x);
+        bans = max (bans, ans[v[x][i]]);
+    }
+    ans[x] = max (ans[x], bans);
+}
+
+int main ()
+{
+    int t;
+    scanf ("%d", &t);
+    while (t --)
+    {
+        int i, p, q;
+        scanf ("%d", &n);
+        for (i = 1; i <= n; i ++)
+            scanf ("%d", &arr[i]);
+        for (i = 0; i < n - 1; i ++)
+        {
+                scanf ("%d%d", &p, &q);
+                v[p].push_back (q);
+                v[q].push_back (p);
+        }
+        level (1, -1, 0);
+        for (i = 1; i <= n; i ++)
+        {
+            st = i;
+            dfs (i, 0, -1, i);
+        }
+
+        rans (1, -1);
+
+        for (i = 1; i <= n; i ++)
+            printf ("%d\n", ans[i]);
+
+        for (i = 1; i <= n; i ++)
+        {
+            v[i].clear ();
+            ans[i] = 0;
+            lvl[i] = 0;
+        }
+    }
+    return 0;
+}

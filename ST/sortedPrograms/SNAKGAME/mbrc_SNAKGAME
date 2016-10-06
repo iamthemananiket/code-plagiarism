@@ -1,0 +1,182 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 700;
+const int inf = 1e9;
+const int iters = 100;
+int n,m;
+
+bool A[maxn][maxn];
+
+int X[maxn];
+int Y[maxn];
+
+int a,b;
+
+int dist(int x,int y) {
+
+	if (x > n || x < 1 || y > m || y < 1) return -inf;
+
+	int d = inf;
+
+	rep(i,1,n) {
+		rep(j,1,m) {
+			if (!A[i][j]) {
+				d = min(d, abs(x-i) + abs(y-j));
+			}
+		}
+	}
+
+	return d;
+}
+
+void selectnew() {
+	rep(i,1,n) {
+		X[i] = i;
+	}
+	rep(j,1,m) {
+		Y[j] = j;
+	}
+
+	rep(i,1,iters) {
+		int x = rand()%n + 1, y = rand()%n + 1;
+		int tmp = X[x]; X[x] = X[y]; X[y] = tmp;
+	}
+
+	rep(i,1,iters) {
+		int x = rand()%m + 1, y = rand()%m + 1;
+		int tmp = Y[x]; Y[x] = Y[y]; Y[y] = tmp;
+	}
+
+	rep(i,1,n) {
+		rep(j,1,m) {
+			if (A[X[i]][Y[j]]) {
+				cout<<"NEW "<<X[i]<<" "<<Y[j]<<endl;
+				a = X[i]; b = Y[j];
+				A[a][b] = false;
+				return;
+			}
+		}
+	}
+}
+
+bool move() {
+
+	//cout<<"Yesh"<<endl;
+
+	bool ok = false;
+
+	rep(i,1,n) {
+		rep(j,1,m) {
+			if (A[i][j]) { ok = true; break; }
+		}
+	}
+
+	if (!ok) return false;
+
+	if (a < 0) {
+		selectnew();
+		return true;
+	}
+
+
+	//cout<<"Take"<<endl;
+
+	int ap = -1, bp = -1;
+
+	rep(i,-1,1) {
+		rep(j,-1,1) {
+			if (abs(i+j) == 1) {
+				if (ap < 0 || dist(a+i,b+j) > dist(ap,bp)) {
+					ap = a+i; bp = b+j;
+				}
+			}
+		}
+	}
+
+	//cout<<ap<<" : "<<bp<<" : "<<dist(ap,bp)<<endl;
+
+	if (dist(ap,bp) <= 0) {
+		selectnew(); return 0;
+	}
+
+	//cout<<"Here"<<endl;
+
+	cout<<"MOVE "<<a<<" "<<b<<" "<<ap<<" "<<bp<<endl;
+
+	a = ap; b = bp; A[a][b] = false;
+
+	return true;
+}
+
+int main() {
+
+	srand(time(NULL));
+
+	ios::sync_with_stdio(false); cin.tie(0);
+
+	int B;
+
+	cin>>n>>m>>B;
+
+	repe(i,0,maxn) {
+		rep(j,0,maxn) {
+			A[i][j] = true;
+		}
+	}
+
+	rep(i,1,B) {
+		int x,y; cin>>x>>y;
+		A[x][y] = false;
+	}
+
+	a = -1; b = -1;
+
+
+	while (true) {
+
+		bool ok = move();
+		if (!ok) {
+			cout<<"EXIT"<<endl;
+			return 0;
+		}
+
+		string cmd;
+
+		cin>>cmd;
+
+		if (cmd == "EXIT") {
+			return 0;
+		} else if (cmd == "FREEZE") {
+			continue;
+		} else if (cmd == "NEW") {
+			int x,y; cin>>x>>y;
+			A[x][y] = false;
+		} else if (cmd == "MOVE") {
+			int x,y; cin>>x>>y;
+			cin>>x>>y;
+			A[x][y] = false;
+		}
+	}
+
+
+}

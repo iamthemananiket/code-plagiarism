@@ -1,0 +1,166 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+using namespace std;
+const int N=100000;
+
+vector<string> dict;
+int D,n,m;
+
+vi adj[N+5];
+bool vis[N];
+int pathlen,pathst;
+int path[N+5];
+int mult[N+5];
+char stat[N+5];
+
+int dfs(int pos)
+{
+  if(vis[pos] || stat[pos]!='.')return 0;
+  vis[pos]=true;
+  int maxv=0,maxc=-1;
+  for(auto i:adj[pos])
+  {
+    if(vis[i])continue;
+    int val=dfs(i);
+    if(maxv < (val+1))
+    {
+      maxv=val+1;
+      maxc=i;
+    }
+  }
+
+  path[pos]=maxc;
+  if(maxv > (pathlen))
+  {
+    pathlen=maxv;
+    pathst=pos;
+  }
+}
+
+int main()
+{
+  finp;
+  cin>>D;
+  dict.resize(D+1);
+  afor(i,1,D)cin>>dict[i];
+
+  cin>>n>>m;
+  afor(i,1,n)cin>>mult[i];
+  afor(i,1,n)cin>>stat[i];
+
+  afor(i,1,m)
+  {
+    int x,y;
+    cin>>x>>y;
+    adj[x].pb(y);
+    adj[y].pb(x);
+  }
+
+  string s;
+  int moves=0;
+  while(1)
+  {
+    moves++;
+    cin>>s;
+    pathlen=0;
+
+    afor(i,1,n)vis[i]=false;
+
+    afor(i,1,n)if(!vis[i])dfs(i);
+
+    if(!pathlen || !s.size())
+    {
+      cout<<"-1";
+      return 0;
+    }
+
+    int dashct=0;
+    int ct[26]={0};
+
+    for(auto i:s)
+    {
+      if(i==95)dashct++;
+      else ct[i-'A']++;
+    }
+    bool found=false;
+    afor(i,1,D)
+    {
+      int tempct[26]={0};
+      for(auto j:dict[i])
+      {
+        tempct[j-'A']++;
+      }
+      int ex=0;
+
+      afor(j,0,25)
+      {
+        if(tempct[j]>ct[j])
+        {
+          ex+=tempct[j]-ct[j];
+        }
+      }
+
+      if(ex>dashct)continue;
+
+      if(dict[i].length()>pathlen)continue;
+
+      found=true;
+      cout<<dict[i].length()<<"\n";
+      int stt=pathst;
+      afor(j,1,dict[i].length())
+      {
+        cout<<stt<<" ";
+        if(tempct[dict[i][j-1]-'A']>ct[dict[i][j-1]-'A'])
+        {
+          stat[stt]='_';
+          cout<<"_\n";
+        }
+        else 
+          {
+            stat[stt]=dict[i][j-1];
+            cout<<(dict[i][j-1])<<"\n";
+          }
+
+        stt=path[stt];
+      }
+      cout<<dict[i].length()<<"\n";
+      stt=pathst;
+      afor(j,1,dict[i].length())
+      {
+        cout<<stt<<" ";
+        stt=path[stt];
+      }
+      cout<<"\n";
+      cout<<dict[i]<<"\n";
+
+      break;
+    
+    }
+
+    if(!found || moves>=1000)
+    {
+      cout<<"-1";
+      return 0;
+    }
+    //return 0;
+    fflush(stdout);
+  }
+
+
+return 0;
+}

@@ -1,0 +1,127 @@
+// LTIME B
+#include <bits/stdc++.h>
+#define int long long
+#define rf freopen("inp.in","r",stdin)
+#define F first
+#define S second
+using namespace std;
+
+const int MAX = 500050;
+
+int N, M , Q , ans = 0;
+int P[MAX] , A[MAX] , B[MAX] , POP[MAX];
+pair < int , int > E[MAX];
+pair < int , pair < int , int > > L[MAX]; 
+multiset < int > FFS;
+stack < int > MOFO[MAX];
+int ANS[MAX];
+
+int root(int x){
+	
+	if( P[x] == x ) return x;
+	return P[x] = root(P[x]);
+
+}
+
+void join( int u , int v ){
+	
+	u = root(u);
+	v = root(v);
+	if( u == v ) return;
+	
+	FFS.erase(FFS.find(POP[u]));
+	FFS.erase(FFS.find(POP[v]));
+	FFS.insert(POP[u] + POP[v]);
+	
+	P[v] = u;
+	POP[u] += POP[v];
+}
+
+#undef int
+
+int main(){
+
+#define int long long
+	
+	cin.tie(0) , ios::sync_with_stdio(false);
+	cin >> N >> M >> Q;
+	
+	for(int i = 1 ; i <= N ; i++){
+		cin >> A[i];
+		POP[i] = A[i];
+		MOFO[i].push(A[i]);
+	}
+
+	for(int i = 1 ; i <= M ; i++){
+		cin >> E[i].F >> E[i].S;
+	}
+	
+	for(int i = 1 ; i <= Q ; i++){
+		
+		char x; 
+		cin >> x;
+		int a , b;
+		
+		if( x == 'P'){
+			cin >> a >> b;
+			L[i].F = 0;
+			POP[a] = A[a] = b;
+			L[i].S.F = a , L[i].S.S = b;
+			MOFO[a].push(b);
+		}
+		
+		else{
+			cin >> a;
+			L[i].F = 1;
+			L[i].S.F = a;
+			B[a] = 1;
+		}
+
+	}
+
+	for(int i = 1 ; i <= N ; i++){
+		P[i] = i;
+		FFS.insert(POP[i]);
+	}
+
+	for(int i = 1 ; i <= M ; i++){
+		if( B[i] ) continue;
+		join(E[i].F , E[i].S);
+	}
+
+	ANS[Q] = *(FFS.rbegin());
+
+	for(int i = Q ; i >= 2 ; i--){
+		
+		if(L[i].F == 0){ // Query to change population
+			
+			int node   = L[i].S.F;
+			MOFO[node].pop();
+			int newpop = MOFO[node].top();
+
+			FFS.erase( FFS.find( POP[root(node)] ) );
+			
+			POP[root(node)] += ( newpop - A[node] );
+			
+			FFS.insert( POP[root(node)] );
+
+			A[node] = newpop ;
+			ANS[i - 1] = *(FFS.rbegin());
+		}
+
+		else{
+
+			int num = L[i].S.F;
+			join(E[num].F , E[num].S);
+			ANS[i - 1] = *(FFS.rbegin());
+
+		}
+
+	}
+
+	for(int i = 1 ; i <= Q ; i++)
+	{
+		cout << ANS[i] << endl;
+	}
+
+}

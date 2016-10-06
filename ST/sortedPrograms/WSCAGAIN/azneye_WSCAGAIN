@@ -1,0 +1,80 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+
+void solve(int test_num) {
+  bool g[15][15];
+  int dist[2][1 << 15];
+  bool can[1 << 15];
+  int V, E, K;
+  cin >> V >> E >> K;
+  memset(g, false, sizeof(g));
+  for (int e = 0, a, b; e < E; e++) {
+    cin >> a >> b;
+    --a, --b;
+    g[a][b] = g[b][a] = true;
+  }
+  for (int mask = 0; mask < (1 << V); mask++) {
+    can[mask] = true;
+    for (int a = 0; a < V; a++)
+      for (int b = a + 1; b < V; b++)
+        if ((mask >> a & 1) && (mask >> b & 1) && g[a][b])
+          can[mask] = false;
+  }
+  const int all = (1 << V) - 1;
+  queue<pair<int, int> > que;
+  memset(dist, 0x3F, sizeof(dist));
+  que.push(make_pair(0, all));
+  dist[0][all] = 0;
+  for (; !que.empty(); que.pop()) {
+    const int at = que.front().first, mask = que.front().second;
+    for (int move = mask;; move = (move - 1) & mask) {
+      if (can[mask ^ move] && __builtin_popcount(move) <= K) {
+        const int other = move | (all ^ mask);
+        if (dist[at][mask] + 1 < dist[at ^ 1][other]) {
+          dist[at ^ 1][other] = dist[at][mask] + 1;
+          que.push(make_pair(at ^ 1, other));
+        }
+      }
+      if (move == 0)
+        break;
+    }
+  }
+  cout << dist[1][all] << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}
+

@@ -1,0 +1,50 @@
+#include<cstdio>
+#include<algorithm>
+#include<random>
+#include<cstdlib>
+#define CONS 1
+using namespace std;
+int down,side,required,i;
+int num_cal()
+{
+   return (down-i)*side+i*side*(side+1)*(i+1)/CONS;
+}
+int distinct_submatrices()
+{
+   for(i=0;i<down;i++)
+   {
+      int current=num_cal();
+      if(current>=required)
+         return i;
+   }
+}
+int generate()
+{
+   return rand();
+}
+int main()
+{
+   int test;
+   scanf("%d",&test);
+   random_device dev;
+   mt19937 cur(dev());
+   uniform_int_distribution<>ds(0,100000000);
+   while(test--)
+   {
+      scanf("%d%d%d",&down,&side,&required);
+      char str[100]="GCAT";
+      for(int i=0;i<distinct_submatrices()-1;i++)
+      {
+         for(int j=0;j<side;j++)
+            printf("%c",str[generate()%4]);
+         printf("\n");
+      }
+      for(int i=max(0,distinct_submatrices()-1);i<down;i++)
+      {
+         for(int j=0;j<side;j++)
+            printf("T");
+         printf("\n");
+      }
+   }
+   return 0;
+}

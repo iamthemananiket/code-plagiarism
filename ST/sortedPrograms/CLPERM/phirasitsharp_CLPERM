@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <algorithm>
+
+#define N 100010
+
+using namespace std;
+
+int arr[N];
+int n, k;
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d", &n, &k);
+		for(int i = 0;i < k;i++) {
+			scanf("%d", &arr[i]);
+		}
+		sort(arr, arr+k);
+		long long s = 0, ans = -1;
+		for(int i = 0;i < k;i++) {
+			long long v = arr[i];
+			long long ls = (v) * (v-1)/2 - s;
+			if(arr[i] > ls) {
+				ans = arr[i];
+				break;
+			}
+			s += arr[i];
+		}
+		if(ans == -1) {
+			long long t = n;
+			ans = t * (t+1)/2 - s + 1;
+		}
+		printf("%s\n", ans%2 ? "Chef" : "Mom");
+	}
+	return 0;
+}

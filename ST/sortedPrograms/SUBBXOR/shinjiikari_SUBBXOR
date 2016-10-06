@@ -1,0 +1,188 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 100010
+#define MAX 21
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline int input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int unused=1;
+
+struct node
+{
+	int l,r,cnt;
+} Trie[MAX*N];
+
+inline void insert(int val)
+{
+	int a=0;
+	for(int i=MAX;i>=0;i--)
+	{
+		if (!((1<<i)&val))
+		{
+			if (Trie[a].l!=-1) Trie[Trie[a].l].cnt++;
+			else
+			{
+				Trie[a].l=unused;
+				Trie[unused].l=-1;
+				Trie[unused].r=-1;
+				Trie[unused].cnt=1;
+				unused++;
+			}
+			a=Trie[a].l;
+		}
+		else
+		{
+			if (Trie[a].r!=-1) Trie[Trie[a].r].cnt++;
+			else
+			{
+				Trie[a].r=unused;
+				Trie[unused].l=-1;
+				Trie[unused].r=-1;
+				Trie[unused].cnt=1;
+				unused++;
+			}
+			a=Trie[a].r;
+		}
+	}
+}
+
+inline int query(int vertex, int num, int level)
+{
+	int ans=0;
+	if (level>MAX) return ans;
+	if ((Trie[vertex].l!=-1&&((1<<(MAX-level))&num))||Trie[vertex].r==-1)
+	{
+		if ((1<<(MAX-level))&num) ans=ans^(1<<(MAX-level));
+		return ans^query(Trie[vertex].l,num,level+1);
+	}
+	else
+	{
+		if (!((1<<(MAX-level))&num)) ans=ans^(1<<(MAX-level));
+		return ans^query(Trie[vertex].r,num,level+1);
+	}
+}
+
+inline void init()
+{
+	Trie[0].l=-1;
+	Trie[0].r=-1;
+	Trie[0].cnt=0;
+}
+
+inline ll lessq(int k, int val)
+{
+	int a=0;
+	ll ans=0;
+	for(int i=MAX;i>=0;i--)
+	{
+		if ((1<<i)&k)
+		{
+			if ((1<<i)&val)
+			{
+				if (Trie[a].r!=-1) ans+=Trie[Trie[a].r].cnt;
+				if (Trie[a].l==-1) {a=-1; break;}
+				else a=Trie[a].l;
+			}
+			else
+			{
+				if (Trie[a].l!=-1) ans+=Trie[Trie[a].l].cnt;
+				if (Trie[a].r==-1) {a=-1; break;}
+				else a=Trie[a].r;
+			}
+		}
+		else
+		{
+			if ((1<<i)&val)
+			{
+				if (Trie[a].r==-1) {a=-1; break;}
+				else a=Trie[a].r;
+			}
+			else
+			{
+				if (Trie[a].l==-1) {a=-1; break;}
+				else a=Trie[a].l;
+			}
+		}
+	}
+	return ans;
+}
+
+int main()
+{
+	int t,n,a[N],x,k;
+	ll ans=0;
+	t=input();
+	while(t--)
+	{
+		ans=0;
+		unused=1;
+		init();
+		n=input();
+		k=input();
+		REP(i,n) a[i]=input();
+		insert(0);
+		x=0;
+		REP(i,n)
+		{
+			x=x^a[i];
+			ans+=lessq(k,x);
+			insert(x);
+		}
+		output(ans);
+	}
+return 0;
+}

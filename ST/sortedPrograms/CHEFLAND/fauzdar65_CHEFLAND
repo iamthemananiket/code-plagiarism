@@ -1,0 +1,333 @@
+#include <bits/stdc++.h>
+//#include <sys/resource.h>
+#include<ext/pb_ds/assoc_container.hpp>
+#include<ext/pb_ds/tree_policy.hpp>
+// #include <boost/multiprecision/cpp_int.hpp> 
+ 
+#define gc getchar//_unlocked
+#define pc putchar//_unlocked
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vpp vector<pp>
+#define vll vector<ll>
+ 
+using namespace std;
+using namespace __gnu_pbds;
+ 
+char putnb[20];
+void putn(ll n) {if(!n)pc('0');if(n<0)pc('-'),n=0-n;int pi=0;while(n)putnb[pi++]=(n%10)+'0',n/=10;while(pi)pc(putnb[--pi]);}
+void sci(int *x) {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+void scll(ll *x)  {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x =  (ll)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+ll fp(ll a,ll b,ll c) {if(b==0)return 1%c; if(b==1)return a%c; ll ret=fp(a,b/2,c); ret=(ret*ret)%c; if(b&1)ret=(ret*a)%c; return ret;}
+ 
+const ll mod=1e9 +7;
+const ll mod2=1999999973;
+const ll inf=1e18;
+const int infs=1e9 + 1000;
+const int N=200000;
+const long double PI = acos(-1);
+ 
+template <typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+ 
+ 
+//Block-Cut tree 
+ 
+ 
+int n,m;
+stack<pp> bc;
+ 
+
+bool vis[N+5];
+bool isart[N+5]; // is articulation point
+vi adj[N+5]; 
+int low[N+5];
+int disc[N+5];
+int parent[N+5];
+ 
+int cnt=0;
+ 
+int tot;
+ 
+
+ 
+int bno = 199999;
+set<int> blovertices[5*N + 5]; // vertices in each block
+vi adjblock[5*N + 5];
+
+int startb = 200000;
+ 
+void bcfound(pp edd)
+{
+  ++bno;
+  blovertices[bno].clear();
+  pp edg;
+ 
+  do
+  {
+    edg = bc.top();
+    blovertices[bno].insert(edg.first);
+    blovertices[bno].insert(edg.second);
+    
+    bc.pop();
+  }while(edg!=edd && edg!=make_pair(edd.second,edd.first));
+}
+ 
+ 
+void dfs(int u)
+{
+  vis[u]=true;
+  disc[u]=low[u]=++cnt;
+  int numchild=0;
+ 
+  for(auto v:adj[u])
+  {
+    if(!vis[v])
+    {
+      numchild++;
+      bc.push({u,v});
+      parent[v] = u;
+      dfs(v);
+  
+      low[u] = min(low[u],low[v]);
+ 
+      if(!parent[u] && numchild > 1)
+      {
+        isart[u]=true;
+      }
+ 
+      if(low[v] >= disc[u])
+      {
+      if(parent[u])isart[u]=true;
+ 
+       bcfound({u,v});
+      }
+    }
+    else if(parent[u] != v)
+    {
+        if(disc[v] < disc[u])bc.push({u,v});
+        low[u] = min(low[u],disc[v]);
+    }
+  }
+}
+ 
+
+ 
+void processblocks()
+{
+  
+  afor(i,startb,bno)
+  {
+    //cout<<i<<" ";
+    adjblock[i].clear();
+    set<int> vis3;
+    set<int> temp;
+    for(auto j:blovertices[i])
+    {
+      if(isart[j])
+      {
+        if(vis3.find(j)==vis3.end())
+          {
+            vis3.insert(j);
+            adjblock[i].pb(j);
+            adjblock[j].pb(i);
+          }
+          temp.insert(j);
+      }
+      else 
+      {
+        //temp.pb(j);
+        for(auto k:adj[j])
+        {
+        if(isart[k] && vis3.find(k)==vis3.end())
+          {
+            vis3.insert(k);
+            adjblock[i].pb(k);
+            adjblock[k].pb(i);
+          }
+        }
+      }
+    }
+   // blovertices[i]=temp;
+   for(auto z:temp)blovertices[i].erase(z);
+
+  // assert(blovertices[i].size() >= 1);
+  }
+}
+ 
+bool dp1[500005]; //can do
+bool dp2[500005]; //can do in straight line
+bool isbad[500005];
+bool dpbad[500005];
+void solve(int pos,int par)
+{
+
+  bool f1= true;
+  bool f2= true;
+  dpbad[pos] = false;
+
+  for(auto i:adjblock[pos])
+  {
+    if(i == par)continue;
+    solve(i,pos);
+     
+    bool curbad = false;
+    if(isbad[pos] || isbad[i])curbad = true;
+    
+    if(!f1 && !f2){}
+    else if(!f2)
+    {
+      if(curbad || dpbad[i])
+      {
+        f1 = false;
+      }
+    }
+    else
+    {
+      if(!dpbad[pos])
+      {
+        if(!dp1[i] && !dp2[i])f1=f2=false;
+        else if(dp1[i] && !dp2[i])
+        {
+          if(curbad){ f1=f2=false; }
+          else { f1=true; f2=false; }
+        }
+        else if(dp1[i] && dp2[i])
+        {
+          f1=f2=true;
+        }
+      }
+      else
+      {
+        if(!dp1[i] && !dp2[i])f1=f2=false;
+        else if(dp1[i] && !dp2[i])
+        {
+          f1=f2=false;
+        }
+        else if(dp1[i] && dp2[i])
+        {
+          if(curbad || dpbad[i])f2=false;
+        }
+      }
+    }
+
+    if(dpbad[i] || curbad)dpbad[pos]=true;
+  
+  }
+
+  dp1[pos] = f1;
+  dp2[pos] = f2;
+  
+}
+
+
+ map<int,int> adj2[N+5];
+int main()
+{
+  
+  finp;
+  cin>>n>>m;
+
+  afor(i,1,m)
+  {
+    int u,v;
+    cin>>u>>v;
+    adj2[u][v]++;
+    adj2[v][u]++;
+    adj[u].pb(v);
+    adj[v].pb(u);
+  }
+
+  if(n == 1)
+  {
+    cout<<"YES";
+    return 0;
+  }
+  if(n == 2)
+  {
+    if(m>=1)cout<<"YES";
+    else cout<<"NO";
+    return 0;
+  }
+
+  dfs(1);
+  processblocks();
+ 
+  afor(i,1,n)
+  {
+    if(!vis[i])
+    {
+      cout<<"NO";
+      return 0;
+    }
+  }
+  
+  int tot=0;
+  int artv;
+  afor(i,1,n)
+  {
+    if(isart[i])tot++,artv=i;
+  }
+
+ 
+
+  if(tot == 0)
+  {
+    cout<<"YES";
+    return 0;
+  }
+ 
+  afor(i,1,n)
+  {
+    if(!isart[i])continue;
+    for(auto j:adjblock[i])
+    {
+      int u;
+
+      if(blovertices[j].size()==1)
+        {
+         
+          u = *blovertices[j].begin();
+
+          if(adj2[i][u]<=1)
+            {
+              isbad[j]=true;
+            }
+        }
+    }
+  }
+
+
+  afor(i,startb,bno)
+  {
+    if(blovertices[i].size() == 0)
+    {
+      assert(adjblock[i].size() >= 2);
+
+      if(adjblock[i].size() == 2)
+      {
+        int u1= adjblock[i][0];
+        int u2= adjblock[i][1];
+
+        if(adj2[u1][u2]<=1)
+          {
+           isbad[i]=true;
+          }
+      }
+    }
+  }
+
+  solve(artv,-1);
+
+  if(dp1[artv])cout<<"YES";
+  else cout<<"NO";
+return 0;
+} 

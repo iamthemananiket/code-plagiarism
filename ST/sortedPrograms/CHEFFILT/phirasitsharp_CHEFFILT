@@ -1,0 +1,56 @@
+#include <stdio.h>
+
+const long long mod = 1000000007ll;
+const int N = 10;
+const int T = 100010;
+
+long long pw[T];
+int cnt[1 << N];
+long long dp[1 << N], tmp[1 << N];
+
+void evaluate(void) {
+  char str[N+2];
+  int n, fs = 0;
+  scanf("%s%d", str, &n);
+  for(int i = 0;i < N;i++) {
+    fs |= ((str[i] == 'w') << i);
+  }
+  for(int i = 0;i < (1 << N);i++) {
+    cnt[i] = dp[i] = 0ll;
+  }
+  dp[fs] = 1ll;
+  for(int i = 0;i < n;i++) {
+    scanf("%s", str);
+    int val = 0;
+    for(int i = 0;i < N;i++) {
+      val |= ((str[i] == '+') << i);
+    }
+    cnt[val]++;
+  }
+  for(int i = 0;i < (1 << N);i++) {
+    int val = cnt[i];
+    if(val == 0) continue;
+    for(int j = 0;j < (1 << N);j++) {
+      tmp[j] = (pw[val-1] * dp[j]) % mod;
+    }
+    for(int j = 0;j < (1 << N);j++) {
+      tmp[j ^ i] = (tmp[j ^ i] + pw[val-1]  * dp[j]) % mod;
+    }
+    for(int j = 0;j < (1 << N);j++) {
+      dp[j] = tmp[j];
+    }
+  }
+  printf("%lld\n", dp[0]);
+}
+int main() {
+  pw[0] = 1ll;
+  for(int i = 1;i < T;i++) {
+    pw[i] = (pw[i-1] * 2ll) % mod;
+  }
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    evaluate();
+  }
+  return 0;
+}

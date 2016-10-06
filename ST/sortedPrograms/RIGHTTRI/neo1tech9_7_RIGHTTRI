@@ -1,0 +1,87 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, d, b, p, x;
+const int N = 1e3 + 5;
+const int LN = 19;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+int f[N];
+vector < long double> ss;
+int main() {
+    csl;
+    cin >> t;
+    while (t--) {
+        long double h, s;
+        cin >> h >> s;
+        ss.clear();
+        ss.push_back(h);
+        s *= 2.0;
+        h *= h;
+        if (s > h) {
+            cout << -1 << '\n';
+            continue;
+        }
+        h = s / h;
+        h *= 2;
+        if (h > 1) {
+            cout << -1 << '\n';
+            continue;
+        }
+        long double u = asin(h);
+        u /= 2.0;
+        //cout << u << '\n';
+        ss.push_back(cos(u) * ss.back());
+        ss.push_back(sin(u) * ss[0]);
+        sort(ss.begin(), ss.end());
+        for (int i = 0; i < 3; ++i)
+            cout << fixed << setprecision(6) << ss[i] << ' ';
+        cout << '\n';
+    }
+    return 0;
+}
+
+

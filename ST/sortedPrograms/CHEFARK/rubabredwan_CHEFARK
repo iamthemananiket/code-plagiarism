@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n) for(ll i=0;i<n;i++)
+#define REPN(i, n)  for(ll i=1;i<=n;i++)
+#define SET(i, n) memset(i, n, sizeof(i))
+#define ALL(i)    i.begin(), i.end()
+
+#define MAX     100050
+
+using namespace std;
+
+typedef long long ll;
+
+const ll MOD = 1e9 + 7;
+
+int A[MAX], n, k;
+ll F[MAX], B[MAX];
+
+ll bigmod(int n, int r){
+  if(r == 0) return 1;
+  if(r % 2 == 0){
+    ll ret = bigmod(n, r/2);
+    return (ret * ret) % MOD;
+  }
+  return (n * bigmod(n, r-1)) % MOD;
+}
+
+ll nCr(int n, int r){
+  ll r1 = F[n];
+  ll r2 = B[n-r] * B[r];
+  r2 %= MOD;
+  return (r1 * r2) % MOD;
+}
+
+bool OK(int take){
+  int r1 = take % 2;
+  int r2 = k % 2;
+  return r1 == r2;
+}
+
+ll solve(int cnt, int take){
+  ll ret = nCr(n, take);
+  if(cnt){
+  	if(take <= k) return ret;
+  	else return 0;
+  }
+  if(OK(take)) return ret;
+  else return 0;
+}
+
+void init(){
+  F[0] = 1;
+  B[0] = bigmod(1, MOD-2);
+  for(ll i=1;i<MAX;i++){
+    F[i] = F[i-1] * i;
+    F[i] %= MOD;
+    B[i] = bigmod(F[i], MOD-2);
+//    cout << "# " << F[i] << " " << B[i] << endl;
+  }
+}
+
+int main(){
+  init();
+  int tc;
+  scanf("%d", &tc);
+  while(tc--){
+//    cout << "HELL0\n";
+    int cnt = 0;
+    scanf("%d %d", &n, &k);
+    REPN(i, n){ scanf("%d", &A[i]); cnt += A[i] == 0; }
+    ll ret = 0;
+    n -= cnt;
+    for(int i=0;i<=min(n, k);i++){
+      ret += solve(cnt, i);
+//      cout << solve(n, i) << endl;
+      ret %= MOD;
+    }
+    printf("%lld\n", ret);
+  }
+  return 0;
+}
+

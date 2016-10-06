@@ -1,0 +1,23 @@
+#include <iostream>
+#include <set>
+
+using namespace std;
+
+set<string> S;
+
+int main() {
+  ios::sync_with_stdio(false);
+  int t;
+  cin >> t;
+  while(t--) {
+    string str;
+    cin >> str;
+    int l = str.length();
+    S.clear();
+    for(int i = 0;i+1 < l;i++) {
+      S.insert(str.substr(i, 2));
+    }
+    cout << S.size() << endl;
+  }
+  return 0;
+}

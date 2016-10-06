@@ -1,0 +1,253 @@
+#include <cstdio>
+#include <set>
+
+using namespace std;
+
+struct AVL {
+    pair<int,int> x;
+    AVL *left, *right;
+    int h,db;
+    AVL(pair<int,int> x): x(x) {
+        h = 1;
+        db = 1;
+        left = right = NULL;
+    }
+};
+
+inline int Db(AVL *p) {
+    return (p==NULL)?0:p->db;
+}
+
+inline int H(AVL *p) {
+    return (p==NULL)?0:p->h;
+}
+
+void Tupd(AVL *&p) {
+    p->db = Db(p->left) + 1 + Db(p->right);
+    p->h = 1 + max(H(p->left),H(p->right));
+}
+
+void rotLeft(AVL *&p) {
+    AVL *q = p->right;
+    p->right = q->left;
+    q->left = p;
+
+    Tupd(p); Tupd(q);
+    p = q;
+}
+
+void rotRight(AVL *&p) {
+    AVL *q = p->left;
+    p->left = q->right;
+    q->right = p;
+
+    Tupd(p); Tupd(q);
+    p = q;
+}
+
+void balLeft(AVL *&p) {
+    if(H(p->right->left) > H(p->right->right)) rotRight(p->right);
+    rotLeft(p);
+}
+
+void balRight(AVL *&p) {
+    if(H(p->left->right) > H(p->left->left)) rotLeft(p->left);
+    rotRight(p);
+}
+
+void insert(AVL *&p, pair<int,int> x) {
+    if(p==NULL) {
+        p = new AVL(x);
+        return;
+    }
+
+    if(x < p->x) {
+        insert(p->left,x);
+        if(H(p->left) > 1+H(p->right)) {
+            balRight(p);
+        } else Tupd(p);
+    } else {
+        insert(p->right,x);
+        if(H(p->right) > 1+H(p->left)) {
+            balLeft(p);
+        } else Tupd(p);
+    }
+}
+
+AVL *eraseSmallest(AVL *&p) {
+    if(p->left == NULL) {
+        AVL *r = p;
+        p = p->right;
+        return r;
+    }
+
+    AVL *r = eraseSmallest(p->left);
+    if(H(p->right) > 1+H(p->left)) {
+        balLeft(p);
+    } else Tupd(p);
+
+    return r;
+}
+
+void erase(AVL *&p, pair<int,int> x) {
+    if(p->x < x) {
+        erase(p->right,x);
+        if(H(p->left) > 1+H(p->right)) {
+            balRight(p);
+        } else Tupd(p);
+    } else if(x < p->x) {
+        erase(p->left,x);
+        if(H(p->right) > 1+H(p->left)) {
+            balLeft(p);
+        } else Tupd(p);
+    } else {
+        if(p->left == NULL) {
+            AVL *r = p;
+            p = p->right;
+            delete r;
+        } else if(p->right == NULL) {
+            AVL *r = p;
+            p = p->left;
+            delete r;
+        } else {
+            AVL *r = eraseSmallest(p->right);
+            p->x = r->x;
+            delete r;
+
+            if(H(p->left) > 1+H(p->right)) {
+                balRight(p);
+            } else Tupd(p);
+        }
+    }
+}
+
+int query(AVL *p, pair<int,int> x) {
+    if(p==NULL) return 0;
+
+    if(p->x <= x) return Db(p->left)+1+query(p->right,x);
+    return query(p->left,x);
+}
+
+AVL *root;
+
+int Query(pair<int,int> x, pair<int,int> y) {
+    x.second--;
+    return query(root,y)-query(root,x);
+}
+
+int n,q;
+
+int szv;
+
+int k[1000000],v[1000000];
+int d[1000000];
+
+int a[100000];
+
+inline int db(int x, int y, int z) {
+    return Query({z,x},{z,y});
+}
+
+void upd(int t) {
+    int s = d[t<<1]>=0?db(k[t],v[t],d[t<<1]):0;
+    if(s > ((v[t]+1-k[t])/2)) {
+        d[t] = d[t<<1];
+    } else {
+        int s = d[(t<<1)+1]>=0?db(k[t],v[t],d[(t<<1)+1]):0;
+        if(s > ((v[t]+1-k[t])/2)) {
+            d[t] = d[(t<<1)+1];
+        }
+    }
+}
+
+void build(int t) {
+    if(k[t]==v[t]) {
+        d[t] = a[k[t]];
+        return;
+    }
+
+    int f((k[t]+v[t])/2);
+
+    k[t<<1] = k[t];
+    v[t<<1] = f;
+    build(t<<1);
+
+    k[(t<<1)+1] = f+1;
+    v[(t<<1)+1] = v[t];
+    build((t<<1)+1);
+
+    d[t] = -1;
+    upd(t);
+}
+
+void update(int t, int x, int y) {
+    if(k[t]==v[t]) {
+        d[t] = y;
+        return;
+    }
+
+    int f((k[t]+v[t])/2);
+    if(x<=f) {
+        update(t<<1,x,y);
+    } else {
+        update((t<<1)+1,x,y);
+    }
+
+    upd(t);
+}
+
+int podo[100000], pv;
+
+void dom(int t, int x, int y) {
+    if((x <= k[t]) && (v[t] <= y)) {
+        if(d[t] >= 0) podo[pv++] = d[t];
+        return;
+    }
+
+    int f((k[t]+v[t])/2);
+
+    if(x<=f) dom((t<<1),x,y);
+    if(y>f) dom((t<<1)+1,x,y);
+}
+
+bool domqry(int x, int y) {
+    pv = 0;
+    dom(1,x,y);
+
+    for(int i=0; i<pv; i++) {
+        //fprintf(stderr,"[%d,%d]<-%d: %d\n",x,y,podo[i],db(x,y,podo[i]));
+        if(db(x,y,podo[i])>((y+1-x)/2)) return 1;
+    }
+
+    return 0;
+}
+
+int main()
+{
+    scanf("%d%d",&n,&q);
+
+    for(int i=0; i<n; i++) {
+        scanf("%d",&a[i]);
+        insert(root,{a[i],i});
+    }
+
+    k[1] = 0; v[1] = n-1;
+    build(1);
+
+    for(int Q=0; Q<q; Q++) {
+        int t,x,y; scanf("%d%d%d",&t,&x,&y); x--;
+        if(t==1) {
+            erase(root,{a[x],x});
+            a[x] = y;
+            insert(root,{a[x],x});
+            update(1,x,y);
+        } else {
+            y--;
+            if(domqry(x,y)) {
+                printf("Yes\n");
+            } else printf("No\n");
+        }
+    }
+
+    return 0;
+}

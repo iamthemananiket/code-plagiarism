@@ -1,0 +1,146 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define sz size()
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int N = 100005;
+const int BSZ = 320;
+
+int A[N], ANS[N];
+int n,m,q;
+int leftMin[N], midMin[N], midMax[N], rightMin[N];
+int updateLeft[N], updateMid[N], updateRight[N];
+int timeLeft, timeMid;
+
+struct sqrtNode {
+  int l,r;
+  int idx;
+};
+
+sqrtNode inp[N];
+
+bool cmp(const sqrtNode &a, const sqrtNode &b) {
+  if(a.l / BSZ != b.l / BSZ) {
+    return a.l / BSZ < b.l / BSZ;
+  }
+  return a.r < b.r;
+}
+
+void solve() {
+
+  int l,r,curAns;
+  l = r = -1;
+
+  rep(i,0,q) {
+    timeLeft++;
+    int x,y;
+    x = inp[i].l;
+    y = inp[i].r;
+
+    if(x >= l) {
+      l = ((x / BSZ) + 1) * BSZ;
+      r = l - 1;
+      curAns = 0;
+      timeMid++;
+    }
+
+    while(y >= r + BSZ) {
+      rep(j,0,BSZ) {
+        if(r+j+1 >= n) break;
+        int val = A[r+j+1];
+        if(updateMid[val] != timeMid) {
+          midMin[val] = r+j+1;
+          midMax[val] = r+j+1;
+          updateMid[val] = timeMid;
+        } else {
+          midMax[val] = r+j+1;
+          curAns = max(curAns, midMax[val] - midMin[val]);
+        }
+      }
+      r += BSZ;
+    }
+    // printf("%d %d %d %d\n",x,y,l,r);
+    int ans = curAns;
+    rep(j,x,min(l,y+1)) {
+      int val = A[j];
+      if(updateLeft[val] != timeLeft) {
+        updateLeft[val] = timeLeft;
+        leftMin[val] = j;
+      } else {
+        ans = max(ans, j - leftMin[val]);
+      }
+      if(updateMid[val] == timeMid) {
+        ans = max(ans, midMax[val] - j);
+      }
+    }
+
+    rep(j,r+1,y+1) {
+      int val = A[j];
+      if(updateRight[val] != timeLeft) {
+        updateRight[val] = timeLeft;
+        rightMin[val] = j;
+      }
+      if(updateLeft[val] == timeLeft) {
+        ans = max(ans, j - leftMin[val]);
+      } else if(updateMid[val] == timeMid) {
+        ans = max(ans, j - midMin[val]);
+      } else if(updateRight[val] == timeLeft) {
+        ans = max(ans, j - rightMin[val]);
+      }
+    }
+
+    ANS[inp[i].idx] = ans;
+  }
+}
+
+int bruteForce(int l, int r) {
+  int res = 0;
+  rep(i,l,r) rep(j,i+1,r+1) {
+    if(A[i] == A[j]) res = max(res, j - i);
+  }
+  return res;
+}
+
+int main() {
+  scanf("%d%d%d",&n,&m,&q);
+
+  rep(i,0,n) S(A[i]);
+
+  rep(i,0,q) {
+    S2(inp[i].l,inp[i].r);
+    inp[i].l -= 1;
+    inp[i].r -= 1;
+    inp[i].idx = i;
+  }
+
+  sort(inp, inp+q, cmp);
+  solve();
+  rep(i,0,q) {
+    // printf("interval %d %d\n",inp[i].l, inp[i].r);
+    // printf("%d %d\n",ANS[inp[i].idx], bruteForce(inp[i].l, inp[i].r));
+    // assert(ANS[inp[i].idx] == bruteForce(inp[i].l, inp[i].r));
+    P(ANS[i]);
+  }
+
+  return 0;
+}

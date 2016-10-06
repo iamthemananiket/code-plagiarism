@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 7;
+
+using namespace std;
+
+int n;
+ll a[205];
+
+inline ll gcd(ll a, ll b) {
+    while(a) {
+        swap(a, b);
+        a %= b;
+    }
+    return b;
+}
+
+inline void solve() {
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    for (int i = 1; i <= n; i++)
+        for (int j = i + 1; j <= n; j++) {
+            ll now = gcd(a[i], a[j]);
+            if (now > 1) {
+                cout << now << '\n';
+                return;
+            }
+        }
+    random_shuffle(a + 1, a + n + 1);
+    for (int it = 1; it <= n; it++) {
+        for (int i = 2; i <= (int)9e5 && 1ll * i * i <= a[it]; i++) {
+            if (a[it] % i != 0)
+                continue;
+            if (a[it] % (1ll * i * i) == 0) {
+                cout << i << '\n';
+                return;
+            }
+            a[it] /= i;
+        }
+        if (a[it] == 1)
+            continue;
+        ll x = sqrt(1.0 * a[it]) - 1;
+        while(1ll * x * x < a[it])
+            x++;
+        if (x * 1ll * x == a[it]) {
+            cout << x << '\n';
+            return;
+        }
+    }
+    assert(0);
+}
+
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+    int t;
+    cin >> t;
+    while(t--)
+        solve();
+    return 0;
+}

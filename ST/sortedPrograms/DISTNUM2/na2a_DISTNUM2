@@ -1,0 +1,192 @@
+#include <bits/stdc++.h>
+//#include "grader.h"
+
+#define pb push_back
+
+using namespace std;
+
+// long long s[5000][5000];
+const int N = (int) 1e5 + 7;
+
+int R, C;
+int sz;
+
+struct knode {
+  int val, l, r;
+  knode() {
+    l = r = 0;
+  }
+  knode(int val) : val(val) {
+    l = r = 0;
+  }
+};
+
+knode k[N * 40 * 20];
+
+inline int insert(const int &v, const int &pos, const int &val, const int &l = 1, const int &r = C) {
+  int res = ++sz;
+  if (v) {
+    k[res].l = k[v].l;
+    k[res].r = k[v].r;
+    k[res].val = k[v].val;
+	}
+	if (l == r) {
+		k[res].val = val;
+		return res;
+	}
+	int m = (l + r) >> 1;
+	if (pos <= m) {
+    k[res].l = insert(k[res].l, pos, val, l, m);
+  } else {
+    k[res].r = insert(k[res].r, pos, val, m + 1, r);
+	}
+	k[res].val = k[k[res].l].val + k[k[res].r].val;
+  return res;
+}
+
+inline int get(const int &v, const int &x, const int &y, const int &l = 1, const int &r = C) {
+	if (!v)
+		return 0;
+	if (x <= l && r <= y)
+		return k[v].val;
+	if (x > r || l > y)
+		return 0;
+	long long res = 0;
+	int m = (l + r) >> 1;
+	return get(k[v].l, x, y, l, m) + get(k[v].r, x, y, m + 1, r);
+}
+
+int NEXT_FREE_INDEX = 1;
+
+struct node {
+	int pt;
+	int l, r;
+	node() {
+		pt = NULL;
+		l = r = 0;
+	}
+} t[5000000];
+
+void init(int r, int c) {
+	R = r;
+	C = c;
+}
+
+int tot;
+
+int row, col, val;
+
+inline int update(const int &v, const int &x, const int &y) {
+	if (x == y) {
+    NEXT_FREE_INDEX++;
+    t[NEXT_FREE_INDEX].l = t[v].l;
+    t[NEXT_FREE_INDEX].r = t[v].r;
+    t[NEXT_FREE_INDEX].pt = insert(t[v].pt, col, val);
+		return NEXT_FREE_INDEX;
+	}
+	int m = (x + y) >> 1;
+  if (row <= m) {
+    int rem = update(t[v].l, x, m);
+    t[++NEXT_FREE_INDEX].l = rem;
+    t[NEXT_FREE_INDEX].r = t[v].r;
+	} else {
+	  int rem = update(t[v].r, m + 1, y);
+    t[++NEXT_FREE_INDEX].l = t[v].l;
+    t[NEXT_FREE_INDEX].r = rem;
+	}
+	t[NEXT_FREE_INDEX].pt = insert(t[v].pt, col, get(t[t[NEXT_FREE_INDEX].l].pt, col, col) + get(t[t[NEXT_FREE_INDEX].r].pt, col, col));
+	return NEXT_FREE_INDEX;
+}
+
+inline int upd(const int &v, const int &x, const int &y, const int &rr, const int &cc, const int &vv) {
+  row = rr;
+  col = cc;
+  val = vv;
+  return update(v, x, y);
+}
+
+inline int get(const int &v, const int &l, const int &r, const int &lx, const int &ly, const int &rx, const int &ry) {
+	if (!v)
+		return 0;
+	if (lx <= l && r <= rx) {
+    //cout<<"!!!"<<l<<' '<<r<<' '<<ly<<' '<<ry<<' '<<get(t[v].pt,ly,ry)<<' '<<t[v].pt->val<<endl;
+		return get(t[v].pt, ly, ry);
+	}
+	if (lx > r || l > rx)
+		return 0;
+	int m = (l + r) >> 1;
+	return get(t[v].l, l, m, lx, ly, rx, ry) + get(t[v].r, m + 1, r, lx, ly, rx, ry);
+}
+
+int n, m;
+
+int a[N];
+int where[N];
+int version[N];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  //freopen("out", "w", stdout);
+  #endif // LOCAL
+
+  scanf("%d%d", &n, &m);
+  for (int i = 1; i <= n; i++) {
+    scanf("%d", &a[i]);
+  }
+  vector<int> tt;
+  for (int i = 1; i <= n; i++)
+    tt.pb(a[i]);
+  sort(tt.begin(), tt.end());
+  tt.resize(unique(tt.begin(), tt.end()) - tt.begin());
+  for (int i = 1; i <= n; i++) {
+    a[i] = upper_bound(tt.begin(), tt.end(), a[i]) - tt.begin();
+  }
+  init(tt.size(), n);
+  version[0] = 1;
+  for (int i = 1; i <= n; i++) {
+    version[i] = upd(version[i - 1], 1, tt.size(), a[i], i, 1);
+    if (where[a[i]])
+      version[i] = upd(version[i], 1, tt.size(), a[i], where[a[i]], 0);
+    where[a[i]] = i;
+  }
+  int prev_ans = 0;
+  for (int i = 1; i <= m; i++) {
+    int qa, qb, qc, qd, qk;
+    scanf("%d%d%d%d%d", &qa, &qb, &qc, &qd, &qk);
+    int K = qk;
+    int l = (qa * 1ll * prev_ans + qb) % n + 1;
+    int r = (qc * 1ll * prev_ans + qd) % n + 1;
+    if (l > r) swap(l, r);
+    int low = 1, high = tt.size();
+    int res = -1;
+    int v = version[r];
+    //cout << "query " << l << ' ' << r << endl;
+    //cout<<get(t[v].pt,l,r)<<endl;
+    while (low < high) {
+      int mid = (low + high) / 2;
+      int tmp = get(t[t[v].l].pt, l, r);
+      //cout<<low<<' '<<mid<<' '<<high<<' '<<qk<<' '<<tmp << endl;
+      if (tmp >= qk) {
+        v = t[v].l;
+        //res = mid;
+        high = mid;
+      } else {
+        v = t[v].r;
+        qk -= tmp;
+        low = mid + 1;
+      }
+    }
+    if (get(version[r], 1, tt.size(), 1, l, low, r) >= K)
+      res = low;
+    if (res == -1) {
+      printf("%d\n", res);
+      prev_ans = 0;
+    } else {
+      printf("%d\n", tt[res - 1]);
+      prev_ans = tt[res - 1];
+    }
+    //cerr << i << ' ' << "done\n";
+  }
+  return 0;
+}

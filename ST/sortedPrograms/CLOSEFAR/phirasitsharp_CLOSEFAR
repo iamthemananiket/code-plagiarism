@@ -1,0 +1,164 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <set>
+
+const int inf = 1 << 30;
+const int N = 35010;
+const int LG_N = 20;
+
+class Edge {
+public:
+	int u, v;
+	void read( void ) {
+		std::cin >> u >> v;
+	}
+	int next( int x ) {
+		return x xor u xor v;
+	}
+} edges[ N ];
+
+int min[ N ][ LG_N ], max[ N ][ LG_N ];
+int parent[ N ][ LG_N ], H[ N ];
+
+std::vector< int > adj[ N ];
+
+int A[ N ];
+int n, q;
+
+std::set< int > S;
+
+void dfs( int u, int p, int h ) {
+
+	H[ u ] = h;
+	parent[ u ][ 0 ] = p;
+	min[ u ][ 0 ] = std::min( A[u], A[p] );
+	max[ u ][ 0 ] = std::max( A[u], A[p] );
+
+	for ( int i = 1 ; i < LG_N ; ++i ) {
+		parent[ u ][ i ] = parent[ parent[ u ][ i-1 ] ][ i-1 ];
+		min[ u ][ i ] = std::min( min[ parent[ u ][ i-1 ] ][ i-1 ], min[ u ][ i-1 ] );
+		max[ u ][ i ] = std::max( max[ parent[ u ][ i-1 ] ][ i-1 ], max[ u ][ i-1 ] );
+	}
+
+	for ( const int id : adj[ u ] ) {
+		int v = edges[ id ].next( u );
+		if ( v != p ) {
+			dfs( v, u, h+1 );
+		}
+	}
+}
+int lca( int x, int y ) {
+	if ( H[ x ] < H[ y ] ) std::swap( x, y );
+	for ( int i = LG_N - 1 ; i >= 0 ; --i ) {
+		if ( H[ parent[ x ][ i ] ] >= H[ y ] ) {
+			x = parent[ x ][ i ];
+		}
+	}
+	if ( x == y ) return x;
+	for ( int i = LG_N - 1 ; i >= 0 ; --i ) {
+		if ( parent[ x ][ i ] != parent[ y ][ i ] ) {
+			x = parent[ x ][ i ];
+			y = parent[ y ][ i ];
+		}
+	}
+	return parent[ x ][ 0 ];
+}
+int get_max ( int x, int y ) {
+	int ans = std::max( A[x], A[y] );
+	int l = lca( x, y );
+	int lenx = H[ x ] - H[ l ];
+	for ( int i = LG_N - 1 ; i >= 0 ; --i ) {
+		if ( ( lenx >> i ) & 1 ) {
+			ans = std::max( ans, max[ x ][ i ] );
+			x = parent[ x ][ i ];
+		}
+	}
+	int leny = H[ y ] - H[ l ];
+	for ( int i = LG_N - 1 ; i >= 0 ; --i ) {
+		if ( ( leny >> i ) & 1 ) {
+			ans = std::max( ans, max[ y ][ i ] );
+			y = parent[ y ][ i ];
+		}
+	}
+	return ans;
+}
+int get_min ( int x, int y ) {
+	int ans = std::min( A[x], A[y] );
+	int l = lca( x, y );
+	int lenx = H[ x ] - H[ l ];
+	for ( int i = LG_N - 1 ; i >= 0 ; --i ) {
+		if ( ( lenx >> i ) & 1 ) {
+			ans = std::min( ans, min[ x ][ i ] );
+			x = parent[ x ][ i ];
+		}
+	}
+	int leny = H[ y ] - H[ l ];
+	for ( int i = LG_N - 1 ; i >= 0 ; --i ) {
+		if ( ( leny >> i ) & 1 ) {
+			ans = std::min( ans, min[ y ][ i ] );
+			y = parent[ y ][ i ];
+		}
+	}
+	return ans;
+}
+
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+
+	std::cin >> n;
+	for ( int i = 1 ; i <= n ; ++i ) {
+		std::cin >> A[i];
+	}
+	for ( int i = 0 ; i+1 < n ; ++i ) {
+		edges[i].read();
+		adj[ edges[i].u ].emplace_back( i );
+		adj[ edges[i].v ].emplace_back( i );
+	}
+
+	dfs( 1, 1, 0 );
+
+	std::cin >> q;
+	while ( q-- ) {
+
+		char ch;
+		int x, y;
+		std::cin >> ch >> x >> y;
+
+		if ( ch == 'F' ) {
+			std::cout << ( get_max( x, y ) - get_min( x, y ) ) << "\n";
+		} else {
+
+			S.clear();
+
+			int l = lca( x, y );
+			S.insert( A[l] );
+			int ans = inf;
+			while ( x != l ) {
+				auto it = S.insert( A[x] ).first;
+				if ( it != S.begin() ) {
+					ans = std::min( ans, *it - *std::prev( it ) );
+				}
+				if ( std::next( it ) != S.end() ) {
+					ans = std::min( ans, *std::next( it ) - *it );
+				}
+				x = parent[ x ][ 0 ];
+			}
+			while ( y != l ) {
+				auto it = S.insert( A[y] ).first;
+				if ( it != S.begin() ) {
+					ans = std::min( ans, *it - *std::prev( it ) );
+				}
+				if ( std::next( it ) != S.end() ) {
+					ans = std::min( ans, *std::next( it ) - *it );
+				}
+				y = parent[ y ][ 0 ];
+			}
+
+			std::cout << ans << "\n";
+		}
+	}
+
+	return 0;
+}

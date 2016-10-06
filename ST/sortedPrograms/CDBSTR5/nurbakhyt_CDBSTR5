@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) (int)((a).size())
+
+const int N = (int)1e5 + 123;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n;
+int u, v;
+vector < int > g[N];
+int d[N];
+int ans;
+
+void dfs(int v, int p = -1) {
+    d[v] = 0;
+	pair < int, int > maxi = mp(-inf, -inf);
+	for (int i = 0; i < sz(g[v]); i++) {
+		int to = g[v][i];
+		if (to == p)
+			continue;
+		dfs(to, v);
+		if (maxi.f < d[to])
+			maxi.s = maxi.f, maxi.f = d[to];
+		else if (maxi.s < d[to])
+			maxi.s = d[to];								
+		if (d[v] < d[to] + 1)
+			d[v] = d[to] + 1;
+	}
+	ans = max(ans, d[v]);
+	ans = max(ans, maxi.f + maxi.s + 2);
+}
+
+void solve() {
+	scanf("%d", &n);
+	for (int i = 1; i < n; i++) {
+		scanf("%d%d", &u, &v);
+		g[u].pb(v);
+		g[v].pb(u);
+	}
+	ans = 0;
+	memset(d, -1, sizeof d);
+	for (int i = 1; i <= n; i++)
+		if (d[i] == -1)
+			dfs(i);
+	printf("%d\n", ans);
+}
+
+int t;
+
+int main() {
+	scanf("%d", &t);
+	while(t--)
+		solve();
+	return 0;
+}

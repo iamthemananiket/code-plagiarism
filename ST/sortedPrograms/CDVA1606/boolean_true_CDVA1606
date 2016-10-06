@@ -1,0 +1,83 @@
+#include<bits/stdc++.h>
+#define N 200009
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+vector<int> find_lps(const string &needle)
+{
+    int m=needle.size();
+    vector<int>lps(m+1);
+    int i=1,j=0;
+    lps[0]=0;
+    while(i<m)
+    {
+        if(needle[i]==needle[j])
+        {
+            j++;
+            lps[i]=j;
+            i++;
+            continue;
+        }
+        else
+        {
+            if(j!=0)
+                j=lps[j-1];
+            else
+            {
+                lps[i]=0;
+                i++;
+            }
+        }
+    }
+    return lps;
+}
+int match(const string &haystack,const string &needle)
+{
+    vector<int>lps=find_lps(needle);
+    int j=0;
+    int i=0;
+    int n=haystack.size();
+    int m=needle.size();
+    int ans=0;
+    while(i<n)
+    {
+        if(needle[j]==haystack[i])
+        {
+            i++;
+            j++;
+            if(j==m)
+            {
+                ans++;
+                j=lps[j-1];
+            }
+            continue;
+        }
+        else
+        {
+            if(j!=0)
+                j=lps[j-1];
+            else
+                i++;
+        }
+    }
+    return ans;
+}
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int n,m,k;
+        cin>>n>>m>>k;
+        string A,B;
+        cin>>A>>B;
+        B=B.substr(0,k);
+        find_lps(B);
+        int ans=match(A,B);
+        if(ans==0)
+            ans=-1;
+        cout<<ans<<endl;
+    }
+    return 0;
+}

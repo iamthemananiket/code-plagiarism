@@ -1,0 +1,153 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define N 250010
+ 
+typedef long long LL;
+const int L = N << 1;
+const int SIGMA = 26;
+ 
+struct Node {
+ 
+	Node *link, *nxt[SIGMA];
+	int len, term;
+	LL cnt;
+ 
+	void init() {
+		memset(nxt, NULL, sizeof(nxt));
+		link = NULL;
+		term = len = 0;
+		cnt = 1;
+	}
+};
+ 
+Node *last;
+ 
+struct SuffixAutomaton {
+ 
+	Node sam[L], *head;
+	int SZ;
+ 
+	void init() {
+		sam[0].init();
+		head = last = &sam[0];
+		SZ = 1;
+	}
+ 
+	void clone(Node *p, Node *u, int x) {
+		Node *r = &sam[SZ ++], *q = u->nxt[x];
+		*r = *q;
+		r->len = u->len + 1;
+		p->link = q->link = r;
+		for (; u && u->nxt[x] == q; u = u->link) u->nxt[x] = r;
+	}
+ 
+	void insert(int x) {
+		Node *nx = last -> nxt[x];
+		if(!nx) {
+			Node *p = &sam[SZ ++], *u = last;
+			p->init();
+			p->len = last->len + 1;
+			last = p;
+			for (;u && !u->nxt[x]; u = u->link) u->nxt[x] = p;
+			if (!u) p->link = head;
+			else if (u->nxt[x]->len == u->len + 1) p->link = u->nxt[x];
+			else clone(p, u, x);
+		} else {
+			if(nx->len == last->len + 1) last = nx;
+			else clone(nx, last, x), last = &sam[SZ - 1];
+		}
+	}
+ 
+	Node *ord[L];
+	int d[L];
+ 
+	void work() {
+		for(int i = 0; i < SZ; i ++) d[i] = 0;
+		for(int i = 0; i < SZ; i ++) d[sam[i].len] ++;
+		for(int i = 1; i < SZ; i ++) d[i] += d[i - 1];
+		for(int i = 0; i < SZ; i ++) ord[-- d[sam[i].len]] = &sam[i];
+		for(int i = SZ - 1; i >= 0; i --) {
+			for(int j = 0; j < 26; j ++) if(ord[i] -> nxt[j]) {
+				ord[i] -> cnt += ord[i] -> nxt[j] -> cnt;
+			}
+		}
+	}
+} SAM;
+ 
+int to[N << 1], head[N], nxt[N << 1];
+int rr[N];
+ 
+void addEdge(int a, int b, int i) {
+	to[i] = b;
+	nxt[i] = head[a];
+	head[a] = i;
+}
+ 
+void dfs(int r, int pa, Node *en) {
+	last = en;
+	SAM.insert(rr[r]);
+	Node *tp = last;
+	for(int i = head[r]; i; i = nxt[i]) {
+		if(to[i] == pa) continue;
+		dfs(to[i], r, tp);
+	}
+}
+ 
+int n, Q;
+string s;
+LL K;
+ 
+void run() {
+	SAM.work();
+	cout << SAM.head->cnt << endl;
+	while(Q --) {
+		cin >> s >> K;
+		if(K > SAM.head -> cnt) {
+			cout << "-1" << endl;
+			continue;
+		}
+		Node *tp = SAM.head;
+		while(1) {
+			if(K == 1) break;
+			K --;
+			for(int k = 0; k < 26; k ++) {
+				int j = s[k] - 'a';
+				if(tp -> nxt[j]) {
+					if(K > tp -> nxt[j] -> cnt) {
+						K -= tp -> nxt[j] -> cnt;
+					} else {
+						cout << s[k];
+						tp = tp -> nxt[j];
+						break;
+					}
+				}
+			}
+		}
+		cout << endl;
+	}
+}
+ 
+int main() {
+ 
+	int siz = 256 << 20;
+	char *_ = (char*)malloc(siz) + siz;
+	__asm__("movl %0, %%esp"::"r"(_));
+ 
+	ios_base::sync_with_stdio(false), cin.tie(NULL), cout.tie(NULL);
+ 
+	SAM.init();
+	cin >> n >> Q;
+	cin >> s;
+	for(int i = 1; i <=n; i ++) rr[i] = s[i - 1] - 'a';
+	for(int i = 1; i < n; i ++) {
+		int x, y;
+		cin >> x >> y;
+		addEdge(x, y, i);
+		addEdge(y, x, i + n - 1);
+	}
+	dfs(1, 0, last);
+	run();
+	return 0;
+}

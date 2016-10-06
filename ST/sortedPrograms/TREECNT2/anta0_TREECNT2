@@ -1,0 +1,202 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+vector<int> primes;
+vector<int> smallestPrimeFactor;
+void linearSieve(int n) {
+	if(n < 1) n = 1;
+	if((int)smallestPrimeFactor.size() >= n + 1) return;
+	int primePiBound = n < 20 ? n - 1 : (int)(n / (log(n * 1.) - 2) + 2);
+	primes.assign(primePiBound + 1, numeric_limits<int>::max());
+	int P = 0;
+	smallestPrimeFactor.assign(n + 1, 0);
+	smallestPrimeFactor[1] = 1;
+	int n2 = n / 2, n3 = n / 3, n5 = n / 5;
+	if(n >= 2)
+		primes[P ++] = 2;
+	if(n >= 3)
+		primes[P ++] = 3;
+	for(int q = 2; q <= n; q += 2)
+		smallestPrimeFactor[q] = 2;
+	for(int q = 3; q <= n; q += 6)
+		smallestPrimeFactor[q] = 3;
+	for(int q = 5; q <= n5; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+		int bound = smallestPrimeFactor[q];
+		for(int i = 2; ; ++ i) {
+			int p = primes[i];
+			if(p > bound) break;
+			int pq = p * q;
+			if(pq > n) break;
+			smallestPrimeFactor[pq] = p;
+		}
+	}
+	for(int q = (n5 + 1) | 1; q <= n; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+	}
+	primes.resize(P);
+}
+
+struct UnionFind {
+	vector<int> data;
+	void init(int n) { data.assign(n, -1); }
+	bool unionSet(int x, int y) {
+		x = root(x); y = root(y);
+		if(x != y) {
+			if(data[y] < data[x]) swap(x, y);
+			data[x] += data[y]; data[y] = x;
+		}
+		return x != y;
+	}
+	bool findSet(int x, int y) { return root(x) == root(y); }
+	int root(int x) { return data[x] < 0 ? x : data[x] = root(data[x]); }
+	int size(int x) { return -data[root(x)]; }
+};
+
+int main() {
+#ifndef _DEBUG
+	const int X = 1000000;
+#else
+	const int X = 100;
+#endif
+	linearSieve(X);
+	vector<int> mobius(X + 1);
+	mobius[1] = 1;
+	for(int x = 2; x <= X; ++ x) {
+		int p = smallestPrimeFactor[x];
+		int y = x / p;
+		mobius[x] = y % p == 0 ? 0 : -mobius[y];
+	}
+	vector<vi> divisors(X + 1);
+	rer(x, 1, X) if(mobius[x] != 0) {
+		for(int y = x; y <= X; y += x)
+			divisors[y].push_back(x);
+	}
+	int N;
+	while(~scanf("%d", &N)) {
+		vector<pair<pii,int>> allEdges(N - 1);
+		vector<vector<int>> divEdges(X + 1);
+		vector<vpii> edgeValues(N - 1);
+		for(int i = 0; i < N - 1; ++ i) {
+			int u, v, w;
+			scanf("%d%d%d", &u, &v, &w), -- u, -- v;
+			for(int d : divisors[w])
+				divEdges[d].push_back(i);
+			allEdges[i] = make_pair(make_pair(u, v), w);
+			edgeValues[i].emplace_back(0, w);
+		}
+		int Q;
+		scanf("%d", &Q);
+		rep(qi, Q) {
+			int i; int w;
+			scanf("%d%d", &i, &w), -- i;
+			vector<int> values;
+			for(auto p : edgeValues[i])
+				values.push_back(p.second);
+			for(int d : divisors[w]) {
+				bool dup = false;
+				for(int x : values)
+					dup |= x % d == 0;
+				if(!dup)
+					divEdges[d].push_back(i);
+			}
+			allEdges[i].second = -1;
+			edgeValues[i].emplace_back(qi + 1, w);
+		}
+		vector<ll> ans(Q + 1, 0);
+		ll base = 0;
+		UnionFind uf, uf2;
+		uf.init(N), uf2.init(N);
+		vector<int> mark(N), mark2(N);
+		vector<int> vertices, vertices2;
+		vector<vpii> addEdges(Q + 1);
+		vector<int> sizes(N);
+		rer(x, 1, X) if(mobius[x] != 0) {
+			bool anyAddEdge = false;
+			for(int i : divEdges[x]) {
+				int u, v;
+				tie(u, v) = allEdges[i].first;
+				int w = allEdges[i].second;
+				if(mark[u] ++ == 0)
+					vertices.push_back(u);
+				if(mark[v] ++ == 0)
+					vertices.push_back(v);
+				if(w != -1) {
+					uf.unionSet(u, v);
+				} else {
+					const auto &values = edgeValues[i];
+					for(int j = 0; j != values.size(); ++ j) {
+						if(values[j].second % x == 0) {
+							int L = values[j].first;
+							int R = j + 1 == values.size() ? Q + 1 : values[j + 1].first;
+							reu(qi, L, R) {
+								anyAddEdge = true;
+								addEdges[qi].emplace_back(u, v);
+							}
+						}
+					}
+				}
+			}
+			ll sum = 0;
+			for(int u : vertices) {
+				int s = -uf.data[u];
+				if(s > 0)
+					sum += (ll)s * (s - 1) / 2;
+				mark[u] = 0;
+			}
+			if(anyAddEdge) {
+				rep(qi, Q + 1) {
+					ll sum2 = sum;
+					for(auto &e : addEdges[qi]) {
+						int a = uf.root(e.first);
+						int b = uf.root(e.second);
+						e.first = a;
+						e.second = b;
+						if(mark2[a] ++ == 0)
+							vertices2.push_back(a);
+						if(mark2[b] ++ == 0)
+							vertices2.push_back(b);
+					}
+					for(auto e : addEdges[qi]) {
+						uf2.unionSet(e.first, e.second);
+					}
+					for(int u : vertices2) {
+						int s = -uf.data[u];
+						sum2 -= (ll)s * (s - 1) / 2;
+						sizes[uf2.root(u)] += s;
+					}
+					for(int u : vertices2) {
+						int s = sizes[u];
+						if(s > 0)
+							sum2 += (ll)s * (s - 1) / 2;
+						mark2[u] = 0;
+						uf2.data[u] = -1;
+						sizes[u] = 0;
+					}
+					vertices2.clear();
+					addEdges[qi].clear();
+					ans[qi] += mobius[x] * sum2;
+				}
+			}
+			for(int u : vertices)
+				uf.data[u] = -1;
+			vertices.clear();
+			if(!anyAddEdge)
+				base += mobius[x] * sum;
+		}
+		rep(i, Q + 1)
+			ans[i] += base;
+		for(int i = 0; i < Q + 1; ++ i)
+			printf("%lld\n", ans[i]);
+	}
+	return 0;
+}

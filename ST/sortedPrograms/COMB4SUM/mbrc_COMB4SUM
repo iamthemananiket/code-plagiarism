@@ -1,0 +1,104 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 1101000
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+ll A[MAXN];
+ll B[MAXN];
+
+int solve() {
+	int n; s(n); 
+	rep(i,1,n) {
+		sl(A[i]);
+	}
+	int idx = 0;
+	sort(A+1,A+n+1);
+	rep(i,1,n) {
+		rep(j,i+1,n) {
+			if (i!=j) {
+				idx++; B[idx] = A[i] + A[j];
+			}
+		}
+	}
+	ll res=0;
+	/*rep(i,1,n) {
+		rep(j,i+1,n) {
+			rep(k,1,n) {
+				rep(l,k+1,n) {
+					if (j!=k) continue;
+					pr(i);psp;pr(j);psp;pr(k);psp;pr(l);endc;
+				
+				res += abs(A[i] + A[j] - A[k] - A[l]);
+				}
+			}
+		}
+	}*/
+	//pr(res); endc;
+	int N = idx;
+	sort(B+1,B+N+1);
+	ll sum = 0; ll ans = 0;
+	rep(i,1,N) {
+		//prl(B[i]); endc;
+		ans += 2*((i-1)*B[i] - sum);
+		sum += B[i];
+	}
+	//prl(ans); endc;
+	sum = 0;
+	rep(a,1,2) {
+		rep(b,1,2) {
+			if ((a==1) and (b==1)) {
+				rep(i,1,n) {
+					sum = 0;
+					rep(j,i+1,n) {
+						ans -= 2 * ((j-i-1)*A[j] - sum);
+						sum += A[j];
+					}
+				}
+			}
+			if ((a==2) and (b==2)) {
+				rep(i,1,n) {
+					sum = 0;
+					rep(j,1,i-1) {
+						ans -= 2*((j-1)*A[j] - sum);
+						sum+=A[j];
+					}
+				}
+			}
+			if (((a==1) and (b==2)) or ((b==1) and (a==2))) {
+				rep(i,1,n) {
+					sum = 0;
+					rep(j,1,i-1) {
+						sum += A[j];
+					}
+					rep(j,i+1,n) {
+						ans -= (i-1) * A[j] - sum;
+					}
+				}
+			}
+			//pr(a); psp; pr(b); psp; prl(ans); endc;
+		}
+	}
+	prl(ans); endc;
+}
+
+int main() {
+	int t; s(t); rep(i,1,t) solve();
+}

@@ -1,0 +1,180 @@
+# include <cstdio>
+# include <stack>
+# include <map>
+# include <iostream>
+# include <algorithm>
+ 
+using namespace std;
+ 
+const int MAX_N = 2e6;
+ 
+int n, m;
+int a[MAX_N];
+int lleft[MAX_N];
+int rright[MAX_N];
+ 
+stack <pair <int, int> > st; 
+map <int, long long> ma;
+map <int, long long> :: iterator it;
+ 
+int b[MAX_N];
+long long times[MAX_N];
+long long sum[MAX_N];
+int k;
+
+pair <int, long long> c[MAX_N];
+ 
+int bsearch (int x)
+{
+	int l, r, mid;
+	l = 0;
+	r = k + 1;
+	while (r - l > 1)
+	{
+		mid = (l + r) >> 1;
+		if (b[mid] < x)
+			l = mid;
+		else
+			r = mid;
+	}
+	return l;
+}
+ 
+int main ()
+{
+	ios_base::sync_with_stdio (0);
+	cin.tie (0);
+ 
+	int i, sz, j, K, pos, p;
+	long long cl, cr, curr_x, curr_times, cnt;
+	char type, starts;
+	///char c[10];
+	
+	cin >> n >> m;
+	for (i = 1; i <= n; i ++)
+	{
+		cin >> a[i];
+		lleft[i] = i;
+		while (!st.empty ())
+		{
+			if ((st.top ()).first < a[i])
+			{
+				lleft[i] = (st.top ()).second;
+				st.pop ();
+			}
+			else
+				break;
+		}
+		st.push (make_pair (a[i], lleft[i]));
+	}
+	while (!st.empty ())
+		st.pop ();
+	for (i = n; i >= 1; i --)
+	{
+		rright[i] = i;
+		while (!st.empty ())
+		{
+			if ((st.top ()).first <= a[i])
+			{
+				rright[i] = (st.top ()).second;
+				st.pop ();
+			}
+			else
+				break;
+		}
+		st.push (make_pair (a[i], rright[i]));
+	}
+	
+	for (i = 1; i <= n; i ++)
+	{
+		cl = i - lleft[i];
+		cr = rright[i] - i;
+		curr_x = a[i];
+		curr_times = cl * cr + cl + cr + 1;
+		///printf ("%d %d %lld %lld %lld\n", i, a[i], cl, cr, curr_times);
+		c[i].first = a[i];
+		c[i].second = curr_times; ///ma[curr_x] += curr_times;
+		
+	}
+	sort (c + 1, c + n + 1);
+	cnt = 0;
+	c[0].first = -1;
+	cnt += c[1].second;
+	
+	for (i = 2; i <= n; i ++)
+	{
+		///printf ("%d %lld %lld\n", c[i].first, c[i].second, cnt);
+		if (c[i].first != c[i - 1].first)
+		{
+			k ++;
+			b[k] = c[i - 1].first;
+			times[k] = cnt;
+			sum[k] = sum[k - 1] + times[k];
+			cnt = 0;
+		}
+		cnt += c[i].second;
+		///printf ("%d %d %lld %lld\n", k, b[k], times[k], sum[k]);
+	}
+
+	k ++;
+	b[k] = c[n].first;
+	times[k] = cnt;
+	sum[k] = sum[k - 1] + times[k];
+	cnt = 0;
+	
+	/**for (it = ma.begin (); it != ma.end (); it ++)
+	{
+		k ++;
+		b[k] = it->first;
+		times[k] = it->second;
+		sum[k] = sum[k - 1] + times[k];
+		///printf ("%d %d %lld %lld\n", k, b[k], times[k], sum[k]);
+	}**/
+		
+	for (i = 1; i <= m; i ++)
+	{
+		
+		cin >> type >> K >> starts;
+		pos = bsearch (K);
+		if (type == '=')
+		{
+			pos ++;
+			if (b[pos] == K)
+				cnt = times[pos];
+			else
+				cnt = 0;
+		}
+		else
+		{
+			///pos = bsearch (K);
+			///cout << pos << " " << b[pos] << "\n";
+			if (type == '<')
+				cnt = sum[pos];
+			else
+			{
+				pos ++;
+				if (b[pos] == K)
+					pos ++;
+				cnt = sum[k] - sum[pos - 1];
+			}
+		}
+		///cout << "\n" << cnt << "\n";
+		if (starts == 'D')
+		{
+			if (cnt & 1)
+				cout << "D";
+			else
+				cout << "C";
+		}
+		else
+		{
+			if (cnt & 1)
+				cout << "C";
+			else
+				cout << "D";
+		}
+		///cout << "\n";
+	}
+	cout << "\n";
+	return 0;
+}

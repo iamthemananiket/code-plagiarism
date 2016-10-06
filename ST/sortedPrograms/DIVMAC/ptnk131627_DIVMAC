@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int maxval=1e6;
+const int N=1e5+10;
+
+int n,m;
+int a[N],t[maxval+10];
+
+set <int> mset;
+struct segtree{
+    int b[N<<2];
+    void build(int node,int L,int R){
+        if (L==R){
+            b[node]=t[a[L]];
+            return;
+        }
+        build(node*2,L,(L+R)/2);
+        build(node*2+1,(L+R)/2+1,R);
+        b[node]=max(b[node*2],b[node*2+1]);
+    }
+    void update(int node,int L,int R,int x){
+        if (L>x||R<x) return;
+        if (L==R){
+            b[node]=t[a[L]];
+            return;
+        }
+        update(node*2,L,(L+R)/2,x);
+        update(node*2+1,(L+R)/2+1,R,x);
+        b[node]=max(b[node*2],b[node*2+1]);
+    }
+    int get(int node,int L,int R,int l,int r){
+        if (L>r||R<l) return 0;
+        if (l<=L&&R<=r) return b[node];
+        return max(get(node*2,L,(L+R)/2,l,r),get(node*2+1,(L+R)/2+1,R,l,r));
+    }
+}mseg;
+struct info{
+    int type,x,y;
+    void read(){
+        scanf("%d%d%d",&type,&x,&y);
+    }
+};
+info qu[N];
+
+void prepare(){
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=n;i++) scanf("%d",a+i);
+    for(int i=1;i<=m;i++) qu[i].read();
+    mseg.build(1,1,n);
+}
+void solve(){
+    mset.clear();
+    for(int i=1;i<=n;i++) if (a[i]!=1) mset.insert(i);
+    mset.insert(n+1);
+    for(int i=1;i<=m;i++){
+        if (qu[i].type==1){
+            printf("%d ",mseg.get(1,1,n,qu[i].x,qu[i].y));
+            continue;
+        }
+        auto ite=mset.lower_bound(qu[i].x);
+        while (*ite<=qu[i].y){
+            int cur=*ite;
+            ++ite;
+            a[cur]/=t[a[cur]];
+            mseg.update(1,1,n,cur);
+            if (a[cur]==1) mset.erase(cur);
+        }
+    }
+    printf("\n");
+}
+int main(){
+    t[1]=1;
+    for(int i=2;i<=maxval;i++) if (!t[i])
+        for(int j=i;j<=maxval;j+=i) if (!t[j])
+            t[j]=i;
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        solve();
+    }
+}

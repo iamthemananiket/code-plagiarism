@@ -1,0 +1,50 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define mp make_pair
+#define f first
+#define pb push_back
+#define s second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 1000*1000*1000
+using namespace std;
+
+const int maxn = 101010;
+
+int a[maxn], u[maxn];
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (".in", "r", stdin);
+	freopen (".out", "w", stdout);
+	#endif
+	int t, n, cnt;
+	cin >> t;
+	for (int Case = 1; Case <= t; Case++)
+	{
+		scanf("%d", &n);
+		cnt = 0;
+		for (int i = 1; i <= n; i++)
+		{
+			scanf("%d", &a[i]);
+			if (u[a[i]] != Case)
+			{
+				u[a[i]] = Case;
+				cnt++;
+			}
+		}
+		printf("%d\n", cnt);
+	}
+	return 0;
+}

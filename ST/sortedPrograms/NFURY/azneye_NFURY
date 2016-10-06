@@ -1,0 +1,70 @@
+/*
+ * 
+ * File:   NFURY.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 13, 2013, 11:24:07 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace NFURY {
+
+void solve(int test_num) {
+  int dp[1111];
+  memset(dp, 0x3F, sizeof(dp));
+  dp[0] = 0;
+  for (int i = 1; i * i <= 1000; i++)
+    for (int j = 0; j + i * i <= 1000; j++)
+      dp[j + i * i] = min(dp[j + i * i], dp[j] + 1);
+  int T, A;
+  cin >> T;
+  while (T--) {
+    cin >> A;
+    cout << dp[A] << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  solve(1);
+}
+}
+
+int main() {
+  NFURY::solve();
+  return 0;
+}

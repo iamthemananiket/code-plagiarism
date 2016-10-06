@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+double x = sqrt(2), y = sqrt(6);
+double c = x+y, d = x-y;
+
+int main() {
+    long long i, k, s;
+    double a, b;
+    cin >> i >> k >> s >> a >> b;
+    long long p = ((k-i)/2);
+    i += p*2;
+    while(i>k)
+      i -= 2, p--;
+    p = p*4 - s;
+    double p2 = pow(2, p);
+    a = a*p2;
+    b = b*p2;
+    if(i!=k) {
+      double temp = a;
+      a = a*d + b*c;
+      b = temp*c - b*d;
+    }
+    printf("%.7lf\n", a + b);
+  return 0;
+}

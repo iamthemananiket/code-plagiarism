@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+const int MAX = 1024;
+typedef bitset<MAX> Bset;
+Bset adj[MAX];
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N, M;
+    cin >> N >> M;
+    for(int v=1;v<=N;++v)
+      adj[v].reset();
+    for(int e=0,a,b;e<M;++e){
+      cin>>a>>b;
+      adj[a].set(b);
+      adj[b].set(a);
+    }
+    Bset fst, snd;
+    bool found=false;
+    for(int a=1;a<=N&&!found;++a){
+      for(int b=a+1;b<=N;++b){
+        if(!adj[a][b]) {
+          fst.set(a);
+          snd.set(b);
+          found=true;
+          break;
+        }
+      }
+    }
+    if(!found) {
+      cout << "YES\n";
+      continue;
+    }
+    bool res = true;
+    vector<int> rem;
+    for(int v=1;v<=N;++v){
+      if(!fst[v] && !snd[v]) {
+        rem.push_back(v);
+      }
+    }
+    while(!rem.empty()) {
+      vector<int> both;
+      for (int r : rem) {
+        const bool ok_fst = (fst & adj[r]) == fst;
+        const bool ok_snd = (snd & adj[r]) == snd;
+        if (!ok_fst && !ok_snd) {
+          res=false;
+          break;
+        }
+        if (ok_fst && ok_snd) {
+          both.push_back(r);
+        } else if (ok_fst) {
+          fst.set(r);
+        } else {
+          snd.set(r);
+        }
+      }
+      if(!res)break;
+      if(both.size() == rem.size()) {
+        fst.set(both.front());
+        both.erase(both.begin());
+      }
+      rem = both;
+    }
+    cout<<(res?"YES":"NO")<<endl;
+  }
+  return 0;
+}

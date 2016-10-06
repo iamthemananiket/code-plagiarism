@@ -1,0 +1,22 @@
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+
+int T;
+long double p,M;
+
+int main()
+{
+    ios::sync_with_stdio(0); cin.tie(NULL);
+
+    for(cin >> T; T--;) {
+        cin >> M >> p;
+
+        cout << fixed << ((pow(-p,M)-((double)1.0)) / (-p-((double)1.0)))*((double)1000000000) << " "
+        << ((double)1000000000)-(((pow(-p,M)-((double)1.0)) / (-p-((double)1.0)))*((double)1000000000)) << endl;
+    }
+
+
+    return 0;
+}

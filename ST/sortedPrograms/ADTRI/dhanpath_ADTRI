@@ -1,0 +1,29 @@
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int  MX = 5000001 ;
+vector<int>  isHyp( MX, -1 );
+
+int main()
+{
+        int  t, i, j, n ;
+
+        for( i=1; i*i<MX; i++ )
+        for( j=i+1; (n=i*i+j*j)<MX; j++ )
+        isHyp[n] = 0 ;
+
+        for( n=0; n<MX; n++ )
+        if( isHyp[n] == 0 )
+        for( t=n ; t<MX ; t+=n )
+        isHyp[t] = 1 ;
+
+        for( scanf("%d",&t) ;  t-- ;  )
+        {
+                scanf( "%d", &n );
+                puts(  isHyp[n] == 1  ?  "YES"  :  "NO"  );
+        }
+
+        return 0;
+} 

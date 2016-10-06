@@ -1,0 +1,54 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+
+void solve(int test_num) {
+  int Y, X, N;
+  cin >> Y >> X >> N;
+  const int S = Y - X;
+  vector<int> dp(S + 1, 1 << 29), val(N);
+  for (int i = 0; i < N; i++)
+    cin >> val[i];
+  sort(val.begin(), val.end());
+  val.erase(unique(val.begin(), val.end()), val.end());
+  dp[0] = 0;
+  for (const int& v : val)
+    for (int x = 0; x + v <= S; x++)
+      dp[x + v] = min(dp[x + v], dp[x] + 1);
+  cout << dp[S] << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

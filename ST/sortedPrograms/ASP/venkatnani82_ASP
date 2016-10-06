@@ -1,0 +1,17 @@
+#include <bits/stdc++.h>
+using namespace std;
+int a[1000010];
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		int n;
+		cin>>n;
+		for (int i = 0; i < n; i++) scanf("%d", a + i);
+		for (int i = 0; i < n - 1; i++) if(a[i] > a[i + 1]) swap(a[i], a[i + 1]), i++;
+		bool ok = true;
+		for (int i = 0; i < n - 1; i++) if(a[i] > a[i + 1]) ok = false;
+		if(ok) printf("YES\n");
+		else printf("NO\n");
+	}	
+}

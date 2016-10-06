@@ -1,0 +1,12 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+    int test;
+    cin >> test;
+    int x;
+    while(test--) {
+        scanf("%d", &x);
+        if(x % 6 == 0) printf("Misha\n");
+        else printf("Chef\n");
+    }
+}

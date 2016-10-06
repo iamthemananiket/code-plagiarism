@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+using namespace std;
+
+#define MOD 1000000007
+
+int A, K, N; char s[100];
+long long cou;
+int a[100];
+
+void subtask1(){
+    cou = 0;
+    for(int i=0; i<N; i++) if(s[i]!='a') cou++;
+    if(cou<=K && N<3) puts("1"); else puts("0");
+}
+
+int ste;
+void mfind(int id, int ec){
+    if(ec>K) return;
+    if(id==N) {cou++; return;}
+    for(a[id]=0; a[id]<A; a[id]++){
+        for(ste=1; id-ste*2>=0;ste++){
+            if(a[id]==a[id-ste] && a[id]==a[id-ste*2]) break;
+        }
+        if(id-ste*2>=0) continue;
+        if(a[id]==(s[id]-'a')) mfind(id+1, ec); else mfind(id+1, ec+1);
+    }
+}
+
+void subtask2(){
+    cou = 0;
+    mfind(0, 0);
+    cout<<cou%MOD<<endl;
+}
+
+void subtask3(){
+    subtask2();
+}
+
+void subtask4(){
+    subtask2();
+}
+
+int main(){
+    //freopen("in.txt", "r", stdin);
+    int TC; scanf("%d", &TC);
+    while(TC--){
+        scanf("%d %d", &A, &K);
+        scanf("%s", s); N = strlen(s);
+        if(A==1) {subtask1(); continue;}
+        if(N<=12) {subtask2(); continue;}
+        if(A==2) {subtask3(); continue;}
+        if(A==3) {subtask4(); continue;}
+    }
+}

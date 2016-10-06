@@ -1,0 +1,342 @@
+/*
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+	ABHINANDAN AGARWAL
+	MNNIT ALLAHABAD
+	CSE
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+*/
+/*
+	
+	01000100 00100000 01100011 01110101 01110010 01100101
+	01001100 01101111 01110110 01100101 00100000 01101001 01110011 00100000 01100001 00100000 01101101 01111001 01110100 01101000 00101110
+	01010010 01100001 01101101 01110000 01100001 01100111 01100101
+	
+*/
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+#define sc(x) scanf("%d",&x)
+#define sc2(x,y) scanf("%d%d",&x,&y)
+#define sc3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define scl(x) scanf("%lld",&x)
+#define scl2(x,y) scanf("%lld%lld",&x,&y)
+#define scl3(x,y,z) scanf("%lld%lld%lld",&x,&y,&z)
+#define scstr(x) scanf("%s",x)
+#define pd(x) printf("%d",x)
+#define pstr(x) printf("%s",x)
+#define newl() printf("\n")
+#define fl(i,n) for (i=0;i<n;i++)
+#define fle(i,n) for (i=1;i<=n;i++)
+#define fla(i,a,n) for (i=a;i<n;i++)
+#define mem(a,i) memset(a,i,sizeof(a))
+#define fi first
+#define se second
+typedef pair<int,int> pii;
+typedef pair<int,pair<int,int> > piii ;
+typedef pair<ll,ll> pll;
+typedef pair<ll,int> pli;
+#define gcd __gcd
+#define wl(n) while (n--)
+#define debug(x) cout<<"debug->"<<#x<<"::"<<x<<endl
+#define debug2(x,y) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\n"
+#define debug3(x,y,z) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\t"<<#z<<" :: "<<z<<"\n"
+#define tr(container, it)  for(typeof(container.begin()) it = container.begin(); it != container.end(); it++) 
+#define all(v) v.begin(),v.end()
+const double eps=0.000000000000001 ;
+#define MOD 1000000007
+typedef long double LF;
+typedef double lF;
+//-------------
+pii fig[20][9];
+void ass()
+{
+	fig[1][0]=mp(0,0);
+	fig[2][0]=mp(-1,0);
+	fig[3][0]=mp(0,1);
+	fig[4][0]=mp(-1,0);fig[4][1]=mp(-2,0);
+	fig[5][0]=mp(0,1);fig[5][1]=mp(0,2);
+	fig[6][0]=mp(-1,0);fig[6][1]=mp(-2,0);fig[6][2]=mp(-3,0);
+	fig[7][0]=mp(0,1);fig[7][1]=mp(0,2);fig[7][2]=mp(0,3);
+	fig[8][0]=mp(-1,0);fig[8][1]=mp(-2,0);fig[8][2]=mp(-3,0);fig[8][3]=mp(-4,0);
+	fig[9][0]=mp(0,1);fig[9][1]=mp(0,2);fig[9][2]=mp(0,3);fig[9][3]=mp(0,4);
+	fig[10][0]=mp(-1,0);fig[10][1]=mp(-1,1);fig[10][2]=mp(0,1);
+	fig[11][0]=mp(-1,0);fig[11][1]=mp(-2,0);fig[11][2]=mp(0,1);fig[11][3]=mp(-1,1);fig[11][4]=mp(-2,1);fig[11][5]=mp(0,2);fig[11][6]=mp(-1,2);fig[11][7]=mp(-2,2);
+	fig[12][0]=mp(-1,0);fig[12][1]=mp(-2,0);fig[12][2]=mp(-2,-1);fig[12][3]=mp(-2,-2);
+	fig[13][0]=mp(0,-1);fig[13][1]=mp(0,-2);fig[13][2]=mp(-1,0);fig[13][3]=mp(-2,0);
+	fig[14][0]=mp(-1,0);fig[14][1]=mp(-2,0);fig[14][2]=mp(0,1);fig[14][3]=mp(0,2);
+	fig[15][0]=mp(-1,0);fig[15][1]=mp(-2,0);fig[15][2]=mp(-2,1);fig[15][3]=mp(-2,2);
+	fig[16][0]=mp(-1,0);fig[16][1]=mp(-1,1);
+	fig[17][0]=mp(-1,0);fig[17][1]=mp(-1,-1);
+	fig[18][0]=mp(0,1);fig[18][1]=mp(-1,1);
+	fig[19][0]=mp(-1,0);fig[19][1]=mp(0,1);
+}
+
+void cpp(int A[11][11],int B[11][11])
+{
+	int i,j;
+	for (i=1;i<=10;i++)
+		for (j=1;j<=10;j++)
+			A[i][j]=B[i][j];
+}
+int A[11][11]={0};
+int alr(int x,int y)
+{
+	if (1<=x&&x<=10&&1<=y&&y<=10)
+		return 1;
+	return 0;
+
+}
+int B[11][11]={0};
+pii mrk(int fn,int x,int y)
+{
+	int i,j;
+	//printf("address-- >%pu\n",&B[0][0]);
+	//printf("corrdinates got :%d,%d\n",x,y);
+	int xx=INT_MIN,yy=INT_MAX;
+	for (i=0;i<9;i++)
+	{
+		B[x+fig[fn][i].fi][y+fig[fn][i].se]=1;
+		/*printf("at index %d saved is :%d,%d\n",i,fig[fn][i].fi,fig[fn][i].se);
+		printf("maked %d,%d ::%d \n",x+fig[fn][i].fi,y+fig[fn][i].se,B[x+fig[fn][i].fi][y+fig[fn][i].se]);*/
+		yy=min(yy,y+fig[fn][i].se);
+		xx=max(xx,x+fig[fn][i].fi);
+		if (fig[fn][i]==mp(0,0))
+			break;
+	}	
+	return mp(xx,yy);
+
+}
+
+int chk(int fn,int x,int y)
+{
+	int i,j;
+	if (!(alr(x,y)&&B[x][y]==0))
+		return 0;
+	for (i=0;i<9;i++)
+	{
+		if (alr(x+fig[fn][i].fi,y+fig[fn][i].se)&&B[x+fig[fn][i].fi][y+fig[fn][i].se]==0);
+			//continue;
+		else return 0;
+		/*if (fig[fn][i]==mp(0,0))
+			break;*/
+	}	
+	return 1;
+}
+
+int clea()
+{
+	int i,j;
+	int cc=0;
+	vector<int>rl,cl;
+	for (i=1;i<=10;i++){
+		int f=1;
+		
+		for (j=1;j<=10;j++)
+		{
+			if (B[i][j]!=1)
+			{
+
+				f=0;
+				break;
+			}
+		}
+		if (f)
+		{
+			cc++;
+			//printf("clearing rrow:%d\n",i);
+			rl.pb(i);
+		}
+	}
+	for (j=1;j<=10;j++)
+	{
+		int f=1;
+		for (i=1;i<=10;i++)
+		{
+			if (B[i][j]!=1)
+			{
+				f=0;break;
+			}
+		}
+		if (f)
+		{
+			cc++;
+			//printf("clearing column %d\n",j);
+			cl.pb(j);			
+
+		}
+	}
+	int xol;
+	for (xol=0;xol<rl.size();xol++)
+	{
+		for (i=1;i<=10;i++)
+			B[rl[xol]][i]=0;
+	}
+	for (xol=0;xol<cl.size();xol++)
+
+	{
+		for (i=1;i<=10;i++)
+			B[i][cl[xol]]=0;
+	}
+	return cc;
+
+}
+void cp(int x)
+{
+	int i,j;
+	for (i=1;i<=10;i++)
+	{
+		for (j=1;j<=10;j++)
+		{
+			if (x)
+				A[i][j]=B[i][j];
+			else B[i][j]=A[i][j];
+		}
+	}
+
+}
+void disp(int A[11][11])
+{
+	int i,j;
+	printf("\n");
+	for (i=1;i<=10;i++)
+	{
+		for (j=1;j<=10;j++)
+			printf("%d ",A[i][j]);
+		printf("\n");
+	}
+
+}
+void cutoff(int B[11][11]);
+int sto[7][11][11];
+int val(char *s)
+{
+	int i,d=strlen(s);
+	//printf("from %s :",s);
+	for (i=0;i<d;i++)
+	{
+		if(s[i]=='-')
+			return 0;
+
+	}
+	return 1;
+}
+int karbe[11][11]={0};
+char pro[100];
+
+int main()
+{
+	ass();
+	int jay=0;
+	while (1)
+	{
+		//int B[11][11]={0};
+		//printf("inside addres::%pu\n",&B[0][0])
+
+		int i,j;
+		
+		pii f[3];
+		sc3(f[0].fi,f[1].fi,f[2].fi);
+		f[0].se=0;f[1].se=1;f[2].se=2;
+		if (f[0].fi==-1)
+			break;
+		/*if (jay>=1)
+		{
+			printf("-1 -1 -1 -1 -1 -1 \n");
+			fflush(stdout);
+			break;
+		}*/
+		jay++;
+		//sort(f,f+3);
+		int mx=-1;
+		int ind=-1;
+		char yop[100]={0};
+		int track=0;
+		while (1)
+		{
+
+			cp(0);
+			int xx,sc=0;
+			char outt[100]={0};
+
+			for (xx=0;xx<3;xx++)
+			{	
+				int fl=0;
+				assert(f[xx].fi!=-1);
+				for(i=1;i<=10;i++)
+				{
+					int takeout=0;
+					for (j=1;j<=10;j++)
+					{
+						int res=chk(f[xx].fi,i,j);
+						if (res)
+						{
+							pii ret=mrk(f[xx].fi,i,j);
+							sc+=clea();
+							/*if (sc>0)
+							{
+								disp(B);
+							}*/
+							fl=1;
+							assert(alr(ret.fi,ret.se));
+							pro[0]='\0';
+							sprintf(pro,"%d %d %d ",f[xx].se+1,ret.fi,ret.se);
+							strcat(outt,pro);
+							takeout=1;
+							break;
+						}
+					}
+					if (takeout)break;
+				}
+				if (!fl)
+				{
+					for (i=xx;i<3;i++)
+					{
+						pro[0]='\0';
+						sprintf(pro,"-1 -1 -1 ");
+						strcat(outt,pro);
+					}
+					//diefucker=1;
+					break;
+				}
+				
+			}
+			
+			//cp(1);
+			if (mx<sc)
+			{
+				mx=sc;
+				ind=track;
+				cpp(karbe,B);
+				//assert(val(outt));
+				strcpy(yop,outt);
+			}
+			track++;
+			/*if(!next_permutation(f,f+3))*/break;
+		}
+		//assert(track==6);
+		assert(strlen(yop)>9);
+		printf("%s\n",yop);
+		fflush(stdout);
+
+		//assert(ind>=0);
+		cpp(A,karbe);
+		if (!val(yop))break;
+		//disp(A);
+	}
+	fflush(stdout);
+	return 0;
+
+}
+void cutoff(int B[11][11])
+{
+	int i,j;
+	for(i=1;i<=10;i++)
+		for (j=1;j<=10;j++)
+			B[i][j]=0;
+
+}

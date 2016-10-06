@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define pi pair<int,int>
+#define F first
+#define S second
+#define MAXN 100005
+#define MOD 1000000007
+
+pair<int, pi > a[MAXN];
+int l[MAXN],r[MAXN];
+int main()
+{
+	int tt,n,i;
+	cin >>tt;
+	while(tt--) {
+		cin >> n;
+		for(i=0;i<n;i++)
+			scanf("%d",l+i);
+		for(i=0;i<n;i++){
+			scanf("%d",r+i);
+			a[i]=make_pair(l[i]*r[i],make_pair(r[i],-i));
+		}
+		sort(a,a+n);
+		printf("%d\n",1-a[n-1].S.S);
+	}
+	return 0;
+}

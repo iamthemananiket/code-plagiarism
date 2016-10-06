@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long a[100010];
+long long store[100010];
+double first[100010];
+long long mul = 1, mod = 1e9 + 7;
+long long power(int x, int p) {
+	if(p == 0) return 1;
+	long long tmp = power(x, p / 2);
+	tmp *= tmp;
+	tmp %= mod;
+	if(p & 1) return (tmp * x) % mod;
+	else return tmp;
+}
+int main() {
+	int n;
+	cin >> n;
+	for(int i = 0; i < n; i++) {
+		scanf("%lld", a + i);
+		store[i + 1] = 1;
+		first[i + 1] = 0;
+	}
+	for(int i = 1; i <= n; i++) for(int j = i; j < n; j += i) {
+		store[i] *= a[j];
+		store[i] %= mod; 
+		first[i] += log10(a[j]);
+	}
+	int q;
+	cin >> q;
+	int x, y, z;
+	double t;
+	while(q--) {
+		scanf("%d", &x);
+		if(x == 1) {
+			scanf("%d %d", &y, &z);
+			y--;
+			long long val1 = (z * power(a[y], mod - 2)) % mod;
+			double val2 = log10(z) - log10(a[y]);
+			for(int i = 1; i * i <= y; i++) {
+				if(y % i != 0) continue;
+				store[i] *= val1;
+				store[i] %= mod;
+				first[i] += val2;
+				if(y / i == i) continue;
+				store[y / i] *= val1;
+				store[y / i] %= mod;
+				first[y / i] += val2;
+			}
+			a[y] = z;
+		}
+		else {
+			scanf("%d", &y);
+			t = first[y] + log10(a[0]);
+			z = t;
+			t -= z;
+			z = pow(10, t);
+			if(abs(pow(10, t) - (z + 1)) < 1e-12) z++;
+			if(z >= 10) z = 1;
+			printf("%d %lld\n", z, (store[y] * a[0]) % mod);
+		}
+	}
+}

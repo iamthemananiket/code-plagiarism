@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+#define repn(i, n)	for(int i=1;i<=n;i++)
+#define rep(i, n)	for(int i=0;i<n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx 			10040
+
+using namespace std;
+
+string str;
+int n;
+int dp[mx][30];
+int vp[mx][30];
+
+int recur(int left, int alp){
+	if(left == 0) return 1;
+	if(dp[left][alp] != -1) return dp[left][alp];
+	int ret = 0;
+	int nxt = alp + 1;
+	if(nxt == 27) nxt = 1;
+	for(int i=1;;i++){
+		int f = i * (i + 1) / 2;
+		if(f > left) break;
+		int g = recur(left - f, nxt);
+		if(g == 1){
+			vp[left][alp] = i;
+			ret = 1;
+			break;
+		}
+	}
+	return dp[left][alp] = ret;
+}
+
+void print(int left, int alp){
+	if(left == 0) return;
+	int ret = 0;
+	int nxt = alp + 1;
+	if(nxt == 27) nxt = 1;
+	int g = vp[left][alp];
+	rep(i, g) printf("%c", alp - 1 + 'a');
+	print(left - (g * (g+1)/2), nxt);
+}
+
+int main(){
+	set(dp, -1);
+	set(vp, -1);
+	int tc;
+	cin >> tc;
+	while(tc--){
+		int n;
+		cin >> n;
+		int f = recur(n, 1);
+		print(n, 1);
+		printf("\n");
+	}
+	return 0;
+}

@@ -1,0 +1,93 @@
+/*
+__________           .___                       
+\______   \ ____   __| _/_  _  _______    ____  
+ |       _// __ \ / __ |\ \/ \/ /\__  \  /    \ 
+ |    |   \  ___// /_/ | \     /  / __ \|   |  \
+ |____|_  /\___  >____ |  \/\_/  (____  /___|  /
+        \/     \/     \/              \/     \/ 
+        
+handle	: rubabredwan (Codeforces/CodeChef/HackerRank)
+task 	: ...............
+
+*/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(z,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			2000050
+#define INF			1e9
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+ll sum(ll n){
+	return n * (n + 1) / 2;
+}
+
+ll bs(ll n, ll m){
+	ll low = 1, high = m, mid, ret = 1;
+	ll r1, r2 = sum(m);
+	while(low <= high){
+		mid = (low + high) / 2;
+		r1 = sum(mid-1);
+		//cout << "#$% " << mid << r1 << endl;
+		if((r2-r1)<= n){
+			ret = mid;
+			high = mid - 1;
+		}
+		else low = mid + 1;
+	}
+	return ret;
+}
+
+int main()
+{
+	ll tc, n1, n2, m;
+	scanf("%lld", &tc);
+	while(tc--){
+		scanf("%lld %lld %lld", &n1, &n2, &m);
+		ll n = min(n1, n2), ret = 0, x;
+		if(n < m) m=n;
+		x = bs(n, m);
+		//cout << "# " << x << endl;
+		ret = sum(m) - sum(x-1);
+		m = x-1;
+		n-=ret;		
+		while(m){
+			if(n < m) m= n;
+			if(n == m){
+				ret+=n;
+				n=0;
+				m=0;
+			}
+			else{
+				n-=m;
+				ret+=m;
+				m--;
+			}
+		}
+		//cout << "# " << ret << endl;
+		ret = (n1-ret)+(n2-ret);
+		printf("%lld\n", ret);
+	}
+	return 0;
+}

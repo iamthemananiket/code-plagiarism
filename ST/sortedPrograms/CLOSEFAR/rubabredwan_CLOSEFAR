@@ -1,0 +1,176 @@
+/*******************************
+*  Bismillahir Rahminir Rahim  * 
+*******************************/
+ 
+#include <bits/stdc++.h>
+ 
+#define READ(x)     freopen(x, "r", stdin) 
+#define WRITE(x)    freopen(x, "w", stdout)
+ 
+#define REP(i, n)   for(int i=0;i<n;i++)
+#define REPN(i, n)  for(int i=1;i<=n;i++)
+#define SET(i, n)   memset(i, n, sizeof(i))
+ 
+#define MAX			400050
+#define INF			(1 << 28)
+#define pb 			push_back
+#define inf  		1e9 
+
+using namespace std;
+ 
+const int BLOCK_SIZE = 500;
+ 
+struct data{
+	int l, r, id, lc;
+	bool operator < (const data &p) const{
+		int e1 = l / BLOCK_SIZE;
+		int e2 = p.l / BLOCK_SIZE;
+		if(e1 == e2) return r < p.r;
+		return e1 < e2;
+	}
+	data () {}
+	data (int a, int b, int c, int d){
+		l = a;
+		r = b;
+		id = c;
+		lc = d;
+	}
+};
+ 
+int n, m, A[MAX], st[MAX], en[MAX], t = 0, cnt = 0;
+int P[MAX][20], level[MAX], par[MAX];
+int ct[MAX], ret[MAX], id[MAX], fnt[MAX];
+int xx[MAX], yy[MAX];
+vector<data>query;
+vector<int>edge[MAX];
+map<int, int>mp; 
+multiset<int>fk;
+ 
+void dfs(int at, int past, int l){
+	t++;
+	st[at] = t;
+	id[t ] = at;
+	par[at] = past;
+	level[at] = l;
+	REP(i, edge[at].size()){
+		int u = edge[at][i];
+		if(u == past) continue;
+		dfs(u, at, l+1);
+	}
+	t++;
+	en[at] =  t;
+	id[ t] = at;
+}
+ 
+int get(int x, int y){
+	if(level[x] < level[y]) swap(x, y);
+	for(int i=17;i>=0;i--){
+		if(level[x] - (1 << i) >= level[y]){
+			x = P[x][i];
+		}
+	}
+	if(x == y) return x;
+	for(int i=17;i>=0;i--){
+		if(P[x][i] != -1 && P[x][i] != P[y][i]){
+			x = P[x][i], y = P[y][i];
+		}
+	}
+	return par[x];
+}
+ 
+void init(){
+	dfs(1, -1, 0);
+	REPN(i, n) P[i][0] = par[i];
+	for(int j=1;(1 << j) <= n;j++){
+		REPN(i, n){
+			if(P[i][j-1] != -1) P[i][j] = P[ P[i][j-1] ][ j-1 ];
+		}
+	}
+}
+ 
+void add(int at){
+	if(ct[at]){
+		fk.erase(fk.find(A[at]));
+	}
+	else{
+		fk.insert(A[at]);
+	}
+	ct[at] ^= 1;
+}
+ 
+void solve(){
+	sort(query.begin(), query.end());
+	int lptr = query[0].l, rptr = query[0].l-1;
+	REP(i, query.size()){
+		int x = query[i].l, y = query[i].r, l = query[i].lc;
+		while(lptr < x) add(id[lptr++]); 
+		while(lptr > x) add(id[--lptr]); 
+		while(rptr < y) add(id[++rptr]); 
+		while(rptr > y) add(id[rptr--]);
+		if(id[x] != l && id[y] != l) add(id[l]);
+		multiset<int>::iterator aa = fk.begin();
+		multiset<int>::iterator bb = fk.end(); bb--;
+	
+		ret[ query[i].id ] = *bb - *aa;
+		if(id[x] != l && id[y] != l) add(id[l]);
+	}
+}
+ 
+int fft(int x, int y, char f){
+	int lc = get(x, y);
+	vector<int>vec;
+	while(1){
+		vec.pb(A[x]);
+		if(x == lc) break;
+		x = P[x][0];
+	}
+	while(y != lc){
+		vec.pb(A[y]);
+		y = P[y][0];
+	}
+	sort(vec.begin(), vec.end());
+	if(f == 'F') return vec[vec.size()-1] - vec[0];
+	else{
+		int ret = inf;
+		for(int i=1;i<vec.size();i++) ret = min(ret, vec[i] - vec[i-1]);
+		return ret;
+	}
+}
+
+char cc[MAX];
+
+int main(){
+	int x, y, z; char c;
+	scanf("%d", &n);
+	REPN(i, n)	scanf("%d", &A[i]);
+	REP(i, n-1){
+		scanf("%d %d", &x, &y);
+		edge[x].pb(y);
+		edge[y].pb(x);
+	}
+	init();
+	scanf("%d", &m);
+	// cout << "~~~~~~~~~~~~~~ " << m << endl;
+	bool flag = false;
+	REP(i, m){
+		scanf(" %c", &cc[i]);
+		flag |= cc[i] == 'C';
+		scanf("%d %d", &xx[i], &yy[i]);
+		// cout << c << ' ' << x << ' ' << y << endl;
+		x = xx[i], y = yy[i];
+		if(st[x] > st[y]) swap(x, y);
+		int lc = get(x, y);
+		if(x == lc) query.push_back(data(st[x], st[y], i, lc));
+		else query.push_back(data(en[x], st[y], i, lc));
+	}
+	if(flag){
+		REP(i, m){
+			printf("%d\n", fft(xx[i], yy[i], cc[i]));
+		}
+	}
+	else{
+		solve();
+		REP(i, m) printf("%d\n", ret[i]);
+	}
+	return 0;
+} 

@@ -1,0 +1,105 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+using namespace std;
+// mylittledoge
+
+struct fin {
+	vector<long long> T;
+	fin(int N) {T.resize(N+1,0);}
+
+	int lastone(int x) {return x&(x^(x-1));}
+
+	void put(int pos, long long val) {
+		for(int i =pos+1; i < T.size(); i +=lastone(i)) T[i] +=val;}
+
+	long long get(int pos) {
+		long long ret =0;
+		for(int i =pos+1; i > 0; i -=lastone(i)) ret +=T[i];
+		return ret;}
+	};
+
+struct oper {
+	int l,r,id;
+	long long x,y;
+
+	bool operator<(const oper &O) const {
+		return l < O.l;}
+	};
+
+int main() {
+	int N,M;
+	scanf("%d",&N);
+	vector<long long> A(N),B(N);
+	for(int i =0; i < N; i++) scanf("%d",&A[i]);
+	for(int i =0; i < N; i++) scanf("%d",&B[i]);
+
+	scanf("%d",&M);
+	vector<oper> V(M);
+	for(int i =0; i < M; i++) {
+		scanf("%d %d %d %d",&V[i].l,&V[i].r,&V[i].x,&V[i].y);
+		V[i].l--;
+		V[i].x -=V[i].y*V[i].l;
+		V[i].id =i+1;}
+	sort(V.begin(),V.end());
+
+	fin Fadd(M+tisic);
+	fin Fsum(M+tisic);
+	vector<int> Es(N+1,0);
+	for(int i =0; i < M; i++) Es[V[i].r]++;
+	vector< vector<int> > ends(N+1);
+	for(int i =0; i <= N; i++) ends[i].dibs(Es[i]);
+	for(int i =0; i < M; i++) ends[V[i].r].push_back(i);
+	int a =0;
+	vector<int> ans(N,0);
+
+	int mi =M, mx =0;
+	for(int i =0; i < N; i++) {
+		while(a < M && V[a].l <= i) {
+			Fsum.put(V[a].id,V[a].x);
+			Fadd.put(V[a].id,V[a].y);
+			mx =max(mx,V[a].id);
+			mi =min(mi,V[a].id);
+			a++;}
+		ALL_THE(ends[i],it) {
+			Fsum.put(V[*it].id,-V[*it].x);
+			Fadd.put(V[*it].id,-V[*it].y);}
+		if(A[i] >= B[i]) continue;
+		if(Fsum.get(mx)+Fadd.get(mx)*i+A[i] < B[i]) {ans[i] =-1; continue;}
+		int ansA =mi-1, ansB =mx;
+		while(ansB-ansA > 1) {
+			int k =(ansA+ansB)>>1;
+			if(Fsum.get(k)+Fadd.get(k)*i+A[i] >= B[i]) ansB =k;
+			else ansA =k;}
+		ans[i] =ansB;}
+
+	for(int i =0; i < N; i++) printf("%d ",ans[i]);
+	printf("\n");
+	return 0;}
+
+// look at my code
+// my code is amazing

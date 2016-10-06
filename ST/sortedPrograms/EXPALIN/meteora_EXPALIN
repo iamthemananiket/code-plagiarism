@@ -1,0 +1,73 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+#define NMAX 500010
+
+using namespace std;
+
+char A[NMAX];
+
+char str[22];
+int S;
+
+int dp[22][22];
+
+int count(){
+	int i,j,n,ct = 0;
+	for(i =0 ; i < S; ++i) dp[i][i] = 1;
+	for(i = 0; i < S-1; ++i){
+		dp[i][i+1] = (str[i] == str[i+1]);
+		ct += dp[i][i+1];
+	}
+
+	for(n = 2; n < S; ++n){
+		for(i = 0, j = i+n; j < S; ++i,++j){
+			dp[i][j] = ((str[i] == str[j]) && (dp[i+1][j-1]));
+			ct += dp[i][j];
+		}
+	}
+	return ct;
+}
+
+
+int N;
+
+int compute(){
+
+	int i,p;
+	long long k;
+
+	int sol = N;
+
+	for(p = 2; p <= N; ++p){
+		for(i = 1; 1LL*i*p <= N; ++i){
+			if(!(i%p)) continue;
+			S = 0;
+			for(k= i; k <= N; k*=p){
+				str[S++] = A[k-1];
+			}
+			sol += count();
+		}
+	}
+
+	return sol;
+}
+
+int main(){
+
+	int t;
+
+	scanf("%d",&t);
+
+	while(t--){
+		scanf("%s",A);
+		N = strlen(A);
+		printf("%d\n",compute());
+	}
+
+
+	return 0;
+}

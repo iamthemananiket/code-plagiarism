@@ -1,0 +1,121 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-9
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+using namespace std;
+// mylittledoge
+
+long long ans, mod =1000000007;
+int N;
+
+long long pw(long long a, long long e) {
+	if(e <= 0) return 1;
+	long long x =pw(a,e/2);
+	x =(x*x)%mod;
+	if(x < 0) x +=mod;
+	if(e%2 != 0) x =(x*a)%mod;
+	if(x < 0) x +=mod;
+	return x;}
+long long pw_prec[5000];
+long long inv_prec[5000];
+vector<int> over[16][16];
+vector<int> under[16];
+int tt =0;
+
+void bt(int B, int P, vector<int> &poc, vector<int> seq) {
+	if(B == (1<<P)-1) {
+		if(N < seq.size()) return;
+		// k casti jasnych
+		long long akt =1;
+		vector<int> var(seq.size(),0);
+		ALL_THE(seq,it) {
+			long long x =(it == seq.begin())?poc[*it]:0;
+			if(it != seq.begin()) ALL_THE(over[*it][*(it-1)],jt) x +=poc[*jt];
+			akt =(akt*x)%mod;
+			if(akt < 0) akt +=mod;
+			ALL_THE(under[*it],jt) var[it-seq.begin()] +=poc[*jt];
+			}
+		// kazde z N-seq.size() cisel ma sum moznosti
+		for(int i =0; i < var.size(); i++) {
+			long long x =pw_prec[var[i]];
+			int k =0;
+			for(int j =0; j < var.size(); j++) if(i != j) {
+				long long y =abs(var[i]-var[j]);
+				if(y != var[i]-var[j]) k =1-k;
+				x =(x*inv_prec[y])%mod;}
+			ans =(ans+akt*x*(1-2*k))%mod;}
+		tt +=var.size()*var.size();
+		return;}
+	for(int i =B+1; i < (1<<P); i++) if(B == -1 || (i&B) == B) {
+		vector<int> seqN =seq;
+		seqN.push_back(i);
+		bt(i,P,poc,seqN);}
+	}
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+
+	vector< vector<int> > dec(2000);
+	for(int d =1; d <= 1000; d++) {
+		int x =d;
+		for(int i =2; i*i <= x; i++) if(x%i == 0) {
+			int a =1;
+			while(x%i == 0) {x /=i; a *=i;}
+			dec[d].push_back(a);}
+		if(x > 1) dec[d].push_back(x);}
+	for(int i =1; i <= 4000; i++) inv_prec[i] =pw(i,mod-2);
+
+	for(int j =0; j < 16; j++) for(int k =0; k < 16; k++)
+		for(int i =0; i < 16; i++) if((k|i) == j) over[j][k].push_back(i);
+	for(int j =0; j < 16; j++)
+		for(int i =0; i < 16; i++) if((i&j) == i) under[j].push_back(i);
+
+	int T;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		int M,L,R;
+		cin >> N >> M >> L >> R;
+		for(int i =1; i <= 1000; i++) pw_prec[i] =pw(i,N-1);
+		ans =0;
+
+		for(int d =L; d <= R; d++) {
+			int P =dec[d].size();
+			vector<int> poc(1<<P,M);
+			for(int i =(1<<P)-1; i >= 0; i--) {
+				for(int j =0; j < P; j++) if((i>>j)&1) poc[i] /=dec[d][j];
+				for(int j =i+1; j < (1<<P); j++) if((i&j) == i) poc[i] -=poc[j];}
+			bt(-1,P,poc,vector<int>(0));}
+
+		ans %=mod;
+		if(ans < 0) ans +=mod;
+		cout << ans << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing
+	

@@ -1,0 +1,169 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+
+template<int D> struct Tree {
+	const Tree<D - 1> *l, *r;
+	int cnt;
+	Tree(const Tree<D - 1> *l, const Tree<D - 1> *r) : l(l), r(r), cnt(0) {
+		if (l) cnt += l->cnt;
+		if (r) cnt += r->cnt;
+	}
+};
+template<> struct Tree<0> {
+	int cnt;
+	Tree(int cnt) : cnt(cnt) {}
+};
+
+template<int D> const Tree<D> *add(const Tree<D> *a, int pos) {
+	if (pos & 1 << (D - 1)) {
+		return new Tree<D>(a ? a->l : nullptr, add(a ? a->r : nullptr, pos ^ 1 << (D - 1)));
+	} else {
+		return new Tree<D>(add(a ? a->l : nullptr, pos), a ? a->r : nullptr);
+	}
+}
+const Tree<0> *add(const Tree<0> *a, int pos) {
+	return new Tree<0>((a ? a->cnt : 0) + 1);
+}
+
+
+template<int D> int solve1(const Tree<D> *a, const Tree<D> *b, int x) {
+	if (x & 1 << (D - 1)) {
+		int cnt = 0;
+		if (a && a->l) cnt -= a->l->cnt;
+		if (b && b->l) cnt += b->l->cnt;
+		if (cnt > 0) {
+			return solve1(a ? a->l : nullptr, b ? b->l : nullptr, x);
+		} else {
+			return 1 << (D - 1) | solve1(a ? a->r : nullptr, b ? b->r : nullptr, x);
+		}
+	} else {
+		int cnt = 0;
+		if (a && a->r) cnt -= a->r->cnt;
+		if (b && b->r) cnt += b->r->cnt;
+		if (cnt > 0) {
+			return 1 << (D - 1) | solve1(a ? a->r : nullptr, b ? b->r : nullptr, x);
+		} else {
+			return solve1(a ? a->l : nullptr, b ? b->l : nullptr, x);
+		}
+	}
+}
+int solve1(const Tree<0> *a, const Tree<0> *b, int k) {
+	return 0;
+}
+
+template<int D> int solve3(const Tree<D> *a, const Tree<D> *b, int x) {
+	if (x & 1 << (D - 1)) {
+		int ret = 0;
+		if (a && a->l) ret -= a->l->cnt;
+		if (b && b->l) ret += b->l->cnt;
+		ret += solve3(a ? a->r : nullptr, b ? b->r : nullptr, x ^ 1 << (D - 1));
+		return ret;
+	} else {
+		return solve3(a ? a->l : nullptr, b ? b->l : nullptr, x);
+	}
+}
+int solve3(const Tree<0> *a, const Tree<0> *b, int x) {
+	int ret = 0;
+	if (a) ret -= a->cnt;
+	if (b) ret += b->cnt;
+	return ret;
+}
+
+template<int D> int solve4(const Tree<D> *a, const Tree<D> *b, int k) {
+	int cnt = 0;
+	if (a && a->l) cnt -= a->l->cnt;
+	if (b && b->l) cnt += b->l->cnt;
+	if (k > cnt) {
+		return 1 << (D - 1) | solve4(a ? a->r : nullptr, b ? b->r : nullptr, k - cnt);
+	} else {
+		return solve4(a ? a->l : nullptr, b ? b->l : nullptr, k);
+	}
+}
+int solve4(const Tree<0> *a, const Tree<0> *b, int k) {
+	return 0;
+}
+
+const int D = 20;
+const Tree<D> *trees[500010];
+
+int main() {
+	
+	
+	for (int QRY; ~scanf("%d", &QRY); ) {
+		int n = 0;
+		trees[0] = nullptr;
+		for (; QRY--; ) {
+			switch (in()) {
+				case 0: {
+					const int x = in();
+					trees[n + 1] = add(trees[n], x);
+					++n;
+				} break;
+				case 1: {
+					const int u = in() - 1;
+					const int v = in();
+					const int x = in();
+					// printf("TODO (1) %d %d %d\n", u, v, x);
+					const int res = solve1(trees[u], trees[v], x);
+					printf("%d\n", res);
+				} break;
+				case 2: {
+					const int k = in();
+					n -= k;
+				} break;
+				case 3: {
+					const int u = in() - 1;
+					const int v = in();
+					const int x = in();
+					// printf("TODO (3) %d %d %d\n", u, v, x);
+					const int res = solve3(trees[u], trees[v], x);
+					printf("%d\n", res);
+				} break;
+				case 4: {
+					const int u = in() - 1;
+					const int v = in();
+					const int k = in();
+					// printf("TODO (4) %d %d %d\n", u, v, k);
+					const int res = solve4(trees[u], trees[v], k);
+					printf("%d\n", res);
+				} break;
+				default: assert(false);
+			}
+		}
+	}
+	
+	return 0;
+}
+

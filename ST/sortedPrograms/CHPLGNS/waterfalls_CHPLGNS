@@ -1,0 +1,43 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+struct Point { double x,y; };
+
+vector<pair<double,int> > polys;
+vector<Point> pts;
+int ans[100013];
+
+int main() {
+    int T;
+    scanf("%d",&T);
+    for (int t=0;t<T;t++) {
+        polys.clear();
+        int N;
+        scanf("%d",&N);
+        for (int i=0;i<N;i++) {
+            double cur = 0;
+            int M;
+            scanf("%d",&M);
+            pts.clear();
+            for (int j=0;j<M;j++) {
+                Point c;
+                scanf("%lf%lf",&c.x,&c.y);
+                pts.push_back(c);
+            }
+            for (int j=0;j<M;j++) {
+                cur+=pts[j].x*pts[(j+1)%M].y;
+                cur-=pts[j].x*pts[(j-1+M)%M].y;
+            }
+            polys.push_back(make_pair(cur<0 ? -cur : cur,i));
+        }
+        sort(polys.begin(),polys.end());
+        for (int i=0;i<N;i++) ans[polys[i].second] = i;
+        for (int i=0;i<N;i++) printf("%d ",ans[i]);
+        printf("\n");
+    }
+
+    return 0;
+}

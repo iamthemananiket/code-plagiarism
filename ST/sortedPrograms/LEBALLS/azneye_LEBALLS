@@ -1,0 +1,75 @@
+/*
+ * Codechef 2013 Ode2Code
+ * Shivam And Balls
+ * File:   LEBALLS.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 16, 2013, 11:15:39 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace LEBALLS {
+
+void solve(int test_num) {
+  int N, st[11], top = 0, at = 0;
+  string seq;
+  cin >> N >> seq;
+  for (int i = 0; i < N; i++) {
+    st[top++] = i + 1;
+    for (; top > 0 && st[top - 1] == seq[at] - '0'; at++)
+      top--;
+  }
+  if (top == 0)
+    cout << "Yes";
+  else
+    cout << "No";
+  cout << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  cin >> tests;
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  LEBALLS::solve();
+  return 0;
+}

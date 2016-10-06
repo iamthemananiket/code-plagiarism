@@ -1,0 +1,82 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int L = 405;
+
+int N, M;
+int C[410];
+
+int nxt[410][410];
+bool on[410];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		M = in();
+		for (int i = 0; i < M; ++i) {
+			C[i] = in();
+		}
+		fill(nxt[M], nxt[M] + L, M);
+		for (int i = M; i--; ) {
+			copy(nxt[i + 1], nxt[i + 1] + L, nxt[i]);
+			nxt[i][C[i]] = i;
+		}
+		int sz = 0;
+		fill(on, on + L, false);
+		int ans = 0;
+		for (int i = 0; i < M; ++i) {
+			if (!on[C[i]]) {
+				++ans;
+				for (; sz >= N; ) {
+					int lm = -1;
+					for (int l = 0; l < L; ++l) if (on[l]) {
+						if (!~lm || nxt[i][lm] < nxt[i][l]) {
+							lm = l;
+						}
+					}
+					--sz;
+					on[lm] = false;
+				}
+				++sz;
+				on[C[i]] = true;
+			}
+		}
+		printf("%d\n", ans);
+	}
+	
+	return 0;
+}
+

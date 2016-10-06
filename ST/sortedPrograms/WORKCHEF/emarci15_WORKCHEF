@@ -1,0 +1,43 @@
+#include <iostream>
+
+using namespace std;
+
+int Q;
+long long l,r;
+int k;
+
+long long db[10];
+bool v[10];
+
+int main()
+{
+    for(cin >> Q; Q--;) {
+        cin >> l >> r >> k;
+        if(r>1000000000ll) return 100;
+        fill(db,db+10,0);
+
+        for(long long i=l; i<=r; i++) {
+            int szjv(0);
+            long long ii(i);
+            fill(v,v+10,0);
+            while(ii) {
+                v[ii%10] = 1;
+                ii /= 10;
+            }
+
+            int sp(0);
+            for(int j=1; j<10; j++) {
+                if(!v[j]) continue;
+                if(i%j) continue;
+                sp++;
+            }
+            db[sp]++;
+        }
+
+        for(int i=k+1; i<10; i++) db[k] += db[i];
+        cout << db[k] << endl;
+    }
+
+
+    return 0;
+}

@@ -1,0 +1,65 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define fi first
+#define se second
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define sz(x) (int((x).size()))
+#define bit(x) (1 << (x))
+#define cnt1(x) (__builtin_popcount(x))
+
+template<class T, class U>
+inline void chkmax(T& x, U y) {
+	if (x < y) x = y;
+}
+
+template<class T, class U>
+inline void chkmin(T& x, U y) {
+	if (y < x) x = y;
+}
+
+typedef long long LL;
+typedef double DB;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+
+bool test(char *s) {
+	int c = 0;
+	for (int i = 0; s[i]; i++) {
+		if (s[i] == '(') c++;
+		else if (s[i] == ')') c--;
+		else return 0;
+		if (c < 0) return 0;
+	}
+	return c == 0;
+}
+
+char s[200005];
+
+int main() {
+	
+	int tc;
+	
+	for (scanf("%d", &tc); tc--; ) {
+		scanf("%s", s);
+		puts(test(s) ? "YES" : "NO");
+	}
+	return 0;
+}

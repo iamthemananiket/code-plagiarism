@@ -1,0 +1,65 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+int T;
+int N, K;
+int main() {
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d%d", &N, &K);
+	VI A(2*N+10), S(2*N+10);
+	REP (i, K) {
+	    int a, b;
+	    scanf("%d%d", &a, &b);
+	    A[a+b] = 1;
+	    S[a-b+N] = 1;
+	}
+
+	LL ans = (LL)N * N;
+	REP (i, 2*N+1) {
+	    if (A[i] == 1) {
+		if (i <= N) ans -= i - 1;
+		else ans -= 2*N - i + 1;
+	    }
+	    if (S[i] == 1) {
+		if (i <= N) ans -= i;
+		else ans -= 2*N - i;
+	    }
+	}
+
+	VI E(2*N+10), O(2*N+10);
+	REP (i, 2*N+9) {
+	    E[i+1] = E[i];
+	    O[i+1] = O[i];
+	    if ((i+N) % 2) O[i+1] += S[i];
+	    else E[i+1] += S[i];
+	}
+	
+	REP (i, 2*N+1) if (A[i]) {
+	    int k = min(i - 2, 2*N - i); // [-k, -k+2, ..., k+2, k]
+	    if (i % 2) {
+		ans += O[k+1+N] - O[-k+N];
+	    } else {
+		ans += E[k+1+N] - E[-k+N];
+	    }
+	}
+
+	printf("%lld\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	int T;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		int N,K;
+		cin >> N >> K;
+		vector< pair<int,int> > A(N);
+		int isz =0;
+		for(int i =0; i < N; i++) {
+			cin >> A[i].ff;
+			if(A[i].ff == 0) isz++;
+			A[i].ss =(A[i].ff > 0)?1:-1;
+			A[i].ff =abs(A[i].ff);}
+		sort(begin(A),end(A));
+		reverse(begin(A),end(A));
+		while(!A.empty() && A.back().ff == 0) A.pop_back();
+		N =A.size();
+		if(N < K) {cout << "0\n"; continue;}
+		long long pr0 =1, sgn =1, mod =1000000007;
+		for(int i =0; i < K; i++) {
+			pr0 =(pr0*A[i].ff)%mod;
+			if(pr0 < 0) pr0 +=mod;
+			sgn *=A[i].ss;}
+		if(sgn == 1) {cout << pr0 << "\n"; continue;}
+		if(K == N) {
+			pr0 =(sgn*pr0)%mod;
+			if(pr0 < 0) pr0 +=mod;
+			if(isz > 0) cout << "0\n"; 
+			else cout << pr0 << "\n";
+			continue;}
+		int a =K, b =K-1;
+		while(b >= 0 && A[K].ss == A[b].ss) b--;
+		while(a < N && A[K-1].ss == A[a].ss) a++;
+		if(b < 0 && a == N) {
+			if(isz > 0) {cout << "0\n"; continue;}
+			long long pr =1;
+			for(int i =N-1; i >= N-K; i--) pr =(pr*A[i].ss*A[i].ff)%mod;
+			if(pr < 0) pr +=mod;
+			cout << pr << "\n";
+			continue;}
+//		bez A[b], s A[K] > bez A[K-1], s A[a]: A[K]/A[b] > A[a]/A[K-1]
+		if(a == N || (b >= 0 && 1LL*A[a].ff*A[b].ff <= 1LL*A[K-1].ff*A[K].ff)) {
+			long long pr =A[K].ff;
+			for(int i =0; i < K; i++) if(i != b) pr =(pr*(A[i].ff))%mod;
+			if(pr < 0) pr +=mod;
+			cout << pr << "\n";}
+		else {
+			long long pr =A[a].ff;
+			for(int i =0; i < K-1; i++) pr =(pr*(A[i].ff))%mod;
+			if(pr < 0) pr +=mod;
+			cout << pr << "\n";}
+		}
+	return 0;}
+
+// look at my code
+// my code is amazing

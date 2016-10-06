@@ -1,0 +1,104 @@
+// A union by rank and path compression based program to detect cycle in a graph
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int MAX=1005;
+bool a[1005],z[1005];
+typedef struct subset
+{
+    int parent;
+    int rank;
+}sun;
+
+// A utility function to find set of an element i
+// (uses path compression technique)
+sun s[MAX];
+int find(int i)
+{
+    // find root and make root as parent of i (path compression)
+    if (s[i].parent != i)
+        s[i].parent = find(s[i].parent);
+
+    return s[i].parent;
+}
+
+// A function that does union of two sets of x and y
+// (uses union by rank)
+void Union( int x, int y)
+{
+    
+    // Attach smaller rank tree under root of high rank tree
+    // (Union by Rank)
+    if (s[x].rank < s[y].rank)
+        s[x].parent = y;
+    else if (s[x].rank > s[y].rank)
+        s[y].parent = x;
+
+    // If ranks are same, then make one as root and increment
+    // its rank by one
+    else
+    {
+        s[y].parent = x;
+        s[x].rank++;
+    }
+}
+
+int main(){
+   // std::ios::sync_with_stdio(false);
+ int t,l;
+ scanf("%d",&t);
+ int k=0;
+ int b,c,p;
+ int n,e;
+ while(t--){
+    k++;
+   scanf("%d%d",&n,&e);
+
+    p=1;
+    for(int i=1;i<=n;i++)
+        {
+            a[i]=true;
+            z[i]=false;
+            s[i].parent=i;
+            s[i].rank=1;
+        }
+    while(e){
+        scanf("%d %d",&b,&c);
+      if(a[b]==true)
+        a[b]=false;
+       else if(a[b]==false)
+        a[b]=true;
+       if(a[c]==true)
+        a[c]=false;
+       else if(a[c]==false)
+        a[c]=true;
+     //cout<<"hi"<<endl;
+       b=find(b);
+        c=find(c);
+      //  cout<<"hi"<<endl;
+        Union(b,c);
+        //z[b]=z[c]=true;
+        e=e-1;
+      
+    }
+    l=s[1].parent;
+    for(int i=1;i<=n;i++)
+    {
+        if(!a[i]||s[i].parent!=l){
+            p=0;
+            break;
+        }
+    }
+    printf("Case %d: ",k );
+    if(p)
+        printf("Yes\n");
+    else
+        printf("No\n");
+        //cout<<"No"<<endl;
+ }
+}   

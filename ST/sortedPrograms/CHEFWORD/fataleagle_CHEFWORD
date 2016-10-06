@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, K;
+
+struct matrix
+{
+    double data[26][26];
+    matrix()
+    {
+        for(int i=0; i<26; i++)
+            for(int j=0; j<26; j++)
+                data[i][j]=0.0;
+    }
+};
+
+matrix multiply(matrix a, matrix b)
+{
+    matrix c;
+    for(int i=0; i<26; i++)
+        for(int j=0; j<26; j++)
+            for(int k=0; k<26; k++)
+                c.data[i][j]+=a.data[i][k]*b.data[k][j];
+    return c;
+}
+
+void solve()
+{
+    int A, B;
+    char S[4], T[4];
+    scanf("%d%d%s", &N, &K, S);
+    A=strlen(S);
+    matrix P[32];
+    for(int i=0; i<26; i++)
+        for(int j=0; j<26; j++)
+            scanf("%lf", &P[0].data[i][j]);
+    for(int i=1; i<32; i++)
+        P[i]=multiply(P[i-1], P[i-1]);
+    matrix I;
+    for(int i=0; i<26; i++)
+        for(int j=0; j<26; j++)
+            I.data[i][j]=i==j;
+    for(int i=0; i<32; i++)
+        if((K>>i)&1)
+            I=multiply(I, P[i]);
+    set<string> has;
+    double ans=0.0;
+    for(int i=0; i<N; i++)
+    {
+        scanf("%s", T);
+        B=strlen(T);
+        if(A!=B)
+            continue;
+        if(has.count(string(T, T+B)))
+            continue;
+        has.insert(string(T, T+B));
+        double tmp=1.0;
+        for(int j=0; j<A; j++)
+            tmp*=I.data[S[j]-'a'][T[j]-'a'];
+        ans+=tmp;
+    }
+    printf("%.20lf\n", ans);
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+        solve();
+    return 0;
+}

@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+map<ll,int> m;
+map<pair<ll,int>,int> rep;
+
+int main()
+{
+	int t,n,a,b,c,d,ans;
+	cin>>t;
+	while(t--)
+	{
+		m.clear();
+		rep.clear();
+		ans=0;
+		scanf("%d",&n);
+		while(n--)
+		{
+			scanf("%d%d%d",&a,&b,&c);
+			d=__gcd(__gcd(a,b),c);
+			a/=d,b/=d,c/=d;
+			if(rep[make_pair(a*1000000000ll+b,c)])
+				continue;
+			else
+				rep[make_pair(a*1000000000ll+b,c)]=1;
+			c=__gcd(a,b);
+			a/=c,b/=c;
+			m[a*1000000000ll+b]++;
+			ans=max(ans,m[a*1000000000ll+b]);
+		}
+		printf("%d\n",ans);
+	}
+}

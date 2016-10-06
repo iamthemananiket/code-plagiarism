@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define mod 1000000007
+
+int h[1000001],m[1000001];
+
+bool verify(int t, int n){
+	if(n==2 && h[0]+t*m[0]==h[1]+t*m[1])
+		return false;
+	for(int i=1;i<n-1;i++){
+		if(h[i-1]+t*m[i-1]<=h[i]+t*m[i] && h[i]+t*m[i]<=h[i+1]+t*m[i+1])
+			return false;
+		if(h[i-1]+t*m[i-1]>=h[i]+t*m[i] && h[i]+t*m[i]>=h[i+1]+t*m[i+1])
+			return false;
+	}
+	return true;
+}
+
+void solve(int n, bool sgn, int &l1, int &r1) {
+	l1=0;r1=mod;
+	for(int i=0;i<n-1;i++,sgn^=1){
+		if(sgn){	//H_i > H_i+1
+			if(m[i]<=m[i+1] && h[i]<=h[i+1])
+				r1=l1=-1;
+			else if(m[i]<m[i+1])
+				r1=min(r1,(h[i]-h[i+1]-1)/(m[i+1]-m[i]));
+			else if(m[i]>m[i+1] && h[i+1]>=h[i])
+				l1=max(l1,1+((h[i+1]-h[i])/(m[i]-m[i+1])));
+		}
+		else{		//H_i < H_i+1
+			if(m[i]<m[i+1] && h[i]>=h[i+1])
+				l1=max(l1,1+((h[i]-h[i+1])/(m[i+1]-m[i])));
+			else if(m[i]>=m[i+1] && h[i]>=h[i+1])
+				r1=l1=-1;
+			else if(m[i]>m[i+1])
+				r1=min(r1,(h[i+1]-h[i]-1)/(m[i]-m[i+1]));
+		}
+		//cout<<i<<" :: "<<l1<<" "<<r1<<"\n";
+	}
+	if(l1>r1)
+		l1=r1=-1;
+}
+
+vector< pair<int,int> > res;
+int main(){
+	int t,n,i;
+	int l1,r1,l2,r2;
+	cin >> t;
+	while(t--){
+		scanf("%d",&n);
+		for(i=0;i<n;i++)
+			scanf("%d %d",h+i,m+i);
+		
+		solve(n,0,l1,r1);
+		solve(n,1,l2,r2);
+
+		if(l1>l2){
+			swap(l1,l2);
+			swap(r1,r2);
+		}
+		res.clear();
+		if(l2==-1)
+			printf("0\n");
+		else if(l1==-1){
+			res.push_back(make_pair(l2,r2));
+			printf("1\n%d ",l2);
+			if(r2==mod)	printf("Inf\n");
+			else		printf("%d\n",r2);
+		}
+		else if(r1<l2-1){
+			res.push_back(make_pair(l1,r1));
+			res.push_back(make_pair(l2,r2));
+			printf("2\n%d %d\n%d ",l1,r1,l2);
+			if(r2==mod)	printf("Inf\n");
+			else		printf("%d\n",r2);
+		}
+		else{
+			r2=max(r1,r2);
+			res.push_back(make_pair(l1,r2));
+			printf("1\n%d  ",l1);
+			if(r2==mod)	printf("Inf\n");
+			else		printf("%d\n",r2);
+		}
+		/*if(res.size()>0){
+			for(i=0;i<res[0].first;i++)
+				if(verify(i,n))
+					cout<<"false negative "<<i<<"\n";
+			for(i=res[0].first;i<=res[0].second && i<=10000;i++)
+				if(!verify(i,n))
+					cout<<"false positive "<<i<<"\n";
+			if(res.size()==1)
+				for(i=res[0].second+1; i<=10000;i++)
+					if(verify(i,n))
+						cout<<"false negative "<<i<<"\n";
+		}
+
+		if(res.size()>1){
+			for(i=res[0].second+1;i<res[1].first;i++)
+				if(verify(i,n))
+					cout<<"false negative "<<i<<"\n";
+			for(i=res[1].first;i<=res[1].second && i<=10000;i++)
+				if(!verify(i,n))
+					cout<<"false positive "<<i<<"\n";
+			for(i=res[1].second+1; i<=10000;i++)
+				if(verify(i,n))
+					cout<<"false negative "<<i<<"\n";
+		}*/
+	}
+}

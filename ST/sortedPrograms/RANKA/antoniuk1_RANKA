@@ -1,0 +1,167 @@
+#include <iostream>
+#include <vector>
+#include <math.h>
+#include <algorithm>
+#include <set>
+#include <queue>
+#include <memory.h>
+
+using namespace std;
+
+// A - 1, B - 2
+int board[10][10];
+
+void clear(int color) {
+    for(int i = 0; i < 9; ++i)
+        for(int j = 0; j < 9; ++j)
+        if (board[i][j] == color)
+            board[i][j] = 0;
+}
+
+void print() {
+    for(int i = 0; i < 9; ++i) {
+        for(int j = 0; j < 9; ++j)
+            cout << board[i][j];
+        cout << "\n";
+    }
+}
+
+bool make_move(int &x, int &y, int who) {
+    if (who == 1) {
+        for(int j = 0; j < 9; ++j)
+            for(int i = 0; i < 9; ++i)
+                if (board[i][j] == 0 && (i+j < 16)) {
+                    board[i][j] = 1;
+                    x = i+1, y = j+1;
+                    return 1;
+                }
+        return 0;
+    }
+    
+    bool first = true;
+    for(int j = 0; j < 9; ++j)
+        for(int i = 0; i < 9; ++i) {
+            if (board[i][j] == 1) continue;
+            
+            if (board[i][j] == 0 && first) {
+                first = false;
+                continue;
+            }
+            
+            if (board[i][j] == 2) continue;
+            
+            board[i][j] = 2;
+            x = i+1, y = j+1;
+            return 1;
+        }
+    return 0;
+}
+
+bool make_move1(int &x, int &y, int who) {
+    if (who == 2) {
+        for(int j = 8; j >= 0; --j)
+            for(int i = 8; i >= 0; --i)
+                if (board[i][j] == 0 && (i+j > 0)) {
+                    board[i][j] = 2;
+                    x = i+1, y = j+1;
+                    return 1;
+                }
+        return 0;
+    }
+    
+    bool first = true;
+    for(int j = 8; j >= 0; --j)
+        for(int i = 8; i >= 0; --i) {
+            if (board[i][j] == 2) continue;
+            
+            if (board[i][j] == 0 && first) {
+                first = false;
+                continue;
+            }
+            
+            if (board[i][j] == 1) continue;
+            
+            board[i][j] = 1;
+            x = i+1, y = j+1;
+            return 1;
+        }
+    return 0;
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+   // freopen("input.txt","w",stdout);
+    int x, y;
+    int CNT = 1;
+    int move = 2;
+    
+    make_move(x, y, 1);
+    cout << x << " " << y << "\n";
+
+    for(int i = 0; ; ++i) {
+        if (!make_move(x, y, 2)) {
+            clear(2);
+            if (!make_move(x, y, 1)) break;
+            
+            if (move == 2) {
+                CNT++;
+                cout << "0 0\n";
+            }
+            CNT++;
+            cout << x << " " << y << "\n";
+            move = 2;
+        }
+        else {
+            if (move == 1) {
+                CNT++;
+                cout << "0 0\n";
+            }
+            CNT++;
+            cout << x << " " << y << "\n";
+            move = 1;
+        }
+        /*if (abs(CNT-6320) <= 10) {
+            cout << CNT << "\n";
+            print();
+        }*/
+    }
+    
+    for(int i = 0; i < 9; ++i)
+        for(int j = 0; j < 9; ++j)
+            board[i][j] = 0;
+    board[8][8] = 2;
+    
+    cout << 9 << " " << 9 << "\n";
+    move = 1;
+    
+    //print();
+    
+    //return 0;
+    for(int i = 0; ; ++i) {
+        if (!make_move1(x, y, 1)) {
+            clear(1);
+            if (!make_move1(x, y, 2)) break;
+            
+            if (move == 1) {
+                CNT++;
+                cout << "0 0\n";
+            }
+            CNT++;
+            cout << x << " " << y << "\n";
+            move = 1;
+        }
+        else {
+            if (move == 2) {
+                CNT++;
+                cout << "0 0\n";
+            }
+            CNT++;
+            cout << x << " " << y << "\n";
+            move = 2;
+        }
+        if (CNT > 10000) break;
+        //print();
+    }
+    
+    return 0;
+}

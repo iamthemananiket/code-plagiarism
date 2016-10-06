@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 100000 + 3;
+
+int mex(int state, int N)
+{
+    if (state == N)
+        return 0;
+
+    unordered_set<int> Set;
+
+    if (state + 1 <= N)
+        Set.insert(mex(state + 1, N));
+
+    if (state + 2 <= N)
+        Set.insert(mex(state + 2, N));
+
+    int s = 0;
+
+    while (Set.count(s))
+        s++;
+
+    return s;
+}
+
+int main()
+{
+
+    #ifndef ONLINE_JUDGE
+        ifstream cin("data.in");
+    #endif // ONLINE_JUDGE
+
+    ios_base::sync_with_stdio(false);
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        int N, M;
+        cin >> N >> M;
+
+        int xorSum = ((N - 1) % 4) ^ ((M - 1) % 3);
+
+        if (xorSum)
+            cout << "Tuzik\n";
+        else
+            cout << "Vanya\n";
+    }
+
+    return 0;
+}

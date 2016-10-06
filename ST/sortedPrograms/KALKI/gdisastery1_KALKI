@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 400 + 1;
+
+int N;
+int x[MAX_N], y[MAX_N];
+
+double dist(int i, int j){
+  return hypot(x[i] - x[j], y[i] - y[j]);
+}
+
+priority_queue< pair<double, pair<int, int> > > pq;
+
+bool in[MAX_N];
+
+void solve(){
+  scanf("%d", &N);
+  for(int i = 0; i < N; i++)
+    scanf("%d%d", x + i, y + i);
+  memset(in, 0, sizeof in);
+  pq.push(mp(0, mp(0, 0)));
+  while(!pq.empty()){
+    pair<int, int> ii = pq.top().second;
+
+    pq.pop();
+    if(in[ii.first])
+      continue;
+    if(ii.first != ii.second){
+      printf("%d %d\n", ii.first + 1, ii.second + 1);
+    }
+    in[ii.first] = true;
+    for(int j = 0; j < N; j++){
+      if(!in[j]){
+	pq.push(mp(dist(ii.first, j), mp(j, ii.first)));
+      }
+    }
+  }
+}
+
+int main(){
+  int T;
+  scanf("%d", &T);
+  while(T--){
+    solve();
+  }
+  return 0;
+}

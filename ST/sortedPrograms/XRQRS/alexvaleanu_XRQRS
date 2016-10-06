@@ -1,0 +1,379 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+class Reader
+{
+public:
+
+    Reader( FILE *_stream, const int _size = ( 1 << 20 ) )
+    {
+        stream = _stream;
+        buffer = new char[_size];
+        size = _size;
+        pointer = 0;
+
+        fread( buffer, size, 1, stream );
+    }
+
+    template <class T>
+    T nextValue()
+    {
+        T value = 0;
+        bool negative = false;
+
+        while ( !isdigit( buffer[pointer] ) )
+                nextPosition();
+
+        if ( buffer[pointer] == '-' )
+        {
+            negative = true;
+            nextPosition();
+        }
+
+        while ( isdigit( buffer[pointer] ) )
+        {
+            value = value * 10 + buffer[pointer] - '0';
+            nextPosition();
+        }
+
+        if ( negative )
+            value = -value;
+
+        return value;
+    }
+
+    template <class T>
+    Reader& operator >> ( T &value )
+    {
+        value = nextValue<T>();
+        return *this;
+    }
+
+private:
+
+    void nextPosition()
+    {
+        if ( ++pointer == size )
+        {
+            fread( buffer, size, 1, stream );
+            pointer = 0;
+        }
+    }
+
+    char *buffer;
+    FILE *stream;
+    int pointer, size;
+};
+
+struct Trie
+{
+    struct TrieNode
+    {
+        TrieNode *sons[2];
+        int cnt;
+        int dim;
+
+        TrieNode()
+        {
+            cnt = 0;
+            dim = 0;
+            sons[0] = sons[1] = NULL;
+        }
+    };
+
+    Trie()
+    {
+        R = new TrieNode();
+    }
+
+    TrieNode *R;
+
+    void insert( TrieNode *&root, int b, int nr )
+    {
+        if ( b == -1 )
+        {
+            root->cnt++;
+            root->dim = root->cnt;
+        }
+        else
+        {
+            int p = (bool)( nr & ( 1 << b ) );
+
+            if ( root->sons[p] == NULL )
+                root->sons[p] = new TrieNode();
+
+            insert( root->sons[p], b - 1, nr );
+
+            root->dim = 0;
+
+            if ( root->sons[0] != NULL )
+                root->dim += root->sons[0]->dim;
+
+            if ( root->sons[1] != NULL )
+                root->dim += root->sons[1]->dim;
+        }
+    }
+
+    void erase( TrieNode *&root, int b, int nr )
+    {
+        if ( b == -1 )
+        {
+            root->cnt--;
+            root->dim = root->cnt;
+        }
+        else
+        {
+            int p = (bool)( nr & ( 1 << b ) );
+
+            if ( root->sons[p] != NULL )
+                insert( root->sons[p], b - 1, nr );
+
+            root->dim = 0;
+
+            if ( root->sons[0] != NULL )
+                root->dim += root->sons[0]->dim;
+
+            if ( root->sons[1] != NULL )
+                root->dim += root->sons[1]->dim;
+        }
+    }
+
+    void kth_order( TrieNode *&root, int b, int k, int &sol )
+    {
+        if ( b != -1 )
+        {
+            if ( root->sons[0] == NULL || root->sons[1] == NULL )
+            {
+                if ( root->sons[0] != NULL )
+                {
+                    kth_order( root->sons[0], b - 1, k, sol );
+                }
+
+                if ( root->sons[1] != NULL )
+                {
+                    sol |= ( 1 << b );
+                    kth_order( root->sons[1], b - 1, k, sol );
+                }
+
+                if ( root->sons[0] == NULL && root->sons[1] == NULL )
+                    cerr << "ERROR";
+            }
+            else
+            {
+                if ( k <= root->sons[0]->dim )
+                    kth_order( root->sons[0], b - 1, k, sol );
+                else
+                {
+                    sol |= ( 1 << b );
+                    kth_order( root->sons[1], b - 1, k - root->sons[0]->dim, sol );
+                }
+            }
+        }
+
+    }
+
+    void max_xor( TrieNode *&root, int b, int numar, int &sol )
+    {
+        if ( b == -1 || ( root->sons[0] == NULL && root->sons[1] == NULL ) ) return;
+
+        bool p = numar & ( 1 << b );
+
+        if ( root->sons[p ^ 1] != NULL )
+        {
+            sol ^= ( 1 << b );
+            max_xor( root->sons[p ^ 1], b - 1, numar, sol );
+        }
+        else
+        {
+            max_xor( root->sons[p], b - 1, numar, sol );
+        }
+    }
+
+    void lessThan( TrieNode *&root, int b, int numar, int &sol )
+    {
+        if ( !root || b == -1 ) return;
+
+        bool p = numar & ( 1 << b );
+
+        if ( p == 0 )
+            lessThan( root->sons[0], b - 1, numar, sol );
+        else
+        {
+
+            if ( root->sons[0] )
+                sol += root->sons[0]->dim;
+
+            lessThan( root->sons[1], b - 1, numar, sol );
+        }
+    }
+
+    void insert( int number )
+    {
+        insert( R, 18, number );
+    }
+
+    void erase( int number )
+    {
+        erase( R, 18, number );
+    }
+
+    int kth_order( int k )
+    {
+        int sol = 0;
+        kth_order( R, 18, k, sol );
+        return sol;
+    }
+
+    int max_xor( int x )
+    {
+        int sol = 0;
+        max_xor( R, 18, x, sol );
+        return sol;
+    }
+
+    int lessThan( int x )
+    {
+        int sol = 0;
+        lessThan( R, 18, x, sol );
+        return sol;
+    }
+};
+
+const int Nmax = 5e5 + 1;
+
+Trie A[4 * Nmax];
+
+int Arb[Nmax], N;
+int aux[Nmax];
+
+void insert( int nod, int st, int dr, int pos, int value )
+{
+    A[nod].insert( value );
+
+    if ( st == dr )
+    {
+    }
+    else
+    {
+        int m = ( st + dr ) / 2;
+
+        if ( pos <= m )
+            insert( 2 * nod, st, m, pos, value );
+        else
+            insert( 2 * nod + 1, m + 1, dr, pos, value );
+    }
+}
+
+void erase( int nod, int st, int dr, int pos, int value )
+{
+    A[nod].erase( value );
+
+    if ( st == dr )
+    {
+    }
+    else
+    {
+        int m = ( st + dr ) / 2;
+
+        if ( pos <= m )
+            erase( 2 * nod, st, m, pos, value );
+        else
+            erase( 2 * nod + 1, m + 1, dr, pos, value );
+    }
+}
+
+int M;
+
+int main()
+{
+    ///freopen("data.in", "r", stdin);
+
+    Reader in( stdin );
+
+    ios_base::sync_with_stdio( false );
+
+    in >> M;
+
+    for ( int p = 1; p <= M; ++p )
+    {
+        int tip, L, R, k, x;
+
+        in >> tip;
+
+        switch( tip )
+        {
+            case 0:
+                {
+                    in >> x;
+
+                    Arb[ ++N ] = x;
+
+                    break;
+                }
+
+            case 1:
+                {
+                    in >> L >> R >> x;
+
+                    int best = 0;
+                    int p = 0;
+
+                    for ( int i = L; i <= R; ++i )
+                    {
+                        if ( best < ( Arb[i] ^ x ) )
+                        {
+                            best = Arb[i] ^ x;
+                            p = Arb[i];
+                        }
+                    }
+
+                    printf("%d\n", p);
+
+                    break;
+                }
+
+            case 2:
+                {
+                    in >> k;
+
+                    N -= k;
+
+                    break;
+                }
+
+            case 3:
+                {
+                    in >> L >> R >> x;
+
+                    int c = 0;
+
+                    for ( int i = L; i <= R; ++i )
+                        c += ( Arb[i] <= x );
+
+                    printf("%d\n", c);
+
+                    break;
+                }
+
+            case 4:
+                {
+                    in >> L >> R >> k;
+
+                    int c = 0;
+
+                    for ( int i = L; i <= R; ++i )
+                        aux[ ++c ] = Arb[i];
+
+                    nth_element( aux + 1, aux + k, aux + c + 1 );
+
+                    printf("%d\n", aux[k]);
+
+                    break;
+                }
+        }
+    }
+
+    return 0;
+}

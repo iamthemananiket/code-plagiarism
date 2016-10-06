@@ -1,0 +1,200 @@
+/* @nazarbek.altybay */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+
+#define pii pair<int, int>
+
+#define pb push_back
+#define mp make_pair
+
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef vector<vector<int>> matrix;
+typedef vector<vector<ll>> matrixLL;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int INF = (int) 1e9 + 7;
+const int MAXN = (int) 2e6 + 7;
+
+int cases, n, k;
+
+int f[MAXN][9];
+int p[MAXN][9];
+
+inline matrix mult(const matrix &a, const matrix &b) {
+  int sz = a.size();
+  matrixLL res;
+  matrix ret;
+  res.resize(sz);
+  ret.resize(sz);
+  ll mod = 1ll * INF * INF;
+  for (int i = 0; i < sz; i++) {
+    res[i].resize(sz);
+    ret[i].resize(sz);
+  }
+  for (int k = 0; k < sz; k++) {
+    for (int i = 0; i < sz; i++) {
+      for (int j = 0; j < sz; j++) {
+        res[i][j] = (res[i][j] + 1ll * a[i][k] * b[k][j]);
+        if (res[i][j] < 0) res[i][j] += mod;
+        if (res[i][j] >= mod) res[i][j] -= mod;
+      }
+    }
+  }
+  for (int i = 0; i < sz; i++)
+    for (int j = 0; j < sz; j++)
+      ret[i][j] = res[i][j] % INF;
+  return ret;
+}
+
+inline matrix bin(matrix a, int deg) {
+  int sz = a.size();
+  matrix res;
+  res.resize(sz);
+  for (int i = 0; i < sz; i++)
+    res[i].resize(sz);
+  for (int i = 0; i < sz; i++)
+    for (int j = 0; j < sz; j++)
+      res[i][j] = (i == j);
+  while (deg) {
+    if (deg & 1) res = mult(res, a);
+    deg >>= 1;
+    a = mult(a, a);
+  }
+  return res;
+}
+
+inline int get(const vector<int> &rec, vector<int> init, const int &pos) {
+  int sum = 0;
+  int res = 0;
+  for (int i = 0; i < min((int) init.size(), pos + 1); i++) {
+    sum = (sum + init[i]) % INF;
+    res = (res + sum) % INF;
+  }
+  if (pos < init.size()) {
+    return res;
+  }
+  init.pb(sum);
+  init.pb(res);
+  matrix a;
+  int sz = rec.size() + 2;
+  a.resize(sz);
+  for (int i = 0; i < sz; i++)
+    a[i].resize(sz);
+  for (int i = 0; i < sz - 3; i++)
+    for (int j = 0; j < sz; j++)
+      a[i][j] = (j == i + 1);
+  for (int i = 0; i < sz - 2; i++) {
+    a[sz - 3][i] = a[sz - 2][i] = a[sz - 1][i] = rec[i];
+  }
+  a[sz - 2][sz - 2] = a[sz - 1][sz - 2] = a[sz - 1][sz - 1] = 1;
+  a = bin(a, pos - (int)init.size() + 3);
+  int ans = 0;
+  for (int i = 0; i < sz; i++) {
+    ans = (ans + 1ll * a[sz - 1][i] * init[i]) % INF;
+    if (ans < 0) ans += INF;
+  }
+  return ans;
+}
+
+matrix cnk;
+
+int calc(int n, int k) {
+  matrix ans = bin(cnk, n);
+  return ans[7][7 - k];
+}
+
+int main() {
+  #ifdef LOCAL
+    freopen("in", "r", stdin);
+  #endif
+
+  cnk.resize(8);
+  for (int i = 0; i < 8; i++)
+    cnk[i].resize(8);
+  cnk[0][0] = 1;
+  for (int i = 1; i < 8; i++) {
+    cnk[i][i] = cnk[i][i - 1] = 1;
+  }
+
+  p[0][0] = 1;
+  for (int i = 1; i <= 100; i++) {
+    for (int j = 1; j <= min(7, i); j++) {
+      if (j == i) p[i][j] = 1;
+      else p[i][j] = (p[i - 1][j - 1] + p[i - j][j]) % INF;
+    }
+  }
+  f[0][0] = 1;
+  for (int i = 1; i <= 100; i++) {
+    f[i][0] = 1;
+    for (int j = 1; j <= min(i, 7); j++) {
+      if (i == j) f[i][j] = 1;
+      else f[i][j] = (f[i - 1][j] + f[i - 1][j - 1]) % INF;
+    }
+  }
+  vector<int> rec[7];
+  vector<int> init[7];
+  // j = 6
+  rec[6] = {1,1,0,0,-1,0,-2,0,1,1,1,1,0,-2,0,-1,0,0,1,1,-1};
+  // j = 5
+  rec[5] = {1,1,0,0,-1,-1,-1,1,1,1,0,0,-1,-1,1};
+  // j = 4
+  rec[4] = {1,1,0,0,-2,0,0,1,1,-1};
+  // j = 3
+  rec[3] = {1, 1, 0, -1, -1, 1};
+  // j = 2
+  rec[2] = {1,1,-1};
+  for (int j = 2; j <= 6; j++) {
+    for (int i = j; i < j+rec[j].size(); i++) {
+      init[j].pb(p[i][j]);
+    }
+    reverse(rec[j].begin(), rec[j].end());
+  }
+  scanf("%d", &cases);
+  //cases=500;
+  while (cases--) {
+    scanf("%d%d", &n, &k);
+    //n=1000000;
+    //k=7;
+    int S = k * (k - 1) / 2;
+    int ans = calc(n, k);
+    int bad = 0;  
+    int upto = n - 1 + k - S;
+    upto -= k - 1;
+    if (upto >= 0)
+      bad = get(rec[k - 1], init[k - 1], upto);
+
+    ans -= bad;
+    if (ans < 0) ans += INF;
+    printf("%d\n", ans);
+  }
+
+  return 0;
+}

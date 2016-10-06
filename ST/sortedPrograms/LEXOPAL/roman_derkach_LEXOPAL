@@ -1,0 +1,49 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ int t,i,j,tt;
+ string s;
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>t;
+     while(t--)
+     {
+        cin>>s;
+        i = 0;
+        j = (int)s.size() - 1;
+        tt=0;
+         while(i<=j)
+         {
+             if(i==j)
+             {
+                 if(s[i] == '.') s[i] = 'a';
+             } else
+             if(s[i] == s[j])
+             {
+                if(s[i] == '.') s[i] = s[j] = 'a';
+             } else
+             if(s[i]!=s[j])
+             {
+                if(s[i] =='.') s[i] = s[j]; else
+                    if(s[j] =='.') s[j] = s[i]; else
+                {
+                    tt=1;
+                    break;
+                }
+             }
+             ++i;
+         --j;
+         }
+         if(tt) cout<<-1; else cout<<s;
+         cout<<'\n';
+
+     }
+
+    return 0;
+  }

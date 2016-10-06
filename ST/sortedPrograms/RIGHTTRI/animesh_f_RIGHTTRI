@@ -1,0 +1,27 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 1e5 + 5;
+
+int main(){
+	int t;
+	cin >> t;
+	while(t--){
+		int hypotenuse;
+		long long area;
+		cin >> hypotenuse >> area;
+		double h = hypotenuse, a = area;
+		double y = h * h + sqrtl(h * h * h * h - 16.0 * a * a);
+		y /= 2.0;
+		if(!(y >= 0)) cout << "-1\n";
+		else{
+			double b = sqrtl(y);
+			double l = 2.0 * a / b;
+			vector < double > sides;
+			sides.push_back(b), sides.push_back(l), sides.push_back(h);
+			sort(sides.begin(), sides.end());
+			cout << fixed << setprecision(10) << sides[0] << ' ' << sides[1] << ' ' << sides[2];
+			cout << endl;
+		}
+	}
+}

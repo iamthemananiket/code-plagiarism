@@ -1,0 +1,84 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <cstdint>
+#include <iostream>
+#include <string>
+#define BB 100001LL
+#define MOD 1000000007LL
+#define SIZE 100005
+#define SZ 32
+
+using namespace std;
+typedef long long int ll;
+
+static uint32_t bit[SIZE][SZ+5],ft[SIZE];
+char A[SIZE],B[SIZE];
+
+static inline int32_t __attribute__((always_inline))
+_mm_popcnt_u32(uint32_t x){
+	int32_t result;
+	__asm__("popcnt %1, %0" : "=r" (result) : "r" (x));
+	return result;
+}
+int main()
+{
+	scanf("%s",&A);
+	int n=strlen(A);
+	for(int i=0;i<n;i++)
+	{
+		bit[i][0]=0;
+		for(int j=1;j<=SZ;j++)
+		{
+			int to=i+j-1;
+			if(to<n)
+			{
+				bit[i][j]=bit[i][j-1]<<1;
+				if(A[to]=='1') bit[i][j]++;
+			}
+			else break;
+		}
+	}
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%s",&B);
+		int m=strlen(B);
+		static uint32_t zan=0;
+		int sz=0,len=m%SZ;
+		for(int i=0;i<m;i+=SZ)
+		{
+			ft[sz]=0;
+			int to=min(i+SZ,m);
+			for(int j=i;j<to;j++)
+			{
+				ft[sz]<<=1;
+				if(B[j]=='1') ft[sz]++;
+			}
+			sz++;
+			if(to!=i+SZ)
+			{
+				sz--;
+				zan=ft[sz];
+			}
+		}
+		ll ret=0;
+		for(int i=0;i+m<=n;i++)
+		{
+			int cnt=0;
+			for(int j=0;j<sz;j++)
+			{
+				cnt+=_mm_popcnt_u32(bit[i+j*SZ][SZ]^ft[j]);
+			}
+			if(len!=0) cnt+=_mm_popcnt_u32(zan^bit[i+sz*SZ][len]);
+			ret=ret*BB%MOD;
+			ret+=cnt;
+			if(ret>=MOD) ret-=MOD;
+		}
+		printf("%lld\n",ret);
+	}
+	return 0;
+}

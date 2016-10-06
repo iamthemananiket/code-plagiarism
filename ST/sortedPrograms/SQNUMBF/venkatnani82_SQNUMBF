@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+bool prime[1000010];
+vector<int> primes;
+long long a[200];
+long long isok(long long x) {
+	for(int i = 0; i < primes.size(); i++) {
+		int cnt = 0;
+		while(x % primes[i] == 0) x /= primes[i], cnt++;
+		if(cnt > 1) return primes[i];
+	}
+	long long sq = sqrt(x + 0.5);
+	if(sq > 1 && sq * sq == x) return sq;
+	return 0;
+}
+int main() {
+	for(int i = 2; i < 1000010; i++) prime[i] = true;
+	for(int i = 2; i * i < 1000010; i++) {
+		if(prime[i]) {
+			for(int j = i * i; j < 1000010; j += i) prime[j] = false;
+		}
+	}
+	for(int i = 2; i < 1000010; i++) if(prime[i]) primes.push_back(i);
+	int test;
+	cin >> test;
+	while(test--) {
+		int n;
+		cin >> n;
+		for(int i = 0; i < n; i++) cin >> a[i];
+		long long ans = 0;
+		for(int i = 0; i < n; i++) {
+			long long ret = isok(a[i]);
+			if(ret > 1) ans = ret;
+			if(ans > 1) break;
+			for(int j = i + 1; j < n; j++) {
+				long long x = __gcd(a[i], a[j]);
+				if(x > 1) {
+					ans = x;
+					break;
+				}
+			}
+			if(ans > 1) break;
+		}
+		assert(ans > 1);
+		cout << ans << endl;
+	}	
+}

@@ -1,0 +1,144 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < int(Y);++(X))
+#define rrep(X,Y) for (int (X) = int(Y-1);(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < int(Y);++(X))
+#define peat(X,Y) for (;(X) < int(Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+
+const int MAX_N=(1<<17);
+const ll INF=1e11;
+int nn=1<<17;
+ll datm[2*MAX_N-1],dats[2*MAX_N-1];
+pll dati[2*MAX_N-1],datd[2*MAX_N-1];
+
+void init(){
+  fill(dati,dati+2*MAX_N-1,pll(INF,-INF));
+  fill(datd,datd+2*MAX_N-1,pll(-INF,INF));
+}
+void update(int k,ll a){
+  k+=nn-1;
+  datm[k]=dats[k]=a;
+  dati[k]=datd[k]=pll(a,a);
+  pll l,r;
+  while(k>0){
+    k=(k-1)/2;
+    datm[k]=max(datm[k*2+1],datm[k*2+2]);
+    dats[k]=dats[k*2+1]+dats[k*2+2];
+    l=dati[k*2+1],r=dati[k*2+2];
+    if(l.Y<=r.X){
+      dati[k]=pll(min(l.X,r.X),max(l.Y,r.Y));
+    }else{
+      dati[k]=pll(-INF,INF);
+    }
+    l=datd[k*2+1],r=datd[k*2+2];
+    if(l.Y>=r.X){
+      datd[k]=pll(max(l.X,r.X),min(l.Y,r.Y));
+    }else{
+      datd[k]=pll(INF,-INF);
+    }
+  }
+}
+
+ll maxf(int a,int b,int k,int l,int r){
+  if(r<=a || b<=l)return 0;
+  if(a<=l && r<=b) return datm[k];
+  else{
+    ll vl=maxf(a,b,k*2+1,l,(l+r)/2);
+    ll vr=maxf(a,b,k*2+2,(l+r)/2,r);
+    return max(vl,vr);
+  }
+}
+ll sum(int a,int b,int k,int l,int r){
+  if(r<=a || b<=l)return 0;
+  if(a<=l && r<=b) return dats[k];
+  else{
+    ll vl=sum(a,b,k*2+1,l,(l+r)/2);
+    ll vr=sum(a,b,k*2+2,(l+r)/2,r);
+    return (vl+vr);
+  }
+}
+pll isInc(int a,int b,int k,int l,int r){
+  if(r<=a || b<=l)return pll(INF,-INF);
+  if(a<=l && r<=b) return dati[k];
+  else{
+    pll vl=isInc(a,b,k*2+1,l,(l+r)/2);
+    pll vr=isInc(a,b,k*2+2,(l+r)/2,r);
+    if(vl.Y<=vr.X)
+      return pll(min(vl.X,vr.X),max(vl.Y,vr.Y));
+    else
+      return pll(-INF,INF);
+  }
+}
+pll isDec(int a,int b,int k,int l,int r){
+  if(r<=a || b<=l)return pll(-INF,INF);
+  if(a<=l && r<=b) return datd[k];
+  else{
+    pll vl=isDec(a,b,k*2+1,l,(l+r)/2);
+    pll vr=isDec(a,b,k*2+2,(l+r)/2,r);
+    if(vl.Y>=vr.X)
+      return pll(max(vl.X,vr.X),min(vl.Y,vr.Y));
+    else
+      return pll(INF,-INF);
+  }
+}
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  init();
+  int i,j,k;
+  ll n,m;
+  cin>>n>>m;
+  ll d;
+  rep(i,n){
+    cin>>d;
+    update(i,d);
+  }
+  char c;
+  ll x,y;
+  rep(i,m){
+    cin>>c>>x>>y;
+    x--;
+    if(c=='U'){
+      update(x,y);
+    }if(c=='M'){
+      cout<<maxf(x,y,0,0,nn)<<endl;
+    }if(c=='S'){
+      cout<<sum(x,y,0,0,nn)<<endl;
+    }if(c=='I'){
+      pll re=isInc(x,y,0,0,nn);
+      cout<<(re.Y<INF)<<endl;
+    }if(c=='D'){
+      pll re=isDec(x,y,0,0,nn);
+      cout<<(re.X<INF)<<endl;
+    }
+  }
+  return 0;
+}

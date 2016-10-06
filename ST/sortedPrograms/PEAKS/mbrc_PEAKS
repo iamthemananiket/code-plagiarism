@@ -1,0 +1,137 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 5010
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int md = 1e9 + 9;
+const int dv = 205;
+
+int A[MAXN]; int forw[MAXN]; int back[MAXN];
+vector<int> dp[210*210][2]; vector<int> bit[210*210][2];
+pii pA[MAXN];
+
+int n;
+
+int query(int x,int a,int b,int l) {
+			if (a < 0 || b < 0) return 0;
+			int ans = 0;
+			while (x > 0) {
+				ans = (ans + bit[a*dv + b][l][x])%md;
+				x -= x & (-x);
+			}
+			return ans;
+}
+
+void update(int x,int v, int a,int b,int l) {
+			while (x < n+3) {
+				bit[a*dv + b][l][x] = (bit[a*dv + b][l][x] + v)%md;
+				x += x & (-x);
+			}
+}
+
+void solve() {
+
+
+
+
+s(n); int av,bv; s(av); s(bv);
+
+
+		    
+		    	for (int j = 0; j < av+3; j++) {
+		    		for (int k = 0; k < bv+3; k++) {
+		    			for (int l = 0; l < 2; l++) {
+		    				dp[j*dv + k][l] = *new vector<int>(n+3);
+		    				bit[j*dv + k][l] = *new vector<int>(n+3);
+		    				for (int i = 0; i < n+3; i++) {
+		    					dp[j*dv + k][l][i] = 0; bit[j*dv + k][l][i] = 0;
+		    				}
+		    			}
+		    		}
+		    	}
+		    
+
+		    for (int i = 1; i <= n; i++) {
+		    	s(A[i]); pA[i] = mp(A[i],i);
+		    }
+
+		    sort(pA+1,pA+n+1);
+
+		    for (int i = 1; i <= n; i++) {
+		    	forw[pA[i].second] = i;
+		    	back[i] = pA[i].second;
+		    }
+
+		    int ans = 0;
+
+		    for (int i = n; i >= 1; i--) {
+		    	for (int a = 0; a <= av; a++) {
+		    		for (int b = 0; b <= bv; b++) {
+		    			for (int l = 0; l <= 1; l++) {
+		    				
+		    				if (i == n) {
+		    					if (a == 0 && b == 0) {
+		    						dp[a*dv + b][l][i] = 1;
+		    					} else {
+		    						dp[a*dv + b][l][i] = 0;
+		    					}
+		    				} else {
+		    					dp[a*dv + b][l][i] = 0; 
+		    					if (a == 0 && b == 0) { dp[a*dv + b][l][i] = 1; }
+		    					int f = forw[i];
+
+			    				if (l == 0) {
+			    					dp[a*dv + b][l][i] = (dp[a*dv + b][l][i] + (query(f,a,b-1,0) + query(f,a,b,1))%md)%md;
+			    				} else {
+			    					dp[a*dv + b][l][i] = (dp[a*dv + b][l][i] + (query(f,a-1,b,1) + query(f,a,b,0))%md)%md;
+			    				}
+		    				}
+		    			}
+		    			int f = forw[i];
+		    			update(f+1,dp[a*dv + b][1][i],a,b,0);
+		    			update(n+1,(md-dp[a*dv + b][1][i])%md,a,b,0);
+		    			update(1,dp[a*dv + b][0][i],a,b,1);
+		    			update(f,(md - dp[a*dv + b][0][i])%md,a,b,1);
+		    		}
+		    	}
+
+		    	if (av == 0 && bv == 0) ans++;
+
+		    	for (int k = i+1; k <= n; k++) {
+		    		if (A[k] > A[i]) {
+		    			ans = (ans + dp[av*dv + bv][0][k])%md;
+		    		} else {
+		    			ans = (ans + dp[av*dv + bv][1][k])%md;
+		    		}
+		    	}
+
+		    }
+
+		    pr(ans); endc;
+
+
+}
+
+int main() {
+	int T; s(T); while (T--) solve();	
+
+
+}

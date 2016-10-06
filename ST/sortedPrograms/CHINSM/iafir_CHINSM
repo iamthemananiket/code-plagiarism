@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int N = 1e5 + 5;
+
+int n, k, a, idx[N];
+long long ans;
+
+int main() {
+  memset(idx, -1, sizeof idx);
+  scanf("%d%d", &n, &k);
+  ans = 0;
+  int last = -1, mk = -1;
+  for(int i = 0; i<n; i++) {
+    scanf("%d", &a);
+    last = max(last, idx[a]);
+    if(a>k && mk != -1)
+      last = max(last, mk), mk = -1;
+    ans += i-last;
+    if(a == k)
+      mk = i;
+    else
+    if(a > k) {
+      a -= k;
+      for(int j = 1; 1LL*j*j <= a; j++)
+        if(a % j == 0) {
+          if(j>k)
+            idx[j] = i;
+          int l = a/j;
+          if(l>k)
+            idx[l] = i;
+        }
+    }
+  }
+  printf("%lld\n", ans);
+  return 0;
+}

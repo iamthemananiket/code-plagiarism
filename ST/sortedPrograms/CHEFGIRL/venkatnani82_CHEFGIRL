@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+class edge{
+public:
+	int to, start, end;
+};
+vector<edge> g[100010]; 
+edge foo;
+vector<int> leaf;
+int dp[100001][33][33];
+void dfs(int root) {
+	bool ok = true;
+	for (int i = 0; i < (int)g[root].size(); i++) {
+		int child = g[root][i].to, st = g[root][i].start, en = g[root][i].end;
+		for (int j = 1; j <= 32; j++) {
+			for (int k = j; k <= 32; k++) {
+				dp[child][j][k] = dp[root][j][k];
+				if(j < st) dp[child][j][k] += st - j;
+				if(k > en) dp[child][j][k] += k - en;
+			}
+		}
+		ok = false;
+		dfs(child);
+	}
+	if(ok) leaf.push_back(root);
+} 
+int newdp[100001][34][34];
+int main(){
+	int n, m;
+	scanf("%d %d", &n, &m);
+	int x, y, st, en;
+	for (int i = 0; i < m; i++) {
+		scanf("%d %d %d %d", &x, &foo.to, &foo.start, &foo.end);
+		g[x].push_back(foo);
+	}
+	dfs(1);
+	int siz = leaf.size();
+	if(siz == 1 && leaf[0] == 1) {
+		cout<<0<<endl;
+		return 0;
+	}
+	int first = leaf[0];
+	for (int i = 1; i <= 32; i++) for (int j = 1; j <= 32; j++) newdp[0][i][j] = dp[first][i][j];	
+	for (int i = 0; i < siz - 1; i++) {
+		int curr = leaf[i + 1];
+		for (int j = 1; j <= 32; j++) for (int k = 1; k <= 32; k++) newdp[i + 1][j][k] = min(newdp[i][j][k], dp[curr][j][k]);  
+		for (int j = 1; j <= 32; j++) {
+			for (int k = j; k <= 32; k++) {
+				for (int w = k + 1; w <= 32; w++) {
+					newdp[i + 1][j][w] = min(newdp[i + 1][j][w], newdp[i][j][k] + dp[curr][k + 1][w]);
+				}
+				for (int w = 1; w < j; w++) {
+					newdp[i + 1][w][k] = min(newdp[i + 1][w][k], newdp[i][j][k] + dp[curr][w][j - 1]);
+				}
+			}
+		}
+	}
+	cout<<newdp[siz - 1][1][32]<<endl;
+}

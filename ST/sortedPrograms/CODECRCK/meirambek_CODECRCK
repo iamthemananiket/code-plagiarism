@@ -1,0 +1,64 @@
+#include <iostream>
+#include <map>
+#include <cstring>
+#include <fstream>
+#include <cstdio>
+#include <math.h>
+#include <queue>
+#include <stack>
+#include <set>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <cassert>
+#include <algorithm>
+#include <ctime>
+#include <vector>
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+#define mp make_pair
+#define pb push_back
+
+const int N = 10050;
+
+double x, y;
+ll id, k, s;
+
+void solve() {
+    cin >> id >> k >> s;
+    cin >> x >> y;
+    if (id % 2 != k % 2) {
+        //double nx = x * (sqrt(2.0) - sqrt(6.0)) - y * (sqrt(2.0) + sqrt(6.0));
+        //double ny = x * (sqrt(2.0) + sqrt(6.0)) + y * (sqrt(6.0) - sqrt(2.0));
+        double nx = sqrt(2.0) * (x + y) - sqrt(6.0)	* (x - y);
+        double ny = sqrt(2.0) * (x - y) + sqrt(6.0)	* (x + y);
+        ++id;
+        x = nx, y = ny;
+    }
+    
+    s -= (k - id) * 2;
+    
+    double ans = x + y;
+    
+    for (int it = 1; it <= min(1000ll, abs(s)); ++ it) {
+        if (s < 0) ans *= 2;
+        else ans /= 2.0;
+    }
+
+    printf("%.15f\n", ans);
+}
+
+int main () {
+    int test = 1;
+    
+    //scanf("%d", &test);
+    
+    while(test--) solve();
+    
+    return 0;
+}

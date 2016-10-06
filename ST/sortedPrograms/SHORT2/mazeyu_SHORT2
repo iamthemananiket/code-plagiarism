@@ -1,0 +1,21 @@
+#include<bits/stdc++.h>
+using namespace std;
+int T,ans,tmp;
+long long x,t,a,i;
+int main()
+{
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%lld",&x);ans=8;
+		if(x==2){puts("14");continue;}
+		for(i=1;(i-1)*i<=x;i++)
+		{
+			a=i-x%i;t=(x+a)/i;
+			if(t>a&&i*i<=a+x&&(i+1)%a==0)ans+=6;
+			if(t>i&&i*i<=a+x+i&&a==1)ans+=6;
+			if(i>a&&i*i<a+x&&(t+1)%a==0)ans+=6;
+		}
+		printf("%d\n",ans);
+	}
+}

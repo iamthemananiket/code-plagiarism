@@ -1,0 +1,89 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+Int MO;
+Int N;
+
+Int getSum(Int n) {
+	/*
+		(1/30) -1 n + 10 n^3 + 15 n^4 + 6 n^5
+	*/
+	const Int mo = MO * 30;
+	const Int nn = n % mo;
+	Int ret = 0;
+	ret = (ret * nn + 6) % mo;
+	ret = (ret * nn + 15) % mo;
+	ret = (ret * nn + 10) % mo;
+	ret = (ret * nn + 0) % mo;
+	ret = (ret * nn + mo - 1) % mo;
+	ret = (ret * nn + 0) % mo;
+	assert(ret % 30 == 0);
+	ret /= 30;
+	return ret;
+}
+Int getSum(Int a, Int b) {
+	return getSum(b) - getSum(a);
+}
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		scanf("%lld%lld", &N, &MO);
+		Int ans = 0;
+		const Int lim = (Int)sqrt(N);
+		for (Int i = 1; N / i > lim; ++i) {
+			Int tmp = (N / i) % MO;
+			(tmp *= i) %= MO;
+			(tmp *= i) %= MO;
+			(tmp *= i) %= MO;
+			(tmp *= i) %= MO;
+			(ans += tmp) %= MO;
+		}
+		for (Int j = 1; j <= lim; ++j) {
+			/*
+				floor(N / i) = j
+				j <= N / i < j + 1
+				N / (j + 1) < i <= N / j
+			*/
+			Int tmp = j % MO;
+			(tmp *= getSum(N / (j + 1), N / j)) %= MO;
+			(ans += tmp) %= MO;
+		}
+		ans = (ans % MO + MO) % MO;
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}

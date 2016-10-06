@@ -1,0 +1,151 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+typedef long long ll;
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MOD = (int)1e9 + 7;
+const int MAX_V = (int)1e6;
+
+int minP[MAX_V + 9];
+vector<int> divisors[(int)1e5 + 9];
+int a[(int)4e5 + 9];
+
+vector<int> factorize(int v) {
+	vector<int> ans;
+	while (minP[v] != 1) {
+		ans.push_back(minP[v]);
+		v /= minP[v];
+	}
+	reverse(ans.begin(), ans.end());
+	return ans;
+}
+
+int query(int x, int l, int r, int i, int j) { //query(0, 0, s-1, i, j), i and j start from 0
+	if (i > r || l > j) {
+		return -INF;
+	} else if (l >= i && r <= j) {
+		return a[x];
+	} else {
+		return max(query(2 * x + 1, l, (l + r) / 2, i, j), 
+			query(2 * x + 2, (l + r) / 2 + 1, r, i, j));
+	}
+}
+
+void update(int x, int l, int r, int pos, const int y) {
+	if (l == r) {
+		a[x] = y;
+	} else {
+		if (pos <= (l + r) / 2) {
+			update(2 * x + 1, l, (l + r) / 2, pos, y);
+		} else {
+			update(2 * x + 2, (l + r) / 2 + 1, r, pos, y);
+		}
+		a[x] = max(a[2 * x + 1], a[2 * x + 2]);
+	}
+}
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	for (int i = 2; i * i <= MAX_V; ++i) {
+		if (minP[i] == 0) {
+			for (int j = i * i; j <= MAX_V; j += i) {
+				if (minP[j] == 0) {
+					minP[j] = i;
+				}
+			}
+		}
+	}
+	for (int i = 1; i <= MAX_V; ++i) {
+		if (minP[i] == 0) {
+			minP[i] = i;
+		}
+	}
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n, m;
+		scanf("%d %d", &n, &m);
+		for (int i = 0; i < n; ++i) {
+			divisors[i] = factorize(nextInt());
+		}
+		int s = 2;
+		while (s < n) {
+			s *= 2;
+		}
+		set<int> pos;
+		for (int i = 0; i < s; i++) {
+			if (i < n) {
+				if (!divisors[i].empty()) {
+					a[s - 1 + i] = divisors[i].back();
+					pos.insert(i);
+				} else {
+					a[s - 1 + i] = 1;
+				}
+			} else {
+				a[s - 1 + i] = 1;
+			}
+		}
+		for (int i = s - 2; i >= 0; i--) {
+			a[i] = max(a[2 * i + 1], a[2 * i + 2]);
+		}
+		vector<int> ans;
+		while (m--) {
+			int type = nextInt();
+			int l = nextInt() - 1;
+			int r = nextInt() - 1;
+			if (type == 0) {
+				vector<int> toDelete;
+				for (set<int>::iterator it = pos.lower_bound(l);
+					it != pos.end() && (*it) <= r;
+					++it) {
+					divisors[*it].pop_back();
+					if (divisors[*it].empty()) {
+						toDelete.push_back(*it);
+						update(0, 0, s - 1, (*it), 1);
+					} else {
+						update(0, 0, s - 1, (*it), divisors[*it].back());
+					}
+				}
+				for (int i = 0; i < toDelete.size(); ++i) {
+					pos.erase(toDelete[i]);
+				}
+			} else {
+				ans.push_back(query(0, 0, s - 1, l, r));
+			}
+		}
+		if (!ans.empty()) {
+			printf("%d", ans[0]);
+			for (int i = 1; i < ans.size(); ++i) {
+				printf(" %d", ans[i]);
+			}
+			printf("\n");
+		}
+	}
+	return 0;
+}

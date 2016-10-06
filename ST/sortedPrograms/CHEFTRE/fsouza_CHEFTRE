@@ -1,0 +1,415 @@
+#include <algorithm>
+#include <bitset>
+#define NDEBUG
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+const int maxn = 100000;
+const int mod = 999999937, base = 1097;
+int basepow[maxn+1];
+
+template <typename T> struct intptr {
+  static T *pool;
+  int pos;
+  inline intptr(int pos = -1): pos(pos) {}
+  inline intptr(T *p): pos(p ? p-pool : -1) {}
+  inline operator T*() const {
+    if (pos == -1) return nullptr;
+    return &pool[pos];
+  }
+  inline operator bool() const { return pos != -1; }
+  inline T *operator->() const {
+    if (pos == -1) return nullptr;
+    return &pool[pos];
+  }
+} __attribute__((packed));
+
+struct treap_t {
+  struct node {
+    intptr<const node> l, r;
+    int hash, revhash;
+    int y = rand();
+    int value:11;
+    int size:18;
+    bool lazyreverse:1;
+    node(const node *l, const node *r, int value): l(l), r(r), value(value) {
+      lazyreverse = false;
+
+      if (l != nullptr) l->propag();
+      if (r != nullptr) r->propag();
+
+      size = 1;
+      if (l != nullptr) size += l->size;
+      if (r != nullptr) size += r->size;
+
+      hash = 0;
+      if (l != nullptr) hash = l->hash;
+      hash = ((lint)hash * base + value) % mod;
+      if (r != nullptr) hash = ((lint)hash * basepow[r->size] + r->hash) % mod;
+
+      revhash = 0;
+      if (r != nullptr) revhash = r->revhash;
+      revhash = ((lint)revhash * base + value) % mod;
+      if (l != nullptr) revhash = ((lint)revhash * basepow[l->size] + l->revhash) % mod;
+    }
+    node(int value): node(nullptr, nullptr, value) {}
+    const node *reversed() const {
+      if (this == nullptr) return nullptr;
+      node *result = new node(*this);
+      result->y = rand();
+      result->lazyreverse = !result->lazyreverse;
+      return result;
+    }
+    void propag() const {
+      node *v = const_cast<node*>(this);
+      if (v->lazyreverse) {
+        cnode *newl = r->reversed(), *newr = l->reversed();
+        v->l = newl;
+        v->r = newr;
+        int temp = v->hash;
+        v->hash = v->revhash;
+        v->revhash = temp;
+        v->lazyreverse = false;
+      }
+    }
+    void *operator new(size_t size);
+    void operator delete(void *mem);
+  } __attribute__((packed));
+  typedef const node cnode;
+
+  intptr<const node> root = nullptr;
+
+  treap_t() {}
+  treap_t(cnode *root): root(root) {}
+  operator cnode*() {
+    return root;
+  }
+
+  void split(cnode *tree, int many, cnode *&left, cnode *&right) {
+    if (tree) tree->propag();
+    if (tree == nullptr) {
+      left = right = nullptr;
+    } else if ((tree->l ? tree->l->size : 0) + 1 <= many) {
+      cnode *newtr;
+      split(tree->r, many - ((tree->l ? tree->l->size : 0) + 1), newtr, right);
+      left = new node(tree->l, newtr, tree->value);
+    } else {
+      cnode *newtl;
+      split(tree->l, many, left, newtl);
+      right = new node(newtl, tree->r, tree->value);
+    }
+  }
+
+  cnode *merge(cnode *left, cnode *right) {
+    if (left) left->propag();
+    if (right) right->propag();
+    if (left == nullptr) return right;
+    if (right == nullptr) return left;
+    if (left->y > right->y) {
+      cnode *newlr = merge(left->r, right);
+      return new node(left->l, newlr, left->value);
+    } else {
+      cnode *newrl = merge(left, right->l);
+      return new node(newrl, right->r, right->value);
+    }
+  }
+
+  void replace(int a, int b, treap_t to) {
+    cnode *left, *right;
+    tie(left, ignore, right) = slice(a, b);
+    root = merge(merge(left, to), right);
+  }
+
+  tuple<treap_t, treap_t, treap_t> slice(int a, int b) {
+    cnode *left, *ab, *right, *leftab;
+    split(root, b+1, leftab, right);
+    split(leftab, a, left, ab);
+    return make_tuple(left, ab, right);
+  }
+
+  void push_back(int value) {
+    root = merge(root, new node(value));
+  }
+
+  void concatenate(treap_t other) {
+    root = merge(root, other);
+  }
+
+  int hash() {
+    if (root == nullptr) return 0;
+    else if (root->lazyreverse) return root->revhash;
+    else return root->hash;
+  }
+};
+
+const int node_pool_size = 0.8 * 1024 * 1024 * 1024 / sizeof(treap_t::node);
+void node_garbage_collect();
+
+treap_t::node *node_pool =
+  static_cast<treap_t::node *>(malloc(sizeof(treap_t::node) * node_pool_size));
+template<> const treap_t::node *intptr<const treap_t::node>::pool =
+  const_cast<treap_t::node *>(node_pool);
+vector<int> node_pool_available;
+
+void initialize_node_pool() {
+  node_pool_available.reserve(node_pool_size);
+  for (int i = 0; i < node_pool_size; ++i)
+    node_pool_available.push_back(i);
+}
+
+void *treap_t::node::operator new(size_t size) {
+  assert(size == sizeof(node));
+  assert(!node_pool_available.empty());
+  treap_t::node *result = &node_pool[node_pool_available.back()];
+  node_pool_available.pop_back();
+  return result;
+}
+void treap_t::node::operator delete(void *mem) {
+  treap_t::node *node_ptr = static_cast<treap_t::node *>(mem);
+  int id = node_ptr - node_pool;
+  node_pool_available.push_back(id);
+}
+
+struct path_t {
+  vector<int> initial_nodes;
+  treap_t treap;
+  void build(const vector<int> &values) {
+    for (int v : initial_nodes)
+      treap.push_back(values[v]);
+  }
+};
+
+struct HeavyLight {
+  int n;
+  vector<vector<int>> adj;
+  vector<int> parent, depth, subtreesize, pathof;
+  vector<path_t> paths;
+  HeavyLight(int n)
+    : n(n), adj(n), parent(n), depth(n)
+    , subtreesize(n), pathof(n), paths(n) {}
+  void build(int root) {
+    dfs1(root, -1, 0);
+    dfs2(root, -1, root);
+  }
+  void dfs1(int v, int p, int d) {
+    parent[v] = p;
+    depth[v] = d;
+    subtreesize[v] = 1;
+    for (int u : adj[v])
+      if (u != p) {
+        dfs1(u, v, d+1);
+        subtreesize[v] += subtreesize[u];
+      }
+  }
+  void dfs2(int v, int p, int pathid) {
+    pathof[v] = pathid;
+    paths[pathid].initial_nodes.push_back(v);
+    for (int u : adj[v])
+      if (u != p)
+        dfs2(u, v, 2*subtreesize[u] >= subtreesize[v] ? pathid : u);
+  }
+  int pos_in_path(int v) { return depth[v] - depth[pathof[v]]; }
+  int lca(int a, int b) {
+    while (pathof[a] != pathof[b])
+      if (depth[pathof[a]] > depth[pathof[b]]) a = parent[pathof[a]];
+      else b = parent[pathof[b]];
+    return depth[a] < depth[b] ? a : b;
+  }
+} *gc_heavylight = nullptr;
+
+vector<bool> node_used(node_pool_size, false);
+
+void node_mark_used(const treap_t::node *v) {
+  if (v != nullptr) {
+    int id = v - node_pool;
+    assert(0 <= id && id < node_pool_size);
+    node_used[id] = true;
+    node_mark_used(v->l);
+    node_mark_used(v->r);
+  }
+}
+
+void node_garbage_collect() {
+  if (gc_heavylight == nullptr) return;
+  HeavyLight &hl = *gc_heavylight;
+
+  fill(node_used.begin(), node_used.end(), false);
+  for (int i = 0; i < hl.n; ++i)
+    if (hl.pathof[i] == i)
+      node_mark_used(hl.paths[i].treap.root);
+
+  for (int i = 0; i < node_pool_size; ++i)
+    if (!node_used[i])
+      delete &node_pool[i];
+}
+
+struct part_t {
+  int id;
+  int start, end;
+  inline int size() const { return max(start, end) - min(start, end) + 1; }
+  part_t extract_prefix(int len) {
+    assert(1 <= len && len < size());
+    if (start <= end) {
+      part_t result = {id, start, start+len-1};
+      start += len;
+      return result;
+    } else {
+      part_t result = {id, start, start-len+1};
+      start -= len;
+      return result;
+    }
+  }
+};
+
+void align(vector<part_t> &patha, vector<part_t> &pathb) {
+  vector<part_t> resulta, resultb;
+  int i = 0, j = 0;
+  while (i < (int)patha.size()) {
+    if (patha[i].size() == pathb[j].size()) {
+      resulta.push_back(patha[i++]);
+      resultb.push_back(pathb[j++]);
+    } else if (patha[i].size() < pathb[j].size()) {
+      resultb.push_back(pathb[j].extract_prefix(patha[i].size()));
+      resulta.push_back(patha[i++]);
+    } else {
+      resulta.push_back(patha[i].extract_prefix(pathb[j].size()));
+      resultb.push_back(pathb[j++]);
+    }
+  }
+  patha = resulta;
+  pathb = resultb;
+}
+
+int main() {
+  initialize_node_pool();
+
+  int n, nq;
+  scanf("%d %d", &n, &nq);
+
+  basepow[0] = 1;
+  for (int i = 1; i <= n; ++i)
+    basepow[i] = (lint)base * basepow[i-1] % mod;
+
+  vector<int> values(n);
+  for (int i = 0; i < n; ++i)
+    scanf("%d", &values[i]);
+
+  HeavyLight hl(n);
+  gc_heavylight = &hl;
+  for (int i = 0; i < n-1; ++i) {
+    int a, b;
+    scanf("%d %d", &a, &b), --a, --b;
+    hl.adj[a].push_back(b);
+    hl.adj[b].push_back(a);
+  }
+  hl.build(0);
+
+  for (int i = 0; i < n; ++i)
+    if (hl.pathof[i] == i)
+      hl.paths[i].build(values);
+
+  auto get_parts = [&](int a, int b) -> vector<part_t> {
+    vector<part_t> pathab, pathba;
+    while (hl.pathof[a] != hl.pathof[b]) {
+      if (hl.depth[hl.pathof[a]] > hl.depth[hl.pathof[b]]) {
+        pathab.push_back(part_t{hl.pathof[a], hl.depth[a] - hl.depth[hl.pathof[a]], 0});
+        a = hl.parent[hl.pathof[a]];
+      } else {
+        pathba.push_back(part_t{hl.pathof[b], hl.depth[b] - hl.depth[hl.pathof[b]], 0});
+        b = hl.parent[hl.pathof[b]];
+      }
+    }
+    pathab.push_back(part_t{hl.pathof[a],
+          hl.depth[a] - hl.depth[hl.pathof[a]],
+          hl.depth[b] - hl.depth[hl.pathof[b]]});
+
+    for (part_t &part : pathba) swap(part.start, part.end);
+    reverse(pathba.begin(), pathba.end());
+
+    pathab.insert(pathab.end(), pathba.begin(), pathba.end());
+    return pathab;
+  };
+
+  auto replace_slice = [&](const part_t &part, treap_t newtreap) {
+    if (part.start <= part.end) {
+      hl.paths[part.id].treap.replace(part.start, part.end, newtreap);
+    } else {
+      newtreap.root = newtreap.root->reversed();
+      hl.paths[part.id].treap.replace(part.end, part.start, newtreap);
+    }
+  };
+
+  auto get_slice = [&](const part_t &part) {
+    if (part.start <= part.end) {
+      return get<1>(hl.paths[part.id].treap.slice(part.start, part.end));
+    } else {
+      treap_t result = get<1>(hl.paths[part.id].treap.slice(part.end, part.start));
+      result.root = result.root->reversed();
+      return result;
+    }
+  };
+
+  auto get_path = [&](int a, int b) {
+    vector<part_t> parts = get_parts(a, b);
+    treap_t result;
+    for (const part_t &part : parts)
+      result.concatenate(get_slice(part));
+    return result;
+  };
+
+  auto copy_path = [&](int a, int b, int c, int d) {
+    vector<part_t> partsab = get_parts(a, b);
+    vector<part_t> partscd = get_parts(c, d);
+    align(partsab, partscd);
+    vector<treap_t> slicesab;
+    for (const part_t &part : partsab)
+      slicesab.push_back(get_slice(part));
+    for (int i = 0; i < (int)partsab.size(); ++i)
+      replace_slice(partscd[i], slicesab[i]);
+  };
+
+  for (int q = 0; q < nq; ++q) {
+    int kind;
+    scanf("%d", &kind);
+    if (kind == 1) {
+      int a, b;
+      scanf("%d %d", &a, &b), --a, --b;
+      copy_path(a, b, b, a);
+    } else if (kind == 2) {
+      int a, b, c, d;
+      scanf("%d %d %d %d", &a, &b, &c, &d), --a, --b, --c, --d;
+      treap_t pathab = get_path(a, b);
+      treap_t pathcd = get_path(c, d);
+      if (pathab.hash() == pathcd.hash()) printf("Yes\n");
+      else printf("No\n");
+    } else {
+      int a, b, c, d;
+      scanf("%d %d %d %d", &a, &b, &c, &d), --a, --b, --c, --d;
+      copy_path(a, b, c, d);
+    }
+
+    if (node_pool_available.size() < node_pool_size / 100)
+      node_garbage_collect();
+  }
+
+  return 0;
+}

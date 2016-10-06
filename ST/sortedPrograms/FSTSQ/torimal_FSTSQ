@@ -1,0 +1,72 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX_N = 2100000;
+
+int a[MAX_N];
+
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    int n;
+    int d;
+    cin >> n >> d;
+    memset(a, 0, sizeof(a));
+    for (int i = 0; i < 2 * n - 1; i++) {
+      int x = (i < n ? (i + 1) : 2 * n - i - 1);
+      a[i] += d * d * x;
+      int p = i;
+      while (a[p] >= 10) {
+        a[p + 1] += a[p] / 10;
+        a[p] %= 10;
+        p++;
+      }      
+    }
+    int m = 0;
+    for (int i = 0; i < MAX_N; i++) {
+      if (a[i] != 0) m = i;
+    }
+    // for (int i = m; i >= 0; i--) {
+    //   cout<< a[i];
+    // }
+    // cout << endl;
+    ll h = 0;
+    for (int i = 0; i <= m; i++) {
+      h = 23 * h + a[i];
+      h %= 1000000007;
+    }
+    cout << h << endl;
+  }
+}

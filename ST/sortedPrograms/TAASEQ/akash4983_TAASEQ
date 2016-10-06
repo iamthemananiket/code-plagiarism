@@ -1,0 +1,79 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+unordered_map<int, int > M;
+const int N = 100005;
+const int INF = 1000000009;
+
+int A[N];
+
+int main() {
+  int t;
+  S(t);
+  while(t--) {
+    int n;
+    S(n);
+    rep(i,0,n) S(A[i]);
+
+    if(n <= 3) {
+      int mn = A[0];
+      rep(i,0,n) {
+        mn = min(mn, A[i]);
+      }
+      P(mn);
+      continue;
+    }
+
+    M.clear();
+    rep(i,1,n) {
+      M[A[i] - A[i-1]]++;
+    }
+    int ans = INF;
+    rep(i,0,n) {
+      if(i == 0) {
+        M[A[1] - A[0]]--;
+        if(M[A[2] - A[1]] == n - 2) ans = min(ans, A[0]);
+        M[A[1] - A[0]]++;
+      } else if(i == n - 1) {
+        M[A[n-1] - A[n-2]]--;
+        if(M[A[n-2] - A[n-3]] == n - 2) ans = min(ans, A[n-1]);
+        M[A[n-1] - A[n-2]]++;
+      } else {
+        M[A[i] - A[i-1]]--;
+        M[A[i+1] - A[i]]--;
+        M[A[i+1] - A[i-1]]++;
+        if(M[A[i+1] - A[i-1]] == n - 2) ans = min(ans, A[i]);
+        M[A[i] - A[i-1]]++;
+        M[A[i+1] - A[i]]++;
+        M[A[i+1] - A[i-1]]--;
+      }
+    }
+    if(ans == INF) P(-1);
+    else P(ans);
+  }
+  return 0;
+}

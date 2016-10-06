@@ -1,0 +1,132 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+
+ll POWER[65];
+ll power(ll a, ll b) {ll ret=1;while(b) {if(b&1) ret*=a;a*=a;if(ret>=MOD) ret%=MOD;if(a>=MOD) a%=MOD;b>>=1;}return ret;}
+ll inv(ll x) {return power(x,MOD-2);}
+
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+struct node {
+	int dom;
+	map<int,int> mp;
+};
+const int MAXN = 1e5+5;
+struct node v[3*MAXN];
+int ar[MAXN];
+void build(int node, int start, int end) {
+	if(start==end) {
+		v[node].mp[ar[start]]++;
+		v[node].dom=ar[start];
+		return;
+	}
+	int mid=(start+end)>>1;
+	build(2*node,start,mid);
+	build(2*node+1,mid+1,end);
+	int len=end-start+1;
+	if(sz(v[2*node].mp)<sz(v[2*node+1].mp)) {
+		v[node].mp=v[2*node+1].mp;
+		for(auto it:v[2*node].mp) v[node].mp[it.ff]+=it.ss;
+	}
+	else {
+		v[node].mp=v[2*node].mp;
+		for(auto it:v[2*node+1].mp) v[node].mp[it.ff]+=it.ss;
+	}
+	v[node].dom=-1;
+	if(v[2*node].dom!=-1) {
+		int f=v[node].mp[v[2*node].dom];
+		if(f>len/2) v[node].dom=v[2*node].dom;
+	}
+	if(v[2*node+1].dom!=-1) {
+		int f=v[node].mp[v[2*node+1].dom];
+		if(f>len/2) v[node].dom=v[2*node+1].dom;
+	}
+}
+void update(int node, int start, int end, int qs, int qe, int val) {
+	if(start>end or qe<start or qs>end) return;
+	if(start>=qs and end<=qe) {
+		v[node].mp.clear();
+		v[node].mp[val]++;
+		v[node].dom=val;
+		return;
+	}
+	int mid=(start+end)>>1;
+	update(2*node,start,mid,qs,qe,val);
+	update(2*node+1,mid+1,end,qs,qe,val);
+	int len=end-start+1;
+	v[node].mp[ar[qs]]--;
+	v[node].mp[val]++;
+	v[node].dom=-1;
+	if(v[2*node].dom!=-1) {
+		int f=v[node].mp[v[2*node].dom];
+		if(f>len/2) v[node].dom=v[2*node].dom;
+	}
+	if(v[2*node+1].dom!=-1) {
+		int f=v[node].mp[v[2*node+1].dom];
+		if(f>len/2) v[node].dom=v[2*node+1].dom;
+	}
+}
+vector<int> finv;
+void query(int node, int start, int end, int qs, int qe) {
+	if(start>end or qe<start or qs>end) return;
+	if(start>=qs and end<=qe) {
+		if(v[node].dom!=-1) finv.pb(v[node].dom);
+		return;
+	}
+	int mid=(start+end)>>1;
+	query(2*node,start,mid,qs,qe);
+	query(2*node+1,mid+1,end,qs,qe);
+}
+int query2(int node, int start, int end, int qs, int qe, int val) {
+	if(start>end or qe<start or qs>end) return 0;
+	if(start>=qs and end<=qe) {
+		return v[node].mp[val];
+	}
+	int mid=(start+end)>>1;
+	return query2(2*node,start,mid,qs,qe,val)+
+	query2(2*node+1,mid+1,end,qs,qe,val);
+}
+int main() {
+	//freopen("TASK.in","r",stdin);	
+	//freopen("TASK.out","w",stdout);
+	precompute();
+	int n,q;
+	cin>>n>>q;
+	for(int i=1;i<=n;i++) scanf("%d",&ar[i]);
+	build(1,1,n);
+	while(q--) {
+		int t,l,r;
+		scanf("%d%d%d",&t,&l,&r);
+		if(t==1) update(1,1,n,l,l,r),ar[l]=r;
+		else {
+			finv.clear();
+			query(1,1,n,l,r);
+			int len=r-l+1;
+			bool is=false;
+			for(auto it:finv) {
+				if(query2(1,1,n,l,r,it)>len/2) {
+					is=true;
+					break;
+				}
+			}
+			if(is) printf("Yes\n");
+			else printf("No\n");
+		}
+	}
+	return 0;
+}

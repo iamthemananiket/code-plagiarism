@@ -1,0 +1,35 @@
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+
+int T;
+int n;
+int s;
+
+int x[250000];
+int y[250000];
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<n; j++) {
+                cin >> s; s--;
+                x[s] = i;
+                y[s] = j;
+            }
+        }
+
+        s = 0;
+        for(int i=1; i<n*n; i++) {
+            s += abs(x[i]-x[i-1]);
+            s += abs(y[i]-y[i-1]);
+        }
+
+        cout << s << endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,173 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 1000010
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int blck,q,a[N],b[N],bit[N];
+ll out[N];
+
+typedef struct query
+{
+	int l;
+	int r;
+	int idx;
+	bool operator <(const query rhs) const
+	{
+		if (l/blck!=rhs.l/blck) return l/blck<rhs.l/blck;
+		else return r<rhs.r;
+	}
+} query;
+
+query Q[N];
+
+inline int querybit(int idx)
+{
+	int out=0;
+	for(int v=idx;v>0;v-=v&-v) out+=bit[v];
+	return out;
+}
+
+inline int update(int idx, int val)
+{
+	for(int v=idx;v<N;v+=v&-v) bit[v]+=val;
+}
+
+ll ans;
+
+inline void insert(int idx, int mode)
+{
+	if (mode==1) ans+=querybit(a[idx]-1);
+	else ans+=querybit(N-1)-querybit(a[idx]);
+	update(a[idx],1);
+}
+
+inline void del(int idx, int mode)
+{
+	if (mode==1) ans-=querybit(a[idx]-1);
+	else ans+=(querybit(a[idx])-querybit(N-1));
+	update(a[idx],-1);
+}
+
+inline void solve()
+{
+	sort(Q,Q+q);
+	int l=0,r=-1;
+	ans=0;
+	REP(i,q)
+	{
+		while(r<Q[i].r)
+		{
+			insert(r+1,0);
+			r++;
+		}
+		while(r>Q[i].r)
+		{
+			del(r,0);
+			r--;
+		}
+		while(l<Q[i].l)
+		{
+			del(l,1);
+			l++;
+		}
+		while(l>Q[i].l)
+		{
+			insert(l-1,1);
+			l--;
+		}
+		out[Q[i].idx]=ans;
+	}
+}
+
+int main()
+{
+	int n,l,r,x;
+	map <int, int> m;
+	n=input();
+	REP(i,n)
+	{
+		a[i]=input();
+		b[i]=a[i];
+	}
+	sort(b,b+n);
+	x=1;
+	REP(i,n)
+	{
+		if (!m[b[i]])
+		{
+			m[b[i]]=x;
+			x++;
+		}
+	}
+	REP(i,n) a[i]=m[a[i]];
+	//REP(i,n) output(a[i]);
+	FILL(bit,0);
+	q=input();
+	blck=sqrt(q);
+	REP(i,q)
+	{
+		l=input();
+		r=input();
+		Q[i].l=l-1;
+		Q[i].r=r-1;
+		Q[i].idx=i;
+	}
+	solve();
+	REP(i,q) output(out[i]);
+return 0;
+}

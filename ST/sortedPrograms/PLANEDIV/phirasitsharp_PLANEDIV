@@ -1,0 +1,35 @@
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <set>
+#include <tuple>
+
+using namespace std;
+
+map<pair<double, double> , set<double> > mp;
+
+void evaluate(void) {
+  int n;
+  mp.clear();
+  cin >> n;
+  for(int i = 0;i < n;i++) {
+    double a, b, c;
+    cin >> a >> b >> c;
+    int g = __gcd((int)a,(int)b);
+    a /= g, b /= g, c /= g;
+    mp[make_pair(a, b)].insert(c);
+  }
+  int ans = 0;
+  for(auto &p : mp) {
+    ans = max(ans, (int)p.second.size());
+  }
+  printf("%d\n", ans);
+}
+int main() {
+  int t;
+  cin >> t;
+  while(t--) {
+    evaluate();
+  }
+  return 0;
+}

@@ -1,0 +1,24 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	long long int t,n,i,x,ans,prev;
+	cin>>t;
+	while(t--)
+	{
+		ans=0;
+		cin>>n;
+		cin>>x;
+		ans+=x;
+		prev=x;
+		for(i=1;i<n;i++)
+		{
+			cin>>x;
+			if(x>prev)
+				ans+=x-prev;
+			prev=x;
+		}
+		cout<<ans<<endl;
+	}
+	return 0;
+}

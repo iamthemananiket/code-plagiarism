@@ -1,0 +1,30 @@
+#include "bits/stdc++.h"
+using namespace std;
+unsigned q , s , a , b;
+unsigned num;
+long long sum = 0;
+unsigned arr[1 << 26];
+int main(){
+    scanf("%u %u %u %u" , &q , &s , &a , &b);
+    while(q--){
+        num = s >> 1;
+        if(s & 1){
+            arr[num >> 5] |= 1u << (num & 31); 
+        }
+        else{
+            arr[num >> 5] &= ~(1u << (num & 31));
+        }
+        s *= a;
+        s += b;
+    }
+    for(int i = (1 << 26) - 1 ; i >= 0 ; --i){
+        if(__builtin_popcount(arr[i])){
+            for(int j = 0 ; j < 32 ; ++j){
+                if(arr[i] & (1 << j)){
+                    sum += (i << 5) + j;
+                }
+            }
+        }
+    }
+    printf("%lld" , sum);
+}

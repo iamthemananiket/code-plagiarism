@@ -1,0 +1,93 @@
+/*
+ * Codechef 2013 Ode2Code
+ * Helping Shivam
+ * File:   LEPROM.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 16, 2013, 11:45:22 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace LEPROM {
+bool vis[55];
+int mr[55];
+int g[55][55];
+int B, G;
+
+int rec(int boy) {
+  if (boy < 0)
+    return true;
+  for (int to = 0; to < G; to++) {
+    if (g[boy][to] && !vis[to]) {
+      vis[to] = true;
+      if (rec(mr[to])) {
+        mr[to] = boy;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void solve(int test_num) {
+  cin >> B >> G;
+  for (int i = 0; i < B; i++)
+    for (int j = 0; j < G; j++)
+      cin >> g[i][j];
+  int res = 0;
+  memset(vis, false, sizeof(vis));
+  memset(mr, -1, sizeof(mr));
+  for (int i = 0; i < B; i++) {
+    memset(vis, false, sizeof(vis));
+    res += rec(i);
+  }
+  cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  LEPROM::solve();
+  return 0;
+}

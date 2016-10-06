@@ -1,0 +1,133 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 101010;
+
+vector <int> g[maxn];
+
+int lvl[maxn], p[maxn];
+
+inline void dfs(int v, int pr = -1, int Level = 1)
+{
+	lvl[v] = Level;
+	p[v] = pr;
+	for (int i = 0; i < (int)g[v].size(); i++)
+	{
+		int to = g[v][i];
+		if (to != pr)
+			dfs(to, v, Level + 1);
+	}
+}
+
+int b[maxn];
+
+int visited[maxn];
+
+int K;
+
+inline int FindVertex(int Query)
+{
+	int vr = -1; 
+	for (int i = 1; i <= K; i++)
+		if (visited[b[i]] != Query && (vr == -1 || lvl[b[i]] > lvl[vr]))
+			vr = b[i];
+	return vr;
+}
+	
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	int T;
+	cin >> T;
+	int n, Q;
+	while (T--)
+	{
+		scanf("%d", &n);
+		for (int i = 1; i <= n; i++)
+		{
+			g[i].clear();
+			visited[i] = 0;
+		}
+		int x, y;
+		for (int i = 1; i < n; i++)
+		{
+			scanf("%d%d", &x, &y);
+			g[x].pb(y);
+			g[y].pb(x);
+		}
+		dfs(1);
+		scanf("%d", &Q);
+		int v;
+		bool found;
+		for (int Query = 1; Query <= Q; Query++)
+		{
+//			cout << endl;
+			scanf("%d", &K);
+			for (int i = 1; i <= K; i++)
+				scanf("%d", &b[i]);
+			v = FindVertex(Query);
+//			cout << "v1 " << v << endl;
+			while (v != -1)
+			{
+				visited[v] = Query;
+				v = p[v];
+			}
+			v = FindVertex(Query);
+//			cout << "v2 " << v << endl;
+			if (v == -1)
+			{
+				puts("Yes");
+				continue;
+			}
+			while (v != -1 && visited[v] != Query)
+			{
+				visited[v] = Query;
+				v = p[v];
+			}
+			v = p[v];
+			while (v != -1)
+			{
+				visited[v] = 0;
+				v = p[v];
+			}
+			found = 0;
+			for (int i = 1; i <= K; i++)
+			{
+				if (visited[b[i]] != Query)
+				{
+					found = 1;
+					break;
+				}
+			}
+			if (!found)
+				puts("Yes");
+			else
+				puts("No");
+		}
+	}
+	return 0;
+}

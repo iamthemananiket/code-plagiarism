@@ -1,0 +1,49 @@
+//Program: chefgr
+//Author: gary
+//Date: 04/10/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAX_N = ;
+
+int T, N, M;
+
+bool solve(){
+  int s = 0, m = 0, x;
+  scanf("%d%d", &N, &M);
+  for(int i = 0; i < N; i++){
+    scanf("%d", &x);
+    s += x;
+    m = max(m, x);
+  }
+  int d = m * N - s;
+  if(d > M) 
+    return false;
+  M -= d;
+  return M % N == 0;
+}
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    puts(solve() ? "Yes" : "No");
+  }
+  return 0;
+}

@@ -1,0 +1,50 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+// mylittlepony
+using namespace std;
+
+int main() {
+	cin.sync_with_stdio(0);
+	int N,Q;
+	cin >> N;
+	vector< vector<int> > S[10];
+	for(int i =0; i < 10; i++) S[i].resize(N+1, vector<int>(N+1,0));
+	for(int i =0; i < N; i++) for(int j =0; j < N; j++) {
+		int a; cin >> a;
+		S[a-1][i+1][j+1]++;}
+	for(int i =0; i < 10; i++) for(int j =0; j < N; j++) for(int k =0; k < N; k++)
+		S[i][j+1][k+1] +=S[i][j][k+1]+S[i][j+1][k]-S[i][j][k];
+
+	cin >> Q;
+	for(int q =0; q < Q; q++) {
+		int x1,y1,x2,y2;
+		cin >> x1 >> y1 >> x2 >> y2;
+		int ans =0;
+		for(int i =0; i < 10; i++)
+			ans +=(int)(S[i][x2][y2]+S[i][x1-1][y1-1]-S[i][x2][y1-1]-S[i][x1-1][y2] > 0);
+		cout << ans << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing

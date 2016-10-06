@@ -1,0 +1,125 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int INF = 1001001001001001001LL;
+Int Abs(Int r) { return (r < 0) ? -r : +r; }
+
+const int LIM_M = 20;
+int pop[(1 << LIM_M) + 10];
+
+int N;
+Int A[100010];
+
+int M;
+Int sumL[(1 << LIM_M) + 10];
+Int sumR[(1 << LIM_M) + 10];
+vector<pair<Int,int>> sumLs[LIM_M + 10];
+vector<pair<Int,int>> sumRs[LIM_M + 10];
+
+int ansLen;
+pint ans[200010];
+
+int main() {
+	for (int p = 1; p < 1 << LIM_M; ++p) {
+		pop[p] = 1 + pop[p & (p - 1)];
+	}
+	
+	for (; ~scanf("%d", &N); ) {
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		
+		ansLen = 0;
+		
+		M = min(N / 2, LIM_M);
+		for (; M * (M + 1) > N * 2; --M);
+		Int sum = accumulate(A, A + N / 2 + M, 0LL) - accumulate(A + N / 2 + M, A + N, 0LL);
+		for (int i = 0; i < M; ++i) {
+			for (int p = 0; p < 1 << i; ++p) {
+				sumL[p | 1 << i] = sumL[p] + A[N / 2 - 1 - i];
+			}
+		}
+		for (int i = 0; i < M; ++i) {
+			for (int p = 0; p < 1 << i; ++p) {
+				sumR[p | 1 << i] = sumR[p] + A[N / 2 + i];
+			}
+		}
+		for (int s = 0; s <= M; ++s) {
+			sumLs[s].clear();
+			sumRs[s].clear();
+		}
+		for (int p = 0; p < 1 << M; ++p) {
+			sumLs[pop[p]].emplace_back(sumL[p], p);
+			sumRs[pop[p]].emplace_back(sumR[p], p);
+		}
+		for (int s = 0; s <= M; ++s) {
+			sort(sumLs[s].begin(), sumLs[s].end());
+			sort(sumRs[s].begin(), sumRs[s].end());
+		}
+		Int opt = INF;
+		int pm = -1, qm = -1;
+		for (int s = 0; s <= M; ++s) {
+			const int szL = sumLs[s].size();
+			const int szR = sumRs[M - s].size();
+			for (int i = 0, j = szR - 1; i < szL && j >= 0; ) {
+				const int p = sumLs[s][i].second;
+				const int q = sumRs[M - s][j].second;
+				const Int dif = sum - (sumL[p] + sumR[q]) * 2;
+				const Int tmp = Abs(dif);
+				if (opt > tmp) {
+					opt = tmp;
+					pm = p;
+					qm = q;
+				}
+				(dif >= 0) ? ++i : --j;
+			}
+		}
+		int r = N / 2 + M;
+		for (int i = M; i--; ) if (qm & 1 << i) {
+			ans[ansLen++] = mp(N / 2 + i, r--);
+		}
+		for (int i = 0; i < M; ++i) if (pm & 1 << i) {
+			ans[ansLen++] = mp(N / 2 - 1 - i, r--);
+		}
+		assert(r == N / 2);
+		
+		printf("%d\n", ansLen);
+		for (int i = 0; i < ansLen; ++i) {
+			printf("%d %d\n", ans[i].first + 1, ans[i].second);
+		}
+	}
+	
+	return 0;
+}
+

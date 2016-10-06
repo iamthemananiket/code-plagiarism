@@ -1,0 +1,71 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-8
+#define fast_cin ios_base::sync_with_stdio(false)
+
+const int MOD = 1e9+7;
+#define double long double
+typedef long long ll;
+typedef pair<int,pair<int,int> > piii;
+
+ll POWER[65];
+ll power(ll a, ll b) {ll ret=1;while(b) {if(b&1) ret*=a;a*=a;if(ret>=MOD) ret%=MOD;if(a>=MOD) a%=MOD;b>>=1;}return ret;}
+ll inv(ll x) {return power(x,MOD-2);}
+
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+bool valid(int x, int y, int z) {
+	if(x+y<=z) return false;
+	if(x+z<=y) return false;
+	if(z+y<=x) return false;
+	return true;
+}
+double semi(int x, int y, int z) {
+	double ret=x+y+z;
+	ret/=2.0;
+	return ret;
+}
+double area(int x, int y, int z) {
+	double s = semi(x,y,z);
+	double ar = s*(s-x);
+	double ar2=(s-y)*(s-z);
+	ar=sqrt(1.0*ar);
+	ar2=sqrt(1.0*ar2);
+	ar*=ar2;
+	return ar;
+}
+bool equal(double x, double y) {
+	if(fabs(x-y)<eps) return true;
+	return false;
+}
+int main() {
+	// freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	precompute();
+	int r;
+	cin>>r;
+	int LIM=1000;
+	vector< piii > v;
+	for(int i=1;i<=LIM;i++) {
+		for(int j=i;j<=LIM;j++) {
+			for(int k=j;k<=LIM;k++) {
+				if(i+j<=k) break;
+				if(!valid(i,j,k)) continue;
+				if(!equal(1.0*area(i,j,k)/semi(i,j,k),r)) continue;
+				v.pb(mp(i,mp(j,k)));
+			}
+		}
+	}
+	cout<<sz(v)<<endl;
+	for(auto it:v) printf("%d %d %d\n",it.ff,it.ss.ff,it.ss.ss);
+	return 0;
+}

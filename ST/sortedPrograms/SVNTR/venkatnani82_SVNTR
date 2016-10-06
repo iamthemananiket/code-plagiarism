@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+int a[200][200];
+long long sum[200][200];
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		int n, m, s;
+		cin>>n>>m>>s;
+		for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) scanf("%d", &a[i][j]);
+		for (int i = 0; i <= n; i++) sum[0][i] = sum[i][0] = 0; 
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j <= m; j++) {
+				sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] + a[i][j]; 
+			}  	
+		}  
+		int ans = 0;
+		for (int i = 1; i <= n; i++) {
+			for (int j = 1; j <= m; j++) {
+				for (int k = i; k <= n; k++) {
+					for (int w = j; w <= m; w++) {
+						if(sum[k][w] - sum[k][j - 1] - sum[i - 1][w] + sum[i - 1][j - 1] <= s) ans++;	
+					}
+				}
+			}
+		}
+		cout<<ans<<endl;
+	}	
+}

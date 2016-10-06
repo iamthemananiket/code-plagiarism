@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	int t;
+	srand(time(NULL));
+	cin>>t;
+	while(t--){
+		string s;
+		cin>>s;
+		vector<int> digits;
+		for(int i=0;i<s.size();i++){
+			digits.push_back(s[i]-'0');
+		}
+		int n;
+		cin>>n;
+		vector<int> B(n);
+		for(int i=0;i<n;i++){
+			cin>>B[i];
+		}
+		
+		int r=rand()%2;
+		if(r==0)
+			sort(digits.rbegin(),digits.rend());
+		else if(r==1)
+			sort(digits.begin(),digits.end());
+		for(int i=0;i<digits.size()/2;i++){
+			cout<<digits[i];
+		}
+		for(int i=digits.size()-1;i>=digits.size()/2;i--){
+			cout<<digits[i];
+		}
+		cout<<"\n";
+	}
+}

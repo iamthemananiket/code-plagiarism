@@ -1,0 +1,188 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct persistent_binary_trie
+{
+    struct trie_node
+    {
+        int cnt;
+        trie_node *link[2];
+        trie_node()
+        {
+            cnt=0;
+            link[0]=link[1]=NULL;
+        }
+    } pool[500001*20+500], *nextpool;
+    trie_node* alloc(trie_node *root)
+    {
+        if(root)
+            *nextpool=*root;
+        return nextpool++;
+    }
+    int N;
+    trie_node *root[500001];
+    persistent_binary_trie()
+    {
+        N=0;
+        nextpool=pool;
+        root[0]=nextpool++;
+    }
+    trie_node* insert(trie_node *root, int pos, int x)
+    {
+        root=alloc(root);
+        root->cnt++;
+        trie_node*& nxt=root->link[(x>>pos)&1];
+        if(pos!=0)
+            nxt=insert(nxt, pos-1, x);
+        else
+        {
+            nxt=alloc(nxt);
+            nxt->cnt++;
+        }
+        return root;
+    }
+    void push(int x)
+    {
+        N++;
+        root[N]=insert(root[N-1], 19, x);
+    }
+    void pop()
+    {
+        N--;
+    }
+    int query(trie_node *L, trie_node *R, int pos, int x)
+    {
+        if(pos==-1)
+            return 0;
+        int dir=((x>>pos)&1)^1;
+        int rcnt=(R && R->link[dir])?R->link[dir]->cnt:0;
+        int lcnt=(L && L->link[dir])?L->link[dir]->cnt:0;
+        if(rcnt-lcnt>=1)
+            return (dir<<pos)|query(L?L->link[dir]:L, R?R->link[dir]:R, pos-1, x);
+        return ((dir^1)<<pos)|query(L?L->link[dir^1]:L, R?R->link[dir^1]:R, pos-1, x);
+    }
+    int query(int l, int r, int x)
+    {
+        return query(root[l-1], root[r], 19, x);
+    }
+} xor_ds;
+
+struct persistent_segment_tree
+{
+    struct node
+    {
+        int sz;
+        node *left, *right;
+        node()
+        {
+            sz=0;
+            left=right=NULL;
+        }
+    } pool[2*500000*40], *nextpool;
+    node* alloc(node *root)
+    {
+        *nextpool=*root;
+        return nextpool++;
+    }
+    int N;
+    node *root[500001], *nil;
+    persistent_segment_tree()
+    {
+        N=0;
+        nextpool=pool;
+        nil=nextpool++;
+        nil->left=nil->right=nil;
+        root[0]=nil;
+    }
+    node* update(node *root, int begin, int end, int x, int v)
+    {
+        if(x<begin || end<x)
+            return root;
+        root=alloc(root);
+        if(begin==end)
+            root->sz+=v;
+        else
+        {
+            int mid=(begin+end)/2;
+            root->left=update(root->left, begin, mid, x, v);
+            root->right=update(root->right, mid+1, end, x, v);
+            root->sz=root->left->sz+root->right->sz;
+        }
+        return root;
+    }
+    void push(int x)
+    {
+        N++;
+        root[N]=update(root[N-1], 1, 500000, x, 1);
+    }
+    void pop()
+    {
+        N--;
+    }
+    int query(node *rootL, node *rootR, int begin, int end, int i, int j)
+    {
+        if(j<begin || end<i)
+            return 0;
+        if(i<=begin && end<=j)
+            return rootR->sz-rootL->sz;
+        int mid=(begin+end)/2;
+        return query(rootL->left, rootR->left, begin, mid, i, j)+
+               query(rootL->right, rootR->right, mid+1, end, i, j);
+    }
+    int query(int l, int r, int x)
+    {
+        return query(root[l-1], root[r], 1, 500000, 1, x);
+    }
+    int query2(node *rootL, node *rootR, int begin, int end, int pos)
+    {
+        if(begin==end)
+            return begin;
+        int mid=(begin+end)/2;
+        if(pos<=rootR->left->sz-rootL->left->sz)
+            return query2(rootL->left, rootR->left, begin, mid, pos);
+        return query2(rootL->right, rootR->right, mid+1, end, pos-(rootR->left->sz-rootL->left->sz));
+    }
+    int query2(int l, int r, int x)
+    {
+        return query2(root[l-1], root[r], 1, 500000, x);
+    }
+} stree_ds;
+
+int main()
+{
+    int M;
+    scanf("%d", &M);
+    int a, b, c, d;
+    for(int i=0; i<M; i++)
+    {
+        scanf("%d%d", &a, &b);
+        switch(a)
+        {
+        case 0:
+            xor_ds.push(b);
+            stree_ds.push(b);
+            break;
+        case 1:
+            scanf("%d%d", &c, &d);
+            printf("%d\n", xor_ds.query(b, c, d));
+            break;
+        case 2:
+            for(int j=0; j<b; j++)
+            {
+                xor_ds.pop();
+                stree_ds.pop();
+            }
+            break;
+        case 3:
+            scanf("%d%d", &c, &d);
+            printf("%d\n", stree_ds.query(b, c, d));
+            break;
+        case 4:
+            scanf("%d%d", &c, &d);
+            printf("%d\n", stree_ds.query2(b, c, d));
+            break;
+        }
+    }
+    return 0;
+}

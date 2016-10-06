@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<ll,ll> pii;
+
+const int maxn = 1e5;
+
+void show(pii p) {
+	p.second *= p.first;
+	p.first--;
+	if (p.first > 0) { printf("%lldx^%lld",p.second,p.first); }
+	else { printf("%lld",p.second); }
+}
+
+void solve() {
+	vector<pii> V;
+	int n; s(n);
+	rep(i,1,n) {
+		ll x,y;
+		sl(x); sl(y); V.pb(mp(-y,x));
+	}
+	sort(V.begin(),V.end()); V[0].first = -V[0].first;
+	show(V[0]);
+	repe(i,1,V.size()) {
+		V[i].first = -V[i].first;
+		if (V[i].first == 0) break;
+		printf(" + "); show(V[i]);
+	}
+	endc;
+}
+
+int main() {
+	int t; s(t); while (t--) solve();
+
+}

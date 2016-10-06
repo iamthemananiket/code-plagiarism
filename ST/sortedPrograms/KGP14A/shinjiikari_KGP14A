@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 110
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+int main()
+{
+	ll kase,t,n,a[N],b[N],ans;
+	scanf("%lld",&t);
+	kase=t;
+	while(t--)
+	{
+		scanf("%lld",&n);
+		REP(i,n) scanf("%lld",&a[i]);
+		REP(i,n) scanf("%lld",&b[i]);
+		sort(a,a+n);
+		sort(b,b+n);
+		ans=0;
+		REP(i,n) ans+=abs(a[i]-b[i]);
+		printf("Case %lld: %lld\n",kase-t,ans);
+	}
+return 0;
+}

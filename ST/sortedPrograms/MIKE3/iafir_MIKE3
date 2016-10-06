@@ -1,0 +1,66 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+     
+using namespace std;
+    
+int n,m,k[22],offer[22][22000],isUse[22];
+vector <int> edge[22];
+
+int acc(int a)
+{
+	int hasil = 0;
+	if(a<m)
+	{
+		if(!isUse[a])
+		{
+			int lo=edge[a].size();
+			for(int i=0; i<lo; i++)
+			{
+				if(!isUse[edge[a][i]])
+					isUse[edge[a][i]] = a+1;
+			}
+			hasil = 1 + acc(a+1);
+			for(int i=0; i<lo; i++)
+			{
+				if(isUse[edge[a][i]] == a+1)
+					isUse[edge[a][i]] = 0;
+			}
+		}
+		hasil = max(hasil,acc(a+1));
+	}
+	return hasil;
+}
+ 
+int main()
+{
+    scanf("%d %d",&n,&m);
+    for(int i=0; i<m; i++)
+    {
+    	scanf("%d",&k[i]);
+    	for(int j = 0; j<k[i]; j++)
+    	{
+    		scanf("%d",&offer[i][j]);
+    	}
+    }
+    for(int i=0; i<m; i++)
+    	for(int j=i+1; j<m; j++)
+    	{
+    		int a=0,b=0;
+    		bool connect = false;
+    		while(a<k[i] && b<k[j] && !connect)
+    		{
+    			while(offer[i][a]>offer[j][b] && b<k[j] ) b++;
+    			while(offer[i][a]<offer[j][b] && a<k[i] ) a++;
+    			if(offer[i][a]==offer[j][b] && a<k[i] && b<k[j] ) connect = true;
+    		}
+    		if(connect)
+    			edge[i].push_back(j);
+    	}
+    memset(isUse,0,sizeof(isUse));
+    printf("%d\n",acc(0));
+    return 0;
+}
+

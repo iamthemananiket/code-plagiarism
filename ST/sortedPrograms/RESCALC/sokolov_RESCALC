@@ -1,0 +1,87 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MOD = (int)1e9 + 7;
+
+int cnt[7];
+pair<int,int> res[109];
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n;
+		scanf("%d", &n);
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j <= 6; ++j) {
+				cnt[j] = 0;
+			}
+			int c;
+			scanf("%d", &c);
+			res[i] = make_pair(c, i);
+			while (c--) {
+				++cnt[nextInt()];
+			}
+			while (true) {
+				sort(cnt + 1, cnt + 6 + 1);
+				if (cnt[1]) {
+					for (int i = 1; i <= 6; ++i) {
+						--cnt[i];
+					}
+					res[i].first += 4;
+				} else if (cnt[2]) {
+					for (int i = 2; i <= 6; ++i) {
+						--cnt[i];
+					}
+					res[i].first += 2;
+				} else if (cnt[3]) {
+					for (int i = 3; i <= 6; ++i) {
+						--cnt[i];
+					}
+					++res[i].first;
+				} else {
+					break;
+				}
+			}
+		}
+		sort(res + 1, res + n + 1);
+		reverse(res + 1, res + n + 1);
+		if (n >= 2 && res[1].first == res[2].first) {
+			printf("tie\n");
+		} else if (res[1].second == 1) {
+			printf("chef\n");
+		} else {
+			printf("%d\n", res[1].second);
+		}
+	}
+	return 0;
+}

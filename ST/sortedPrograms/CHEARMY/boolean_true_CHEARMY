@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+int main()
+{
+    int test;
+    cin>>test;
+    while(test--)
+    {
+        ll k;
+        cin>>k;
+        k--;
+        if(k==0)
+        {
+            cout<<"0"<<endl;
+            continue;
+        }
+        string ans="";
+        while(k!=0)
+        {
+            ll rem=k%5;
+            ans=((char)('0'+rem*2))+ans;
+            k/=5;
+        }
+        cout<<ans<<endl;
+    }
+}
+

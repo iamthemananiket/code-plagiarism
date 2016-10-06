@@ -1,0 +1,74 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <cstdint>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, const pair<T1, T2> &a) { return os << "(" << a.first << ", " << a.second << ")"; };
+template <typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template <typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template <typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+
+const Int MO = 1000000007;
+Int bn[310][310];
+
+int R, B, L;
+
+int main() {
+	for (int i = 0; i < 305; ++i) {
+		bn[i][0] = bn[i][i] = 1;
+		for (int j = 1; j < i; ++j) {
+			bn[i][j] = (bn[i - 1][j - 1] + bn[i - 1][j]) % MO;
+		}
+	}
+	
+	for (int TC = in(); TC--; ) {
+		R = in();
+		B = in();
+		L = in();
+		Int ans = 0;
+		for (int x = 0; x <= B; ++x) {
+			if ((R - 4 * x) % 6 == 0) {
+				const int y = (R - 4 * x) / 6;
+				if (y >= 0) {
+					const int ub = min(L, B - x - y);
+					for (int z = 0; z <= ub; ++z) {
+						Int tmp = 1;
+						(tmp *= bn[B][x]) %= MO;
+						(tmp *= bn[B - x][y]) %= MO;
+						(tmp *= bn[B - x - y][z]) %= MO;
+						(ans += tmp) %= MO;
+					}
+				}
+			}
+		}
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}

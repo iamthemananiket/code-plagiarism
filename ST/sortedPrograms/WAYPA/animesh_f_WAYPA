@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+#define ll long long
+using namespace std;
+ 
+const int MAX = 105;
+
+const int MOD = (int)(1e9 + 297);
+
+int ans = 1 , T , N;
+vector < pair < int , int > > adjList[MAX];
+int phash[MAX][MAX];
+int dist[MAX][MAX];
+
+  
+inline void dfs( int root , int node , int par ){
+
+    for(auto next: adjList[node]){
+        if( next.first == par ) continue;
+        phash[root][next.first] = ( phash[root][node] * 1LL * 137 + next.second ) % MOD;
+        dist[root][next.first] = dist[root][node] + 1;
+        dfs( root , next.first , node);
+    }
+}
+
+int main() {
+        
+    cin.tie(0);
+    ios::sync_with_stdio(0);
+    cin >> T;
+
+    while(T--){
+                
+        cin >> N;
+        
+        for(int i = 1 ; i <= N ; i++){
+            adjList[i].clear();
+            for(int j = 1 ; j <= N ; j++){
+                dist[i][j] = phash[i][j] = 0;
+            }
+        }
+
+        ans = 2;
+        
+        for(int i = 1 ; i < N ; i++){
+            int u , v , w;
+            cin >> u >> v >> w;
+            adjList[u].push_back( make_pair(v,w) );
+            adjList[v].push_back( make_pair(u,w) );
+        }
+
+        for(int i = 1 ; i <= N ; i++) dfs(i,i,0);
+
+        for(int i = 1 ; i <= N ; i++)
+            for(int j = i + 1 ; j <= N ; j++){
+                if( phash[i][j] == phash[j][i] ) 
+                    ans = max(ans, dist[i][j] + 1);
+        }
+
+        cout << ans << endl;
+    }
+
+    return 0;
+}

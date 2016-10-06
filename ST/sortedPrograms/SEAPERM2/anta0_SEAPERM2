@@ -1,0 +1,123 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+vector<vector<int>> minorSet(const vector<int> &p) {
+	int n = (int)p.size();
+	vector<vector<int>> minors(n, vector<int>(n - 1));
+	rep(i, n) {
+		vector<int> &minor = minors[i];
+		rep(j, n) if(j != i)
+			minor[j - (j > i)] = p[j] - (p[j] > p[i] ? 1 : 0);
+	}
+	sort(minors.begin(), minors.end());
+	return minors;
+}
+
+map<vector<vector<int>>, vector<int>> smallMap;
+
+vector<int> solve(vector<vector<int>> &minors) {
+	int n = (int)minors.size();
+	if(n <= 4) {
+		vector<int> p = smallMap[minors];
+		assert(!p.empty());
+		return p;
+	}
+
+	vector<int> pos(n, 0), cnt(n - 1, 0);
+	rep(i, n) {
+		const vector<int> &minor = minors[i];
+		while(minor[pos[i]] != 0) ++ pos[i];
+		++ cnt[pos[i]];
+	}
+
+	int origpos = -1, factor = -1;
+	rep(i, n) {
+		int x = i == 0 ? 0 : cnt[i - 1], y = i == n - 1 ? 0 : cnt[i];
+		if((x == i || x == i + 1) && (y == n - 1 - i || y == n - i)) {
+			origpos = i;
+			if(x == i && y == n - 1 - i) {
+				factor = 0;
+			} else if(x == i + 1 && y == n - 1 - i) {
+				factor = 2;
+			} else if(x == i && y == n - i) {
+				factor = 1;
+			} else {
+				assert(false);
+			}
+			break;
+		}
+	}
+	assert(origpos != -1);
+
+	int pprime = -1;
+	if(factor == 0) {
+		rep(i, n) {
+			if(pos[i] != origpos - 1 && pos[i] != origpos) {
+				pprime = i;
+				break;
+			}
+		}
+		assert(pprime != -1);
+	} else {
+		pair<int, int> minRun(INF, -1);
+		rep(i, n) {
+			const vector<int> &minor = minors[i];
+			int j = 0;
+			if(factor == 1) {
+				while(pos[i] + j < n - 1 && minor[pos[i] + j] == j)
+					++ j;
+			} else {
+				while(pos[i] - j >= 0 && minor[pos[i] - j] == j)
+					++ j;
+			}
+			amin(minRun, make_pair(j, i));
+		}
+		pprime = minRun.second;
+	}
+
+	vector<int> p = minors[pprime];
+	for(int &x : p) ++ x;
+	p.insert(p.begin() + origpos, 0);
+	return p;
+}
+
+int main() {
+	smallMap.clear();
+	rer(n, 1, 4) {
+		vector<int> p(n);
+		iota(p.begin(), p.end(), 0);
+		do {
+			smallMap[minorSet(p)] = p;
+		} while(next_permutation(p.begin(), p.end()));
+	}
+
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int n;
+		scanf("%d", &n);
+		vector<vector<int>> minors(n, vector<int>(n - 1));
+		rep(i, n) {
+			rep(j, n - 1) {
+				int x;
+				scanf("%d", &x), -- x;
+				minors[i][j] = x;
+			}
+		}
+		sort(minors.begin(), minors.end());
+		vector<int> ans = solve(minors);
+		for(int i = 0; i < n; ++ i) {
+			if(i != 0) putchar(' ');
+			printf("%d", ans[i] + 1);
+		}
+		puts("");
+	}
+	return 0;
+}

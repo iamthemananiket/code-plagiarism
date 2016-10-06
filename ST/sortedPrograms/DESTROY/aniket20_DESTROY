@@ -1,0 +1,71 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+
+int a[maxs];
+
+int main()
+{
+	int t,ans,prev1,cnt,i,n;
+	sc("%d",&t);
+	while(t--){
+		sc("%d",&n);
+		for(i=0;i<n;i++){
+			sc("%d",&a[i]);
+		}
+		sort(a,a+n);
+		ans=0;
+		prev1=0;
+		int fl=0;
+		if(n&1){
+			fl=1;
+			ans=1;
+		}
+		int pairs=0;
+		int tot=n/2+fl;
+		for(i=0;i<n;i++){
+			int req=a[i];
+			cnt=0;
+			while(i<n && a[i]==req){
+				i++;
+				cnt++;
+			}
+			if(cnt>tot){
+				pairs=(cnt-tot);
+			}
+			i--;
+		}
+		ans+=pairs*2+(n/2-pairs);
+		pr("%d\n",ans);
+	}
+	return 0;
+}

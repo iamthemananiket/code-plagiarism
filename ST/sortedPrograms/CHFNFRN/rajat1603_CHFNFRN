@@ -1,0 +1,54 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e3 + 3;
+const int SZ = 1 + (N >> 5);
+int t;
+int n , m;
+int a , b;
+unsigned graph[N][SZ];
+int col[N];
+bool rekt;
+void dfs(int node){
+    for(int i = 1 ; i <= n ; ++i){
+        if(!(graph[node][i >> 5] & (1u << (i & 31)))){
+            if(col[i] == -1){
+                col[i] = !col[node];
+                dfs(i);
+            }
+            if(col[i] == col[node]){
+                rekt = 1;
+            }
+        }
+    }
+}
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d %d" , &n , &m);
+        for(int i = 1 ; i <= n ; ++i){
+            for(int j = 0 ; j <= (n >> 5) ; ++j){
+                graph[i][j] = 0;
+            }
+            graph[i][i >> 5] |= 1u << (i & 31);
+            col[i] = -1;
+        }
+        while(m--){
+            scanf("%d %d" , &a , &b);
+            graph[a][b >> 5] |= 1u << (b & 31);
+            graph[b][a >> 5] |= 1u << (a & 31);
+        }
+        rekt = 0;
+        for(int i = 1 ; i <= n ; ++i){
+            if(col[i] == -1){
+                col[i] = 0;
+                dfs(i);
+            }
+        }
+        if(rekt){
+            printf("NO\n");
+        }
+        else{
+            printf("YES\n");
+        }
+    }
+}

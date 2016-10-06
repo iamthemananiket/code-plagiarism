@@ -1,0 +1,180 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1e5 + 5;
+const int V = 1e6 + 6;
+const int LOG = 21;
+
+int leastDivisor[V];
+
+int nxt[N], pre[N];
+int divisors[N][LOG];
+int size[N];
+
+int maxDivisor[N << 2];
+int indexOf[N];
+
+int n, m;
+
+void initSieve() {
+    for (int i = 2; i * i < V; ++i)
+        if (leastDivisor[i] == 0)
+            for (int j = i * i; j < V; j += i)
+                if (leastDivisor[j] == 0)
+                    leastDivisor[j] = i;
+
+    for (int i = 1; i < V; ++i)
+        if (leastDivisor[i] == 0)
+            leastDivisor[i] = i;
+}
+
+inline void gather(const int &k) {
+    maxDivisor[k] = max(maxDivisor[k << 1], maxDivisor[k << 1 | 1]);
+}
+
+void build(int k, int l, int r) {
+    if (l == r) {
+        maxDivisor[k] = divisors[l][size[l]];
+        indexOf[l] = k;
+        return;
+    }
+    build(k << 1, l, l + r >> 1);
+    build(k << 1 | 1, (l + r >> 1) + 1, r);
+    gather(k);
+}
+
+int get(int k, int l, int r, int i, int j) {
+    if (r < i || j < l) return 1;
+    if (i <= l && r <= j) return maxDivisor[k];
+    return max(get(k << 1, l, l + r >> 1, i, j), get(k << 1 | 1, (l + r >> 1) + 1, r, i, j));
+}
+
+void merge(vector<int> &a) {
+    if (!a.empty()) {
+        int x = pre[a[0]];
+        int y = nxt[a.back()];
+        for (int v : a) {
+            pre[v] = x; nxt[v] = y;
+        }
+        a.clear();
+    }
+}
+
+void update(int l, int r) {
+    vector<int> a;
+    for (int i = l; i <= r; i = nxt[i]) {
+        int k = indexOf[i];
+        int last = maxDivisor[k];
+        if (size[i]) maxDivisor[k] = divisors[i][--size[i]];
+        if (!size[i]) {
+            a.push_back(i);
+        } else {
+            merge(a);
+        }
+        if (maxDivisor[k] != last)
+            for (k >>= 1; k; k >>= 1) gather(k);
+    }
+    merge(a);
+}
+
+void solve_subtask3(int m) {
+    build(1, 1, n);
+    for (int i = 1; i <= n; ++i) nxt[i] = i + 1, pre[i] = i - 1;
+
+    while (m--) {
+        int cmd, L, R;
+        cin >> cmd >> L >> R;
+        if (cmd == 0)
+            update(L, R);
+        else
+            cout << get(1, 1, n, L, R) << ' ';
+    }
+}
+
+namespace subtask2 {
+    int a[N << 2];
+    bool lazy[N << 2];
+
+    void build(int k, int l, int r) {
+        if (l == r) {
+            a[k] = divisors[l][size[l]];
+            return;
+        }
+        build(k << 1, l, l + r >> 1);
+        build(k << 1 | 1, (l + r >> 1) + 1, r);
+        a[k] = max(a[k << 1], a[k << 1 | 1]);
+    }
+
+    void pushDown(int k) {
+        if (lazy[k]) {
+            a[k] = 1;
+            if ((k << 1 | 1) < (N << 2))
+                lazy[k << 1] = lazy[k << 1 | 1] = true;
+            lazy[k] = false;
+        }
+    }
+
+    void update(int k, int l, int r, int i, int j) {
+        pushDown(k);
+        if (r < i || j < l) return;
+        if (i <= l && r <= j) {
+            lazy[k] = true;
+            pushDown(k);
+            return;
+        }
+        update(k << 1, l, l + r >> 1, i, j);
+        update(k << 1 | 1, (l + r >> 1) + 1, r, i, j);
+        a[k] = max(a[k << 1], a[k << 1 | 1]);
+    }
+
+    int get(int k, int l, int r, int i, int j) {
+        pushDown(k);
+        if (r < i || j < l) return 1;
+        if (i <= l && r <= j) return a[k];
+        return max(get(k << 1, l, l + r >> 1, i, j), get(k << 1 | 1, (l + r >> 1) + 1, r, i, j));
+    }
+
+    void solve(int m) {
+        build(1, 1, n);
+
+        while (m--) {
+            int cmd, L, R;
+            cin >> cmd >> L >> R;
+            if (cmd == 0)
+                update(1, 1, n, L, R);
+            else
+                cout << get(1, 1, n, L, R) << ' ';
+        }
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false); cin.tie(NULL);
+    int ntest; cin >> ntest;
+    initSieve();
+    while (ntest--) {
+        cin >> n >> m;
+        int maxSize = 0;
+        for (int i = 1; i <= n; ++i) {
+            int x; cin >> x;
+            divisors[i][size[i] = 0] = 1;
+            while (x > 1) {
+                divisors[i][++size[i]] = leastDivisor[x];
+                x /= leastDivisor[x];
+            }
+            reverse(divisors[i] + 1, divisors[i] + size[i] + 1);
+            maxSize = max(maxSize, size[i]);
+        }
+        /*
+        if (maxSize <= 1) {
+            subtask2::solve(m);
+        }
+        else*/
+        {
+            solve_subtask3(m);
+        }
+        cout << '\n';
+    }
+    return 0;
+}

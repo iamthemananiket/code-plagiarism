@@ -1,0 +1,17 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		int k;
+		int r[3];
+		for (int i = 0; i < 3; i++) cin>>r[i];
+		cin>>k;
+		long long ans = 0;
+		sort(r, r + 3);
+		for (int i = 0; i < 3; i++) ans += min(r[i], k - 1);
+		ans++;
+		cout<<ans<<endl;     
+	}
+}

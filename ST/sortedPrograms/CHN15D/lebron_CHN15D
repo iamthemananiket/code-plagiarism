@@ -1,0 +1,159 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int N = 100031;
+
+using namespace std;
+
+int n;
+long long k;
+int M[N],C[N];
+vector<pair<double,int> > order;
+int t[N*4];
+
+void build(int v,int tl,int tr)
+{
+	t[v]=0;
+	if (tl==tr)
+		return;
+	int tm=tl+tr;
+	tm/=2;
+	build(v*2,tl,tm);
+	build(v*2+1,tm+1,tr);
+}
+
+int get(int v,int tl,int tr,int l,int r)
+{
+	if (l>r)
+		return 0;
+	if (tl==l&&tr==r)
+		return t[v];
+	int tm=tl+tr;
+	tm/=2;
+	return get(v*2,tl,tm,l,min(r,tm))+get(v*2+1,tm+1,tr,max(tm+1,l),r);
+}
+
+void update(int v,int tl,int tr,int ps,int val)
+{
+	if (tl==tr)
+	{
+		t[v]=val;
+		return ;
+	}
+	int tm=tl+tr;
+	tm/=2;
+	if (ps<=tm)
+		update(v*2,tl,tm,ps,val);
+	else
+		update(v*2+1,tm+1,tr,ps,val);
+	t[v]=t[v*2]+t[v*2+1];
+}
+
+double eval(double k,double b,double at)
+{
+	//at=kx+b
+	//-kx=-at+b
+	//kx=at-b
+	//x=(at-b)/k
+	
+	return (at-b)/k;
+}
+
+long long count_inversions(double Y)
+{
+	vector<pair<double,int> > v;
+	for (int i=0;i<order.size();i++)
+	{
+		int id=order[i].second;
+		
+		double here=eval(M[id],C[id],Y);
+		v.push_back(make_pair(here,i));
+	}
+	sort(v.begin(),v.end());
+	
+	long long res=0;
+	
+	build(1,0,n-1);
+	for (int i=0;i<v.size();i++)
+	{
+		int id=v[i].second;
+		res+=get(1,0,n-1,id+1,n-1);
+		update(1,0,n-1,id,1);
+	}
+	return res;
+}
+
+int main(){
+//	freopen("path2.in","r",stdin);
+//	freopen("path2.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>n>>k;
+	for (int i=1;i<=n;i++)
+	{
+		cin>>M[i]>>C[i];
+	}
+	
+	for (int i=1;i<=n;i++)
+	{
+		double qx=eval(M[i],C[i],-1e15);
+		
+		order.push_back(make_pair(qx,i));
+	}
+	
+	sort(order.begin(),order.end());
+	
+	double l,r;
+	l=-1e9;
+	r=1e9;
+	
+	for (int iter=1;iter<=40;iter++)
+	{
+		double mid=l+r;
+		mid/=2;
+		long long INV=count_inversions(mid);
+		if (INV<k)
+			l=mid;
+		else
+			r=mid;
+	}
+	
+	cout.precision(10);
+	cout<<fixed<<l<<endl;
+	
+	return 0;
+}

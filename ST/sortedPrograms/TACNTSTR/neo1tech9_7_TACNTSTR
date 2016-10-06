@@ -1,0 +1,102 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, x, y, d, p, c, L, b;
+const int N = 1e5 + 500;
+const int LN = 21;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+string str;
+long long tsx[N], tis[N], rcnt[N], Z[N];
+inline ll PowerMod(ll a, ll p, ll mod) {
+    ll ret = 1;
+    a %= mod;
+    while (p > 0) {
+        if (p & 1) {
+            ret *= a;
+            ret %= mod;
+        }
+        a *= a;
+        a %= mod;
+        p >>= 1LL;
+    }
+    return ret;
+}
+
+int main() {
+    csl;
+    cin >> str;
+    tsx[0] = 1;
+    tis[0] = 1;
+    ll invd = PowerMod(26, mod - 2, mod);
+    for (int i = 1; i < N; ++i) {
+        tsx[i] = (tsx[i - 1] * 26) % mod;
+        tis[i] = (tis[i - 1] * invd) % mod;
+    }
+    for (int i = 0; i < str.size(); ++i) {
+        Z[i] = ((ll('Z' - str[i])) * tsx[i]) % mod;
+    }
+    for (int i = str.size() - 1; i >= 0; --i) {
+        Z[i] += Z[i + 1];
+        if (Z[i] >= mod) Z[i] -= mod;
+    }
+    ll sol = 0;
+    for (int i = 0; i < str.size(); ++i) {
+        sol += (1LL * ((int)'Z' - (int)str[i])) * (((Z[i + 1] * tis[i + 1]) % mod) + 1);
+        //cout << Z[i + 1] << '\n';
+        sol %= mod;
+    }
+    cout << sol << '\n';
+    return 0;
+}
+
+
+
+
+
+
+
+

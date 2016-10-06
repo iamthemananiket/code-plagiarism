@@ -1,0 +1,75 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+#define N 600
+#define M 1100
+#define inf 100000000
+
+int st[M], en[M], w[M];
+double dis[N][N], dis1[N][N];
+int vis[N], vis1[N], arr[N];
+int main(){
+    //freopen("1.in", "r", stdin);
+	int n, m, X, Y, T;
+	for(scanf("%d", &T); T --;) {
+        scanf("%d%d", &n, &m);
+        for(int i = 0; i < m; i++)scanf("%d%d%d", &st[i], &en[i], &w[i]);
+        scanf("%d%d", &X, &Y);
+        if(Y == X) {
+            printf("%.10lf\n", 0.0);
+            continue;
+        }
+        int so = X, de = Y;
+        for(int i=1; i <= n; i ++)for(int j = 0; j <= n; j ++)dis[j][i] = dis1[j][i] = inf;
+        dis[0][so] = 0;
+        dis1[0][de] = 0;
+        for(int i = 1; i <= n; i++){
+            for(int j = 0; j < m; j++){
+                dis[i][en[j]] = min(dis[i][en[j]],dis[i-1][st[j]]+w[j]);
+                dis1[i][st[j]] = min(dis1[i][st[j]], dis1[i - 1][en[j]] + w[j]);
+            }
+        }
+        for(int i = 1; i <= n; i ++) vis[i] = vis1[i] = 0;
+        for(int i = 1; i <= n; i ++) for(int j = 0; j <= n; j ++) {
+            if(dis[j][i] != inf) vis[i] = 1;
+            if(dis1[j][i] != inf) vis1[i] = 1;
+        }
+        for(int i = 1; i <= n; i ++) if(vis[i] && !vis1[i]) vis[i] = 0;
+        if(!vis[de]) {
+            puts("-1");
+            continue;
+        }
+        int gas = 0;
+        for(int i = 1; i <= n; i ++) if(vis[i]) arr[gas ++] = i;
+        int cnt = 0;
+        for(int i = 0; i < m; i ++) if(vis[st[i]] && vis[en[i]]) {
+            st[cnt] = lower_bound(arr, arr + gas, st[i]) - arr;
+            en[cnt] = lower_bound(arr, arr + gas, en[i]) - arr;
+            w[cnt ++] = w[i];
+        }
+        n = gas;
+        m = cnt;
+        so = lower_bound(arr, arr + gas, so) - arr;
+        de = lower_bound(arr, arr + gas, de) - arr;
+        for(int i=0; i < n; i ++)for(int j = 0; j <= n; j ++)dis[j][i] = inf;
+        dis[0][so] = 0;
+        for(int i = 1; i <= n; i++){
+            for(int j = 0; j < m; j++){
+                dis[i][en[j]] = min(dis[i][en[j]],dis[i-1][st[j]]+w[j]);
+            }
+        }
+        double ans = inf;
+        for(int i = 0; i < n; i++) {
+            double mx = -inf;
+            for(int j = 0; j < n; j ++) {
+                double t = 1.0*(dis[n][i] - dis[j][i])/(n-j);
+                mx = max(mx, t);
+            }
+            if(mx < 0) continue;
+            ans = min(ans, mx);
+        }
+        for(int j = 1; j <= n; j ++) ans = min(ans, 1.0 * dis[j][de] / j);
+        printf("%.10lf\n", ans);
+	}
+	return 0;
+}

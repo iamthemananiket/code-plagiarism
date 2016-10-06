@@ -1,0 +1,26 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+char n[100100];
+
+int main ()
+{
+	int sz, a;
+	scanf ("%s", n);
+	sz = strlen (n);
+	a = n[sz - 1] - '0';
+	if (a & 1)
+		printf ("NO\n");
+	else
+		printf ("YES\n");
+	return 0;
+}

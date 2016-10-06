@@ -1,0 +1,188 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 1010
+#define M 505010
+#define MAX 30
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline int input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(int x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+vector <int> G[N];
+vector <pii> Tree[N];
+int low[N],vis[N],dfn[N],rm[N],U[M],V[M],isbridge[M],cnt,root,f[N][N],ans[N][N]; 
+queue <int> Q[N];
+
+inline int dfs(int v, int edge)
+{
+	vis[v]=1;
+	dfn[v]=cnt++;
+	low[v]=dfn[v];
+	int e,w;
+	REP(i,G[v].size())
+	{
+		e=G[v][i];
+		if (U[e]==v) w=V[e];
+		else w=U[e];
+		if (!vis[w]) low[v]=min(low[v],dfs(w,e));
+		else if (e!=edge) low[v]=min(low[v],dfn[w]);
+	}
+	if (low[v]==dfn[v]&&edge!=-1) isbridge[edge]=1;
+	return low[v];
+}
+
+inline void maketree(int u)
+{
+	int v,e,w,curr=cnt++;
+	Q[curr].push(u);
+	vis[u]=1;
+	while(!Q[curr].empty())
+	{
+		v=Q[curr].front();
+		Q[curr].pop();
+		rm[v]=curr;
+		REP(i,G[v].size())
+		{
+			e=G[v][i];
+			if (U[e]==v) w=V[e];
+			else w=U[e];
+			if (vis[w]) continue;
+			if (isbridge[e])
+			{
+				Tree[curr].pb(mp(cnt,f[U[e]][V[e]]));
+				Tree[cnt].pb(mp(curr,f[U[e]][V[e]]));
+				maketree(w);
+			}
+			else
+			{
+				Q[curr].push(w);
+				vis[w]=1;
+			}
+		}
+	}
+}
+
+inline void process(int v, int weight)
+{
+	ans[root][v]=weight;
+	int w;
+	vis[v]=1;
+	REP(i,Tree[v].size())
+	{
+		w=Tree[v][i].X;
+		if (vis[w]) continue;
+		process(w,min(weight,Tree[v][i].Y));
+	}
+}
+
+int main()
+{
+	int t,n,m,mod,maxv,x,y;
+	t=input();
+	while(t--)
+	{
+		n=input();
+		m=input();
+		mod=input();
+		f[1][1]=1%mod;
+		REPP(i,2,n+1)
+		{
+			f[i][1]=1%mod;
+			f[1][i]=1%mod;
+		}
+		REPP(i,2,n+1) REPP(j,2,n+1)
+		if (i==j) f[i][j]=0;
+		else f[i][j]=((f[i-1][j]+f[i][j-1])%mod+f[i-1][j-1])%mod;
+		REPP(i,1,n+1) G[i].clear();
+		REPP(i,1,n+1) Tree[i].clear();
+		REP(i,m)
+		{
+			x=input();
+			y=input();
+			U[i]=x;
+			V[i]=y;
+			G[x].pb(i);
+			G[y].pb(i);
+		}
+		FILL(vis,0);
+		FILL(isbridge,0);
+		cnt=0;
+		dfs(1,-1);
+		cnt=0;
+		FILL(vis,0);
+		maketree(1);
+		if (mod==1)
+		{
+			output(0);
+			continue;
+		}
+		maxv=0;
+		for(root=0;root<cnt;root++)
+		{
+			FILL(vis,0);
+			process(root,mod);
+		}
+		REPP(i,1,n+1) REPP(j,i+1,n+1)
+		{
+			if (rm[i]==rm[j]) continue;
+			//printf("FUCK\n");
+			//output(i);
+			//output(j);
+			//output(ans[rm[i]][rm[j]]);
+			maxv=max(maxv,f[i][j]-ans[rm[i]][rm[j]]);
+		}
+		output(maxv);
+	}
+return 0;
+}

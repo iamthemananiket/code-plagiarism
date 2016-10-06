@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 50005;
+int f[N], maxi[N], pos[N];
+vector<int> G[N], ver, rec;
+queue<int> que;
+bool vis[N];
+
+struct E {
+	int t, a, b;
+};
+
+bool comp(const E &e1, const E &e2) {
+	return e1.t < e2.t;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, n, m, t, a, b;
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n >> m;
+		repu(i, 0, N) f[i] = 0, maxi[i] = i;
+		repu(i, 0, n) {
+			cin >> a;
+			f[a]++;
+		}
+		vector<E> ev(m);
+		repu(i, 0, m) {
+			cin >> ev[i].t >> ev[i].a >> ev[i].b;
+		}
+		sort(all(ev), comp);
+		for (int i = m - 1; i >= 0;) {
+			int cur = i;
+			while (cur >= 0 && ev[cur].t == ev[i].t) {
+				G[ev[cur].a].push_back(ev[cur].b);
+				G[ev[cur].b].push_back(ev[cur].a);
+				ver.push_back(ev[cur].a);
+				ver.push_back(ev[cur].b);
+				cur--;
+			}
+			sort(all(ver)); uni(ver);
+			repu(i, 0, ver.size()) pos[ver[i]] = i;
+			{// dfs
+				repu(i, 0, ver.size()) {
+					if (!vis[i]) {
+						int best = maxi[ver[i]];
+						que.push(ver[i]); rec.push_back(ver[i]);
+						vis[i] = true;
+						while (!que.empty()) {
+							int p = que.front(); que.pop();
+							for (auto &x : G[p]) {
+								if (!vis[pos[x]]) {
+									vis[pos[x]] = true;
+									que.push(x); amax(best, maxi[x]);
+									rec.push_back(x);
+								}
+							}
+						}
+						for (auto &x : rec) amax(maxi[x], best);
+						rec.clear();
+					}
+				}
+			}
+			repu(i, 0, ver.size()) {
+				vis[i] = false; G[ver[i]].clear();
+			}
+			ver.clear();
+			i = cur;
+		}
+		ll ret = 0;
+		repu(i, 0, N) ret += f[i] * 1LL * maxi[i];
+		printf("%lld\n", ret);
+	}
+	return 0;
+}

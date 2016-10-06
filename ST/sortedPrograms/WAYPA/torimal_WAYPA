@@ -1,0 +1,298 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+#define endl '\n'
+typedef unsigned long long ull;
+typedef long long ll;
+typedef pair<int, int> pii;
+
+const int C = 10;
+const int MAX_N = 110000;
+const int MODS[] = {1000000007, 1000000009};
+const int BS[] = {10007, 10007};
+const int IBS[] = {820925358, 74148097};
+
+typedef pair<int, char> Edge;
+typedef array<int, 2> Hash;
+int n;
+vector<Edge> g[MAX_N];
+
+struct State {
+  int count;
+  int length;
+  State *next[C];
+  State *fail;
+};
+
+bool is_centroid[MAX_N];
+int size[MAX_N];
+int ptr;
+State pool[1 << 20];
+Hash bs[MAX_N];
+Hash hs[MAX_N];
+Hash rhs[MAX_N];
+bool is_palindrome[MAX_N];
+
+
+int calc_size(int v, int p) {
+  size[v] = 1;
+  for (Edge e : g[v]) {
+    int u = e.first;
+    if (u != p && !is_centroid[u]) {
+      size[v] += calc_size(u, v);
+    }
+  }
+  return size[v];
+}
+
+pii centroid(int v, int p, int t) {
+  pii ans = pii(1 << 28, -1);
+  int mx = 0, s = 0;
+  for (Edge e : g[v]) {
+    int u = e.first;
+    if (u != p && !is_centroid[u]) {
+      ans = min(ans, centroid(u, v, t));
+      mx = max(mx, size[u]);
+      s += size[u];
+    }
+  }
+  mx = max(mx, t - s);
+  return min(ans, pii(mx, v));
+}
+
+State *newState() {
+  State *s = new (pool + ptr++) State;
+  s->count = 0;
+  s->length = 0;
+  fill(s->next, s->next + C, nullptr);
+  s->fail = nullptr;
+  return s;
+}
+
+void calc_hash(int v, int p) {
+  for (Edge e : g[v]) {
+    int u, c;
+    tie(u, c) = e;
+    if (u != p && !is_centroid[u]) {
+      for (int j = 0; j < 2; j++) {
+	hs[u][j] = ((ll)BS[j] * hs[v][j] + c) % MODS[j];
+	rhs[u][j] = ((ll)IBS[j] * rhs[v][j] + c) % MODS[j];
+      }
+      calc_hash(u, v);
+    }
+  }
+}
+
+void check_palindrome(int v, int p, vector<int> &path) {
+  int len = path.size() / 2;
+  if (len == 0) {
+    is_palindrome[v] = true;
+  } else {
+    int w1 = path[len - 1];
+    int w2 = path[path.size() - len - 1];
+    Hash h1;
+    Hash h2;
+    for (int j = 0; j < 2; j++) {
+      h1[j] = ((ll)bs[len - 1][j] * rhs[w1][j] % MODS[j]);
+      h2[j] = (hs[v][j] - (ll)bs[len][j] * hs[w2][j] % MODS[j] + MODS[j]) % MODS[j];
+    }
+    is_palindrome[v] = (h1 == h2);
+  }
+  for (Edge e : g[v]) {
+    int u, c;
+    tie(u, c) = e;
+    if (u != p && !is_centroid[u]) {
+      path.push_back(u);
+      check_palindrome(u, v, path);
+      path.pop_back();
+    }
+  }  
+}
+
+void add(State *s, int v, int p) {
+  s->count++;
+  for (Edge e : g[v]) {
+    int u, c;
+    tie(u, c) = e;
+    if (u != p && !is_centroid[u]) {
+      if (s->next[c] == nullptr) {
+	State *t = newState();
+	s->next[c] = t;
+	t->length = s->length + 1;
+      }
+      add(s->next[c], u, v);
+    }
+  }
+}
+
+void sub(State *s, int v, int p) {
+  s->count--;
+  for (Edge e : g[v]) {
+    int u, c;
+    tie(u, c) = e;
+    if (u != p && !is_centroid[u]) {
+      assert(s->next[c] != nullptr);
+      sub(s->next[c], u, v);
+    }
+  }
+}
+
+int solve(const State *s, int v, int p, vector<int> &path) {
+  path.push_back(v);
+  int ans = 0;
+  if (is_palindrome[path[path.size() - 1 - s->length]]) {
+    ans = 2 * s->length + (path.size() - 1 - s->length) + 1;
+  }
+  auto has_next = [&](const State *s, int c) {
+    return (s->next[c] != nullptr
+	    && s->next[c]->count > 0
+	    && is_palindrome[path[path.size() - 1 - s->length]]);
+  };
+  for (Edge e : g[v]) {
+    int u, c;
+    tie(u, c) = e;
+    if (u != p && !is_centroid[u]) {
+      const State *t = s;
+      while (t->fail != t && !has_next(t, c)) {
+	t = t->fail;
+      }
+      if (has_next(t, c)) t = t->next[c];
+      ans = max(ans, solve(t, u, v, path));
+    }
+  }
+  path.pop_back();
+  return ans;
+}
+
+void build(State *s0) {
+  s0->fail = s0;
+  queue<State*> q;
+  for (int c = 0; c < C; c++) {
+    if (s0->next[c] != nullptr) {
+      s0->next[c]->fail = s0;
+      q.push(s0->next[c]);
+    } else {
+      s0->next[c] = s0;
+    }
+  }
+  while (!q.empty()) {
+    State *s = q.front();
+    q.pop();
+    for (int c = 0; c < C; c++) {
+      if (s->next[c] != nullptr) {
+	q.push(s->next[c]);
+	State *t = s->fail;
+	while (t->next[c] == nullptr) t = t->fail;
+	s->next[c]->fail = t->next[c];
+      }
+    }
+  }
+}
+
+int rec(int v) {
+  calc_size(v, -1);
+  int cv = centroid(v, -1, size[v]).second;
+  is_centroid[cv] = true;
+
+  int ans = 1;
+  for (Edge e : g[cv]) {
+    int u = e.first;
+    if (!is_centroid[u]) {
+      ans = max(ans, rec(u));
+    }
+  }
+
+  vector<int> path;
+  for (int j = 0; j < 2; j++) {
+    hs[cv][j] = 0;
+    rhs[cv][j] = 0;
+  }
+  calc_hash(cv, -1);
+  check_palindrome(cv, -1, path);
+  
+  State *s0 = newState();  
+  add(s0, cv, -1);
+  build(s0);
+  
+  for (Edge e : g[cv]) {
+    int u, c;
+    tie(u, c) = e;
+    if (!is_centroid[u]) {
+      assert(s0->next[c] != nullptr);
+      sub(s0->next[c], u, cv);
+
+      State *t = s0->next[c];
+      if (s0->next[c]->count == 0) t = s0;
+      path.push_back(cv);
+      ans = max(ans, solve(t, u, cv, path));
+      path.pop_back();
+
+      add(s0->next[c], u, cv);
+    }
+  }  
+
+  ptr = 0;
+  is_centroid[cv] = false;
+  return ans;
+}
+
+int main() {
+  ios_base::sync_with_stdio(false); cin.tie(0);
+
+  for (int j = 0; j < 2; j++) {
+    bs[0][j] = 1;
+  }
+  for (int i = 1; i < MAX_N; i++) {
+    for (int j = 0; j < 2; j++) {
+      bs[i][j] = (ll)BS[j] * bs[i - 1][j] % MODS[j];
+    }
+  }
+  
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+      g[i].clear();
+    }
+    for (int i = 0; i < n - 1; i++) {
+      int u, v;
+      char c;
+      cin >> u >> v >> c;
+      u--, v--;
+      c -= '0';
+      g[u].push_back(Edge(v, c));
+      g[v].push_back(Edge(u, c));
+    }
+    cout << rec(0) << endl;
+  }
+}

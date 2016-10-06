@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+
+const int inf = (-1u >> 3);
+const int N = 100010;
+const int K = 32;
+
+struct Edge {
+  int u, v, l, r;
+  void read(void) {
+    scanf("%d%d%d%d", &u, &v, &l, &r);
+    l--; r--;
+  }
+  int next(int x) {
+    return u xor x xor v;
+  }
+} edge[N];
+
+vector<int> list;
+int ans[K][K], tmp[K][K], dp[K][K];
+int to[N];
+int n, m;
+
+void dfs(int u) {
+  if(to[u] == -1) {
+    for(int i = K-1;i >= 0;i--) {
+      for(int j = i;j < K;j++) {
+        ans[i][j] = min(ans[i][j], dp[i][j]);
+        for(int k = i;k+1 < j;k++) {
+          ans[i][j] = min(ans[i][j], ans[i][k] + ans[k+1][j]);
+        }
+      }
+    }
+    return;
+  }
+  int e = to[u];
+  int l = edge[e].l, r = edge[e].r;
+  for(int i = 0;i < K;i++) for(int j = 0;j < K;j++) {
+    dp[i][j] = dp[i][j] + max(0, l-i) + max(0, j-r);
+  }
+  for(int i = 0;i < K;i++) for(int j = K-1;j >= 0;j--) {
+    if(i > 0) dp[i][j] = min(dp[i][j], dp[i-1][j]);
+    if(j+1 < K) dp[i][j] = min(dp[i][j], dp[i][j+1]);
+  }
+  dfs(edge[e].next(u));
+}
+int main() {
+  scanf("%d%d", &n, &m);
+  for(int i = 1;i <= n;i++) to[i] = -1;
+  for(int i = 0;i < m;i++) {
+    edge[i].read();
+    if(edge[i].u == 1) {
+      list.push_back(i);
+    }else {
+      to[edge[i].u] = i;
+    }
+  }
+  for(int i = 0;i < K;i++) for(int j = 0;j < K;j++) {
+    ans[i][j] = inf;
+  }
+  for(int e : list) {
+    int v = edge[e].next(1);
+    int l = edge[e].l, r = edge[e].r;
+    for(int i = 0;i < K;i++) for(int j = 0;j < K;j++) {
+      dp[i][j] = max(0, l-i) + max(0, j-r);
+    }
+    dfs(v);
+  }
+  printf("%d\n", ans[0][K-1]);
+  return 0;
+}

@@ -1,0 +1,155 @@
+//Problem AVGSHORT
+
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<algorithm>
+#include<cmath>
+#include<vector>
+#include<set>
+#include<queue>
+
+using namespace std;
+
+int get()
+{
+  char c;
+  while(c=getchar(),(c<'0'||c>'9')&&(c!='-'));
+  bool flag=(c=='-');
+  if(flag)
+    c=getchar();
+  int x=0;
+  while(c>='0'&&c<='9')
+    {
+      x=x*10+c-48;
+      c=getchar();
+    }
+  return flag?-x:x;
+}
+
+void output(int x)
+{
+  if(x<0)
+    {
+      putchar('-');
+      x=-x;
+    }
+  int len=0,data[10];
+  while(x)
+    {
+      data[len++]=x%10;
+      x/=10;
+    }
+  if(!len)
+    data[len++]=0;
+  while(len--)
+    putchar(data[len]+48);
+  putchar('\n');
+}
+
+struct edge
+{
+  int data;
+  double weight;
+};
+
+const int maxv=500;
+const int maxe=1000;
+
+int x[maxe],y[maxe],w[maxe];
+bool valid[maxv];
+vector<edge> g[maxv];
+vector<int> pre[maxv];
+
+double dist(int s,int t,int n,int m,double ans)
+{
+  for(int i=0;i<n;i++)
+    g[i].clear();
+  for(int i=0;i<m;i++)
+    if(valid[y[i]])
+      g[x[i]].push_back((edge){y[i],w[i]-ans});
+  static int q[maxv],depth[maxv];
+  static double dist[maxv];
+  static bool flag[maxv];
+  int f=0,r=1;
+  q[0]=s;
+  memset(flag,0,sizeof(flag));
+  for(int i=0;i<n;i++)
+    dist[i]=(i==s)?0:1e10;
+  depth[s]=0;
+  while(f!=r)
+    {
+      int u=q[f++];
+      if(f==n)
+        f=0;
+      flag[u]=false;
+      for(int i=0;i<g[u].size();i++)
+        {
+          int v=g[u][i].data;
+          double newdist=dist[u]+g[u][i].weight;
+          if(newdist<dist[v])
+            {
+              dist[v]=newdist;
+              depth[v]=depth[u]+1;
+              if(depth[v]>=n)
+                return -1;
+              if(!flag[v])
+                {
+                  q[r++]=v;
+                  flag[v]=true;
+                  if(r==n)
+                    r=0;
+                }
+            }
+        }
+    }
+  return dist[t];
+}
+
+void dfs(int v)
+{
+  if(valid[v])
+    return;
+  valid[v]=true;
+  for(int i=0;i<pre[v].size();i++)
+    dfs(pre[v][i]);
+}
+
+int main()
+{
+  int test=get();
+  while(test--)
+    {
+      int n=get(),m=get();
+      for(int i=0;i<m;i++)
+        {
+          x[i]=get()-1;
+          y[i]=get()-1;
+          w[i]=get();
+        }
+      int s=get()-1,t=get()-1;
+      for(int i=0;i<n;i++)
+        pre[i].clear();
+      for(int i=0;i<m;i++)
+        pre[y[i]].push_back(x[i]);
+      memset(valid,0,sizeof(valid));
+      dfs(t);
+      if(!valid[s])
+        {
+          cout<<-1<<endl;
+          continue;
+        }
+      double l=1,r=100;
+      while(r-l>1e-8)
+        {
+          double mid=(l+r)/2;
+          if(dist(s,t,n,m,mid)<0)
+            r=mid;
+          else
+            l=mid;
+        }
+      printf("%0.10lf\n",(l+r)/2);
+    }
+  return 0;
+}

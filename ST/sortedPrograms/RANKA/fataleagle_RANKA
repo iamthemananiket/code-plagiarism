@@ -1,0 +1,118 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+string initial[]={
+".ox.xo.xO",
+"oXOxOXooX",
+"oXOxOXo.o",
+".ox.xo.oX",
+".ox.xo.xO",
+"oXOxOXo.x",
+"oXOxOXoxO",
+".ox.xo.oX",
+"oXOxOXo.o"
+};
+
+struct bit
+{
+    int x0, y0, x1, y1;
+} bits[5]={
+{0, 8, 1, 8}, {4, 8, 3, 8}, {6, 8, 7, 8},
+{8, 2, 8, 1}, {8, 4, 8, 5}
+};
+
+struct bit2
+{
+    int x0, y0, x1, y1, x2, y2, x3, y3;
+} bits2[4]={
+{1, 2, 1, 1, 2, 1, 2, 2},
+{1, 4, 1, 5, 2, 5, 2, 4},
+{5, 2, 5, 1, 6, 1, 6, 2},
+{5, 4, 5, 5, 6, 5, 6, 4}
+};
+
+vector<int> path[6];
+vector<int> path2[5];
+
+int player;
+
+void put_white(int x, int y)
+{
+    if(player==1)
+        printf("0 0\n");
+    printf("%d %d\n", x+1, y+1);
+    player=1;
+}
+
+void put_black(int x, int y)
+{
+    if(player==0)
+        printf("0 0\n");
+    printf("%d %d\n", x+1, y+1);
+    player=0;
+}
+
+void advance_bit2(int bit)
+{
+    static int pos[4];
+    pos[bit]=(pos[bit]+1)%4;
+    if(pos[bit]==0)
+        put_white(bits2[bit].x0, bits2[bit].y0);
+    else if(pos[bit]==1)
+        put_black(bits2[bit].x1, bits2[bit].y1);
+    else if(pos[bit]==2)
+        put_black(bits2[bit].x2, bits2[bit].y2);
+    else if(pos[bit]==3)
+        put_white(bits2[bit].x3, bits2[bit].y3);
+}
+
+int main()
+{
+    path[1].push_back(0);
+    path[1].push_back(1);
+    for(int i=2; i<=5; i++)
+    {
+        for(auto& it: path[i-1])
+            path[i].push_back(it<<1);
+        reverse(path[i-1].begin(), path[i-1].end());
+        for(auto& it: path[i-1])
+            path[i].push_back((it<<1)|1);
+    }
+    path2[1].push_back(0);
+    path2[1].push_back(1);
+    path2[1].push_back(2);
+    path2[1].push_back(3);
+    for(int i=2; i<=4; i++)
+        for(int j=0; j<4; j++)
+        {
+            for(auto& it: path2[i-1])
+                path2[i].push_back((it<<2)+j);
+            reverse(path2[i-1].begin(), path2[i-1].end());
+        }
+    for(int i=0; i<9; i++)
+        for(int j=0; j<9; j++)
+            if(initial[i][j]=='o' || initial[i][j]=='O')
+                put_white(i, j);
+            else if(initial[i][j]=='x')
+                put_black(i, j);
+    for(size_t i=1; i<path[5].size(); i++)
+    {
+        int pre=path[5][i-1];
+        int cur=path[5][i];
+        int diff_bit=__builtin_ctz(pre^cur);
+        if((cur>>diff_bit)&1)
+            put_black(bits[diff_bit].x1, bits[diff_bit].y1);
+        else
+            put_white(bits[diff_bit].x0, bits[diff_bit].y0);
+        for(size_t j=1; j<path2[4].size(); j++)
+        {
+            int pre2=path2[4][j-1];
+            int cur2=path2[4][j];
+            int diff_bit2=__builtin_ctz(pre2^cur2)/2;
+            advance_bit2(diff_bit2);
+        }
+        reverse(path2[4].begin(), path2[4].end());
+    }
+    return 0;
+}

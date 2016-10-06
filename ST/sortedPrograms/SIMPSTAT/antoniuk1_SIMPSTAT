@@ -1,0 +1,43 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <unordered_map>
+
+using namespace std;
+
+int a[111111];
+
+int main() {
+    ios::sync_with_stdio(0);
+    int t;
+    cin >> t;
+    while (t --> 0) {
+        int n, k;
+        cin >> n >> k;
+        for(int i = 0; i < n; ++i)
+            cin >> a[i];
+        sort(a, a+n);
+        long long s = 0;
+        for(int i = k; i + k < n; ++i)
+            s += a[i];
+        
+        cout.precision(10);
+        cout << fixed << 1.0 * s / (n-k-k) << "\n";
+    }
+    return 0;
+}

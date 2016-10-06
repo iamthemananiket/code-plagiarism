@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int t, n;
+long long a[10001000], s;
+
+void solve() {
+	int st = 1, en = n;
+	for (int i = 1; i <= n; i ++) {
+		if (i & 1) s -= a[st++];
+		else s -= a[en--];
+        if (!s) {
+			st = 1, en = n;
+			for (int j = 1; j <= i; j ++) {
+				printf("%d%c", j & 1 ? st ++ : en --, j < i ? ' ' : '\n');
+			}
+			return;
+        }
+	}
+	puts("BING");
+}
+
+int main() {
+//	freopen("f.in", "r", stdin);
+	scanf("%d", &t);
+	while (t --) {
+		scanf("%d", &n);
+		for (int i = 1; i <= n; i ++) scanf("%lld", &a[i]);
+		scanf("%lld", &s);
+		solve();
+	}
+	return 0;
+}

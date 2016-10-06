@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long f[100010];
+long long mod = 1e9 + 7;
+long long mu[100010];
+long long g[100010];
+int onePrime[100010];
+int main() {
+	for(int i = 2; i < 100010; i++) {
+		if(onePrime[i] == 0) {
+			for(int j = 2 * i; j < 100010; j += i) {
+				onePrime[j] = i;
+			}
+		}
+	}
+	mu[1] = 1;
+	mu[2] = 1;
+	for(int i = 3; i < 100010; i++) {
+		if(onePrime[i] == 0) {
+			mu[i] = i - 1;
+			continue;
+		}
+		int tmp = i, res = 1;
+		while(tmp % onePrime[i] == 0) tmp /= onePrime[i], res *= onePrime[i];
+		// if(i == 4) cout << res << " * " << tmp << endl;
+		mu[i] = mu[tmp] * res / onePrime[i] * (onePrime[i] - 1);
+	} 
+	// for(int i = 2; i <= 10; i++) cout << mu[i] << " " << i << endl;
+	f[1] = 1;
+	f[2] = 1;
+	for(int i = 3; i < 100010; i++) f[i] = f[i - 1] + f[i - 2], f[i] %= mod;
+	long long ans = 0;
+	int n = 1e5 + 10;
+	for(int i = 1; i <= n; i++) {
+		for(int j = i; j <= n; j += i) {
+			g[j] += f[i] * 1LL * mu[j / i];
+			g[j] %= mod;
+		}
+	}
+	int test;
+	cin >> test;
+	int x;
+	while(test--) {
+		scanf("%d", &x);
+		printf("%lld\n", g[x + 1] - 1);
+	}
+}

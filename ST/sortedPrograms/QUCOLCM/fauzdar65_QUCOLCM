@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+ll dp[10005],n;
+
+pair<ll,ll> tim[10005];
+
+int bsearch( ll lim)
+{
+int low=0,high=n-1,mid;
+
+while(low<high)
+{
+	mid= (low+high)/2;
+	
+	if(high==low+1)
+	{
+		if((tim[low].first)>lim)break;
+		else { low=high; break;}
+	}
+	
+	if((tim[mid].first)<=lim)low=mid+1;
+	
+	else high=mid;
+}
+
+return low;
+}
+
+int main() {
+	int t;
+	cin>>t;
+	
+	while(t--)
+	{
+		cin>>n;
+		
+		for(int i=0;i<n;i++)
+		{
+			cin>>tim[i].first>>tim[i].second;
+		}
+	sort(tim,tim+n);
+	
+	dp[n-1]=1;
+	
+	ll ans=1;
+	for(int i=n-2;i>=0;i--)
+	{
+		int val=bsearch(tim[i].second);
+		ll val2;
+		if(tim[val].first>tim[i].second)val2=dp[val]+1;
+		else val2=1;
+		
+		dp[i]=max(val2,dp[i+1]);
+		
+		if(dp[i]>ans)ans=dp[i];
+	}
+	
+	
+	cout<<ans<<endl;
+	}
+	return 0;
+}

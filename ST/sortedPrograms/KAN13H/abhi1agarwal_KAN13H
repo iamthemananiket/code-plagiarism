@@ -1,0 +1,209 @@
+/*
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+	ABHINANDAN AGARWAL
+	MNNIT ALLAHABAD
+	CSE
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+*/
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+int fs()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (c<'0'||c>'9')
+		c=getchar_unlocked();
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return x; 
+}
+void pps(const char *s)
+{
+	int i;
+	for (i=0;s[i]!='\0';i++)
+	{
+		putchar_unlocked(s[i]);
+	}
+}
+void _ppd(int a)
+{
+	if (a==0)
+		return ;
+	_ppd(a/10);
+	putchar_unlocked(a%10+'0');
+}
+void ppd(int a) // Printing integer using utchar unlocked!
+{
+	if (a==0)
+	{
+		pc('0');
+		return;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_ppd(a);
+}
+void _pplld(ll a)
+{
+	if (a==0)
+		return ;
+	_pplld(a/10);
+	pc(a%10+'0');
+}
+void pplld(ll a)
+{
+	if (a==0)
+	{
+		pc('0');
+		return ;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_pplld(a);
+}
+int ggs(char *s) // String inputting
+{
+	int x=0;
+	char c=gc();
+	while (!('a'<=c&&c<='z')&&c!=-1) // change conditions to whatever strings can input !
+		c=gc();
+	while ('a'<=c&&c<='z')
+	{
+		s[x++]=c;
+		c=gc();
+	}
+	s[x]='\0';
+	return x;
+}
+
+int fsn()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (!('0'<=c&&c<='9'||c=='-'))
+		c=getchar_unlocked();
+	int neg=0;
+	if (c=='-'){
+		neg=1;
+		c=getchar_unlocked();
+	}
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return (neg==0?x:-x); 
+}
+//------------------------------------------------------------------------------------
+struct node 
+{
+	ll mv;
+	int n1;
+};
+
+int _n,_p,_k;
+node dp[60][60];
+bool dpm[60][60];
+ll inf=10000000000000000LL;
+node ga(int n,int p)
+{
+	if (n<=1&&p>=2)
+		return (node){1,1}; // q hoga
+	if (p<=2)
+		return (node){inf,-1};
+	if(dpm[n][p])
+		return dp[n][p];
+	int i,n1=-1;
+	ll mini=inf;
+	for (i=1;i<n;i++)
+	{
+		ll x=2*ga(i,p).mv+ga(n-i,p-1).mv;
+		if (x<mini)
+		{
+			mini=x;
+			n1=i;
+		}
+	}
+	dpm[n][p]=true;
+	return dp[n][p]=(node){mini,n1};
+	
+}
+void reset()
+{
+	int i,j;
+	for (i=0;i<60;i++)
+		for(j=0;j<60;j++)
+			dpm[i][j]=false;
+}
+int main()
+{
+	int t;
+	scanf("%d",&t);
+	reset();
+	//printf("inf is :%lld\n",inf);
+	ga(50,50); 
+/*	int i,j;
+	for (i=1;i<50;i++)
+	{	for (j=1;j<50;j++)
+			printf("%lld ",dp[i][j].mv);
+		printf("\n");
+	}
+*/	
+/*	int i,j;
+	for (i=0;i<50;i++)
+	{	for (j=0;j<50;j++)
+			printf("(i:%d,j:%d,mv:%lld,n1:%d) ",i,j,ga(i,j).mv,ga(i,j).n1);
+		printf("\n");
+	}
+*/
+	int ass;
+	for (ass=1;ass<=t;ass++)
+	{
+		scanf("%d%d%d",&_n,&_p,&_k);
+		//printf("calculation done \n");
+		int n=_n,p=_p;
+		ll ans=0;
+		while (1)
+		{
+			//printf("n is :%d and p:%d k:%d\n",n,p,_k);
+			if (_k==1)
+			{
+				ans+=ga(n,p).mv;
+				break;
+			}
+
+			if(_k>ga(n,p).n1)
+			{
+				ans+=ga(ga(n,p).n1,p).mv;
+				_k-=ga(n,p).n1;
+				n=n-ga(n,p).n1;	
+				p-=1;
+
+			}
+			else
+			{
+				ans+=ga(ga(n,p).n1,p).mv+ga(n-ga(n,p).n1,p-1).mv;
+				n=ga(n,p).n1;
+			}
+		}
+		printf("Case %d: %lld\n",ass,ans);
+	}
+	return 0;
+}

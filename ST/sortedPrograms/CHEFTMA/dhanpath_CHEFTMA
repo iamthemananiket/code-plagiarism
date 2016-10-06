@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  t, n, k, m, i, j ;
+
+        for(  cin >> t ;  t-- ;  )
+        {
+                cin >> n >> k >> m ;
+                vector<int>  diff(n), dec(k+m);
+
+                for( i=0; i<n; i++ )
+                        cin >> diff[i] ;
+                for( i=0; i<n; i++ )
+                        cin >> j,   diff[i] -= j ;
+                for( i=0; i<k+m; i++ )
+                        cin >> dec[i] ;
+
+                sort( diff.begin(), diff.end() );
+                sort( dec.begin(), dec.end() );
+
+                i = n-1 ;
+                j = k+m-1 ;
+                while ( i>=0 && j>=0 && diff[i] && dec[j] )
+                {
+                        if( diff[i] >= dec[j] )
+                        {
+                                diff[i] -= dec[j] ;
+                                i--;
+                                j--;
+                        }
+                        else  j-- ;
+                }
+
+                long long  ans = 0 ;
+                for( auto &v : diff )
+                        ans += v ;
+
+                cout << ans << endl ;
+        }
+
+        return 0;
+} 

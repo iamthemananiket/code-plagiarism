@@ -1,0 +1,54 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int n,cap,i,x,y,q;
+vector<int> a[10011][3],p(10011);
+vector<bool> vis(10011,0);
+
+void dfs(int fat,int me)
+{
+    a[me][1]=a[fat][1];
+    a[me][1].push_back(me);
+    a[me][2].resize(101,10011);
+    a[me][2][p[me]]=me;
+    vis[me]=1;
+    for(int j=0; j<a[me][0].size(); j++ )
+    {
+        int c=a[me][0][j];
+        if( ! vis [ c ] )
+        {
+            dfs( me, c );
+            for(i=1;i<101;i++)
+                if( a[me][2][i] > a[c][2][i] )
+                    a[me][2][i] = a[c][2][i];
+        }
+    }
+}
+
+int main()
+{
+    std::ios::sync_with_stdio(0);
+    cin >> n >> i >> cap;
+    for(i=1;i<n;i++)
+    {
+        cin>>x>>y;
+        a[x][0].push_back(y);
+        a[y][0].push_back(x);
+    }
+    for(i=1;i<=n;i++)
+        cin>>p[i];
+    dfs(0,cap);
+    cin>>q;
+    while(q--)
+    {
+        cin>>x>>y;
+        while(1)
+        {
+            if(a[x][2][y]!=10011) { cout<<a[x][2][y]<<endl; break; }
+            if(x==cap) { cout<<"-1\n"; break; }
+            x=a[x][1][ a[x][1].size()-2 ];
+        }
+    }
+    return 0;
+}

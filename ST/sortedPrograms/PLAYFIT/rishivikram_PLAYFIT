@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+#define maxx(a,b) (a)>(b)?(a):(b)
+#define minn(a,b) (a)<(b)?(a):(b)
+using namespace std;
+int main()
+{
+	int t;
+	long long int n,x,i,j,maxi,mini,ans;
+	scanf("%d",&t);
+	while(t--)
+	{
+		ans=0;
+		scanf("%lld",&n);
+		scanf("%lld",&x);
+		mini=x;
+		for(i=1;i<n;i++)
+		{
+			scanf("%lld",&x);
+			ans=maxx(ans,x-mini);
+			mini=minn(mini,x);
+		}
+		if(n==1||ans==0)
+			printf("UNFIT\n");
+		else
+			printf("%lld\n",ans);
+	}
+	return 0;
+}

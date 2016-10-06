@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, Q, K;
+vector<int> adj[100001];
+int P[18][100001];
+int depth[100001];
+
+void dfs(int u, int p)
+{
+    P[0][u]=p;
+    for(int i=1; i<=17; i++)
+        P[i][u]=P[i-1][P[i-1][u]];
+    for(auto& v: adj[u]) if(v!=p)
+    {
+        depth[v]=depth[u]+1;
+        dfs(v, u);
+    }
+}
+
+int lca(int u, int v)
+{
+    if(depth[u]<depth[v])
+        swap(u, v);
+    for(int i=17; i>=0; i--) if(depth[P[i][u]]>=depth[v])
+        u=P[i][u];
+    if(u==v)
+        return u;
+    for(int i=17; i>=0; i--) if(P[i][u]!=P[i][v])
+        u=P[i][u], v=P[i][v];
+    return P[0][u];
+}
+
+int dist(int u, int v)
+{
+    return depth[u]+depth[v]-2*depth[lca(u, v)];
+}
+
+void _main()
+{
+    scanf("%d", &N);
+    for(int i=1; i<=N; i++)
+        adj[i].clear();
+    int a, b;
+    for(int i=1; i<N; i++)
+    {
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    dfs(1, 1);
+    scanf("%d", &Q);
+    for(int i=0; i<Q; i++)
+    {
+        scanf("%d", &K);
+        vector<int> q(K);
+        for(int j=0; j<K; j++)
+            scanf("%d", &q[j]);
+        if(K<3)
+        {
+            printf("Yes\n");
+            continue;
+        }
+        sort(q.begin(), q.end(), [&](int a, int b){
+            return depth[a]>depth[b];
+        });
+        int l=q[0];
+        for(int j=1; j<K; j++)
+            l=lca(l, q[j]);
+        vector<int> paths;
+        for(int j=0; j<K; j++)
+        {
+            bool ok=false;
+            for(auto& it: paths) if(dist(it, l)==dist(it, q[j])+dist(q[j], l))
+            {
+                ok=true;
+                break;
+            }
+            if(!ok)
+            {
+                paths.push_back(q[j]);
+                if(paths.size()>2)
+                    break;
+            }
+        }
+        bool good=paths.size()<=2;
+        for(auto& it: paths)
+            for(auto& it2: paths) if(it!=it2)
+                good&=lca(it, it2)==l;
+        if(good)
+            printf("Yes\n");
+        else
+            printf("No\n");
+    }
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+        _main();
+    return 0;
+}

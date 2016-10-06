@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+struct Query {
+  int l, r, id;
+  
+  bool operator<(const Query& q) const {
+    return tie(r,l) < tie(q.r, q.l);
+  }
+};
+
+typedef long long ll;
+const int MAX = 111000;
+int to[MAX];
+vector<int> adj[MAX];
+vector<pair<int,int>> cycles, edges; //(a > b)
+bool vis[MAX];
+
+void update(vector<int>& bit, int pos, int val) {
+  for(int i=pos;i<(int)bit.size();i+=i&-i)
+    bit[i] += val;
+}
+
+int ask(const vector<int>& bit, int pos) {
+  int res = 0;
+  for(int i=pos;i>0;i-=i&-i)
+    res += bit[i];
+  return res;
+}
+
+void go(int start) {
+  static stack<int> st;
+  int at = start;
+  while (!vis[at]) {
+    st.push(at);
+    vis[at] = true;
+    at = to[at];
+  }
+  int low = at, hig = at;
+  while (!st.empty() && st.top() != at) {
+    low = min(low, st.top());
+    hig = max(hig, st.top());
+    st.pop();
+  }
+  if (!st.empty()) {
+    cycles.push_back({hig,low});
+  }
+  while (!st.empty()) {
+    st.pop();
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int N, Q;
+  cin >> N >> Q;
+  for(int i=1;i<=N;++i) {
+    cin >> to[i];
+    adj[to[i]].push_back(i);
+    auto e = make_pair(i, to[i]);
+    if(e.first < e.second) {
+      swap(e.first, e.second);
+    }
+    edges.push_back(e);
+  }
+  memset(vis,false,sizeof(vis));
+  for(int v=1;v<=N;++v){
+    if(!vis[v]) {
+      go(v);
+    }
+  }
+  vector<Query> ques(Q);
+  vector<int> res(Q);
+  for(auto& q : ques) {
+    static int id = 0;
+    cin >> q.l >> q.r;
+    q.id = id++;
+  }
+  sort(ques.begin(), ques.end());
+  vector<int> bit(N+1,0);
+  sort(edges.begin(), edges.end());
+  sort(cycles.begin(), cycles.end());
+  auto edg = edges.begin(), cyc = cycles.begin();
+  int sum = 0;
+  for(const auto& q : ques) {
+    while (edg != edges.end() && edg->first <= q.r) {
+      update(bit, edg->second, -1);
+      --sum;
+      ++edg;
+    }
+    while (cyc != cycles.end() && cyc->first <= q.r) {
+      update(bit, cyc->second, 1);
+      ++sum;
+      ++cyc;
+    }
+    res[q.id] = q.r - q.l + 1 + sum - ask(bit, q.l-1);
+  }
+  for(int q=0;q<Q;++q)
+    cout << res[q] << '\n';
+  return 0;
+}

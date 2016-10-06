@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+ll a[103],j,z;
+
+bool grid[1000006];
+int pr[1000006],cnt;
+
+void getP(int n){
+	pr[0]=2;cnt=1;
+	ll i,j;
+	for(i=3;i<n;i+=2)
+		if(!grid[i]){
+			pr[cnt++]=i;
+			for(j=i*i;j<n;j+=i+i)
+				grid[j]=1;
+		}
+}
+
+int main(){
+	int tt,n,i;
+	getP(1000000);
+	cin >>tt;
+	while(tt--) {
+		cin >> n;
+		for(i=0;i<n;i++)
+			scanf("%lld",a+i);
+		for(i=0;i<n;i++)
+			for(j=i+1;j<n;j++)
+				if(__gcd(a[i],a[j])>1){
+					printf("%lld\n",__gcd(a[i],a[j]));
+					goto E;
+				}
+		for(i=0;i<n;i++){
+			for(j=0;j<cnt && a[i]>1;j++)
+				if(a[i]%pr[j]==0){
+					a[i]/=pr[j];
+					if(a[i]%pr[j]==0){
+						printf("%d\n",pr[j]);
+						goto E;
+					}
+				}
+			z = sqrt(a[i])-1;
+			while(z*z<a[i])
+				z++;
+			if(z*z==a[i] && z>1){
+				printf("%lld\n",z);
+				goto E;
+			}
+		}
+		E:;
+	}
+	return 0;
+}

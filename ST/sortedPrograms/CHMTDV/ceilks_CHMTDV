@@ -1,0 +1,1419 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#define each(it,o) for(auto it= (o).begin(); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define inrep int t;cin>>t; while(t--)
+#define CPS double(CLOCKS_PER_SEC)
+
+#ifdef DEBUG
+
+#else
+#define ass assert
+
+#endif
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> pii;
+typedef vector<pii > vpii;
+typedef long long ll;
+typedef vector<ll> vll;
+typedef pair<ll,ll> pll;
+typedef vector<pll > vpll;
+typedef vector<string> vs;
+typedef long double ld;
+clock_t START=clock();
+double TMAX=1.95;
+template<typename T> ostream& operator<< ( ostream &o,vector<T> v ) {
+    if ( v.size() >0 )
+        o<<v[0];
+    for ( unsigned   i=1; i<v.size(); i++ )
+        o<<" "<<v[i];
+    return o<<endl;
+}
+template<typename U,typename V> ostream& operator<< ( ostream &o,pair<U,V> p ) {
+    return o<<"("<<p.first<<", "<<p.second<<") ";
+}
+template<typename T> istream& operator>> ( istream &in,vector<T> &v ) {
+
+    for ( unsigned   i=0; i<v.size(); i++ )
+        in>>v[i];
+    return in;
+}
+
+struct Inst {
+    const int n,k;
+    const vector<vi>&a;
+    vector<vll> p;
+    ll bestsc;
+    vi h,v;
+    int minl;
+    int bigl;
+    int smalll;
+    int bigc;
+    int smallc;
+    ll minsc;
+    ll maxsc;
+
+    Inst ( const vector<vi> &_a, int _k ) :n ( _a.size() ),k ( _k ),a ( _a ), p ( n+1,vll ( n+1 ) ) {
+        rep ( i,n ) rep ( j,n ) {
+            p[i+1][j+1]=a[i][j]+p[i+1][j];
+        }
+        rep ( i,n ) rep ( j,n ) {
+            p[i+1][j+1]+=p[i][j+1];
+        }
+        smalll=n/k;
+        bigl=smalll+1;
+        bigc=n-smalll*k;
+        smallc=k-bigc;
+        minl=max ( 1,smalll-1 );
+        minsc=INFL, maxsc=0;
+        bb=vector<vll> ( n-bigl+1,vll ( n-bigl+1 ) );
+        rep ( i,n-bigl+1 ) rep ( j,n-bigl+1 ) {
+            ll v=getSquare ( i,j,bigl );
+            bb[i][j]=v;
+            minsc=min ( minsc,v-1 );
+            maxsc=max ( maxsc,v );
+
+        }
+        bestsc=maxsc;
+
+
+    }
+    vector<vll> bb;
+    ll getBB ( int i, int j ) {
+        return bb[i][j];
+    }
+    ll getSquare ( int i, int j, int l ) {
+        return getRect ( i,j,l,l );
+    }
+    ll getRect ( int i, int j, int li, int lj ) {
+        return p[i+li][j+lj]-p[i+li][j]-p[i][j+lj]+p[i][j];
+    }
+    ll getRectBF ( int i, int j, int li, int lj ) {
+        ll su=0;
+        reu ( x,i,i+li ) reu ( y,j,j+lj ) su+=a[x][y];
+        return su;
+    }
+
+};
+struct RemStore {
+    const unsigned MX=50000;
+
+    priority_queue<pair<ll,int>,vector<pair<ll,int>>,greater<pair<ll,int>>> qu;
+    vector<vi> store;
+
+    vector<pair<ll,int>> order;
+    RemStore() : store ( MX ) {}
+    unsigned crt=0;
+    void init() {
+        while ( qu.size() ) {
+            order.push_back ( qu.top() );
+            qu.pop();
+        }
+        reverse ( all ( order ) );
+//         cout<<"first: "<<order[0]<<endl;
+    }
+    void insert ( ll va, const vi &v ) {
+        int st=qu.size();
+        if ( qu.size() >=MX ) {
+            if ( qu.top().first >va ) return;
+            st=qu.top().second;
+            qu.pop();
+        }
+        store[st]=v;
+        qu.push ( mp ( va,st ) );
+
+    }
+
+    void pop() {
+        crt++;
+    }
+    bool empty() {
+        return crt==order.size();
+    }
+    const vi &getVec() {
+        return store[order[crt].second];
+    }
+    ll getVal() {
+        return order[crt].first;
+    }
+    int size() {
+        return order.size()-crt;
+    }
+
+};
+struct IG {
+    const int n;
+    Inst &inst;
+    vector<bool> used;
+    vector<vi> conds;
+    vector<vi> allConds;
+    RemStore  remconds;
+    vi condActive;
+    int cndCnt=0;
+    int activeCount=0;
+    vi openR;
+    vi openC;
+    vi open;
+    IG ( Inst &_inst ) :n ( _inst.n ),inst ( _inst ),used ( 2*n-2 ), conds ( 2*n-2 ),
+        open ( 2*n-2 ) {
+
+        for ( int j: inst.h ) used[j-1]=1;
+        for ( int j: inst.v ) used[n+j-2]=1;
+        int mins=inst.smalll;
+        int maxs=inst.bigl;
+        vi v ( maxs );
+        rep ( i,n-maxs ) {
+            rep ( j,maxs ) v[j]=i+j;
+            addCond ( v );
+        }
+        reu ( i,n-1,2*n-1-maxs ) {
+            rep ( j,maxs ) v[j]=i+j;
+            addCond ( v );
+
+        }
+        rep ( i,n-mins ) rep ( j,n-mins ) {
+            reu ( l1,mins,maxs+1 ) reu ( l2,mins,maxs+1 ) {
+                if ( i+l1>n ||j+l2>n ) continue;
+                ll v=inst.getRect ( i,j,l1,l2 );
+                vi vi;
+                reu ( k,i,i+l1-1 ) vi.push_back ( k );
+                reu ( k,n-1+j,n-1+j+l2-1 ) vi.push_back ( k );
+                if ( v>inst.bestsc ) {
+                    addCond ( vi );
+                } else {
+                    remconds.insert ( v,vi );
+                }
+            }
+        }
+        remconds.init();
+//         sort ( all ( remconds ) );
+    }
+    void addCond ( const vi &v ) {
+        int met=0;
+        for ( int i:v ) {
+            conds[i].push_back ( cndCnt );
+            met+=used[i];
+        }
+        cndCnt++;
+        condActive.push_back ( met );
+        allConds.push_back ( v );
+        if ( !met ) {
+            activeCount++;
+            for ( int i:v ) {
+                if ( !open[i] ) {
+                    if ( i<n-1 ) openR.push_back ( i );
+                    else openC.push_back ( i );
+                }
+                open[i]++;
+            }
+        }
+    }
+
+    void remVert ( int i ) {
+        used[i]=0;
+        for ( int j: conds[i] ) {
+            int met=--condActive[j];
+            assert ( met>=0 );
+            if ( !met ) {
+                activeCount++;
+                for ( int k:allConds[j] ) {
+                    if ( !open[k] ) {
+                        if ( k<n-1 ) openR.push_back ( k );
+                        else openC.push_back ( k );
+                    }
+                    open[k]++;
+                }
+            }
+        }
+    }
+    void addVert ( int i ) {
+        used[i]=1;
+        for ( int j: conds[i] ) {
+            int met=++condActive[j];
+            if ( met==1 ) {
+                activeCount--;
+                for ( int k:allConds[j] ) {
+                    open[k]--;
+                    if ( !open[k] ) {
+                        if ( k<n-1 ) {
+                            swap ( openR.back(),* find ( all ( openR ),k ) );
+                            openR.pop_back();
+                        } else {
+                            swap ( openC.back(),* find ( all ( openC ),k ) );
+                            openC.pop_back();
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+    int cnt=0;
+    int cnt2=0;
+    int cnt3=0;
+    void swapRow() {
+        int aCountO=activeCount;
+        int a;
+        do {
+            a=rand() % ( n-1 );
+        } while ( !used[a] );
+        remVert ( a );
+        if ( openR.size() <=1 ) {
+            addVert ( a );
+            return;
+        }
+        cnt2++;
+        int b;
+
+        do {
+            int i=rand() %openR.size();
+            b=openR[i];
+        } while ( a==b );
+        addVert ( b );
+
+
+
+        if ( aCountO<activeCount ) {
+            remVert ( b );
+            addVert ( a );
+            assert ( aCountO==activeCount );
+        } else   cnt3++;
+    }
+    void swapCol() {
+        int aCountO=activeCount;
+        int a;
+        do {
+            a=rand() % ( n-1 ) +n-1;
+//             cnt3++;
+        } while ( !used[a] );
+
+
+        remVert ( a );
+        if ( openC.size() <=1 ) {
+            addVert ( a );
+            return;
+        }
+        cnt2++;
+        int b;
+
+        do {
+
+            b= openC[rand() %openC.size()];
+        } while ( a==b );
+        addVert ( b );
+        if ( aCountO<activeCount ) {
+            remVert ( b );
+            addVert ( a );
+            assert ( aCountO==activeCount );
+        } else   cnt3++;
+    }
+    void trySwap() {
+        while ( !activeCount ) {
+            update();
+            if ( remconds.empty() ) {
+                return;
+            }
+            inst.bestsc=remconds.getVal();
+            addCond ( remconds.getVec() );
+            remconds.pop();
+        }
+        if ( cnt&1 ) swapCol();
+        else swapRow();
+//         assert ( activeCount<=1 );
+
+    }
+    int hsize;
+    void update() {
+        inst.h.clear();
+        rep ( i,n-1 ) {
+            if ( used[i] ) inst.h.push_back ( i+1 );
+        }
+        inst.v.clear();
+        reu ( i,n-1,2*n-2 ) {
+            if ( used[i] ) inst.v.push_back ( i-n+2 );
+        }
+        inst.bestsc=remconds.getVal();
+    }
+    void run ( double tle ) {
+        clock_t st=clock();
+//         cout<<"initially: "<<cndCnt<<", remaining: "<<remconds.size() <<" score: "<<inst.bestsc <<endl;
+        while ( cnt++&1||  clock()-st<CPS*tle ) {
+            trySwap();
+            if ( !activeCount && remconds.empty() ) {
+                update();
+                break;
+            }
+
+        }
+//         cout<<"elapsed: "<<(clock()-START)/CPS<<endl;
+//         cout<<"finally: "<<cndCnt<<", remaining: "<<remconds.size() <<" score: "<<inst.bestsc <<endl;
+//         cout<<cnt<<" "<<cnt2<< " "<<cnt3<<" Iters"<<endl;
+    }
+
+
+};
+void improveG ( Inst &inst ) {
+
+    IG ig ( inst );
+    double rem=TMAX- ( clock()-START ) /CPS;
+//     cout<<"passed: "<<clock()-START<<endl;
+//      cout<<"time: "<<rem<<endl;
+    ig.run ( rem );
+//      cout<<"elapsed: "<<(clock()-START)/CPS<<endl;
+
+}
+struct RemStore2 {
+    const unsigned MX=20000;
+
+    priority_queue<pair<ll,pii>,vector<pair<ll,pii>>,greater<pair<ll,pii>>> qu;
+    vector<pair<ll,pii>> order;
+    RemStore2() {}
+    RemStore2(const RemStore2 &o):order(o.order),crt(o.crt){
+//         rep(i,order.size())order[i]=o.order[i];
+    }
+    unsigned crt=0;
+    void init() {
+        while ( qu.size() ) {
+            order.push_back ( qu.top() );
+            qu.pop();
+        }
+        reverse ( all ( order ) );
+    }
+    void insert ( ll va, const pii &p ) {
+
+        if ( qu.size() >=MX ) {
+            if ( qu.top().first >va ) return;
+
+            qu.pop();
+        }
+        qu.push ( mp ( va,p ) );
+
+    }
+
+    void pop() {
+        crt++;
+    }
+    bool empty() {
+        return crt==order.size();
+    }
+    const pii &getCond() {
+        return order[crt].second;
+    }
+    ll getVal() {
+        return order[crt].first;
+    }
+    int size() {
+        return order.size()-crt;
+    }
+
+};
+struct IG2 {
+    const int n;
+    Inst &inst;
+    vector<bool> used;
+    vector<vpii> conds;
+    RemStore2 remconds;
+    vi condActive;
+    int cndCnt=0;
+    int activeCount=0;
+    vi openR;
+    vi openC;
+    vi stightR, stightC;
+    vi tight;
+    vi open;
+    vector<bool> essential;
+    int essRc=0,essCc=0;
+    int essRs=0;
+    int essCs=0;
+    IG2 ( Inst &_inst ) :n ( _inst.n ),inst ( _inst ),used ( 2*n-2 ), conds ( 2*n-2 ),
+        tight ( 2*n-2,INF ) ,
+        open ( 2*n-2 ),
+        essential ( 2*n-2 ) {
+        for ( int j: inst.h ) {
+            addVert ( j-1 );
+        }
+        for ( int j: inst.v ) {
+            addVert ( n+j-2 );
+
+        }
+        bestused=used;
+        rep ( i,n-2 ) {
+            addCond ( i,i+1 );
+        }
+        reu ( i,n-1,2*n-3 ) {
+            addCond ( i,i+1 );
+
+        }
+        rep ( i,n-1 ) rep ( j,n-1 ) {
+            ll v=inst.getBB ( i,j );
+            if ( v>inst.bestsc ) {
+
+                addCond ( i,n-1+j );
+            } else {
+                remconds.insert ( v,mp ( i,n-1+j ) );
+            }
+            v=inst.getRect ( i,j,1,2 );
+            if ( v>inst.bestsc ) {
+
+                addCond ( n-1+j,n-1+j );
+            } else {
+                remconds.insert ( v,mp ( n-1+j,n-1+j ) );
+            }
+            v=inst.getRect ( i,j,2,1 );
+            if ( v>inst.bestsc ) {
+
+                addCond ( i,i );
+            } else {
+                remconds.insert ( v,mp ( i,i ) );
+            }
+        }
+        remconds.init();
+    }
+
+    void addEssential ( int i ) {
+        if ( essential[i] ) return;
+        essential[i]=1;
+
+        if ( i<n-1 ) essRc++;
+        else essCc++;
+        if ( !used[i] ) {
+            activeCount++;
+            if ( !open[i] ) {
+                if ( i<n-1 ) openR.push_back ( i );
+                else openC.push_back ( i );
+            }
+            open[i]++;
+        } else {
+            if ( tight[i]<2 ) {
+                remTight ( i );
+            }
+            tight[i]=INF;
+            if ( i<n-1 ) essRs++;
+            else essCs++;
+        }
+    }
+    void addCond ( int i, int j ) {
+        if ( i==j ) return addEssential ( i );
+        conds[i].push_back ( mp ( j,cndCnt ) );
+        conds[j].push_back ( mp ( i,cndCnt++ ) );
+        int met=used[i]+used[j];
+        condActive.push_back ( met );
+
+        if ( !met ) {
+            if ( !open[i] &&!essential[i] ) {
+                if ( i<n-1 ) openR.push_back ( i );
+                else openC.push_back ( i );
+            }
+            if ( !open[j] &&!essential[j] ) {
+                if ( j<n-1 ) openR.push_back ( j );
+                else openC.push_back ( j );
+            }
+            open[i]++;
+            open[j]++;
+            activeCount++;
+        } else if ( met==1 ) {
+            if ( isCRPair ( i,j ) ) {
+                if ( !used[i] ) {
+                    tight[j]++;
+                    if ( tight[j]==2 ) {
+                        remTight ( j );
+                    }
+                } else {
+                    tight[i]++;
+                    if ( tight[i]==2 ) {
+                        remTight ( i );
+                    }
+                }
+            }
+        }
+//         checkTight();
+    }
+//     void checkCond() {
+//         rep ( i,n-2 ) {
+//             if ( used[i] ) continue;
+//             for ( pii p:conds[i] ) {
+//                 assert ( !condActive[p.second] || used[p.first] );
+//             }
+//         }
+//     }
+    void rem ( vi &v, int x ) {
+        auto it=find ( all ( v ),x ) ;
+        assert ( it!=v.end() );
+        swap ( v.back(),*it );
+        v.pop_back();
+    }
+    void remTight ( int i ) {
+        if ( i<n-1 ) rem ( stightR,i );
+        else rem ( stightC,i );
+    }
+    void addTight ( int i ) {
+        if ( i<n-1 )  stightR.push_back ( i );
+        else stightC.push_back ( i );
+    }
+//     void checkTight() {
+//         vector<bool> fnd ( 2*n-2 );
+//         for ( int j: stightC ) {
+//             assert ( !fnd[j] );
+//             fnd[j]=1;
+//             assert ( tight[j]<2 );
+//         }
+//         for ( int j: stightR )  {
+//             assert ( !fnd[j] );
+//             fnd[j]=1;
+//             assert ( tight[j]<2 );
+//         }
+//     }
+    bool isCRPair ( int i, int j ) {
+        return ( i>=n-1 &&j<n-1 ) || ( i<n-1 &&j>=n-1 );
+    }
+
+
+    void remVert ( int i ) {
+        used[i]=0;
+//         int rem=0;
+        if ( tight[i]<2 ) {
+
+             remTight ( i );
+        }
+        tight[i]=INF;
+        for ( pii p: conds[i] ) {
+            int met=--condActive[p.second];
+            if ( met==1 ) {
+                if ( isCRPair ( i,p.first ) ) {
+                    tight[p.first]++;
+                    if ( tight[p.first]==2 ) {
+                       
+                         remTight ( p.first );
+
+                    }
+                }
+            } else if ( met==0 ) {
+
+                if ( !open[i] ) {
+                    if ( i<n-1 ) openR.push_back ( i );
+                    else openC.push_back ( i );
+                }
+                if ( !open[p.first] &&!essential[p.first] ) {
+                    if ( p.first<n-1 ) openR.push_back ( p.first );
+                    else openC.push_back ( p.first );
+                }
+                open[i]++;
+                open[p.first]++;
+                activeCount++;
+            }
+        }
+       
+
+    }
+
+    void addVert ( int i ) {
+        used[i]=1;
+        assert ( tight[i]==INF );
+        if ( essential[i] ) {
+            open[i]--;
+            activeCount--;
+            if ( i<n-1 ) {
+                rem ( openR,i );
+                essRs++;
+            } else {
+                rem ( openC,i );
+                essCs++;
+            }
+        } else {
+            tight[i]=0;
+        }
+
+
+        for ( pii p: conds[i] ) {
+            int met=++condActive[p.second];
+            if ( met==1 ) {
+                if ( isCRPair ( i,p.first ) ) {
+                    tight[i]++;
+//                     if ( tight[i]==2 ) {
+//                         remTight ( i );
+//                     }
+                }
+                open[i]--;
+                if ( !open[i] &&!essential[i] ) {
+                    if ( i<n-1 ) {
+                        rem ( openR,i );
+                    } else {
+                        rem ( openC,i );
+                    }
+                }
+                open[p.first]--;
+                if ( !open[p.first]&&!essential[p.first] ) {
+                    if ( p.first<n-1 ) {
+                        rem ( openR,p.first );
+                    } else {
+                        rem ( openC,p.first );
+                    }
+                }
+                activeCount--;
+
+            } else if ( met==2 ) {
+                if ( isCRPair ( i,p.first ) ) {
+                    tight[p.first]--;
+                    if ( tight[p.first]==1 ) {
+                        addTight ( p.first );
+
+                    }
+                }
+            }
+        }
+        if ( tight[i]<2 ) addTight ( i );
+    }
+    int cnt=0;
+    int cnt2=0;
+    int cnt3=0;
+    int cnt4=0;
+    int cnt5=0;
+    vi tmpopen;
+
+    void swapRow() {
+        int aCountO=activeCount;
+        int a;
+        if ( stightR.empty() ) return;
+        do {
+            int ind=rand() %stightR.size();
+            a=stightR[ind];
+        } while ( !used[a] ||essential[a] );
+        bool fail=tight[a]>activeCount;
+        if ( fail ) return;
+
+
+
+        remVert ( a );
+
+        if ( openR.size() <=1 ) {
+            addVert ( a );
+            return;
+        }
+        cnt2++;
+        int b;
+        do {
+            int i=rand() %openR.size();
+            b=openR[i];
+        } while ( a==b );
+        addVert ( b );
+
+        if ( essential[b] ) return;
+        if ( activeCount>aCountO ) {
+            remVert ( b );
+            addVert ( a );
+            assert ( aCountO==activeCount );
+            return;
+        }
+
+
+        assert ( !fail );
+        cnt3++;
+        cnt4++;
+
+
+    }
+    void swapCol() {
+        int aCountO=activeCount;
+        int a;
+        if ( stightC.empty() ) return;
+        do {
+            int ind=rand() %stightC.size();
+            a=stightC[ind];
+        } while ( !used[a] ||essential[a] );
+        bool fail=tight[a]>activeCount;
+        if ( fail ) return;
+        remVert ( a );
+        if ( openC.size() <=1 ) {
+            addVert ( a );
+            return;
+        }
+
+
+        cnt2++;
+        int b;
+        do {
+            b= openC[rand() %openC.size()];
+        } while ( a==b );
+        addVert ( b );
+        if ( essential[b] ) return;
+        if ( activeCount>aCountO ) {
+            remVert ( b );
+            addVert ( a );
+            return;
+        }
+        assert ( !fail );
+        cnt3++;
+        cnt4++;
+
+    }
+
+
+
+//     void rebuild() {
+//         return;
+// //         if ( activeCount<lactive ) {
+// //             lactive=activeCount;
+// //             return;
+// //         }
+//
+// //         cout<<"rebuild "<<cnt5<<" "<<activeCount<<endl;
+//         rep ( i,2*n-2 ) {
+//             if ( used[i] &&!essential[i] ) remVert ( i );
+//         }
+//         int remr=inst.k-1-essRc;
+//         int remc=inst.k-1-essCs;
+//         rep ( j,remr ) {
+//             int i=rand() %openR.size();
+//             int   b=openR[i];
+//             addVert ( b );
+//         }
+//         rep ( j,remc ) {
+//             int i=rand() %openC.size();
+//             int   b=openC[i];
+//             addVert ( b );
+//         }
+//         lactive=activeCount;
+//
+//     }
+
+    vi iters;
+    void trySwap() {
+        if ( !activeCount ) {
+            iters.push_back ( cnt4 );
+            cnt4=0;
+            cnt5=0;
+            update();
+        }
+        while ( !activeCount ) {
+            if ( remconds.empty() ) {
+                return;
+            }
+            int i,j;
+            tie ( i,j ) =remconds.getCond();
+            inst.bestsc=remconds.getVal();
+            addCond ( i,j );
+            remconds.pop();
+            if ( essCc>inst.k-1 || essRc>inst.k-1 ) return;
+        }
+
+        if ( ( cnt&1 ) && ( essCs<inst.k-1 ) ) swapCol();
+        else if ( essRs<inst.k-1 ) swapRow();
+    }
+    vector<bool> bestused;
+    void update() {
+        bestused=used;
+    }
+    int ITB=10000;
+    void run ( double tle ) {
+
+//         cout<<"initially: "<<cndCnt<<", remaining: "<<remconds.size() <<" score: "<<inst.bestsc <<endl;
+        clock_t st=clock();
+//         cout<<" "<<stightC<<stightR<<activeCount<<endl;
+        while ( cnt&127|| clock()-st<CPS*tle ) {
+
+            if ( essCc>inst.k-1 || essRc>inst.k-1 ) {
+//                 cout<<"essential full"<<essCc<<" "<<essRc<<" "<<inst.k<<endl;
+                break;
+            }
+            if ( !activeCount && remconds.empty() ) {
+
+                update();
+                break;
+            }
+            cnt++;
+            trySwap();
+            if ( cnt4>ITB ) break;
+        }
+        inst.h.clear();
+        rep ( i,n-1 ) {
+            if ( bestused[i] ) inst.h.push_back ( i+1 );
+        }
+        inst.v.clear();
+        reu ( i,n-1,2*n-2 ) {
+            if ( bestused[i] ) inst.v.push_back ( i-n+2 );
+        }
+//         cout<<"t1:"<<vpii ( all ( t1 ) ) <<"t2:"<<vpii ( all ( t2 ) );
+//         vector<pair<pii,int>> ccd2;
+//         for ( pair<pii,int> p: cndcnt ) if ( p.second>1000 ) ccd2.push_back ( p );
+//         cout<<( ccd2);
+//         cout<<"essential needed"<<essCc<<" "<<essRc<<" "<<inst.k-1<<endl;
+//         cout<<"essential full"<<essCs<<" "<<essRs<<" "<<inst.k-1<<endl;
+//         cout<<"finally: "<<cndCnt<<", remaining: "<<remconds.size() <<endl;
+//         cout<<cnt<<" "<<cnt2<< " "<<cnt3<<" "<<cnt4<<" "<<cnt5<<" Iters"<<endl;
+//         cout<<"Queues: "<<stightC<<stightR<<openC<<openR<<endl;
+
+//         cout<<iters<<endl;
+    }
+};
+
+void improveG2 ( Inst &inst ) {
+
+
+    vi h0=inst.h;
+    vi v0=inst.v;
+    ll bs0=inst.bestsc;
+    vi hopt=inst.h;
+    vi vopt=inst.v;
+    ll bs=inst.bestsc;
+    int cnt=0;
+    double bt=0,rt=0;
+    IG2 igst(inst);
+    while ( ( clock()-START ) <TMAX *CPS ) {
+        cnt++;
+        inst.h=h0;
+        inst.v=v0;
+        inst.bestsc=bs0;
+        clock_t st=clock();
+//         IG2 ig ( inst );
+        IG2 ig(igst);
+        clock_t done=clock();
+        bt+=done-st;
+        st=done;
+        ig.run ( min ( 0.1,TMAX- ( clock()-START ) /CPS ) );
+        done=clock();
+        rt+=done-st;
+        if ( inst.bestsc<bs ) {
+            hopt=inst.h;
+            vopt=inst.v;
+            bs=inst.bestsc;
+        }
+    }
+//      cout<<" build: "<<bt<<" run: "<<rt<<endl;
+//     cout<<cnt<<" Iters "<<endl;
+    inst.h=hopt;
+    inst.v=vopt;
+    inst.bestsc=bs;
+
+}
+
+
+void checkDists ( int n, const vi &h, const vi &v ) {
+    int lst=0;
+    map<int,int> hd;
+    for ( int j:h ) {
+        hd[j-lst]++;
+        lst=j;
+    }
+    hd[n-lst]++;
+
+    lst=0;
+    map<int,int> vd;
+    for ( int j:v ) {
+        vd[j-lst]++;
+        lst=j;
+    }
+    vd[n-lst]++;
+    cout<<"hor: "<<vpii ( all ( hd ) ) <<"ver: "<<vpii ( all ( vd ) );
+}
+void checkDists ( const Inst &inst ) {
+    checkDists ( inst.n,inst.h, inst.v );
+}
+vi findVec ( const vector<bool> &v,const Inst &inst ) {
+    vi p ( inst.n );
+    vi gB ( inst.n,-1 );
+    gB[0]=0;
+    int lst=-1;
+    rep ( i,inst.n-inst.bigl ) {
+        if ( gB[i]>=0 ) {
+            if ( v[i] &&gB[i+inst.bigl]<=gB[i] ) {
+                gB[i+inst.bigl]=gB[i]+1;
+                p[i+inst.bigl]=i;
+                if ( gB[i+inst.bigl]==inst.bigc ) {
+                    lst=i+inst.bigl;
+                    break;
+                }
+            }
+            if ( gB[i+inst.smalll]<gB[i] ) {
+                gB[i+inst.smalll]=gB[i];
+                p[i+inst.smalll]=i;
+            }
+        }
+    }
+    if ( lst<0 ) return vi();
+    int i=p[lst];
+    vi res;
+
+    while ( i ) {
+        res.push_back ( i );
+        i=p[i];
+    }
+    reverse ( all ( res ) );
+
+    while ( lst<inst.n ) {
+        res.push_back ( lst );
+        lst+=inst.smalll;
+    }
+    return res;
+
+}
+vi findVec ( const vi &v,const Inst &inst ) {
+    int minl=inst.minl;
+    vi p ( inst.n+1 );
+    vi cnt ( inst.n+1,INF );
+    cnt[0]=0;
+    rep ( i,inst.n ) {
+        if ( cnt[i]<INF ) {
+            rep ( j,v[i]+1 ) {
+                if ( i+minl+j>inst.n ) break;
+                if ( cnt[i+minl+j]>cnt[i]+1 ) {
+                    cnt[i+minl+j]=cnt[i]+1;
+                    p[i+minl+j]=i;
+                }
+
+            }
+        }
+    }
+    if ( cnt[inst.n]>inst.k ) return vi();
+//     assert(cnt[inst.n]==inst.k);
+    int i=p[inst.n];
+    vi res;
+
+    while ( i ) {
+        res.push_back ( i );
+        i=p[i];
+    }
+    reverse ( all ( res ) );
+
+    return res;
+
+}
+const int BSBOUND=1000;
+void optV3 ( Inst &inst ) {
+    const int minl=inst.minl;
+    const int steps=6;
+    vi hsize ( inst.k );
+    int lst=0;
+    rep ( i,inst.k-1 ) {
+        hsize[i]=inst.h[i]-lst;
+        lst=inst.h[i];
+    }
+    hsize.back() =inst.n-lst;
+    ll mi=inst.minsc;
+    ll ma=inst.maxsc;
+    vi bestv;
+    while ( ma-mi>BSBOUND ) {
+        ll s= ( ma+mi ) >>1;
+        vi vposs ( inst.n,steps );
+        reu ( i,1,minl+steps ) {
+            vposs[inst.n-i]=max ( 0,i-minl );
+        }
+        bool fail=0;
+        rep ( j,inst.n-minl ) {
+            int topi=0;
+            rep ( i,inst.k ) {
+                int v=vposs[j];
+                assert ( j+minl+v<=inst.n );
+                assert ( topi+hsize[i]<=inst.n );
+                while ( v>=0 && inst.getRect ( topi,j,hsize[i],minl+v ) >s ) v--;
+                if ( v<0 ) {
+                    fail=1;
+                    break;
+                }
+
+                vposs[j]=v;
+                if ( i<inst.k -1 ) topi=inst.h[i];
+            }
+            if ( fail ) break;
+        }
+        if ( fail ) {
+            mi=s;
+            continue;
+        }
+        vi r=findVec ( vposs,inst );
+        if ( r.size() ) {
+            ma=s;
+            bestv=r;
+        } else mi=s;
+
+    }
+    if ( ma<inst.bestsc ) {
+        inst.bestsc=ma;
+        inst.maxsc=ma;
+        inst.v=bestv;
+//         assert(inst.v.size()==inst.k);
+    }
+//      cout<<"bestv: "<<ma<<endl;
+}
+void optH3 ( Inst &inst ) {
+    const int minl=inst.minl;
+    const int steps=6;
+
+
+
+    vi vsize ( inst.k );
+    int lst=0;
+    rep ( i,inst.k-1 ) {
+        vsize[i]=inst.v[i]-lst;
+        lst=inst.v[i];
+    }
+    vsize.back() =inst.n-lst;
+    ll mi=inst.minsc;
+    ll ma=inst.maxsc;
+    vi besth;
+    while ( ma-mi>BSBOUND ) {
+        ll s= ( ma+mi ) >>1;
+        vi hposs ( inst.n,steps );
+        reu ( i,1,minl+steps ) {
+            hposs[inst.n-i]=max ( 0,i-minl );
+        }
+        bool fail=0;
+        rep ( i,inst.n-minl ) {
+            int topj=0;
+            rep ( j,inst.k ) {
+                int v=hposs[i];
+                assert ( i+minl+v<=inst.n );
+                assert ( topj+vsize[j]<=inst.n );
+                while ( v>=0 && inst.getRect ( i,topj,minl+v,vsize[j] ) >s ) v--;
+                if ( v<0 ) {
+                    fail=1;
+                    break;
+                }
+
+                hposs[i]=v;
+                if ( j<inst.k -1 ) topj=inst.v[j];
+            }
+            if ( fail ) break;
+        }
+        if ( fail ) {
+            mi=s;
+            continue;
+        }
+        vi r=findVec ( hposs,inst );
+        if ( r.size() ) {
+            ma=s;
+            besth=r;
+        } else mi=s;
+
+    }
+    if ( ma<inst.bestsc ) {
+        inst.bestsc=ma;
+        inst.maxsc=ma;
+        inst.h=besth;
+//         assert(inst.v.size()==inst.k);
+    }
+//     cout<<"bestv: "<<ma<<endl;
+}
+void optH2 ( Inst &inst ) {
+    vector<bool> vb ( inst.k );
+    int lst=0;
+    rep ( i,inst.k-1 ) {
+        vb[i]=inst.v[i]-lst==inst.bigl;
+        lst=inst.v[i];
+    }
+    vb.back() =inst.n-lst==inst.bigl;
+
+    ll mi=inst.minsc;
+    ll ma=inst.maxsc;
+    vi besth;
+    while ( ma-mi>BSBOUND ) {
+
+        ll s= ( ma+mi ) >>1;
+        vector<bool> hposs ( inst.n,1 );
+        rep ( i,inst.n-inst.bigl+1 ) {
+            int topj=0;
+            rep ( j,inst.k-1 ) {
+                hposs[i]=hposs[i] && ( !vb[j] || inst.getBB ( i,topj ) <=s );
+                topj=inst.v[j];
+            }
+            hposs[i]=hposs[i] && ( !vb[inst.k-1] || inst.getBB ( i,topj ) <=s );
+        }
+//          cout<<vposs<<endl;
+        vi r=findVec ( hposs,inst );
+        if ( r.size() ) {
+            ma=s;
+            besth=r;
+
+        } else mi=s;
+
+    }
+    if ( ma<inst.bestsc ) {
+//         cout<<"new best: "<<ma<<endl;
+        inst.bestsc=ma;
+        inst.maxsc=ma;
+        inst.h=besth;
+    }
+//     cout<<"bestv: "<<ma<<endl;
+//     return bestv;
+}
+void optV2 ( Inst &inst ) {
+    vector<bool> hb ( inst.k );
+    int lst=0;
+    rep ( i,inst.k-1 ) {
+        hb[i]=inst.h[i]-lst==inst.bigl;
+        lst=inst.h[i];
+    }
+    hb.back() =inst.n-lst==inst.bigl;
+    ll mi=inst.minsc;
+    ll ma=inst.maxsc;
+    vi bestv;
+    while ( ma-mi>BSBOUND ) {
+
+        ll s= ( ma+mi ) >>1;
+        vector<bool> vposs ( inst.n,1 );
+        int topi=0;
+        rep ( i,inst.k-1 ) {
+            if ( hb[i] )
+                rep ( j,inst.n-inst.bigl +1 ) {
+                vposs[j]=vposs[j] && ( inst.getBB ( topi,j ) <=s );
+            }
+            topi=inst.h[i];
+        }
+        if ( hb[inst.k-1] )
+            rep ( j,inst.n-inst.bigl +1 ) {
+
+
+            vposs[j]=vposs[j] && ( inst.getBB ( topi,j ) <=s );
+        }
+        vi r=findVec ( vposs,inst );
+        if ( r.size() ) {
+            ma=s;
+            bestv=r;
+        } else mi=s;
+
+    }
+    if ( ma<inst.bestsc ) {
+        inst.bestsc=ma;
+        inst.maxsc=ma;
+        inst.v=bestv;
+    }
+}
+vi fillUni ( int n, int k ) {
+    double del=n /double ( k );
+    vi res ( k-1 );
+    reu ( i,1,k )
+    res[i-1]=int ( i*del +.5 );
+    return res;
+}
+
+
+
+
+void findOpt ( int n, int k,const vector<vll> &partials,Inst &inst, vi&vals ) {
+    ll ma=inst.bestsc;
+    ll mi=0;
+    vi bestv;
+    while ( ma-mi>1 ) {
+        vi v;
+        ll s= ( mi+ma ) >>1;
+        ll mval=0;
+
+        vll lstp ( k );
+        rep ( i,k-1 ) {
+            int j=v.empty() ?0:v.back();
+            while ( j<n ) {
+                bool f=0;
+                rep ( l,k ) {
+                    if ( partials[l][j]-lstp[l]>s ) {
+                        f=1;
+                        break;
+
+                    } else mval=max ( mval,partials[l][j]-lstp[l] );
+                }
+
+                if ( f ) break;
+                j++;
+
+            }
+            if ( !j ) break;
+            v.push_back ( j );
+            if ( j==n ) {
+                break;
+            }
+            rep ( l,k ) lstp[l]=partials[l][j-1];
+        }
+        bool f=v.empty();
+        if ( !f && v.back() <n ) {
+            rep ( l,k ) {
+                if ( partials[l][n-1]-lstp[l]>s ) {
+                    f=1;
+                    break;
+                }
+            }
+        }
+        if ( f ) mi=s;
+        else {
+            ma=mval;
+            bestv=v;
+        }
+    }
+    if ( inst.bestsc>ma ) {
+        inst.bestsc=inst.maxsc=ma;
+        vals=bestv;
+    }
+
+}
+
+
+
+void optV ( Inst &inst ) {
+    int n=inst.n;
+    int k=inst.k;
+    int lst=0;
+
+    vector<vll> partials ( k,vll ( n ) );
+    rep ( i,k ) {
+        int nxt=i==k-1?n:inst.h[i];
+        reu ( j,lst,nxt ) {
+            rep ( l,n ) partials[i][l]+=inst.a[j][l];
+        }
+        reu ( j,1,n ) partials[i][j]+=partials[i][j-1];
+        lst=nxt;
+
+    }
+    findOpt ( n,k,partials,inst,inst.v );
+//     inst.v= findOpt ( n,k,partials );
+
+}
+void optH ( Inst &inst ) {
+    int n=inst.n;
+    int k=inst.k;
+    int lst=0;
+
+    vector<vll> partials ( k,vll ( n ) );
+    rep ( i,k ) {
+        int nxt=i==k-1?n:inst.v[i];
+        reu ( j,lst,nxt ) {
+            rep ( l,n ) partials[i][l]+=inst.a[l][j];
+        }
+        reu ( j,1,n ) partials[i][j]+=partials[i][j-1];
+        lst=nxt;
+
+    }
+    findOpt ( n,k,partials,inst,inst.h );
+//     inst.h= findOpt ( n,k,partials );
+}
+
+pair<vi,vi> solveDumb ( vector<vi> & a, int k ) {
+    double del=a.size() /double ( k );
+    pair<vi,vi> res=mp ( vi ( k-1 ),vi ( k-1 ) );
+    reu ( i,1,k ) {
+        res.first[i-1]=int ( i*del );
+        res.second[i-1]=int ( i*del );
+    }
+    return res;
+
+}
+
+void solveDumb ( Inst &inst ) {
+    inst.h= fillUni ( inst.n, inst.k );
+    inst.v= fillUni ( inst.n, inst.k );
+}
+
+void correctSol ( int n,int k, vi &s ) {
+
+    int vmax=n+s.size()-k;
+    while ( !s.empty() &&s.back() >vmax ) {
+        s.pop_back();
+        vmax--;
+    }
+    while ( int ( s.size() ) <k-1 ) s.push_back ( ++vmax );
+}
+void correctSol ( int n,int k, pair<vi,vi> &s ) {
+    correctSol ( n,k,s.first );
+    correctSol ( n,k,s.second );
+}
+
+void solveO ( Inst &inst ) {
+
+    if ( !inst.h.size() )
+        inst.h=fillUni ( inst.n,inst.k );
+    rep ( i,10 ) {
+
+        optV ( inst );
+        correctSol ( inst.n, inst.k, inst.v );
+        optH ( inst );
+        correctSol ( inst.n, inst.k, inst.h );
+    }
+}
+void solveO2 ( Inst &inst ) {
+    int n=inst.n,k=inst.k;
+    if ( n%k==0 || k<n/5 ) return solveO ( inst );
+    if ( inst.h.empty() ) {
+        inst.h=fillUni ( inst.n, inst.k );
+    }
+    ll bestsc=INFL;
+    rep ( i,10 ) {
+        optV2 ( inst );
+        if ( bestsc==inst.bestsc ) break;
+        bestsc=inst.bestsc;
+        optH2 ( inst );
+        if ( bestsc==inst.bestsc ) break;
+        bestsc=inst.bestsc;
+    }
+}
+void solveO3 ( Inst &inst ) {
+
+    solveO ( inst );
+    if ( inst.n %inst.k==0 ) return;
+    ll bestsc=INFL;
+    rep ( i,10 ) {
+        optV3 ( inst );
+        correctSol ( inst.n,inst.k,inst.v );
+        optH3 ( inst );
+        correctSol ( inst.n,inst.k,inst.v );
+        if ( bestsc==inst.bestsc ) return;
+        bestsc=inst.bestsc;
+    }
+
+
+}
+void solveG ( Inst &inst ) {
+    int n=inst.n,k=inst.k;
+    if ( n%k==0 || k<n/8 ) return solveO ( inst );
+    solveO2 ( inst );
+    improveG ( inst );
+
+}
+void solveG2 ( Inst & inst ) {
+    int n=inst.n, k=inst.k;
+    if ( n%k==0 || k<n/2 ) return solveG ( inst );
+    solveO2( inst );
+    improveG2 ( inst );
+}
+void dump ( const pair<vi,vi> &a ) {
+    rep ( i,a.first.size()-1 ) printf ( "%d ",a.first[i] );
+    printf ( "%d\n",a.first.back() );
+    rep ( i,a.second.size()-1 ) printf ( "%d ",a.second[i] );
+    printf ( "%d\n",a.second.back() );
+}
+#ifndef DEBUG
+#define gc getchar_unlocked
+
+void scan ( int &x ) {
+    int c = gc();
+    x = 0;
+    for ( ; ( c<48 || c>57 ); c = gc() );
+    for ( ; c>47 && c<58; c = gc() ) {
+        x = ( x << 1 ) + ( x << 3 ) + c - 48;
+    }
+}
+template<typename T> void scan ( vector<T> &v ) {
+    for ( T &r:v ) scan ( r );
+
+}
+typedef void ( *solver ) ( Inst &s );
+solver usedS=solveG2;
+
+int main() {
+    int n,k;
+    scan ( n );
+    scan ( k );
+    vector<vi> a ( n,vi ( n ) );
+    scan ( a );
+    Inst inst ( a,k );
+    usedS ( inst );
+    dump ( mp ( inst.h, inst.v ) );
+
+
+}
+#endif
+
+
+

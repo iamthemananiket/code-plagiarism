@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+const int N = 5123;
+
+int a[N], b[N], ord[N];
+ll f[N][N];
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input","r",stdin);
+  freopen("f.output","w",stdout);
+  freopen("error","w",stderr);
+#endif
+
+  int t = read();
+  for (int tt = 0; tt < t; tt++) {
+    int n = read();
+    for (int i = 0; i < n; i++) {
+      a[i] = read();
+    }
+    for (int i = 0; i < n; i++) {
+      b[i] = read();
+      ord[i] = i;
+    }
+    sort(ord, ord + n, [&](int x,int y){
+      return b[x] > b[y];
+    });
+    for (int i = 0; i < n; i++) {
+      int A = a[ord[i]];
+      int B = b[ord[i]];
+      eprintf("%d %d\n", A, B);
+      for (int k = 1; k <= i + 1; k++) {
+        f[i][k] = 0ll;
+        if (i > 0)
+          f[i][k] = f[i - 1][k];
+        umax(f[i][k], ((i > 0)? f[i - 1][k - 1] : 0ll) + ll(B) * (k - 1) + A);
+      }
+    }
+    for (int i = 1; i <= n; i++) {
+      printf("%lld ", f[n - 1][i]);
+    }
+    puts("");
+  }
+
+  return 0;
+}

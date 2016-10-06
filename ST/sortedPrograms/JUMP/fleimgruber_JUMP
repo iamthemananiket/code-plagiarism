@@ -1,0 +1,107 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 300005
+#define INF 123456789876542343LL
+
+int n,p[MAX_N],a[MAX_N],h[MAX_N];
+ll dp[MAX_N];
+
+ll f(int i)
+{
+	if (i==n)
+		return a[n];
+	if (dp[i]!=INF)
+		return dp[i];
+	ll ans=INF;
+	for (int j=i+1; j<=n; j++)
+		if (p[i]<p[j])
+			ans=min(ans,f(j)+(h[j]-h[i])*1LL*(h[j]-h[i]));
+	return dp[i]=ans+a[i];
+}
+
+vector<ll> M,B;
+
+bool bad(int l1, int l2, int l3)
+{
+	return (B[l3]-B[l1])*(M[l1]-M[l2])>(B[l2]-B[l1])*(M[l1]-M[l3]);
+}
+
+void add(ll m, ll b)
+{
+	M.pb(m);
+	B.pb(b);
+	while (sz(M)>=3&&bad(sz(M)-3,sz(M)-2,sz(M)-1))
+	{
+		M.erase(M.end()-2);
+		B.erase(B.end()-2);
+	}
+}
+
+#define val(p) (M[p]*i+B[p])
+int ptr;
+ll query(int i)
+{
+	ptr=min(ptr,sz(M)-1);
+	while (ptr<sz(M)-1&&val(ptr+1)<val(ptr))
+		ptr++;
+	return val(ptr);
+}
+#undef val
+
+vector<pair<ll,ll> > put[MAX_N];
+
+ll solveSub34()
+{
+	dp[n]=a[n];
+	add(-2*n,dp[n]+n*1LL*n);
+	for (int i=n-1; i>0; i--)
+	{
+		for (int j=0; j<sz(put[i]); j++)
+			add(put[i][j].fi,put[i][j].se);
+		dp[i]=query(i)+i*1LL*i+a[i];
+		if (p[i]>=i)
+			add(-2*i,dp[i]+i*1LL*i);
+		else
+			put[p[i]-1].pb(mp(-2*i,dp[i]+i*1LL*i));
+	}
+	return dp[1];
+}
+
+int main()
+{
+	scanf("%d",&n);
+	for (int i=1; i<=n; i++)
+		scanf("%d",p+i);
+	for (int i=1; i<=n; i++)
+		scanf("%d",a+i);
+	for (int i=1; i<=n; i++)
+		scanf("%d",h+i);
+	bool sub34=true;
+	for (int i=1; i<=n; i++)
+		sub34&=h[i]==i;
+	if (!sub34)
+	{
+		for (int i=1; i<=n; i++)
+			dp[i]=INF;
+		printf("%lld\n",f(1));
+	}
+	else
+		printf("%lld\n",solveSub34());
+	return 0;
+}

@@ -1,0 +1,29 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+
+#define Nx 1001001
+using namespace std;
+
+int t,hh, mm;
+
+int main()
+{
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d %d",&hh,&mm);
+		if(hh<0 || hh>23 || mm<0 || mm>59)
+			printf("Invalid Time\n");
+		else
+		{
+			hh %= 12;
+			float ans;
+			ans = abs(hh*30 - mm*6 + (float)mm/2);
+			if(ans>180)
+				ans = 360 - ans;
+			printf("%.1f\n",ans);
+		}
+	}
+	return 0;
+}

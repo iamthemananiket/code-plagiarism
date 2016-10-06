@@ -1,0 +1,103 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,pair<int,int> > piii;
+const int MAXN = 1e5+5;
+struct node {
+	ll vv,lazy;
+};
+vector<pair<int,int> > ar[MAXN];
+int maxx,maxy;
+struct node st[3*MAXN];
+void update(int node, int start, int end, int qs, int qe, int v) {
+	if(st[node].lazy) {
+		st[node].vv+=st[node].lazy;
+		if(start!=end) {
+			st[2*node].lazy += st[node].lazy;
+			st[2*node+1].lazy += st[node].lazy;
+		}
+		st[node].lazy=0;
+	}
+	if(start>end or qe<start or qs>end) return;
+	if(start>=qs and end<=qe) {
+		st[node].vv+=1LL*v;
+		if(start!=end) {
+			st[2*node].lazy += 1LL*v;
+			st[2*node+1].lazy += 1LL*v;
+		}
+		return;
+	}
+	int mid=(start+end)>>1;
+	update(2*node, start, mid, qs, qe, v);
+	update(2*node+1, mid+1, end, qs, qe, v);
+	st[node].vv=max(st[2*node].vv,st[2*node+1].vv);
+}
+const ll INF = 1e11;
+ll query(int node, int start, int end, int qs, int qe) {
+	if(st[node].lazy) {
+		st[node].vv+=st[node].lazy;
+		if(start!=end) {
+			st[2*node].lazy += st[node].lazy;
+			st[2*node+1].lazy += st[node].lazy;
+		}
+		st[node].lazy=0;
+	}
+	if(start>end or qe<start or qs>end) return -INF;
+	if(start>=qs and end<=qe) {
+		return st[node].vv;
+	}
+	int mid=(start+end)>>1;
+	ll ret = max(query(2*node, start, mid, qs, qe),query(2*node+1, mid+1, end, qs, qe));
+	st[node].vv=max(st[2*node].vv,st[2*node+1].vv);
+	return ret;
+}
+ll go(int l) {
+	ll ret=-1;
+	for(int i=1;i<=maxx;i++) {
+		for(auto it:ar[i]) update(1,1,maxy,it.ff-l+1,it.ff,it.ss);
+		if(i-l>=1) for(auto it:ar[i-l]) update(1,1,maxy,it.ff-l+1,it.ff,-it.ss);
+		ll p = query(1,1,maxy,1,maxy);
+		ret=max(ret,p);
+	}
+	return ret;
+}
+void reset() {
+	for(int i=0;i<3*MAXN;i++) st[i].vv=st[i].lazy=0;
+}
+int main() {
+	//freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	int n,l;
+	cin>>n>>l;
+	maxx=-1;
+	maxy=-1;
+	for(int i=1;i<=n;i++) {
+		int x,y,c;
+		scanf("%d%d%d",&x,&y,&c);
+		ar[x].pb(mp(y,c));
+		maxx=max(maxx,x);
+		maxy=max(maxy,y);
+	}
+	ll v = go(l);
+	ll lo=0,hi=l;
+	ll ret;
+	while(lo<=hi) {
+		reset();
+		ll mid=lo+(hi-lo+1)/2;
+		ll val = go(mid);
+		if(val>=v) ret=mid,hi=mid-1;
+		else lo=mid+1;
+	}
+	cout<<v<<" "<<ret<<endl;
+	return 0;
+}

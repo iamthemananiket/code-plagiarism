@@ -1,0 +1,49 @@
+#include <iostream>
+#include <fstream>
+#include <climits>
+#include <cmath>
+
+using namespace std;
+
+int N, ind_min, ind_max;
+double maxim, minim = INT_MAX;
+double x11, y11, x22, y22, x33, y33;
+
+double Area()
+{
+    double val11 = x11 * ( y22 - y33 ) * 1.0;
+    double val22 = x22 * ( y11 - y33 ) * 1.0;
+    double val33 = x33 * ( y11 - y22 ) * 1.0;
+
+    return ( abs( val11 - val22 + val33 ) / 2.0 );
+}
+
+int main()
+{
+    //ifstream cin("date.in");
+
+    cin >> N;
+
+    for ( int i = 1; i <= N; ++i )
+    {
+        cin >> x11 >> y11 >> x22 >> y22 >> x33 >> y33;
+
+        double area = Area();
+
+        if ( area <= minim )
+        {
+            minim = area;
+            ind_min = i;
+        }
+
+        if ( area >= maxim )
+        {
+            maxim = area;
+            ind_max = i;
+        }
+    }
+
+    cout << ind_min << " " << ind_max << "\n";
+
+    return 0;
+}

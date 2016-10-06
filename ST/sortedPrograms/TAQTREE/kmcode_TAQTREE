@@ -1,0 +1,242 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+#define MAX 100001
+struct st{
+	int go;
+	int cost;
+	st(int go_, int cost_){
+		go = go_;
+		cost = cost_;
+	}
+};
+bool use[MAX];
+vector<st> g[MAX];
+int size_tree[MAX];  //size of i's subtree
+vector<st> v[MAX];  //tree
+int n;
+int q;
+int t;
+vector<pair<int, int> > vv;  //edge input
+int dep[MAX];
+int construct_graph(int b, int h = 0){
+	dep[b] = h;
+	use[b] = true;
+	for (int i = 0; i < g[b].size(); i++){
+		if (use[g[b][i].go]){
+			continue;
+		}
+		v[b].push_back(g[b][i]);
+		size_tree[b] += construct_graph(g[b][i].go, h + 1);
+	}
+	size_tree[b]++;
+	return size_tree[b];
+}
+//HLD
+int belong[MAX];  //node hld
+int bbelong[MAX];  //belong belong
+class hl{
+public:
+	hl(){
+	}
+	vector<int> bit;
+	void add(int i, int x){
+		i++;
+		while (i < bit.size()){
+			bit[i] += x;
+			i += i&-i;
+		}
+	}
+	int sum(int i){
+		i++;
+		int r = 0;
+		while (i > 0){
+			r += bit[i];
+			i -= i&-i;
+		}
+		return r;
+	}
+};
+vector<hl> tt;
+vector<int> star;
+int dist[100001];
+void make(int b, int bb, int cc){
+	belong[b] = bb;
+	bbelong[b] = cc;
+	if (v[b].size() == 0){
+		tt[bb].bit.assign(cc + 2, 0);
+		return;
+	}
+	int ii = 0;
+	int m_siz = -1;
+	for (int i = 0; i < v[b].size(); i++){
+		if (size_tree[v[b][i].go]>m_siz){
+			ii = i;
+			m_siz = size_tree[v[b][i].go];
+		}
+	}
+	for (int i = 0; i < v[b].size(); i++){
+		if (ii != i){
+			star.push_back(v[b][i].go);
+			tt.push_back(hl());
+			int rururu = tt.size() - 1;
+			make(v[b][i].go, tt.size() - 1, 0);
+			tt[rururu].add(bbelong[v[b][i].go], v[b][i].cost);
+		}
+		else{
+			make(v[b][i].go, bb, cc + 1);
+			tt[bb].add(bbelong[v[b][i].go], v[b][i].cost);
+		}
+	}
+	return;
+}
+//lca
+#define MAX_LOG 17
+int vis[MAX_LOG][MAX];
+void pre_lca(int b){
+	for (int i = 0; i < v[b].size(); i++){
+		vis[0][v[b][i].go] = b;
+		pre_lca(v[b][i].go);
+	}
+}
+void init(){
+	for (int i = 0; i < MAX_LOG - 1; i++){
+		for (int j = 0; j < n; j++){
+			if (vis[i][j] == -1){
+				vis[i + 1][j] = -1;
+				continue;
+			}
+			else{
+				vis[i + 1][j] = vis[i][vis[i][j]];
+			}
+		}
+	}
+}
+int lca(int a, int b){
+	if (dep[b]>dep[a]){
+		swap(a, b);
+	}
+	for (int i = 0; i < MAX_LOG; i++){
+		if (((dep[a] - dep[b]) >> i) & 1){
+			a = vis[i][a];
+		}
+	}
+	if (a == b){
+		return a;
+	}
+	for (int i = MAX_LOG - 1; i >= 0; i--){
+		if (vis[i][a] != vis[i][b]){
+			a = vis[i][a];
+			b = vis[i][b];
+		}
+	}
+	return vis[0][a];
+}
+int query(int a, int b){
+	if (dep[b]<dep[a]){
+		swap(a, b);
+	}
+	int r = 0;
+	//process
+	if (belong[a] == belong[b]&&0){
+		r = tt[belong[a]].sum(bbelong[b]) - tt[belong[b]].sum(bbelong[a]);
+	}
+	else{
+		/*int lef = 0;
+		int ri = 0;
+		while (b != -1){
+			lef += tt[belong[b]].sum(bbelong[b]);
+			int bb = b;
+			b = vis[0][star[belong[b]]];
+		}
+		swap(a, b);
+		while (b != -1){
+			ri += tt[belong[b]].sum(bbelong[b]);
+			int bb = b;
+			b = vis[0][star[belong[b]]];
+		}
+		return lef - ri;*/
+		while (belong[a] != belong[b]){
+			r += tt[belong[b]].sum(bbelong[b]);
+			b = vis[0][star[belong[b]]];
+		}
+		r += tt[belong[b]].sum(bbelong[b]);
+		r -= tt[belong[a]].sum(bbelong[a]);
+	}
+	return r;
+}
+int main(){
+	scanf("%d", &n);
+	for (int i = 1; i < n; i++){
+		int kari, kari1, kari2;
+		scanf("%d%d%d", &kari, &kari1, &kari2);
+		kari--;
+		kari1--;
+		dist[i-1]=kari2;
+		vv.push_back(make_pair(kari, kari1));
+		g[kari].push_back(st(kari1, kari2));
+		g[kari1].push_back(st(kari, kari2));
+	}
+	construct_graph(0);
+	star.push_back(0);
+	tt.push_back(hl());
+	vis[0][0] = -1;
+	make(0, 0, 0);
+	int q;
+	pre_lca(0);
+	init();
+	scanf("%d", &q);
+	while (q--){
+		int ty = 0;
+		scanf("%d", &ty);
+		if (ty == 1){
+			int a, b;
+			scanf("%d%d", &a, &b);
+			a--;
+			int aa = vv[a].first;
+			int bb = vv[a].second;
+			if (dep[aa] > dep[bb]){
+				swap(aa, bb);
+			}
+			int ad = b - dist[a];
+			dist[a] = b;
+			tt[belong[bb]].add(bbelong[bb], ad);
+		}
+		else{
+			int ans = 0;
+			int kari, kari1;
+			scanf("%d%d", &kari, &kari1);
+			kari--;
+			kari1--;
+			int lc = lca(kari, kari1);
+			ans += query(lc, kari);
+			ans += query(lc, kari1);
+			printf("%d\n", ans);
+		}
+		continue;
+	}
+	return 0;
+}

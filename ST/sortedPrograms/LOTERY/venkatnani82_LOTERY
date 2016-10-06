@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long mod = 1e9 + 7;
+map<int, int> prmcnt[100010]; 
+vector<int> primes; 
+bool prime[100010];
+int prsiz, m;
+int c[1000010], d[1000010];
+int M[100010][20][170];
+vector<int> Values[170]; 
+void Compute_ST(vector<int> & A, int Pri){
+      int i, j, N = A.size();
+   
+  //initialize M for the intervals with length 1
+      for (i = 0; i < N; i++)
+          M[i][0][Pri] = i;
+  //compute values from smaller to bigger intervals
+      for (j = 1; 1 << j <= N; j++)
+          for (i = 0; i + (1 << j) - 1 < N; i++)
+              if (A[M[i][j - 1][Pri]] < A[M[i + (1 << (j - 1))][j - 1][Pri]])
+                  M[i][j][Pri] = M[i][j - 1][Pri];
+              else
+                  M[i][j][Pri] = M[i + (1 << (j - 1))][j - 1][Pri];
+}
+int RMQ(vector<int> & A, int i, int j, int Pri){
+	int k = (log2(j - i + 1));
+	if(A[M[i][k][Pri]] <= A[M[j - (1 << k) + 1][k][Pri]]) return M[i][k][Pri];
+	else return M[j - (1 << k) + 1][k][Pri];
+}
+long long power(long long a, long long b){
+	if(b == 0) return 1;
+	long long tmp = power(a, b / 2);
+	if(b % 2 == 0) return (tmp * tmp) % mod;
+	else return (((tmp * tmp) % mod) * a) % mod;
+}
+long long calcLcm(int l, int r){
+	long long ret = 1;
+	for (int i = 0; i < prsiz; i++) {
+		if(primes[i] > 1000) break;
+		ret *= power(primes[i], -Values[i][RMQ(Values[i], l - 1, r - 1, i)]);
+		// if(l == 1 && r == 3){
+		// 	cout<<-Values[i][RMQ(Values[i], l - 1, r - 1, i)]<<" ** ";
+		// }
+		ret %= mod;
+	}
+	// cout<<endl;
+	return ret;
+}
+long long remMul[100010];
+int main(){
+	int ref = 100010;
+	int rem[ref];
+	for (int i = 0; i < ref; i++) rem[i] = i;
+	for (int i = 0; i < ref; i++) prime[i]=true ;
+	for (int i = 2; i * i < ref; i++)  if(prime[i]) for (int j = i * i; j < ref; j+=i) {
+		prime[j]=false;
+		while (rem[j] % i == 0){
+		    rem[j] /= i;
+		    prmcnt[j][i]++;
+		}
+	}
+	int t, n1, k1, a, b;
+	cin>>t>>n1>>k1>>a>>b>>m;
+	for (int i = 2; i < 1000; i++) if(prime[i]) primes.push_back(i); 
+	prsiz = primes.size();
+	// cout<<prsiz<<endl;
+	for (int i = 2; i < ref; i++) if(rem[i] > 1) prmcnt[i][rem[i]]++; 
+	remMul[0] = 1;
+	for (int i = 1; i < ref; i++) remMul[i] = remMul[i - 1] * rem[i], remMul[i] %= mod;
+	// for (int i = 2; i < 10; i++) cout<<rem[i]<<" ";
+	// cout<<endl;
+	for (int i = 0; i < prsiz; i++) {
+		if(primes[i] > 1000) break;
+		// cout<<primes[i]<<endl;
+		for (int j = 1; j <= m; j++) Values[i].push_back(-prmcnt[j][primes[i]]);
+		Compute_ST(Values[i], i); 
+	}
+	for (int i = 1; i < t; i++) scanf("%d", c + i);
+	for (int i = 1; i < t; i++) scanf("%d", d + i); 
+	long long answer = calcLcm(n1 - k1 + 1, n1);
+	cout<<answer<<endl;
+	for (int i = 1; i < t; i++) {
+		n1 = 1 + (a * 1LL * answer + 1LL * c[i]) % m;
+		k1 = 1 + (b * 1LL * answer + 1LL * d[i]) % n1;
+		answer = calcLcm(n1 - k1 + 1, n1);
+		// cout<<n1<<" "<<k1<<" "<<answer<<endl;
+		// cout<<remMul[n1]<<" "<<remMul[n1 - k1]<<endl;
+		// answer *= remMul[n1];
+		// answer %= mod;
+		// answer *= power(remMul[n1 - k1], mod - 2);
+		// answer %= mod;
+		printf("%lld\n", answer);
+	}
+	// for (int i = 0; i < 10; i++) cout<<-Values[0][i]<<" ";
+	// cout<<endl; 
+	// for (int i = 0; i < 10; i++)  cout<<RMQ(Values[0], 0, i, 0)<<" ";
+	// cout<<endl;
+}

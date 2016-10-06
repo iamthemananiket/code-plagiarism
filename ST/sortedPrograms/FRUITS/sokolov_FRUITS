@@ -1,0 +1,48 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = 2e9;
+
+
+int main() {
+	//freopen("input.txt", "rt", stdin);
+	//freopen("output.txt", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n, m, k;
+		scanf("%d %d %d", &n, &m, &k);
+		if (abs(n - m) <= k) {
+			printf("0\n");
+		} else {
+			printf("%d\n", max(n, m) - (min(n, m) + k));
+		}
+	}
+	return 0;
+}

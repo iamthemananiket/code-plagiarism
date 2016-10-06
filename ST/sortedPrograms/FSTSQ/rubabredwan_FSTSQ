@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(z,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<=b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			2000050
+#define MOD			ll(1e9 + 7)
+#define INF			INT_MAX
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+#define OVERFLOW 2
+#define ROW b_len
+#define COL a_len+b_len+OVERFLOW
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+int getCarry(int num) {
+    int carry = 0;
+    if(num>=10) {
+        while(num!=0) {
+            carry = num %10;
+            num = num/10;
+        }
+    }
+    else carry = 0;
+    return carry;
+}
+
+int num(char a) {
+    return int(a)-48;
+}
+
+string mult(string a, string b) {
+        string ret;
+        int a_len = a.length();
+        int b_len = b.length();
+        int mat[ROW][COL];
+        for(int i =0; i<ROW; ++i) {
+            for(int j=0; j<COL; ++j) {
+                mat[i][j] = 0;
+
+            }
+        }
+
+        int carry=0, n,x=a_len-1,y=b_len-1;
+        for(int i=0; i<ROW; ++i) {
+            x=a_len-1;
+            carry = 0;
+            for(int j=(COL-1)-i; j>=0; --j) {
+                if((x>=0)&&(y>=0))  {
+                    n = (num(a[x])*num(b[y]))+carry;
+                    mat[i][j] = n%10;
+                    carry = getCarry(n);
+                }
+                else if((x>=-1)&&(y>=-1)) mat[i][j] = carry;
+                x=x-1;
+            }
+            y=y-1;
+        }
+
+        carry = 0;
+        int sum_arr[COL];
+        for(int i =0; i<COL; ++i) sum_arr[i] = 0;
+        for(int i=0; i<ROW; ++i) {
+            for(int j=COL-1; j>=0; --j) {
+                sum_arr[j] += (mat[i][j]);
+            }
+        }
+        int temp;
+        for(int i=COL-1; i>=0; --i) {
+            sum_arr[i] += carry;
+            temp = sum_arr[i];
+            sum_arr[i] = sum_arr[i]%10;
+            carry = getCarry(temp);
+        }
+
+        for(int i=0; i<COL; ++i) {
+            ret.push_back(char(sum_arr[i]+48));
+        }
+
+        while(ret[0]=='0'){
+            ret = ret.substr(1,ret.length()-1);
+        }
+        return ret;
+}
+
+ll power(ll x, ll n){
+	ll ret = 1;
+	REP(i, n) ret = ((ret % MOD)  * (x % MOD)) % MOD;
+	return ret;
+}
+
+int main() {
+	ll tc, n, d;
+	scanf("%lld", &tc);
+	while(tc--){
+		scanf("%lld %lld", &n, &d);
+		
+		string input = "";
+		
+		REP(i, n) input += (d + '0');
+		
+		string abul = mult(input, input);
+		
+		ll ret = 0;
+		
+		for(ll i=0;i<abul.size();i++){
+			ret = (  (ret % MOD) + (( ll(power(23, i) * ll(num(abul[i])) ) % MOD)) )  % MOD;
+		}
+		printf("%lld\n", ret);
+	}
+    return 0;
+}

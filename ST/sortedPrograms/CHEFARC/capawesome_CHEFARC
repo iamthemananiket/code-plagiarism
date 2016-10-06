@@ -1,0 +1,94 @@
+# include <cstdio>
+# include <cstring>
+# include <queue>
+# include <algorithm>
+
+using namespace std;
+
+const int MAX_N = 111;
+const int MAX_M = 111;
+
+int n, m;
+int k[2];
+int grid[MAX_N][MAX_N];
+int dist[2][MAX_N][MAX_N];
+
+queue <pair <int, int>> q;
+
+void read ()
+{
+	int i, j;
+	scanf ("%d%d%d%d", &n, &m, &k[0], &k[1]);
+	for (i = 1; i <= n; i ++)
+		for (j = 1; j <= m; j ++)
+			scanf ("%d", &grid[i][j]);
+}
+
+void calc (int x, int y, int f)
+{
+	int nx, ny, ax, ay, cx, cy, ma, mb;
+	pair <int, int> crr;
+	dist[f][x][y] = 0;
+	q.push ({x, y});
+	while (!q.empty ())
+	{
+		crr = q.front ();
+		q.pop ();
+		cx = crr.first;
+		cy = crr.second;
+		///printf ("%d - %d %d %d\n", f, cx, cy, dist[f][cx][cy]);
+		for (ax = 0; ax <= k[f]; ax ++)
+			for (ay = 0; ax + ay <= k[f]; ay ++)
+				for (ma = 0; ma < 2; ma ++)
+					for (mb = 0; mb < 2; mb ++)
+					{
+						nx = cx + ax;
+						if (ma)
+							nx -= 2 * ax;
+						ny = cy + ay;
+						if (mb)
+							ny -= 2 * ay;
+						if (nx <= 0 || nx > n)
+							continue;
+						if (ny <= 0 || ny > m)
+							continue;
+						if (dist[f][nx][ny] != -1)
+							continue;
+						if (grid[nx][ny] == 1)
+							continue;
+						dist[f][nx][ny] = dist[f][cx][cy] + 1;
+						q.push ({nx, ny});
+					}
+			
+	}
+}
+
+void solve ()
+{
+	int i, j, ans = 1e9;
+	memset (dist, -1, sizeof (dist));
+	calc (1, 1, 0);
+	calc (1, m, 1);
+	for (i = 1; i <= n; i ++)
+		for (j = 1; j <= m; j ++)
+		{
+			///printf ("%d %d %d %d\n", i, j, dist[0][i][j], dist[1][i][j]);
+			if (dist[0][i][j] != -1 && dist[1][i][j] != -1 && ans > max (dist[0][i][j], dist[1][i][j]))
+				ans = max (dist[0][i][j], dist[1][i][j]);
+		}
+	if (ans == (int) 1e9)
+		ans = -1;
+	printf ("%d\n", ans);
+}
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		read ();
+		solve ();
+	}
+	return 0;
+}

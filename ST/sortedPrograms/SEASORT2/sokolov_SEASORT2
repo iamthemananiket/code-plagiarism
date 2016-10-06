@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+#define N 10005
+
+int a[N], b[N];
+vector<int> res1, res2;
+
+int main() {
+	int n;
+	scanf("%d", &n);
+	for (int i = 1; i <= n; i++) {
+		scanf("%d", &a[i]);
+		b[i] = a[i];
+	}
+	int l = 1;
+	int r = n;
+	bool ok = true;
+	long long score1 = 0;
+	while (l < r) {
+		int mini = l;
+		int maxi = r;
+		for (int i = l; i <= r; i++) {
+			if (a[i] < a[mini]) {
+				mini = i;
+			}
+			if (a[i] >= a[maxi]) {
+				maxi = i;
+			}
+		}
+		if (maxi == r || (r-maxi <= mini-l && ok)) {
+			if (maxi != r) {
+				res1.push_back(maxi);
+				res1.push_back(r);
+				score1 += r-maxi+1;
+				int L = maxi;
+				int R = r;
+				while (L < R) {
+					swap(a[L++], a[R--]);
+				}
+			}
+			r--;
+		} else {
+			if (mini != l) {
+				res1.push_back(l);
+				res1.push_back(mini);
+				score1 += mini-l+1;
+				int L = l;
+				int R = mini;
+				while (L < R) {
+					swap(a[L++], a[R--]);
+				}
+				ok = false;
+			}
+			l++;
+		}
+	}
+
+	l = 1;
+	r = n;
+	ok = true;
+	long long score2 = 0;
+	while (l < r) {
+		int mini = l;
+		int maxi = r;
+		for (int i = l; i <= r; i++) {
+			if (b[i] < b[mini]) {
+				mini = i;
+			}
+			if (b[i] >= b[maxi]) {
+				maxi = i;
+			}
+		}
+		if (mini == l || (mini-l >= r-maxi && ok)) {
+			if (mini != l) {
+				res2.push_back(l);
+				res2.push_back(mini);
+				score2 += mini-l+1;
+				int L = l;
+				int R = mini;
+				while (L < R) {
+					swap(b[L++], b[R--]);
+				}
+				
+			}
+			l++;
+		} else {
+			if (maxi != r) {
+				res2.push_back(maxi);
+				res2.push_back(r);
+				score2 += r-maxi+1;
+				int L = maxi;
+				int R = r;
+				while (L < R) {
+					swap(b[L++], b[R--]);
+				}
+				ok = false;
+			}
+			r--;
+		}
+	}
+
+	if (score1 + res1.size() * n <= score2 + res2.size() * n) {
+		printf("%d\n", res1.size() / 2);
+		for (int i = 0; i < res1.size(); i += 2) {
+			printf("%d %d\n", res1[i], res1[i+1]);
+		}
+	} else {
+		printf("%d\n", res2.size() / 2);
+		for (int i = 0; i < res2.size(); i += 2) {
+			printf("%d %d\n", res2[i], res2[i+1]);
+		}
+	}
+	return 0;
+}

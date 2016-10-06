@@ -1,0 +1,24 @@
+#include<stdio.h>
+int TC;
+long long a, b, c, d, r, t;
+int main()
+{
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%lld%lld%lld%lld", &a, &b, &c, &d);
+		r = 0;
+		if (d * 2 < a)t = d;
+		else t = a / 2;
+		a -= t * 2;
+		d -= t;
+		r += t * 2;
+		if (d * 2 < b)t = d;
+		else t = b / 2;
+		b -= t * 2;
+		d -= t;
+		r += t * 2;
+		if (c > a + b)r += (a + b);
+		else r += c;
+		printf("%lld\n", r);
+	}
+}

@@ -1,0 +1,215 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+ 
+using namespace std;
+ 
+int n,ar[100][100],mx,mi,mj;
+ 
+int used[200][200];
+int cur;
+int flag;
+int deg[200],S[200];
+ 
+bool can_move()
+{
+	for (int i=1;i<=n;i++)
+		if (i!=cur&&used[cur][i]==0)
+			return true;
+	return false;
+}
+ 
+pair<int, int> get_move()
+{
+	int ai,aj;
+	double mx=-10000;
+	for (int i=1;i<=n;i++)
+		if (i!=cur&&used[cur][i]==0)
+		{
+			double mx2=0;
+			for (int j=1;j<=n;j++)
+				if (used[i][j]==0&&ar[i][j]>mx2)
+				{
+					double t=ar[i][j];
+					if (deg[j])
+						t-=S[j]*1.0/deg[j];
+					mx2=max(mx2,t);
+				}
+			
+			if (ar[cur][i]-mx2>=mx)
+			{
+				ai=cur;
+				aj=i;
+				mx=ar[cur][i]-mx2;
+			}
+		}	
+		
+	return make_pair(ai,aj);
+}
+ 
+double func(int v1,int v2)
+{
+	double cost=ar[v1][v2];
+	if (deg[v2])
+		cost-=1.0*S[v2]/deg[v2];
+	return cost+deg[v2]*0.5;
+}
+ 
+pair<int, int> get_move2()
+{
+	int ai,aj;
+	double mx=-1e9;
+	for (int i=1;i<=n;i++)
+		if (i!=cur&&used[cur][i]==0)
+			if (func(cur,i)>mx)
+			{
+				ai=cur;
+				aj=i;
+				mx=func(cur,i);
+			}
+	return make_pair(ai,aj);
+}
+ 
+int model_game(int start)
+{
+	for (int i=1;i<=n;i++)
+		for (int j=1;j<=n;j++)
+		{
+			used[i][j]=0;
+		}
+	int ans=0;
+	cur=start;
+	while (true)
+	{
+		if (!can_move())
+			break;
+		pair<int,int> tp=get_move();
+		ans+=ar[tp.first][tp.second];
+		used[tp.first][tp.second]=1;
+		cur=tp.second;
+		if (!can_move())
+			break;
+		tp=get_move();
+		ans-=ar[tp.first][tp.second];
+		used[tp.first][tp.second]=1;
+		cur=tp.second;		
+	}
+	return ans;
+}
+ 
+void mov(int a,int b)
+{
+	used[a][b]=1;
+	deg[a]--;
+	S[a]-=ar[a][b];
+	cur=b;
+}
+ 
+int main(){
+//freopen("elections.in","r",stdin);
+//freopen("elections.out","w",stdout);
+//freopen("F:/in.txt","r",stdin);
+//freopen("F:/output.txt","w",stdout);
+//ios_base::sync_with_stdio(0);
+//cin.tie(0);
+ 
+cin>>n;
+for (int i=1;i<=n;i++)
+{
+	deg[i]=n-1;
+	for (int j=1;j<=n;j++)
+	{
+	cin>>ar[i][j];
+	S[i]+=ar[i][j];
+	if (ar[i][j]>mx)
+		mx=ar[i][j],
+		mi=i,
+		mj=j;
+	}
+}
+ 
+//cout<<mi<<" "<<mj<<endl;
+//used[mi][mj]=1;
+ 
+pair<int, int> tp;
+ 
+int a_start=-1;
+ 
+int mdif=0;
+ 
+for (int start=1;start<=n;start++)
+{
+	int dif=model_game(start);
+	//cout<<start<<"#"<<dif<<endl;
+	if (dif>mdif)
+	{
+		a_start=start;
+		mdif=dif;
+	}
+}
+ 
+if (a_start<0)
+	return 1;
+ 
+for (int i=1;i<=n;i++)
+	for (int j=1;j<=n;j++)
+		used[i][j]=0;
+		
+cur=a_start;
+flag=0;
+ 
+while (true)
+{
+	if (!can_move())
+		break;
+//	flag=0;
+	if (flag==0)
+		tp=get_move();
+	else
+		tp=get_move2();
+		
+	cout<<tp.first<<" "<<tp.second<<endl;
+	
+	mov(tp.first,tp.second);
+	if (!can_move())
+		break;
+ 
+	int a,b;
+	pair<int, int> tp=get_move();
+	cin>>a>>b;
+	if (ar[cur][tp.second]>ar[cur][b])
+		flag=1;
+	mov(a,b);
+}
+ 
+//cin.get();cin.get();
+return 0;}   

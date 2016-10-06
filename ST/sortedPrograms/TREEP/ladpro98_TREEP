@@ -1,0 +1,295 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 100005;
+const int BASE = 43;
+const int MOD = 1e9 + 7;
+const long long MM = 1LL * MOD * MOD;
+
+struct Edge {
+    int u, v; char c;
+} E[N];
+
+int power[N], invPow[N];
+vector<int> F[N], adj[N];
+
+int calcInv(long long a) {
+    long long ans = 1;
+    for (int p = MOD - 2; p; p >>= 1) {
+        if (p & 1) ans = ans * a % MOD;
+        a = a * a % MOD;
+    }
+    return ans;
+}
+
+struct BIT {
+    int *Hash;
+    int *RHash;
+    int n;
+
+    BIT(int _n) {
+        n = _n;
+        Hash = new int[n + 1];
+        RHash = new int[n + 1];
+        for (int i = 1; i <= n; ++i) Hash[i] = RHash[i] = 0;
+    }
+
+    void clear() {
+        delete(Hash);
+        delete(RHash);
+    }
+
+    void update(int i, long long c, char cur) {
+        int pos = i;
+        for (; i <= n; i += i & -i) {
+            int j = i - (i & -i);
+            // range (j..i]
+            Hash[i] += (c - cur + MOD) * power[i - pos] % MOD;
+            if (Hash[i] >= MOD) Hash[i] -= MOD;
+            RHash[i] += (c - cur + MOD) * power[pos - j - 1] % MOD;
+            if (RHash[i] >= MOD) RHash[i] -= MOD;
+        }
+    }
+
+    inline long long getHash(int i) {
+        // prefix Hash[1..i]
+        int till = i;
+        int ans = 0;
+        for (; i; i -= i & -i) {
+            ans += (long long)Hash[i] * power[till - i] % MOD;
+            if (ans >= MOD) ans -= MOD;
+        }
+        return ans;
+    }
+
+    inline long long getHash(const int i, const int j) {
+        return (getHash(j) - getHash(i - 1) * power[j - i + 1] + MM) % MOD;
+    }
+
+    inline long long getRHash(int i) {
+        // prefix RHash [i->1]
+        int ans = 0;
+        for (int j; i; i = j) {
+            j = i - (i & -i);
+            ans += (long long)RHash[i] * power[j] % MOD;
+            if (ans >= MOD) ans -= MOD;
+        }
+        return ans;
+    }
+
+    inline long long getRHash(const int i, const int j) {
+        return (getRHash(j) - getRHash(i - 1) + MOD) * invPow[i - 1] % MOD;
+    }
+} *root[N];
+
+vector<int> a[N];
+vector<int> chain[N];
+int par[N], size[N], depth[N];
+int head[N], idx[N];
+int chainIdx[N], chainSize[N];
+int discover[N], finish[N];
+int L[N], R[N];
+bool was[N];
+char label[N];
+
+int n, m, nChain, Time;
+
+void dfsInit(int u) {
+    discover[u] = ++Time;
+    size[u] = 1;
+    for (int v : a[u]) if (v != par[u]) {
+        par[v] = u;
+        depth[v] = depth[u] + 1;
+        dfsInit(v);
+        size[u] += size[v];
+    }
+    finish[u] = Time;
+}
+
+void dfsHLD(int u) {
+    int heavy = 0;
+    for (int v : a[u]) if (v != par[u] && size[heavy] < size[v])
+        heavy = v;
+    if (heavy) {
+        chainIdx[heavy] = nChain;
+        ++chainSize[nChain];
+        head[heavy] = head[u];
+        idx[heavy] = idx[u] + 1;
+        dfsHLD(heavy);
+    }
+    for (int v : a[u]) if (v != par[u] && v != heavy) {
+        chainSize[chainIdx[v] = (++nChain)] = 1;
+        head[v] = v;
+        idx[v] = 1;
+        dfsHLD(v);
+    }
+}
+
+inline int LCA(int u, int v) {
+    while (head[u] != head[v]) {
+        if (depth[head[u]] > depth[head[v]])
+            u = par[head[u]];
+        else
+            v = par[head[v]];
+    }
+    return depth[u] < depth[v] ? u : v;
+}
+
+void initialize() {
+    Time = 0;
+    dfsInit(1);
+    chainSize[nChain = 1] = 1;
+    head[1] = 1; idx[1] = 1;
+    chainIdx[1] = 1;
+    dfsHLD(1);
+    for (int i = 1; i <= nChain; ++i) {
+        chain[i].resize(chainSize[i] + 1);
+        root[i] = new BIT(chainSize[i]);
+    }
+    for (int i = 1; i <= n; ++i) chain[chainIdx[i]][idx[i]] = i;
+    for (int i = 1; i < n; ++i) {
+        if (depth[E[i].u] > depth[E[i].v]) swap(E[i].u, E[i].v);
+        label[E[i].v] = E[i].c;
+    }
+    for (int i = 2; i <= n; ++i) root[chainIdx[i]]->update(idx[i], label[i], 'a');
+}
+
+inline int getDirectAncestor(int u, int p) {
+    while (p) {
+        if (depth[u] - depth[head[u]] >= p) return chain[chainIdx[u]][idx[u] - p];
+        p -= depth[u] - depth[head[u]] + 1;
+        u = par[head[u]];
+    }
+    return u;
+}
+
+inline int getAncestor(const int u, const int v, const int lca, const int length, const int p) {
+    if (depth[u] - depth[lca] >= p) return getDirectAncestor(u, p);
+    return getDirectAncestor(v, length - p);
+}
+
+inline int gatherHashDown(int u, const int p) {
+    int ans = 0;
+    int save = u;
+    while (head[u] != head[p]) {
+        ans = (root[chainIdx[u]]->getHash(1, idx[u]) * power[depth[save] - depth[u]] + ans) % MOD;
+        u = par[head[u]];
+    }
+    if (u != p) ans = (root[chainIdx[u]]->getHash(idx[p] + 1, idx[u]) * power[depth[save] - depth[u]] + ans) % MOD;
+    return ans;
+}
+
+inline long long gatherHashUp(int u, const int p) {
+    long long ans = 0;
+    while (head[u] != head[p]) {
+        ans = (ans * power[depth[u] - depth[par[head[u]]]] + root[chainIdx[u]]->getRHash(1, idx[u])) % MOD;
+        u = par[head[u]];
+    }
+    if (u != p) ans = (ans * power[depth[u] - depth[p]] + root[chainIdx[u]]->getRHash(idx[p] + 1, idx[u])) % MOD;
+    return ans;
+}
+
+inline bool isAncestor(const int u, const int v) {
+    return discover[u] <= discover[v] && finish[v] <= finish[u];
+}
+
+inline int hashPath(const int u, const int v, int p) {
+    if (isAncestor(u, v)) p = u; else if (isAncestor(v, u)) p = v;
+    return (gatherHashUp(u, p) * power[depth[v] - depth[p]] + gatherHashDown(v, p)) % MOD;
+}
+
+bool forget[N];
+
+clock_t start;
+
+double getTime() {
+    clock_t now = clock();
+    return double(now - start) / CLOCKS_PER_SEC;
+}
+
+void solve() {
+    cin >> n;
+    for (int i = 1; i < n; ++i) {
+        cin >> E[i].u >> E[i].v >> E[i].c;
+        a[E[i].u].push_back(E[i].v);
+        a[E[i].v].push_back(E[i].u);
+    }
+    initialize();
+    cin >> m;
+    vector<int> used;
+    bool tle = 0;
+    for (int i = 1; i <= m; ++i) {
+        if (!tle && getTime() > 3) tle = 1;
+        int cmd, u, v;
+        cin >> cmd >> u >> v;
+        if (cmd == 2) {
+            char c; cin >> c;
+            if (depth[u] > depth[v]) swap(u, v);
+            if (label[v] == c) continue;
+            root[chainIdx[v]]->update(idx[v], c, label[v]);
+            label[v] = c;
+        } else {
+            int p = LCA(u, v);
+            int length = depth[u] + depth[v] - depth[p] * 2;
+            int ans = length;
+            if (tle) {
+                cout << ans << '\n';
+                continue;
+            }
+            while (ans > 1) {
+                bool found = 0;
+                for (int f : adj[ans]) if (!forget[f]) {
+                    if (hashPath(u, getAncestor(v, u, p, length, f), p) == hashPath(getAncestor(u, v, p, length, f), v, p)) {
+                        ans = f;
+                        found = 1;
+                        break;
+                    } else {
+                        //go(f);
+                        for (int ff : adj[f]) {
+                            used.push_back(ff);
+                            forget[ff] = 1;
+                        }
+                    }
+                }
+                if (!found) break;
+            }
+            while (!used.empty()) {
+                forget[used.back()] = 0;
+                used.pop_back();
+            }
+            cout << ans << '\n';
+        }
+    }
+    for (int i = 1; i <= n; ++i) a[i].clear();
+    for (int i = 1; i <= nChain; ++i) root[i]->clear(), chain[i].clear();
+}
+
+int main() {
+    start = clock();
+    ios::sync_with_stdio(0); cin.tie(0);
+#ifdef _LAD_
+    freopen("TREEP.txt", "r", stdin);
+    freopen("TREEP.my", "w", stdout);
+    freopen("err", "w", stderr);
+#endif
+    power[0] = invPow[0] = 1;
+    for (int i = 1; i < N; ++i) {
+        power[i] = 1LL * power[i - 1] * BASE % MOD;
+        invPow[i] = calcInv(power[i]);
+    }
+    for (int i = N - 1; i > 0; --i) for (int j = i + i; j < N; j += i)
+        F[j].push_back(i);
+    for (int u = 1; u < N; ++u) {
+        for (int v : F[u]) {
+            if (!forget[v]) {
+                adj[u].push_back(v);
+                for (int vv : F[v]) forget[vv] = 1;
+            }
+        }
+        for (int v : F[u]) forget[v] = 0;
+    }
+    int nTest; cin >> nTest;
+    while (nTest--) solve();
+    return 0;
+}

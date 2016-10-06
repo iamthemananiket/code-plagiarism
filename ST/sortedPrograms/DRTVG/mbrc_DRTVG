@@ -1,0 +1,113 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 1e5 + 7;
+const int lmaxn = 21;
+
+const int md = 1e9 + 7;
+
+int d,n;
+ll A[maxn];
+ll L[maxn][lmaxn];
+ll ans[maxn][lmaxn];
+int depth[maxn];
+int dpow[maxn];
+ll many[maxn][lmaxn];
+
+vector<int> G[maxn];
+
+int anc(int x,int h) {
+	int ih = depth[x];
+
+	if (h > ih) return -1;
+
+	drep(k,lmaxn-1,0) {
+		if (L[x][k] > 0 && ih - depth[L[x][k]] <= h) {
+			x = L[x][k];
+		}
+	}
+	return x;
+}
+
+void dfs(int x,int pi,int dep) {
+
+	depth[x] = dep;
+
+	L[x][0] = pi; many[x][0] = 0; ans[x][0] = 0;
+	repe(k,1,lmaxn) {
+
+		many[x][k] = ans[x][k] = 0;
+
+		if (L[x][k-1] < 0) {
+			L[x][k] = -1;
+		} else {
+			L[x][k] = L[L[x][k-1]][k-1];
+		}
+	}
+
+	for (int y : G[x]) {
+		if (y == pi) continue;
+		dfs(y,x,dep+1);
+	}
+
+	repe(i,0,lmaxn) {
+		many[x][i] = (many[x][i] + 1) % md; // end here
+		ans[x][i] = (ans[x][i] + (A[x]*many[x][i])%md)%md;
+	}
+
+	repe(i,1,lmaxn) {
+		int y = anc(x,dpow[i-1]); if (y < 0) return;
+		ans[y][i-1] = (ans[y][i-1] + ans[x][i])%md;
+		many[y][i-1] = (many[y][i-1] + many[x][i])%md;
+	}
+
+}
+
+int main() {
+	s(n); s(d);
+	rep(i,1,n) {
+		sl(A[i]);
+	}
+
+	rep(i,2,n) {
+		int x,y; s(x);s(y);
+		G[x].pb(y); G[y].pb(x);
+	}
+
+	dpow[0] = 1;
+	rep(i,1,20) {
+		dpow[i] = dpow[i-1] * d;
+	}
+
+
+	dfs(1,-1,0);
+
+	ll su = 0;
+
+	rep(i,1,n) {
+
+		//cout<<i<<" : "<<ans[i][0]<<endl;
+
+		su = (su + ans[i][0])%md;
+	}
+	prl(su); endc;
+}

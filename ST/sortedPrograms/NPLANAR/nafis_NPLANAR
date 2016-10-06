@@ -1,0 +1,234 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+const int MAXV=222;
+const int MAXE=MAXV*MAXV*2;
+const int NOT_NODE=-1;
+struct struct_edge{int v;struct_edge* n;};
+typedef struct_edge* edge;
+int V;
+struct_edge pool[MAXE];
+edge top;
+edge adj[MAXV];
+void init()
+{
+     top=pool;
+     memset(adj,0,sizeof(adj));
+}
+void add_edge(int u,int v)
+{
+     top->v=v,top->n=adj[u],adj[u]=top++;
+     top->v=u,top->n=adj[v],adj[v]=top++;
+}
+
+int match[MAXV];
+int qh,qt;
+int q[MAXV];
+bool inq[MAXV];
+int father[MAXV];
+int base[MAXV];
+bool inb[MAXV];
+int LCA(int root,int u,int v)
+{
+    static bool inp[MAXV];
+    memset(inp,0,sizeof(inp));
+    for (;;)
+    {
+        inp[u=base[u]]=true;
+        if (u==root) break;
+        u=father[match[u]];
+    }
+    for (;;)
+    {
+        if (inp[v=base[v]]) return v;
+        else v=father[match[v]];
+    }
+}
+void mark_blossom(int lca,int u)
+{
+     while (base[u]!=lca)
+     {
+           int v=match[u];
+           inb[base[u]]=true;
+           inb[base[v]]=true;
+           u=father[v];
+           if (base[u]!=lca) father[u]=v;
+     }
+}
+void blossom_contraction(int s,int u,int v)
+{
+     int lca=LCA(s,u,v);
+     memset(inb,0,sizeof(inb));
+     mark_blossom(lca,u);
+     mark_blossom(lca,v);
+     if (base[u]!=lca) father[u]=v;
+     if (base[v]!=lca) father[v]=u;
+     for (int u=0;u<V;u++)
+         if (inb[base[u]])
+         {
+            base[u]=lca;
+            if (!inq[u]) inq[q[++qt]=u]=true;
+         }
+}
+int find_augmenting_path(int s)
+{
+    memset(inq,0,sizeof(inq));
+    memset(father,NOT_NODE,sizeof(father));
+    for (int i=0;i<V;i++) base[i]=i;
+    inq[q[qh=qt=0]=s]=true;
+    while (qh<=qt)
+    {
+          int u=q[qh++];
+          for (edge e=adj[u];e;e=e->n)
+          {
+              int v=e->v;
+              if (base[u]!=base[v]&&match[u]!=v)
+              {
+                 if ((v==s)||(match[v]!=NOT_NODE&&father[match[v]]!=NOT_NODE))
+                    blossom_contraction(s,u,v);
+                 else if (father[v]==NOT_NODE)
+                 {
+                      father[v]=u;
+                      if (match[v]==NOT_NODE) return v;
+                      else if (!inq[match[v]]) inq[q[++qt]=match[v]]=true;
+                 }
+              }
+          }
+    }
+    return NOT_NODE;
+}
+int augment_path(int s,int t)
+{
+    int u,v,w;
+    u=t;
+    while (u!=NOT_NODE)
+    {
+          v=father[u];
+          w=match[v];
+          match[v]=u;
+          match[u]=v;
+          u=w;
+    }
+    return t!=NOT_NODE;
+}
+int edmonds()
+{
+    int matchc=0;
+    memset(match,NOT_NODE,sizeof(match));
+    for (int u=0;u<V;u++)
+        if (match[u]==NOT_NODE)
+           matchc+=augment_path(u,find_augmenting_path(u));
+    return matchc;
+}
+
+
+
+pair < int, int > pp[1000001];
+int ar[3001][110], tmp[110];
+vector < int > vc[3001];
+
+bool on[55][55];
+set < pair < int, pair < int, int > > > S;
+
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    int T; cin >> T;
+    while(T--){
+        set0(ar);
+        int n, m; cin >> n >> m;
+        REP(i, m){
+            int x, y; cin >> x >> y;
+            pp[i] = mp(x, y);
+            ar[x][y/30] |= 1<<(y % 30);
+            ar[y][x/30] |= 1<<(x % 30);
+        }
+        FOR(i, 1, n+1) ar[i][i/30] |= (1<<i%30);
+
+        S.clear();
+        REP(i, m){
+            set0(tmp);
+            REP(j, 110) tmp[j] = ar[pp[i].xx][j] & ar[pp[i].yy][j];
+            tmp[pp[i].xx/30] ^= 1<<(pp[i].xx % 30);
+            tmp[pp[i].yy/30] ^= 1<<(pp[i].yy % 30);
+            REP(j, 110){
+                if(tmp[j] == 0) continue;
+                REP(k, 30){
+                    if((tmp[j] & 1<<k) == 0) continue;
+                    int v1 = pp[i].xx, v2 = pp[i].yy, v3 = j*30 + k;
+                    if(v1 < v2) swap(v1, v2);
+                    if(v1 < v3) swap(v1, v3);
+                    if(v2 < v3) swap(v2, v3);
+                    S.insert(mp(v1, mp(v2, v3)));
+                }
+            }
+        }
+        for(int i = 1; i <= n; i++) vc[i].clear();
+
+        int cnt = 0;
+        for(auto &v: S){
+            cnt++;
+            vc[v.xx].pb(cnt);
+            vc[v.yy.xx].pb(cnt);
+            vc[v.yy.yy].pb(cnt);
+//            cout << v.xx << " " << v.yy.xx <<  " " << v.yy.yy << endl;
+        }
+
+        set0(on);
+
+        V = cnt;
+        init();
+        FOR(i, 1, n+1){
+            if(vc[i].size() == 2 && !on[vc[i][0]-1][vc[i][1]-1]){
+                add_edge(vc[i][0] - 1, vc[i][1] - 1);
+                on[vc[i][0]-1][vc[i][1]-1] = 1;
+                on[vc[i][1]-1][vc[i][0]-1] = 1;
+            }
+        }
+
+        cout << cnt-edmonds() << endl;
+    }
+}

@@ -1,0 +1,73 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef unsigned long long ll;
+const int BASE = 1000000007;
+char line[1 << 24];
+ll dict[444000];
+int D;
+
+ll get_hash(const char* str) {
+  //hash = str[i] + (hash << 6) + (hash << 16) - hash
+  ll res = 0;
+  for (; *str; str++)
+    res = res * BASE + (*str);
+  return res;
+}
+
+void solve(int test_num) {
+  char word[256];
+#ifdef AZN
+  D = 349900;
+  freopen("SPELL_dict.txt", "r", stdin);
+#else
+  scanf("%d", &D);
+  getchar_unlocked();
+#endif
+  assert(D == 349900);
+  set<ll> seen;
+  //int cnt = 0;
+  for (int i = 0; i < D; i++) {
+    gets(word);
+    //ll ha = get_hash(word);
+  }
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+#endif
+  gets(line);
+  puts(line);
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+using namespace std;
+vector<int> v;
+vector<pair<int, int> > num; 
+int ans, n, sum, a[20], m, x, y;
+bool ok[1 << 16];
+int Bitcount(unsigned int u){
+     unsigned int uCount;
+     uCount = u - ((u >> 1) & 033333333333) - ((u >> 2) & 011111111111);
+     return ((uCount + (uCount >> 3)) & 030707070707) % 63;
+}
+void f(int mask, int ptr, int val, int st){
+	if(ptr >= n) return;
+	int tmp = val, tmpptr = ptr;
+	for (int i = st; i < (int)v.size(); i++) {
+		if(v[i] & ~mask) continue;
+		tmpptr += Bitcount(v[i]);
+		if(tmpptr > n) break;
+		tmp += a[tmpptr - 1];
+	}
+	if(tmp <= ans) return;
+	for (int i = st; i < (int)v.size(); i++) {
+		if(v[i] & ~mask) continue;
+		int cnt = ptr + Bitcount(v[i]);
+		f(mask & ~v[i], cnt, val + a[cnt - 1], i + 1);
+		ans = max(ans, val + a[cnt - 1]);
+	}
+} 
+int main() {
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		v.clear(), num.clear();
+		ans = 0, sum = 0;
+		scanf("%d", &n);
+		for (int i = 0; i < n; i++) scanf("%d", a + i), sum += a[i];
+		scanf("%d", &m);
+		for (int i = 0; i < (1 << n); i++) ok[i] = false;
+		for (int i = 0; i < m; i++) {
+			scanf("%d", &x);
+			int mask = 0;
+			bool flag = false;
+			for (int j = 0; j < x; j++) scanf("%d", &y), mask += (1 << (y - 1));
+			if(ok[mask]) continue;
+			for (int s = mask; s > 0 && !flag; s = (s - 1) & mask) if(ok[s]) flag = true;
+			ok[mask] = true;
+			if(flag) continue;
+			num.push_back(make_pair(x, mask));
+		}
+		sort(num.begin(), num.end());
+		for (int i = 0; i < (int)num.size(); i++) v.push_back(num[i].second);
+		sort(a, a + n);
+		reverse(a, a + n);
+		f((1 << n) - 1, 0, 0, 0);
+		printf("%d\n", sum - ans);
+	}	
+}

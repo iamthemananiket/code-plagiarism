@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, M;
+char S[21][21];
+int dx[4]={-1, 1, 0, 0};
+int dy[4]={0, 0, -1, 1};
+string Z="UDLR";
+
+struct robot
+{
+    int x, y;
+    void go(int dir)
+    {
+        if(S[x+dx[dir]][y+dy[dir]]=='*')
+            return;
+        x+=dx[dir];
+        y+=dy[dir];
+    }
+};
+
+bool seen[21][21];
+pair<int, int> path[21][21];
+int d[21][21];
+
+vector<int> bfs(int x, int y)
+{
+    memset(seen, 0, sizeof seen);
+    seen[x][y]=true;
+    d[x][y]=-1;
+    queue<pair<int, int>> Q;
+    Q.push({x, y});
+    while(!Q.empty())
+    {
+        tie(x, y)=Q.front();
+        if(S[x][y]=='C')
+            break;
+        Q.pop();
+        for(int i=0; i<4; i++) if(S[x+dx[i]][y+dy[i]]!='*')
+        {
+            if(!seen[x+dx[i]][y+dy[i]])
+            {
+                seen[x+dx[i]][y+dy[i]]=true;
+                path[x+dx[i]][y+dy[i]]=make_pair(x, y);
+                d[x+dx[i]][y+dy[i]]=i;
+                Q.push({x+dx[i], y+dy[i]});
+            }
+        }
+    }
+    vector<int> ret;
+    while(d[x][y]!=-1)
+    {
+        ret.push_back(d[x][y]);
+        tie(x, y)=path[x][y];
+    }
+    reverse(ret.begin(), ret.end());
+    return ret;
+}
+
+int main()
+{
+    scanf("%d%d", &N, &M);
+    for(int i=0; i<N; i++)
+        scanf("%s", S[i]);
+    vector<robot> v;
+    for(int i=0; i<N; i++)
+        for(int j=0; j<M; j++) if(S[i][j]=='.')
+            v.push_back((robot){i, j});
+    string ans;
+    for(int i=0; i<(int)v.size(); i++)
+    {
+        auto m=bfs(v[i].x, v[i].y);
+        for(auto& it: m)
+        {
+            ans+=Z[it];
+            for(int j=i+1; j<(int)v.size(); j++)
+                v[j].go(it);
+        }
+    }
+    printf("%s\n", ans.c_str());
+    return 0;
+}

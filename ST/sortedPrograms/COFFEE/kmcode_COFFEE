@@ -1,0 +1,101 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+int t;
+priority_queue<pair<long long int,int> > q[5002];
+long long int qq[5002];  //out of d
+long long int s[5002];
+long long int sm[5002];
+long long int dp[5002][5002];
+int u_s = 0;
+int use[5002][5002];
+int main(){
+	scanf("%d", &t);
+	while (t--){
+		int n, d, k;
+		scanf("%d%d%d", &n, &k, &d);
+		long long int m;
+		scanf("%lld", &m);
+		for (int i = 0; i <= k; i++){
+			while (q[i].size()){
+				q[i].pop();
+			}
+			qq[i] =-1LL;
+		}
+		for (int i = 1; i <= n; i++){
+			scanf("%lld", &s[i]);
+			if (i){
+				s[i] += s[i - 1];
+			}
+		}
+		for (int i = 1; i <= n; i++){
+			sm[i] = s[i];
+			sm[i] *= m;
+		}
+		u_s++;
+		qq[0] = 0;
+		for (int i = 1; i <= n+1; i++){
+			for (int j = k+1; j >= 1; j--){
+				int cl = i - d;
+				cl--;
+				cl--;
+				if (cl >= 0 && use[cl][j - 1] == u_s){
+					qq[j - 1]=max(qq[j-1],dp[cl][j - 1] + sm[cl + d] - sm[cl] - s[cl + d]);
+				}
+				while (!q[j - 1].empty()){
+					if (q[j - 1].top().second <= cl){
+						q[j-1].pop();
+					}
+					else{
+						break;
+					}
+				}
+				long long int maxt = -1LL;
+				if (q[j - 1].size()){
+					maxt = max(maxt, q[j - 1].top().first + sm[i - 1]);
+				}
+				if (qq[j - 1]!=-1LL){
+					maxt = max(maxt, qq[j - 1] + s[i - 1]);
+				}
+				if (maxt == -1LL){
+					continue;
+				}
+				else{
+					q[j].push(make_pair(maxt - sm[i], i));
+				}
+				dp[i][j] = maxt;
+				use[i][j] = u_s;
+			}
+		}
+		long long int ans = 0LL;
+		for (int i = 1; i <= n; i++){
+			ans = max(ans, dp[i][k]);
+		}
+		ans = max(ans, dp[n+1][k + 1]);
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

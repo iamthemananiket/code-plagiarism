@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+#define forn(i, n) for (int (i) = 0; (i) < n; ++(i))
+#define ford(i, n) for (int (i) = (n) - 1; (i) >= 0; --(i))
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ld, ld> pll;
+
+const int nmax = 1510;
+
+ll choose(ll val)
+{
+    return val * (val - 1) / 2;
+}
+
+int main()
+{
+
+    //freopen("input.txt", "r", stdin);
+
+    int n, m;
+    scanf("%d%d", &n, &m);
+
+    bitset<nmax> b[nmax];
+    for (int i = 1; i <= n; ++i) {
+        scanf("\n");
+        for (int j = 1; j <= m; ++j) {
+            char c;
+            scanf("%c", &c);
+            b[i][j] = c - '0';
+            b[i][j] = b[i][j] ^ b[i - 1][j] ^ b[i][j - 1] ^ b[i - 1][j - 1];
+        }
+    }
+
+    ll ans = 0;
+
+    for (int x = 0; x < n; ++x) {
+        for (int y = x + 1; y <= n; ++y) {
+            bitset<nmax> c = b[x] ^ b[y];
+            //cout << x << " " << y << " : " << c[0] << " " << c[1] << " " << c[2] << " : ";
+            ll cnt1 = c.count(), cnt0 = m + 1 - cnt1;
+            //cout << cnt1 << " " << cnt0 << "\n";
+            ans += choose(cnt1);
+            ans += choose(cnt0);
+        }
+    }
+
+    printf("%lld\n", ans);
+
+}

@@ -1,0 +1,55 @@
+#include<bits/stdc++.h>
+#define N 1000000007
+#define ll long long
+using namespace std;
+struct mixture
+{
+	int color;
+	int smoke;
+};
+mixture dp[101][101];
+int main()
+{
+	int t,i,j,k,n,p;
+	ios_base::sync_with_stdio(false);
+	while(cin>>n)
+	{
+		
+		for(i=0;i<n;i++)
+		{
+			cin>>k;
+			dp[i][i].color=k;
+			dp[i][i].smoke=0;
+		}
+		for(i=0;i<n;i++)
+		{
+			for(j=0;j<n;j++)
+			{
+				dp[i][j].smoke=INT_MAX;
+			}
+			dp[i][i].smoke=0;
+		}
+		for(p=1;p<n;p++)
+		{
+			for(i=0;i<n;i++)
+			{
+				if(i+p>=n)
+				{
+					break;
+				}
+				j=i+p;
+			//	cout<<i<<" "<<j<<endl;
+				for(k=i+1;k<=j;k++)
+				{
+					if(dp[i][j].smoke>dp[i][k-1].smoke+dp[k][j].smoke+dp[i][k-1].color*dp[k][j].color)
+					{
+						dp[i][j].smoke=dp[i][k-1].smoke+dp[k][j].smoke+dp[i][k-1].color*dp[k][j].color;
+						dp[i][j].color=(dp[i][k-1].color+dp[k][j].color)%100;
+					}
+				}
+			}
+		}
+		cout<<dp[0][n-1].smoke<<endl;
+	}
+	return 0;
+}

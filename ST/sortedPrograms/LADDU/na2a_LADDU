@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+
+using namespace std;
+
+const int N = (int) 1e5 + 7;
+const int MOD = (int) 1e9 + 7;
+
+int n;
+string origin;
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  //freopen("out", "w", stdout);
+  #endif // LOCAL
+
+  int c;
+  cin >> c;
+  while (c--) {
+    cin >> n >> origin;
+    int score = 0;
+    while (n--) {
+      string type;
+      cin >> type;
+      if (type[0] == 'C' && type.back() == 'N') {
+        int rn;
+        cin >> rn;
+        score += 300 + 20 - min(rn, 20);
+      } else if (type[0] == 'T') {
+        score += 300;
+      } else if (type[0] == 'B') {
+        int b;
+        cin >> b;
+        score += b;
+      } else {
+        score += 50;
+      }
+    }
+    if (origin[0] == 'I')
+      cout << score / 200 << endl;
+    else
+      cout << score / 400 << endl;
+  }
+
+  return 0;
+}

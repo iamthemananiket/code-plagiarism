@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MP make_pair
+#define A first
+#define B second
+
+unsigned int Q,S,A,B;
+pair<unsigned int,int> has[10000013];
+bool ok[10000013];
+
+int main() {
+	cin >> Q >> S >> A >> B;
+	for (int i=0;i<Q;i++) {
+		has[i] = MP(S/2,i);
+		if (S&1) ok[i] = 1;
+		S = S*A+B;
+	}
+	sort(has,has+Q);
+	has[Q].A = -1;
+	long long ans = 0;
+	for (int i=0;i<Q;i++) if (has[i].A!=has[i+1].A) {
+		if (ok[has[i].B]) ans+=has[i].A;
+	}
+	cout << ans;
+
+	return 0;
+}

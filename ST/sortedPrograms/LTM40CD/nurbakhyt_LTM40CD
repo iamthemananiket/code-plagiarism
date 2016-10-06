@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < ll, ll >
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)2e5 + 123;
+const ll inf = (ll)1e18 + 123;
+const double eps = 1e-9;
+
+using namespace std;
+
+int getR(int a, int b, int c, bool &ok) {
+    ok = 0;
+    double k = (0.0 + a + b + c) / 2.0;
+    double area = sqrt(k * (k - a) * (k - b) * (k - c));
+    k = area / k;
+    if (fabs(k - floor(k)) < eps)
+        ok = 1;
+    return (int)k;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+	ios_base :: sync_with_stdio(NULL), cin.tie(NULL), cout.tie(NULL);
+    int n;
+    cin >> n;
+    bool ok = 0;
+    vector < pair < int, pi > > ans;
+    for (int i = 1; i <= 500; i++) {
+        for (int j = i; j <= 500; j++) {
+            for (int k = j; k < i + j; k++)
+                if (getR(i, j, k, ok) == n) {
+                    if (ok)
+                        ans.pb(mp(i, mp(j, k)));
+                }
+        }
+    }
+    cout << sz(ans) << '\n';
+    for (auto i : ans)
+        cout << i.f << ' ' << i.s.f << ' ' << i.s.s << '\n';
+	return 0;
+}

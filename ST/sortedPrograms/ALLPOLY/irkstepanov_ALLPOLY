@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ld, ld> pll;
+
+const ld eps = 1e-10;
+const ld inf = 1e7;
+
+bool lt(ld a, ld b)
+{
+    return b - a > eps;
+}
+
+bool eq(ld a, ld b)
+{
+    return abs(a - b) <= eps;
+}
+
+bool leq(ld a, ld b)
+{
+    return lt(a, b) || eq(a, b);
+}
+
+bool gt(ld a, ld b)
+{
+    return a - b > eps;
+}
+
+bool geq(ld a, ld b)
+{
+    return gt(a, b) || eq(a, b);
+}
+
+struct pt
+{
+    ld x, y;
+    pt() : x(0), y(0) {}
+    pt(ld x, ld y) : x(x), y(y) {}
+    pt operator-(const pt& other) const
+    {
+        return {x - other.x, y - other.y};
+    }
+    pt operator+(const pt& other) const
+    {
+        return {x + other.x, y + other.y};
+    }
+    pt operator*(ld k) const
+    {
+        return {x * k, y * k};
+    }
+};
+
+ld cross(const pt& p, const pt& q)
+{
+    return p.x * q.y - p.y * q.x;
+}
+
+struct line
+{
+    ld a, b, c;
+    line() {}
+    line(ld a, ld b, ld c) : a(a), b(b), c(c) {}
+    line(const pt& p, const pt& q)
+    {
+        a = p.y - q.y;
+        b = q.x - p.x;
+        c = cross(p, q);
+        ld tmp = sqrt(a * a + b * b);
+        a /= tmp, b /= tmp, c /= tmp;
+    }
+    int halfplane() const
+    {
+        return gt(b, 0) || (eq(b, 0) && gt(a, 0));
+    }
+    bool operator<(const line& other) const
+    {
+        if (halfplane() != other.halfplane()) {
+            return halfplane() < other.halfplane();
+        }
+        pt n1 = {a, b};
+        pt n2 = {other.a, other.b};
+        if (!eq(cross(n1, n2), 0)) {
+            return lt(cross(n1, n2), 0);
+        }
+        return lt(c, other.c);
+    }
+    pt operator+(const line& other) const
+    {
+        ld a1 = a, b1 = b, c1 = -c;
+        ld a2 = other.a, b2 = other.b, c2 = -other.c;
+        ld det = a1 * b2 - a2 * b1;
+        ld det1 = c1 * b2 - c2 * b1;
+        ld det2 = a1 * c2 - a2 * c1;
+        return {det1 / det, det2 / det};
+    }
+};
+
+bool strict(const pt& p, const line& l)
+{
+    ld val = p.x * l.a + p.y * l.b + l.c;
+    return gt(val, 0);
+}
+
+vector<line> intersect(vector<line> v)
+{
+    v.pb({1, 0, inf});
+    v.pb({-1, 0, inf});
+    v.pb({0, 1, inf});
+    v.pb({0, -1, inf});
+    sort(all(v));
+    deque<line> d;
+    int s = 0;
+    for (int i = 0; i < sz(v); ++i) {
+        //cout << v[i].a << " " << v[i].b << " " << v[i].c << "\n";
+        if (i && eq(v[i].a, v[i - 1].a) && eq(v[i].b, v[i - 1].b)) {
+            continue;
+        }
+        while (s >= 2 && !strict(d[s - 1] + d[s - 2], v[i])) {
+            d.pop_back();
+            --s;
+        }
+        while (s >= 2 && !strict(d[0] + d[1], v[i])) {
+            d.pop_front();
+            --s;
+        }
+        if (s < 2 || strict(v[i] + d.back(), d[0])) {
+            d.pb(v[i]);
+            ++s;
+        }
+        if (s >= 2) {
+            pt n1 = {d[s - 2].a, d[s - 2].b};
+            pt n2 = {d[s - 1].a, d[s - 1].b};
+            if (gt(cross(n1, n2), 0)) {
+                return {};
+            }
+        }
+    }
+    if (s <= 2) {
+        return {};
+    }
+    vector<line> ans;
+    for (line& l : d) {
+        ans.pb(l);
+    }
+    return ans;
+}
+
+ld area(const vector<line>& v)
+{
+    ld ans = 0;
+    vector<pt> p;
+    for (int i = 0; i < sz(v); ++i) {
+        p.pb(v[i] + v[(i + 1) % sz(v)]);
+        //cout << p.back().x << " " << p.back().y << "\n";
+    }
+    for (int i = 0; i < sz(p); ++i) {
+        ans += cross(p[(i + 1) % sz(p)], p[i]);
+    }
+    return abs(ans) / 2;
+}
+
+int main()
+{
+
+    //freopen("input.txt", "r", stdin);
+
+    int tt;
+    scanf("%d", &tt);
+
+    while (tt--) {
+        int n;
+        scanf("%d", &n);
+        vector<pt> p(n);
+        for (int i = 0; i < n; ++i) {
+            scanf("%Lf%Lf", &p[i].x, &p[i].y);
+        }
+        vector<line> v;
+        for (int i = 0; i < n; ++i) {
+            v.pb(line(p[(i + 1) % n], p[i]));
+        }
+        v = intersect(v);
+        /*for (line& l : v) {
+            cout << l.a << " " << l.b << " " << l.c << "\n";
+        }*/
+        ld s = area(v);
+        s /= 4e14;
+        cout << fixed;
+        cout.precision(12);
+        cout << s << "\n";
+    }
+
+}

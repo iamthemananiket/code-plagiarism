@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+const int MAXV = 10004;
+vector<int> adj[MAXV];
+int dist[MAXV], wei[MAXV];
+bool dead[MAXV], is_art[MAXV];
+int num[MAXV], low[MAXV];
+
+
+void dfs(int at, int par) {
+  static int next_num = 0;
+  num[at] = low[at] = next_num++;
+  for(const int to : adj[at]) {
+    if (to==par)continue;
+    if(~num[to]){
+      low[at]=min(low[at],num[to]);
+    } else{
+      dfs(to, at);
+      low[at]=min(low[at],low[to]);
+      if(at!=par&&low[to]>=num[at]){
+        is_art[at]=true;
+      }
+    }
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int V, E, K, S;
+  cin >> V >> E >> K >> S;
+  for(int v=1;v<=V;++v)
+    cin>>wei[v];
+  for(int e=0,a,b;e<E;++e) {
+    cin>>a>>b;
+    adj[a].push_back(b);
+    adj[b].push_back(a);
+  }
+  memset(num,-1,sizeof(num));
+  memset(is_art,false,sizeof(is_art));
+  dfs(S,S);
+  memset(dead,false,sizeof(dead));
+  dead[S] = true;
+  vector<int> border, res;
+  border.push_back(S);
+  while (true) {
+    vector<int> infected;
+    for(int at : border) {
+      for(int to:adj[at]) {
+        if(!dead[to]) {
+          infected.push_back(to);
+          dead[to] = true;
+        }
+      }
+    }
+    //cerr<<infected.size()<<endl;
+    if(infected.empty()) {
+      break;
+    }
+    int best=infected.front();
+    for(int v:infected)
+      if(make_pair(is_art[v],wei[v])>make_pair(is_art[best],wei[best]))
+        best=v;
+    res.push_back(best);
+    infected.erase(find(infected.begin(),infected.end(),best));
+    border = move(infected);
+  }
+  while((int)res.size()<K)
+    res.push_back(1);
+  for(int r:res)
+    cout<<r<<' ';
+  cout<<endl;
+  return 0;  
+}

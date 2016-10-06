@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("long.inp","r",stdin)
+#define OUTPUT freopen("long.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=1e5+10;
+
+int n,a[N],b[N];
+string s;
+void prepare(){
+    cin>>n>>s;
+    FOR(i,1,n) cin>>a[i];
+    FOR(i,1,n) b[i]=s[i-1]-'0';
+    b[0]=b[n+1]=1;
+    a[0]=-inf-10;a[n+1]=inf*2;
+}
+ll solve(){
+    ll ans=0;
+    FOR(i,0,n) ans+=a[i+1]-a[i];
+    FOR(st,0,n) if (b[st]){
+        int en=st+1;
+        while (!b[en]) en++;
+        int sub=0;
+        REP(j,st,en) sub=max(sub,a[j+1]-a[j]);
+        ans-=sub;
+    }
+    return ans;
+}
+int main(){
+//    freopen("input.inp","r",stdin);
+    int test;
+    cin>>test;
+    while (test--){
+        prepare();
+        cout<<solve()<<'\n';
+    }
+}

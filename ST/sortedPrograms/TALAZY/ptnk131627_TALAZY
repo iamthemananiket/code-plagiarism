@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+long long solve(int n,int br,long long k){
+    long long ans=0;
+    while (n){
+        ans+=1LL*k*((n+1)/2);
+        n>>=1;
+        k<<=1;
+        if (n) ans+=br;
+    }
+    return ans;
+}
+int main(){
+    int test;
+    cin>>test;
+    while (test--){
+        int n,br,k;
+        cin>>n>>br>>k;
+        cout<<solve(n,br,k)<<'\n';
+    }
+}

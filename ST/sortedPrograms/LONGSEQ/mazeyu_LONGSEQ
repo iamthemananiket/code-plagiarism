@@ -1,0 +1,22 @@
+#include<bits/stdc++.h>
+#include<iostream>
+#include<string>
+using namespace std;
+string s;
+int i,j,t,sum1,sum2,l;
+
+int main()
+{
+	cin>>t;
+	for (j=1;j<=t;++j)
+	{
+		cin>>s;
+		sum1=0; sum2=0;
+		l=s.length();
+		for (i=0;i<=l-1;++i)
+		  if (s[i]=='1') ++sum1;
+		  else ++sum2;
+		if ((sum1==1)||(sum2==1)) cout<<"Yes"<<endl;
+		else cout<<"No"<<endl;
+	}
+}

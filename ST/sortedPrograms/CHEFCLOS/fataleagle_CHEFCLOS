@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector<int> special{11, 13, 17, 19, 23};
+int N, K, L, n, spec;
+int a[30];
+int b[30];
+int m[30][30];
+int force[30];
+long long C[60][60];
+long long ans;
+
+void rec(int pos, int mask, int k)
+{
+    if(k<0)
+        return;
+    if(pos==n)
+    {
+        int bits=__builtin_popcount(mask);
+        ans+=C[spec+k+bits-1][k];
+        return;
+    }
+    if(!force[pos])
+        rec(pos+1, mask, k);
+    bool good=true;
+    for(int i=0; i<pos; i++) if((mask>>i)&1)
+        good&=(mask&m[pos][i])==m[pos][i];
+    if(good)
+        rec(pos+1, mask|(1<<pos), k-1+force[pos]);
+}
+
+void _main()
+{
+    scanf("%d%d%d", &N, &K, &L);
+    ans=0;
+    n=0;
+    spec=1;
+    memset(b, -1, sizeof b);
+    for(int i=2; i<=L; i++)
+    {
+        if(find(special.begin(), special.end(), i)==special.end())
+            b[i]=n, a[n++]=i;
+        else
+            spec++;
+    }
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<i; j++)
+        {
+            m[i][j]=(1<<i)|(1<<j);
+            bool good=true;
+            while(good)
+            {
+                good=false;
+                for(int k=0; k<n; k++) if((m[i][j]>>k)&1)
+                    for(int l=k+1; l<n; l++) if((m[i][j]>>l)&1)
+                    {
+                        int g=__gcd(a[k], a[l]);
+                        if(b[g]==-1)
+                            continue;
+                        if(!((m[i][j]>>b[g])&1))
+                            m[i][j]|=1<<b[g], good=true;
+                    }
+            }
+            m[i][j]&=~(1<<i);
+        }
+    }
+    memset(force, 0, sizeof force);
+    for(int i=0; i<N; i++)
+    {
+        int x;
+        scanf("%d", &x);
+        if(b[x]!=-1)
+            force[b[x]]=1;
+    }
+    rec(0, 0, K);
+    printf("%lld\n", ans%1000000007);
+}
+
+int main()
+{
+    for(int i=0; i<60; i++)
+    {
+        C[i][0]=1;
+        for(int j=1; j<=i; j++)
+            C[i][j]=C[i-1][j-1]+C[i-1][j];
+    }
+    int T;
+    scanf("%d", &T);
+    while(T--)
+        _main();
+    return 0;
+}

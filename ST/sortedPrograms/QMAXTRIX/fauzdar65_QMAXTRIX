@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define gc getchar_unlocked
+#define pc putchar_unlocked
+#define ll long long
+#define sci(x) {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define scll(x)  {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x =  (ll)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+char putnb[20];
+#define putn(n) {if(!n)pc('0');if(n<0)pc('-'),n=0-n;int pi=0;while(n)putnb[pi++]=(n%10)+'0',n/=10;while(pi)pc(putnb[--pi]);}
+using namespace std;
+const int inf=1e8;
+const ll infl=1e18;
+const int N=100000;
+
+ll n,q;
+ll L[N+5],R[N+5];
+ll colq[N+5];
+ll su;
+
+int main()
+{
+  finp;
+  cin>>n;
+
+  afor(i,1,n)
+  {
+  	cin>>L[i]>>R[i];
+  	su+=R[i]-L[i]+1;
+  	colq[L[i]]+=1;
+  	colq[R[i]+1]-=1;
+  }
+
+  afor(i,1,n)
+  {
+  	colq[i]+=colq[i-1];
+  }
+
+  ll x,y;
+
+  cin>>q;
+
+  while(q--)
+  {
+  	cin>>x>>y;
+  	ll sum= su - colq[y] - (R[x]-L[x]+1) ;
+
+  	if(y>=L[x] && y<=R[x])sum++;
+
+  	if(sum%2)cout<<"O\n";
+  	else cout<<"E\n";
+  }
+  
+return 0;
+}

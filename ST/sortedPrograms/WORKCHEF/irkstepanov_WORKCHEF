@@ -1,0 +1,367 @@
+#include <iostream>
+#include <vector>
+#include <string.h>
+#include <algorithm>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+ 
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+const int mod = 2520;
+const ll inf = 1e18;
+
+ll precalc[20][10];
+int pc[1 << 9];
+int lcm[1 << 9];
+int k;
+vector<vector<char> > y(1 << 9, vector<char>(mod, false));
+
+int gcd(int a, int b)
+{
+    if (a < b) {
+        swap(a, b);
+    }
+    while (b) {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+
+bool bit(int mask, int pos)
+{
+    return (mask >> pos) & 1;
+}
+
+void global_init()
+{
+    for (int i = 0; i < (1 << 9); ++i) {
+        for (int j = 0; j < 9; ++j) {
+            if (bit(i, j)) {
+                ++pc[i];
+            }
+        }
+    }
+    lcm[0] = 1;
+    int oldest = -1;
+    for (int mask = 1; mask < (1 << 9); ++mask) {
+        if (!(mask & (mask - 1))) {
+            ++oldest;
+        }
+        int a = oldest + 1, b = lcm[mask ^ (1 << oldest)];
+        lcm[mask] = a * b / gcd(a, b);
+    }
+    
+precalc[1][1] = 9LL;
+precalc[2][1] = 59LL;
+precalc[3][1] = 640LL;
+precalc[4][1] = 6870LL;
+precalc[5][1] = 72374LL;
+precalc[6][1] = 752554LL;
+precalc[7][1] = 7753077LL;
+precalc[8][1] = 79358834LL;
+precalc[9][1] = 808508575LL;
+precalc[10][1] = 8208509756LL;
+precalc[11][1] = 83117472265LL;
+precalc[12][1] = 839890645550LL;
+precalc[13][1] = 8473074138944LL;
+precalc[14][1] = 85366135457703LL;
+precalc[15][1] = 859136469673701LL;
+precalc[16][1] = 8638781294063548LL;
+precalc[17][1] = 86800266698796437LL;
+precalc[18][1] = 871604238619217379LL;
+
+precalc[1][2] = 0LL;
+precalc[2][2] = 5LL;
+precalc[3][2] = 175LL;
+precalc[4][2] = 2644LL;
+precalc[5][2] = 33007LL;
+precalc[6][2] = 382306LL;
+precalc[7][2] = 4250033LL;
+precalc[8][2] = 46049697LL;
+precalc[9][2] = 490293790LL;
+precalc[10][2] = 5155278261LL;
+precalc[11][2] = 53706649381LL;
+precalc[12][2] = 555579296788LL;
+precalc[13][2] = 5715875036866LL;
+precalc[14][2] = 58550216325558LL;
+precalc[15][2] = 597651602682369LL;
+precalc[16][2] = 6083010868463192LL;
+precalc[17][2] = 61766720523146026LL;
+precalc[18][2] = 625928558568697983LL;
+
+precalc[1][3] = 0LL;
+precalc[2][3] = 0LL;
+precalc[3][3] = 30LL;
+precalc[4][3] = 574LL;
+precalc[5][3] = 9677LL;
+precalc[6][3] = 134643LL;
+precalc[7][3] = 1694752LL;
+precalc[8][3] = 20056375LL;
+precalc[9][3] = 228073131LL;
+precalc[10][3] = 2522883639LL;
+precalc[11][3] = 27355149271LL;
+precalc[12][3] = 292205351803LL;
+precalc[13][3] = 3085748993530LL;
+precalc[14][3] = 32295494846849LL;
+precalc[15][3] = 335605119320260LL;
+precalc[16][3] = 3467511308935990LL;
+precalc[17][3] = 35658800607172773LL;
+precalc[18][3] = 365283751683629689LL;
+
+precalc[1][4] = 0LL;
+precalc[2][4] = 0LL;
+precalc[3][4] = 0LL;
+precalc[4][4] = 67LL;
+precalc[5][4] = 1720LL;
+precalc[6][4] = 32607LL;
+precalc[7][4] = 502769LL;
+precalc[8][4] = 6862390LL;
+precalc[9][4] = 86597306LL;
+precalc[10][4] = 1036887307LL;
+precalc[11][4] = 11962872224LL;
+precalc[12][4] = 134321195048LL;
+precalc[13][4] = 1477607039573LL;
+precalc[14][4] = 15998955336888LL;
+precalc[15][4] = 171076354956930LL;
+precalc[16][4] = 1811021016016792LL;
+precalc[17][4] = 19015196180807000LL;
+precalc[18][4] = 198310454938660467LL;
+
+precalc[1][5] = 0LL;
+precalc[2][5] = 0LL;
+precalc[3][5] = 0LL;
+precalc[4][5] = 0LL;
+precalc[5][5] = 84LL;
+precalc[6][5] = 3996LL;
+precalc[7][5] = 93047LL;
+precalc[8][5] = 1625805LL;
+precalc[9][5] = 24235196LL;
+precalc[10][5] = 326403213LL;
+precalc[11][5] = 4112583984LL;
+precalc[12][5] = 49438916260LL;
+precalc[13][5] = 574098062067LL;
+precalc[14][5] = 6493690863967LL;
+precalc[15][5] = 71967730696235LL;
+precalc[16][5] = 784830565223073LL;
+precalc[17][5] = 8448518906721307LL;
+precalc[18][5] = 89989965119503750LL;
+
+precalc[1][6] = 0LL;
+precalc[2][6] = 0LL;
+precalc[3][6] = 0LL;
+precalc[4][6] = 0LL;
+precalc[5][6] = 0LL;
+precalc[6][6] = 248LL;
+precalc[7][6] = 9483LL;
+precalc[8][6] = 227889LL;
+precalc[9][6] = 4281784LL;
+precalc[10][6] = 69536703LL;
+precalc[11][6] = 1011387905LL;
+precalc[12][6] = 13591165295LL;
+precalc[13][6] = 172396879969LL;
+precalc[14][6] = 2094088568001LL;
+precalc[15][6] = 24602665205238LL;
+precalc[16][6] = 281575319282572LL;
+precalc[17][6] = 3155903819441803LL;
+precalc[18][6] = 34777503541312697LL;
+
+precalc[1][7] = 0LL;
+precalc[2][7] = 0LL;
+precalc[3][7] = 0LL;
+precalc[4][7] = 0LL;
+precalc[5][7] = 0LL;
+precalc[6][7] = 0LL;
+precalc[7][7] = 105LL;
+precalc[8][7] = 9110LL;
+precalc[9][7] = 321067LL;
+precalc[10][7] = 7173152LL;
+precalc[11][7] = 130455136LL;
+precalc[12][7] = 2076153559LL;
+precalc[13][7] = 30076886515LL;
+precalc[14][7] = 406603457499LL;
+precalc[15][7] = 5215945715172LL;
+precalc[16][7] = 64235916723687LL;
+precalc[17][7] = 765865374838382LL;
+precalc[18][7] = 8895451302215582LL;
+
+precalc[1][8] = 0LL;
+precalc[2][8] = 0LL;
+precalc[3][8] = 0LL;
+precalc[4][8] = 0LL;
+precalc[5][8] = 0LL;
+precalc[6][8] = 0LL;
+precalc[7][8] = 0LL;
+precalc[8][8] = 0LL;
+precalc[9][8] = 7199LL;
+precalc[10][8] = 250369LL;
+precalc[11][8] = 6382062LL;
+precalc[12][8] = 129800495LL;
+precalc[13][8] = 2259032102LL;
+precalc[14][8] = 35252704401LL;
+precalc[15][8] = 507649365727LL;
+precalc[16][8] = 6874243802202LL;
+precalc[17][8] = 88698503913949LL;
+precalc[18][8] = 1101093003474519LL;
+
+precalc[1][9] = 0LL;
+precalc[2][9] = 0LL;
+precalc[3][9] = 0LL;
+precalc[4][9] = 0LL;
+precalc[5][9] = 0LL;
+precalc[6][9] = 0LL;
+precalc[7][9] = 0LL;
+precalc[8][9] = 0LL;
+precalc[9][9] = 0LL;
+precalc[10][9] = 11460LL;
+precalc[11][9] = 166804LL;
+precalc[12][9] = 2689336LL;
+precalc[13][9] = 52286220LL;
+precalc[14][9] = 971926914LL;
+precalc[15][9] = 16290631536LL;
+precalc[16][9] = 249350284884LL;
+precalc[17][9] = 3552616040075LL;
+precalc[18][9] = 47835158330548LL;
+
+}
+
+void init()
+{
+    for (int mask = 1; mask < (1 << 9); ++mask) {
+        y[mask].assign(mod, false);
+        if (pc[mask] >= k) {
+            for (int smask = mask; smask; smask = (smask - 1) & mask) {
+                if (pc[smask] == k) {
+                    for (int val = 0; val < mod; val += lcm[smask]) {
+                        y[mask][val] = true;
+                    }
+                }
+            }
+        }
+    }
+}
+
+vector<int> conv(ll val)
+{
+    vector<int> ans;
+    if (val == 0) {
+        ans.pb(0);
+        return ans;
+    }
+    while (val) {
+        ans.pb(val % 10);
+        val /= 10;
+    }
+    reverse(all(ans));
+    return ans;
+}
+
+ll f(ll x)
+{
+    if (k == 0) {
+        return x;
+    }
+    vector<int> s = conv(x);
+    ll ans = 0;
+    vector<vector<ll> > dp_old(1 << 9, vector<ll>(mod));
+    for (int d = 1; d < 10; ++d) {
+        if (d < s[0]) {
+            dp_old[1 << (d - 1)][d] = 1;
+        }
+    }
+    int curr_mask = (1 << (s[0] - 1));
+    int curr_rem = s[0];
+    for (int len = 1; len < sz(s); ++len) {
+        vector<vector<ll> > dp(1 << 9, vector<ll>(mod));
+        for (int mask = 0; mask < (1 << 9); ++mask) {
+            int nrem = -1;
+            for (int rem = 0; rem < mod; ++rem) {
+                for (int d = 0; d < 10; ++d) {
+                    ll curr0 = dp_old[mask][rem];
+                    ++nrem;
+                    if (nrem == mod) {
+                        nrem = 0;
+                    }
+                    if (!curr0) {
+                        continue;
+                    }
+                    int nmask = mask;
+                    if (d) {
+                        nmask |= (1 << (d - 1));
+                    }
+                    dp[nmask][nrem] += curr0;
+                }
+            }
+        }
+        for (int d = 0; d < 10; ++d) {
+            int nmask = curr_mask;
+            if (d) {
+                nmask |= (1 << (d - 1));
+            }
+            int nrem = (curr_rem * 10 + d) % mod;
+            if (d < s[len]) {
+                ++dp[nmask][nrem];
+            }
+        }
+        dp_old.swap(dp);
+        curr_rem = (curr_rem * 10 + s[len]) % mod;
+        if (s[len]) {
+            curr_mask |= (1 << (s[len] - 1));
+        }
+    }
+    for (int len = 1; len <= sz(s); ++len) {
+        if (len < sz(s)) {
+            ans += precalc[len][k];
+            continue;
+        }
+        for (int mask = 1; mask < (1 << 9); ++mask) {
+            if (pc[mask] >= k) {
+                for (int rem = 0; rem < mod; ++rem) {
+                    if (y[mask][rem]) {
+                        ans += dp_old[mask][rem];
+                    }
+                }
+            }
+        }
+    }
+    if (pc[curr_mask] >= k && y[curr_mask][curr_rem]) {
+        ++ans;
+    }
+    return ans;
+}
+
+int main()
+{
+    
+    global_init();
+ 
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        ll l, r;
+        cin >> l >> r >> k;
+        init();
+        ll ans = 0;
+        if (r == inf) {
+            ans = f(r - 1);
+            if (k <= 1) {
+                ++ans;
+            }
+        } else {
+            ans = f(r);
+        }
+        //cout << ans << " ";
+        if (l > 1) {
+            ans -= f(l - 1);
+        }
+        cout << ans << "\n";
+    }
+    
+}

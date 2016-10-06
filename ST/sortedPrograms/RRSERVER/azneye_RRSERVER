@@ -1,0 +1,70 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+int g[22];
+
+void chmin(int& a, int b) {
+  if (b < a)
+    a = b;
+}
+
+void solve(int test_num) {
+  int V, E;
+  cin >> V >> E;
+  memset(g, 0, sizeof(g));
+  while (E--) {
+    int a, b;
+    cin >> a >> b;
+    --a, --b;
+    g[a] |= 1 << b;
+    g[b] |= 1 << a;
+  }
+  vector<int> dp(1 << V, 1 << 29);
+  dp[0] = 0;
+  for (int mask = 0; mask < (1 << V); mask++) {
+    const int slot = __builtin_popcount(mask);
+    for (int nx = 0; nx < V; nx++) {
+      if (1 << nx & ~mask) {
+        const int have = __builtin_popcount(mask & g[nx]);
+        const int other = __builtin_popcount(g[nx]) - have;
+        chmin(dp[mask | 1 << nx], dp[mask] + have * slot - other * slot);
+      }
+    }
+  }
+  cout << dp[(1 << V) - 1] << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

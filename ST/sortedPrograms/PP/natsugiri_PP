@@ -1,0 +1,142 @@
+#include<map>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+struct Manacher {
+    vector<int>rad;
+    Manacher(){}
+    Manacher(const string &t) {
+	int n = t.size(), i, j, k;
+	rad = vector<int>(2*n);
+	for (i=0, j=0; i<2*n; i+=k, j=max(j-k, 0)) {
+	    while (i-j >= 0 && i+j+1 < 2*n && t[(i-j)/2] == t[(i+j+1)/2]) j++;
+	    rad[i] = j;
+	    for (k=1; i-k >= 0 && rad[i]-k >= 0 && rad[i-k] != rad[i]-k; k++)
+		rad[i+k] = min(rad[i-k], rad[i]-k);
+	}
+    }
+    bool ok(int l, int r) { // [l, r)
+        return r-l <= rad[l+r-1];
+    }
+    pair<int, int> span(int mid, bool ev/*=even length str*/) { 
+	if (ev) { // [mid-2, mid-1, mid, mid+1]
+	    return make_pair(mid - rad[mid*2+1]/2, mid + rad[mid*2+1]/2);
+	} else { // [mid-1, mid, mid+1]
+	    return make_pair(mid - rad[mid*2]/2, mid + rad[mid*2]/2 + 1);
+	}
+    }
+};
+struct Node {
+    int mark;
+    map<char, Node*> next;
+    Node() {
+	mark = 0;
+    }
+};
+Node node[1000100];
+int node_i;
+void init_trie() {
+    node[0] = Node();
+    node_i = 1;
+}
+void insert_trie(const string &s, int mark) {
+    Node *x = &node[0];
+    for (int i=0; i<(int)s.size(); i++) {
+	// int k = s[i] - 'a';
+	char c = s[i];
+	if (!x->next.count(c)) {
+	    node[node_i] = Node();
+	    x->next[c] = &node[node_i];
+	    node_i++;
+	}
+	x = x->next[c];
+    }
+    //x->mark = mark;
+    x->mark += mark;
+}
+bool find_trie(const string &s) {
+    Node *x = &node[0];
+    for (int i=0; i<(int)s.size(); i++) {
+	// int k = s[i] - 'a';
+	char c = s[i];
+	if (!x->next[c]) return false; // match s[0..i-1]
+	x = x->next[c];
+    }
+    // match x->mark;
+    return true;
+}
+
+pair<LL, LL> count_trie(const string &s) {
+    Manacher M(s);
+    Node *x = &node[0];
+    LL ret = 0, same = 0;
+    for (int i=0; i<(int)s.size(); i++) {
+	if (M.ok(i, s.size())) ret += x->mark;
+	// int k = s[i] - 'a';
+	char c = s[i];
+	if (!x->next[c]) return make_pair(ret, 0LL);
+	x = x->next[c];
+    }
+    if (x) same = x->mark;
+    return make_pair(ret, same);
+}
+
+int N;
+string S[1000011];
+char buf[1000011];
+
+pair<LL, LL> solve() {
+    init_trie();
+    REP (i, N) insert_trie(S[i], 1);
+
+    LL ans = 0, same = 0;
+    REP (i, N) {
+	insert_trie(S[i], -1);
+	string K = S[i];
+	reverse(K.begin(), K.end());
+	pair<LL, LL> x = count_trie(K);
+	ans += x.first;
+	same += x.second;
+	insert_trie(S[i], 1);
+    }
+    return make_pair(ans, same);
+}
+void MAIN() {
+    scanf("%d", &N);
+    REP (i, N) {
+	scanf("%s", buf);
+	S[i] = buf;
+    }
+
+    LL ans = 0, same = 0;
+    pair<LL, LL> x;
+    x = solve();
+    ans += x.first; same += x.second;
+    REP (i, N) reverse(S[i].begin(), S[i].end());
+    x = solve();
+    ans += x.first; same += x.second;
+
+    printf("%lld\n", ans + same / 2);
+    // eprintf("%lld\n", same);
+}
+
+int main() {
+    int T;
+    scanf("%d", &T);
+    REP (_, T) MAIN();
+    return 0;
+}

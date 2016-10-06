@@ -1,0 +1,129 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 110
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const ll md = 1e9 + 7;
+
+typedef struct bigint {
+	ll a; ll b; ll c; ll d;
+} bigint;
+
+inline bigint bigi(ll x) {
+	bigint B; B.d = 0; B.c = 0; B.b = 0; B.a = 0;
+	return B;
+}
+
+inline bigint add1(bigint B) {
+	B.d++; 
+	if (B.d >= md) {
+		B.c++; B.d = 0;
+		if (B.c >= md) {
+			B.b++; B.c=0;
+			if (B.b >= md) {
+				B.a++; B.b = 0;
+			}
+		}
+	}
+	return B;
+}
+
+inline bigint add(bigint A,bigint B) {
+	bigint C; 
+	C.a = A.a + B.a; C.b = A.b + B.b; C.c = A.c + B.c; C.d = A.d + B.d;
+	if (C.d >= md) {
+		C.d -= md; C.c++;
+		if (C.c >= md) {
+			C.b++; C.c = 0;
+			if (C.b >= md) {
+				C.a++; C.b = 0;
+			}
+		}
+	}
+	return C;
+
+}
+
+inline string pad(ll a) {
+	string s = "";
+	while (a > 0) {
+		int d = a%10; a/=10;
+		s = (char)(d + '0')  + s;
+	}
+	while (s.size() < 17) s = "0"+s;
+	return s;
+}
+
+void printbig(bigint A) {
+	string a = pad(A.a), b = pad(A.b), c = pad(A.c), d = pad(A.d);
+	if (A.a == 0) {
+		if (A.b == 0) {
+			if (A.c == 0) {
+				cout<<A.d<<endl;
+			} else {
+				cout<<A.c<<d<<endl;
+			}
+		} else {
+			cout<<A.b<<c<<d<<endl;
+		}
+	} else {
+		cout<<A.a<<b<<c<<d<<endl;
+	}
+	
+}
+	
+
+
+const int maxv = 1e4 + 10;
+//const int maxv = 50;
+int dp[2][MAXN][2*maxv + 1];
+ll A[MAXN]; ll X[MAXN];
+//const ll md = 1e9 + 7;
+
+void solve() {
+	int n,S; s(n); s(S);
+	rep(i,1,n) { sl(A[i]); ll b,c; sl(b); sl(c); X[i] = c-b; X[i] = MIN(X[i],maxv); }
+	rep(i,1,n) {
+		rep(j,0,S) {
+			rep(val,-maxv,+maxv) {
+				int idx = val + maxv;
+				dp[i&1][j][idx] = 0;
+				if (j >= A[i]) {
+					dp[i&1][j][idx] = (dp[i&1][j][idx] + dp[i&1][j-A[i]][MAX(MIN(idx + X[i],2*maxv),0)])%md;
+					if (val + X[i] > 0) {
+						dp[i&1][j][idx] = (dp[i&1][j][idx] + 1)%md;
+					}
+				}
+				if ((i > 1)) {
+					dp[i&1][j][idx] = (dp[i&1][j][idx]+dp[(i-1)&1][j][idx])%md;
+				}
+				//cout<<i<<" : "<<j<<" : "<<val<<" : "<<dp[i&1][j][idx]<<endl;
+			}
+		}
+	}
+	pr(dp[n&1][S][maxv]); endc;
+	
+}
+	
+
+int main() {
+	int t; s(t); while (t--) solve();
+}

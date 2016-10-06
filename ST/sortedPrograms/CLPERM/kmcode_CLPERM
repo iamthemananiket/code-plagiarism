@@ -1,0 +1,93 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+int t;
+int n;
+int k;
+vector<long long int> v;
+set<int> use;
+int main(){
+	scanf("%d", &t);
+	while (t--){
+		v.clear();
+		use.clear();
+		scanf("%d%d", &n, &k);
+		long long int mint = 0;
+		long long int maxt = 0;
+		while (k--){
+			int a;
+			scanf("%d", &a);
+			v.push_back(a);
+			use.insert(a);
+		}
+		sort(v.begin(), v.end());
+		v.erase(unique(v.begin(), v.end()), v.end());
+		long long int countt = 0;
+		if (v.size()){
+			if (v[0] > 1){
+				maxt = (1LL + v[0] - 1LL)*((v[0] - 1LL) - 1LL + 1LL) / 2LL;
+			}
+			v.push_back(n + 1LL);
+			for (int i = 0; i < v.size()-1; i++){
+				if (v[i] + 1LL != v[i+1]){
+					long long int tmp = mint + v[i] + 1LL;
+					if (tmp > maxt + 1LL){
+						break;
+					}
+					maxt = maxt + (v[i] + 1LL + v[i + 1] - 1LL)*((v[i + 1] - 1LL) - (v[i] + 1LL) + 1LL) / 2LL;
+				}
+			}
+			countt = maxt + 1LL;
+			if (countt % 2LL){
+				puts("Chef");
+			}
+			else{
+				puts("Mom");
+			}
+			continue;
+		}
+		maxt = 0;
+		for (int i = 1; i <= n; i++){
+			if (use.count(i)){
+				continue;
+			}
+			else{
+				if (maxt + 1LL < mint + (long long int)i){
+					break;
+				}
+				maxt = maxt + (long long int)i;
+			}
+		}
+		countt = maxt + 1LL;
+		if (countt % 2LL){
+			puts("Chef");
+		}
+		else{
+			puts("Mom");
+		}
+	}
+	return 0;
+}

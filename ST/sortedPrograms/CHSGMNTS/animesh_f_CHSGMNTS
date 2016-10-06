@@ -1,0 +1,87 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 1005;
+
+int t, n, arr[N];
+bool in[N], visited[N];
+vector < int > compress, position[N];
+
+struct node{
+	long long ans;
+	int pref_ones, suff_ones;
+	node(long long a = 0, int p = 0, int s = 0){
+		ans = a;
+		pref_ones = p;
+		suff_ones = s;
+	}
+}tree[N * 4];
+
+inline node merge(int l, int r, node x, node y){
+	node res;
+	res.ans = (x.ans + y.ans) + (x.suff_ones * 1LL * y.pref_ones);
+	
+	int mid = (l + r) >> 1;
+	
+	res.pref_ones = x.pref_ones;
+	if(x.pref_ones == mid - l + 1) res.pref_ones += y.pref_ones;
+	
+	res.suff_ones = y.suff_ones;
+	if(y.suff_ones == r - mid)  res.suff_ones += x.suff_ones;
+	return res;
+}
+
+inline void update(int i, int l, int r, int pos, int val){
+	if(l == r){
+		tree[i].ans = val;
+		tree[i].pref_ones = tree[i].suff_ones = val;
+		return;
+	}	
+	int mid = (l + r) >> 1;
+	if(mid >= pos) update(i * 2, l, mid, pos, val);
+	else update(i * 2 + 1, mid + 1, r, pos, val);
+	tree[i] = merge(l, r, tree[i * 2], tree[i * 2 + 1]);
+}
+
+int main(){
+		
+	scanf("%d", &t);
+	while(t--){
+
+		scanf("%d", &n);
+		compress.clear();
+		for(int i = 1; i <= n; i++){
+			scanf("%d", arr + i);
+			compress.push_back(arr[i]);
+			in[i] = false;
+			position[i].clear();
+		}
+		
+		sort(compress.begin(), compress.end());
+		compress.resize(unique(compress.begin(), compress.end()) - compress.begin());
+		
+		for(int i = 1; i <= n; i++){
+			arr[i] = 1 + lower_bound(compress.begin(), compress.end(), arr[i]) - compress.begin();
+		}
+		
+		long long ans = 0;
+		for(int c = n; c >= 1; c--){  // d >= c
+ 			position[arr[c]].push_back(c);
+			in[arr[c]] = true;
+			for(int i = 0; i <= n * 4; i++) tree[i] = node();
+			for(int i = 1; i <= n; i++) visited[i] = false;
+			for(int i = c; i <= n; i++) update(1, c, n, i, 1);
+			int b = c - 1;
+			for(int a = b; a >= 1; a--){
+				if((in[arr[a]]) && (!visited[arr[a]])){
+					for(int pos : position[arr[a]]) 
+						update(1, c, n, pos, 0);
+					visited[arr[a]] = true;
+				}
+				ans += tree[1].ans;
+			}
+		}
+		
+		printf("%lld\n", ans);
+	}
+}

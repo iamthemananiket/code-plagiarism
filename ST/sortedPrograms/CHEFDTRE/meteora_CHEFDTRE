@@ -1,0 +1,130 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+
+
+#define NMAX 100010
+
+using namespace std;
+
+struct node{
+	int lft,rht,sz,pr;
+};
+
+int mx = 100002;
+
+node tree[NMAX];
+
+int nn;
+int create_node(){
+	tree[nn].lft = tree[nn].rht = mx;
+	tree[nn].sz = 1;
+	tree[nn].pr = rand();
+	return nn++;
+}
+
+int upd(int x){
+	tree[x].sz = 1+tree[tree[x].lft].sz + tree[tree[x].rht].sz;
+	return x;
+}
+
+pair<int,int> split(int x, int vl){
+	if(x >= mx) return make_pair(mx,mx);
+
+	pair<int,int> sp;
+	if(vl < x){
+		sp = split(tree[x].lft,vl);
+		tree[x].lft = sp.second;
+		sp.second = upd(x);
+		return sp;
+	}
+
+	sp = split(tree[x].rht,vl);
+	tree[x].rht = sp.first;
+	sp.first = upd(x);
+	return sp;
+}
+
+void print(int x, int k){
+	if(x >= mx) return;
+
+	if(k < tree[tree[x].lft].sz){
+		print(tree[x].lft,k);
+		return;
+	}
+
+	k -= tree[tree[x].lft].sz;
+	if(!k){
+		printf("%d\n",x+1);
+		return;
+	}
+	--k;
+
+	print(tree[x].rht,k);
+}
+
+int merge(int l, int r){
+	if(l >= mx) return r;
+	if(r >= mx) return l;
+
+
+	if(tree[l].pr > tree[r].pr){
+		tree[l].rht = merge(tree[l].rht,r);
+		return upd(l);
+	}
+	tree[r].lft = merge(l,tree[r].lft);
+	return upd(r);
+}
+
+int ins(int rt,int x){
+
+	pair<int,int> sp;
+	sp = split(rt,x);
+
+	sp.first = merge(sp.first,x);
+	return merge(sp.first,sp.second);
+}
+
+int mergetree(int rt, int x){
+	if(x >= mx) return rt;
+
+	int l,r;
+	l = tree[x].lft, r = tree[x].rht;
+	tree[x].lft = tree[x].rht = mx;
+
+	rt = ins(rt,upd(x));
+
+	rt = mergetree(rt,l);
+	return mergetree(rt,r);
+}
+
+
+int roots[NMAX*3];
+int M;
+
+int N,Q;
+int main(){
+
+	scanf("%d%d",&N,&Q);
+
+	char str[15];
+	int a,b;
+
+	for(M = 0; M < N; ++M) roots[M] = create_node();
+	while(Q--){
+		scanf("%s%d%d",str,&a,&b);
+		if(str[0] == 'U'){
+			--a,--b;
+			a = roots[a];
+			b = roots[b];
+			if(tree[a].sz < tree[b].sz) swap(a,b);
+			roots[M++] = mergetree(a,b);
+			continue;
+		}
+		--a;
+		--b;
+		print(roots[a],b);
+	}
+	return 0;
+}

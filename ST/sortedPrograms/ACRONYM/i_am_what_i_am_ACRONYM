@@ -1,0 +1,33 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	string s;
+	getline(cin,s);
+	int n  = s.size();
+	int c= 0;
+	int pos = -1;
+	bool valid = false;
+	for(int i=0;i<n;i++)
+	 {
+	 	if(s[i]==' ')
+	 	 {
+	 	 	if(valid && pos!=i-2)
+		 	 	c++;
+	 	 	pos = i;
+	 	 	valid = false;
+	 	 	continue;
+		  }
+		else if(s[i]>='a' && s[i]<='z')
+			valid = false;
+		else
+		 {
+			if(pos==i-1)
+				valid = true; 	
+		 }	
+	 }
+	if(valid)
+		c++;
+	cout<<c<<endl;
+}

@@ -1,0 +1,70 @@
+# include <cstdio>
+# include <vector>
+
+using namespace std;
+
+const int MAX_N = 1e5 + 10;
+const int MAX_K = 1e5 + 10;
+
+int n, k;
+int a[MAX_N];
+int del[MAX_K];
+int last;
+
+long long ans;
+
+vector <int> div[MAX_K];
+
+void era ()
+{
+	int i, j;
+	for (i = 1; i < MAX_K; i ++)
+		for (j = i; j < MAX_K; j += i)
+			div[j].push_back (i);
+}
+
+int main ()
+{
+	int i, j, x, cl = 0, prv_cl = 0, t;
+	era ();
+	scanf ("%d%d", &n, &k);
+	if (n <= 100)
+	{
+		for (i = 1; i <= n; i ++)
+			scanf ("%d", &a[i]);
+		
+		for (i = 1; i <= n; i ++)
+		{
+			for (j = i - 1; j > prv_cl; j --)
+				if (a[j] % a[i] == k)
+					break;
+			cl = j;
+			ans += i - cl;
+			prv_cl = cl;
+		}
+		printf ("%lld\n", ans);
+		return 0;
+	}
+	for (i = 1; i <= n; i ++)
+	{
+		scanf ("%d", &a[i]);
+		if (a[i] > k)
+			cl = del[a[i]];
+		if (a[i] > k && last > cl)
+			cl = last;
+		if (prv_cl > cl)
+			cl = prv_cl;
+		ans += i - cl;
+		prv_cl = cl;
+		///printf ("%d %d -> %d\n", i, cl, i - cl);
+		if (a[i] == k)
+			last = i;
+		x = a[i] - k;
+		if (x <= 1)
+			continue;
+		for (j = 0; j < (int) div[x].size (); j ++)
+			del[div[x][j]] = i;
+	}
+	printf ("%lld\n", ans);
+	return 0;
+}

@@ -1,0 +1,124 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int MO = 1000000007;
+
+int N, L, R, M;
+int D;
+
+int dsLen;
+int ds[32];
+Int a[32][32][32], b[32][32][32];
+
+int main() {
+	/*
+	int mx = 0, mm = -1;
+	for (int m = 1; m <= 1000; ++m) {
+		int cnt = 0;
+		for (int i = 1; i <= m; ++i) {
+			for (int j = i; j <= m; j += i) {
+				for (int k = j; k <= m; k += j) {
+					if (m % k == 0) {
+						++cnt;
+					}
+				}
+			}
+		}
+		if (m <= 10) {
+			cout << cnt << ", ";
+		}
+		if (mx < cnt) {
+			mx = cnt;
+			mm = m;
+		}
+	}
+	cout << endl;
+	cout << mx << " " << mm << endl;
+	*/
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		M = in();
+		L = in();
+		R = in();
+		Int ans = 0;
+		for (D = L; D <= R; ++D) {
+			dsLen = 0;
+			for (int d = 1; d * d <= D; ++d) if (D % d == 0) {
+				ds[dsLen++] = d;
+				if (d != D / d) {
+					ds[dsLen++] = D / d;
+				}
+			}
+			sort(ds, ds + dsLen);
+			for (int u = 0; u < dsLen; ++u) {
+				fill(a[0][u], a[0][u] + dsLen, 0);
+			}
+			for (int m = 1; m <= D; ++m) {
+				for (int u = 0; u < dsLen; ++u) {
+					const int l = m / __gcd(m, ds[u]) * ds[u];
+					const int v = lower_bound(ds, ds + dsLen, __gcd(l, D)) - ds;
+					a[0][u][v] += (M + D - m) / D;
+				}
+			}
+			const int eLim = 32 - __builtin_clz(N);
+			for (int e = 1; e < eLim; ++e) {
+				for (int u = 0; u < dsLen; ++u) {
+					fill(a[e][u], a[e][u] + dsLen, 0);
+				}
+				for (int u = 0; u < dsLen; ++u) for (int w = 0; w < dsLen; ++w) if (a[e - 1][u][w]) for (int v = 0; v < dsLen; ++v) if (a[e - 1][w][v]) {
+					(a[e][u][v] += a[e - 1][u][w] * a[e - 1][w][v]) %= MO;
+				}
+			}
+			for (int u = 0; u < dsLen; ++u) for (int v = 0; v < dsLen; ++v) {
+				b[0][u][v] = (u == v) ? 1 : 0;
+			}
+			int idx = 0;
+			for (int e = 0; e < eLim; ++e) if (N & 1 << e) {
+				for (int u = 0; u < dsLen; ++u) {
+					fill(b[idx + 1][u], b[idx + 1][u] + dsLen, 0);
+				}
+				for (int u = 0; u < dsLen; ++u) for (int w = 0; w < dsLen; ++w) if (b[idx][u][w]) for (int v = 0; v < dsLen; ++v) if (a[e][w][v]) {
+					(b[idx + 1][u][v] += b[idx][u][w] * a[e][w][v]) %= MO;
+				}
+				++idx;
+			}
+			(ans += b[idx][0][dsLen - 1]) %= MO;
+		}
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}
+

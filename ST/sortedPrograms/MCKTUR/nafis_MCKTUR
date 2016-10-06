@@ -1,0 +1,134 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+//LL cat[1001], dp[101][101];
+LL fact[500001], inv[500001];
+LL ncr(int n, int r){
+    if(r > n) return 0;
+    LL ret = (fact[n] * inv[r]) % mod;
+    return (ret * inv[n-r]) % mod;
+}
+
+pair < int, int > seg[400001];
+void insert(int idx, int s, int e, int p, int x, int y){
+    if(s == e){
+        seg[idx] = mp(x, y);
+        return;
+    }
+    int mid = (s + e) / 2;
+    if(p <= mid) insert(idx * 2 + 1, s, mid, p, x, y);
+    else insert(idx * 2 + 2, mid + 1, e, p, x, y);
+    seg[idx].xx = max(seg[idx * 2 + 1].xx, seg[idx * 2 + 2].xx);
+    seg[idx].yy = min(seg[idx * 2 + 1].yy, seg[idx * 2 + 2].yy);
+}
+pair < int, int > query(int idx, int s, int e, int st, int ed){
+    if(s == st && e == ed) return seg[idx];
+    int mid = (s + e) / 2;
+    if(ed <= mid) return query(idx * 2 + 1, s, mid, st, ed);
+    else if(st > mid) return query(idx * 2 + 2, mid + 1, e, st, ed);
+    else {
+        pair < int, int > p1 = query(idx * 2 + 1, s, mid, st, mid);
+        pair < int, int > p2 = query(idx * 2 + 2, mid + 1, e, mid + 1, ed);
+        return mp(max(p1.xx, p2.xx), min(p1.yy, p2.yy));
+    }
+}
+
+int ar[100001][2];
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+//    cat[0] = 1;
+//    for(int i = 1; i <= 1000; i++){
+//        for(int j = 0; j < i; j++) cat[i] = (cat[i] + cat[j] * cat[i-1-j]) % mod;
+//    }
+//    dp[0][0] = 1;
+//    for(int i = 2; i <= 100; i += 2){
+//        for(int j = 1; j <= i/2; j++){
+//            for(int k = 2; k <= i; k += 2){
+//                dp[i][j] = (dp[i][j] + dp[i-k][j-1] * cat[(k-2)/2]) % mod;
+//            }
+//            cout << dp[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
+
+    fact[0] = 1;
+    for(LL i = 1; i <= 500000; i++) fact[i] = (fact[i-1] * i) % mod;
+    REP(i, 500001) inv[i] = modinverse(fact[i], mod);
+    int n, q; cin >> n >> q;
+    for(int i = 1; i <= n; i++){
+        cin >> ar[i][0];
+    }
+    for(int i = 1; i <= n; i++){
+        cin >> ar[i][1];
+    }
+    FOR(i, 1, n+1) insert(0, 1, n, i, ar[i][0], ar[i][1]);
+
+    while(q--){
+        int L, R; cin >> L >> R;
+        pair < int, int > p = query(0, 1, n, L, R);
+        if(p.yy*2 > p.xx){
+            cout << 0 << "\n";
+            continue;
+        }
+        p.xx /= 2;
+        p.xx--; p.yy--;
+        p.yy = p.xx - p.yy;
+        LL v = (ncr(p.xx+p.yy, p.yy) * (p.xx - p.yy + 1)) % mod;
+        v = (v * modinverse((LL)p.xx+1, mod)) % mod;
+        cout << v << "\n";
+    }
+
+}
+/*
+1
+1 1
+2 2 1
+5 5 3 1
+14 14 9 4 1
+42 42 28 14 5 1
+132 132 90 48 20 6 1
+*/

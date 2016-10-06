@@ -1,0 +1,154 @@
+/* GG */
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <string>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <climits>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <sstream>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+//#include <unordered_set>
+//#include <unordered_map>
+
+#define f first
+#define s second
+
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<int, int> pii;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int N = (int) 2e5 + 7;
+const int MOD = (int) 1e9 + 7;
+
+const int SIZE = 600;
+
+int t;
+int n, k, l;
+int a[30];
+
+int cnk[55][55];
+int g[55][55];
+
+bool good[1 << 27];
+int pre[33][33][33];
+
+bool check(int mask) {
+  for (int i = 0; i < 25; i++) {
+    if ((mask >> i) & 1) {
+      for (int j = 0; j < 25; j++) {
+        if ((mask >> j) & 1) {
+          if (!((mask >> (g[i][j])) & 1))
+            return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+inline int calc(const int &sz, const int &k) {
+  if (sz > k)
+    return 0;
+  return cnk[k - 1][sz - 1];
+}
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  for (int i = 1; i <= 30; i++)
+    for (int j = 1; j <= 30; j++)
+      g[i - 1][j - 1] = __gcd(i, j) - 1;
+
+  cnk[0][0] = 1;
+  for (int i = 1; i <= 30; i++) {
+    cnk[i][0] = cnk[i][i] = 1;
+    for (int j = 1; j < i; j++)
+      cnk[i][j] = (cnk[i - 1][j] + cnk[i - 1][j - 1]) % MOD;
+  }
+
+  vector<int> all;
+
+  good[0] = 1;
+  int largest = 0;
+  for (int mask = 1; mask < (1 << 27); mask++) {
+    while ((mask >> (largest + 1)) & 1) {
+      largest++;
+    }
+    int son = mask ^ (1 << largest);
+    if (good[son]) {
+      good[mask] = 1;
+      for (int i = 0; i < largest; i++) {
+        if ((mask >> i) & 1) {
+          good[mask] &= ((mask >> g[largest][i]) & 1);
+          if (!good[mask])
+            break;
+        }
+      }
+    }
+    if (good[mask]) {
+      all.pb(mask);
+    }
+  }
+  
+  for (int delta = 0; delta <= 30; delta++) {
+    for (int need = 0; need <= 30; need++) {
+      for (int k = 1; k <= 30; k++) {
+        for (int i = 0; i <= need; i++)
+          pre[delta][need][k] = (pre[delta][need][k] + cnk[need][i] * 1LL * calc(delta + i, k)) % MOD;
+      }
+    }
+  }
+  scanf("%d", &t);
+  while (t--) {
+    scanf("%d%d%d", &n, &k, &l);
+    int have = 0;
+    for (int i = 1; i <= n; i++) {
+      scanf("%d", &a[i]);
+      have |= (1 << (a[i] - 1));
+    }
+    int ans = 0; 
+    for (auto mask : all) {
+      if (mask >= (1 << l))
+        break;
+      if ((mask & have) == have) {
+        int need = __builtin_popcount(have);
+        int delta = __builtin_popcount(mask ^ have);
+        ans += pre[delta][need][k];
+        if (ans >= MOD) ans -= MOD;
+        //for (int i = 0; i <= need; i++) {
+        //  ans = (ans + 1LL * cnk[need][i] * calc(delta + i)) % MOD;
+        //}
+      }
+    }
+    printf("%d\n", ans);
+  }
+  
+  return 0;
+}

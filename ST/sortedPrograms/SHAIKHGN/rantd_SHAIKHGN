@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 501;
+short a[2][N], b[N][N], f[30][N][N];
+
+inline void calc(int n, int d) {
+	REPU(i, 0, n) REPU(j, 0, n) {
+		f[d + 1][i][j] = 0;
+		REPU(k, 0, n) if (f[d][i][k] && f[d][k][j]) {
+			f[d + 1][i][j] = 1; break;
+		}
+	}
+}
+
+inline void reset(int x) {
+	MEM(a, 0);
+	a[0][x] = 1;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int n, q, k, x;
+
+	cin >> n;
+	REPU(i, 0, n) REPU(j, 0, n) {
+		cin >> f[0][i][j];
+	}
+	REPU(d, 0, 29) calc(n, d);
+	
+	cin >> q;
+	REPU(_, 0, q) {
+		cin >> k >> x; x--;
+		reset(x);
+		int ord = 0, ans = 0;
+		REPU(i, 0, 30) if (k & (1 << i)) {
+			int nord = ord ^ 1;
+			REPU(j, 0, n) a[nord][j] = 0;
+			REPU(l, 0, n) if (a[ord][l]) {
+				REPU(j, 0, n) if (f[i][l][j]) {
+					a[nord][j] = 1;
+				}
+			}
+			ord ^= 1;
+		}
+		REPU(i, 0, n) if (a[ord][i]) {
+			ans++;
+		}
+		printf("%d\n", ans);
+		if (ans > 0) {
+			REPU(i, 0, n) if (a[ord][i]) {
+				ans--;
+				printf("%d%c", i + 1, " \n"[ans == 0]);
+			}
+		}
+		else puts("-1");
+	}
+
+	
+	return 0;
+}

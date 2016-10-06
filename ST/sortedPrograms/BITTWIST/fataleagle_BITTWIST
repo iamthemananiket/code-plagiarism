@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+unsigned int bitTwister(unsigned int x, unsigned int y)
+{
+    x ^= x >> 11u;
+    x ^= (x << 7u) & 2636928640u;
+    x ^= (x << 15u) & 4022730752u;
+    x ^= (x >> 18u);
+    return (1812433253u * (x ^ (x >> 30u)) + y) & 4294967295u;
+}
+
+int N, Q;
+unsigned int A[100000];
+int P[100000];
+vector<int> adj[100000];
+int S[100000];
+int T[100000];
+int in[100000];
+int out[100000];
+int now;
+int depth[100000];
+int id[100000];
+vector<int> pos[100000];
+
+void dfs(int u)
+{
+    in[u]=++now;
+    id[in[u]]=u;
+    for(auto& v: adj[u])
+    {
+        depth[v]=depth[u]+1;
+        dfs(v);
+    }
+    out[u]=now;
+}
+
+void _main()
+{
+    scanf("%d%d", &N, &Q);
+    for(int i=0; i<N; i++)
+        scanf("%u", A+i);
+    for(int i=0; i<N; i++)
+        adj[i].clear();
+    for(int i=1; i<N; i++)
+        scanf("%d", P+i), adj[--P[i]].push_back(i);
+    S[0]=0;
+    for(int i=0, j=1; i<j; i++)
+    {
+        int u=S[i];
+        for(auto& v: adj[u])
+            S[j++]=v;
+    }
+    for(int i=0; i<N; i++)
+        T[S[i]]=i;
+    now=-1;
+    dfs(0);
+    for(int i=0; i<N; i++)
+        pos[i].clear();
+    for(int i=0; i<N; i++)
+        pos[depth[i]].push_back(in[i]);
+    for(int i=0; i<N; i++)
+        sort(pos[i].begin(), pos[i].end());
+    map<pair<int, int>, unsigned int> cache;
+    int a, b;
+    for(int i=0; i<Q; i++)
+    {
+        scanf("%d%d", &a, &b);
+        a--;
+        int d=depth[a]+b;
+        auto be=lower_bound(pos[d].begin(), pos[d].end(), in[a]);
+        auto en=upper_bound(pos[d].begin(), pos[d].end(), out[a]);
+        --en;
+        int x=id[*be], y=id[*en];
+        x=T[x], y=T[y];
+        if(cache.count({x, y}))
+            printf("%u\n", cache[{x, y}]);
+        else
+        {
+            unsigned int ans=A[S[x]];
+            for(int j=x+1; j<=y; j++)
+                ans=bitTwister(ans, A[S[j]]);
+            printf("%u\n", cache[{x, y}]=ans);
+        }
+    }
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    for(int i=0; i<T; i++)
+        _main();
+    return 0;
+}

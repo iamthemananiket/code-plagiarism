@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+inline int scan(){
+    int x = 0;
+    char c = getchar_unlocked();
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x << 3) + (x << 1) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+
+const int MAX = 2e5 + 5;
+
+int T , N , M , A[MAX] ;
+vector < pair < int , int > > day[MAX];
+vector < int > adjList[MAX];
+set < int > nodes;
+int m[MAX] , ans[MAX] , cur = 0;
+bool vis[MAX];
+
+inline void dfs( int node ){
+	m[cur++] = node;
+	vis[node] = true;
+	for( int next : adjList[node] ){
+		if( vis[next] ) continue;
+		dfs( next );
+	}
+}
+
+inline void solve(){
+
+	for(int i = 1 ; i < MAX ; i++){
+		day[i].clear();
+		ans[i] = i;
+	}
+
+	N = scan() , M = scan();
+	
+	for(int i = 1 ; i <= N ; i++) A[i] = scan();
+	
+	for(int i = 1 ; i <= M ; i++){
+		int t = scan() , a = scan() , b = scan();
+		day[t].push_back( make_pair(a,b) );
+	}
+
+	for(int i = MAX - 1 ; i >= 1 ; i--){
+		
+		if( day[i].size() == 0 ) continue;
+		int sz = day[i].size();
+		
+		for(int j = 0 ; j < sz ; j++){
+			int u = day[i][j].first , v = day[i][j].second;
+			nodes.insert(u); nodes.insert(v);
+			adjList[u].push_back(v);
+			adjList[v].push_back(u);
+		}
+
+		for(int x : nodes){
+			if( !vis[x] ){
+				dfs(x);
+				int res = 0;
+				for(int j = 0 ; j < cur ; j++)
+				    res = max( res , ans[m[j]] );
+				for(int j = 0 ; j < cur ; j++)
+					ans[m[j]] = max( ans[m[j]] , res );
+				cur = 0;
+			}
+		}
+
+		for(int x : nodes){
+			adjList[x].clear();
+			vis[x] = false;
+		}
+
+		nodes.clear();
+	
+	}
+
+	long long opt = 0;
+	for(int i = 1 ; i <= N ; i++) opt += ans[ A[i] ];
+	printf("%lld\n",opt);
+
+}
+
+int main(){
+	T = scan();
+	while( T-- ) solve();	
+}

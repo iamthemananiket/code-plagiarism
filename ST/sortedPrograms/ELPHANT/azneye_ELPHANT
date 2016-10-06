@@ -1,0 +1,227 @@
+/*
+ * IOI '11 - Pattaya, Thailand
+ * Dancing Elephants
+ * File:   ioi1122.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Sep 19, 2013, 10:25:50 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace ioi1122 {
+const unsigned int buffer_size = 1 << 16;
+char input_buffer[buffer_size];
+unsigned int bytes_read = 0;
+unsigned int input_index = 0;
+
+inline char next_char() {
+  if (input_index == bytes_read) {
+    bytes_read = fread(input_buffer, sizeof(char), buffer_size, stdin);
+    input_buffer[bytes_read] = '\0'; //sentinel
+    input_index = 0;
+  }
+  return input_buffer[input_index++];
+}
+
+inline int next_int() {
+  char c = 0;
+  int ans = 0;
+  while (c < '-')
+    c = next_char();
+  while (c >= '0') {
+    ans = (ans << 1) + (ans << 3);
+    ans += c - '0';
+    c = next_char();
+  }
+  return ans;
+}
+
+char output_buffer[buffer_size];
+unsigned int output_index = 0;
+
+inline void write_flush() {
+  fwrite(output_buffer, sizeof(char), output_index, stdout);
+  output_index = 0;
+}
+
+inline void write_char(char c) {
+  output_buffer[output_index++] = c;
+  if (output_index == buffer_size)
+    write_flush();
+}
+
+inline void write_int(int num) {
+  if (num >= 10)
+    write_int(num / 10);
+  write_char(num % 10 + '0');
+}
+
+inline void println(int x) {
+  write_int(x);
+  write_char('\n');
+}
+
+const int MAX = 150000;
+const int INF = 1 << 30;
+
+struct Block {
+  int x[800], dp[800], to[800];
+  int S;
+
+  void process();
+
+  bool belong(int pos) {
+    return x[0] <= pos && pos <= x[S - 1];
+  }
+
+  void get(int& res, int& start) {
+    int p = upper_bound(x, x + S, start) - x;
+    if (p < S) {
+      res += dp[p];
+      start = to[p];
+    }
+  }
+
+  void add(int nx) {
+    x[S++] = nx;
+    for (int i = S - 2; i >= 0 && x[i] > x[i + 1]; i--)
+      swap(x[i], x[i + 1]);
+    process();
+  }
+
+  bool remove(int val) {
+    int pos = lower_bound(x, x + S, val) - x;
+    if (pos >= S || x[pos] != val)
+      return false;
+    for (int i = pos + 1; i < S; i++)
+      x[i - 1] = x[i];
+    S--;
+    process();
+    return true;
+  }
+
+};
+int pos[MAX], ord[MAX];
+Block b[400];
+int N, L, Q, B, BSIZE;
+
+void Block::process() {
+  x[S] = INF;
+  dp[S] = 0;
+  for (int i = S - 1, j = S; i >= 0; i--) {
+    while (x[i] + L < x[j])
+      j--;
+    dp[i] = dp[j + 1] + 1;
+    to[i] = (j + 1 == S ? x[i] + L : to[j + 1]);
+  }
+}
+
+bool cmp(int a, int b) {
+  return pos[a] < pos[b];
+}
+
+void build() {
+  for (int i = 0; i < N; i++)
+    ord[i] = i;
+  sort(ord, ord + N, cmp);
+  //plnarr(pos, pos + N);
+  //plnarr(ord, ord + N);
+  B = 0;
+  for (int i = 0; i < N; i += BSIZE, B++) {
+    b[B].S = min(N - i, BSIZE);
+    for (int j = 0; j < BSIZE && i + j < N; j++)
+      b[B].x[j] = pos[ord[i + j]];
+    b[B].process();
+  }
+}
+
+void go() {
+  int start = -1, res = 0;
+  for (int i = 0; i < B; i++)
+    b[i].get(res, start);
+  println(res);
+}
+
+void solve(int test_num) {
+  N = next_int();
+  L = next_int();
+  Q = next_int();
+  if (N > 50000) return;
+  for (int i = 0; i < N; i++)
+    pos[i] = next_int();
+  BSIZE = (int) sqrt(N);
+  build();
+  for (int q = 0, cnt = 0, id, npos; q < Q; q++, cnt++) {
+    if (cnt == BSIZE) {
+      cnt = 0;
+      build();
+    }
+    id = next_int();
+    npos = next_int();
+    for (int i = 0; i < B; i++)
+      if (b[i].remove(pos[id]))
+        break;
+    pos[id] = npos;
+    bool added = false;
+    int last;
+    for (int i = 0; i < B; i++) {
+      if (b[i].S == 0)
+        continue;
+      last = i;
+      if (b[i].belong(npos) || npos <= b[i].x[0]) {
+        b[i].add(npos);
+        added = true;
+        break;
+      }
+    }
+    if (!added)
+      b[last].add(npos);
+    go();
+  }
+  write_flush();
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  solve(1);
+}
+}
+
+int main() {
+  ioi1122::solve();
+  return 0;
+}

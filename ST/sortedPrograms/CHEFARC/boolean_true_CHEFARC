@@ -1,0 +1,102 @@
+#include<iostream>
+#include<climits>
+#include<string>
+#include<algorithm>
+#include<deque>
+#include<cmath>
+#define N 109
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+int allowed[N][N];
+int robo1[N][N];
+int robo2[N][N];
+int n, m;
+void propagate_robo1(int k)
+{
+	deque<pair<int, int> >r1;
+	r1.push_back(make_pair(0, 0));
+	robo1[0][0] = 0;
+	while (!r1.empty())
+	{
+		int curx = r1.front().first;
+		int cury = r1.front().second;
+		r1.pop_front();
+		for (int y = cury - k; y <= cury + k; y++)
+		{
+			for (int x = curx - k + (int)fabs((double)y - cury); x <= curx + k - (int)fabs((double)y - cury); x++)
+			{
+				if (x >= 0 && x < n&&y >= 0 && y < m && allowed[x][y] == 0)
+				{
+					if (robo1[x][y]>robo1[curx][cury] + 1)
+					{
+						robo1[x][y] = robo1[curx][cury] + 1;
+						r1.push_back(make_pair(x, y));
+					}
+				}
+			}
+		}
+	}
+}
+void propagate_robo2(int k)
+{
+	deque<pair<int, int> >r2;
+	r2.push_back(make_pair(0, m - 1));
+	robo2[0][m - 1] = 0;
+	while (!r2.empty())
+	{
+		int curx = r2.front().first;
+		int cury = r2.front().second;
+		r2.pop_front();
+		for (int y = cury - k; y <= cury + k; y++)
+		{
+			for (int x = curx - k + (int)fabs((double)y - cury);x <= curx + k - (int)fabs((double)y - cury); x++)
+			{
+				if (x >= 0 && x < n&&y >= 0 && y < m && allowed[x][y] == 0)
+				{
+					if (robo2[x][y]>robo2[curx][cury] + 1)
+					{
+						robo2[x][y] = robo2[curx][cury] + 1;
+						r2.push_back(make_pair(x, y));
+					}
+				}
+			}
+		}
+	}
+}
+int main()
+{
+	int test;
+	cin >> test;
+	while (test--)
+	{
+		int k1, k2;
+		cin >> n >> m >> k1 >> k2;
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < m; j++)
+			{
+				robo1[i][j] = robo2[i][j] = INT_MAX;
+			}
+		}
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < m; j++)
+				cin >> allowed[i][j];
+		}
+		propagate_robo1(k1);
+		propagate_robo2(k2);
+		int ans = INT_MAX;
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < m; j++)
+			{
+				ans = min(ans, max(robo1[i][j], robo2[i][j]));
+			}
+		}
+		if (ans == INT_MAX)
+			cout << "-1" << endl;
+		else
+			cout << ans << endl;
+	}
+}

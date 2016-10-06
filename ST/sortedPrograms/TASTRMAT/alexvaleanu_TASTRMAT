@@ -1,0 +1,333 @@
+#include <bits/stdc++.h>
+
+#define VI vector<int>
+#define VII vector<pair<int,int>>
+#define QI queue<int>
+
+#define ms(a,v) memset( a, v, sizeof( a ) )
+#define FOR(i,a,b) for(int i = a; i <= b; ++i)
+#define ROF(i,a,b) for(int i = a; i >= b; i--)
+#define foreach(v, c) for( typeof( (c).begin() ) v = (c).begin(); v != (c).end(); ++v)
+
+#define pb push_back
+#define pp pair<int,int>
+#define mp make_pair
+#define fi first
+#define se second
+
+#define popcount __builtin_popcount
+#define gcd __gcd
+#define bit(n,i) ( n & ( 1LL << i ) )
+#define lsb(x) ( x & ( -x ) )
+
+#define FIN(str) freopen(str,"r",stdin)
+#define FOUT(str) freopen(str,"w",stdout)
+#define Fin(str) ifstream(str)
+#define Fout(str) ostream(str)
+#define SYNC ios_base::sync_with_stdio(0);
+
+#define ll long long
+#define ull unsigned long long
+
+inline void read( int &a )
+{
+    register char ch;
+    a = 0;
+    int sign = 1;
+
+    do
+    {
+        ch = getchar();
+
+    } while ( !isdigit( ch ) && ch != '-' );
+
+    if ( ch == '-' )
+    {
+        sign = -1;
+        ch = getchar();
+    }
+
+    do
+    {
+        a = a * 10 + ch - '0';
+        ch = getchar();
+
+    } while( isdigit( ch ) );
+
+    a *= sign;
+}
+
+inline void write( int a )
+{
+    char s[20];
+    int i = 0;
+    int sign = 1;
+
+    if ( a < 0 )
+        sign = -1,
+        a = -a;
+
+    do
+    {
+        s[ i++ ] = a % 10 + '0';
+        a /= 10;
+
+    } while ( a );
+
+    i--;
+
+    if ( sign == -1 )
+        putchar( '-' );
+
+    while ( i >= 0 ) putchar( s[ i-- ] );
+}
+
+const int dx[] = { -1, 0, 1, 0 };
+const int dy[] = { 0, 1, 0, -1 };
+
+const int dl[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
+const int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+const int INF = 2e9;
+const double EPS = 1e-9;
+
+const int Nmax = 1e5 + 2;
+const int Maxn = 100000/32+2;
+
+const int LgMax = log2(Nmax) + 1;
+
+using namespace std;
+
+uint nrB[ ( 1 << 16 ) + 2 ];
+uint revB[ ( 1 << 16 ) + 2 ];
+
+uint bits( uint x )
+{
+	return nrB[ x & ( ( 1 << 16 ) - 1 ) ] + nrB[ x >> 16 ];
+}
+
+uint getrev(uint x)
+{
+	return ( revB[ x & ( ( 1 << 16 ) - 1 ) ] << 16 ) | revB[ x >> 16 ];
+}
+
+struct BitSet
+{
+	uint a[Maxn];
+
+	BitSet operator ^ ( const BitSet& o ) const
+	{
+		BitSet res;
+
+		for ( int i = 0; i < Maxn; ++i )
+            res.a[i] = a[i] ^ o.a[i];
+
+		return res;
+	}
+
+	BitSet operator & (const BitSet& o) const
+	{
+		BitSet res;
+
+		for ( int i = 0; i < Maxn; ++i )
+            res.a[i] = a[i] & o.a[i];
+
+		return res;
+	}
+
+	BitSet operator | (const BitSet& o) const
+	{
+		BitSet res;
+
+		for ( int i = 0; i < Maxn; ++i )
+            res.a[i] = a[i] | o.a[i];
+
+		return res;
+	}
+
+	void setint(int pos, uint val)
+	{
+		int ind = pos >> 5;
+
+		if ( ind >= 0 && ind < Maxn )
+            a[ind] |= val << ( pos & 31 );
+
+		pos += 31;
+		ind = pos >> 5;
+
+		if ( ind >= 0 && ind < Maxn )
+            a[ind] |= val >> ( 31 - ( pos & 31 ) );
+	}
+
+	void flip(int pos)
+	{
+		a[pos >> 5] ^= ( (uint)1 ) << ( pos & 31 );
+	}
+
+	int test(int pos) const
+	{
+		return ( a[pos >> 5] >> ( pos & 31 ) ) & 1;
+	}
+
+	void setval(int pos, int val)
+	{
+		if ( test( pos ) != val )
+            flip( pos );
+	}
+
+	BitSet shift(int sh)
+	{
+		BitSet res;
+		res.clear();
+		for ( int i = 0; i < Maxn; ++i ) {
+			int pos = (i<<5)+sh;
+			res.setint(pos, a[i]);
+		}
+		return res;
+	}
+
+	void clear()
+	{
+		memset(a,0,sizeof(a));
+	}
+
+	void fill(int l, int r, int val)
+	{
+		for (int i = l; i <= r; ) {
+			if ((i&31)||(i+31 > r)) setval(i, val), ++i;
+			else {
+				if (val) a[i>>5] = ~0;
+				else a[i>>5] = 0;
+				i += 32;
+			}
+		}
+	}
+
+	void copy(const BitSet& o, int l, int r, int to)
+	{
+		int sh = to-l;
+		for (int i = l; i <= r; ) {
+			if ((i&31)||(i+31 > r)) {
+				if (i+sh >= 0 && ((i+sh)>>5) < Maxn) setval(i+sh, o.test(i));
+				++i;
+			} else {
+				if (i+sh >= 0 && ((i+sh)>>5) < Maxn) setint(i+sh, o.a[i>>5]);
+				i += 32;
+			}
+		}
+	}
+	void reverse(int l, int r)
+	{
+		BitSet tmp = *this;
+		fill(l, r, 0);
+		for (int i = l; i <= r; ) {
+			if ((i&31)||(i+31 > r)) {
+				int toi = r-(i-l);
+				setval(toi, tmp.test(i));
+				++i;
+			} else {
+				setint(r-(i+31-l), getrev(tmp.a[i>>5]));
+				i += 32;
+			}
+		}
+	}
+};
+
+char A[Nmax], B[Nmax];
+int a[Nmax];
+int seq[Nmax];
+int N, M, K, T;
+
+int query( int L )
+{
+    int sol = seq[0] % 1000000007;
+
+    for ( int i = 1; i < L; ++i )
+    {
+        sol = ( 1LL * sol * 100001 + seq[i] ) % 1000000007;
+    }
+
+    return sol;
+}
+
+int main()
+{
+    ///FIN("data.in");
+    ///FOUT("data.out");
+
+    for ( int i = 0; i < ( 1 << 16 ); ++i )
+        nrB[i] = nrB[i >> 1] + ( i & 1 );
+
+    for ( int i = 0; i < ( 1 << 16 ); ++i )
+    {
+        int res = 0;
+        int aux = i;
+
+        for ( int j = 0; j < 16; ++j )
+        {
+            res = ( res << 1 ) | ( aux & 1 );
+            aux >>= 1;
+        }
+
+        revB[i] = res;
+    }
+
+	BitSet cur;
+
+    scanf("%s", A);
+    N = strlen( A );
+
+    scanf("%d", &K);
+
+    while ( K-- )
+    {
+        cur.clear();
+
+        scanf("%s", B);
+        M = strlen( B );
+        T = 0;
+
+        for ( int i = 0; i < N; ++i )
+        {
+            if ( A[i] == '1' )
+                cur.flip( i );
+        }
+
+        for ( int i = 0; i < M; ++i )
+        {
+            if ( B[i] == '1' )
+                cur.flip( i + N );
+        }
+
+        for ( int j = 0; j + M - 1 < N; ++j )
+        {
+            int dist = 0;
+
+            int l = j;
+            int r = N;
+
+			BitSet tmp = cur ^ cur.shift( j - N );
+
+			r = j + M - 1;
+
+			for ( int i = l; i <= r; )
+            {
+				if ( ( i & 31 ) || ( i + 31 > r ) )
+                {
+                    dist += tmp.test( i ), ++i;
+				}
+				else
+                {
+					dist += bits( tmp.a[i >> 5] );
+					i += 32;
+				}
+			}
+
+           seq[ T++ ] = dist;
+        }
+
+        printf("%d\n", query( T ) );
+    }
+
+    return 0;
+}

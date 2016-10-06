@@ -1,0 +1,102 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%lld",&x)
+#define pi(x) printf("%lld",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output_large.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli long long int
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+using namespace std;
+lli BIT[100001], a[100001], n;
+void update(int x, int val)
+{
+      for(; x <= n; x += x&-x)
+        BIT[x] += val;
+}
+lli query(int x)
+{
+     lli sum = 0;
+     for(; x > 0; x -= x&-x)
+        sum += BIT[x];
+     return sum;
+}
+int prog()
+{
+    lli i,j,k,m,x,y,z;
+    gi(n);
+    fl(i,0,100001)
+        BIT[i]=0;
+    vector<lli> g1;
+    vector<lli> g2;
+    map<lli,lli> rev;
+    vector<pair<lli,lli> > mar;
+    fl(i,0,n)
+    {
+        gi(x);gi(y);
+        mar.pb(mp(x,y));
+    }
+    sort(mar.begin(),mar.end());
+    fl(i,1,n+1)
+    {
+        x=mar[i-1].fi;
+        y=mar[i-1].se;
+        g1.pb(y);
+        g2.pb(y);
+    }
+    sort(g2.begin(),g2.end());
+    fl(i,1,n+1)
+    {
+        rev[g2[i-1]]=i;
+    }
+    fl(i,0,n)
+        g1[i]=rev[g1[i]];
+    x = 0;
+    fl(i,0,n)
+    {
+        //cout<<g1[i]<<"  ";
+        y=(i)-query(g1[i]);
+        //cout<<y<<endl;
+        update(g1[i], 1);
+        x+=y;
+    }
+    cout<<x;
+    r0;
+}
+int main()
+{
+    //f_in;
+    lli t;
+    t=1;
+    //gi(t);
+    while(t--)
+        prog();
+    return 0;
+}

@@ -1,0 +1,58 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+int main() {
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int N;
+		scanf("%d", &N);
+		vector<int> A(N);
+		vector<vi> B(N);
+		int sum = 0;
+		rep(i, N) {
+			scanf("%d", &A[i]);
+			sum += A[i];
+			rep(j, A[i]) {
+				int b;
+				scanf("%d", &b);
+				B[i].push_back(b);
+			}
+		}
+		vector<int> seq(sum);
+		for(int i = 0; i < sum; ++ i)
+			scanf("%d", &seq[i]);
+		reverse(seq.begin(), seq.end());
+		vector<int> prod(N + 1);
+		prod[0] = 1;
+		rep(i, N)
+			prod[i + 1] = prod[i] * (A[i] + 1);
+		int P = prod[N];
+		vector<bool> dp(P);
+		dp[0] = true;
+		int idx[21];
+		rep(p, P - 1) if(dp[p]) {
+			int x = p, len = 0;
+			rep(i, N) {
+				idx[i] = x % (A[i] + 1);
+				len += idx[i];
+				x /= A[i] + 1;
+			}
+			int s = seq[len];
+			rep(i, N) {
+				if(idx[i] < A[i] && B[i][idx[i]] == s)
+					dp[p + prod[i]] = true;
+			}
+		}
+		bool ans = dp[P - 1];
+		puts(ans ? "Yes" : "No");
+	}
+	return 0;
+}

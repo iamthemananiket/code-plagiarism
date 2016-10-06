@@ -1,0 +1,78 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+//#include <unordered_map>
+
+using namespace std;
+
+vector<long long> v1, v2;
+long long a[111111];
+
+long long ccc(long long s) {
+    long long cc = 0;
+    for(int i = 0; i < v1.size(); ++i) {
+        if (v1[i] > s) continue;
+        cc += (int)(upper_bound(v2.begin(), v2.end(), s - v1[i]) - v2.begin());
+    }
+    return cc;
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    //freopen("input.txt", "r", stdin); //freopen("output.txt", "w", stdout);
+    int n, k;
+    cin >> n >> k;
+    for(int i = 0; i < n; ++i)
+        cin >> a[i];
+
+    long long sum = 0;// accumulate(a, a+n, 0);
+    for(int i = 0; i < n; ++i)
+        sum += a[i];
+    long long s = 0;
+    v1.push_back(0);
+    v2.push_back(0);
+    for(int i = 0; i < n; ++i) {
+        s += a[i];
+        v1.push_back(s);
+    }
+    s = 0;
+    for(int i = 0; i < n; ++i) {
+        s += a[n-i-1];
+        v2.push_back(s);
+    }
+
+    s = 0;
+    for(int i = 60; i >= 0; --i) {
+        if (ccc(s + (1ll << i)) < k)
+            s += (1ll << i);
+    }
+    s += 2;
+
+    vector<long long> vv;
+    for(int i = 0; i < v1.size() && v1[i] <= s; ++i) {
+        for(int j = 0; j < v2.size() && v1[i] + v2[j] <= s; ++j)
+        vv.push_back(v1[i] + v2[j]);
+    }
+    sort(vv.begin(), vv.end());
+    for(int i = 0; i < k; ++i)
+        cout << sum - vv[i] << " ";
+    cout << "\n";
+
+
+    return 0;
+}

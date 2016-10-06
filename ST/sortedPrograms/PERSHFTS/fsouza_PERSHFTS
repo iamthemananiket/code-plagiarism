@@ -1,0 +1,93 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+const int mod = 1e9+7, inv2 = (mod+1)/2;
+
+struct Bit {
+  int n;
+  vector<int> bit;
+  Bit(int n): n(n), bit(n+1) {}
+  void add(int i, int v) {
+    for (++i; i <= n; i += i&-i) bit[i] += v;
+  }
+  int query(int i) {
+    int ret = 0;
+    for (++i; i > 0; i -= i&-i) ret += bit[i];
+    return ret;
+  }
+};
+
+int parity(vector<int> v) {
+  int ret = 0;
+  for (int i = 0; i < (int)v.size(); ++i)
+    while (v[i] != i)
+      swap(v[i], v[v[i]]), ret ^= 1;
+  return ret;
+}
+
+int find_idx(const vector<int> &v, bool same_parity, const vector<int> &fact) {
+  const int n = v.size();
+  int idx = 0;
+  Bit bit(n);
+  for (int i = 0; i < n; ++i) bit.add(i, +1);
+  for (int i = 0; i < n; ++i) {
+    bit.add(v[i], -1);
+    int nless = bit.query(v[i]);
+    if (same_parity) {
+      if (i < n-2)
+	idx = (idx + (lint)nless * fact[n-i-1] % mod * inv2) % mod;
+    } else {
+      idx = (idx + (lint)nless * fact[n-i-1]) % mod;
+    }
+  }
+  return idx;
+}
+
+int main() {
+  const int maxn = 100000;
+  vector<int> fact(maxn+1);
+  fact[0] = 1;
+  for (int v = 1; v <= maxn; ++v) fact[v] = (lint)fact[v-1] * v % mod;
+  
+  int nt;
+  scanf("%d", &nt);
+
+  for (int t = 0; t < nt; ++t) {
+    int n, k;
+    scanf("%d %d", &n, &k);
+
+    vector<int> p(n), q(n);
+    for (int i = 0; i < n; ++i) scanf("%d", &p[i]), --p[i];
+    for (int i = 0; i < n; ++i) scanf("%d", &q[i]), --q[i];
+
+    int idx;
+    if (k == n) {
+      vector<int> rotp = p;
+      rotate(rotp.begin(), find(rotp.begin(), rotp.end(), q[0]), rotp.end());
+      if (rotp == q) idx = q[0];
+      else idx = -1;
+    } else if (k%2 == 1) {
+      if (parity(p) == parity(q)) idx = find_idx(q, true, fact);
+      else idx = -1;
+    } else {
+      idx = find_idx(q, false, fact);
+    }
+
+    if (idx >= 0) printf("%d\n", (idx + 1) % mod);
+    else printf("-1\n");
+  }
+
+  return 0;
+}

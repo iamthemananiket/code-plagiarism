@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		string s;
+		cin>>s;
+		set<string> ss; 
+		for (int i = 0; i < (int)s.length() - 1; i++) {
+			string tmp = "";
+			tmp.push_back(s[i]);
+			tmp.push_back(s[i + 1]);
+			ss.insert(tmp);
+		}    
+		cout<<(int)ss.size()<<endl;
+	}
+}

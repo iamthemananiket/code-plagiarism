@@ -1,0 +1,116 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+template<typename T, typename Func>
+void countingSort(int n, const T v[], T dest[], int cnt[/*B*/], int B, Func f) {
+	if(n <= (B >> 4) || n <= 16) {
+		memcpy(dest, v, sizeof(T) * n);
+		std::stable_sort(dest, dest + n, [f](const T &a, const T &b) -> bool { return f(a) < f(b); });
+		return;
+	}
+	for(int j = 0; j < B; ++ j)
+		cnt[j] = 0;
+	for(int i = 0; i < n; ++ i)
+		++ cnt[f(v[i])];
+	for(int j = 1; j < B; ++ j)
+		cnt[j] += cnt[j - 1];
+	for(int i = n - 1; i >= 0; -- i)
+		dest[-- cnt[f(v[i])]] = v[i];
+}
+
+int main() {
+	int N; int M; int Q;
+	while(~scanf("%d%d%d", &N, &M, &Q)) {
+		vector<vector<int> > A(N, vector<int>(M));
+		int S = 0;
+		for(int i = 0; i < N; ++ i) for(int j = 0; j < M; ++ j) {
+			scanf("%d", &A[i][j]);
+//			A[i][j] = 1;
+			S += A[i][j];
+		}
+		vector<int> cnts(S + 1, 0);
+		rep(rot, 4) {
+			vector<vi> sumH(N, vi(M + 1));
+			rep(i, N) rep(j, M)
+				sumH[i][j + 1] = sumH[i][j] + A[i][j];
+
+			rep(i, N) rep(j, M) {
+				int num = A[i][j];
+				for(int k = 1; i + k < N && j - k >= 0 && j + k < M; ++ k) {
+					num += sumH[i + k][j + k + 1] - sumH[i + k][j - k];
+					++ cnts[num];
+				}
+			}
+
+			vector<vi> sumD(N + 1, vi(M + 1));
+			rep(i, N) rep(j, M)
+				sumD[i + 1][j + 1] = sumD[i][j] + A[i][j];
+
+			rep(i, N) rep(j, M) {
+				int num = A[i][j];
+				for(int k = 1; i + k < N && j - k >= 0; ++ k) {
+					num += sumD[i + k + 1][j + 1] - sumD[i][j - k];
+					++ cnts[num];
+				}
+			}
+
+			vector<vi> nA(M, vi(N));
+			rep(i, N) rep(j, M) nA[j][i] = A[i][M - 1 - j];
+			A = nA;
+			swap(N, M);
+		}
+
+		cnts[0] = 0;
+		vector<int> sums0(S + 1);
+		vector<ll> sums1(S + 1);
+		rer(i, 1, S) {
+			sums0[i] = sums0[i - 1] + cnts[i];
+			sums1[i] = sums1[i - 1] + (ll)cnts[i] * i;
+		}
+
+		rep(i, Q) {
+			int G;
+			scanf("%d", &G);
+			int k = upper_bound(all(sums1), G) - sums1.begin();
+			int ans = sums0[k - 1];
+			if(k <= S)
+				ans += (int)(G - sums1[k - 1]) / k;
+			printf("%d\n", ans);
+		}
+	}
+	return 0;
+}

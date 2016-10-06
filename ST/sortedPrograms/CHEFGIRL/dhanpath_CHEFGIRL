@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+int  n, m, p=0 ;
+int  dp[2][32] ;
+vector<set<int>>  edges ;
+vector<int>  rangeL, rangeR, L, R ;
+
+void  dfs( int u )
+{
+        for( int i=0; i<32; i++ )
+        {
+                if( i < rangeL[u] )
+                        L[i] +=  rangeL[u] - i ;
+                if( i > rangeR[u] )
+                        R[i] +=  i - rangeR[u] ;
+        }
+        if( ! edges[u].empty() )
+                dfs( *edges[u].begin() );
+}
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        cin >> n >> m ;
+
+        edges.resize(n);
+        rangeL.resize(n);
+        rangeR.resize(n);
+
+        while(m--)
+        {
+                int  x, y, a, b ;
+                cin >> x >> y >> a >> b ;
+                if( edges[x-1].find(y-1) != edges[x-1].end() )
+                        while(1){}
+                else  edges[x-1].insert(y-1);
+                rangeL[y-1] = a-1 ;
+                rangeR[y-1] = b-1 ;
+        }
+
+        for( int i=0; i<32; i++ )
+                dp[p][i] = 1<<30 ;
+
+        for( auto &z: edges[0] )
+        {
+                L.clear();
+                L.resize(32,0);
+                R.clear();
+                R.resize(32,0);
+                dfs(z);
+                p = 1-p ;
+                for( int i=0; i<32; i++ )
+                {
+                        dp[p][i] = min( dp[!p][i], L[0]+R[i] );
+                        for( int j=0; j<i; j++ )
+                                if(  dp[p][i]  >  dp[!p][j] + L[j+1] + R[i]  )
+                                        dp[p][i]  =  dp[!p][j] + L[j+1] + R[i]  ;
+                }
+        }
+
+        if( dp[p][31] == 1<<30 )
+                dp[p][31] = 0 ;
+
+        cout << dp[p][31] ;
+
+        return 0;
+} 

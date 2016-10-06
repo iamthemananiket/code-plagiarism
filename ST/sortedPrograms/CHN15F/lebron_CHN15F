@@ -1,0 +1,205 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int N = 1000;
+
+using namespace std;
+
+int tests,n,m,mod;
+int reach[200];
+
+int iters;
+
+void mult(vector<vector<int> > &a,vector<vector<int > > &b)
+{
+	vector<vector<int> > res;
+	res=a;
+	for (int i=0;i<res.size();i++)
+		for (int j=0;j<res[i].size();j++)
+			res[i][j]=0;
+	
+	for (int i=0;i<res.size();i++)
+		for (int k=0;k<res.size();k++)
+		if (a[i][k]>0)
+			for (int j=0;j<res.size();j++)
+			{	
+				res[i][j]=(res[i][j]+1ll*a[i][k]*b[k][j])%mod;
+			}
+	
+	for (int i=0;i<res.size();i++)
+		for (int j=0;j<res.size();j++)
+			a[i][j]=res[i][j];
+}
+/*
+vector<vector<long long> > pw(vector<vector<long long> > a,long long b)
+{
+	if (b==1)
+		return a;
+	if (b%2)
+		return mult(a,pw(a,b-1));
+	return pw(mult(a,a),b/2);
+}
+*/
+void show(vector<vector<int> > v)
+{
+	for (int i=0;i<v.size();i++)
+	{
+		for (int j=0;j<v[i].size();j++)
+			cout<<v[i][j]<<" ";
+		cout<<endl;
+	}
+}
+
+int nreach[200];
+vector<vector<int> >V[100];
+int dp[200][200];
+vector<pair<int, int> > g[200];
+
+int main(){
+//	freopen("path2.in","r",stdin);
+//	freopen("path2.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>tests;
+	
+	for (;tests;--tests)
+	{
+		cin>>n>>m>>mod;
+		
+		vector<vector<int> > v;
+		
+		v.resize(1<<n);
+		for (int i=0;i<v.size();i++)
+		{
+			v[i].resize(1<<n);
+			for (int j=0;j<v[i].size();j++)
+				v[i][j]=0;
+		}
+		
+		for (int mask=0;mask<(1<<n);mask++)
+			for (int mask2=0;mask2<(1<<n);mask2++)
+			{
+				for (int i=0;i<n;i++)
+					reach[i]=0;
+				for (int old=0;old<n;old++)
+					if ((mask&(1<<old)))
+						for (int nw=old;nw<=old;nw++)
+						{
+							if (nw!=old)
+								continue;
+							if (!(mask2&(1<<nw)))
+								continue;
+							int L,R;
+							L=min(old,nw);
+							R=max(old,nw);
+							int bad=0;
+							for (int q=L;q<=R;q++)
+								if (!(mask&(1<<q)))
+									bad=1;
+							if (bad)
+								continue;
+							reach[nw]=1;
+						}
+				
+				for (int i=0;i<n;i++)
+					nreach[i]=0;
+					
+				for (int i=0;i<n;i++)
+					if (reach[i])
+					{
+						int L,R;
+						L=R=i;
+						if (L>0&&(mask2&(1<<(L-1))))
+							--L;
+						if (R+1<n&&(mask2&(1<<(R+1))))
+							++R;
+						for (int j=L;j<=R;j++)
+							nreach[j]=1;
+					}
+				int new_mask=0;
+				for (int i=0;i<n;i++)
+					new_mask+=nreach[i]*(1<<i);
+				v[mask][new_mask]=(v[mask][new_mask]+1)%mod;	
+			}
+		
+		int SZ=0;
+		
+		for (int i=0;i<v.size();i++)
+		{
+			g[i].clear();
+			for (int j=0;j<v.size();j++)
+			{
+				if (v[i][j])
+					g[i].push_back(make_pair(j,v[i][j]));
+			}
+			SZ+=g[i].size();
+		}
+		
+	//	cout<<SZ<<endl;
+		
+//		show(v);
+		
+		//v=pw(v,m);
+		
+		dp[0][1]=1;
+		for (int i=0;i<m;i++)
+		{
+			for (int j=0;j<(1<<n);j++)
+				dp[i+1][j]=0;
+			
+			for (int mask=0;mask<(1<<n);mask++)
+			{
+				for (int j=0;j<g[mask].size();j++)
+				{
+					int new_mask=g[mask][j].first;
+					int ways=g[mask][j].second;
+					dp[i+1][new_mask]=(dp[i+1][new_mask]+1ll*ways*dp[i][mask])%mod;
+				}
+			}
+		}
+		
+		int ans=0;
+		for (int i=1;i<v.size();i++)
+			ans+=dp[m][i],
+			ans%=mod;
+		cout<<ans<<endl;
+		//cout<<iters<<endl;
+		
+	}
+	
+	return 0;
+}

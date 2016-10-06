@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1010;
+const int SIZE = 26;
+const int LIMIT = 1e9 + 9;
+
+char a[N], b[N];
+int toA[N][26], toB[N][26];
+int memoLCS[N][N];
+int memoCnt[N][N];
+int n, k;
+
+void build(char a[], int to[][26]) {
+    for (int c = 0; c < 26; ++c) for (int i = n - 1; i >= 0; --i) {
+        if (a[i + 1] - 'a' == c)
+            to[i][c] = i + 1;
+        else
+            to[i][c] = to[i + 1][c];
+    }
+}
+
+int dpLCS(int i, int j) {
+    int &ans = memoLCS[i][j];
+    if (ans != -1) return ans;
+    if (i > n || j > n) return ans = 0;
+    ans = max(dpLCS(i + 1, j), dpLCS(i, j + 1));
+    if (a[i] == b[j]) return ans = max(ans, dpLCS(i + 1, j + 1) + 1);
+    return ans;
+}
+
+int dpCnt(int i, int j) {
+    assert(a[i] == b[j]);
+    int &ans = memoCnt[i][j];
+    if (ans != -1) return ans;
+    int curLCS = dpLCS(i, j);
+    if (curLCS == 1) return ans = 1;
+    ans = 0;
+    for (int c = 0; c < 26; ++c) if (toA[i][c] && toB[j][c]) {
+        int append = dpLCS(toA[i][c], toB[j][c]);
+        if (append + 1 == curLCS) {
+            ans += dpCnt(toA[i][c], toB[j][c]);
+            if (ans > LIMIT) ans = LIMIT;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    cin >> n >> k;
+    cin >> (a + 1) >> (b + 1);
+    build(a, toA); build(b, toB);
+    memset(memoLCS, -1, sizeof(memoLCS));
+    memset(memoCnt, -1, sizeof(memoCnt));
+    int LCS = dpLCS(1, 1);
+    int x = 0, y = 0, curLCS = LCS;
+    string ans;
+    for (int i = 1; i <= LCS; ++i) {
+        bool found = false;
+        for (int c = 0; c < 26; ++c) if (toA[x][c] && toB[y][c]) {
+            int newX = toA[x][c], newY = toB[y][c];
+            int append = dpLCS(newX, newY);
+            if (curLCS == append) {
+                int cnt = dpCnt(newX, newY);
+                if (k <= cnt) {
+                    found = true;
+                    ans += char('a' + c);
+                    x = newX; y = newY;
+                    --curLCS;
+                    break;
+                } else {
+                    k -= cnt;
+                }
+            }
+        }
+        if (!found) {
+            cout << -1 << endl;
+            return 0;
+        }
+    }
+    cout << ans << endl;
+    return 0;
+}

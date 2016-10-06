@@ -1,0 +1,78 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 1e5 + 100;
+
+int n;
+
+int a[MAX_N];
+
+map <int, int> ma;
+
+priority_queue <int> pq;
+
+int pos;
+int b[MAX_N];
+
+int main ()
+{
+	int t, ans, j, p, q, i;
+	map <int, int> :: iterator it, curr;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		ma.clear ();
+		ans = 0;
+		scanf ("%d", &n);
+		for (i = 1; i <= n; i ++)
+		{
+			scanf ("%d", &a[i]);
+			ma[a[i]] ++;
+		}
+		
+		for (it = ma.begin (); it != ma.end (); it ++)
+		{
+			pq.push (it->second);
+			///printf ("%d %d\n", it->first, it->second);
+		}
+		
+		while (!pq.empty ())
+		{
+			p = pq.top ();
+			pq.pop ();
+			if (pq.empty ())
+			{
+				pq.push (p);
+				break;
+			}
+			q = pq.top ();
+			pq.pop ();
+			///printf ("%d %d %d\n", p, q, ans);
+			ans ++;
+			p --;
+			q --;
+			if (q)
+				pq.push (q);
+			if (p)
+				pq.push (p);
+		}
+		
+		if (!pq.empty ())
+		{
+			p = pq.top ();
+			pq.pop ();
+			ans += p;
+		}
+		printf ("%d\n", ans);
+	}
+	return 0;
+}

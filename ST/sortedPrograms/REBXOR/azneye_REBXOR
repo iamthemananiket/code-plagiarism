@@ -1,0 +1,106 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+struct Node {
+  Node* ch[2];
+};
+typedef long long ll;
+typedef Node* pNode;
+const int MOD = int(1e9) + 7;
+const int MAX = 411000;
+int a[MAX], lef[MAX], rig[MAX];
+Node pool[MAX * 60], *ptr = pool;
+
+void add(pNode at, int x) {
+  for (int b = 29; b >= 0; --b) {
+    const int bit = x >> b & 1;
+    if (!at->ch[bit]) {
+      at->ch[bit] = ptr++;
+    }
+    at = at->ch[bit];
+  }
+}
+
+int get_max(pNode at, int x) {
+  int res = 0;
+  for (int b = 29; b >= 0; --b) {
+    const int bit = (x >> b & 1) ^ 1;
+    if (at->ch[bit]) {
+      at = at->ch[bit];
+      res |= 1 << b;
+    } else {
+      at = at->ch[bit ^ 1];
+    }
+  }
+  return res;
+}
+
+void solve(int test_num) {
+  int N;
+  scanf("%d", &N);
+  for (int i = 0; i < N; ++i) {
+    scanf("%d", a + i);
+  }
+  pNode root = ptr++;
+  int sum = 0;
+  add(root, 0);
+  for (int i = 0; i < N; ++i) {
+    sum ^= a[i];
+    lef[i] = get_max(root, sum);
+    if (i > 0) {
+      lef[i] = max(lef[i], lef[i - 1]);
+    }
+    add(root, sum);
+  }
+  root = ptr++;
+  sum = 0;
+  add(root, 0);
+  for (int i = N - 1; i >= 0; --i) {
+    sum ^= a[i];
+    rig[i] = get_max(root, sum);
+    if (i + 1 < N) {
+      rig[i] = max(rig[i], rig[i + 1]);
+    }
+    add(root, sum);
+  }
+  int res = 0;
+  for (int i = 0; i + 1 < N; ++i) {
+    res = max(res, lef[i] + rig[i + 1]);
+  }
+  cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

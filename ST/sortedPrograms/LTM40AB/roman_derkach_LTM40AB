@@ -1,0 +1,25 @@
+#include<bits/stdc++.h>
+#define int long long
+ using namespace std;
+ int ans,t,a,b,c,d,i;
+  //int
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+     cin>>t;
+      while(t-->0)
+      {
+        cin>>a>>b>>c>>d;
+        ans = 0;
+         for(i=a;i<=b;++i)
+         {
+            ans+=max(0ll,(d - max(c,i+1) + 1));
+         }
+         cout<<ans<<'\n';
+      }
+
+  }

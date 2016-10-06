@@ -1,0 +1,120 @@
+#include<cassert>
+#include<queue>
+#include<stack>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+const LL INF = 1LL<<60;
+
+int T, N, K, A[5111];
+LL dp[5111][5111]; // 125 000 000 000
+LL O[5111][5111];
+
+void test() {
+    N = 5000;
+    K = N;///2;
+    REP (i, N) A[i] = rand() % 1000000000;
+}
+
+int cnt;
+
+void rec(int t, int x, int y, int l, int r) {
+    if (l+1 == r) {
+	for (int i=max(x, l); i<y; i++) amin(dp[t][i], dp[t-1][l] + O[l][i]);
+	cnt += y-x;
+	return;
+    }
+    int m = (x+y)/2;
+    int k = 1;
+    for (int i=l; i<r && i<m; i++) {
+	if (dp[t][m] > dp[t-1][i] + O[i][m]) {
+	    dp[t][m] = dp[t-1][i] + O[i][m];
+	    k = i;
+	}
+	cnt++;
+    }
+
+    if (x+1 >= y) return;
+    rec(t, x, m, l, k+1);
+    rec(t, m+1, y, k, r);
+}
+
+int nxt[5111][33];
+ 
+int main() {
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d%d", &N, &K);
+	REP (i, N) scanf("%d", A+i);
+//	 test();
+	
+	REP (i, N) {
+	    O[i][i+1] = A[i];
+	    nxt[i][0] = i+1;
+	    int cnt = 1;
+	    for (int r=i+1; r<N; r++) {
+		O[i][r+1] = O[i][r] | A[r];
+		if (O[i][r] != O[i][r+1]) nxt[i][cnt++] = r+1;
+	    }
+	      while (cnt < 33) {
+		nxt[i][cnt] = nxt[i][cnt-1];
+		cnt++;
+	    }
+	}
+
+	REP (i, K+1) REP (j, N+1) dp[i][j] = -INF;
+	dp[0][0] = 0;
+
+	VI v(1, 0);
+	REP (b, K) {
+	    EACH (e, v) {
+		REP (j, 33) {
+		    int nx = nxt[*e][j]; LL x = O[*e][nx];
+		    amax(dp[b+1][nx], dp[b][*e] + x);
+		    if ((j < 32 && nxt[*e][j] == nxt[*e][j+1]) || N-nx < K-b-1) break;
+		}
+	    }
+	    if (b+1==K) break;
+	    v.clear();
+	    LL lo = -1;
+	    REP (i, N) {
+		if (dp[b+1][i] > lo) {
+		    v.push_back(i);
+		    lo = dp[b+1][i];
+		}
+	    }
+	}
+
+	LL ans = *max_element(dp[K], dp[K]+N+1);
+		
+	// REP (i, N+1) REP (j, N+1) O[i][j] = -O[i][j];
+	
+	// REP (i, K+1) REP (j, N+1) dp[i][j] = INF;
+	// dp[0][0] = 0;
+
+	// cnt = 0;
+	// REP (t, K) rec(t+1, 1, N+1, 0, N);
+	
+	// eprintf("%d\n%d\n", cnt, N*K*12);
+	
+	// LL ans = -dp[K][N];
+	
+	printf("%lld\n", ans);
+    }
+    return 0;
+}

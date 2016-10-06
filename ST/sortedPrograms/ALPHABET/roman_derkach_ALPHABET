@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+//#define int long long
+#define pb push_back
+ using namespace std;
+
+ char a[1000];
+ string s;
+ int i,n;
+
+ inline void tt()
+ {
+     for(i=0;i<(int)s.size();++i)
+        if(!a[s[i]-'a'])
+     {
+         cout<<"No\n";
+         return;
+     }
+     cout<<"Yes\n";
+ }
+
+ //int
+  main()
+ {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    // freopen("O.in","r",stdin);freopen("O.out","w",stdout);
+
+    cin>>s;
+    for(i=0;i<(int)s.size();++i) a[s[i]-'a']=1;
+
+    cin>>n;
+    while(n--)
+    {
+        cin>>s;
+        tt();
+    }
+
+ }

@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <string.h>
+#include <vector>
+
+using namespace std;
+
+const int N = 1000010;
+const int S = 7;
+
+int inv[S][S];
+char A[N], B[N];
+int L;
+int valA[N], valB[N];
+int bck[N], ans[N], l;
+
+void evaluate(void) {
+  scanf("%s%s%d", A, B, &L);
+  int la = strlen(A), lb = strlen(B);
+  for(int i = 0;i < la;i++) valA[i] = A[i] - '0';
+  for(int i = 0;i < lb;i++) valB[i] = B[i] - '0';
+  while(valB[lb-1] == 0) { la--; lb--; }
+  l = 0;
+  int val, carry, k, kk;
+  for(int j = la - 1;j >= 0 and l < L;j--) {
+    val = inv[valA[j]][valB[lb-1]];
+    ans[l++] = val;
+    carry = 0;
+    for(k = lb-1, kk = j;kk >= j-L-1 and (k >= 0 or carry);k--, kk--) {
+      carry += (k >= 0 ? val * valB[k] : 0);
+      valA[kk] -= carry % S;
+      carry /= S;
+      if(valA[kk] < 0) {
+        valA[kk-1]--;
+        valA[kk] += S;
+      }
+    }
+  }
+  int f = 0;
+  for(int i = l-1;i >= 0;i--) {
+    if(ans[i] == 0 and f == 0) continue;
+    f = 1;
+    printf("%d", ans[i]);
+  }
+  if(f == 0) printf("0");
+  printf("\n");
+}
+int main() {
+  int t;
+  for(int i = 0;i < S;i++) {
+    for(int j = 0;j < S;j++) {
+      inv[(j * i) % S][i] = (i == 0 ? 0 : j);
+    }
+  }
+  scanf("%d", &t);
+  while(t--) {
+    evaluate();
+  }
+  return 0;
+}

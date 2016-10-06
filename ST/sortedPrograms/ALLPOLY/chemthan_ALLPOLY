@@ -1,0 +1,314 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return a > val ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+
+#define RL long double
+#define EPS 1e-9
+struct PT {
+	RL x, y;
+	PT() {}
+	PT(RL x, RL y) : x(x), y(y) {}
+	PT(const PT& p) : x(p.x), y(p.y) {}
+	bool operator < (const PT& rhs) const {return make_pair(y, x) < make_pair(rhs.y, rhs.x);}
+	bool operator == (const PT& rhs) const {return make_pair(y, x) == make_pair(rhs.y, rhs.x);}
+	PT operator + (const PT& p) const {return PT(x + p.x, y + p.y);}
+	PT operator - (const PT& p) const {return PT(x - p.x, y - p.y);}
+	PT operator * (RL c) const {return PT(x * c, y * c);}
+	PT operator / (RL c) const {return PT(x / c, y / c);}
+};
+RL cross(PT p, PT q) {return p.x * q.y - p.y * q.x;}
+RL area(PT a, PT b, PT c) {return fabs(cross(a, b) + cross(b, c) + cross(c, a)) / 2;}
+RL area2(PT a, PT b, PT c) {return cross(a, b) + cross(b, c) + cross(c, a);}
+RL dot(PT p, PT q) {return p.x * q.x + p.y * q.y;}
+RL dist(PT p, PT q) {return sqrt(dot(p - q, p - q));}
+RL dist2(PT p, PT q) {return dot(p - q, p - q);}
+PT RotateCCW90(PT p) {return PT(-p.y, p.x);}
+PT RotateCW90(PT p) {return PT(p.y, -p.x);}
+PT RotateCCW(PT p, RL t) {return PT(p.x * cos(t) - p.y * sin(t), p.x * sin(t) + p.y * cos(t));}
+int rlcmp(RL x) {return x < -EPS ? -1 : x > EPS;}
+int rlcmp(RL x, RL y) {return rlcmp(x - y);}
+ostream& operator << (ostream& os, const PT& p) {
+  os << "(" << p.x << "," << p.y << ")"; 
+}
+int LinesParallel(PT a, PT b, PT c, PT d) {
+	return fabs(cross(b - a, c - d)) < EPS;
+}
+PT ComputeLineIntersection(PT a, PT b, PT c, PT d) {
+	b = b - a; d = c - d; c = c - a;
+	return a + b * cross(c, d) / cross(b, d);
+}
+#define REMOVE_REDUNDANT
+#ifdef REMOVE_REDUNDANT
+bool between(const PT& a, const PT& b, const PT& c) {
+	return (fabs(area2(a, b, c)) < EPS && (a.x - b.x) * (c.x - b.x) <= 0 && (a.y - b.y) * (c.y - b.y) <= 0);
+}
+#endif
+void ConvexHull(vector<PT>& pts) {
+	sort(pts.begin(), pts.end());
+	pts.erase(unique(pts.begin(), pts.end()), pts.end());
+	vector<PT> up, dn;
+	for (int i = 0; i < pts.size(); i++) {
+		while (up.size() > 1 && area2(up[up.size() - 2], up.back(), pts[i]) >= +EPS) up.pop_back();
+		while (dn.size() > 1 && area2(dn[dn.size() - 2], dn.back(), pts[i]) <= -EPS) dn.pop_back();
+		up.push_back(pts[i]);
+		dn.push_back(pts[i]);
+	}
+	pts = dn;
+	for (int i = up.size() - 2; i >= 1; i--) pts.push_back(up[i]);
+//#ifdef REMOVE_REDUNDANT
+//	if (pts.size() <= 2) return;
+//	dn.clear();
+//	dn.push_back(pts[0]);
+//	dn.push_back(pts[1]);
+//	for (int i = 2; i < pts.size(); i++) {
+//		if (between(dn[dn.size() - 2], dn[dn.size() - 1], pts[i])) dn.pop_back();
+//		dn.push_back(pts[i]);
+//	}
+//	if (dn.size() >= 3 && between(dn.back(), dn[0], dn[1])) {
+//		dn[0] = dn.back();
+//		dn.pop_back();
+//	}
+//	pts = dn;
+//#endif
+}
+PT ProjectPointSegment(PT a, PT b, PT c) {
+	RL r = dot(b - a, b - a);
+	if (fabs(r) < EPS) return a;
+	r = dot(c - a, b - a) / r;
+	if (r < 0) return a;
+	if (r > 1) return b;
+	return a + (b - a) * r;
+}
+int PointOnPolygon(const vector<PT>& p, PT q) {
+	for (int i = 0; i < p.size(); i++) if (dist2(ProjectPointSegment(p[i], p[(i + 1) % p.size()], q), q) < EPS) return 1;
+	return 0;
+}
+int PointInPolygonSlow(const vector<PT>& p, PT q) {
+	int c = 0;
+	for (int i = 0; i < p.size(); i++) {
+		int j = (i + 1) % p.size();
+		if ((p[i].y <= q.y && q.y < p[j].y || p[j].y <= q.y && q.y < p[i].y) && q.x < p[i].x + (p[j].x - p[i].x) * (q.y - p[i].y) / (p[j].y - p[i].y)) c = !c;
+	}
+	return c;
+}
+
+pair<long double, long double> nomalize(PT a, PT b) {
+	return make_pair((b.y - a.y) / (b.x - a.x), a.y - a.x * (b.y - a.y) / (b.x - a.x));
+}
+
+struct Line {
+	PT a, b;
+	Line(PT a, PT b) : a(a), b(b) {}
+	int operator < (const Line& rhs) const {
+		if (a.x == b.x) {
+			if (rhs.a.x == rhs.b.x) {
+				return a.x < rhs.a.x;
+			}
+			else {
+				return 1;
+			}
+		}
+		else if (rhs.a.x == rhs.b.x) {
+			return 0;
+		}
+		else {
+			//pair<long double, long double> r = nomalize(a, b);
+			//assert(rlcmp(a.x * r.fi + r.se, a.y) == 0);
+			//assert(rlcmp(b.x * r.fi + r.se, b.y) == 0);
+//			pair<long double, long double> r1 = nomalize(a, b);
+//			pair<long double, long double> r2 = nomalize(rhs.a, rhs.b);
+			return nomalize(a, b) > nomalize(rhs.a, rhs.b);
+		}
+	}
+};
+
+const int maxn = 100010;
+int n;
+PT p[maxn];
+vector<Line> vln[2];
+
+int parallel(Line u, Line v) {
+	return LinesParallel(u.a, u.b, v.a, v.b);
+//	return (u.b.y - u.a.y) * (v.b.x - v.a.x) == (v.b.y - v.a.y) * (u.b.x - u.a.x);
+}
+
+void solve() {
+	int test; cin >> test;
+	while (test--) {
+		FOR(i, 0, 2) vln[i].clear();
+		cin >> n;
+		vector<PT> vp;
+		FOR(i, 0, n) {
+			int x, y; cin >> x >> y;
+//			if (n > 20) {
+				while (sz(vp) > 1 && cross(PT(x, y) - vp[sz(vp) - 2], vp[sz(vp) - 1] - vp[sz(vp) - 2]) == 0) vp.pop_back();
+//			}
+			vp.pb(PT(x, y));
+		}
+//		if (n > 20) {
+			if (sz(vp) > 2 && cross(vp.back() - vp[0], vp[1] - vp[0]) == 0) {
+				vp.erase(vp.begin());
+			}
+//		}
+		n = sz(vp);
+		FOR(i, 0, n) p[i] = vp[i];
+		FOR(i, 0, n) {
+			int nxt = (i + 1) % n;
+			if (p[i].x < p[nxt].x || (p[i].x == p[nxt].x && p[i].y < p[nxt].y)) {
+				vln[0].pb(Line(p[i], p[nxt]));
+			}
+			else {
+				vln[1].pb(Line(PT(-p[i].x, -p[i].y), PT(-p[nxt].x, -p[nxt].y)));
+			}
+		}
+		sort(all(vln[0])); sort(all(vln[1]));
+		FOR(i, 0, sz(vln[1])) {
+			vln[1][i].a.x *= -1;
+			vln[1][i].a.y *= -1;
+			vln[1][i].b.x *= -1;
+			vln[1][i].b.y *= -1;
+		}
+		vector<Line> tmp = vln[0];
+		tmp.insert(tmp.end(), all(vln[1]));
+		
+//		if (n <= 20) {
+//			vector<PT> poly;
+//			tmp.clear();
+//			FOR(i, 0, n) {
+//				tmp.pb(Line(p[i], p[(i + 1) % n]));
+//			}
+//			FOR(i, 0, sz(tmp)) FOR(j, i + 1, sz(tmp)) {
+//				if (!parallel(tmp[i], tmp[j])) {
+//					PT q = ComputeLineIntersection(tmp[i].a, tmp[i].b, tmp[j].a, tmp[j].b);
+//					int found = 0;
+//					FOR(k, 0, sz(tmp)) {
+//						if (cross(tmp[k].a - q, tmp[k].b - q) > +1e-6) {
+//							found = 1;
+//							break;
+//						}
+//					}
+//					if (!found && fabs(q.x) < 1e9 && fabs(q.y) < 1e9) {
+//						poly.pb(q);
+//					}
+//				}
+//			}
+//			FOR(i, 0, n) {
+//				PT q = p[i];
+//				int found = 0;
+//				FOR(k, 0, sz(tmp)) {
+//					if (cross(tmp[k].a - q, tmp[k].b - q) > +EPS) {
+//						found = 1;
+//						break;
+//					}
+//				}
+//				if (!found) {
+//					poly.pb(q);
+//				}
+//			}
+//			ConvexHull(poly);
+//			long double ans = 0.0;
+//			FOR(i, 0, sz(poly)) {
+//				ans += cross(poly[i], poly[(i + 1) % sz(poly)]);
+//			}
+//			cout << prec(9) << fabs(ans) / 8e14 << "\n";
+//			continue;
+//		}
+		
+		vector<Line> res;
+		FOR(i, 0, sz(tmp)) {
+			while (sz(res) && parallel(tmp[i], res.back())) res.pop_back();
+			while (sz(res) > 1) {
+				PT p = ComputeLineIntersection(res[sz(res) - 2].a, res[sz(res) - 2].b, res[sz(res) - 1].a, res[sz(res) - 1].b);
+				PT q = ComputeLineIntersection(res[sz(res) - 1].a, res[sz(res) - 1].b, tmp[i].a, tmp[i].b);
+				if (cross(p - q, tmp[i].b - tmp[i].a) < 0) res.pop_back();
+				else {
+					break;
+				}
+			}
+			res.pb(tmp[i]);
+		}
+		FOR(k, 0, 10) {
+			tmp.clear();
+			FOR(i, 0, 2) {
+				if (sz(res)) {
+					tmp.pb(res.back());
+					res.pop_back();
+				}
+			}
+			reverse(all(tmp));
+			FOR(i, 0, sz(res)) tmp.pb(res[i]);
+			res.clear();
+			FOR(i, 0, sz(tmp)) {
+				while (sz(res) && parallel(tmp[i], res.back())) res.pop_back();
+				while (sz(res) > 1) {
+					PT p = ComputeLineIntersection(res[sz(res) - 2].a, res[sz(res) - 2].b, res[sz(res) - 1].a, res[sz(res) - 1].b);
+					PT q = ComputeLineIntersection(res[sz(res) - 1].a, res[sz(res) - 1].b, tmp[i].a, tmp[i].b);
+					if (cross(p - q, tmp[i].b - tmp[i].a) < 0) res.pop_back();
+					else {
+						break;
+					}
+				}
+				res.pb(tmp[i]);
+			}
+		}
+		vector<PT> rz;
+		FOR(i, 0, sz(res)) {
+			rz.pb(ComputeLineIntersection(res[i].a, res[i].b, res[(i + 1) % sz(res)].a, res[(i + 1) % sz(res)].b));
+		}
+		long double ans = 0.0;
+		FOR(i, 0, sz(rz)) {
+			ans += cross(rz[i], rz[(i + 1) % sz(rz)]);
+		}
+		cout << prec(9) << fabs(ans) / 8e14 << "\n";
+	}
+}
+
+int main() {
+	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

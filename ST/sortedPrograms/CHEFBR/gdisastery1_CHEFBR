@@ -1,0 +1,87 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 111;
+const int mod = 1e9 + 7;
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+int N;
+int A[MAX_N];
+int dp[MAX_N];
+int l[MAX_N], r[MAX_N];
+int tmp[MAX_N];
+
+int rec(int k){
+  if(dp[k] != -1)
+    return dp[k];
+  int f[MAX_N] = {};
+  f[l[k]] = 1;
+  for(int i = l[k] + 1; i < r[k]; i++){
+    f[i] = f[i - 1];
+    if(A[i] > 0 && l[A[i]] > l[k] && l[A[i]] < r[A[i]]){
+      madd(f[i], mul(rec(A[i]), f[l[A[i]] - 1]));
+    }
+  }
+  return dp[k] = f[r[k] - 1];
+}
+
+int main(){
+  scanf("%d", &N);
+  for(int i = 1; i <= N; i++)
+    scanf("%d", A + i);
+  // Compress :-)
+  for(int i = 1; i <= N; i++)
+    tmp[i] = abs(A[i]);
+  sort(tmp + 1, tmp + N + 1);
+  int m = unique(tmp + 1, tmp + N + 1) - tmp - 1;
+  for(int i = 1; i <= N; i++){
+    int p = A[i] < 0 ? -1 : 1;
+    A[i] = p * (lower_bound(tmp + 1, tmp + m + 1, abs(A[i])) - tmp);
+  }
+  // for(int i = 1; i <= N; i++)  printf("%d ", A[i]); puts("");
+  fill(l, l + MAX_N, -2);
+  fill(r, r + MAX_N, -2);
+  l[0] = 0, r[0] = N + 1; // Dummy :)
+  for(int i = 1; i <= N; i++)
+    if(A[i] < 0)      l[-A[i]] = i;
+    else              r[+A[i]] = i;
+  memset(dp, -1, sizeof dp);
+  printf("%d\n", rec(0));
+  return 0;
+}

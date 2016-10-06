@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+vector<int> g[100010];
+vector<int> rdg[100010];
+bool visited[100010];
+int end[100010];
+int tim = 0;
+int scNum[100010];
+vector<int> comp;
+vector<pair<int, int> > store;
+set<pair<int, int> > added;
+int deg[100010];
+void dfs1(int root) {
+	visited[root] = true;
+	for(int i = 0; i < g[root].size(); i++) {
+		int child = g[root][i];
+		if(added.find(make_pair(child, root)) == added.end()) {
+			rdg[child].push_back(root);
+			added.insert(make_pair(root, child));
+		}
+		if(visited[child]) continue;
+		dfs1(child);
+	}
+	end[root] = tim;
+	tim++;
+}
+void dfs2(int root) {
+	visited[root] = true;
+	comp.push_back(root);
+	for(int i = 0; i < rdg[root].size(); i++) {
+		int child = rdg[root][i];
+		if(visited[child]) continue;
+		dfs2(child);
+	}
+}
+int main() {
+	int n, m;
+	cin >> n >> m;
+	int x, y;
+	for(int i = 0; i < m; i++) {
+		scanf("%d %d", &x, &y);
+		g[x].push_back(y);
+		g[y].push_back(x);
+	}
+	dfs1(1);
+	for(int i = 1; i <= n; i++) store.push_back(make_pair(end[i], i));
+	sort(store.rbegin(), store.rend());
+	for(int i = 1; i <= n; i++) visited[i] = false;
+	int compNum = 0;
+	for(int i = 0; i < store.size(); i++) {
+		if(visited[store[i].second]) continue;
+		dfs2(store[i].second);
+		compNum++;
+		for(int j = 0; j < comp.size(); j++) scNum[comp[j]] = compNum;
+		comp.clear();
+	}
+	for(int i = 1; i <= n; i++) {
+		for(int j = 0; j < g[i].size(); j++) {
+			int child = g[i][j];
+			if(scNum[i] == scNum[child]) continue; 
+			else deg[scNum[i]]++;
+		}
+	}
+	int leaves = 0;
+	for(int i = 1; i <= compNum; i++) if(deg[i] == 1) leaves++;
+	if(leaves <= 2) cout << "YES\n";
+	else cout << "NO\n";
+}

@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define X first
+#define Y second
+ 
+typedef long double ld;
+typedef pair< ld, ld > ld2;
+typedef pair< ld, ld2 > ld3;
+typedef pair<int, int> ii;
+ 
+const int N = 2e3+5, T = 1e7 + 7;
+const ld eps = 1e-12, eps1 = 1e-12;
+ 
+int t;
+long long n0, r, p, m, b, n;
+ 
+ld3 circle[7];
+ 
+ld ans[N];
+ 
+ld findR(ld angle) {
+	ld low = circle[1].X, up = 2*circle[0].X-circle[1].X;
+	ld cs = cos(angle), sn = sin(angle);
+	while(fabs(up-low) >= eps1) {
+		ld mid = (up+low)/2;
+		ld2 op = ld2(mid*cs, mid*sn);
+		ld r1 = mid - circle[1].X;
+		ld r2 = circle[0].X - hypot(op.X-circle[0].Y.X, op.Y-circle[0].Y.Y);
+		if(r1 > r2)
+			up = mid;
+		else
+			low = mid;
+	}
+	return low;
+}
+ 
+ld2 findA(ld3& bef, ld lastAngle) {
+	ld low = lastAngle, up = min((ld)2*M_PI, lastAngle + M_PI), rmid, mid;
+	while(fabs(up-low)>=eps) {
+		mid = (low+up)/2;
+		rmid = findR(mid);
+		ld2 op = ld2(rmid*cos(mid), rmid*sin(mid));
+		ld r1 = rmid- circle[1].X;
+		ld r2 = hypot(op.X-bef.Y.X, op.Y-bef.Y.Y) - bef.X;
+		if(r1 < r2)
+			up = mid;
+		else
+			low = mid;
+	}
+	return ld2(rmid, mid);
+}
+ 
+ld2 findB(ld rr) {
+	ld low = 0, up = M_PI, mid, rmid;
+	while(fabs(up-low) >= eps) {
+		mid = (low+up)/2;
+		rmid = findR(mid);
+		ld r1 = rmid - circle[1].X;
+		if(r1 > rr)
+			up = mid;
+		else
+			low = mid;
+	}
+	return ld2(rmid, mid);
+}
+ 
+int main() {
+	cin.sync_with_stdio(0);
+	cout << setprecision(6) << fixed;
+	cin >> t >> n0 >> p >> m >> b;
+	for(int i = 0; i<4; i++)
+		cin >> circle[i].X;
+	circle[0].Y = ld2(circle[1].X-circle[0].X, 0);
+	circle[1].Y = ld2(0, 0);
+	ld2 temp = findB(circle[2].X);
+	if(circle[2].X > circle[3].X) {
+		temp.Y = 2*M_PI-temp.Y;
+	}
+	circle[2].Y = ld2(temp.X*cos(temp.Y), temp.X*sin(temp.Y));
+	temp = findA(circle[2], temp.Y);
+	circle[3].Y = ld2(temp.X*cos(temp.Y), temp.X*sin(temp.Y));
+	for(int i = 0; i<4; i++)
+		ans[i+1] = circle[i].X;
+	int cur = 3;
+	for(int i = 5; i<N; i++) {
+		circle[2] = circle[3];
+		temp = findA(circle[2], temp.Y);
+		circle[3] = ld3(temp.X-circle[1].X, ld2(temp.X*cos(temp.Y), temp.X*sin(temp.Y)));
+		ans[i] = circle[3].X;
+	}
+	ld tot = 0;
+	for(int i = 0; i<t; i++) {
+		n0 = ((n0*p) % m) + b;
+		tot += ans[n0];
+	}
+	cout << tot << "\n";
+	return 0;
+} 

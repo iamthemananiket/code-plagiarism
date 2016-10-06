@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define mod 1000000007
+#define upperlimit 1000100
+#define INF 1000000100
+#define INFL 1000000000000000100
+#define eps 1e-8
+#define endl '\n'
+#define sd(n) scanf("%d",&n)
+#define slld(n) scanf("%lld",&n)
+#define pd(n) printf("%d",n)
+#define plld(n) printf("%lld",n)
+#define pds(n) printf("%d ",n)
+#define pllds(n) printf("%lld ",n)
+#define pdn(n) printf("%d\n",n)
+#define plldn(n) printf("%lld\n",n)
+#define REP(i,a,b) for(i=a;i<=b;i++)
+#define mp make_pair
+#define pb push_back
+#define pcc pair<char,char>
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define vi vector<int>
+#define vl vector<ll>
+#define tr(container,it) for(typeof(container.begin()) it=container.begin();it!=container.end();it++)
+#define F first
+#define S second
+
+using namespace std;
+
+ll gcd(ll n1,ll n2){
+	if(!n1)return n2;
+	if(!n2)return n1;
+	if(n1%n2==0)return n2;
+	return gcd(n2,n1%n2);
+}
+ll powmod(ll base,ll exponent)
+{
+	ll ans=1;
+	while(exponent){
+		if(exponent&1)ans=(ans*base)%mod;
+		base=(base*base)%mod;
+		exponent/=2;
+	}
+	return ans;
+}
+bool visited[555];
+vi adj[555];
+int colour[555];
+bool possible;
+void dfs(int node,int c){
+	visited[node]=true;
+	if(colour[node]==(-1*c))possible = false;
+	colour[node]=c;
+	for(int i=0;i<adj[node].size();i++)if(!visited[adj[node][i]])dfs(adj[node][i],-1*c);
+}
+int main()
+{
+	int t,i,j,k,n;
+	sd(t);
+	for(int tt=1;tt<=t;tt++){
+		printf("Case %d: ",tt);
+		sd(n);
+		for(i=0;i<=n;i++){
+			visited[i]=false;
+			adj[i].clear();
+			colour[i]=0;
+		}
+		for(i=1;i<=n;i++){
+			sd(k);
+			while(k--){
+				sd(j);
+				adj[i].pb(j);
+			}
+		}
+		possible=true;
+		for(i=1;i<=n;i++)if(!visited[i])dfs(i,1);
+		for(i=1;i<=n;i++){
+			for(j=0;j<adj[i].size();j++)if(colour[i]==colour[adj[i][j]])possible=false;
+		}
+		if(possible){
+			int cnt=0;
+			for(i=1;i<=n;i++)if(colour[i]==1)cnt++;
+			cnt=min(cnt,n-cnt);
+			printf("1 %d %d\n",cnt,(n-cnt));
+		}
+		else printf("0 0 0\n");
+	}
+	return 0;
+}

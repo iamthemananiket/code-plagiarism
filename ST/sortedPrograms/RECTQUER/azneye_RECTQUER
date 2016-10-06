@@ -1,0 +1,88 @@
+/*
+ * 2013 Codechef Decembe Challenge
+ * Rectangular Queries
+ * File:   RECTQUER.cpp
+ * Author: Andy Y.F. Huang
+ * Created on 2013-12-06, 4:42:07 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace RECTQUER {
+int tree[333][1 << 10];
+int PW;
+
+void solve(int test_num) {
+  int N, Q;
+  scanf("%d", &N);
+  for (PW = 1; PW < N;)
+    PW <<= 1;
+  memset(tree, 0, sizeof(tree));
+  for (int r = 0; r < N; r++) {
+    for (int c = 0; c < N; c++) {
+      scanf("%d", &tree[r][c + PW]);
+      tree[r][c + PW] = 1 << tree[r][c + PW];
+    }
+    for (int i = PW - 1; i > 0; i--)
+      tree[r][i] = tree[r][i + i] | tree[r][i + i + 1];
+  }
+  scanf("%d", &Q);
+  while (Q--) {
+    int r1, c1, r2, c2;
+    scanf("%d %d %d %d", &r1, &c1, &r2, &c2);
+    int res = 0;
+    for (int i = r1 - 1; i < r2; i++)
+      for (int l = c1 + PW - 1, r = c2 + PW; l < r; l >>= 1, r >>= 1) {
+        if (l & 1)
+          res |= tree[i][l++];
+        if (r & 1)
+          res |= tree[i][--r];
+      }
+    printf("%d\n", __builtin_popcount(res));
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  solve(1);
+}
+}
+
+int main() {
+  RECTQUER::solve();
+  return 0;
+}

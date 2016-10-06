@@ -1,0 +1,169 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < int(Y);++(X))
+#define rrep(X,Y) for (int (X) = int(Y-1);(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < int(Y);++(X))
+#define peat(X,Y) for (;(X) < int(Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+typedef vector<vector<int> > Graph;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+
+struct Seg{
+ int mn,ind;
+  Seg(ll d=100000,ll i=100000){
+    mn=d;
+    ind=i;
+  }
+};
+
+const int MAX_N=(1<<15);
+const int INF=(1<<30);
+int nn=MAX_N;
+Seg SegE=Seg(INF,-1);
+vector<Seg> data(2*MAX_N-1);
+
+Seg operator+(Seg l,Seg r){
+  Seg seg;
+  if(l.mn<r.mn){
+    seg.mn=l.mn;
+    seg.ind=l.ind;
+  }else{
+    seg.mn=r.mn;
+    seg.ind=r.ind;
+  }
+  return seg;
+}
+
+void upd(vector<Seg> &dat,int k,Seg a){
+  k+=nn-1;
+  dat[k]=a;
+  while(k>0){
+    k=(k-1)/2;
+    dat[k]=dat[k*2+1]+dat[k*2+2];
+  }
+}
+
+//(l,r,0,0,nn)
+Seg query(vector<Seg> &dat,int a,int b,int k,int l,int r){
+  if(r<=a || b<=l)return SegE;
+  if(a<=l && r<=b) return dat[k];
+  return query(dat,a,b,k*2+1,l,(l+r)/2) + query(dat,a,b,k*2+2,(l+r)/2,r);
+}
+
+void dfs(int v,int p,int d,vector<int> &num,
+         vector<int> &dep,Graph &g){
+  num.pb(v);
+  upd(data,dep.size(),Seg(d,dep.size()));
+  dep.pb(d);
+  rep(i,g[v].size()){
+    if(g[v][i]==p)continue;
+    dfs(g[v][i],v,d+1,num,dep,g);
+    num.pb(v);
+    upd(data,dep.size(),Seg(d,dep.size()));
+    dep.pb(d);
+  }
+}
+
+int main(){
+//  ios_base::sync_with_stdio(false);
+//  cout<<fixed<<setprecision(0);
+  int i,j,k;
+  int n,q,root,a,b,v,t,T;
+  scanf("%d %d %d",&n,&T,&root);
+//  cin>>n>>T>>root;
+  root--;
+  vector<vector<Seg> > tt(T,vector<Seg>(2*MAX_N-1));
+//  fill(tt[0],tt[0]+100*(2*MAX_N-1),Seg(123456));
+  Graph g(n);
+  rep(i,n-1){
+    scanf("%d %d",&a,&b);
+    //cin>>a>>b;
+    --a,--b;
+    g[a].pb(b);
+    g[b].pb(a);
+  }
+  vector<int> p(n),num,dep,left(n,-1),right(n),used(T);
+  rep(i,n){
+    scanf("%d",&(p[i]));
+//    cin>>p[i];
+    --p[i];
+    used[p[i]]=1;
+  }
+  dfs(root,-1,0,num,dep,g);
+//  cout<<num;
+  vector<int> prod[T],prodi[T];
+  rep(i,num.size()){
+    if(left[num[i]]<0){
+      left[num[i]]=i;
+      prod[p[num[i]]].pb(i);
+    }
+    right[num[i]]=i;
+    upd(tt[p[num[i]]],i,num[i]);
+  }
+//  rep(i,T)
+//    reverse_copy(all(prod[i]),prodi[i].begin());
+  cin>>q;
+  rep(i,q){
+    cin>>v>>t;
+    --v,--t;
+    if(!used[t]){
+      cout<<-1<<endl;
+      continue;
+    }
+    if(v==root){
+//      cout<<left[v]<<","<<right[v]<<endl;
+      cout<<query(tt[t],left[v],right[v],0,0,nn).mn+1<<endl;
+      continue;
+    }
+//    cout<<"["<<v<<","<<t<<"]"<<endl;
+//    cout<<prod[t]<<endl;
+    auto r=lower_bound(all(prod[t]),left[v]);
+    Seg lv=Seg(-1,0),rv=lv;
+    if(r!=prod[t].end()){
+      rv=query(data,left[v],(*r)+1,0,0,nn);
+    }
+    if(r!=prod[t].begin()){
+      --r;
+      lv=query(data,*r,left[v]+1,0,0,nn);
+    }
+    if(lv.mn>rv.mn){
+      //        cout<<lv.ind<<","<<lv.mn<<endl;
+      cout<<query(tt[t],left[num[lv.ind]],right[num[lv.ind]]+1,0,0,nn).mn+1<<endl;
+      continue;
+    }else{
+ //     cout<<"left";
+ //     cout<<rv.ind<<","<<rv.mn<<endl;
+ //     cout<<"min("<<left[num[rv.ind]]<<","<<right[num[rv.ind]]<<endl;
+      cout<<query(tt[t],left[num[rv.ind]],right[num[rv.ind]]+1,0,0,nn).mn+1<<endl;
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,35 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+
+int main()
+{
+	int t;
+	scanf("%d",&t);
+	while(t--)
+	{
+	 float hard,carbon,tens;
+	 cin>>hard>>carbon>>tens;
+	 int a,b,c;
+	 a=(hard>50)*4;
+	 b=(carbon<0.7)*2;
+	 c=(tens>5600);
+	 
+	 int ans=a+b+c;
+	 if(ans==7)
+	   cout<<10<<endl;
+	else if(ans==6)
+	 cout<<9<<endl;
+	else if(ans==3)
+	 cout<<8<<endl;
+	else if(ans==5)
+	 cout<<7<<endl;
+	else if(ans==0)
+	 cout<<5<<endl;
+	else cout<<6<<endl;
+	 
+	 
+		
+	}
+}

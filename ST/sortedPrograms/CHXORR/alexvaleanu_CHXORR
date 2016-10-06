@@ -1,0 +1,138 @@
+#include <iostream>
+#include <fstream>
+#include <climits>
+
+using namespace std;
+
+const int Nmax = 2005;
+
+int T, N;
+int a[Nmax];
+int maxim;
+
+struct Trie
+{
+    int indice;
+    Trie *son[2];
+
+    Trie()
+    {
+        son[0] = NULL;
+        son[1] = NULL;
+        indice = 0;
+    }
+
+    ~Trie()
+    {
+        son[0] = NULL;
+        son[1] = NULL;
+        indice = 0;
+    }
+};
+
+Trie *R;
+
+void insereaza( Trie *nod, int sum, int exp, int index )
+{
+    if ( exp == -1 )
+    {
+        nod->indice = index;
+        return;
+    }
+
+    bool t = ( sum & ( 1LL << exp ) );
+
+    if ( nod->son[t] == 0 )
+            nod->son[t] = new Trie;
+
+    insereaza( nod->son[t], sum, exp - 1, index );
+}
+
+void query( int sum, int start, int finish )
+{
+    Trie *nod = R;
+
+    for ( int i = 31; i >= 0; i-- )
+    {
+        bool t = ( sum & ( 1LL << i ) );
+
+        if ( nod->son[t ^ 1] )
+                nod = nod->son[t ^ 1];
+        else
+                nod = nod->son[t];
+    }
+
+    if ( ( sum ^ a[nod->indice] ) > maxim && nod->indice != start && nod->indice != finish && nod->indice )
+    {
+        maxim = sum ^ a[nod->indice];
+    }
+}
+
+void solve()
+{
+    insereaza( R, 0, 31, 0 );
+
+    for ( int i = 1; i <= N; ++i )
+            insereaza( R, a[i], 31, i );
+
+    for ( int i = 1; i < N; ++i )
+            for ( int j = i + 1; j <= N; ++j )
+            {
+                query( a[i] ^ a[j], i, j );
+            }
+}
+
+void sterge( Trie *&rr )
+{
+    if ( rr->son[0] )
+            sterge( rr->son[0] );
+
+    if ( rr->son[1] )
+            sterge( rr->son[1] );
+
+    delete rr;
+}
+
+int rezolve()
+{
+    int best = 0;
+
+    for ( int i = 1; i <= N - 2; ++i )
+            for ( int j = i + 1; j <= N - 1; ++j )
+                for ( int k = j + 1; k <= N; ++k )
+                {
+                    best = max( best, ( a[i] ^ a[j] ^ a[k] ) );
+                }
+
+    return best;
+}
+
+int main()
+{
+    for ( cin >> T; T; T-- )
+    {
+        cin >> N;
+
+        for ( int i = 1; i <= N; ++i )
+                cin >> a[i];
+
+        if ( N <= 100 )
+        {
+            cout << rezolve() << "\n";
+
+            continue;
+        }
+
+        maxim = 0;
+
+        R = new Trie;
+
+        solve();
+
+        cout << maxim << "\n";
+
+        sterge( R );
+    }
+
+    return 0;
+}

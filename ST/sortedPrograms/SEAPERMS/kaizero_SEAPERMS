@@ -1,0 +1,84 @@
+#include<stdio.h>
+#include<algorithm>
+#include<map>
+using namespace std;
+struct Query{
+    int a, b;
+}Q[101000];
+int n, m, K, A[101000], C[201000], S[201000], w[201000], ord[201000], cnt;
+long long Mod = 1000000007, Res, F[101000], InvF[101000], Inv[101000];
+map<int,int>Map;
+long long GetInv(long long a){
+    long long r = 1, b = Mod-2;
+    while(b){
+        if(b%2)r=r*a%Mod;
+        b/=2,a=a*a%Mod;
+    }
+    return r;
+}
+void Add(int x){
+    int a = Map[x];
+    C[a]++,S[a]++;
+    Res = Res * S[a] % Mod;
+    while(a<cnt){
+        a++;
+        if(w[a]>=x+K)break;
+        S[a]++;
+        Res = Res * S[a] % Mod * Inv[S[a]-C[a]] % Mod;
+    }
+}
+void Del(int x){
+    int a = Map[x];
+    Res = Res * Inv[S[a]] % Mod;
+    C[a]--,S[a]--;
+    while(a<cnt){
+        a++;
+        if(w[a]>=x+K)break;
+        Res = Res * Inv[S[a]] % Mod * (S[a]-C[a]) % Mod;
+        S[a]--;
+    }
+}
+int main(){
+    int i, c = 0, pv = 1, s = 0;
+    F[0]=InvF[0]=1;
+    for(i=1;i<=100100;i++){
+        F[i]=F[i-1]*i%Mod;
+        InvF[i]=GetInv(F[i]);
+        Inv[i]=GetInv(i);
+    }
+    scanf("%d%d",&n,&K);
+    for(i=1;i<=n;i++){
+        scanf("%d",&A[i]);
+        ord[++c] = A[i];
+    }
+    scanf("%d",&m);
+    for(i=0;i<m;i++){
+        scanf("%d%d",&Q[i].a,&Q[i].b);
+        ord[++c] = Q[i].b;
+    }
+    sort(ord+1,ord+c+1);
+    for(i=1;i<=c;i++){
+        if(i==1||ord[i]!=ord[i-1]){
+            cnt++;
+            w[cnt] = ord[i];
+            Map[ord[i]]=cnt;
+        }
+    }
+    for(i=1;i<=n;i++)C[Map[A[i]]]++;
+    Res = 1;
+    for(i=1;i<=cnt;i++){
+        s += C[i];
+        while(w[pv] + K <= w[i]){
+            s -= C[pv];
+            pv++;
+        }
+        S[i] = s;
+        Res = Res * F[S[i]] % Mod * InvF[S[i]-C[i]] % Mod;
+    }
+    for(i=0;i<m;i++){
+        Del(A[Q[i].a]);
+        A[Q[i].a] = Q[i].b;
+        Add(Q[i].b);
+        printf("%lld\n",Res);
+    }
+}

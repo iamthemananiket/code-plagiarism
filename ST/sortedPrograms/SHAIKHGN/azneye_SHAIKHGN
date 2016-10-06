@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef double dd;
+const int MAX = 512;
+void mult(int a[MAX][MAX], int b[MAX][MAX], int res[MAX][MAX]) {
+  static ll rows[MAX][8], cols[MAX][8];
+  memset(rows,0,sizeof(rows));
+  memset(cols,0,sizeof(cols));
+  for(int i=0;i<MAX;++i) {
+    for(int j=0;j<MAX;++j) {
+      if (a[i][j])
+        rows[i][j >> 6] |= 1LL << (j & 63);
+      if(b[i][j])
+        cols[j][i >> 6] |= 1LL << (i & 63);
+    }
+  }
+  for(int i=0;i<MAX;++i) {
+    for(int j=0;j<MAX;++j) {
+      res[i][j] = 0;
+      for(int k=0;k<8;++k) {
+        if (rows[i][k] & cols[j][k]) {
+          res[i][j] = 1;
+          break;
+        }
+      }
+    }
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int N;
+  cin >> N;
+  static int g[MAX][MAX], base[30][MAX][MAX];
+  static ll mask[30][MAX][8];
+  memset(mask,0,sizeof(mask));
+  for(int i=0;i<N;++i)
+    for(int j=0;j<N;++j) {
+      cin >> g[i][j];
+      if (g[i][j])
+        mask[0][i][j >> 6] |= 1LL << (j & 63);
+    }
+  memcpy(base[0], g, sizeof(g));  
+  for(int e=0;e+1<30;++e){
+    mult(base[e], base[e], base[e+1]);
+    for(int r=0;r<MAX;++r){
+      for(int c=0;c<MAX;++c) {
+        if (base[e+1][r][c]) {
+          mask[e+1][r][c >> 6] |= 1LL << (c & 63);
+        }
+      }
+    }
+  }
+  int Q;
+  cin >> Q;
+  while (Q-- > 0) {
+    int K, st;
+    cin >> K >> st;
+    static ll row[8], temp[8];
+    memset(row,0,sizeof(row));
+    --st;
+    row[st >> 6] |= 1LL << (st & 63);
+    for(int e = 29; e >= 0; --e) {
+      if (K >> e & 1) {
+        memset(temp,0,sizeof(temp));
+        for(int r = 0; r < MAX; ++r) {
+          if (row[r >> 6] >> (r & 63) & 1) {
+            for(int k = 0; k < 8; ++k) {
+              temp[k] |= mask[e][r][k];
+            }
+          }
+        }
+        memcpy(row, temp, sizeof(temp));
+      }        
+    }
+    vector<int> res;
+    for(int i=0;i<N;++i)
+      if (row[i >> 6] >> (i & 63) & 1)
+        res.push_back(i+1);
+    cout << res.size() << endl;
+    if(res.empty()) {
+      cout << "-1\n";
+    } else {
+      for(int x : res)
+        cout << x << ' ';
+      cout << endl;
+    }
+  }
+  return 0;
+}

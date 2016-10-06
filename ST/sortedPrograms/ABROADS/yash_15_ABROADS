@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+ll pop[500005];
+pair<int,int> road[500005];
+bool del[500005];
+pair< bool, pair<int,int> > query[500005];
+priority_queue < pair<ll,int> > pq;
+pair<ll,int> node;
+int par[500005];
+ll totPop[500005];
+
+int Head(int x) {
+	if(par[x]!=x)
+		par[x]=Head(par[x]);
+	return par[x];
+}
+
+void Merge(int x, int y)
+{
+	int p1=Head(x),p2=Head(y);
+	if(p1!=p2)
+	{
+		totPop[p2]+=totPop[p1];
+		par[p1]=p2;
+		totPop[p1]=-1;
+		pq.push(make_pair(totPop[p2],Head(p2)));
+	}
+}
+
+void Update(int x, int v) {
+
+	totPop[Head(x)]+=v-pop[x];
+	pop[x]=v;
+	pq.push(make_pair(totPop[Head(x)],Head(x)));
+}
+
+long long Query() {
+	while(!pq.empty()) {
+		node=pq.top();
+		if(Head(node.second)!=node.second)
+			pq.pop();
+		else if (totPop[Head(node.second)]!=node.first)
+			pq.pop();
+		else
+			return node.first;
+	}
+	assert(0);
+}
+ll ans[500005];
+int main () {
+	int n,m,q,i,v,p;
+	char ch;
+	cin >> n >> m >> q;
+	for(i=1;i<=n;i++)
+		scanf("%lld",pop+i);
+
+	for(i=1;i<=m;i++)
+		scanf("%d %d",&road[i].first,&road[i].second);
+
+	for(i=1;i<=q;i++) {
+		scanf(" %c",&ch);
+		if(ch=='D') {
+			scanf("%d",&v);
+			query[i]=make_pair(0,make_pair(road[v].first,road[v].second));
+			del[v]=1;
+		}
+		else {
+			scanf("%d %d",&v,&p);
+			query[i]=make_pair(1,make_pair(v,pop[v]));
+			pop[v]=p;
+		}
+	}
+	for(i=1;i<=n;i++) 
+		totPop[i]=pop[i],par[i]=i;
+	for(i=1;i<=m;i++)
+		if(!del[i])
+			Merge(road[i].first,road[i].second);
+	for(i=1;i<=n;i++)
+		if(Head(i)==i)
+			pq.push(make_pair(totPop[i],i));
+
+	for(i=q;i;i--) {
+		ans[i]=Query();
+		if(query[i].first)
+			Update(query[i].second.first,query[i].second.second);
+		else
+			Merge(query[i].second.first,query[i].second.second);
+	}
+	for(i=1;i<=q;i++)
+		printf("%lld\n",ans[i]);
+
+}

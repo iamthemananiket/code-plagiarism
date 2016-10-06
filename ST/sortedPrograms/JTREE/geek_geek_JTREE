@@ -1,0 +1,149 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<bitset>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%lld",&x)
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+#define FS ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define lli long long int
+using namespace std;
+vector<vector <lli> > graph;
+vector<vector<pair<lli,lli> > > ticket;
+lli *minc;
+lli min_cost(lli **mc,lli **parent,lli v,lli len)
+{
+    if(len == 1)
+        return minc[v];
+    lli i,j,k,p,x,y;
+    x = (lli)log2(len-1);
+    y = pow(2,x);
+    return min(mc[v][x],min_cost(mc,parent,parent[v][x],(len-y)));
+
+}
+void process(lli **mc,lli **parent,lli v,lli p)
+{
+    lli i,j,k,x,y,z,cost,temp,tp;
+    parent[v][0]=p;
+    x = p;
+    fl(i,1,30)
+    {
+        parent[v][i]=parent[p][i-1];
+        p = parent[v][i];
+    }
+    cost = 0;
+    if(ticket[v].size()!=0)
+        cost = pow(10,16);
+    pair<lli,lli> temp_pair;
+    fl(i,0,ticket[v].size())
+    {
+        temp_pair = ticket[v][i];
+        x = temp_pair.fi;
+        y = temp_pair.se;
+        cost = min(cost,y+min_cost(mc,parent,parent[v][0],x));
+    }
+    p = parent[v][0];
+    minc[v]=cost;
+    z = cost;
+    z = min(cost,minc[p]);
+    mc[v][0]=z;
+    fl(i,1,30)
+    {
+        z = min(z,mc[p][i-1]);
+        mc[v][i]=z;
+        p = parent[v][i];
+    }
+    //cout<<" Vertex : "<<v+1<<"  "<<minc[v]<<endl;
+    fl(i,0,graph[v].size())
+    {
+        temp = graph[v][i];
+        process(mc,parent,temp,v);
+    }
+}
+int prog()
+{
+    lli i,j,k,n,m,x,y,z;
+    gi(n);gi(m);
+    graph.resize(n);
+    ticket.resize(n);
+    minc = new lli[n];
+    fl(i,0,n)
+        {
+            minc[i]=0;
+            graph[i].resize(0);
+            ticket[i].resize(0);
+        }
+    fl(i,0,n-1)
+    {
+        gi(x);gi(y);
+        x--;y--;
+        graph[y].pb(x);
+    }
+    fl(i,0,m)
+    {
+        gi(x);gi(y);gi(z);
+        x--;
+        if(x!=0)
+            ticket[x].pb(mp(y,z));
+    }
+    lli ** parent,**mc;
+    parent = new lli * [n];
+    mc = new lli * [n];
+    fl(i,0,n)
+    {
+        parent[i] = new lli [30];
+        mc[i] = new lli [30];
+    }
+    fl(i,0,30)
+        {
+            parent[0][i]=0;
+            mc[0][i]=0;
+        }
+    process(mc,parent,0,0);
+    gi(z);
+    fl(i,0,z)
+    {
+        gi(y);
+        printf("%lld\n",minc[y-1]);
+    }
+    r0;
+}
+int main()
+{
+  //  f_in;
+int    t=1;
+    //sd(t);
+    while(t--)
+        {
+            prog();
+        }
+    r0;
+}

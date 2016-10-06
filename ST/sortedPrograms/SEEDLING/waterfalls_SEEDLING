@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MOD = 1e9+7;
+int add(int a, int b) { return a+b-(a+b>=MOD)*MOD; }
+
+int n,s;
+int dp[113][20013];
+int dpinf[113];
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%d%d",&n,&s);
+		memset(dp,0,sizeof dp);
+		memset(dpinf,0,sizeof dpinf);
+		dp[0][0+10000] = 1;
+        for (int r=0;r<n;r++) {
+			int a,b,c;
+			scanf("%d%d%d",&a,&b,&c);
+            for (int i=0;i<=s;i++) {
+                int na = i+a;
+                if (na>s) continue;
+                for (int j=0;j<20013;j++) {
+                    int nv = j+c-b;
+                    if (nv<0) continue;
+                    if (nv>=20013) dpinf[na] = add(dpinf[na],dp[i][j]);
+                    else dp[na][nv] = add(dp[na][nv],dp[i][j]);
+                }
+                dpinf[na] = add(dpinf[na],dpinf[i]);
+            }
+        }
+        int ans = 0;
+        for (int i=0;i<=s;i++) {
+            for (int j=1+10000;j<20013;j++) ans = add(ans,dp[i][j]);
+            ans = add(ans,dpinf[i]);
+        }
+        printf("%d\n",ans);
+	}
+
+    return 0;
+}

@@ -1,0 +1,142 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int SN = 5e7 + 7;
+const int LN = 30;
+int t;
+int n;
+int arr[N];
+int a , b;
+vector < int > v[N];
+int val[N];
+int ans[N];
+void dfs(int node , int parent , int sum){
+    sum ^= arr[node];
+    val[node] = sum;
+    for(int next : v[node]){
+        if(next != parent){
+            dfs(next , node , sum);
+        }
+    }
+}
+int cur;
+int lft[SN];
+int rgt[SN];
+struct trie{
+    int root;
+    int sz;
+    void insert(int num){
+        int node = root;
+        for(int i = LN - 1 ; i >= 0 ; --i){
+            if(num & (1 << i)){
+                if(!rgt[node]){
+                    rgt[node] = ++cur;
+                    ++sz;
+                }
+                node = rgt[node];
+            }
+            else{
+                if(!lft[node]){
+                    lft[node] = ++cur;
+                    ++sz;
+                }
+                node = lft[node];
+            }
+        }
+    }
+    int query(int num){
+        int node = root;
+        int res = 0;
+        for(int i = LN - 1 ; i >= 0 ; --i){
+            if(num & (1 << i)){
+                if(lft[node]){
+                    res += 1 << i;
+                    node = lft[node];
+                }
+                else{
+                    node = rgt[node];
+                }
+            }
+            else{
+                if(rgt[node]){
+                    res += 1 << i;
+                    node = rgt[node];
+                }
+                else{
+                    node = lft[node];
+                }
+            }
+        }
+        return res;
+    }
+};
+trie tr[N];
+void dfs2(int node , int parent , int baap){
+    ans[baap] = max(ans[baap] , tr[baap].query(val[node] ^ arr[baap]));
+    ans[baap] = max(ans[baap] , val[node] ^ val[baap] ^ arr[baap]);
+    for(int next : v[node]){
+        if(next != parent){
+            dfs2(next , node , baap);
+        }
+    }
+}
+void dfs3(int node , int parent , int baap){
+    tr[baap].insert(val[node]);
+    for(int next : v[node]){
+        if(next != parent){
+            dfs3(next , node , baap);
+        }
+    }
+}
+void dfs1(int node , int parent){
+    tr[node].sz = 0;
+    ans[node] = arr[node];
+    int child = -1;
+    for(int next : v[node]){
+        if(next != parent){
+            dfs1(next , node);
+            ans[node] = max(ans[node] , ans[next]);
+            if(child == -1 || tr[next].sz > tr[child].sz){
+                child = next;
+            }
+        }
+    }
+    if(child == -1){
+        tr[node].root = ++cur;
+        tr[node].insert(val[node]);
+    }
+    else{
+        ans[node] = max(ans[node] , tr[child].query(val[node] ^ arr[node]));
+        tr[node].root = tr[child].root;
+        tr[node].sz = tr[child].sz;
+        for(int next : v[node]){
+            if(next != parent){
+                if(next != child){
+                    dfs2(next , node , node);
+                    dfs3(next , node , node);
+                }
+            }
+        }
+        tr[node].insert(val[node]);
+    }
+}
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d" , &n);
+        for(int i = 1 ; i <= n ; ++i){
+            scanf("%d" , arr + i);
+            v[i].clear();
+        }
+        for(int i = 1 ; i < n ; ++i){
+            scanf("%d %d" , &a , &b);
+            v[a].emplace_back(b);
+            v[b].emplace_back(a);
+        }
+        dfs(1 , 0 , 0);
+        dfs1(1 , 0);
+        for(int i = 1 ; i <= n ; ++i){
+            printf("%d\n" , ans[i]);
+        }
+    }
+}

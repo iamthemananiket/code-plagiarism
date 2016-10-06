@@ -1,0 +1,67 @@
+#include <cstdio>
+#include <queue>
+
+using namespace std;
+
+pair<int,int> sp[2];
+
+int T,n,m,k[2];
+int d[2][100][100];
+int a[100][100];
+
+queue<pair<int,int> > sor;
+
+inline int abs(int x) {
+    return x>0?x:-x;
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d%d%d",&n,&m,&k[0],&k[1]);
+        sp[1] = make_pair(0,m-1);
+
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                scanf("%d",&a[i][j]);
+            }
+        }
+
+        for(int i=0; i<2; i++) {
+            sor.push(sp[i]);
+            fill(&d[i][0][0],&d[i][n][0],10001);
+            d[i][sp[i].first][sp[i].second] = 0;
+
+            while(!sor.empty()) {
+                pair<int,int> p = sor.front();
+                sor.pop();
+
+                for(int q=p.first-k[i]; q<=p.first+k[i]; q++) {
+                    if((q<0) || (q>=n)) continue;
+                    int rl(k[i]-abs(p.first-q));
+                    for(int r=p.second-rl; r<=p.second+rl; r++) {
+                        if((r<0) || (r>=m)) continue;
+                        if(a[q][r]) continue;
+                        if(d[i][q][r] > 10000) {
+                            d[i][q][r] = d[i][p.first][p.second]+1;
+                            sor.push({q,r});
+                        }
+                    }
+                }
+            }
+        }
+
+        int sol(10001);
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<m; j++) {
+                sol = min(sol,max(d[0][i][j],d[1][i][j]));
+            }
+        }
+
+        if(sol > 10000) sol = -1;
+
+        printf("%d\n",sol);
+    }
+
+    return 0;
+}

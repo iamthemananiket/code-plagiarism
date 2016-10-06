@@ -1,0 +1,138 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX_V = 110000;
+
+int V, U;
+vector<int> g[MAX_V], rg[MAX_V], h[MAX_V], rh[MAX_V];
+int no[MAX_V];
+bool used[MAX_V];
+ll a[MAX_V], b[MAX_V];
+
+void _tsort(const vector<int> *g, int v, vector<int> &vs) {
+  used[v] = true;
+  for (int u : g[v]) {
+    if (!used[u]) _tsort(g, u, vs);
+  }
+  vs.push_back(v);
+}
+
+vector<int> tsort(int V, const vector<int> *g) {
+  fill(used, used + V, false);
+  vector<int> vs;
+  for (int i = 0; i < V; i++) {
+    if (!used[i]) _tsort(g, i, vs);
+  }
+  reverse(vs.begin(), vs.end());
+  return vs;
+}
+
+void _scc(int v, int U) {
+  no[v] = U;
+  for (int u : rg[v]) {
+    if (no[u] == -1) {
+      _scc(u, U);
+    }
+  }
+}
+
+int scc(int V) {
+  int U = 0;
+  vector<int> vs = tsort(V, g);
+  fill(no, no + V, -1);
+  for (int v : vs) {
+    if (no[v] == -1) {
+      _scc(v, U);
+      U++;
+    }
+  }
+  return U;
+}
+
+ll dfs(int v) {
+  ll ans = 0;
+  for (int u : rh[v]) {
+    ans += max(0LL, dfs(u));
+  }
+  return ans + b[v];
+}
+
+
+int main() {
+  int T;
+  scanf("%d", &T);
+  while (T--) {
+    scanf("%d", &V);
+    for (int v = 0; v < V; v++) {
+      g[v].clear();
+      rg[v].clear();
+      h[v].clear();
+      rh[v].clear();
+      b[v] = 0;
+    }
+    for (int v = 0; v < V; v++) {
+      int p;
+      scanf("%d", &p);
+      p--;
+      g[v].push_back(p);
+      rg[p].push_back(v);
+    }
+    for (int v = 0; v < V; v++) {
+      scanf("%lld", &a[v]);
+    }
+    U = scc(V);
+    for (int v = 0; v < V; v++) {
+      b[no[v]] += a[v];
+      for (int u : g[v]) {
+        if (no[v] != no[u]) {
+          h[no[v]].push_back(no[u]);
+          rh[no[u]].push_back(no[v]);
+        }
+      }
+    }
+    for (int v = 0; v < U; v++) {
+      sort(h[v].begin(), h[v].end());
+      h[v].erase(unique(h[v].begin(), h[v].end()), h[v].end());
+      sort(rh[v].begin(), rh[v].end());
+      rh[v].erase(unique(rh[v].begin(), rh[v].end()), rh[v].end());
+
+    }
+    ll ans = 0;
+    for (int v = 0; v < U; v++) {
+      if (h[v].size() == 0) {
+        ans += max(0LL, dfs(v));
+      }
+    }
+    printf("%lld\n", ans);
+    
+  }
+}

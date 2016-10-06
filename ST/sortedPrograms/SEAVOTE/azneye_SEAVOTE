@@ -1,0 +1,56 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+
+void solve(int test_num) {
+  int N;
+  cin >> N;
+  vector<int> per(N);
+  for (int i = 0; i < N; i++)
+    cin >> per[i];
+  sort(per.begin(), per.end());
+  reverse(per.begin(), per.end());
+  while (!per.empty() && per.back() == 0)
+    per.pop_back();
+  const int high = accumulate(per.begin(), per.end(), 0);
+  const int low = high - per.size();
+  if (low < 100 && 100 <= high)
+    cout << "YES\n";
+  else
+    cout << "NO\n";
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

@@ -1,0 +1,113 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 1e-14
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll f[maxs],ifac[maxs];
+vector<int>v[maxs];
+
+ll power(ll a,ll b,ll c){
+	ll t=1;
+	while(b>0){
+		if(b&1){
+			t=(t*a)%c;
+		}
+		b>>=1;
+		a=(a*a)%c;
+	}
+	return t;
+}
+
+ll C(ll l,ll r){
+	if(l<r || l<0){
+		return 0;
+	}
+	ll ret=f[l];
+	ret=(ret*ifac[r])%N;
+	ret=(ret*ifac[l-r])%N;
+	return ret;
+}
+
+ll fun(int l,int r){
+	if(l>r){
+		return 1;
+	}
+	int ind=lower_bound(v[r+1].begin(),v[r+1].end(),l)-v[r+1].begin();
+	if(ind==v[r+1].size()){
+		return 0;
+	}
+	ll ret=1;
+	ind=v[r+1][ind];
+//	cout<<ind<<" "<<l<<" "<<r<<endl;
+	ret=(ret*C(r-l,ind-l))%N;
+	ret=(ret*fun(l,ind-1))%N;
+	ret=(ret*fun(ind+1,r))%N;
+	return ret;
+}
+
+int a[maxs];
+int main()
+{
+	int n,t,i,j;
+	sc("%d",&t);
+	while(t--){
+		sc("%d",&n);
+		for(i=1;i<=n;i++){
+			sc("%d",&a[i]);
+		}
+		int fl=0;
+		for(i=1;i<=n;i++){
+			if((i+a[i]+1)>(n+1)){
+				fl=1;
+				break;
+			}
+			v[i+a[i]+1].pb(i);
+		}
+		f[0]=1;
+		for(i=1;i<=n;i++){
+			f[i]=(f[i-1]*i)%N;
+		}
+		for(i=0;i<=n;i++){
+			ifac[i]=power(f[i],N-2,N);
+		}
+		
+		if(fl){
+			pr("0\n");
+		}
+		else{
+			ll ans=fun(1,n);
+			pr("%lld\n",ans);
+		}
+		for(i=0;i<=(n+1);i++){
+			v[i].clear();
+		}
+	}
+	return 0;
+}

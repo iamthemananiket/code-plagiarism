@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+typedef pair<int, int> P;
+typedef pair<P, P> Q;
+#define X first
+#define Y second
+const int N = 65;
+int n, k, a[N][N];
+
+int dist(int xs, int ys, int xt, int yt) {
+	int dx = xt - xs, dy = yt - ys;
+	return tabs(dx) + tabs(dy);
+}
+
+inline bool inside(int x, int y) {
+	return x >= 0 && x < n && y >= 0 && y < n;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, a;
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n >> k;
+		vector<P> c(k + 1);
+		int x = 0, y = 0, id = 1;
+		repu(i, 0, n) repu(j, 0, n) {
+			cin >> a;
+			if (a) {
+				c[a] = P(i, j);
+				x += i, y += j;
+			}
+		}
+		repu(i, 0, k) cin >> a;
+		
+		x /= k, y /= k;
+		vector<vector<bool>> mark(n, vector<bool>(n, false));
+		vector<vector<int>> ret(n, vector<int>(n, 0));
+		vector<int> done(k + 1, 0);
+		priority_queue<Q, vector<Q>, greater<Q>> que;
+		repu(i, 1, k + 1) {
+			que.push(Q(P(dist(x, y, c[i].X, c[i].Y), i), P(x, y)));
+		}
+		
+		int cnt = 0;
+		while (!que.empty() && cnt < k) {
+			Q q = que.top(); que.pop();
+			if (done[q.X.Y] || mark[q.Y.X][q.Y.Y]) continue;
+			mark[q.Y.X][q.Y.Y] = true;
+			done[q.X.Y] = true;
+			ret[q.Y.X][q.Y.Y] = q.X.Y;
+			cnt++;
+			repu(i, -1, 2) repu(j, -1, 2) {
+				if (i == 0 && j == 0) continue;
+				int nx = q.Y.X + i, ny = q.Y.Y + j;
+				if (inside(nx, ny) && !mark[nx][ny]) {
+					repu(l, 1, k + 1) {
+						if (done[l]) continue;
+						que.push(Q(P(dist(nx, ny, c[l].X, c[l].Y), l), P(nx, ny)));
+					}
+				}
+			}
+		}
+		
+		repu(i, 0, n) {
+			repu(j, 0, n) printf("%d%c", ret[i][j], j == n - 1 ? '\n' : ' ');
+		}
+	}
+	
+	return 0;
+}

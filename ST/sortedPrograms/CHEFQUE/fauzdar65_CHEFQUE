@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define gc getchar//_unlocked
+#define pc putchar//_unlocked
+#define ll long long
+void sci(int *x) {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+void scll(ll *x)  {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x =  (ll)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define fp(a,b,c) {if(b==0)return 1%c; if(b==1)return a%c; ll ret=fp(a,b/2,c); ret=(ret*ret)%c; if(b&2)ret=(ret*a)%c; return ret;}
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+char putnb[20];
+void putn(ll n) {if(!n)pc('0');if(n<0)pc('-'),n=0-n;int pi=0;while(n)putnb[pi++]=(n%10)+'0',n/=10;while(pi)pc(putnb[--pi]);}
+using namespace std;
+const ll mod=1e9 +7;
+const ll mod2=1999999973;
+const int infs=1e9;
+const ll inf=1e18;
+const int N=10000000;
+
+pp arr[N+5];
+pp rem[N+5];
+ll q,s,a,b;
+const ll tmod= 1LL << 32LL;
+
+
+int main()
+{
+  scanf("%d %d %d %d",&q,&s,&a,&b);
+  
+  arr[0]=rem[0]={-1,-1};
+
+  int act=1;
+  int rct=1;
+  int tt=0;
+  while(q--)
+  {
+    ++tt;
+    ll snew= (a*s + b);
+    if(snew>=tmod)snew%=tmod;
+    if(s&1)
+    {
+      arr[act++]={s/2,tt};
+    }
+    else
+    {
+      rem[rct++]={s/2,tt};
+    }
+    s=snew;
+  }
+
+  --act;
+  --rct;
+  sort(arr+1,arr+act+1);
+  sort(rem+1,rem+rct+1);
+
+  
+  int p1=1;
+  int p2=1;
+
+  ll ans=0;
+  
+  //cout<<act<<" "<<rct<<endl;
+  //return 0;
+  while(p1<=act && p2<=rct)
+  {
+    int val=arr[p1].first;
+    while(p2<=rct && rem[p2].first<val)++p2;
+
+    int cma=-1;
+    while(p2<=rct && rem[p2].first==val)cma=max(cma,rem[p2].second),++p2;
+
+    int cma2=-1;
+
+    while(p1<=act && arr[p1].first==val)
+    {
+      cma2=max(cma2,arr[p1].second);
+      ++p1;
+    }
+
+    if(cma2>cma)ans+=val;
+  }
+  
+
+
+  while(p1<=act)
+  {
+    if(arr[p1].first!=arr[p1-1].first)ans+=arr[p1].first;
+    p1++;
+  }
+  printf("%lld",ans);
+return 0;
+}

@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 1000005, M = 100005, SM = 316;
+ll pw[M], memo[101][101];
+int c[N], d[N], g[M][SM];
+vector<int> primes;
+bool is_prime[M];
+
+inline ll mod_pow(ll x, ll n = MOD - 2) {
+    ll ret = 1;
+    while (n) {
+        if (n & 1) ret = ret * x % MOD;
+        x = x * x % MOD;
+        n >>= 1;
+    }
+    return ret;
+}
+
+inline int get(int n, int m, int p) {
+    if (p < SM) return (g[n][p] + g[m][p]);
+    return (n / p + m / p);
+}
+
+inline ll calc(int n, int k) {
+    k = min(k - 1, (n - 1) >> 1);
+    ll ans = pw[n];
+    ll cur = 1;
+    repu(i, 0, primes.size()) {
+        if (primes[i] >= n) break;
+        int mini = get(n - 1, 0, primes[i]);
+        repu(j, 1, k + 1) amin(mini, get(n - 1 - j, j, primes[i]));
+        cur = cur * mod_pow(primes[i], mini) % MOD;
+    }
+    ans = ans * mod_pow(cur) % MOD;
+    return ans;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+
+    int ntest, n, k, a, b, m;
+    ll ans;
+    
+    mem(is_prime, true);
+    repu(i, 2, M) {
+        if (is_prime[i]) {
+            primes.push_back(i);
+            for (int j = i + i; j < M; j += i) is_prime[j] = false;
+        }
+    }
+    
+    repu(tn, 2, M) {
+        repu(i, 0, primes.size()) {
+            int p = primes[i];
+            if (p > tn || p >= SM) break;
+            int cur = p, tot = 0;
+            while (cur <= tn) tot += tn / cur, cur *= p;
+            g[tn][p] = tot;
+        }
+    }
+
+    pw[0] = 1;
+    repu(i, 1, M) pw[i] = i * pw[i - 1] % MOD;
+    
+    repu(i, 1, 101) repu(j, 1, i + 1) memo[i][j] = calc(i, j);
+
+    // calculate g[n][K]=gcd[(n-k)!(k-1)!], k=1,...,K
+    
+    cin >> ntest >> n >> k >> a >> b >> m;
+    repu(i, 1, ntest) cin >> c[i];
+    repu(i, 1, ntest) cin >> d[i];
+    
+    if (n < 101 && k < 101) ans = memo[n][k];
+    else ans = calc(n, k);
+    printf("%lld\n", ans);
+
+    repu(i, 1, ntest) {
+        n = 1 + (a * ans + c[i]) % m;
+        k = 1 + (b * ans + d[i]) % n;
+        if (n < 101 && k < 101) ans = memo[n][k];
+        else ans = calc(n, k);
+        printf("%lld\n", ans);
+    }
+	
+	return 0;
+}

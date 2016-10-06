@@ -1,0 +1,90 @@
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 100500;
+int a[N];
+
+void solve() {
+	int n;
+	scanf("%d", &n);
+	int ans = 0, cnt = 0, id = 0;
+	for (int i = 1; i <= n; ++ i) {
+		int k;
+		scanf("%d", &k);
+		for (int j = 1; j <= 6; ++ j) a[j] = 0;
+		int cur = k;
+		for (int j = 1; j <= k; ++ j) {
+			int x;
+			scanf("%d", &x);
+			a[x]++;
+		}
+		
+		sort(a + 1, a + 7);
+		cur += a[1] * 4;
+		for (int j = 6; j > 0; -- j) a[j] -= a[1];
+		
+		while (true) {
+			sort(a + 1, a + 7);
+			reverse(a + 1, a + 7);
+			if (a[5] > 0) {
+				cur += 2;
+				for (int j = 1; j <= 5; ++ j) --a[j];
+			}
+			else break;
+		}
+		while (true) {
+			sort(a + 1, a + 7);
+			reverse(a + 1, a + 7);
+			if (a[4] > 0) {
+				cur ++;
+				for (int j = 1; j <= 4; ++ j) --a[j];
+			}
+			else break;
+		}
+
+		if (ans < cur) ans = cur, cnt = 1, id = i;
+		else if (ans == cur) cnt++;
+	}
+	if (cnt > 1) puts("tie");
+	else if (id == 1) puts("chef");
+	else printf("%d\n", id);
+}
+
+int main() {
+	#ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+	#endif
+
+	int t;
+	scanf("%d", &t);
+
+	while (t--) solve();
+
+    return 0;
+}

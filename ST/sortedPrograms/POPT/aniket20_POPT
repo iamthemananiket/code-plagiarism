@@ -1,0 +1,157 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 2000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int graph[1005][1005];
+int ograph[1005][1005];
+int n;
+int parent[1005];
+int mark[1005];
+int bfs(int s,int d)
+{
+	queue<int>q;
+	q.push(s);
+	int val,i,j;
+	for(i=0;i<=n;i++){
+		mark[i]=0;
+		parent[i]=-1;
+	}
+	mark[s]=1;
+	int fl=0;
+	while(!q.empty()){
+		int p=q.front();
+		q.pop();
+		for(i=0;i<=n;i++){
+			if(ograph[p][i]-graph[p][i]>0 && !mark[i]){
+				q.push(i);
+				mark[i]=1;
+				parent[i]=p;
+				if(i==d){
+					fl=1;
+					break;
+				}
+			}	
+		}
+		if(fl==1){
+			break;
+		}
+	}
+	val=INT_MAX;
+	if(i!=d)
+		return 0;
+	
+		
+	while(i!=s){
+		j=parent[i];
+		val=min(ograph[j][i]-graph[j][i],val);
+		i=j;
+	}
+	i=d;
+	while(i!=s){
+		j=parent[i];
+		graph[j][i]+=val;
+		graph[i][j]-=val;
+		i=j;
+	}
+	if(val==INT_MAX){
+		return 0;
+	}
+	else{
+		return val;
+	}
+}
+
+int max_flow(int s, int d)
+{
+	int maxFlow=0;
+	int temp=bfs(s,d);
+	while(temp){
+		maxFlow+=temp;
+		temp=bfs(s,d);
+	}
+	return maxFlow;
+}
+int mark1[1005][1005];
+string s[505];
+
+int main()
+{
+	iosbase;
+	int t,i,j;
+	cin>>t;
+	while(t--){
+		cin>>n;
+		for(i=0;i<n;i++){
+			cin>>s[i];
+		}
+		for(i=0;i<n;i++){
+			for(j=0;j<n;j++){
+				mark1[i][j]=0;
+			}
+		}
+		for(i=0;i<=2*n+1;i++){
+			for(j=0;j<=2*n+1;j++){
+				graph[i][j]=0;
+				ograph[i][j]=0;
+			}
+		}
+		for(i=0;i<n;i++){
+			for(j=n-1;j>=0;j--){
+				if(s[j][i]=='#'){
+					break;
+				}
+				mark1[j][i]=1;
+			}
+		}
+		for(i=0;i<n;i++){
+			for(j=0;j<n;j++){
+				if(s[i][j]=='#'){
+					break;
+				}
+				if(mark1[i][j]==1){
+				//	cout<<i<<" "<<j<<endl;
+					ograph[i+1][n+j+1]=1;
+				//	ograph[j+n+1][i+1]=1;
+				}
+			}
+		}
+		for(i=0;i<n;i++){
+			ograph[0][i+1]=1;
+		}
+		for(i=0;i<n;i++){
+			ograph[n+i+1][2*n+1]=1;
+		}
+		n=2*n+1;
+		int ans=max_flow(0,n);
+		cout<<ans<<"\n";
+	}
+	return 0;
+}

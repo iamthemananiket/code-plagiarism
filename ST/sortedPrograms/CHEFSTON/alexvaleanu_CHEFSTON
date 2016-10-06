@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 1e5 + 1;
+
+int A[Nmax], B[Nmax];
+int N, K, T;
+
+int main()
+{
+    ios_base::sync_with_stdio( false );
+
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> N >> K;
+
+        for ( int i = 1; i <= N; ++i )
+            cin >> A[i];
+
+        for ( int i = 1; i <= N; ++i )
+            cin >> B[i];
+
+        long long best = -1e18;
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            int cnt = K / A[i];
+            long long sol = 1LL * cnt * B[i];
+
+            best = max( best, sol );
+        }
+
+        cout << best << "\n";
+    }
+
+    return 0;
+}

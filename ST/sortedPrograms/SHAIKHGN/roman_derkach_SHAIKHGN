@@ -1,0 +1,234 @@
+#include<bits/stdc++.h>
+//#define int long long
+#define pb push_back
+ using namespace std;
+
+const int N = 700;
+ int nql,num[N],ost[N],i,j,n,k,x,z,s,W,m,K=31,tin[N],usd[N],Q,last[N],tt,timer,q[N],qq[N],mx;
+long long a[N][N],p[N],res[N][N],matrix[N][N],c[N][N];
+ struct my
+ {
+     int k,x,num,kol;
+     vector<int> vec;
+ }b;
+
+
+ char cmp(my a,my b)
+ {
+     return(a.k<b.k);
+ }
+
+  char cmp2(my a,my b)
+ {
+     return(a.num<b.num);
+ }
+
+ //inline
+ void TT()
+ {
+         while(k)
+         {
+             if(k&1){
+
+                    for(j=0;j<=num[n];++j)
+                    for(i=1;i<=n;++i)
+                    c[j][i]=0;
+
+                    for(j=1;j<=n;++j)
+                    for(i=1;i<=n;++i)
+                            if(res[num[j]][i] & p[ost[j]])
+                        {
+                            for(W=0;W<=num[n];++W)
+                                c[W][i]|=matrix[W][j];
+                        }
+
+    for(j=0;j<=num[n];++j)
+     for(i=1;i<=n;++i)
+        res[j][i]=c[j][i];
+
+             }
+
+            for(j=0;j<=num[n];++j)
+             for(i=1;i<=n;++i)
+                    c[j][i]=0;
+
+                for(j=1;j<=n;++j)
+                 for(i=1;i<=n;++i)
+                            if(matrix[num[j]][i] & p[ost[j]])
+                        {
+                            for(W=0;W<=num[n];++W)
+                                c[W][i]|=matrix[W][j];
+                        }
+    for(j=0;j<=num[n];++j)
+     for(i=1;i<=n;++i)
+        matrix[j][i]=c[j][i];
+
+             k>>=1;
+         }
+ }
+
+ char ch;
+
+ void read(int &x)
+ {
+     x = 0;
+      while(1)
+      {
+          ch = getchar();
+          if(!(ch>='0'&&ch<='9')) return;
+          x*=10;
+          x+=ch-'0';
+      }
+ }
+
+ int i_w,kol_w,m_w[100],M_w;
+
+ void write(int x)
+ {
+   //  cout<<x; return;
+     kol_w=0;
+     if(x<0) M_w=1,x=-x;else M_w=0;
+     while(1)
+     {
+         m_w[++kol_w] = x % 10;
+         x/=10;
+         if(x==0)break;
+     }
+     if(M_w) putchar('-');
+     for(i_w=kol_w;i_w>0;--i_w)
+        putchar(char('0' + m_w[i_w]));
+ }
+
+  void dfs(int v)
+ {
+    if(tin[v]>=0)
+    {
+        usd[v] = 1;
+        Q = 1;
+        v = last[v];
+        while(!usd[v])
+        {
+            usd[v]=1;
+            ++Q;
+            v = last[v];
+        }
+
+        for(i=1;i<=n;++i)
+            if(usd[i])
+        {
+            if((k - tin[i]) % Q == 0)
+            {
+                //write(1);
+                putchar('1');
+                putchar('\n');
+                write(i);
+                putchar('\n');
+                tt=1;
+                return;
+            }
+        }
+
+        return;
+    } else
+    {
+        tin[v] = timer++;
+        if(tin[v]==k)
+        {
+                putchar('1');
+                putchar('\n');
+                write(v);
+                putchar('\n');
+            tt=1;
+            return;
+        }
+        if(q[v])last[q[v]] = v,dfs(q[v]);
+    }
+ }
+
+
+
+ //int
+  main()
+ {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    //freopen("input.txt","r",stdin);freopen("output.txt","w",stdout);
+
+     read(n);
+
+     for(i=1;i<=n;++i)
+        num[i] = i / K,
+        ost[i] = i % K;
+
+            p[0] = 1;
+        for(i=1;i<K;++i)p[i] = (p[i-1]<<1);
+
+     for(i=1;i<=n;++i){
+    for(j=1;j<=n;++j)
+    {
+        read(x);
+        if(x) a[num[j]][i]+=p[ost[j]],++q[i],qq[i] = j;
+    }
+    mx=max(mx,q[i]);
+     }
+
+     if(mx==1)
+     {
+        for(i=1;i<=n;++i)
+         {
+            q[i]=qq[i];
+         }
+        read(m);
+        while(m--)
+         {
+            read(k);
+            read(x);
+            for(i=1;i<=n;++i) tin[i] = -1,usd[i] = 0;
+            timer=0;
+            tt=0;
+            dfs(x);
+            if(!tt)
+            {
+                putchar('0');
+                putchar('\n');
+                putchar('-');
+                putchar('1');
+                putchar('\n');
+            }
+         }
+         return 0;
+     }
+
+     read(m);
+     while(m--)
+     {
+         cin>>k>>x;
+
+      for(i=1;i<=n;++i)
+       for(j=1;j<=n;++j)
+        if(i==j)
+          res[num[i]][i]=p[ost[i]]; else res[i][j] = 0;
+
+          for(j=0;j<=num[n];++j)
+            for(i=1;i<=n;++i)
+                matrix[j][i] = a[j][i];
+            TT();
+
+             for(i=1;i<=n;++i)
+                if(res[num[i]][x] & p[ost[i]])
+                 ++b.kol,b.vec.pb(i);
+                 if(b.kol==0) b.vec.pb(-1);
+
+                 write(b.kol);
+                 write(b.vec[0]);
+                 for(i=1;i<b.kol;++i)
+                 {
+                     putchar(' ');
+                     write(b.vec[i]);
+                 }
+                 putchar('\n');
+     }
+ }

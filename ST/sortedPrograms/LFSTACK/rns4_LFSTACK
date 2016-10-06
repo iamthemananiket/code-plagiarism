@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 1000010
+
+vector <int> a[M];
+int d[M], en[M];
+int b[M], n, m;
+
+map <vector <int>, bool> mp;
+
+int dfs(int x, int s, vector <int> &v) {
+  if (x == n) {
+    if (s == 0) {
+      mp[v] = 1; return 0;
+    }
+    for (int i = 0; i < n; i++) {
+      if (a[i][v[i]] == b[s]) {
+        v[i]--;
+        if (mp.count(v)) {
+          v[i]++; mp[v] = 1;
+          if (s == m) return 1;
+          else return 0;
+        }
+        v[i]++;
+      }
+    }
+    return 0;
+  }
+  for (int i = 0; i <= d[x]; i++) {
+    v.push_back(i);
+    if (dfs(x + 1, s + i, v)) return 1;
+    v.pop_back();
+  }
+  return 0;
+}
+
+int main() {
+  //freopen("in.txt", "r", stdin);
+  int T;
+  for (scanf("%d", &T); T--; ) {
+    mp.clear();
+    scanf("%d", &n);
+    m = 0;
+    int N = 1;
+    for (int i = 0; i < n; i++) {
+      scanf("%d", d + i);
+      a[i].resize(d[i] + 1);
+      a[i][0] = 0;
+      for (int j = d[i]; j; j--) scanf("%d", &a[i][j]);
+      m += d[i];
+    }
+
+    int bf = 0;
+    for (int i = 1; i <= m; i++) {
+      scanf("%d", b + i);
+    }
+    vector <int> v;
+    if (dfs(0, 0, v)) {
+      puts("Yes");
+    }
+    else puts("No");
+  }
+}

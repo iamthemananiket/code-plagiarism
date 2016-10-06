@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+#define MP make_pair
+#define  F first
+#define  S second
+
+using namespace std;
+
+inline int gcd( int a , int b ){
+	if( b == 0 ) return a;
+	return gcd( b , a % b );
+}
+
+set < pair < pair < int , int > , int > > S;
+map < pair < int , int > , int > M;
+int T , N;
+
+int main(){
+	
+	//rf;
+	
+	cin.tie(0);
+	ios::sync_with_stdio(0);
+
+	cin >> T;
+	while(T--){
+
+
+		S.clear();
+		M.clear();
+		
+		cin >> N;
+		
+		for(int i = 1 ; i <= N ; i++){
+			
+			int x , y , z;
+			cin >> x >> y >> z;
+			
+			int hcf = gcd( gcd(abs(x),abs(y)) , abs(z) );
+			x /= hcf , y /= hcf , z /= hcf;
+			
+			if (x < 0) S.insert( MP(MP(-x,-y),-z) );
+			else if( x == 0 and y < 0 ) S.insert( MP(MP(x,-y) ,-z) );
+			else       S.insert( MP(MP(x,y),z) );
+		}
+
+		int res = 0;
+
+		for( auto line : S ){
+			
+			int hcf = gcd( abs(line.F.F) , abs(line.F.S) ) ;
+
+        	if ( (line.F.F > 0 and line.F.S < 0) or (line.F.F < 0 and line.F.S > 0) )
+				M[ MP( line.F.F / hcf , line.F.S / hcf ) ]++;
+			else
+        	    M[ MP( - (line.F.F / hcf) , line.F.S / hcf ) ]++;	
+		}
+
+		for( auto slopes : M ){
+			res = max( res , slopes.S );
+		}
+
+		cout << res << endl;
+
+	}
+
+}

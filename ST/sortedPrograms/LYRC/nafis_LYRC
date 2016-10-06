@@ -1,0 +1,246 @@
+#include <set>
+#include <map>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <cctype>
+#include <cstdio>
+#include <string>
+#include <vector>
+#include <cassert>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int NN = 1000005;
+const int MM = 505;
+
+int cases, caseno, n, res[MM], t;
+char T[NN], A[MM][5005];
+
+struct node {
+    node *next[67];
+    vector <int> out;
+    node() {
+        for( int i = 0; i < 67; i++ ) next[i] = NULL;
+        out.clear();
+    }
+};
+
+int getv( char p ){
+    if( p >= 'a' && p <= 'z' )return p-'a' +1;
+    if( p >= 'A' && p <= 'Z' )return p-'A' + 27;
+    if( p >= '0' && p <= '9' )return p-'0' + 53;
+    return 63;
+}
+
+queue <node *> Q;
+
+node* buildTrieWithFailure( int n ) {
+    node *root = new node;
+    for( int i = 0; i < n; i++ ) {
+        node *p = root;
+        for( int j = 0; A[i][j]; j++ ) {
+            int c = getv(A[i][j]);
+            if( !p->next[c] ) p->next[c] = new node;
+            p = p->next[c];
+        }
+        p->out.push_back(i);
+    }
+    for( int i = 1; i < 64; i++ ) {
+        if( !root->next[i] ) root->next[i] = root;
+        else {
+            Q.push( root->next[i] );
+            root->next[i]->next[0] = root;
+        }
+    }
+    while( !Q.empty() ) {
+        node *u = Q.front(); Q.pop();
+        for( int i = 1; i < 64; i++ ) if( u->next[i] ) {
+            node *v = u->next[i];
+            node *w = u->next[0];
+            while( !w->next[i] ) w = w->next[0];
+            v->next[0] = w = w->next[i];
+            for( int j = 0; j < w->out.size(); j++ ) v->out.push_back( w->out[j] );
+            Q.push(v);
+        }
+    }
+    return root;
+}
+
+void AhoCorasick( node *p, char *T ) {
+    for( int i = 0; T[i]; i++ ) {
+        int c = getv( T[i] );
+        while( !p->next[c] ) p = p->next[0];
+        p = p->next[c];
+        for( int j = 0; j < p->out.size(); j++ ) res[ p->out[j] ]++;
+    }
+}
+
+void deleteTrie( node *p ) {
+    for( int i = 1; i < 64; i++ ) if( p->next[i] && p->next[i] != p ) deleteTrie( p->next[i] );
+    delete p;
+}
+
+int main() {
+    //freopen("a.in", "r", stdin);
+    //freopen("a2.ans", "w", stdout);
+
+
+        scanf("%d", &n);
+        for( int i = 0; i < n; i++ ) {
+            scanf("%s", A[i]);
+            res[i] = 0;
+        }
+        node *root = buildTrieWithFailure( n );
+
+        scanf( "%d", &t );
+        for( int i = 0; i < t; i++ ){
+            scanf( "%s", T );
+            AhoCorasick( root, T );
+        }
+
+        //printf("Case %d:\n", ++caseno);
+        for( int i = 0; i < n; i++ ) printf("%d\n", res[i]);
+
+        //deleteTrie( root );
+
+    return 0;
+}
+
+
+//#include <set>
+//#include <map>
+//#include <list>
+//#include <cmath>
+//#include <ctime>
+//#include <deque>
+//#include <queue>
+//#include <stack>
+//#include <cctype>
+//#include <cstdio>
+//#include <string>
+//#include <vector>
+//#include <cassert>
+//#include <climits>
+//#include <cstdlib>
+//#include <cstring>
+//#include <sstream>
+//#include <iostream>
+//#include <algorithm>
+//
+//using namespace std;
+//
+//const int NN = 1000005;
+//const int MM = 1005;
+//
+//int cases, caseno, n;
+//char T[NN], A[MM][MM * 5];
+//
+//int getv( char p ){
+//    if( p >= 'a' && p <= 'z' )return p-'a' +1;
+//    if( p >= 'A' && p <= 'Z' )return p-'A' + 27;
+//    if( p >= '0' && p <= '9' )return p-'0' + 53;
+//    return 63;
+//}
+//
+//struct node {
+//    int cnt;
+//    bool state;
+//    node *next[67];
+//    vector <node *> out;
+//    node() {
+//        for( int i = 0; i < 67; i++ ) next[i] = NULL;
+//        out.clear();
+//        cnt = state = false;
+//    }
+//};
+//queue <node *> Q;
+//
+//node* buildTrieWithFailure( int n ) {
+//    node *root = new node;
+//    for( int i = 0; i < n; i++ ) {
+//        node *p = root;
+//        for( int j = 0; A[i][j]; j++ ) {
+//            int c = getv( A[i][j] );
+//            if( !p->next[c] ) p->next[c] = new node;
+//            p = p->next[c];
+//        }
+//    }
+//    for( int i = 1; i < 67; i++ ) {
+//        if( !root->next[i] ) root->next[i] = root;
+//        else {
+//            Q.push( root->next[i] );
+//            root->next[i]->next[0] = root;
+//        }
+//    }
+//    while( !Q.empty() ) {
+//        node *u = Q.front(); Q.pop();
+//        for( int i = 1; i < 67; i++ ) if( u->next[i] ) {
+//            node *v = u->next[i];
+//            node *w = u->next[0];
+//            while( !w->next[i] ) w = w->next[0];
+//            v->next[0] = w = w->next[i];
+//            w->out.push_back( v );
+//            Q.push(v);
+//        }
+//    }
+//    return root;
+//}
+//
+//void AhoCorasick( node *p, char *T ) {
+//    for( int i = 0; T[i]; i++ ) {
+//        int c = getv( T[i] );
+//        while( !p->next[c] ) p = p->next[0];
+//        p = p->next[c];
+//        p->cnt++;
+//    }
+//}
+//
+//int findRes( node *p ) {
+//    if( p->state ) return p->cnt;
+//    for( int i = 0; i < p->out.size(); i++ ) p->cnt += findRes( p->out[i] );
+//    p->state = true;
+//    return p->cnt;
+//}
+//
+//void deleteTrie( node *p ) {
+//    for( int i = 1; i < 27; i++ ) if( p->next[i] && p->next[i] != p ) deleteTrie( p->next[i] );
+//    delete p;
+//}
+//
+//int main() {
+//    //freopen("a.in", "r", stdin);
+//    //freopen("a.ans", "w", stdout);
+//
+//        scanf("%d", &n);
+//        for( int i = 0; i < n; i++ ) scanf("%s", A[i]);
+//        node *root = buildTrieWithFailure( n );
+//        int t;
+//        scanf("%d",&t);
+//        while(t--){
+//            scanf( "%s", T );
+//            AhoCorasick( root, T );
+//        }
+//
+//        for( int i = 0; i < n; i++ ) {
+//            node *p = root;
+//            for( int j = 0; A[i][j]; j++ ) {
+//                int c = getv( A[i][j] );
+//                p = p->next[c];
+//            }
+//            printf("%d\n", findRes( p ));
+//        }
+//        //deleteTrie( root );
+//
+//
+//    return 0;
+//}

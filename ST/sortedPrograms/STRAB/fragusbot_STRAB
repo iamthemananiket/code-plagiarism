@@ -1,0 +1,80 @@
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+#include <cassert>
+
+using namespace std;
+
+const int mod = 1e9 + 7;
+
+char a[25];
+char b[25];
+int bad[1 << 22];
+int cnt[25];
+int ways[25];
+int f[25];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  memset(bad, 0, sizeof bad);
+  int st = 1;
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n, m;
+    scanf("%d %d %s %s", &n, &m, a, b);
+    int lo = 0, hi = 0;
+    for (int i = 0; i < m; ++i) {
+      lo |= ((a[i] == 'B') << (m - i - 1));
+      hi |= ((b[i] == 'B') << (m - i - 1));
+    }
+    assert(lo <= hi);
+    memset(cnt, 0, sizeof cnt);
+    for (int i = lo; i <= hi; ++i) {
+      bad[i] = st;
+    }
+    for (int len = 1; len <= n; ++len) {
+      cnt[len] = (1 << len);
+      if (len >= m) {
+        for (int mask = 0; mask < (1 << len); ++mask) {
+          for (int i = 0; i + m - 1 < len; ++i) {
+            if (bad[(mask & (((1 << m) - 1) << i)) >> i] == st) {
+              --cnt[len];
+              break;
+            }
+          }
+        }
+      }
+    }
+    memset(f, 0, sizeof f);
+    memset(ways, 0, sizeof ways);
+    f[0] = 1;
+    ways[0] = 1;
+    for (int i = 1; i <= n; ++i) {
+      f[i] += 24LL * ways[i - 1] % mod;
+      if (f[i] >= mod) {
+        f[i] -= mod;
+      }
+      ways[i] = f[i];
+      for (int j = 1; j <= n; ++j) {
+        if (i - j >= 0) {
+          ways[i] += 1LL * cnt[j] * f[i - j] % mod;
+          if (ways[i] >= mod) {
+            ways[i] -= mod;
+          }
+        }
+      }
+    }
+    printf("%d\n", ways[n]);
+    ++st;
+  }
+  return 0;
+}

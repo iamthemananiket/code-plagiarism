@@ -1,0 +1,93 @@
+#include <iostream>
+#include <map>
+
+using namespace std;
+
+const int N = 1010;
+
+map<int, int> pos;
+
+int use[N];
+int nxt[N], lf[N], rg[N];
+
+int A[N];
+int n;
+
+inline int C2( int x ) { return x * (x+1) / 2; }
+
+void solve( void ) {
+
+	cin >> n;
+	for ( int i = 1 ; i <= n ; i++ ) {
+		cin >> A[i];
+	}
+
+	pos.clear();
+	for ( int i = n ; i >= 0 ; i-- ) {
+		if ( pos.find( A[i] ) != pos.end() ) {
+			nxt[i] = pos[ A[i] ];
+		} else {
+			nxt[i] = n+1;
+		}
+		pos[A[i]] = i;
+	}
+
+	long long ans = 0ll;
+
+	for ( int i = 1 ; i <= n ; i++ ) {
+
+		fill ( use, use+n+1, 0 );
+
+		for ( int j = 1 ; j <= i ; j++ ) {
+			if ( use[j] ) continue;
+			for ( int k = j ; k <= n ; k = nxt[k] ) {
+				use[k] = true;
+			}
+		}
+
+		int seg_num = 0;
+		lf[i] = i + 1;
+		rg[n+1] = n;
+		for ( int j = i+1 ; j <= n ; j++ ) {
+			if( !use[j] and use[j-1] ) {
+				int cnt = 0;
+				while( j + cnt <= n and !use[j+cnt] ) {
+					cnt++;
+				}
+				rg[j] = j + cnt - 1;
+				lf[j+cnt-1] = j;
+				seg_num += C2( cnt );
+			} else if ( use[j] ) {
+				lf[j] = j + 1;
+				rg[j] = j - 1;
+			}
+		}
+
+		for ( int j = 1 ; j <= i ; j++ ) {
+			if ( j > 1 and i+1 <= nxt[j-1] ) {
+				for ( int k = nxt[j-1] ; k <= n ; k = nxt[k] ) {
+					int l = lf[k-1], r = rg[k+1];
+					seg_num -= C2 ( k - l ) + C2 ( r - k );
+					seg_num += C2 ( r - l + 1 );
+					use[k] = false;
+					rg[l] = r;
+					lf[r] = l;
+				}
+			}
+			ans += seg_num;
+		}
+	}
+
+	cout << ans << endl;
+}
+int main() {
+
+	ios::sync_with_stdio( false );
+	int test;
+	cin >> test;
+	while ( test-- ) {
+		solve();
+	}
+
+	return 0;
+}

@@ -1,0 +1,147 @@
+#include<bits/stdc++.h>
+#define tm otoshol
+#define pb push_back
+#define next natypnoi
+#define last poperedni
+ using namespace std;
+
+ const int N = 1e5 + 121, T = 4 * N,M = 1e6 + 1;
+ int t[T],t1[T],a[N],one,two,tl,tm,tr,v,i,lp[M],kol,j,n,tt,type,m,next[N],last[N],l,r;
+ vector<int> pr;
+
+ void build(int v,int tl,int tr)
+ {
+     if(tl == tr) t[v] = lp[a[tl]]; else
+     {
+         int tm = (tl+tr)>>1,one = v<<1,two = one +  1;
+         build(one,tl,tm);
+         build(two,tm+1,tr);
+         t[v] = max(t[one],t[two]);
+     }
+ }
+
+ void build1(int v,int tl,int tr)
+ {
+     if(tl == tr) t1[v] = 1; else
+     {
+         int tm = (tl+tr)>>1,one = v<<1,two = one + 1;
+         build1(one,tl,tm);
+         build1(two,tm+1,tr);
+         t1[v] = t1[one] + t1[two];
+     }
+ }
+
+ inline int kth2(int x)
+ {
+     tl = v = 1;
+     tr = n;
+      while(tl<tr)
+      {
+          tm = (tl+tr)>>1;
+          one = v<<1;
+          two = one + 1;
+          if(t1[one] >= x)
+            v = one,tr = tm; else
+          {
+              x-=t1[one];
+              v = two;
+              tl = tm + 1;
+          }
+      }
+      x-=t1[v];
+      if(x>0) return n + 1;
+      return tl;
+ }
+
+ int get2(int v,int tl,int tr,int l,int r)
+ {
+     if(tl>r||tr<l||l>r) return 0;
+     if((tl>=l&&tr<=r) || (!t[v])) return t1[v];
+     int tm = (tl+tr)>>1,one = v<<1,two = one + 1;
+     return get2(one,tl,tm,l,r) + get2(two,tm+1,tr,l,r);
+ }
+
+ inline void up2(int pos)
+ {
+     tl = v = 1;
+     tr = n;
+      while(tl<tr)
+      {
+          --t1[v];
+          tm = (tl+tr)>>1;
+          if(pos<=tm) v<<=1,tr =tm; else
+            v<<=1,++v,tl = tm + 1;
+      }
+      --t1[v];
+ }
+
+ inline void up(int pos)
+ {
+     tl = v = 1;
+     tr = n;
+      while(tl<tr)
+      {
+          tm = (tl+tr)>>1;
+          if(pos<=tm) v<<=1,tr =tm; else
+            v<<=1,++v,tl = tm + 1;
+      }
+      t[v] = lp[a[pos]];
+      v>>=1;
+      while(v)
+      {
+          t[v] = max(t[v<<1],t[(v<<1)+1]);
+          v>>=1;
+      }
+ }
+
+ int get(int v,int tl,int tr,int l,int r)
+ {
+     if(l>tr||r<tl) return 0;
+     if(tl>=l&&tr<=r) return t[v];
+     int tm = (tl+tr)>>1,one = v<<1,two = one +1;
+     return max(get(one,tl,tm,l,r),get(two,tm+1,tr,l,r));
+ }
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    lp[1] = 1;
+
+    for(i=2;i<M;++i)
+    {
+        if(!lp[i]) lp[i] = i,++kol,pr.pb(i);
+        for(j=0;j<kol && pr[j] *1ll* i<M && pr[j]<=lp[i];++j)
+        lp[pr[j] *1ll* i] = pr[j];
+    }
+
+   // for(i=2;i<=10;++i) cout<<i<<' '<<lp[i]<<endl;
+
+    cin>>tt;
+     while(tt--)
+     {
+        cin>>n>>m;
+         for(i=1;i<=n;++i) cin>>a[i],next[i] = i + 1,last[i] = i - 1;
+            build(1,1,n);
+            build1(1,1,n);
+         while(m--)
+         {
+             cin>>type>>l>>r;
+             if(type==0)
+             {
+                 l = kth2(get2(1,1,n,1,l-1) + 1);
+                 for(i=l;i<=r;i=next[i])
+                 {
+                     a[i]/=lp[a[i]];
+                     up(i);
+                     if(a[i] == 1) next[last[i]] = next[i], last[next[i]] = last[i],up2(i);
+                 }
+             } else cout<<get(1,1,n,l,r)<<'\n';
+         }
+     }
+
+    return 0;
+  }

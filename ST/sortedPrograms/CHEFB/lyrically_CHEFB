@@ -1,0 +1,73 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int LIM = 1000005;
+
+int N;
+int A[100010];
+
+int es[LIM + 10];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		fill(es, es + LIM, 0);
+		for (int i = 0; i < N; ++i) {
+			int a = A[i];
+			for (int d = 2; d * d <= a; ++d) if (a % d == 0) {
+				int e = 0;
+				for (; a % d == 0; a /= d) {
+					++e;
+				}
+				chmax(es[d], e);
+			}
+			if (a > 1) {
+				chmax(es[a], 1);
+			}
+		}
+		int ans = 0;
+		for (int p = 2; p < LIM; ++p) {
+			ans += es[p];
+		}
+		printf("%d\n", ans);
+	}
+	
+	return 0;
+}
+

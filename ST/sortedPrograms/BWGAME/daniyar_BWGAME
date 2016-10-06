@@ -1,0 +1,93 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 101010;
+
+int L[maxn], R[maxn];
+
+int a[maxn];
+
+int n;
+
+int Inversions()
+{
+	int cnt = 0;
+	for (int i = 1; i <= n; i++)
+		for (int j = i + 1; j <= n; j++)
+			if (a[i] > a[j])
+				cnt++;
+	return cnt;
+}
+
+bool used[maxn];
+
+int Alex, Fedya;
+
+void rec(int x)
+{
+	if (x == n + 1)
+	{
+		int res = Inversions();
+		if (res % 2 == 1)
+			Fedya++;
+		else
+			Alex++;
+		return ;
+	}
+	for (int i = L[x]; i <= R[x]; i++)
+	{
+		if (!used[i])
+		{
+			used[i] = 1;
+			a[x] = i;
+			rec(x + 1);
+			used[i] = 0;
+		}
+	}
+}
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	int T;
+	cin >> T;
+	while (T--)
+	{
+		scanf("%d", &n);
+		for (int i = 1; i <= n; i++)
+			scanf("%d%d", &L[i], &R[i]);
+		Alex = Fedya = 0;
+		rec(1);
+		if (Alex == Fedya)
+			puts("Draw");
+		else if (Alex > Fedya)
+			puts("Alex");
+		else
+			puts("Fedor");
+	}
+	return 0;
+}

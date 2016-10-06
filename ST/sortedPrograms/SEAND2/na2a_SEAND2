@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+
+#define F first
+#define S second
+
+#define mp make_pair
+#define pb push_back
+
+#define llong long long
+
+using namespace std;
+
+const int MXN = (int) 2e5 + 7;
+const int INF = (int) 1e9 + 7;
+
+int t, n;
+int arr[MXN];
+
+string a;
+
+int getRand(int seed) {
+    return (seed * 511 + 97) % a.size();
+}
+
+int main() {
+    scanf("%d", &t);
+    while (t--) {
+        cin >> a >> n;
+        for (int i = 0; i < n; i++)
+            scanf("%d", &arr[i]);
+
+        for (int i = 0; i < a.size(); i++)
+            swap(a[i], a[getRand(arr[i % n + 1])]);
+
+        cout << a << "\n";
+    }
+    return 0;
+}

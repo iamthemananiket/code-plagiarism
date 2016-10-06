@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+
+ll POWER[65];
+ll power(ll a, ll b) {ll ret=1;while(b) {if(b&1) ret*=a;a*=a;if(ret>=MOD) ret%=MOD;if(a>=MOD) a%=MOD;b>>=1;}return ret;}
+ll inv(ll x) {return power(x,MOD-2);}
+
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+bool fun(int a, int b, int c, int d) {
+	int g1=__gcd(a,b);
+	int g2=__gcd(c,d);
+	int t1=a/g1;
+	int t2=b/g1;
+	int t3=c/g2;
+	int t4=d/g2;
+	if(t1==t3 and t2==t4) return true;
+	t1=b/g1;
+	t2=a/g1;
+	t3=c/g2;
+	t4=d/g2;
+	if(t1==t3 and t2==t4) return true;
+	t1=a/g1;
+	t2=b/g1;
+	t3=d/g2;
+	t4=c/g2;
+	if(t1==t3 and t2==t4) return true;
+	t1=b/g1;
+	t2=a/g1;
+	t3=d/g2;
+	t4=c/g2;
+	if(t1==t3 and t2==t4) return true;
+	return false;
+}
+int main() {
+//	freopen("TASK.in","r",stdin);	
+//	freopen("TASK.out","w",stdout);
+//	precompute();
+	int a,b,c,d;
+	cin>>a>>b>>c>>d;
+	bool f=false;
+	f|=fun(a,b,c,d);
+	f|=fun(a,c,b,d);
+	f|=fun(a,d,b,c);
+	if(f) cout<<"Possible"<<endl;
+	else cout<<"Impossible"<<endl;
+	return 0;
+}

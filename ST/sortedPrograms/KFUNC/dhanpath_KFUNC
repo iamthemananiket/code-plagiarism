@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        long long  t, a[10], d, L, R, i, ans, LB, UB ;
+
+        for(  cin >> t ;  t-- ;  )
+        {
+                cin >> a[1] >> d >> L >> R ;
+                a[1]%=9;  if(!a[1]) a[1]=9;
+                for( i=2; i<10; i++ ) {
+                        a[i] = ( a[i-1] + d ) % 9 ;
+                        if(!a[i])  a[i]=9;
+                }
+                ans = 0LL ;
+                LB = (L+8)/9 ;
+                UB = (R+8)/9 ;
+                L%=9;  if(!L) L=9;
+                R%=9;  if(!R) R=9;
+                if( LB == UB ) {
+                        for( i=L; i<=R; i++ )
+                                ans += a[i] ;
+                        cout << ans << endl ;
+                        continue ;
+                }
+                for( i=L; i<10; i++ )
+                        ans += a[i] ;
+                for( i=1; i<=R; i++ )
+                        ans += a[i] ;
+                ans += (UB-LB-1)*accumulate(a+1,a+10,0LL) ;
+                cout << ans << endl ;
+        }
+
+        return 0;
+} 

@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+#define MX 4010
+
+int mul[10][MX][MX];
+int l[10][MX], sum[10][MX];
+
+int main() {
+	for(int i = 1;i < 10;i++) {
+		for(int j = 0;j < MX;j++) {
+			if(j == 0) {
+				mul[i][j][0] = 1;
+				l[i][j] = 1;
+				sum[i][j] = 1;
+			}else {
+				l[i][j] = l[i][j-1];
+				for(int k = 0;k < l[i][j-1];k++) {
+					mul[i][j][k] = mul[i][j-1][k] * i;
+				}
+				for(int k = 0;k < l[i][j] - 1;k++) {
+					mul[i][j][k+1] += mul[i][j][k] / 10;
+					mul[i][j][k] %= 10;
+				}
+				while(mul[i][j][l[i][j]-1] >= 10) {
+					mul[i][j][l[i][j]] = mul[i][j][l[i][j]-1] / 10;
+					mul[i][j][l[i][j]-1] %= 10;
+					l[i][j]++;
+				}
+				sum[i][j] = 0;
+				for(int k = 0;k < l[i][j];k++) {
+					sum[i][j] += mul[i][j][k];
+				}
+			}
+		}
+	}
+	int t;
+	scanf("%d", &t);
+	for(int i = 0;i < t;i++) {
+		int a, b;
+		scanf("%d%d", &a, &b);
+		printf("Case %d: %d\n", i+1, sum[a][b]);
+	}
+	return 0;
+}

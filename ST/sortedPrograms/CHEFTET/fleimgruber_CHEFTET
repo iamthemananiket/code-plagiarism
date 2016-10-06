@@ -1,0 +1,95 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 10005
+
+int n,a[MAX_N],b[MAX_N],hi;
+bool gdp[8][MAX_N],dp[8][MAX_N];
+
+bool f(int i, int mask)
+{
+	if (i==n+1)
+		return mask==1;
+	if (gdp[mask][i])
+		return dp[mask][i];
+	gdp[mask][i]=true;
+	//0
+	bool ans=a[i]==hi&&(mask&1)==1&&f(i+1,mask/2);
+	//1
+	if (!(mask&1))
+		ans|=a[i]+b[i-1]==hi&&f(i+1,mask/2);
+	if (!(mask&2))
+		ans|=a[i]+b[i]==hi&&(mask&1)==1&&f(i+1,(mask/2)^1);
+	if (!(mask&4))
+		ans|=a[i]+b[i+1]==hi&&(mask&1)==1&&f(i+1,(mask/2)^2);
+	//2
+	if (!(mask&3))
+		ans|=a[i]+b[i-1]+b[i]==hi&&f(i+1,(mask/2)^1);
+	if (!(mask&5))
+		ans|=a[i]+b[i-1]+b[i+1]==hi&&f(i+1,(mask/2)^2);
+	if (!(mask&6))
+		ans|=a[i]+b[i]+b[i+1]==hi&&(mask&1)==1&&f(i+1,(mask/2)^3);
+	//3
+	if (!(mask&7))
+		ans|=a[i]+b[i-1]+b[i]+b[i+1]==hi&&f(i+1,(mask/2)^3);
+	return dp[mask][i]=ans;
+}
+
+bool solve(int v)
+{
+	for (int mask=0; mask<8; mask++)
+		for (int i=1; i<=n; i++)
+			gdp[mask][i]=false;
+	hi=v;
+	b[0]=b[n+1]=hi+1;
+	return f(1,1);
+}
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d",&n);
+		for (int i=1; i<=n; i++)
+			scanf("%d",b+i);
+		for (int i=1; i<=n; i++)
+			scanf("%d",a+i);
+		vi can;
+		can.pb(a[1]);
+		can.pb(a[1]+b[1]);
+		if (n>1)
+		{
+			can.pb(a[1]+b[2]);
+			can.pb(a[1]+b[1]+b[2]);
+		}
+		sort(all(can));
+		bool got=false;
+		for (int i=sz(can)-1; i>=0; i--)
+			if (solve(can[i]))
+			{
+				printf("%d\n",can[i]);
+				got=true;
+				break;
+			}
+		if (!got)
+			printf("-1\n");
+	}
+	return 0;
+}

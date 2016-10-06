@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int n;
+pii in[maxs];
+int dp[205][2005];
+
+int fun(int pos, int tim){
+	//cout<<pos<<" "<<tim<<endl;
+	if(pos==n)return 0;
+	if(dp[pos][tim]!=-1)return dp[pos][tim];
+	if(in[pos].F==-31)return fun(pos+1, tim);
+	int ret=fun(pos+1, tim)+1;
+	ret=min(ret, fun(pos+1, tim+in[pos].S)+(tim+in[pos].S>in[pos].F));
+	dp[pos][tim]=ret;
+	return ret;
+}
+
+int main(){
+	int t;
+	sc("%d", &t);
+	int c=1;
+	while(t--){
+		sc("%d", &n);
+		for(int i=0; i<n; i++)sc("%d", &in[i].S);
+		for(int i=0; i<n; i++){
+			sc("%d", &in[i].F);
+			in[i].F-=30;
+		}
+		sort(in, in+n);
+		//for(int i=0; i<n; i++)cout<<in[i].F<<" "<<in[i].S<<endl;
+		for(int i=0; i<=n; i++){
+			for(int j=0; j<=2000; j++)dp[i][j]=-1;
+		}
+		int ans=fun(0, 0);
+		pr("Case %d: %d\n",c++, ans);
+	}
+}

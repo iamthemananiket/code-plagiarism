@@ -1,0 +1,122 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+#define NMAX 100010
+#define TMAX ((1<<18)+10)
+
+#define inf (2e9+10)
+
+using namespace std;
+
+class segtree{
+private:
+	int tree[TMAX];
+	int lookup[NMAX];
+
+	int N;
+
+	inline int left(int x){ return (x+1)*2-1; }
+	inline int right(int x){ return (x+1)*2; }
+	inline int parent(int x){ return (x+1)/2-1; }
+
+	void init(int node, int s, int e){
+		tree[node] = -inf;
+		if(s == e){
+			lookup[s] = node;
+			return ;
+		}
+
+		int l,r,m;
+		l = left(node), r = right(node), m = (s+e)/2;
+
+		init(l,s,m);
+		init(r,m+1,e);
+	}
+
+	int query(int node, int s, int e, int i, int j){
+		if(s > j || e < i) return -inf;
+		if(s >= i && e <=j) return tree[node];
+
+		int l,r,m;
+		l = left(node), r = right(node), m = (s+e)/2;
+
+		return max(query(l,s,m,i,j),query(r,m+1,e,i,j));
+	}
+
+public:
+
+	void init(int n){
+		N = n;
+		init(0,0,N-1);
+	}
+
+	int query(int i, int j){
+		return query(0,0,N-1,i,j);
+	}
+
+	void update(int x, int vl){
+		x = lookup[x];
+		tree[x] = vl;
+		while(x){
+			x = parent(x);
+			tree[x] = max(tree[left(x)],tree[right(x)]);
+		}
+	}
+};
+
+
+segtree P1,P2,Q1,Q2;
+
+int p[NMAX];
+int q[NMAX];
+int N,Q;
+
+void upd(int i){
+	P1.update(i,p[i]);
+	P2.update(i,-p[i]);
+	Q1.update(i,q[i]);
+	Q2.update(i,-q[i]);
+}
+
+int main(){
+	int i,x,y;
+
+	scanf("%d",&N);
+
+	P1.init(N);
+	P2.init(N);
+	Q1.init(N);
+	Q2.init(N);
+	for(i = 0; i < N; ++i){
+		scanf("%d%d",&x,&y);
+		p[i] = x+y;
+		q[i] = x-y;
+		upd(i);
+	}
+
+	long long ds;
+
+	scanf("%d",&Q);
+
+	char c;
+	while(Q--){
+
+		scanf(" %c",&c);
+		if(c == 'Q'){
+			scanf("%d%d",&x,&y);
+			ds = (long long)P1.query(x,y)+P2.query(x,y);
+			ds = max(ds,(long long)Q1.query(x,y)+Q2.query(x,y));
+			printf("%lld\n",ds);
+			continue;
+		}
+
+		scanf("%d%d%d",&i,&x,&y);
+		p[i] = x+y, q[i] = x-y;
+		upd(i);
+	}
+
+	return 0;
+}

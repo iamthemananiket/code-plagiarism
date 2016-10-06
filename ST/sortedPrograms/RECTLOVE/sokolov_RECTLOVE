@@ -1,0 +1,69 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+ 
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+ 
+double C2(int n) {
+	return (double)n * (n - 1) / 2;
+}
+ 
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n, m, k;
+		scanf("%d %d %d", &n, &m, &k);
+		double res = 0;
+		double denom = C2(n) * C2(m) + n * C2(m) + m * C2(n) + (double)n * m;
+		while (k--) {
+			int v;
+			scanf("%d", &v);
+			int x = (v + m - 1) / m;
+			int y = (v % m == 0) ? m : (v % m);
+			double nom = (double)x * (n - x + 1) * y * (m - y + 1);
+			res += nom / denom;
+		}
+		printf("%.12lf\n", res);
+	}
+	//printf("%d\n", C2(n) * C2(m) + n * C2(m) + m * C2(n) + n * m);
+	/*int res = 0;
+	for (int x1 = 1; x1 <= n; ++x1) {
+		for (int y1 = 1; y1 <= m; ++y1) {
+			for (int x2 = x1; x2 <= n; ++x2) {
+				for (int y2 = y1; y2 <= m; ++y2) {
+					++res;
+				}
+			}
+		}
+	}
+	printf("brute = %d\n", res);*/
+	return 0;
+} 

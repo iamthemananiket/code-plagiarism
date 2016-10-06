@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+void _main()
+{
+    int A, B;
+    scanf("%d%d", &A, &B);
+    int ans=0;
+    while(__builtin_popcount(A)!=1)
+        ans++, A/=2;
+    if(A>B)
+        swap(A, B);
+    ans+=__builtin_ctz(B/A);
+    printf("%d\n", ans);
+}
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

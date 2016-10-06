@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("draft.inp","r",stdin)
+#define OUTPUT freopen("draft.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=1e5+10,M=5e2+10;
+
+int n,m,v[N][2],q[N],w[N],p[N],mul[M][M];
+int f[N][M],g[M];
+vector <int> e[N];
+void BFS(){
+    q[1]=1;
+    int top=1,bot=1;
+    while (top<=bot){
+        int x=q[top++];
+        for(auto i:e[x]) if (i!=p[x]){
+            int y=v[i][0]+v[i][1]-x;
+            p[y]=i;
+            q[++bot]=y;
+        }
+    }
+}
+void prepare(){
+    scanf("%d%d",&n,&m);
+    REP(i,1,n){
+        int x,y;
+        scanf("%d%d%d",&x,&y,w+i);
+        w[i]=__gcd(w[i],m);
+        v[i][0]=x;v[i][1]=y;
+        e[x].push_back(i);
+        e[y].push_back(i);
+    }
+    BFS();
+    FOR(i,1,m)
+        FOR(j,1,m) mul[i][j]=__gcd(i*j,m);
+}
+ll solve(){
+    FOR(i,1,n) f[i][1]=1;
+    FORD(pha,n,2){
+        int x=q[pha],y=v[p[x]][0]+v[p[x]][1]-x;
+        FOR(i,1,m) f[y][mul[w[p[x]]][i]]+=f[x][i];
+    }
+    FOR(pha,2,n){
+        int x=q[pha],y=v[p[x]][0]+v[p[x]][1]-x;
+        FOR(i,1,m) g[i]=f[y][i];
+        FOR(i,1,m) g[mul[w[p[x]]][i]]-=f[x][i];
+        FOR(i,1,m) f[x][mul[w[p[x]]][i]]+=g[i];
+    }
+//    FOR(i,1,n)
+//        FOR(j,1,m) cout<<f[i][j]<<" \n"[j==m];
+    ll ans=0;
+    FOR(i,1,n) ans+=f[i][m];
+    return ans/2;
+}
+int main(){
+    prepare();
+    cout<<solve();
+}

@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, K, B, Q;
+int A[10001];
+int E[20100];
+int P[10001][15];
+int in[10001];
+int out[10001];
+int now;
+int ans[10001][101];
+vector<int> adj[10001];
+vector<int> pos[101];
+
+void dfs(int u, int p)
+{
+    P[u][0]=p;
+    for(int i=1; i<15; i++)
+        P[u][i]=P[P[u][i-1]][i-1];
+    in[u]=now;
+    ans[u][A[u]]=u;
+    E[now++]=A[u];
+    for(auto& v: adj[u])
+    {
+        if(v==p)
+            continue;
+        dfs(v, u);
+        for(int i=1; i<=K; i++)
+            ans[u][i]=min(ans[u][i], ans[v][i]);
+        E[now++]=A[u];
+    }
+    out[u]=now-1;
+}
+
+inline bool contains(int u, int x)
+{
+    vector<int>::iterator it=lower_bound(pos[x].begin(), pos[x].end(), in[u]);
+    return it!=pos[x].end() && *it<=out[u];
+}
+
+int main()
+{
+    memset(ans, 0x3f, sizeof ans);
+    scanf("%d%d%d", &N, &K, &B);
+    int a, b;
+    for(int i=1; i<N; i++)
+    {
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    dfs(B, B);
+    for(int i=0; i<now; i++)
+        pos[E[i]].push_back(i);
+    scanf("%d", &Q);
+    for(int i=0; i<Q; i++)
+    {
+        scanf("%d%d", &a, &b);
+        if(!contains(B, b))
+            puts("-1");
+        else
+        {
+            int u=a;
+            while(1)
+            {
+                int v=-1;
+                if(!contains(u, b))
+                    for(int i=0; i<15; i++)
+                        if(contains(P[u][i], b))
+                        {
+                            v=i;
+                            break;
+                        }
+                if(v==-1)
+                    break;
+                if(v==0)
+                {
+                    u=P[u][v];
+                    break;
+                }
+                else
+                    u=P[u][v-1];
+            }
+            printf("%d\n", ans[u][b]);
+        }
+    }
+    return 0;
+}

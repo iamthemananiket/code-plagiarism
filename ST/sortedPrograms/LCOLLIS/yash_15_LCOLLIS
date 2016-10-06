@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+char a[20];
+int c[20];
+int main(){
+	int tt,n,m,i,j;
+	int ans,k,f[11]={0,0,1,3,6,10,15,21,28,36,45};
+	cin >>tt;
+	while(tt--) {
+		cin >> n >> m;
+		memset(c,0,sizeof c);
+		for(i=0,ans=0;i<n;i++){
+			scanf(" %s",a);
+			for(j=0;j<m;j++)
+				c[j]+=(a[j]=='1');
+		}
+		for(j=0;j<m;j++)
+			ans+=f[c[j]];
+		printf("%d\n",ans);
+	}
+	return 0;
+}

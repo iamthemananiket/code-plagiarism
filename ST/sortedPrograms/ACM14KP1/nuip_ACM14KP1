@@ -1,0 +1,95 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < int(Y);++(X))
+#define rrep(X,Y) for (int (X) = int(Y-1);(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < int(Y);++(X))
+#define peat(X,Y) for (;(X) < int(Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+typedef pair<double,double> P;
+
+int N;
+double INF=1e10;
+
+bool compare_y(P a,P b){
+  return a.Y<b.Y;
+}
+
+inline double Dist(double x,double y){
+  return sqrt(x*x+y*y);
+}
+
+double closest_pair(P a[], int n){
+  if(n<=1)return INF;
+  int m= n/2;
+  double x=a[m].X;
+  double d=min(closest_pair(a,m),closest_pair(a+m,n-m));
+  inplace_merge(a,a+m,a+n,compare_y);
+
+  vector<P> b;
+  double sum=0;
+  rep(i,n){
+    if(fabs(a[i].X-x)>=d/2)continue;
+    rep(j,b.size()){
+      double
+        dx=a[i].X-b[b.size()-j-1].X,
+        dy=a[i].Y-b[b.size()-j-1].Y;
+      if(dy>=d/2)break;
+      sum=Dist(dx,dy);
+      for(int k=j+1;k<b.size();k++){
+        double dx1,dy1,dx2,dy2;
+        dx1=a[i].X-b[b.size()-k-1].X;
+        dy1=a[i].Y-b[b.size()-k-1].Y;
+        dx2=b[b.size()-j-1].X-b[b.size()-k-1].X;
+        dy2=b[b.size()-j-1].Y-b[b.size()-k-1].Y;
+        if(dy1+dy2>=d-sum || dy1>=d/2)break;
+        d=min(d,sum+Dist(dx1,dy1)+Dist(dx2,dy2));
+      }
+    }
+    b.pb(a[i]);
+  }
+  return d;
+}
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(10);
+  int i,j,k;
+  int t,T;
+  cin>>T;
+  rep(t,T){
+    int n;
+    cin>>n;
+    P a[n];
+    rep(i,n)
+      cin>>a[i].X>>a[i].Y;
+    sort(a,a+n);
+    cout<<"Case "<<t+1<<": "<<closest_pair(a,n)<<endl;
+  }
+  return 0;
+}

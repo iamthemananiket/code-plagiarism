@@ -1,0 +1,82 @@
+#include <iostream>
+#include <map>
+#include <cstring>
+#include <fstream>
+#include <cstdio>
+#include <math.h>
+#include <queue>
+#include <stack>
+#include <set>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <cassert>
+#include <algorithm>
+#include <ctime>
+#include <vector>
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+#define mp make_pair
+#define pb push_back
+
+const int N = 100500;
+
+int n, x[N], y[N];
+
+void solve() {
+	scanf("%d", &n);
+	int mnX = INF, mnY = INF, mxX = -INF, mxY = -INF;
+	for (int i = 1; i <= n; ++ i) {
+		scanf("%d%d", &x[i], &y[i]);
+		mnX = min(mnX, x[i]);
+		mnY = min(mnY, y[i]);
+		mxX = max(mxX, x[i]);
+		mxY = max(mxY, y[i]);
+	}
+	for (int i = 1; i <= n; ++ i) {
+		if ((x[i] == mnX || x[i] == mxX) && (y[i] == mnY || y[i] == mxY)) {
+
+//			cout << x[i] << " " << y[i] << " " << mnX << " " << mnY << " " << mxX << " " << mxY << endl;
+
+			printf("1\n%d ", i);
+			if (y[i] == mnY) printf("N");
+			else printf("S");
+			if (x[i] == mnX) printf("E");
+			else printf("W");
+			puts("");
+			return;
+		}
+	}
+	puts("2");
+	int id1 = -1, id2 = -1;
+	for (int i = 1; i <= n; ++ i) {
+		if (x[i] == mnX) id1 = i;
+	}
+	for (int i = 1; i <= n; ++ i) {
+		if (x[i] == mxX) id2 = i;
+	}
+
+	if (y[id1] <= y[id2]) {
+		printf("%d NE\n%d SW\n", id1, id2);
+	}
+	else printf("%d SE\n%d NW\n", id1, id2);
+}
+ 
+int main () {
+	#ifndef ONLINE_JUDGE
+	freopen("in", "r", stdin);
+	freopen("out", "w", stdout);
+	#endif
+
+	int test = 1;
+    
+    scanf("%d", &test);
+    
+    while(test--) solve();
+return 0;
+} 

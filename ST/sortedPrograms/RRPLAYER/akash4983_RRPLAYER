@@ -1,0 +1,40 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define sz size()
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+int main() {
+	int t;
+	S(t);
+	while(t--) {
+		int n;
+		S(n);
+		double ans = 0.0;
+		rep(i,1,n+1) {
+			ans += 1 / (double)i;
+		}
+		ans *= n;
+		printf("%0.6lf\n",ans);
+	}
+	return 0;
+}

@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define reps(i,a,n) for(int i = a; i < n; i++)
+#define s(n) cin >> n
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define rsz(x,n) x.clear(); x.resize(n)
+#define rrsz(x,a,n) x.clear(); x.resize(n,a)
+#define wt while(true)
+#define all(x) x.begin(),x.end()
+#define pb push_back
+#define ls(x) ((2*(x)) + 1)
+#define rs(x) ((ls(x)) + 1)
+#define md(a,b) (((a) + (b))/2)
+int s;
+int t, n, ans;
+int X[1000];
+int Y[1000];
+vector < pair < long double, pair < int, int > > > edge;
+vector < int > Parent;
+int find(int x){
+	if(x == Parent[x]) return x;
+	else return Parent[x] = find(Parent[x]);
+}
+void uni(int u, int v){
+	u = find(u), v = find(v);
+	Parent[u] = v;
+}
+int main(){
+	csl;
+	cin >> t;
+	while(t--){
+		edge.clear();
+		cin >> n;
+		rep(i,n)
+			cin >> X[i] >> Y[i];
+		rep(i,n)
+			reps(j, i + 1, n){
+				edge.push_back(make_pair((long double)sqrt((X[i] - X[j])*(X[i] - X[j]) + (Y[i] - Y[j])*(Y[i] - Y[j])), make_pair(i + 1, j + 1)));
+		}
+		sort(edge.begin(), edge.end());
+		Parent.resize(n + 1);
+		rep(i,n + 1)
+			Parent[i] = i;
+		int sz = 0;
+		rep(i, edge.size()){
+			if(find(edge[i].second.first) != find(edge[i].second.second)){
+				++sz;
+				cout << edge[i].second.first << ' ' << edge[i].second.second << '\n';
+				uni(edge[i].second.first, edge[i].second.second);
+			}
+			if(sz == n - 1)
+				break;
+		}
+	}
+	return 0;
+}
+

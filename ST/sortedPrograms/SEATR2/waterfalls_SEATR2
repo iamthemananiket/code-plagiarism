@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+const int MOD = 1e9+7;
+int add(int a, int b) {
+	int res = a+b;
+	if (res>=MOD) res-=MOD;
+	return res;
+}
+int mult(int a, int b) { return ((ll) a*b)%MOD; }
+
+int N,M;
+vector<int> adj[513];
+int ways[513][20013];
+
+void dfs(int x, int p=0) {
+	for (int i: adj[x]) if (i!=p) dfs(i,x);
+	for (int v=1;v<=M;v++) {
+		ways[x][v] = 1;
+		for (int i: adj[x]) if (i!=p) {
+			int cur = 0;
+			for (int k=v;k<=M;k+=v) cur = add(cur,ways[i][k]);
+			ways[x][v] = mult(ways[x][v],cur);
+		}
+	}
+}
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%d%d",&N,&M);
+		for (int i=1;i<=N;i++) adj[i].clear();
+		for (int i=1;i<N;i++) {
+			int a,b;
+			scanf("%d%d",&a,&b);
+			adj[a].push_back(b);
+			adj[b].push_back(a);
+		}
+		memset(ways,0,sizeof ways);
+		dfs(1);
+		int ans = 0;
+		for (int v=1;v<=M;v++) ans = add(ans,ways[1][v]);
+		printf("%d\n",ans);
+	}
+
+	return 0;
+}

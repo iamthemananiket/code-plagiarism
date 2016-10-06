@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    bool b = 0;
+    while(c < '0' || c > '9'){
+        if(c == '-')
+            b = 1;
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return b?-x:x;
+}
+const int N = 100001;
+int t , n;
+int f[N];
+long long r[N];
+int indeg[N];
+long long ans;
+int main(){
+    t = scan();
+    while(t--){
+        n = scan();
+        ans = 0;
+        for(int i = 1 ; i <= n ; ++i){
+            indeg[i] = 0;
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            f[i] = scan();
+            ++indeg[f[i]];
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            r[i] = scan();
+        }
+        queue<int> q;
+        for(int i = 1 ; i <= n ; ++i){
+            if(!indeg[i]){
+                q.push(i);
+            }
+        }
+        while(!q.empty()){
+            int node = q.front();
+            q.pop();
+            if(r[node] > 0){
+                r[f[node]] += r[node];
+            }
+            --indeg[f[node]];
+            if(!indeg[f[node]]){
+                q.push(f[node]);
+            }
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            int node = i;
+            long long temp = 0;
+            while(indeg[node]){
+                temp += r[node];
+                indeg[node] --;
+                node = f[node];
+            }
+            if(temp > 0){
+                ans += temp;
+            }
+        }
+        printf("%lld\n",ans);
+    }
+}

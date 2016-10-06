@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1e4 + 5;
+
+int n, k, ans;
+
+vector< int > kalah;
+bitset< N > bs;
+
+int main() {
+	bs.set();
+	bs[1] = 1;
+	bs[2] = 0;
+	kalah.push_back(1);
+	for(int i = 3; i<N; i++) if(bs[i]) {
+		kalah.push_back(i);
+		for(int j = 0; j<kalah.size(); j++)
+			if(i + kalah[j] < N)
+				bs[i+kalah[j]] = 0;
+			else
+				break;
+	}
+	int t; scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d", &n, &k);
+		if(bs[n] && bs[k])
+			puts("Vanka");
+		else
+			puts("Tuzik");
+	}
+	return 0;
+}
+// 2 
+// 3 

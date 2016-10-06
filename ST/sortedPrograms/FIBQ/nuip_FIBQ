@@ -1,0 +1,187 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<unordered_map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y)-1;(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+#define eb emplace_back
+#define UNIQUE(X) (X).erase(unique(all(X)),(X).end())
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> using vv=vector<vector<T>>;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+template<class T> inline bool MX(T &l,const T &r){return l<r?l=r,1:0;}
+template<class T> inline bool MN(T &l,const T &r){return l>r?l=r,1:0;}
+const ll MOD=1e9+7;
+
+inline double Mod(double v,double mod=MOD){
+  return v;
+}
+inline ll Mod(ll v,ll mod=MOD){
+  return v%mod;
+}
+typedef vector<vector<ll> > matl;
+typedef vector<vector<double> > matd;
+template<class T> vector<T> operator*(const T &a,vector<T> v){
+  rep(i,v.size())
+    v[i]=Mod(v[i]*a);
+  return v;
+}
+template<class T> vector<T> operator+(vector<T> v,const vector<T> &w){
+  rep(i,v.size())
+    v[i]=Mod(v[i]+w[i]);
+  return v;
+}
+template<class T> vector<vector<T> > matE(T n){
+  vector<vector<T> > re(n,vector<T>(n));
+  rep(i,n)
+    re[i][i]=1;
+  return re;
+}
+template<class T>vector<vector<T> >matE(vector<vector<T> >mat){
+  return matE((T)(mat.size()));
+}
+
+template<class T>
+vector<vector<T> > transpose(const vector<vector<T> > &a,
+vector<vector<T>> &re){
+  re.resize(a[0].size(),vector<T>(a.size()));
+  rep(i,a[0].size())
+    rep(j,a.size())
+      re[i][j]=a[j][i];
+  return re;
+}
+
+template<class T> T operator*(const vector<T> &a,
+		     const vector<T> &b){
+  T re=0;
+  rep(i,a.size())
+    re=Mod(re+Mod(a[i]*b[i]));
+  return re;
+}
+template<class T> vector<vector<T> >
+operator*(const vector<vector<T> > &a
+,const vector<vector<T> > &b_){
+  vector<vector<T> > b;
+  transpose(b_,b);
+  vector<vector<T> > re(a.size(),vector<T>(b.size()));
+  rep(i,a.size())
+    rep(j,b.size())
+      re[i][j]=a[i]*b[j];
+  return re;
+}
+template<class T>
+vector<vector<T> > pow(vector<vector<T> > a,ll n){
+  vector<vector<T> > re;
+  if(n==0)
+    return matE(a);
+  re=pow(a,n/2);
+  return re*re*(n%2?a:matE(a));
+}
+const int MAX_N=(1<<17);
+const ll INF=(1ll<<60);
+int nn=MAX_N;
+
+struct Seg{
+  ll a,b,c,d;
+  Seg(){
+    a=d=1;
+    b=c=0;
+  }
+  static Seg e;
+};
+vector<Seg> dat(2*MAX_N);
+Seg Seg::e=Seg();
+Seg A;
+Seg operator+(const Seg &l,const Seg &r){
+  Seg re;
+  re.a=(l.a*r.a+l.b*r.c)%MOD;
+  re.b=(l.a*r.b+l.b*r.d)%MOD;
+  re.c=(l.c*r.a+l.d*r.c)%MOD;
+  re.d=(l.c*r.b+l.d*r.d)%MOD;
+  return re;
+}
+ostream& operator<<(ostream &os, const Seg &t) { return os<<"["<<t.a<<","<<t.b<<","<<t.c<<","<<t.d<<"]";}
+template<class T=Seg> void upd(int k,T a,vector<T> &dat=dat){
+  k+=dat.size()/2-1;
+  dat[k]=a;
+  while(k>0){
+    k=(k-1)/2;
+    dat[k]=dat[k*2+1]+dat[k*2+2];
+  }
+}
+
+//(l,r,0,0,nn)
+template<class T=Seg> T query(int a,int b,const vector<T> &dat=dat,int k=0,int l=0,int r=-1){
+  if(r<0) r=dat.size()/2;
+  if(r<=a || b<=l)return T::e;
+  if(a<=l && r<=b) return dat[k];
+  T lv=query(a,b,dat,k*2+1,l,(l+r)/2) ,rv= query(a,b,dat,k*2+2,(l+r)/2,r);
+  return lv+rv;
+}
+
+Seg pow(int n){
+  Seg re,r=A;
+  for(;n;n/=2){
+    if(n%2) re=re+r;
+    r=r+r;
+  }
+  (re.a+=1)%=MOD;
+  (re.d+=1)%=MOD;
+  return re;
+}
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  A.b=A.c=A.d=1;
+  A.a=0;
+  int n,q,x,y;
+  cin>>n>>q;
+  rep(i,n){
+    cin>>x;
+    dat[nn-1+i]=pow(x);
+    //cout<<x<<":"<<pow(x)<<endl;
+  }
+  rrep(i,nn-1) dat[i]=dat[2*i+1]+dat[2*i+2];
+  char c;
+  rep(i,q){
+    cin>>c>>x>>y;
+    --x;
+    if(c=='Q'){
+      cout<<query(x,y).b<<endl;
+    }else{
+      upd(x,pow(y));
+    }
+  }
+  return 0;
+}

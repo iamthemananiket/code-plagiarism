@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+const int MAX = 5e6 + 100;
+
+bool sieve[MAX];
+bool pyth[MAX];
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input","r",stdin);
+  freopen("f.output","w",stdout);
+  freopen("error","w",stderr);
+#endif
+
+  for (int i = 2; i < MAX; i++) {
+    if (sieve[i]) continue;
+    for (int x = i; x < MAX; x += i) {
+      sieve[x] = 1;
+      if (i % 4 == 1) {
+        pyth[x] = 1;
+      }
+    }
+  }
+
+  int t = read();
+  while (t--) {
+    int n = read();
+    puts(pyth[n]? "YES" : "NO");
+  }
+
+  return 0;
+}

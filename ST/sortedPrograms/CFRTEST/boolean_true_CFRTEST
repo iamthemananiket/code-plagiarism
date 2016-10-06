@@ -1,0 +1,23 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int n,p,cnt=0;
+        scanf("%d",&n);
+        map<int,int>memo;
+        for(int i=0;i<n;i++)
+        {
+            scanf("%d",&p);
+            if(memo[p]==0)
+            {
+                cnt++;
+                memo[p]=1;
+            }
+        }
+        printf("%d\n",cnt);
+    }
+}

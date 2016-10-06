@@ -1,0 +1,101 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+int head[222000], to[666000], pred[666000], cost[666000];
+int que[222000];
+int res[222000];
+bool vis[222000];
+int N;
+
+bool bfs(int st) {
+  int qf = 0, qb = 0;
+  que[qb++] = st;
+  vis[st] = true;
+  res[st] = 0;
+  for (int at, e; qf < qb; qf++) {
+    at = que[qf];
+    for (e = head[at]; ~e; e = pred[e]) {
+      if (!vis[to[e]]) {
+        res[to[e]] = res[at] ^ cost[e];
+        vis[to[e]] = true;
+        que[qb++] = to[e];
+      } else if (res[to[e]] != (res[at] ^ cost[e])) {
+        return false;
+      }
+    }
+  }
+  N = qb;
+  return true;
+}
+
+void solve(int test_num) {
+  int V, E, K;
+  scanf("%d %d %d", &V, &E, &K);
+  memset(head, -1, sizeof(head));
+  for (int e = 0, a, b, c; e < E; e++) {
+    scanf("%d %d %d", &a, &b, &c);
+    cost[e + e] = cost[e + e + 1] = c;
+    to[e + e] = b;
+    pred[e + e] = head[a];
+    head[a] = e + e;
+    to[e + e + 1] = a;
+    pred[e + e + 1] = head[b];
+    head[b] = e + e + 1;
+  }
+  memset(vis, false, sizeof(vis));
+  memset(res, 0, sizeof(res));
+  int last = 1;
+  for (int v = 1; v <= V; v++) {
+    if (vis[v])
+      continue;
+    last = v;
+    if (!bfs(v)) {
+      puts("-1\n");
+      return;
+    }
+  }
+  K--;
+  memset(vis, false, sizeof(vis));
+  bfs(last);
+  for (int bit = 0; bit < 30; bit++)
+    if (K >> bit & 1)
+      for (int i = 0; i < N; i++)
+        res[que[i]] ^= 1 << bit;
+  for (int v = 1; v <= V; v++)
+    printf("%d ", res[v]);
+  puts("");
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

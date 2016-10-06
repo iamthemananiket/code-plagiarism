@@ -1,0 +1,85 @@
+# include <cstdio>
+# include <algorithm>
+
+using namespace std;
+
+const int MAX_N = 1e5 + 10;
+
+int n;
+int e[MAX_N];
+int a[MAX_N];
+int nxt[MAX_N];
+int ans;
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		ans = 0;
+		int i, lst, crr;
+		scanf ("%d", &n);
+		for (i = 1; i <= n; i ++)
+		{
+			char c;
+			while (1)
+			{
+				scanf ("%c", &c);
+				if (c == '0' || c == '1')
+					break;
+			}
+			e[i] = c - '0';
+		}
+		lst = n + 1;
+		for (i = n; i >= 1; i --)
+		{
+			nxt[i] = lst;
+			if (e[i])
+				lst = i;
+		}
+		
+		for (i = 1; i <= n; i ++)
+			scanf ("%d", &a[i]);
+		/**
+		for (i = 1; i <= n; i ++)
+			printf ("%d ", nxt[i]);
+		printf ("\n");
+		**/
+		
+		crr = 1e9;
+		
+		lst = 0;
+		
+		for (i = 1; i <= n; i ++)
+		{
+			if (e[i])
+			{
+				if (crr < (int) 1e9)
+					ans += crr;
+				crr = 1e9;
+				lst = i;
+				continue;		
+			}
+			if (nxt[i] == n + 1)
+			{
+				crr = a[n] - a[lst];
+				continue;
+			}
+			if (!lst)
+			{
+				crr = a[nxt[i]] - a[1];
+				continue;
+			}
+			crr = min (crr, a[i] - a[lst] + a[nxt[i]] - a[i + 1]);
+			crr = min (crr, a[nxt[i]] - a[lst + 1]);
+			crr = min (crr, a[nxt[i] - 1] - a[lst]);
+		}
+		
+		if (crr < (int) 1e9)
+			ans += crr;
+		
+		printf ("%d\n", ans);
+	}
+	return 0;
+}

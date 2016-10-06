@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 205;
+vector<int> G[N];
+int n, match[N];
+bool used[N];
+
+void add_edge(int u, int v) {
+    G[u].push_back(v);
+    G[v].push_back(u);
+}
+
+bool dfs(int v) {
+    used[v] = true;
+    repu(i, 0, G[v].size()) {
+        int u = G[v][i], w = match[u];
+        if (w < 0 || !used[w] && dfs(w)) {
+            match[v] = u;
+            match[u] = v;
+            return true;
+        }
+    }
+    return false;
+}
+
+int bipartite_matching() {
+    int res = 0;
+    mem(match, -1);
+    repu(v, 1, n + n + 1) {
+        if (match[v] < 0) {
+            mem(used, 0);
+            if (dfs(v)) res++;
+        }
+    }
+    return res;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, m, a, b;
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n >> m;
+		repu(i, 0, m) {
+			cin >> a >> b;
+			add_edge(a, b + n);
+		}
+		printf("%d\n", n - bipartite_matching());
+		repu(i, 1, n + n + 1) {
+			G[i].clear();
+		}
+	}
+	
+	return 0;
+}

@@ -1,0 +1,23 @@
+#include <cstdio>
+#include <iostream>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+int main()
+{
+    long long n,k,t;
+    cin>>t;
+    for (int i=1;i<=t;i++)
+    {
+        cin>>n>>k;
+        if (k>0)
+        {
+            cout<<(n/k)<<" "<<(n%k)<<endl;
+        }
+        else
+        {
+            cout<<0<<" "<<n<<endl;
+        }
+    }
+}

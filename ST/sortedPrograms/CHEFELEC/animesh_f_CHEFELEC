@@ -1,0 +1,51 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 1e5 + 5;
+
+int t, n, arr[N];
+char el[N];
+long long sum[N];
+
+int main(){
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d", &n);
+		scanf("%s", el + 1);
+		for(int i = 1; i <= n; i++){
+			scanf("%d", arr + i);
+			sum[i] = sum[i - 1] + arr[i];
+		}
+		long long ans = 0, cur = arr[1];
+		int l = 1, r = n;
+		for(int i = 1; i <= n; i++){
+			if(el[i] == '1'){
+				ans += (arr[i]) - (cur);
+				l = i;
+				break;
+			}	
+		}
+		cur = arr[n];
+		for(int i = n; i >= 1; i--){
+			if(el[i] == '1'){
+				ans += cur - (arr[i]);
+				r = i;
+				break;
+			}	
+		}
+		vector < int > idx;
+		for(int i = l; i <= r; i++){
+			if(el[i] == '1') idx.push_back(i);
+		}
+		for(int i = 0; i < (int) idx.size() - 1; i++){
+			int idx1 = idx[i], idx2 = idx[i + 1];
+			long long mn = (1LL << 60LL); 
+			for(int j = idx1; j < idx2; j++){
+				cur = (arr[j] - arr[idx1]) + (arr[idx2] - arr[j + 1]);
+				mn = min(mn, cur);
+			}
+			ans += mn;
+		}
+		printf("%lld\n", ans);
+	}
+}

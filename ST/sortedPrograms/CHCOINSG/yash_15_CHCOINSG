@@ -1,0 +1,10 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int tt,n,i;
+	cin >> tt;
+	while(tt--){
+		scanf("%d",&n);
+		puts((n%6)?"Chef":"Misha");
+	}
+}

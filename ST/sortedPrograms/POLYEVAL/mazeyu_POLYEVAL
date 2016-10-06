@@ -1,0 +1,79 @@
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#define mod 786433
+#define N 786432
+#define g 10
+#define G 18
+using namespace std;
+int n,i,m,x,j,tot,Q[N],but[N],k;
+long long ans,ans1,E[N],C[N],D[N],w,u1,u2,u3,ww,w0,w1,w2,ss,B[N];
+long long powmod(long long x,long long y)
+{
+    long long ans=1;
+    for(;y;y>>=1,x=x*x%mod)
+        if(y&1)ans=ans*x%mod;
+    return ans;
+}
+void Init()
+{
+    for(i=0;i<N;i++)
+    {
+    	int t=i/3,s=i%3;
+    	for(int j=0;j<G;j++,t>>=1)s=s<<1|(t&1);
+    	but[s]=i;
+	}
+}
+void NTT(long long *A)
+{
+    for(i=0;i<N;i++)B[i]=A[but[i]];
+    for(i=0;i<N;i++)A[i]=B[i];
+    for(i=1;i<N/3;i<<=1)
+    {
+    	w=powmod(g,(mod-1)/i/2);
+    	for(j=0;j<N;j+=i<<1)
+        {
+            w0=1;
+            for(k=0;k<i;k++,w0=w0*w%mod)
+            {
+				u1=A[j+k];
+                A[j+k]=(u1+A[j+k+i]*w0)%mod;
+                A[j+k+i]=(u1-A[j+k+i]*w0)%mod;
+                if(A[j+k+i]<0)A[j+k+i]+=mod;
+            }
+        }
+	}
+    for(;i<N;i*=3)
+    {
+        ww=powmod(g,(mod-1)/3);
+        w=powmod(g,(mod-1)/i/3);
+        for(j=0;j<N;j+=i*3)
+        {
+            w0=1;w1=ww;w2=ww*ww%mod;
+            for(k=0;k<i;k++,w0=w0*w%mod,w1=w1*w%mod,w2=w2*w%mod)
+            {
+                u1=A[j+k]+A[j+k+i]*w0+A[j+k+i+i]*w0%mod*w0;
+                u2=A[j+k]+A[j+k+i]*w1+A[j+k+i+i]*w1%mod*w1;
+                u3=A[j+k]+A[j+k+i]*w2+A[j+k+i+i]*w2%mod*w2;
+                A[j+k]=u1%mod;A[j+k+i]=u2%mod;A[j+k+i+i]=u3%mod;
+            }
+        }
+    }
+}
+int main()
+{
+	Init();
+	scanf("%d",&n);
+	for(i=0;i<=n;i++)scanf("%lld",&E[i]);
+	ss=E[0];NTT(E);
+	C[0]=1;D[1]=0;
+	for(i=1;i<N;i++)
+		C[i]=C[i-1]*g%mod,D[C[i]]=i;
+	scanf("%d",&m);
+	while(m--)
+	{
+		scanf("%d",&x);
+		if(x)printf("%lld\n",E[D[x]]);
+		else printf("%lld\n",ss);
+	}
+}

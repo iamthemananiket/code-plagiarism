@@ -1,0 +1,99 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int MO = 1000000007;
+
+int N;
+
+struct Mat {
+	Int v[40][40];
+	Mat() {
+		for (int i = 0; i < N; ++i) {
+			fill(v[i], v[i] + N, 0);
+		}
+	}
+	Mat(int) {
+		for (int i = 0; i < N; ++i) {
+			fill(v[i], v[i] + N, 0);
+			v[i][i] = 1;
+		}
+	}
+};
+Mat operator*(const Mat &a, const Mat &b) {
+	Mat ret;
+	for (int i = 0; i < N; ++i) for (int k = 0; k < N; ++k) for (int j = 0; j < N; ++j) {
+		(ret.v[i][j] += a.v[i][k] * b.v[k][j]) %= MO;
+	}
+	return ret;
+}
+Mat power(const Mat &a, Int e) {
+	Mat x = a, y(1);
+	for (; e; e >>= 1, x = x * x) if (e & 1) y = y * x;
+	return y;
+}
+
+Int E;
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		E = in() - 1;
+		N = in();
+		Mat A;
+		for (int i = 0; i < N; ++i) for (int j = 0; j < N; ++j) for (int k = 0; k < N; ++k) {
+			if (i % 2 != j % 2 && abs(i - j) <= 1 && abs(j - k) <= 1) {
+				++A.v[k][i];
+			}
+		}
+		Mat AA = power(A, E / 2);
+		if (E % 2 != 0) {
+			Mat B;
+			for (int i = 0; i < N; ++i) for (int j = 0; j < N; ++j) {
+				if (i % 2 != j % 2 && abs(i - j) <= 1) {
+					++B.v[j][i];
+				}
+			}
+			AA = B * AA;
+		}
+		Int ans = 0;
+		for (int i = 0; i < N; ++i) for (int j = 0; j < N; ++j) {
+			(ans += AA.v[i][j]) %= MO;
+		}
+		ans = (ans % MO + MO) % MO;
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}

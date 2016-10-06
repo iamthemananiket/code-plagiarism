@@ -1,0 +1,27 @@
+#include<iostream>
+#include<string>
+using namespace std;
+int main()
+{
+ ios::sync_with_stdio(false);
+ cin.tie(0);
+ int Q,i,len;
+ string A,B;
+ char ch;
+ cin>>Q;
+ while(Q--)
+ {
+  cin>>ch>>i;
+  if(ch=='+')
+  {
+   cin>>A;
+   B.insert(i,A);
+  }
+  else
+  {
+   cin>>len;
+   cout<<B.substr(i-1,len)<<"\n";
+  }
+ }
+ return 0;
+}

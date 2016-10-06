@@ -1,0 +1,98 @@
+#include <iostream>
+#include <deque>
+
+using namespace std;
+
+const int inf = -1u / 2;
+const int N = 1010;
+
+deque < int > deq;
+
+int mx_row[N][N], mx_col[N][N];
+
+int sum[N][N];
+int A[N][N];
+int n, m;
+
+int q, a, b;
+
+int main ( void ) {
+
+	ios :: sync_with_stdio ( false );
+
+	cin >> n >> m;
+	for ( int i = 0 ; i < n ; i++ ) {
+		for ( int j = 0 ; j < m ; j++ ) {
+			cin >> A[i][j];
+		}
+	}
+
+	for ( int i = 0 ; i < n ; i++ ) {
+		for ( int j = 0 ; j < m ; j++ ) {
+			sum[i][j] = A[i][j];
+			if ( i > 0 ) sum[i][j] += sum[i-1][j];
+			if ( j > 0 ) sum[i][j] += sum[i][j-1];
+			if ( i > 0 and j > 0 ) sum[i][j] -= sum[i-1][j-1];
+		}
+	}
+
+	cin >> q;
+	
+	while ( q-- ) {
+
+		cin >> a >> b;
+
+		for ( int i = 0 ; i < n ; i++ ) {
+			
+			deq.clear();
+			
+			for ( int j = 0 ; j < m ; j++ ) {
+				while ( ( not deq.empty() ) and deq.front() < j-b+1 ) {
+					deq.pop_front();
+				}
+				while ( ( not deq.empty() ) and A[i][ deq.back() ] <= A[i][j] ) {
+					deq.pop_back();
+				}
+				
+				deq.push_back ( j );
+
+				mx_row[i][j] = deq.front();
+			}
+		}
+
+		for ( int j = 0 ; j < m ; j++ ) {
+
+			deq.clear();
+
+			for ( int i = 0 ; i < n ; i++ ) {
+				while ( ( not deq.empty() ) and deq.front() < i-a+1 ) {
+					deq.pop_front();
+				}
+				while ( ( not deq.empty() ) and A[ deq.back() ][ mx_row [ deq.back() ] [j] ] <= A[i][ mx_row[i][j] ]) {
+					deq.pop_back();
+				}
+
+				deq.push_back ( i );
+
+				mx_col[i][j] = deq.front();
+			}
+		}
+	
+		int ans = inf;
+
+		for ( int i = a-1 ; i < n ; i++ ) {
+			for ( int j = b-1 ; j < m ; j++ ) {
+				int s = sum[i][j];
+				if ( i >= a ) s -= sum[ i-a ][j];
+				if ( j >= b ) s -= sum[i][ j-b ];
+				if ( i >= a and j >= b ) s += sum[ i-a ][ j-b ];
+				int mx = A[ mx_col[i][j] ][ mx_row[ mx_col[i][j] ][j] ];
+				ans = min ( ans, mx * a * b - s );
+			}
+		}
+
+		cout << ans << "\n";
+	}
+
+	return 0;
+}

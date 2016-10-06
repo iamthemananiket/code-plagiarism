@@ -1,0 +1,42 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 15;
+
+int n, m, k;
+int s, t, a, b, c;
+int cnt, val[1 << N];
+
+vector < pair < int, int > > adj[N];
+vector < int > nodes;
+
+int main(){
+    cin >> n >> m >> k;
+    cin >> s >> t;
+    for(int i = 1; i <= n; i++){
+        if(i == s || i == t) continue;
+        nodes.push_back(i);
+    }
+    for(int i = 1; i <= m; i++){
+        cin >> a >> b >> c;
+        adj[a].push_back({b, c});
+    }
+    for(int mask = 0; mask < (1 << (n - 2)); mask++){
+        vector < int > S, T;
+        S.push_back(s); T.push_back(t);
+        for(int i = 0; i < (n - 2); i++){
+            if(mask & (1 << i)) S.push_back(nodes[i]);
+            else T.push_back(nodes[i]);
+        }
+        int cost = 0;
+        for(int i = 0; i < (int) S.size(); i++){
+            int node = S[i];
+            for(auto edge : adj[node])
+                if(find(T.begin(), T.end(), edge.first) != T.end())
+                    cost += edge.second;
+        }
+        val[cnt++] = cost;
+    }
+    sort(val, val + cnt);
+    cout << val[k - 1] << '\n';
+}

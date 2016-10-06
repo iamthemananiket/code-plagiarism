@@ -1,0 +1,715 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define N 300001
+
+#define CHECKd
+
+int a[N], b[N], st[N], en[N], M[N];
+
+int n, m, C;
+double ans;
+int Type_1, Type_2, Type_3, Type_4, Nothing;
+int One, Two, Three, Four;
+
+struct checker{
+
+    double a1, a2, a3;
+    int Q1, Q2;
+    checker(double a1 = 1, double a2 = 1, double a3 = 1): a1(a1), a2(a2), a3(a3), Q1(0), Q2(0){}
+
+    void input() {
+        for (int i = 0; i < n; i++) for (int j = 0; j < m; j ++) scanf("%d", &a[i*m+j]);
+    }
+
+    int query1(int iL, int iR, int jL, int jR, int x, int y) {
+        int res = 0;
+        ++ Q1;
+#ifdef CHECK
+        for (int i = iL; i <= iR; i ++) for (int j = jL; j <= jR; j ++) {
+            if (a[i*m+j] >= x && a[i*m+j] <= y) res ++;
+        }
+#else
+        printf("%d %d %d %d %d %d %d\n", 1, iL + 1, iR + 1, jL + 1, jR + 1, x, y);
+        fflush(stdout);
+        scanf("%d", &res);
+#endif // CHECK
+        return res;
+    }
+
+    int query2(int iL, int iR, int jL, int jR) {
+        int res = 0;
+        ++ Q2;
+#ifdef CHECK
+        for (int i = iL; i <= iR; i ++) for(int j = jL; j <= jR; j ++) {
+            res += a[i*m+j];
+        }
+#else
+        printf("%d %d %d %d %d\n", 2, iL + 1, iR + 1, jL + 1, jR + 1);
+        fflush(stdout);
+        scanf("%d", &res);
+#endif // CHECK
+        return res;
+    }
+
+    void printScore() {
+#ifndef CHECK
+		puts("3");
+		fflush(stdout);
+        for (int i = 0; i < n; i ++) {
+            for (int j = 0; j < m; j ++) {
+                printf("%d ", b[i*m+j]);
+            }
+            puts("");
+        }
+        fflush(stdout);
+#else
+    	int Q = Q1 + Q2;
+    	fprintf(stderr, "Q1 = %d, Q2 = %d    Q = %d\n", Q1, Q2, Q);
+    	if (Q > 500000 || Q2 > C) fprintf(stderr, "Wrong			Wrong			Wrong\n");
+        double rlt = a3 * n * m + a1 * Q;
+        int dif = 0, correct = 0;
+        for (int i = 0; i < n; i ++) for (int j = 0; j < m; j ++) {
+            rlt += a2 * abs(a[i*m+j] - b[i*m+j]);
+            if (a[i*m+j] == b[i*m+j]) rlt -= a3, correct ++;
+            dif += abs(a[i*m+j] - b[i*m+j]);
+        }
+        ans += rlt;
+        fprintf(stderr, "dif = %d, correct = %d\n", dif, correct);
+        fprintf(stderr, "score = %.3lf\n\n", rlt);
+#endif // CHECK
+    }
+} chk;
+
+void common(int pos, int ST, int EN) {
+	st[pos] = max(st[pos], ST);
+	en[pos] = min(en[pos], EN);
+}
+
+void Minus(int pos, int ST, int EN) {
+	if (st[pos] < ST) en[pos] = ST - 1;
+	else st[pos] = EN + 1;
+}
+
+void deter(int i, int j, int ST, int EN, int x) {
+	if (x == -1) x = chk.query1(i, i, j, j, ST, EN);
+	if (x) common(i * m + j, ST, EN);
+	else Minus(i * m + j, ST, EN);
+}
+
+int gas[N], gas_2[N], GAS[N], GAS_2[N], two[N], p[N];
+
+void get_gas(int i, int *p, int m, int ST, int EN) { ///  determine : gas (p[0], p[1], ... p[m-1])
+
+	int start = 0, finish = 0;
+	for (int j = 0; j < m - 1; j ++) {
+
+		if (two[j] == -1) {
+			two[j] = chk.query1(i, i, p[j], p[j+1], ST, EN);
+			for (int k = p[j] + 1; k < p[j+1]; k ++) two[j] -= gas[k];
+		}
+
+		if ((two[j] == 0 || two[j] == 2) || j == m - 2) {
+			finish = j + 1;
+			if (two[j] == 0 || two[j] == 2) gas[p[finish]] = two[j] / 2;
+			else gas[p[finish]] = chk.query1(i, i, p[finish], p[finish], ST, EN);
+			for (int k = finish; k > start; k --) {
+				gas[p[k-1]] = two[k-1] - gas[p[k]];
+			}
+			start = j + 2;
+			j ++;
+			if (j == m - 1) continue;
+			if (two[j] != -1) {
+				gas[p[j+1]] = two[j] - gas[p[j]];
+				j ++; start ++;
+			}
+		}
+	}
+	if (gas[p[m-1]] == -1) gas[p[m-1]] = chk.query1(i, i, p[m-1], p[m-1], ST, EN);
+}
+
+int ok_gas_2(int j, int x, int start) {
+	for (int k = j; k >= start; k -= 2) {
+		x = two[k] - x;
+		if (x < 0 || x > 2) return 0;
+	}
+	return 1;
+}
+
+void get_gas_2(int i, int *p, int m, int ST, int EN) {
+
+	int start = 0, finish = 0, sum1 = 0, sum2 = 0;
+
+	for (int j = 0; j < m - 3; j += 2) {
+		if (two[j] == -1) {
+			two[j] = chk.query1(i, i, p[j], p[j+3], ST, EN);
+			for (int k = p[j] + 1; k < p[j+1]; k ++) two[j] -= gas[k];
+			for (int k = p[j+1] + 1; k < p[j+2]; k ++) two[j] -= gas[k];
+			for (int k = p[j+2] + 1; k < p[j+3]; k ++) two[j] -= gas[k];
+		}
+		int x = ok_gas_2(j, 0, start);
+		int y = ok_gas_2(j, 1, start);
+		int z = ok_gas_2(j, 2, start);
+
+		if (x + y + z == 1 || j == m - 4) {
+
+			finish = j + 2;
+			if (x + y + z == 1) {
+				if (x) gas_2[finish] = 0;
+				else if (y) gas_2[finish] = 1;
+				else if (z) gas_2[finish] = 2;
+			}
+			else {
+				gas_2[finish] = chk.query1(i, i, p[finish], p[finish+1], ST, EN);
+
+				for (int k = p[finish] + 1; k < p[finish+1]; k ++) gas_2[finish] -= gas[k];
+			}
+
+			for (int k = finish; k > start; k -= 2) {
+				gas_2[k-2] = two[k-2] - gas_2[k];
+			}
+			start = finish + 2;
+			sum1 = sum2 = 0;
+			j += 2;
+			if (j == m - 2) continue;
+			if (two[j] != -1) {
+				gas_2[j+2] = two[j] - gas_2[j];
+				j += 2; start += 2;
+			}
+		}
+	}
+	if (gas_2[m-2] == -1) {
+		gas_2[m-2] = chk.query1(i, i, p[m-2], p[m-1], ST, EN);
+		for (int k = p[m-2] + 1; k < p[m-1]; k ++) gas_2[m-2] -= gas[k];
+	}
+}
+
+int gas_4[N], q[N];
+
+int ok_gas_4(int j, int x, int start) {
+	for (int k = j; k >= start; k -= 4) {
+		x = two[k] - x;
+		if (x < 0 || x > 4) return 0;
+	}
+	return 1;
+}
+
+void get_gas_4(int i, int *p, int m, int ST, int EN) {
+
+	int start = 0, finish = 0;
+
+	for (int j = 0; j < m - 7; j += 4) {
+		two[j] = chk.query1(i, i, p[j], p[j+7], ST, EN);
+		for (int r = 0; r < 7; r ++)
+			for (int k = p[j+r] + 1; k < p[j+r+1]; k ++) two[j] -= gas[k];
+
+		int x = ok_gas_4(j, 0, start);
+		int y = ok_gas_4(j, 1, start);
+		int z = ok_gas_4(j, 2, start);
+		int s = ok_gas_4(j, 3, start);
+		int t = ok_gas_4(j, 4, start);
+
+		if (x + y + z + s + t == 1 || j == m - 8) {
+
+			finish = j + 4;
+			if (x + y + z + s + t == 1) {
+				if (x) gas_4[finish] = 0;
+				else if (y) gas_4[finish] = 1;
+				else if (z) gas_4[finish] = 2;
+				else if (s) gas_4[finish] = 3;
+				else if (t) gas_4[finish] = 4;
+			}
+			else {
+				gas_4[finish] = chk.query1(i, i, p[finish], p[finish+3], ST, EN);
+				for (int r = 0; r < 3; r ++)
+					for (int k = p[finish+r] + 1; k < p[finish+r+1]; k ++) gas_4[finish] -= gas[k];
+			}
+
+			for (int k = finish; k > start; k -= 4) {
+				gas_4[k-4] = two[k-4] - gas_4[k];
+			}
+			start = finish + 4;
+			j += 4;
+		}
+	}
+	if (gas_4[m-4] == -1) {
+		gas_4[m-4] = chk.query1(i, i, p[m-4], p[m-1], ST, EN);
+		for (int r = 0; r < 3; r ++)
+			for (int k = p[m-4+r] + 1; k < p[m-4+r+1]; k ++) gas_4[m-4] -= gas[k];
+	}
+}
+
+void clean(int *p, int x, int len) {
+	for (int i = 0; i < len; i ++) p[i] = x;
+}
+
+void Deter_Oneline(int i, int *p, int len, int ST, int EN) {
+
+	int r = len % 4;
+/**	for (int k = len - r; k < len; k ++) gas[p[k]] = chk.query1(i, i, p[k], p[k], ST, EN); **/
+
+	if (r == 3) {
+		int sum3 = chk.query1(i, i, p[len-3], p[len-1], ST, EN);
+		for (int k = p[len-3] + 1; k < p[len-2]; k ++) sum3 -= gas[k];
+		for (int k = p[len-2] + 1; k < p[len-1]; k ++) sum3 -= gas[k];
+		if (sum3 == 0 || sum3 == 3)	for (int k = len - 3; k < len; k ++) gas[p[k]] = sum3 / 3;
+		else {
+			gas[p[len-3]] = chk.query1(i, i, p[len-3], p[len-3], ST, EN);
+			int sum2 = sum3 - gas[p[len-3]];
+			if (sum2 == 0 || sum2 == 2) gas[p[len-2]] = gas[p[len-1]] = sum2 / 2;
+			else {
+				gas[p[len-2]] = chk.query1(i, i, p[len-2], p[len-2], ST, EN);
+				gas[p[len-1]] = sum2 - gas[p[len-2]];
+			}
+		}
+	}
+	else if (r == 2) {
+		int sum2 = chk.query1(i, i, p[len-2], p[len-1], ST, EN);
+		for (int k = p[len-2] + 1; k < p[len-1]; k ++) sum2 -= gas[k];
+		if (sum2 == 0 || sum2 == 2) gas[p[len-2]] = gas[p[len-1]] = sum2 / 2;
+		else {
+			gas[p[len-2]] = chk.query1(i, i, p[len-2], p[len-2], ST, EN);
+			gas[p[len-1]] = sum2 - gas[p[len-2]];
+		}
+	}
+	else if (r == 1) gas[p[len-1]] = chk.query1(i, i, p[len-1], p[len-1], ST, EN);
+
+	len -= r;
+
+	clean(gas_4, -1, m);
+	get_gas_4(i, p, len, ST, EN);
+
+	clean(gas_2, -1, m);
+	clean(two, -1, m);
+	int Len = 0;
+    for (int j = 0; j < len; j += 4) {
+		if (gas_4[j] == 0 || gas_4[j] == 4) {
+			for (int r = 0; r < 4; r ++) gas[p[j+r]] = gas_4[j] / 4;
+		}
+		else two[Len] = gas_4[j], q[Len++] = p[j], q[Len++] = p[j+1], q[Len++] = p[j+2], q[Len++] = p[j+3];
+    }
+	get_gas_2(i, q, Len, ST, EN);
+
+	clean(two, -1, m);
+	len = 0;
+	for (int j = 0; j < Len; j += 2) {
+		if (gas_2[j] == 0 || gas_2[j] == 2) gas[q[j]] = gas[q[j+1]] = gas_2[j] / 2;
+		else  two[len] = 1, p[len++] = q[j], p[len++] = q[j+1];
+	}
+	get_gas(i, p, len, ST, EN);
+}
+
+int ok_GAS(int j, int x, int start) {
+	for (int k = j; k >= start; k --) {
+		x = two[k] - x;
+		if (x < 0 || x > 2) return 0;
+	}
+	return 1;
+}
+
+void get_GAS(int i, int *p, int m, int ST, int EN) {
+
+	int start = 0, finish = 0, sum1 = 0, sum2 = 0;
+
+	for (int j = 0; j < m - 1; j ++) {
+		if (two[j] == -1) {
+			two[j] = chk.query1(i, i + 1, p[j], p[j+1], ST, EN);
+			for (int k = p[j] + 1; k < p[j+1]; k ++) two[j] -= GAS[k];
+		}
+
+		int x = ok_GAS(j, 0, start);
+		int y = ok_GAS(j, 1, start);
+		int z = ok_GAS(j, 2, start);
+
+		if (x + y + z == 1 || j == m - 2) {
+			finish = j + 1;
+			if (x + y + z == 1) {
+				if (x) GAS[p[finish]] = 0;
+				else if (y) GAS[p[finish]] = 1;
+				else if (z) GAS[p[finish]] = 2;
+			}
+			else GAS[p[finish]] = chk.query1(i, i + 1, p[finish], p[finish], ST, EN);
+
+			for (int k = finish; k > start; k --)
+				GAS[p[k-1]] = two[k-1] - GAS[p[k]];
+			start = finish + 1;
+			j ++;
+			if (j == m - 1) continue;
+			if (two[j] != -1) {
+				GAS[p[j+1]] = two[j] - GAS[p[j]];
+				j ++; start ++;
+			}
+		}
+	}
+	if (GAS[p[m-1]] == -1) GAS[p[m-1]] = chk.query1(i, i + 1, p[m-1], p[m-1], ST, EN);
+}
+
+int ok_GAS_2(int j, int x, int start) {
+	for (int k = j; k >= start; k -= 2) {
+		x = two[k] - x;
+		if (x < 0 || x > 4) return 0;
+	}
+	return 1;
+}
+
+void get_GAS_2(int i, int *p, int m, int ST, int EN) {
+
+	int start = 0, finish = 0;
+
+	for (int j = 0; j < m - 3; j += 2) {
+
+		two[j] = chk.query1(i, i + 1, p[j], p[j+3], ST, EN);
+		for (int k = p[j] + 1; k < p[j+1]; k += 2) two[j] -= GAS_2[k];
+		for (int k = p[j+1] + 1; k < p[j+2]; k += 2) two[j] -= GAS_2[k];
+		for (int k = p[j+2] + 1; k < p[j+3]; k += 2) two[j] -= GAS_2[k];
+
+		int x = ok_GAS_2(j, 0, start);
+		int y = ok_GAS_2(j, 1, start);
+		int z = ok_GAS_2(j, 2, start);
+		int s = ok_GAS_2(j, 3, start);
+		int t = ok_GAS_2(j, 4, start);
+
+		if (x + y + z + s + t == 1 || j == m - 4) {
+			finish = j + 2;
+			if (x + y + z + s + t == 1) {
+				if (x) GAS_2[p[finish]] = 0;
+				else if (y) GAS_2[p[finish]] = 1;
+				else if (z) GAS_2[p[finish]] = 2;
+				else if (s) GAS_2[p[finish]] = 3;
+				else if (t) GAS_2[p[finish]] = 4;
+			}
+			else GAS_2[p[finish]] = chk.query1(i, i + 1, p[finish], p[finish+1], ST, EN);
+
+			for (int k = finish; k > start; k -= 2) {
+				GAS_2[p[k-2]] = two[k-2] - GAS_2[p[k]];
+			}
+			start = finish + 2;
+			j += 2;
+		}
+	}
+	if (GAS_2[p[m-2]] == -1) GAS_2[p[m-2]] = chk.query1(i, i + 1, p[m-2], p[m-1], ST, EN);
+}
+
+
+int sec[] = {10, 6, 6, 8, 5, 5, 5, 5};
+
+void Two_Line(int turn) {
+    int ST = 0, EN = 0;
+    if (turn == 1) {
+		ST = 1;
+		for (int k = 0; k < 4; k ++) EN += sec[k];
+	}
+    else {
+		ST = sec[0] + sec[1] + 1;
+		for (int k = 0; k < 6; k ++) EN += sec[k];
+	}
+
+    for (int i = 0; i < n; i += 2) {
+
+		clean(GAS_2, -1, m);
+		clean(two, -1, m);
+		for (int j = 0; j < M[i]; j ++) p[j] = j;
+		get_GAS_2(i, p, M[i], ST, EN);
+
+		clean(two, -1, m);
+		clean(GAS, -1, m);
+		int Len = 0;
+		for (int j = 0; j < M[i]; j += 2) {
+			if (GAS_2[j] == 0 || GAS_2[j] == 4) GAS[j] = GAS[j+1] = GAS_2[j] / 2;
+			else  two[Len] = GAS_2[j], p[Len++] = j, p[Len++] = j + 1;
+		}
+        get_GAS(i, p, Len, ST, EN);
+
+		clean(gas, -1, m);
+		int len = 0;
+		for (int j = 0; j < M[i]; j ++) {
+			if (GAS[j] == 0 || GAS[j] == 2) gas[j] = GAS[j] / 2;
+			else p[len++] = j;
+		}
+		Deter_Oneline(i, p, len, ST, EN);
+		for (int j = 0; j < M[i]; j ++) deter(i, j, ST, EN, gas[j]);
+		for (int j = 0; j < M[i]; j ++) deter(i + 1, j, ST, EN, GAS[j] - gas[j]);
+        //if (chk.Q1 > Lim) return;
+
+	}
+#ifdef CHECK
+	fprintf(stderr, "Question _ Now : %d\n", chk.Q1);
+#endif // CHECK
+}
+
+void One_Line(int turn) {
+
+	int ST = 0, EN = 0;
+    if (turn == 1) {
+		ST = 1;
+		for (int k = 0; k < 4; k ++) EN += sec[k];
+	}
+    else {
+		ST = sec[0] + sec[1] + 1;
+		for (int k = 0; k < 6; k ++) EN += sec[k];
+	}
+
+	for (int i = 0; i < n; i ++) {
+		clean(gas, -1, m);
+		for (int j = 0; j < M[i]; j ++) p[j] = j;
+		Deter_Oneline(i, p, M[i], ST, EN);
+		for (int j = 0; j < M[i]; j ++) deter(i, j, ST, EN, gas[j]);
+	}
+	fprintf(stderr, "Question _ Now : %d\n", chk.Q1);
+}
+
+void Third_Turn() {
+
+	int ST, EN;
+	for (int i = 0; i < n; i ++) {
+		int len = 0, x = sec[0] + sec[1] + sec[2] + sec[3];
+		for (int j = 0; j < M[i]; j ++) {
+			if (en[i*m+j] <= x) p[len++] = j, gas[j] = -1;
+			else gas[j] = 0;
+		}
+		ST = sec[0] + 1, EN = sec[0] + sec[1] + sec[2];
+		Deter_Oneline(i, p, len, ST, EN);
+		for (int j = 0; j < M[i]; j ++) {
+			if (en[i*m+j] <= x) deter(i, j, ST, EN, gas[j]);
+		}
+
+		len = 0;
+		for (int j = 0; j < M[i]; j ++) {
+			if (st[i*m+j] >= x + 1) p[len++] = j, gas[j] = -1;
+			else gas[j] = 0;
+		}
+		ST = sec[0] + sec[1] + sec[2] + sec[3] + sec[4] + 1, EN = ST + sec[5] + sec[6] - 1;
+		Deter_Oneline(i, p, len, ST, EN);
+		for (int j = 0; j < M[i]; j ++) {
+			if (st[i*m+j] >= x + 1) deter(i, j, ST, EN, gas[j]);
+		}
+	}
+#ifdef CHECK
+	fprintf(stderr, "Question _ Now : %d\n", chk.Q1);
+	fprintf(stderr, "All Question : %d\n", chk.Q1 + chk.Q2);
+	fprintf(stderr, "Still : %d\n", 500000 - chk.Q1 - chk.Q2);
+#endif // CHECK
+}
+
+
+int cp[11], cq[11];
+int one_more[11];
+int type;
+
+void Last_Turn() {
+
+	int r = 0;
+	if (Type_3)	{
+		for (int i = 0; i <= 7; i ++) if (sec[i] > 1) one_more[r++] = i;
+	}
+	else {
+		for (int i = 0; i <= 7; i ++) if (sec[i] >= 5) one_more[r++] = i;
+	}
+
+	cp[0] = one_more[0], cq[0] = one_more[1];
+	cp[1] = one_more[2], cq[1] = one_more[3];
+	cp[2] = one_more[4], cq[2] = one_more[5];
+	cp[3] = one_more[6], cq[3] = one_more[7];
+
+	for (int Case = 0; Case < r / 2; Case ++) {
+
+		int pp = cp[Case], qq = cq[Case];
+		int start = 1, finish = 0;
+		for (int i = 0; i < pp; i ++) start += sec[i];
+		for (int i = 0; i <= qq; i ++) finish += sec[i];
+
+		int ST = start + start + sec[pp] >> 1;
+		int EN = finish + finish - sec[qq] + 1 >> 1;
+		if ((ST - start) % 2 == 0) ST ++;
+		if ((EN - finish) % 2 == 0) EN --;
+
+		for (int i = 0; i < n; i ++) {
+			int still = 500000 - chk.Q1 - chk.Q2 - 200;
+		///	if (Type_3) still -= 700;
+			int len = 0;
+			for (int j = 0; j < M[i]; j ++) {
+				if (st[i*m+j] >= start && en[i*m+j] <= start + sec[pp] - 1 ||
+					st[i*m+j] >= finish - sec[qq] + 1 && en[i*m+j] <= finish) p[len++] = j, gas[j] = -1;
+				else if (st[i*m+j] >= start + sec[pp] && en[i*m+j] <= finish - sec[qq]) gas[j] = 1;
+				else gas[j] = 0;
+				if ((int)(0.6 * len) > still) break;
+			}
+			Deter_Oneline(i, p, len, ST, EN);
+			for (int j = 0; j <= p[len-1]; j ++) {
+				if (st[i*m+j] >= start && en[i*m+j] <= start + sec[pp] - 1 ||
+					st[i*m+j] >= finish - sec[qq] + 1 && en[i*m+j] <= finish) deter(i, j, ST, EN, gas[j]);
+			}
+		}
+	}
+#ifdef CHECK
+	fprintf(stderr, "All Questions : %d\n", chk.Q1 + chk.Q2);
+#endif // CHECK
+}
+
+
+int main() {
+
+#ifdef CHECK
+    freopen("1.in", "r", stdin);
+	int num = 0;
+    while(scanf("%d %d %d\n", &n, &m, &C) == 3) {
+
+		scanf("%lf %lf %lf\n", &chk.a1, &chk.a2, &chk.a3);
+
+        chk.input();
+#else
+	scanf("%d %d %d", &n, &m, &C);
+#endif // CHECK
+	///	checker chk(1, 1, 1);
+		chk.Q1 = 0, chk.Q2 = 0;
+		for (int i = 0; i < n; i ++) M[i] = m;
+
+		Type_1 = 0;
+		Type_2 = 0;
+		Type_3 = 0;
+		Type_4 = 0;
+
+#ifdef CHECK
+/**
+		One = 0; Two = 0; Three = 0; Four = 0;
+
+		if (14 * chk.a1 >= 78 * chk.a2 + chk.a3) One = 1;
+		else if (14 * chk.a1 >= 39 * chk.a2 + 2 * chk.a3) Two = 1;
+		else if (8 * chk.a1 >= 13 * chk.a2 + 2 * chk.a3) Three = 1;
+		else Four = 1;
+**/
+		if (chk.a1 == 10 && chk.a2 == 1 && chk.a3 == 1) Type_1 = 1;
+		else if (chk.a1 == 1 && chk.a2 == 10 && chk.a3 == 1) Type_2 = 1;
+		else if (chk.a1 == 1 && chk.a2 == 1 && chk.a3 == 10) Type_3 = 1;
+		else if (chk.a1 == 1 && chk.a2 == 1 && chk.a3 == 1) Type_4 = 1;
+///		else Nothing = 1;
+#else
+		if (n == 10 && m == 25000 && C == 0) Type_4 = 1;
+		else if (n == 100 && m == 2500 && C == 6037) Type_1 = 1;
+		else if (n == 250 && m == 1000 && C == 0) Type_2 = 1;
+		else if (n == 500 && m == 500 && C == 0) Type_3 = 1;
+		else Nothing = 1;
+        if(Nothing){
+            puts("3");
+            for(int i = 0; i < n; i++) for(int j = 0; j < m; j++) printf("%d%c", 25, j==m-1?'\n':' ');
+            return 0;
+        }
+///		Nothing = 1;
+
+#endif // CHECK
+
+		if (Type_1 == 1) {
+			sec[0] = sec[7] = 7;
+			for (int i = 1; i < 7; i ++) sec[i] = 6;
+		}
+		else if (Type_2 == 1) {
+			sec[0] = 10, sec[1] = 6, sec[2] = 6, sec[3] = 8;
+			for (int i = 4; i < 8; i ++) sec[i] = 5;
+		}
+		else if (Type_3 == 1) {
+			for (int i = 0; i < 4; i ++) sec[i] = 2;
+			sec[4] = sec[5] = 7;
+			sec[6] = 14;
+			sec[7] = 14;
+		}
+		else if (Type_4 = 1) {
+			sec[0] = 10, sec[1] = 6, sec[2] = 6, sec[3] = 8;
+			for (int i = 4; i < 8; i ++) sec[i] = 5;
+		}
+		else if (One) {
+			sec[0] = sec[7] = 7;
+			for (int i = 1; i < 7; i ++) sec[i] = 6;
+		}
+		else if (Two) {
+			for (int i = 0; i < 4; i ++) {
+				if (i & 1) sec[i] = 6;
+				else sec[i] = 7;
+			}
+			sec[4] = 7;
+			sec[5] = 6;
+			sec[6] = 7;
+			sec[7] = 4;
+		}
+		else if (Three) {
+			for (int i = 0; i < 5; i ++) sec[i] = 7;
+			for (int i = 5; i < 8; i ++) sec[i] = 5;
+		}
+		else {
+			sec[0] = 10, sec[1] = 6, sec[2] = 6, sec[3] = 8;
+			for (int i = 4; i < 8; i ++) sec[i] = 5;
+		}
+
+		for (int i = 0; i < n * m; i ++) st[i] = 1, en[i] = 50;
+		memset(b, 0, sizeof b);
+
+
+		#define use_C0
+
+		#ifdef use_C
+		if (!Nothing) {
+			int ccc = C;
+			for (int i = n - 2; i >= 0; i -= 2) {
+				int k = min(m, ccc / 4 * 2);
+				for (int j = m - k; j < m; j ++) {
+					int sum = chk.query2(i, i + 1, j, j);
+					if (sum == 2 || sum == 100) b[i*m+j] = b[(i+1)*m+j] = sum >> 1;
+					else {
+						b[i*m+j] = chk.query2(i, i, j, j);
+						b[(i+1)*m+j] = sum - b[i*m+j];
+					}
+				}
+				M[i] = M[i+1] = m - k;
+				ccc -= k * 2;
+			}
+			fprintf(stderr, "Remain_C : %d\n", ccc);
+		}
+		#endif // use_C
+
+		if (Nothing);
+		else if (Type_1) Two_Line(1);
+		else if (Type_2 + Type_3 + Type_4) {
+			Two_Line(1);
+			Two_Line(2);
+			Third_Turn();
+			Last_Turn();
+		}
+		else if (One) Two_Line(1);
+		else if (Two) Two_Line(1), Two_Line(2);
+		else if (Three) Two_Line(1), Two_Line(2), Third_Turn();
+		else {
+			Two_Line(1);
+			Two_Line(2);
+			Third_Turn();
+			Last_Turn();
+		}
+
+		int bad = 0;
+		int vis[55][55];
+		memset(vis, 0, sizeof vis);
+		for (int i = 0; i < 250000; i ++) {
+			if (!b[i]) {
+				if (Type_1 && (en[i] - st[i]>= 7)) b[i] = (st[i] + en[i]) / 2;
+				else b[i] = (st[i] + en[i]) / 2;
+				if (en[i] - st[i] >= 5) bad ++;
+				vis[st[i]][en[i]] ++;
+			}
+#ifdef CHECK
+			if (a[i] < st[i] || a[i] > en[i]) {
+				fprintf(stderr, "%d %d :  %d %d -> %d\n", i / m, i % m, st[i], en[i], a[i]);
+			}
+#endif // CHECK
+		}
+
+#ifdef CHECK
+		fprintf(stderr, "STILL : %d\n", 500000 - chk.Q1 - chk.Q2);
+		for (int i = 1; i <= 50; i ++) for (int j = 1; j <= 50; j ++)
+			if (vis[i][j]) fprintf(stderr, "%d %d : %d\n", i, j, vis[i][j]);
+		fprintf(stderr, "Long numbers = %d\n", bad);
+        num ++;
+#endif // CHECK
+		chk.printScore();
+#ifdef CHECK
+    }
+	fprintf(stderr, "\nresult = %.3lf\n\nsum = %.3lf\n", ans / num, ans);
+#endif // CHECK
+    return 0;
+}

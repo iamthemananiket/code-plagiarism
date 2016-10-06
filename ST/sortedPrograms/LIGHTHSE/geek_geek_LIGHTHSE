@@ -1,0 +1,133 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) fastscan(x)
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli long long int
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+#define ms 10000000
+using namespace std;
+int prog()
+{
+    lli i,j,k,n,x,y,z;
+    cin>>n;
+    vector<pair<lli,lli> > pts;
+    lli hx,hy,lx,ly;
+    hx=hy = -1*mod*100;
+    lx=ly= mod*100;
+    fl(i,0,n)
+    {
+        cin>>x>>y;
+        lx=min(lx,x);
+        hx=max(hx,x);
+        ly=min(ly,y);
+        hy=max(hy,y);
+        pts.pb(mp(x,y));
+    }
+    lli mx,Mx,mxi,Mxi;
+    lli mx1,Mx1,mxi1,Mxi1;
+    mx = mod*100;
+    mx1=-1*mx;
+    Mx1=mx;
+    Mx = -1*mx;
+    fl(i,0,n)
+    {
+        x = pts[i].fi;
+        y = pts[i].se;
+        if(x==lx && y==ly)
+        {
+            cout<<"1\n";
+            cout<<i+1<<' '<<"NE\n";
+            r0;
+        }
+        if(x==hx && y==ly)
+        {
+            cout<<"1\n";
+            cout<<i+1<<' '<<"NW\n";
+            r0;
+        }
+        if(x==lx && y==hy)
+        {
+            cout<<"1\n";
+            cout<<i+1<<' '<<"SE\n";
+            r0;
+        }
+        if(x==hx && y==hy)
+        {
+            cout<<"1\n";
+            cout<<i+1<<' '<<"SW\n";
+            r0;
+        }
+        if(y==hy && mx>x)
+        {
+            mx = x;
+            mxi=i+1;
+        }
+        if(y==hy && mx1<x)
+        {
+            mx1 = x;
+            mxi1=i+1;
+        }
+        if(y==ly && Mx<x)
+        {
+            Mx=x;
+            Mxi=i+1;
+        }
+        if(y==ly && Mx1>x)
+        {
+            Mx1=x;
+            Mxi1=i+1;
+        }
+    }
+    cout<<"2\n";
+    if(pts[Mxi-1].fi>=pts[mxi-1].fi)
+    {
+        cout<<mxi<<' '<<"SE\n";
+        cout<<Mxi<<' '<<"NW\n";
+    }
+    else
+    {
+        cout<<mxi1<<' '<<"SW\n";
+        cout<<Mxi1<<' '<<"NE\n";
+    }
+    r0;
+}
+int main()
+{
+    //f_in;
+    lli t;
+    t=1;
+    cin>>t;
+    while(t--)
+        prog();
+    return 0;
+}

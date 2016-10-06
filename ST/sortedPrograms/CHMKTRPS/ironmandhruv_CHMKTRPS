@@ -1,0 +1,254 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ll long long int
+#define pb push_back
+#define mp make_pair
+#define INF (ll)(1e18)
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define sz(x) ((int) (x).size())
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i = 0;i < N;i++)
+#define frep(i,a,b) for(int i = a;i <= b;i++)
+#define pii pair<int , int>
+#define pll pair<ll , ll>
+#define vii vector<int>
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcount(x)
+#define print(A,j,k) for(int ii=j;ii<=k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+#define SQRT 350
+#define CASES int t;cin>>t;while(t--)
+#define FILE freopen("inp.txt" , "r" , stdin);
+
+const int N = 3e5 + 5;
+const int MOD = 1e9 + 7;
+
+vii ans;
+pii A[N];
+int n;
+
+clock_t tx , ty;
+
+void output() {
+	cout << ans.size()/3 << '\n';
+	rep(i , ans.size())
+		cout << ans[i] + 1 << ' ';
+	cout << '\n';
+	exit(0);
+}
+
+void output2(vii& ans) {
+	cout << ans.size()/3 << '\n';
+	rep(i , ans.size())
+		cout << ans[i] + 1 << ' ';
+	cout << '\n';
+	exit(0);
+}
+
+ll sum;
+
+ll find() {
+	ll ans = -1 , cnt = 0;
+	map<int , int> M;
+
+	rep(i , 1000000) {
+		int a = rand() % n;
+		int b = rand() % n;
+		int c = rand() % n;
+		if (a == b || a == c || b == c)
+			continue;
+		a = A[a].ff;
+		b = A[b].ff;
+		c = A[c].ff;
+		M[a + b + c]++;
+		if (M[a + b + c] > cnt) {
+			ans = a + b + c;
+			cnt = M[a + b + c];
+		}
+	}
+	return ans;
+}
+
+
+set< pii > S;
+unordered_map< int , int > M , ID;
+
+vii G[N];
+int C[N];
+
+
+void bruteforce(int lo , int hi , ll xx , vii& ans) {
+	sum = xx;
+	// cout << "making sum " << sum << '\n';
+	for(int i = lo;i <= hi;i++) {
+		if (M[i] == 0)
+			continue;
+		// cout << "i " << i << '\n';
+		for(int j = hi;j >= i;j--) {
+			int r = sum - i - j;
+			if (M[j] == 0 || M[r] == 0)
+				continue;
+
+				if (i == j && i == sum - i - j) {
+					int c = G[ID[i]].size() - C[ID[i]];
+					if (c < 3)
+						continue;
+				}
+ 
+				if ((i == j) || (i == sum - i - j)) {
+					int c = G[ID[i]].size() - C[ID[i]];
+					if (c < 2)
+						continue;
+				}
+ 
+				if (j == sum - i - j) {
+					int c = G[ID[j]].size() - C[ID[j]];
+					if (c < 2)
+						continue;
+				}
+ 
+				// cout << "taking elements " << i << ' ' << j << ' ' << sum - i - j << '\n';
+ 
+				ans.pb( G[ID[i]][C[ID[i]]++]);
+				ans.pb( G[ID[j]][C[ID[j]]++] );
+				ans.pb(G[ID[sum - i - j]][C[ID[sum - i - j]]++]);
+				M[i] = M[j] = M[sum - i - j] = 0;
+		}
+	}
+}
+
+int main(int argc, char const *argv[])
+{
+	fast;
+	srand(time(NULL));
+
+	// FILE;
+
+	ty = clock();
+
+	cin >> n;
+
+	n *= 3;
+	sum = 0;
+	int lo = inf , hi = -1;
+
+	int c = 0;
+
+	rep(i , n) {
+		cin >> A[i].ff;
+		lo = min(lo , A[i].ff);
+		hi = max(hi , A[i].ff);
+		if (M[A[i].ff] == 0) {
+			ID[A[i].ff] = ++c;
+			M[A[i].ff] = 2;
+		}
+
+		G[ID[A[i].ff]].pb(i);
+		sum += A[i].ff;
+		A[i].ss = i;
+	}
+
+	// sort(A , A + n);
+
+	ll val = 0 , xx , cnt = -1 , f = 0;
+	unordered_map<int , int > XX;
+	rep(i , n) {
+		val += A[i].ff;
+		if (i % 3 == 2) {
+			f++;
+			XX[val/f]++;
+			// cout << val / f << ' ' << XX[val / f] << '\n';
+			// cout << "cnt " << cnt << '\n';
+			if (XX[val / f] > cnt) {
+				// cout << "xx " << val/f << '\n';
+				cnt = XX[val / f];
+				xx = val / f;
+			}
+		}
+	}
+
+	if (hi - lo <= 2000) {
+		
+		vii V1 , V2;
+		bruteforce(lo , hi , xx , V1);
+
+		rep(i , n) {
+			M[A[i].ff] = 2;
+			C[ID[A[i].ff]] = 0;
+		}
+
+		bruteforce(lo , hi , sum/3 , V2);
+
+		if (V1.size() > V2.size()) {
+			output2(V1);
+		}
+		else
+			output2(V2);
+	}
+
+	// if (sum % 3 != 0) {
+	// 	method1();
+	// 	return 0;
+	// }
+
+	// cout << "here\n";
+
+	sum = xx;
+	// cout << "making sum " << sum << '\n';
+
+	for(int ii = 0;ii < n;ii++) {
+		int i = A[ii].ff;
+
+		if (M[i] == 0)
+			continue;
+
+		for(int jj = n - 1;jj >= ii;jj--) {
+
+			int j = A[jj].ff;
+
+			if (M[j] == 2 && M[sum - i - j] == 2) {
+ 
+				if (i == j && i == sum - i - j) {
+					int c = G[ID[i]].size() - C[ID[i]];
+					if (c < 3)
+						continue;
+				}
+ 
+				if ((i == j) || (i == sum - i - j)) {
+					int c = G[ID[i]].size() - C[ID[i]];
+					if (c < 2)
+						continue;
+				}
+ 
+				if (j == sum - i - j) {
+					int c = G[ID[j]].size() - C[ID[j]];
+					if (c < 2)
+						continue;
+				}
+ 
+				// cout << "taking elements " << i << ' ' << j << ' ' << sum - i - j << '\n';
+ 
+				ans.pb( G[ID[i]][C[ID[i]]++]);
+				ans.pb( G[ID[j]][C[ID[j]]++] );
+				ans.pb(G[ID[sum - i - j]][C[ID[sum - i - j]]++]);
+				M[i] = M[j] = M[sum - i - j] = 0;
+				break;
+			}
+			tx = clock();
+			tx-= ty;
+			if (((double)tx)/CLOCKS_PER_SEC > 3.9) {
+				output();
+			}
+		}
+	}
+
+	output();
+
+	return 0;
+}

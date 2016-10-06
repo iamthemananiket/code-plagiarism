@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+#include <string.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef double ld;
+typedef pair<ll, int> pll;
+
+int s(int x)
+{
+    int ans = 0;
+    while (x) {
+        ans += x % 10;
+        x /= 10;
+    }
+    return ans;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //freopen("input.txt", "r", stdin);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    int n;
+    cin >> n;
+
+    int ans = 0;
+
+    for (int x = max(n - 300, 0); x <= n; ++x) {
+        if (x + s(x) + s(s(x)) == n) {
+            ++ans;
+        }
+    }
+
+    cout << ans << "\n";
+
+}

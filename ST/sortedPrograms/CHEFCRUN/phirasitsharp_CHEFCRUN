@@ -1,0 +1,66 @@
+#include <cassert>
+#include <iostream>
+
+const int N = 200010;
+const int64_t inf = 1ll << 60;
+
+int64_t sum[ N ];
+int64_t arr[ N ];
+
+int n;
+int st, en;
+
+int64_t path( int a, int b ) {
+	if ( a > b ) std::swap( a, b );
+	int64_t len = sum[ b-1 ] - sum[ a-1 ];
+	return std::min( len, sum[ n ] - len );
+}
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	int test;
+	std::cin >> test;
+	while ( test-- ) {
+
+		std::cin >> n;
+		for ( int i = 1 ; i <= n ; ++i ) {
+			std::cin >> arr[ i ];
+		}
+		std::cin >> st >> en;
+
+		assert( st < en );
+
+		for ( int i = 1 ; i <= n ; ++i ) {
+			sum[i] = sum[i-1] + arr[i];
+		}
+
+		int64_t ans = inf;
+		for ( int i = 1 ; i <= n ; ++i ) {
+			ans = std::min( ans, path( st, i ) + path( i, en ) );
+		}
+
+		int64_t max = 0, smax = 0;
+		for ( int i = st ; i < en ; ++i ) {
+			smax = std::max< int64_t >( 0ll, smax + arr[ i ] );
+			max = std::max< int64_t >( max, smax );
+		}
+
+		int64_t len = sum[ en-1 ] - sum[ st-1 ];
+		ans = std::min( ans, 2 * ( len - max ) + sum[ n ] - len );
+
+		max = smax = 0;
+		for ( int i = en ; i != st ; i = i % n + 1 ) {
+			smax = std::max< int64_t >( 0ll, smax + arr[ i ] );
+			max = std::max< int64_t >( max, smax );
+		}
+
+		len = sum[ n ] - ( sum[ en-1 ] - sum[ st-1 ] );
+		ans = std::min( ans, 2 * ( len - max ) + sum[ n ] - len );
+
+		std::cout << ans << "\n";
+	}
+
+	return 0;
+}

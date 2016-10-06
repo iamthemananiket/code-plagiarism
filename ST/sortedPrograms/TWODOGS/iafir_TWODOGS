@@ -1,0 +1,46 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <utility>
+
+using namespace std;
+
+long long N,K,T[555555],wmin;
+bool ada[1111111]={false};
+
+int main()
+{
+	scanf("%lld %lld",&N,&K);
+	wmin=0;
+	for(int i=0; i<N; i++)
+		scanf("%lld",&T[i]);
+	int i = 0;
+	while(i<=N/2)
+	{
+		if(T[i]<K)
+		{
+			if(ada[K-T[i]] && K != 2*T[i])
+			{
+				wmin=i+1;
+				break;
+			}
+			ada[T[i]]=true;
+		}
+		if(T[N-1-i]<K)
+		{
+			if(ada[K-T[N-1-i]] && K != 2*T[N-1-i])
+			{
+				wmin=i+1;
+				break;
+			}
+			ada[T[N-1-i]]=true;
+		}
+		i++;
+	}
+	if(!wmin)
+		printf("-1\n");
+	else
+		printf("%lld\n",wmin);
+	return 0;
+}

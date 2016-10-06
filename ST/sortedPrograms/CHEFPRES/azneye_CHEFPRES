@@ -1,0 +1,102 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+vector<int> adj[11111];
+vector<int> have[111];
+int depth[11111], par[14][11111];
+int prod[11111];
+
+void dfs(int at) {
+  for (const int& to : adj[at]) {
+    if (to != par[0][at]) {
+      par[0][to] = at;
+      depth[to] = depth[at] + 1;
+      dfs(to);
+    }
+  }
+}
+
+int get_lca(int a, int b) {
+  if (depth[b] > depth[a])
+    swap(a, b);
+  for (int i = 13; i >= 0; i--)
+    if (depth[par[i][a]] >= depth[b])
+      a = par[i][a];
+  if (a == b)
+    return a;
+  for (int i = 13; i >= 0; i--)
+    if (par[i][a] != par[i][b])
+      a = par[i][a], b = par[i][b];
+  return par[0][a];
+}
+
+void solve(int test_num) {
+  int N, K, root;
+  cin >> N >> K >> root;
+  for (int i = 1, x, y; i < N; i++) {
+    cin >> x >> y;
+    adj[x].push_back(y);
+    adj[y].push_back(x);
+  }
+  for (int v = 1; v <= N; v++) {
+    cin >> prod[v];
+    have[prod[v]].push_back(v);
+  }
+  par[0][root] = root;
+  dfs(root);
+  for (int j = 0; j + 1 < 14; j++)
+    for (int v = 1; v <= N; v++)
+      par[j + 1][v] = par[j][par[j][v]];
+  int Q;
+  cin >> Q;
+  while (Q--) {
+    int A, P, res = -1, dist = -1;
+    cin >> A >> P;
+    for (const int& v : have[P]) {
+      const int new_dist = depth[get_lca(v, A)];
+      if (new_dist > dist) {
+        dist = new_dist;
+        res = v;
+        if (dist == depth[A])
+          break;
+      }
+    }
+    cout << res << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}
+

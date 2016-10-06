@@ -1,0 +1,147 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector<int> stableMariage(const vector<vector<int>> &menPreff, const vector<vector<int>> &womenPreff)
+{
+    const int N = menPreff.size();
+
+    vector<vector<int>> mapWomanToMan(N);
+
+    for (int i = 0; i < N; ++i)
+        mapWomanToMan[i].resize(N);
+
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
+            mapWomanToMan[i][ womenPreff[i][j] ] = j;
+
+    vector<int> womanMatch(N, -1);
+    vector<int> manMatch(N, -1);
+
+    queue<int> bachelors;
+
+    for (int i = 0; i < N; ++i)
+        bachelors.push(i);
+
+    while (!bachelors.empty())
+    {
+        int man = bachelors.front();
+        bachelors.pop();
+
+        for (int woman : menPreff[man])
+        {
+            if (womanMatch[woman] == -1) /// woman is free
+            {
+                womanMatch[woman] = man;
+                manMatch[man] = woman;
+                break;
+            }
+            else
+            {
+                int otherMan = womanMatch[woman];
+
+                if (mapWomanToMan[woman][otherMan] > mapWomanToMan[woman][man])
+                {
+                    manMatch[otherMan] = -1; /// free the other man
+                    bachelors.push(otherMan);
+
+                    womanMatch[woman] = man;
+                    manMatch[man] = woman;
+                    break;
+                }
+            }
+        }
+    }
+
+    return manMatch;
+}
+
+///---------------------------------------------------
+const int BUFFER_SIZE = (1 << 16);
+char buffer[BUFFER_SIZE];
+int position = BUFFER_SIZE;
+
+inline char getChar()
+{
+    if ( position == BUFFER_SIZE )
+    {
+        position = 0;
+        fread(buffer, BUFFER_SIZE, 1, stdin);
+    }
+
+    return buffer[position++];
+}
+
+inline int getInt()
+{
+    register int a = 0;
+    char ch;
+    int sgn = 1;
+
+    do
+    {
+        ch = getChar();
+
+    } while ( !isdigit(ch) && ch != '-' );
+
+    if ( ch == '-' )
+    {
+        sgn = -1;
+        ch = getChar();
+    }
+
+    do
+    {
+        a = (a << 3) + (a << 1) + ch - '0';
+        ch = getChar();
+
+    } while ( isdigit(ch) );
+
+    return a * sgn;
+}
+///---------------------------------------------------
+
+int main()
+{
+    ///freopen("data.in", "r", stdin);
+
+    int T = getInt();
+
+    while (T--)
+    {
+        int N = getInt();
+
+        vector<vector<int>> menPreffs(N), womenPreffs(N);
+
+        for (int i = 0; i < N; ++i)
+        {
+            womenPreffs[i].resize(N);
+            int x = getInt();
+
+            for (int j = 0; j < N; ++j)
+            {
+                womenPreffs[i][j] = getInt();
+                womenPreffs[i][j]--;
+            }
+        }
+
+        for (int i = 0; i < N; ++i)
+        {
+            menPreffs[i].resize(N);
+            int x = getInt();
+
+            for (int j = 0; j < N; ++j)
+            {
+                menPreffs[i][j] = getInt();
+                menPreffs[i][j]--;
+            }
+        }
+
+        vector<int> marriages = stableMariage(menPreffs, womenPreffs);
+
+        for (int i = 0; i < N; ++i)
+            printf("%d %d\n", i + 1, marriages[i] + 1);
+    }
+
+    return 0;
+}

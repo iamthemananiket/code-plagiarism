@@ -1,0 +1,70 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+
+char a[(int)1e6 + 9], b[(int)1e6 + 9];
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		scanf("%s %s", a, b);
+		int fromZeroToOneCount = 0;
+		int fromOneToZeroCount = 0;
+		bool isAnyZero = false;
+		bool isAnyOne = false;
+		int n = strlen(a);
+		for (int i = 0; i < n; ++i) {
+			if (a[i] == '0') {
+				isAnyZero = true;
+				if (b[i] == '1') {
+					++fromZeroToOneCount;
+				}
+			} else {
+				isAnyOne = true;
+				if (b[i] == '0') {
+					++fromOneToZeroCount;
+				}
+			}
+		}
+		if ((fromZeroToOneCount > 0 && !isAnyOne)
+			|| (fromOneToZeroCount > 0 && !isAnyZero)) {
+			printf("Unlucky Chef\n");
+			continue;
+		}
+		int x = min(fromZeroToOneCount, fromOneToZeroCount);
+		fromZeroToOneCount -= x;
+		fromOneToZeroCount -= x;
+		printf("Lucky Chef\n%d\n", x + fromZeroToOneCount + fromOneToZeroCount);
+	}
+	return 0;
+}

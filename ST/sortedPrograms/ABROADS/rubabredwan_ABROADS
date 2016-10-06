@@ -1,0 +1,107 @@
+/*
+__________           .___
+\______   \ ____   __| _/_  _  _______    ____
+ |       _// __ \ / __ |\ \/ \/ /\__  \  /    \
+ |    |   \  ___// /_/ | \     /  / __ \|   |  \
+ |____|_  /\___  >____ |  \/\_/  (____  /___|  /
+        \/     \/     \/              \/     \/
+
+handle	: rubabredwan (Codeforces/CodeChef/HackerRank)
+task 	: ...............
+
+*/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(x,"w",stdout)
+#define SF(x)		scanf("%d", &x)
+#define PF(x)		printf("%d", x)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			500050
+#define INF			1e9
+#define EPS			1e-9
+
+#define xx 			first
+#define yy	 		second
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+
+using namespace std;
+
+typedef long long 		ll;
+typedef unsigned long long	ull;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+int n, m, q, x, y; char c;
+int pop[MAX];
+pii road[MAX];
+bool usable[1010][1010];
+vector<int>edge[MAX];
+int vis[MAX], t=1, ret;
+
+void dfs_visit(int at){
+    //cout << "## " << at << ' ' << pop[at] << endl;
+    ret += pop[at];
+	vis[at] = t;
+	REP(i, edge[at].size()){
+		int v = edge[at][i];
+		if(vis[v] != t && usable[at][v] == false){
+            //cout << at << " -- > " << v << endl;
+            dfs_visit(v);
+		}
+	}
+}
+
+int dfs(){
+    int ans = 0;
+	REPN(i, n){
+	    if(vis[i] != t){
+            //cout << "********\n";
+            ret = 0;
+            dfs_visit(i);
+            ans = max(ans, ret);
+	    }
+	}
+
+	return ans;
+}
+
+int main(){
+    scanf("%d %d %d", &n, &m, &q);
+    REPN(i, n) scanf("%d", &pop[i]);
+    REPN(i, m){
+        scanf("%d %d", &x, &y);
+        road[i] = make_pair(x, y);
+        edge[x].pb(y);
+        edge[y].pb(x);
+    }
+    while(q--){
+        scanf(" %c", &c);
+        if(c == 'D'){
+            scanf("%d", &x);
+            pii now = road[x];
+            usable[ now.xx ][ now.yy ] = 1;
+            usable[ now.yy ][ now.xx ] = 1;
+        }
+        else{
+            scanf("%d %d", &x, &y);
+            pop[x] = y;
+        }
+        int ans = dfs();
+        printf("%d\n", ans);
+        t++;
+    }
+	return 0;
+}

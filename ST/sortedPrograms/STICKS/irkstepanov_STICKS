@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+#define forn(i, n) for (int (i) = 0; (i) < n; ++(i))
+#define ford(i, n) for (int (i) = (n) - 1; (i) >= 0; --(i))
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ld, ld> pll;
+
+const int amax = 1010;
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+
+    ios_base::sync_with_stdio(false);
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        int n;
+        cin >> n;
+        vector<int> cnt(amax);
+        while (n--) {
+            int a;
+            cin >> a;
+            ++cnt[a];
+        }
+        int ans = -1;
+        int max1 = -1, max2 = -1;
+        for (int i = amax - 1; i >= 0; --i) {
+            if (cnt[i] >= 4) {
+                ans = max(ans, i * i);
+            }
+            if (cnt[i] >= 2) {
+                if (max1 == -1) {
+                    max1 = i;
+                } else if (max2 == -1) {
+                    max2 = i;
+                }
+            }
+        }
+        if (max1 != -1 && max2 != -1) {
+            ans = max(ans, max1 * max2);
+        }
+        cout << ans << "\n";
+    }
+
+}

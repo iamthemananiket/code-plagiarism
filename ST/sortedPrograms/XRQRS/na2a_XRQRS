@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+
+#define F first
+#define S second
+
+#define mp make_pair
+#define pb push_back
+
+#define llong long long
+
+using namespace std;
+
+const int MXN = (int) 2e7 + 7;
+const int INF = (int) 1e9 + 7;
+
+const double PI = (double) acos(-1);
+
+struct node {
+    int go[2];
+    int val;
+    int leaves;
+};
+
+node b[MXN];
+
+int trees[MXN];
+int sz;
+
+int n, m;
+
+int make_vertex(int l, int r, int leaves) {
+    sz++;
+    b[sz].go[0] = l;
+    b[sz].go[1] = r;
+    b[sz].leaves = leaves;
+    b[sz].val = b[l].val + b[r].val + leaves;
+    return sz;
+}
+
+int add(int v, int x, int id) {
+    if (id == -1) {
+        sz++;
+        b[sz].go[0] = b[sz].go[1] = 0;
+        b[sz].leaves = b[v].leaves + 1;
+        b[sz].val = b[sz].leaves;
+        return sz;
+    }
+    int bit = (x >> id) & 1;
+    if (bit == 0) return make_vertex(add(b[v].go[0], x, id - 1), b[v].go[1], b[v].leaves);
+    else return make_vertex(b[v].go[0], add(b[v].go[1], x, id - 1), b[v].leaves);
+}
+
+int main() {
+    scanf("%d", &m);
+    while (m--) {
+        int qt, l, r, x;
+        scanf("%d", &qt);
+        if (qt == 0) {
+            scanf("%d", &x);
+            n++;
+            trees[n] = add(trees[n - 1], x, 20);
+            //for(int i=1;i<=sz;i++)cout<<b[i].go[0]<<' '<<b[i].go[1]<<endl;
+        }
+        else if (qt == 1) {
+            scanf("%d%d%d", &l, &r, &x);
+            int lv = trees[l - 1], rv = trees[r];
+            int ans = 0;
+            for (int i = 20; i >= 0; i--) {
+                int bit = (x >> i) & 1;
+                //cout<<lv<<' '<<rv<<' '<<b[lv].go[bit]<<' '<<b[rv].go[bit]<<' '<<b[lv].go[bit^1]<<' '<<b[rv].go[bit^1]<<endl;
+                if(b[rv].val-b[lv].val==0){
+                    while(true){}
+                }
+                if (b[b[rv].go[bit ^ 1]].val - b[b[lv].go[bit ^ 1]].val > 0) {
+                    rv = b[rv].go[bit ^ 1];
+                    lv = b[lv].go[bit ^ 1];
+                    if (bit == 0) ans += (1 << i);
+                }
+                else if (b[b[rv].go[bit]].val - b[b[lv].go[bit]].val > 0) {
+                    lv = b[lv].go[bit];
+                    rv = b[rv].go[bit];
+                    if (bit == 1) ans += (1 << i);
+                }
+                else {
+                    //while(true){}
+                }
+            }
+            printf("%d\n", ans);
+        }
+        else if (qt == 2) {
+            scanf("%d", &x);
+            n -= x;
+            //sz -= x * 21;
+        }
+        else if (qt == 3) {
+            scanf("%d%d%d", &l, &r, &x);
+            int lv = trees[l - 1], rv = trees[r];
+            int ans = 0;
+            for (int i = 20; i >= 0; i--) {
+                int bit = (x >> i) & 1;
+                if (bit == 1) ans += b[b[rv].go[0]].val - b[b[lv].go[0]].val;
+                rv = b[rv].go[bit];
+                lv = b[lv].go[bit];
+            }
+            ans += b[rv].val - b[lv].val;
+            printf("%d\n", ans);
+        }
+        else {
+            scanf("%d%d%d", &l, &r, &x);
+            int lv = trees[l - 1], rv = trees[r];
+            int ans = 0;
+            for (int i = 20; i >= 0; i--) {
+                if (b[b[rv].go[0]].val - b[b[lv].go[0]].val >= x) {
+                    lv = b[lv].go[0];
+                    rv = b[rv].go[0];
+                }
+                else {
+                    x -= b[b[rv].go[0]].val - b[b[lv].go[0]].val;
+                    lv = b[lv].go[1];
+                    rv = b[rv].go[1];
+                    ans += (1 << i);
+                }
+            }
+            printf("%d\n", ans);
+        }
+    }
+    return 0;
+}

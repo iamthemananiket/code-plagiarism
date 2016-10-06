@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <queue>
+#include <functional>
+#include <set>
+#include <cmath>
+#define SIZE 1005
+
+using namespace std;
+typedef long long int ll;
+typedef pair <int,int> P;
+
+bool pal[SIZE][SIZE];
+int dp[SIZE][SIZE];
+char str[SIZE];
+int n;
+
+void solve()
+{
+	for(int L=1;L<=n;L++)
+	{
+		for(int i=0;i+L<=n;i++)
+		{
+			int s=i,t=i+L-1;
+			if(L==1) pal[s][t]=true;
+			else if(L==2) pal[s][t]=str[s]==str[t];
+			else
+			{
+				if(str[s]==str[t]) pal[s][t]=pal[s+1][t-1];
+				else pal[s][t]=false;
+			}
+			if(pal[s][t])
+			{
+				dp[s][t]=dp[s][s+(L/2)-1]+1;
+			}
+			else
+			{
+				dp[s][t]=0;
+			}
+		}
+	}
+}
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%s",&str);
+		n=strlen(str);
+		solve();
+		ll ret=0;
+		for(int i=0;i<n;i++)
+		{
+			for(int j=i;j<n;j++)
+			{
+				ret+=dp[i][j];
+			}
+		}
+		printf("%lld\n",ret);
+	}
+	return 0;
+}

@@ -1,0 +1,91 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+//#include<unordered_map>
+using namespace std;
+
+long long int dp[100002][502];
+
+vector<pair<int, long long int> > v[100002];
+bool use[100002];
+int n;
+long long int m;
+
+vector<int> V[502];
+
+long long int answer = 0;
+
+int nex[502][502];
+
+inline void dfs(int b) {
+	use[b] = true;
+	dp[b][1 % m]++;
+	for (int i = 0;i < v[b].size();i++) {
+		int go = v[b][i].first;
+		if (use[go]) {
+			continue;
+		}
+		int D = v[b][i].second;
+		dfs(go);
+		for (int k = 0;k < m;k++) {
+			if (dp[go][k]) {
+				int K = nex[D][k];
+				int siz = V[K].size();
+				for (int kk = 0;kk <siz ;kk++) {
+					answer += dp[go][k] * dp[b][V[K][kk]];
+				}
+			}
+		}
+		for (int k = 0;k < m;k++) {
+			dp[b][nex[D][k]] += dp[go][k];
+		}
+	}
+}
+int main() {
+	scanf("%d%d", &n, &m);
+	for (int i = 1;i < n;i++) {
+		int a, b;
+		scanf("%d%d", &a, &b);
+		a--;
+		b--;
+		int c;
+		scanf("%d", &c);
+		c %= m;
+		v[a].push_back(make_pair(b, c));
+		v[b].push_back(make_pair(a, c));
+	}
+	for (int i = 0;i < m;i++) {
+		for (int j = 0;j < m;j++) {
+			if ((i*j) % m == 0) {
+				V[i].push_back(j);
+			}
+			nex[i][j] = (i*j) % m;
+		}
+	}
+	dfs(0);
+	printf("%lld\n", answer);
+	return 0;
+}

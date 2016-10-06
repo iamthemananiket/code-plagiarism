@@ -1,0 +1,87 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%ld",&x)
+#define pi(x) printf("%ld",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli long long int
+#define li long int
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+using namespace std;
+int ps[1007];
+long int dp[1007];
+long int dp1[1007];
+int prog()
+{
+    int i,j,k,n,s,x,y,z,m;
+    scanf("%d",&n);
+    scanf("%d",&m);
+    scanf("%d",&s);
+    s--;
+    fl(i,0,n)
+        dp1[i]=dp[i]=0;
+    dp[s]=1;
+    fl(i,0,m)
+        scanf("%d",&ps[i]);
+    fl(i,0,m)
+        {
+            fl(j,0,n)
+            {
+            x = j-ps[i];
+                if(x>=0)
+                    {
+                        dp1[x]+=dp[j];
+                        if(dp1[x]>=mod)
+                            dp1[x]%=mod;
+                        dp1[j]+=dp[x];
+                        if(dp1[j]>=mod)
+                            dp1[j]%=mod;
+                    }
+            }
+
+            fl(j,0,n)
+                {dp[j]=dp1[j];
+                dp1[j]=0;}
+            }
+    fl(i,0,n)
+        printf("%ld ",dp[i]);
+    printf("\n");
+    r0;
+}
+int main()
+{
+    //f_in;
+    int t;
+    scanf("%d",&t);
+    while(t--)
+        prog();
+    r0;
+}

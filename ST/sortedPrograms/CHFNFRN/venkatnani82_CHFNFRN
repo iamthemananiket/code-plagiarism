@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+bool pres[1010][1010];
+bool visited[1010];
+int label[1010];
+int n, m;
+void dfs(int root) {
+	visited[root] = true;
+	for(int i = 0; i < n; i++) {
+		if(!pres[root][i] || visited[i]) continue;
+		label[i] = label[root] ^ 1;
+		dfs(i);
+	}
+}
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		cin >> n >> m;
+		int x, y;
+		for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) pres[i][j] = true;
+		for(int i = 0; i < n; i++) visited[i] = false;
+		for(int i = 0; i < m; i++) {
+			scanf("%d %d", &x, &y);
+			pres[x - 1][y - 1] = pres[y - 1][x - 1] = false;
+		}
+		for(int i = 0; i < n; i++) {
+			if(visited[i]) continue;
+			label[i] = 0;
+			dfs(i);
+		}
+		bool ok = true;
+		for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) {
+			if(i != j && pres[i][j] && label[i] + label[j] != 1) ok = false;
+		}
+		// for(int i = 0; i < n; i++) cout << i << " " << label[i] << endl;
+		if(ok) printf("YES\n");
+		else printf("NO\n");
+	}
+}

@@ -1,0 +1,31 @@
+#include<bits/stdc++.h>
+#define mp make_pair
+#define f first
+#define s second
+ using namespace std;
+
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+    //freopen("input.txt","r",stdin); freopen("output.txt","w",stdout);
+
+        int n,i,x,tt=0,mx=0;
+    cin>>n;
+   for(i=1;i<=n;++i)
+     {
+         cin>>x;
+         if(x==0)
+         {
+             if(tt) mx=max(mx,i- tt);
+             tt=0;
+         } else if(!tt) tt=i;
+     }
+
+     if(tt) mx=max(mx,n-tt+1);
+
+                    cout<<mx<<endl;
+
+    return 0;
+  }

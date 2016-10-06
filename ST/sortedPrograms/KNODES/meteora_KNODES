@@ -1,0 +1,123 @@
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+#include <set>
+#include <vector>
+
+#define NMAX 100010
+
+typedef long long lli;
+
+using namespace std;
+
+vector<int> adj[NMAX];
+vector<pair<int,int> > child[NMAX];
+pair<int,int> A[NMAX];
+int at[NMAX];
+int st[NMAX];
+int en[NMAX];
+int cur;
+
+
+void dfs(int v, int p){
+	st[v] = cur++;
+	at[cur-1] = v;
+
+	int i,u;
+
+	child[v].clear();
+	for(i = 0; i < adj[v].size(); ++i){
+		u = adj[v][i];
+		if(u == p) continue;
+		dfs(u,v);
+		child[v].push_back(make_pair(st[u],u));
+	}
+
+	en[v] = cur-1;
+}
+
+
+int K;
+
+int comp(pair<int,int> a, pair<int,int> b){
+	return a.second == b.second ? a.first > b.first : a.second < b.second;
+}
+
+int check(){
+	int i;
+	sort(A,A+K,comp);
+
+	int sp;
+
+
+ i = 0;
+
+	for(i = 1; i < K; ++i){
+		if(A[i].first > A[i-1].second)  break;
+	}
+
+	sp = i-1;
+
+
+	int nx;
+
+	int v;
+
+
+	for(; i < K; ++i){
+		if(i != sp+1 && A[i].first > A[i-1].second) return 0;
+		if(i != K-1 && A[i].first < A[sp].first) return 0;
+
+		if(A[i].first < A[sp].first){
+			v = at[A[i].first];
+			nx = upper_bound(child[v].begin(),child[v].end(),make_pair(A[sp].first,cur))-child[v].begin()-1;
+			nx = child[v][nx].second;
+			if(st[nx] < A[sp+1].first && en[nx] >= A[sp+1].second) return 0;
+		}
+	}
+
+	return 1;
+}
+
+int N,Q;
+
+int main(){
+	int t,i;
+	int u,v;
+	scanf("%d",&t);
+
+	while(t--){
+		cur =0;
+		scanf("%d",&N);
+
+		for(i = 0; i < N-1;++i){
+			scanf("%d%d",&u,&v);
+			--u,--v;
+			adj[u].push_back(v);
+			adj[v].push_back(u);
+		}
+
+		dfs(0,-1);
+
+		scanf("%d",&Q);
+
+		while(Q--){
+			scanf("%d",&K);
+			for(i = 0; i < K; ++i){
+				scanf("%d",&v);
+				--v;
+				A[i] = make_pair(st[v],en[v]);
+			}
+
+			if(check()){
+				printf("Yes\n");
+			}else{
+				printf("No\n");
+			}
+		}
+
+		for(i = 0; i < N; ++i) adj[i].clear();
+	}
+
+	return 0;
+}

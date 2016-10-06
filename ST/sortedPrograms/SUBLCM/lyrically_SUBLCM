@@ -1,0 +1,73 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int LIM = 1000005;
+int mxp[LIM + 10];
+
+int N;
+int A[100010];
+int app[LIM + 10];
+
+int main() {
+	iota(mxp, mxp + LIM, 0);
+	for (int i = 2; i < LIM; ++i) if (mxp[i] == i) for (int j = i; j < LIM; j += i) mxp[j] = i;
+// pv(mxp,mxp+31);
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		fill(app, app + LIM, -1);
+		int ans = 0;
+		int l = -1;
+		for (int i = 0; i < N; ++i) {
+			for (int a = A[i]; a > 1; ) {
+				const int p = mxp[a];
+				for (; a % p == 0; a /= p);
+				chmax(l, app[p]);
+				app[p] = i;
+			}
+// cout<<l<<" "<<i<<endl;
+			chmax(ans, i - l);
+		}
+		if (ans < 2) {
+			puts("-1");
+		} else {
+			printf("%d\n", ans);
+		}
+	}
+	
+	return 0;
+}

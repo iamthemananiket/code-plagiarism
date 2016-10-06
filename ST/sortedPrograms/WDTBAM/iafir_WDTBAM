@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1e3 + 6;
+
+int w[N];
+char a[N], b[N];
+
+int main() {
+  int t; scanf("%d", &t);
+  while(t--) {
+    int n; scanf("%d", &n);
+    scanf("%s%s", a, b);
+    int cnt = 0;
+    for(int i = 0; i<n; i++)
+      cnt += (a[i] == b[i]);
+    for(int i = 0; i<=n; i++) {
+      scanf("%d", w+i);
+    }
+    int ans = 0;
+    for(int i = 0; i<= cnt; i++)
+      ans = max(ans, w[i]);
+    if(cnt == n)
+      ans = w[n];
+    printf("%d\n", ans);
+  }
+  return 0;
+}

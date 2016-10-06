@@ -1,0 +1,206 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y-1);(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+//#define int long long
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+
+typedef vector<vector<pii> > Graph;
+int n,INF=2e8;
+
+int dfs(Graph &g,int v,int p,int t){
+  if(v==t)
+    return 0;
+  int re=INF;
+  rep(i,g[v].size()){
+    if(g[v][i].X!=p){
+      re=min(dfs(g,g[v][i].X,v,t)+g[v][i].Y,re);
+    }
+  }
+  return re;
+}
+const int MAX_N=(1<<18);
+//const ll INF=(1ll<<60);
+int nn=MAX_N;
+struct Seg{
+ int mn,ind;
+  Seg(int d=100000,int i=100000){
+    mn=d;
+    ind=i;
+  }
+  static Seg e;
+};
+vector<Seg> dat(2*MAX_N-1);
+Seg Seg::e=Seg(INF,-1);
+struct Dist{
+  int d;
+  Dist(int di=0){
+    d=di;
+  }
+  static Dist e;
+};
+vector<Dist> d(2*MAX_N-1);
+Dist Dist::e=Dist();
+
+Seg operator+(Seg l,Seg r){
+  if(l.mn>r.mn)
+    swap(l,r);
+  return l;
+}
+Dist operator+(Dist l,Dist r){
+  l.d+=r.d;
+  return l;
+}
+
+template<class T> void upd(vector<T> &dat,int k,T a){
+  //  cout<<k<<":"<<a.mn<<","<<a.ind<<endl;
+  k+=nn-1;
+  dat[k]=a;
+  while(k>0){
+    k=(k-1)/2;
+    dat[k]=dat[k*2+1]+dat[k*2+2];
+  }
+}
+template<class T> void add(vector<T> &dat,int k,T a){
+  //  cout<<k<<":"<<a.mn<<","<<a.ind<<endl;
+  k+=nn-1;
+  dat[k]=dat[k]+a;
+  while(k>0){
+    k=(k-1)/2;
+    dat[k]=dat[k*2+1]+dat[k*2+2];
+  }
+}
+
+//(l,r,0,0,nn)
+template<class T> T query(vector<T> &dat,int a,int b,int k,int l,int r){
+  if(r<=a || b<=l)return T::e;
+  if(a<=l && r<=b) return dat[k];
+  return query(dat,a,b,k*2+1,l,(l+r)/2) + query(dat,a,b,k*2+2,(l+r)/2,r);
+}
+//rangeMin(lmost[v],lmost[w]);
+
+void dfsLCA(Graph &g,int v,int p,int d,vector<Seg> &data,vector<int> &num){
+  upd(data,num.size(),Seg(d,v));
+  num.pb(v);
+  rep(i,g[v].size())
+    if(g[v][i].X!=p){
+      dfsLCA(g,g[v][i].X,v,d+1,data,num);
+      upd(data,num.size(),Seg(d,v));
+      num.pb(v);
+    }
+}
+void preLCA(Graph &g,int root,vector<Seg> &dat,vector<int> &lmost){
+  vector<int> num;
+  dfsLCA(g,root,-1,0,dat,num);
+  //  cout<<"num:"<<num;
+  lmost.resize(g.size());
+  rrep(i,num.size())
+    lmost[num[i]]=i;
+}
+void dfs(Graph &g,int v,int p,int d,vector<int> &di,vector<int> &pre,vector<int> &r){
+  pre.pb(v);
+  di.pb(d);
+  for(pii w:g[v])
+    if(w.X!=p)dfs(g,w.X,v,d+w.Y,di,pre,r);
+  r[v]=di.size();
+}
+int dst(int v){
+  return query(d,0,v+1,0,0,nn).d;
+}
+
+main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  int i,j,k,a,b,c;
+  cin>>n;
+  Graph g(n);
+  vector<pii> e;
+  rep(i,n-1){
+    cin>>a>>b>>c;
+    --a,--b;
+    e.pb(pii(a,g[a].size()));
+    e.pb(pii(b,g[b].size()));
+    g[a].pb(pii(b,c));
+    g[b].pb(pii(a,c));
+  }
+  vector<int> lmost(n),pre,di,erp(n),right(n);
+  preLCA(g,0,dat,lmost);
+  int hoge=0;
+  dfs(g,0,-1,0,di,pre,right);
+  hoge=0;
+  rep(i,n){
+    upd(d,i,Dist(di[i]-hoge));
+    hoge=di[i];
+    erp[pre[i]]=i;
+  }
+  //cout<<pre<<erp<<right;
+    //   rep(i,n)cout<<di[erp[i]]<<",";cout<<endl;
+  int q;
+  cin>>q;
+  rep(i,q){
+    cin>>a>>b>>c;
+    if(a==1){
+      --b;
+      int dd,dst[2];
+      rep(i,2){
+	pii tmp=e[2*b+i];
+	dst[i]=tmp.X;
+	dd=c-g[tmp.X][tmp.Y].Y;
+	g[tmp.X][tmp.Y].Y=c;
+      }
+      int bb;
+      //     cout<<dst[0]<<"-"<<dst[1]<<":"<<c<<endl;
+      if(erp[dst[0]]>erp[dst[1]])
+	bb=dst[0];
+      else
+	bb=dst[1];
+      add(d,erp[bb],Dist(dd));
+      add(d,right[bb],Dist(-dd));
+      //        cout<<bb<<":"<<erp[bb]<<"~"<<right[bb]<<endl;
+    }else{
+      --b,--c;
+      //  cout<<b<<","<<c<<endl;
+      int l=lmost[b],r=lmost[c];
+      if(l>r)swap(l,r);
+      //    cout<<l<<","<<r<<endl;
+      int lca=query(dat,l,r+1,0,0,nn).ind;
+      //    cout<<lca<<endl;
+      //             cout<<dfs(g,b,-1,c)<<"==";
+      cout<<dst(erp[b])+dst(erp[c])-2*dst(erp[lca])<<endl;
+      //  cout<<dst(erp[b])<<","<<dst(erp[c])<<","<<dst(erp[lca])<<endl;
+    }
+  }
+  return 0;
+}

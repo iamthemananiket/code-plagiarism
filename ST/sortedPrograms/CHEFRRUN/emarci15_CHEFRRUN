@@ -1,0 +1,64 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+int n;
+int a[1000000];
+
+int eler[1000000];
+
+int st[1000000];
+int stv;
+
+int r;
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(NULL);
+
+    for(cin >> T; T--;) {
+        cin >> n;
+        for(int i=0; i<n; i++) {
+            cin >> a[i];
+            a[i] = (i+a[i]+1) % n;
+        }
+
+        fill(eler,eler+n,0);
+        int sol(0);
+        for(int i=0; i<n; i++) {
+            if(eler[i]) continue;
+            st[stv=0] = i;
+            while(stv>=0) {
+                int p = st[stv];
+                if(eler[p]) {
+                    sol += (r>=0);
+                    if(r==p) r = -1;
+                    stv--;
+                    eler[p] = 2;
+                    continue;
+                }
+
+                eler[p] = 1;
+                if(eler[a[p]]==1) {
+                    r = a[p];
+                    if(r==p) r = -1;
+                    sol++;
+                } else if(eler[a[p]]==2) {
+                    r = -1;
+                } else {
+                    st[++stv] = a[p];
+                    continue;
+                }
+
+                eler[p] = 2;
+                stv--;
+            }
+        }
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

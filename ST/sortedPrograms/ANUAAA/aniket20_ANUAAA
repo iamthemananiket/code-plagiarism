@@ -1,0 +1,157 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 1000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+vector<int>primes[maxs];
+int mark[maxs],sz,currentl,currentr,a[maxs],b[maxs];
+vector<ppi>queries;
+ll ans=0,cnt[maxs],post[mins];
+bool comp(ppi p1,ppi p2){
+	if((p1.F.F/sz)<(p2.F.F/sz)){
+		return true;
+	}
+	if((p1.F.F/sz)>(p2.F.F/sz)){
+		return false;
+	}
+	return p1.F.S<p2.F.S;
+}
+
+void add(int ind){
+	int j;
+	for(j=0;j<primes[a[ind]].size();j++){
+		ans-=cnt[primes[a[ind]][j]]*cnt[primes[a[ind]][j]];
+		cnt[primes[a[ind]][j]]++;
+		ans+=cnt[primes[a[ind]][j]]*cnt[primes[a[ind]][j]];
+		ans%=N;
+		if(ans<0){
+			ans+=N;
+		}
+		
+	}
+}
+
+void remove(int ind){
+	int j;
+	for(j=0;j<primes[a[ind]].size();j++){
+		ans-=cnt[primes[a[ind]][j]]*cnt[primes[a[ind]][j]];
+		cnt[primes[a[ind]][j]]--;
+		ans+=cnt[primes[a[ind]][j]]*cnt[primes[a[ind]][j]];
+		ans%=N;
+		if(ans<0){
+			ans+=N;
+		}
+	}
+}
+
+ll fun(int l,int r){
+	
+	while(currentl<l){
+		remove(currentl);
+		currentl++;
+	}
+	while(currentr>r){
+		remove(currentr);
+		currentr--;
+	}
+	while(currentl>l){
+		currentl--;
+		add(currentl);
+	}
+	while(currentr<r){
+		currentr++;
+		add(currentr);
+	}
+	//cout<<l<<" "<<r<<" "<<currentl<<" "<<currentr<<" "<<ans<<endl;
+	return ans;
+}
+
+int main()
+{
+	int n,m,i,j,l,r;
+	ll tot;
+	for(i=2;i<maxs;i++){
+		if(!mark[i]){
+			for(j=i;j<maxs;j+=i){
+				primes[j].pb(i);
+				mark[j]=1;
+			}
+		}
+	}
+	sc("%d %d",&n,&m);
+	sz=sqrt(n);
+	for(i=0;i<n;i++){
+		sc("%d",&a[i]);
+	}
+	for(i=0;i<m;i++){
+		sc("%d",&b[i]);
+	}
+	for(i=0;i<m;i++){
+		for(j=0;j<m;j++){
+			l=(b[i]+b[j])%n;
+			r=(b[i]-b[j]+n)%n;
+			queries.pb({{min(l,r),max(l,r)},i});
+		}
+	}
+	for(i=0;i<m;i++){
+		post[i]=1;
+	}
+	sort(queries.begin(),queries.end(),comp);
+	for(j=0;j<primes[a[0]].size();j++){
+		ans-=cnt[primes[a[0]][j]]*cnt[primes[a[0]][j]];
+		cnt[primes[a[0]][j]]++;
+		ans+=cnt[primes[a[0]][j]]*cnt[primes[a[0]][j]];
+		ans%=N;
+		if(ans<0){
+			ans+=N;
+		}
+		
+	}
+	tot=0;
+	for(i=0;i<queries.size();i++){
+		tot=fun(queries[i].F.F,queries[i].F.S);
+		if(tot>=N){
+			tot%=N;
+		}
+		post[queries[i].S]*=tot;
+		if(post[queries[i].S]>=N){
+			post[queries[i].S]%=N;
+		}
+	}
+	tot=0;
+	for(i=0;i<m;i++){
+		tot+=post[i];
+		if(tot>=N){
+			tot%=N;
+		}
+	}
+	pr("%lld\n",tot);
+	return 0;
+}

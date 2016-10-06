@@ -1,0 +1,64 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX_V = 100000;
+int a[MAX_V + 1];
+
+bool is_palindrome(string s) {
+  int p = 0, q = s.size() - 1;
+  while (p < q && s[p] == s[q]) p++, q--;
+  return p >= q;
+}
+
+
+int main() {
+  for (int i = 0; i < MAX_V; i++) {
+    string s = to_string(i);
+    if (is_palindrome(to_string(i))) {
+      a[i] = i;
+    } else {
+      a[i] = 0;
+    }
+  }
+  for (int i = 0; i < MAX_V; i++) {
+    a[i + 1] += a[i];
+  }
+  int T;
+  cin >> T;
+  while (T--) {
+    int l, r;
+    cin >> l >> r;
+    cout << a[r] - a[l - 1] << endl;
+  }
+}

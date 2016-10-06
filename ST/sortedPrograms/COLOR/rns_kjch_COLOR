@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+int TC, n; char s[100005];
+int cou[4];
+
+int max(int x, int y){
+    if(x>y) return x; return y;
+}
+
+int main(){
+    scanf("%d", &TC);
+    while(TC--){
+        scanf("%d\n", &n);
+        scanf("%s", s);
+        cou[0] = cou[1] = cou[2] = cou[3] = 0;
+        for(int i=0; i<n; i++){
+            if(s[i]=='R') cou[1]++;
+            if(s[i]=='G') cou[2]++;
+            if(s[i]=='B') cou[3]++;
+        }
+        cou[0] = cou[1]+cou[2]+cou[3];
+        printf("%d\n", cou[0] - max(cou[1], max(cou[2],cou[3])));
+    }
+}

@@ -1,0 +1,115 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int BASE = 13;
+const int INV = 3303820997;
+int powB[125013], powI[125013];
+
+inline int add(int a, int b) { return a+b; }
+inline int sub(int a, int b) { return a-b; }
+inline int mult(int a, int b) { return a*b; }
+
+int n,q;
+int hashs[10][125013], hasht[10][125013];
+
+int get(int* s, int a, int b) {
+	int res = sub(s[b],s[a-1]);
+	res = mult(res,powI[a]);
+	return res;
+}
+
+int lcp(int* s, int a, int* t, int b) {
+	int low = 0;
+	int high = n+2-max(a,b);
+	while (high-low>1) {
+		int mid = (low+high)/2;
+		if (get(s,a,a+mid-1)==get(t,b,b+mid-1)) low = mid;
+		else high = mid;
+	}
+	return low;
+}
+
+int visited[13];
+int match[13];
+bool adj[13][13];
+bool dfs(int x) {
+	visited[x] = 1;
+	for (int i=9;i>=0;i--) if (adj[x][i]) {
+		if (match[i]==-1 || (!visited[match[i]] && dfs(match[i]))) {
+			match[i] = x;
+			return 1;
+		}
+	}
+	return 0;
+}
+int matching() {
+	int ans = 0;
+	for (int i=0;i<10;i++) match[i] = -1;
+	for (int i=0;i<10;i++) {
+		for (int j=0;j<10;j++) visited[j] = 0;
+		ans+=dfs(i);
+	}
+	return ans;
+}
+
+int len[10][10];
+bool check(int k) {
+	memset(adj,0,sizeof adj);
+	for (int i=0;i<10;i++) {
+		for (int j=0;j<10;j++) adj[i][j] = (len[i][j]>=k);
+	}
+	return matching()==10;
+}
+void query(int a, int b) {
+	for (int i=0;i<10;i++) {
+		for (int j=0;j<10;j++) {
+			len[i][j] = lcp(hashs[i],a,hasht[j],b);
+		}
+	}
+	int low = 0;
+	int high = n+2-max(a,b);
+	while (high-low>1) {
+		int mid = (low+high)/2;
+		if (check(mid)) low = mid;
+		else high = mid;
+	}
+	check(low);
+	printf("%d ",low);
+	char ans[11];
+	memset(ans,0,sizeof ans);
+	for (int i=0;i<10;i++) ans[match[i]] = 'a'+i;
+	printf("%s\n",ans);
+}
+
+void solve() {
+	memset(hashs,0,sizeof hashs); memset(hasht,0,sizeof hasht);
+	scanf("%d%d",&n,&q);
+	for (int r=0;r<2;r++) {
+		for (int i=1;i<=n;i++) {
+			char c;
+			scanf(" %c",&c);
+			int j = c-'a';
+			for (int k=0;k<10;k++) hashs[k][i] = hashs[k][i-1];
+			hashs[j][i] = add(hashs[j][i],powB[i]);
+		}
+		swap(hashs,hasht);
+	}
+	while (q--) {
+		int a,b;
+		scanf("%d%d",&a,&b);
+		query(a,b);
+	}
+}
+
+int main() {
+	powB[0] = powI[0] = 1;
+	for (int i=1;i<125013;i++) powB[i] = mult(powB[i-1],BASE);
+	for (int i=1;i<125013;i++) powI[i] = mult(powI[i-1],INV);
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		solve();
+	}
+
+	return 0;
+}

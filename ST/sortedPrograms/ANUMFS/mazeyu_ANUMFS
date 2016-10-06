@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+#define N 500010
+using namespace std;
+bool t;
+double mii;
+int n,m,R[60],C[60],x[6000],y[6000];
+int sx[N],sy[N],a[2000][2000],f[2000][2000],l,r,fx;
+int mx,my,i,yy,xx,ln,j,tot,mix,miy,mfy,mfx,mij,k,g[N],Fx,Fy,X,Y;
+struct mj{int x,y,z;}b[N],q[N*20];
+struct mi{int R,V,num;}c[N];
+bool cmp(mi a,mi b){return a.R==b.R?a.V<b.V:a.R<b.R;}
+bool cmp1(mj a,mj b){return a.z<b.z;}
+bool Sendplane(int id, int x, int y) {
+    printf("%d %d %d\n", id, x, y);
+    fflush(stdout);
+    char temp[4];
+    scanf("%s", temp);
+    return temp[0]=='y';
+}
+void Init()
+{
+	scanf("%d",&n);
+	for(int i=1;i<=n;i++)scanf("%d%d",&x[i],&y[i]);
+	scanf("%d",&m);
+	for(int i=1;i<=m;i++)scanf("%d%d",&R[i],&C[i]);
+}
+int main()
+{
+	Init();srand(23333);
+	mx=my=yy=2e9;
+	for(i=1;i<=n;i++)
+	{
+		sx[i]=x[i];sy[i]=y[i];
+		mx=min(mx,sx[i]);my=min(my,sy[i]);
+	}
+	mx--;my--;
+	for(i=1;i<=m;i++)
+		c[i].R=R[i],c[i].V=C[i],c[i].num=i-1;
+	sort(c+1,c+m+1,cmp);
+	for(i=1;i<=n;i++)a[sx[i]-mx][sy[i]-my]=f[sx[i]-mx][sy[i]-my]=1;
+	f[0][0]=1;
+	for(l=r=1;l<=r;l++)
+	{
+		if(q[l].x)if(!f[q[l].x-1][q[l].y])f[q[l].x-1][q[l].y]=1,q[++r].x=q[l].x-1,q[r].y=q[l].y;
+		if(q[l].x<1100)if(!f[q[l].x+1][q[l].y])f[q[l].x+1][q[l].y]=1,q[++r].x=q[l].x+1,q[r].y=q[l].y;
+		if(q[l].y)if(!f[q[l].x][q[l].y-1])f[q[l].x][q[l].y-1]=1,q[++r].x=q[l].x,q[r].y=q[l].y-1;
+		if(q[l].y<1100)if(!f[q[l].x][q[l].y+1])f[q[l].x][q[l].y+1]=1,q[++r].x=q[l].x,q[r].y=q[l].y+1;
+	}
+	for(i=1;i<=1100;i++)
+		for(j=1;j<=1100;j++)
+			if((!f[i][j])||a[i][j])b[++tot].x=i,b[tot].y=j;
+	while(tot>1)
+	{
+		mii=2e9;
+		for(int tss=5;tss--;)
+		{
+			t=rand()%tot+1;
+			X=b[t].x;Y=b[t].y;
+			for(i=1;i<=tot;i++)
+				b[i].z=abs(b[i].x-X)+abs(b[i].y-Y);
+			sort(b+1,b+tot+1,cmp1);j=1;
+			for(i=1;i<=m;i++)
+			{
+				for(;b[j].z<=c[i].R&&j<=tot;j++);
+				fx=min(tot-j+1,j-1);
+				if(fx)if(log2((double)c[i].V+2)/fx<mii)mii=log2((double)c[i].V+2)/fx,mij=i,Fx=X,Fy=Y;
+			}
+		}
+		if(mii>=1e9)continue;
+		for(i=1;i<=tot;i++)
+			b[i].z=abs(b[i].x-Fx)+abs(b[i].y-Fy);
+		sort(b+1,b+tot+1,cmp1);
+		t=Sendplane(c[mij].num,Fx+mx,Fy+my);
+		if((!c[mij].R)&&t){tot=0;break;}
+		for(j=1;b[j].z<=c[mij].R&&j<=tot;j++);
+		if(t)tot=j-1;else
+		{
+			for(i=j;i<=tot;i++)swap(b[i-j+1],b[i]);
+			tot=tot-j+1;
+		}
+	}
+	if(tot)t=Sendplane(c[1].num,b[1].x+mx,b[1].y+my);
+	if(t)printf("%d %d %d\n",-1,b[1].x+mx,b[1].y+my);
+	else printf("%d %d %d\n",-1,-1,-1);
+}

@@ -1,0 +1,41 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <set>
+#include <cstring>
+#include <string>
+#define NMAX 5010
+
+using namespace std;
+typedef long long lli;
+
+lli dp[NMAX][NMAX];
+int N;
+
+pair<int,int> A[NMAX];
+
+
+int main(){
+	int t,i,k;
+
+	scanf("%d",&t);
+	while(t--){
+		scanf("%d",&N);
+		for(i = 0; i < N; ++i) scanf("%d",&A[i].second);
+		for(i = 0; i < N; ++i) scanf("%d",&A[i].first);
+		sort(A,A+N);
+
+		for(k = 1; k <= N; ++k) dp[N][k] = -(1e18);
+
+		for(i = N-1; i >= 0; --i){
+			for(k = 1; k <= N; ++k){
+				dp[i][k] = max(dp[i+1][k],dp[i+1][k-1]+A[i].second + A[i].first*1LL*(k-1));
+			}
+		}
+
+		for(k = 1; k <= N; ++k) printf("%lld ",dp[0][k]);
+		printf("\n");
+	}
+
+	return 0;
+}

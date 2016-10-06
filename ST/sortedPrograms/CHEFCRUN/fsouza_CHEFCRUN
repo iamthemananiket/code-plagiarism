@@ -1,0 +1,70 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+lint maxsubseq(const vector<int> &vals) {
+  lint result = 0, now = 0;
+  for (int v : vals) {
+    now = max(0LL, now + v);
+    result = max(result, now);
+  }
+  return result;
+}
+
+int main() {
+  int nt;
+  scanf("%d", &nt);
+  for (int test = 0; test < nt; ++test) {
+    int n;
+    scanf("%d", &n);
+    vector<int> next(n);
+    for (int i = 0; i < n; ++i)
+      scanf("%d", &next[i]);
+    int s, t;
+    scanf("%d %d", &s, &t), --s, --t;
+
+    rotate(next.begin(), next.begin()+s, next.end());
+    t -= s;
+    s = 0;
+
+    lint result = LLONG_MAX;
+
+    for (int inv = 0; inv < 2; ++inv) {
+      vector<lint> acc(n+1);
+      acc[0] = 0;
+      for (int i = 0; i < n; ++i)
+	acc[i+1] = acc[i] + next[i];
+
+      result = min(result, acc[t] + acc[n]);
+      result = min(result, acc[n] + acc[t] - 2 * maxsubseq(vector<int>(next.begin(), next.begin()+t)));
+
+      rotate(next.begin(), next.begin()+t, next.end());
+      s = (s-t+n)%n;
+      t = 0;
+      swap(s, t);
+    }
+
+    printf("%lld\n", result);
+  }
+
+  return 0;
+}

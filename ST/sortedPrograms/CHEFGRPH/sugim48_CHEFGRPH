@@ -1,0 +1,74 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u; ll V; int v; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+int pow_mod(ll x, ll n, int m) {
+	ll res = 1;
+	for (; n > 0; n >>= 1) {
+		if (n & 1) res = (res * x) % m;
+		x = (x * x) % m;
+	}
+	return res;
+}
+
+int main() {
+	ll n; int m, k;
+	cin >> n >> m >> k;
+	map<ll, vector<edge> > G;
+	G[n + 1];
+	map<ll, map<int, int> > mp;
+	while (k--) {
+		ll U, V; int u, v;
+		scanf("%lld%d%lld%d", &U, &u, &V, &v);
+		if (U == 0) mp[V][v] = (mp[V][v] + 1) % MOD;
+		else {
+			edge e = {u, V, v};
+			G[U].push_back(e);
+		}
+		G[V];
+	}
+	ll _i = 0; int sum = 1;
+	for (auto it = G.begin(); it != G.end(); it++) {
+		ll i = it->first;
+		vector<edge>& a = it->second;
+		map<int, int>& b = mp[i];
+		int x = (ll)sum * pow_mod(m, i - _i - 1, MOD) % MOD;
+		for (int j = 0; j < a.size(); j++) {
+			edge& e = a[j];
+			mp[e.V][e.v] = ((ll)mp[e.V][e.v] + x + b[e.u]) % MOD;
+		}
+		_i = i;
+		sum = (ll)(i <= n ? m : 1) * x % MOD;
+		for (auto _it = b.begin(); _it != b.end(); _it++)
+			sum = (sum + _it->second) % MOD;
+	}
+	cout << sum << endl;
+}

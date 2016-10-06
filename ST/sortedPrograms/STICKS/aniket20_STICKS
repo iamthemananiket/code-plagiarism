@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int mark[50005];
+vector<int>vals;
+int main()
+{
+	int t,i,j,x,n, area;
+	sc("%d",&t);
+	while(t--){
+		sc("%d",&n);
+		for(i=0;i<n;i++){
+			sc("%d",&x);
+			mark[x]++;
+		}
+		int fl=0;
+		for(i=50000;i>=1;i--){
+			if(mark[i]>=4 && vals.size()==0){
+				fl=1;
+				area=i*i;
+				break;
+			}
+			if(mark[i]>=2){
+				vals.pb(i);
+			}
+		}
+		if(fl==1){
+			pr("%d\n", area);
+		}
+		else if(vals.size()<2){
+			pr("-1\n");
+		}
+		else{
+			area = vals[0]*vals[1];
+			pr("%d\n", area);
+		}
+		vals.clear();
+		for(i=0;i<=50000;i++){
+			mark[i]=0;
+		}
+	}
+	return 0;
+}

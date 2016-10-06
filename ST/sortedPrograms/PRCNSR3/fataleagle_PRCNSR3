@@ -1,0 +1,115 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MOD=1000000007;
+const int MOD2=100000;
+int N, Q;
+vector<int> adj[100001];
+int in[100001];
+int out[100001];
+int now;
+int bit[100001];
+
+struct matrix
+{
+    int data[2][2];
+    matrix operator* (const matrix& other) const
+    {
+        matrix ret;
+        for(int i=0; i<2; i++)
+        {
+            for(int j=0; j<2; j++)
+            {
+                ret.data[i][j]=0;
+                for(int k=0; k<2; k++)
+                    ret.data[i][j]=(ret.data[i][j]+1LL*data[i][k]*other.data[k][j])%MOD2;
+            }
+        }
+        return ret;
+    }
+};
+
+int get(int n)
+{
+    matrix a;
+    for(int i=0; i<2; i++)
+        for(int j=0; j<2; j++)
+            a.data[i][j]=1;
+    a.data[1][1]=0;
+    matrix ret;
+    for(int i=0; i<2; i++)
+        for(int j=0; j<2; j++)
+            ret.data[i][j]=i==j;
+    while(n)
+    {
+        if(n&1)
+            ret=ret*a;
+        a=a*a;
+        n/=2;
+    }
+    matrix base;
+    base.data[0][0]=1, base.data[0][1]=0;
+    base.data[1][0]=0, base.data[1][1]=0;
+    return (ret*base).data[1][0];
+}
+
+void dfs(int u, int p)
+{
+    in[u]=++now;
+    for(auto& v: adj[u]) if(v!=p)
+        dfs(v, u);
+    out[u]=now;
+}
+
+void add(int x, int v)
+{
+    for(; x<=N; x+=x&-x)
+        bit[x]=(bit[x]+v)%MOD;
+}
+
+int sum(int x)
+{
+    int ret=0;
+    for(; x>0; x-=x&-x)
+        ret=(ret+bit[x])%MOD;
+    return ret;
+}
+
+int main()
+{
+    scanf("%d%d", &N, &Q);
+    for(int i=1; i<N; i++)
+    {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    for(int i=1; i<=N; i++)
+        add(i, 1);
+    dfs(1, 1);
+    int a, b, op;
+    while(Q--)
+    {
+        scanf("%d", &op);
+        if(op==0)
+        {
+            scanf("%d%d", &a, &b);
+            if(b%2==0)
+            {
+                b=1LL*get(b/2+1)*b%MOD;
+                add(in[a], b);
+            }
+        }
+        else
+        {
+            scanf("%d", &a);
+            int ans=sum(out[a])-sum(in[a]-1);
+            if(ans<0)
+                ans+=MOD;
+            printf("%d\n", ans);
+        }
+    }
+    return 0;
+}

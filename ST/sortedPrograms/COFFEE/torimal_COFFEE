@@ -1,0 +1,84 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, ll> pii;
+
+const int MAX_N = 5500;
+
+int n, K, d;
+ll m;
+ll a[MAX_N];
+ll s[MAX_N];
+
+int main() {
+  int T;
+  cin >> T;
+  while  (T--) {
+    cin >> n >> K >> d >> m;
+    for (int i = 1; i <= n; i++) {
+      cin >> a[i];
+    }
+    for (int i = 1; i <= n; i++) {
+      s[i] = a[i] + s[i - 1];
+    }
+    vector<vector<ll>> dp1;
+    vector<deque<pii>> dp2;
+    for (int i = 0; i <= K; i++) {
+      dp1.push_back(vector<ll>(n + 1, -1));
+      dp2.push_back(deque<pii>());
+    }
+    dp1[0][0] = 0;
+    dp2[0].push_back(pii(0, -m * s[1]));
+    for (int i = 1; i <= n; i++) {
+      for (int k = min(i, K); k >= 0; k--) {
+        if (dp1[k][i - 1] != -1) {
+          dp1[k][i] = dp1[k][i - 1] + a[i];
+        }
+        if (k > 0) {
+          dp1[k][i] = max(dp1[k][i],
+                          dp2[k - 1].front().second + m * s[i]);
+        }
+        while (!dp2[k].empty()
+               && dp2[k].front().first < i - d) {
+          dp2[k].pop_front();
+        }                
+        while (!dp2[k].empty()
+               && dp2[k].back().second <= dp1[k][i] - m * s[i + 1]) {
+          dp2[k].pop_back();
+        }
+        dp2[k].push_back(pii(i, dp1[k][i] - m * s[i + 1]));
+      }
+    }
+    cout << dp1[K][n] << endl;
+  }
+}

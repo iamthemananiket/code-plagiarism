@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+
+#define mp make_pair
+#define pb push_back
+#define sz(a) static_cast<int>((a).size())
+#define all(a) (a).begin(), (a).end()
+#define forn(i, n) for (int i = 0; i < n; ++i)
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+typedef vector<int> vi;
+typedef pair<int, int> edge;
+
+const ll mod = 1e9 + 7;
+
+void add(ll& a, ll b)
+{
+    a += b;
+    if (a >= mod) {
+        a -= mod;
+    }
+}
+
+void mult(ll& a, ll b)
+{
+    a *= b;
+    if (a >= mod) {
+        a %= mod;
+    }
+}
+
+ll binpow(ll a, ll n)
+{
+    if (!n) {
+        return 1;
+    }
+    ll ans = 1;
+    while (n) {
+        if (n & 1) {
+            mult(ans, a);
+        }
+        mult(a, a);
+        n >>= 1;
+    }
+    return ans;
+}
+
+int main()
+{
+
+    ios::sync_with_stdio(false);
+
+    //ifstream cin("input.txt");
+    //ofstream cout("division.out");
+
+    int tt;
+    cin >> tt;
+    while (tt--) {
+        int n, x;
+        ll m;
+        cin >> n >> x >> m;
+        vector<ll> a(n + 1);
+        for (int i = 1; i <= n; ++i) {
+            cin >> a[i];
+            if (a[i] >= mod) {
+                a[i] %= mod;
+            }
+        }
+        n = x;
+        ll c = 1;
+        ll ans = a[n];
+        for (int i = n - 1; i; --i) {
+            ll y = m + (ll)(n - i - 1);
+            ll z = n - i;
+            if (y % mod == 0) {
+                break;
+            }
+            y %= mod;
+            mult(c, y);
+            ll t = binpow(z, mod - 2);
+            mult(c, t);
+            ll r = c;
+            mult(r, a[i]);
+            add(ans, r);
+        }
+        cout << ans << "\n";
+    }
+
+}

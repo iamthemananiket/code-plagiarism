@@ -1,0 +1,49 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <set>
+#include <cstring>
+#include <string>
+
+using namespace std;
+typedef long long lli;
+
+lli pow2[100];
+int P2;
+lli pow3[100];
+int P3;
+lli powall[10000];
+int P;
+lli L,R;
+
+int main(){
+	int t;
+
+	P3 = 38;
+	P2 = 60;
+	pow2[0] = 1;
+	pow3[0] =1;
+	for(int i= 1; i <= P2; ++i) pow2[i] = pow2[i-1]*2LL;
+	for(int i =1; i <= P3; ++i) pow3[i] = pow3[i-1]*3LL;
+
+	lli lim = pow2[P2];
+
+	for(int i = 0; i <= P2; ++i){
+		for(int j = 0; j <= P3; ++j){
+			if(pow2[i] > lim/pow3[j]) break;
+			if(i == 0 && j) continue;
+			powall[P++] = pow2[i]*pow3[j];
+		}
+	}
+
+	sort(powall,powall+P);
+
+
+	scanf("%d",&t);
+	while(t--){
+		scanf("%lld%lld",&L,&R);
+		printf("%d\n",upper_bound(powall,powall+P,R)-lower_bound(powall,powall+P,L));
+	}
+
+	return 0;
+}

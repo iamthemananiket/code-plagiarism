@@ -1,0 +1,36 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+int main() {
+  const int maxn = 5000000;
+  vector<bool> possible(maxn+1, false);
+
+  for (int y = 1; y*y <= maxn; ++y)
+    for (int x = y+1; x*x + y*y <= maxn; ++x) {
+      int v = x*x + y*y;
+      for (int z = v; z <= maxn; z += v)
+	possible[z] = true;
+    }
+
+  int nt;
+  scanf("%d", &nt);
+  for (int t = 0; t < nt; ++t) {
+    int n;
+    scanf("%d", &n);
+    printf(possible[n] ? "YES\n" : "NO\n");
+  }
+  
+  return 0;
+}

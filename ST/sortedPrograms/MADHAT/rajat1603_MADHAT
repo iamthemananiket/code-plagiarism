@@ -1,0 +1,106 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int LN = 17;
+const int mod = 1e9 + 7;
+int add(int a , int b){
+    int res = a + b;
+    if(res >= mod){
+        return res - mod;
+    }
+    return res;
+}
+int mult(int a , int b){
+    long long res = a;
+    res *= b;
+    if(res >= mod){
+        return res % mod;
+    }
+    return res;
+}
+int power(int a , int b){
+    int res = 1;
+    while(b){
+        if(b & 1){
+            res = mult(res , a);
+        }
+        a = mult(a , a);
+        b >>= 1;
+    }
+    return res;
+}
+int fact[N + N];
+int ifact[N + N];
+void pre(){
+    fact[0] = 1;
+    for(int i = 1 ; i < N + N ; ++i){
+        fact[i] = mult(fact[i - 1] , i);
+    }
+    ifact[N + N - 1] = power(fact[N + N - 1] , mod - 2);
+    for(int i = N + N - 2 ; i >= 0 ; --i){
+        ifact[i] = mult(ifact[i + 1] , i + 1);
+    }
+}
+int ncr(int n , int r){
+    return mult(fact[n] , mult(ifact[r] , ifact[n - r]));
+}
+int t;
+int n;
+int arr[N];
+int nxt[N];
+int st[LN][N];
+int logtable[N];
+int query(int l , int r){
+    int k = logtable[r - l + 1];
+    return max(st[k][l] , st[k][r - (1 << k) + 1]);
+}
+int solve(int ql , int qr){
+    if(ql > qr){
+        return 1;
+    }
+    if(query(ql , qr) > qr + 1){
+        return 0;
+    }
+    int l = ql;
+    int r = qr;
+    while(l < r){
+        int mid = l + r >> 1;
+        if(query(ql , mid) > qr){
+            r = mid;
+        }
+        else{
+            l = mid + 1;
+        }
+    }
+    int idx = l + r >> 1;
+    if(nxt[idx] > qr + 1){
+        return 0;
+    }
+    return mult(mult(solve(ql , idx - 1) , solve(idx + 1 , qr)) , ncr(qr - ql , qr - idx));
+}
+int main(){
+    pre();
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d" , &n);
+        for(int i = 1 ; i <= n ; ++i){
+            scanf("%d" , arr + i);
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            nxt[i] = i + 1 + arr[i];
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            st[0][i] = nxt[i];
+        }
+        for(int i = 1 ; i < LN ; ++i){
+            for(int j = 1 ; j + (1 << i) - 1 <= n ; ++j){
+                st[i][j] = max(st[i - 1][j] , st[i - 1][j + (1 << (i - 1))]);
+            }
+        }
+        logtable[1] = 0;
+        for(int i = 2 ; i <= n ; ++i){
+            logtable[i] = logtable[i >> 1] + 1;
+        }
+        printf("%d\n" , solve(1 , n));
+    }
+}

@@ -1,0 +1,66 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <stdio.h>
+#include <math.h>
+#include <algorithm>
+using namespace std;
+
+#define long long long
+
+int nextInt() {
+	int n;
+	scanf("%d", &n);
+	return n;
+}
+
+long nextLong() {
+	long n;
+	scanf("%lld", &n);
+	return n;
+}
+
+long root(int i, long x) {
+	if (i == 1) {
+		return x;
+	}
+	long res = max((long) (1), (long) (pow(x, 1.0 / i)) - 1);
+	while (pow(res+1, i) <= x) {
+		res++;
+	}
+	return res;
+}
+
+const int MOD = (int) (1e9 + 7);
+const double EPS = 1e-9;
+
+int a[10005];
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; tt++) {
+		int n = nextInt();
+		int q = nextInt();
+		for (int i = 1; i <= n; i++) {
+			a[i] = (a[i-1] + ((nextInt() + MOD) % MOD)) % MOD;
+		}
+		for (int qq = 1; qq <= q; qq++) {
+			long x = nextLong();
+			int res = 0;
+			for (int i = 1; i <= n; i++) {
+				long v = root(i, x);
+				if (v == 1) {
+					res = (res + ((a[n] - a[i-1] + MOD) % MOD)) % MOD;
+					break;
+				} else {
+					res = (int) ((res + (((long) ((a[i] - a[i-1] + MOD) % MOD) * (v % MOD)) % MOD)) % MOD);
+				}
+			}
+			printf("%d", res);
+			if (qq == q) {
+				printf("\n");
+			} else {
+				printf(" ");
+			}
+		}
+	}
+	return 0;
+}

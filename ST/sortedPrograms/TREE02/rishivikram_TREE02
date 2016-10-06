@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+const int MAXN = 2e5+5;
+vector<int> adj[MAXN];
+int w[MAXN];
+pll dfs(int s, int par, ll X) {
+	if(w[s]>X) return {0,(int)1e9};
+	ll cur = w[s];
+	ll del=0;
+	vector< pll > S;
+	for(auto it:adj[s]) {
+		if(it==par) continue;
+		S.pb(dfs(it,s,X));
+	}
+	sort(all(S));
+	for(auto it:S) {
+		pll temp = it;
+		if(cur+temp.ff<=X) cur+=temp.ff;
+		else del++;
+		del+=temp.ss;
+	}
+	return {cur,del};
+}
+int main() {
+	// freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	int n,k;
+	cin>>n>>k;
+	for(int i=1;i<=n;i++) scanf("%d",&w[i]);
+	for(int i=1;i<n;i++) {
+		int x,y;
+		scanf("%d%d",&x,&y);
+		adj[x].pb(y);
+		adj[y].pb(x);
+	}
+	ll lo=0, hi=2e15;
+	ll ret=-1;
+	while(lo<=hi) {
+		ll mid = lo+(hi-lo+1)/2;
+		if(dfs(1,-1,mid).second>=k) lo=mid+1;
+		else ret=mid,hi=mid-1;
+	}
+	cout<<ret<<endl;
+	return 0;
+}

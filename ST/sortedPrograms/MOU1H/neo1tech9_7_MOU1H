@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+pair < pair <long long, long long> , long long > X[100005];
+string ss;
+long long SA[100005][25];
+long long t;
+long long sa[100005];
+long long lcp(long long x, long long y);
+long long step;
+long long n, as, am;
+int main(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(false);
+	cin >> t;
+	while(t--){
+		cin >> n;
+		cin >> as;
+		ss.clear();
+		for(long long i = 1; i < n; ++i){
+			cin >> am;
+			ss.push_back(char(101 + am - as));
+			as = am;
+		}
+		for(long long i = 0; i < ss.size(); ++i)
+			SA[i][0] = (long long)ss[i];
+	    step = 0;
+		for(long long cnt = 1; (cnt >> 1) < ss.size(); cnt <<= 1){
+			++step;
+			for(long long i = 0; i < ss.size(); ++i){
+				X[i].first.first = SA[i][step - 1];
+				X[i].first.second = i + cnt < ss.size() ? SA[i + cnt][step - 1] : - 1;
+				X[i].second = i;
+			}
+			sort(X, X + ss.size());
+			for(long long i = 0; i < ss.size(); ++i)
+			   SA[X[i].second][step] = i > 0 && X[i].first.first == X[i - 1].first.first && X[i].first.second == X[i - 1].first.second ? SA[X[i - 1].second][step] : i;
+		}
+		for(long long i = 0; i < ss.size(); ++i){
+			sa[SA[i][step]] = i;
+		}
+		long long ans = (long long)ss.size()*((long long)ss.size()+1LL)/2LL;
+		for(long long i = 1; i < ss.size(); ++i){
+			ans -= lcp(sa[i], sa[i - 1]);
+		}
+		cout << ans % 1000000009 << '\n';
+	}
+	return 0;
+}
+long long lcp(long long x, long long y){
+	long long ret = 0;
+	for(long long i = step; i >= 0; --i){
+		if(SA[x][i] == SA[y][i])
+			(x += 1 << i), (y += 1 << i), (ret += 1 << i);
+		if(x >= ss.size() || y >= ss.size())
+		break;
+	}
+	return ret;
+}

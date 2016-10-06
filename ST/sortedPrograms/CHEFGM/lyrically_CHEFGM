@@ -1,0 +1,49 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+typedef long long Int;
+
+int in() { int x; scanf("%d", &x); return x; }
+
+int K;
+int N[1010];
+int A[1010][110];
+
+int main() {
+	for (int TC = in(); TC--; ) {
+		K = in();
+		for (int i = 0; i < K; ++i) {
+			N[i] = in();
+			for (int j = 0; j < N[i]; ++j) {
+				A[i][j] = in();
+			}
+		}
+		for (int i = 0; i < K; ++i) {
+			sort(A[i], A[i] + N[i]);
+			N[i] = unique(A[i], A[i] + N[i]) - A[i];
+		}
+		Int ans = 0;
+		for (int i = 0; i < K; ++i) {
+			int head = 0;
+			for (int j = 0; j < N[i] && A[i][0] % 2 == A[i][j] % 2; ++j) {
+				++head;
+			}
+			Int tmp = ((A[i][0] % 2 != 0) ? -1 : +1) * ((Int)head << 45);
+			for (int j = head; j < N[i]; ++j) {
+				tmp += ((A[i][j] % 2 != 0) ? -1 : +1) * (1LL << (45 - (j - head + 1)));
+			}
+//printf(" %d %Lf\n",head,tmp/(long double)(1LL<<45));
+			ans += tmp;
+		}
+		if (ans < 0) {
+			puts("ODD");
+		} else if (ans > 0) {
+			puts("EVEN");
+		} else {
+			puts("DON'T PLAY");
+		}
+	}
+	return 0;
+}

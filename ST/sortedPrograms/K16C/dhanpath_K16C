@@ -1,0 +1,53 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll;
+
+int main() 
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+        
+        vector<ll>  fact(100010,0);
+        fact[0] = 1 ;
+        for( int i=1; i<100010; i++ )
+                fact[i] = ( fact[i-1] * i ) % 1000000007 ;
+        
+        int t;
+        cin >> t ;
+        while(t--)
+        {
+                int n ;
+                cin >> n ;
+                vector<int> a(n);
+                for( int i=0; i<n; i++ )
+                        cin >> a[i] ;
+                
+                sort( a.begin(), a.end() );
+                
+                if( a.back() < 0 )
+                {
+                        cout << a.back() << endl ;
+                        cout << fact[n] << endl ;
+                        for( auto &z: a )
+                                cout << z << ' ' ;
+                        cout << endl ;
+                        continue;
+                }
+                
+                int neg=0, pos=0 ;
+                ll sm=0;
+                for( int i=0; i<n; i++ )
+                        if( a[i] < 0 ) neg++;
+                        else  pos++,  sm = sm + a[i] ;
+                
+                cout << sm << endl ;
+                cout << ( fact[neg+1] * fact[pos] ) % 1000000007 << endl ;
+                for( auto &z: a )
+                        cout << z << ' ' ;
+                cout << endl ;
+        }
+        
+	return 0;
+}

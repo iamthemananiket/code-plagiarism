@@ -1,0 +1,38 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int tops[100100];
+
+int main()
+{
+    int t;
+    scanf("%d",&t);
+    while(t--)
+    {
+        int n;
+        scanf("%d",&n);
+        int siz = 0;
+        for(int i = 0;i<n;++i)
+        {
+            int pres;
+            scanf("%d",&pres);
+            int pos = upper_bound(tops,tops+siz,pres) - tops;
+            if(pos<siz)
+            {
+                tops[pos] = pres;
+            }
+            else
+            {
+                tops[siz++] = pres;
+            }
+        }
+        printf("%d ",siz);
+        for(int i = 0;i<siz;++i)
+        {
+            printf("%d ",tops[i]);
+        }
+        printf("\n");
+    }
+
+    return 0;
+}

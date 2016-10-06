@@ -1,0 +1,117 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 2000 + 2;
+
+struct node
+{
+    int x, y;
+
+    bool operator < (const node &A) const
+    {
+        int l1 = (y - x + 1);
+        int l2 = (A.y - A.x + 1);
+
+        if (l1 != l2)
+            return l1 < l2;
+        else
+            return x < A.x;
+    }
+};
+
+node V[MAX_N];
+char str[MAX_N];
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    ios_base::sync_with_stdio(false);
+
+    int T, N, K;
+
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N >> K;
+
+        for (int i = 0; i < N; ++i)
+            str[i] = 0;
+
+        for (int i = 0; i < K; ++i)
+        {
+            int x, y;
+            cin >> x >> y;
+
+            V[i] = {x, y};
+        }
+
+        sort(V, V + K);
+
+        for (int i = 0; i < K; ++i)
+        {
+            int x = V[i].x;
+            int y = V[i].y;
+
+            assert(str[x] != ')');
+            assert(str[y] != '(');
+
+            str[x] = '(';
+            str[y] = ')';
+        }
+
+        for (int i = 0; i < K; ++i)
+        {
+            int x = V[i].x;
+            int y = V[i].y;
+
+            int j = x;
+            int nrOpen = 0;
+
+            while (j <= y)
+            {
+                if (str[j] != 0)
+                {
+                    if (str[j] == '(')
+                        nrOpen++;
+                    else
+                        nrOpen--;
+
+                    assert(nrOpen >= 0);
+                }
+                else
+                {
+                    if (nrOpen > 0)
+                    {
+                        str[j] = ')';
+                        nrOpen--;
+                    }
+                    else
+                    {
+                        str[j] = '(';
+                        nrOpen++;
+                    }
+
+                    assert(nrOpen >= 0);
+                }
+
+                j++;
+            }
+
+            assert(nrOpen == 0);
+        }
+
+        for (int i = 0; i < N; ++i)
+            if (str[i] == 0)
+                str[i] = '(';
+
+        for (int i = 0; i < N; ++i)
+            cout << str[i];
+
+        cout << "\n";
+    }
+
+    return 0;
+}

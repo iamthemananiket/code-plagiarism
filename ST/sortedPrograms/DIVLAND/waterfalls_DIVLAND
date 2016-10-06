@@ -1,0 +1,138 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using std::string;
+
+static struct IO {
+	char tmp[1 << 10];
+
+	// fast input routines
+	char cur;
+	inline char nextChar() { return cur = getc_unlocked(stdin); }
+	inline char peekChar() { return cur; }
+
+	inline operator bool() { return peekChar(); }
+	inline static bool isBlank(char c) { return (c < '-' && c); }
+	inline bool skipBlanks() { while (isBlank(nextChar())); return peekChar() != 0; }
+
+	inline IO& operator >> (char & c) { c = nextChar(); return *this; }
+
+	inline IO& operator >> (char * buf) {
+		if (skipBlanks()) {
+			if (peekChar()) {
+				*(buf++) = peekChar();
+				while (!isBlank(nextChar())) *(buf++) = peekChar();
+			} *(buf++) = 0; } return *this; }
+
+	inline IO& operator >> (string & s) {
+		if (skipBlanks()) {	s.clear(); s += peekChar();
+			while (!isBlank(nextChar())) s += peekChar(); }
+		return *this; }
+
+	inline IO& operator >> (double & d) { if ((*this) >> tmp) sscanf(tmp, "%lf", &d); return *this;	}
+
+#define defineInFor(intType) \
+	inline IO& operator >>(intType & n) { \
+		if (skipBlanks()) { \
+			int sign = +1; \
+			if (peekChar() == '-') { \
+				sign = -1; \
+				n = nextChar() - '0'; \
+			} else \
+				n = peekChar() - '0'; \
+			while (!isBlank(nextChar())) { \
+				n += n + (n << 3) + peekChar() - 48; \
+			} \
+			n *= sign; \
+		} \
+		return *this; \
+	}
+
+defineInFor(int)
+defineInFor(unsigned int)
+defineInFor(long long)
+
+	// fast output routines
+
+	inline void putChar(char c) { putc_unlocked(c, stdout); }
+	inline IO& operator << (char c) { putChar(c); return *this; }
+	inline IO& operator << (const char * s) { while (*s) putChar(*s++); return *this; }
+
+	inline IO& operator << (const string & s) { for (int i = 0; i < (int)s.size(); ++i) putChar(s[i]); return *this; }
+
+	char * toString(double d) { sprintf(tmp, "%lf%c", d, '\0'); return tmp; }
+	inline IO& operator << (double d) { return (*this) << toString(d); }
+
+
+#define defineOutFor(intType) \
+	inline char * toString(intType n) { \
+		char * p = (tmp + 30); \
+		if (n) { \
+			bool isNeg = 0; \
+			if (n < 0) isNeg = 1, n = -n; \
+			while (n) \
+				*--p = (n % 10) + '0', n /= 10; \
+			if (isNeg) *--p = '-'; \
+		} else *--p = '0'; \
+		return p; \
+	} \
+	inline IO& operator << (intType n) { return (*this) << toString(n); }
+
+defineOutFor(int)
+defineOutFor(long long)
+
+#define endl ('\n')
+#define cout __io__
+#define cin __io__
+} __io__;
+
+using namespace std;
+
+long long cost[1000013];
+int st[4000013];
+int size;
+inline int left(int w) { return w<<1; }
+inline int right(int w) { return (w<<1)+1; }
+inline void build(int w, int L, int R) {
+    if (L==R) st[w] = L;
+    else {
+        build(left(w),L,(L+R)/2);
+        build(right(w),(L+R)/2+1,R);
+        st[w] = cost[st[left(w)]]>cost[st[right(w)]] ? st[left(w)] : st[right(w)];
+    }
+}
+inline void updateI(int w, int L, int R, int a, long long val) {
+    if (L==R) cost[a]+=val;
+    else {
+        if ((L+R)/2>=a) updateI(left(w),L,(L+R)/2,a,val);
+        if ((L+R)/2+1<=a) updateI(right(w),(L+R)/2+1,R,a,val);
+        st[w] = cost[st[left(w)]]>cost[st[right(w)]] ? st[left(w)] : st[right(w)];
+    }
+}
+
+int N,M;
+vector<pair<int,int> > adj[1000013];
+
+int main() {
+    cin >> N >> M;
+    register int a,b,c;
+    for (int i=0;i<M;i++) {
+        cin >> a >> b >> c;
+        adj[a].push_back(make_pair(b,c));
+        adj[b].push_back(make_pair(a,c));
+        cost[a]+=i%10+11;
+        cost[b]+=i%10+11;
+    }
+    size = N;
+    build(1,0,size-1);
+    for (int i=0;i<N/2;i++) {
+        int next = st[1];
+        updateI(1,0,size-1,next,-10000000000000000LL);
+        cout << next << ' ';
+        for (int j=0;j<adj[next].size();j++) updateI(1,0,size-1,adj[next][j].first,adj[next][j].second);
+    }
+    cout << '\n';
+
+    return 0;
+}

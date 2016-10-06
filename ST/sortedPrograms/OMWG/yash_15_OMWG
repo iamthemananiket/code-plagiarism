@@ -1,0 +1,12 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+	int tt,a,b;
+	cin >>tt;
+	while(tt--) {
+		cin >> a >> b;
+		cout<<(a*(b-1)+b*(a-1))<<"\n";
+	}
+	return 0;
+}

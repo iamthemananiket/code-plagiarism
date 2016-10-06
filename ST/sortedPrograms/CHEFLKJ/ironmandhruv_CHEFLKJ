@@ -1,0 +1,201 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ll long long int
+#define pb push_back
+#define mp make_pair
+#define INF (ll)(1e18)
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define sz(x) ((int) (x).size())
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i = 0;i < N;i++)
+#define frep(i,a,b) for(int i = a;i <= b;i++)
+#define pii pair<int , int>
+#define pll pair<ll , ll>
+#define vii vector<int>
+#define vpii vector< pii >
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcountll(x)
+#define print(A,j,k) for(int ii=j;ii<k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+#define SQRT 350
+#define CASES int t;cin>>t;while(t--)
+#define FILE freopen("inp.txt" , "r" , stdin);
+#define ld long double
+
+const int MOD = 1e9 + 7;
+const int N = 1e6 + 5;
+
+struct node {
+	int dominator;
+	unordered_map<int , int> M;
+	node () {
+		dominator = 0;
+		M.clear();
+	}
+};
+
+struct node tree[N];
+int A[N];
+
+void build(int node , int l , int r) {
+	
+	if (l > r)
+		return;
+
+	if (l == r) {
+		tree[node].M.clear();
+		tree[node].M[A[l]]++;
+		tree[node].dominator = A[l];
+		return;
+	}
+
+	int mid = (l + r)/2;
+	build(2 * node , l , mid);
+	build(2 * node + 1 , mid + 1 , r);
+
+	int sz = (r - l + 1);
+	sz = sz/2 + 1;
+	
+	for(auto it = tree[2 * node].M.begin();it != tree[2 * node].M.end();it++) {
+		tree[node].M[it -> ff] += it -> ss;
+		if (tree[node].M[it -> ff] >= sz) {
+			tree[node].dominator = it -> ff;
+		}
+	}
+	
+	for(auto it = tree[2 * node + 1].M.begin();it != tree[2 * node + 1].M.end();it++) {
+		tree[node].M[it -> ff] += it -> ss;
+		if (tree[node].M[it -> ff] >= sz) {
+			tree[node].dominator = it -> ff;
+		}
+	}
+
+	// cout << "range " << l << ' ' << r << ' ' << tree[node].dominator << '\n';
+
+}
+
+void update(int node , int l , int r , int x , int value , int prev) {
+	
+	if (l > r || l > x || r < x)
+		return;
+
+	if (l == r) {
+		assert(l == x);
+		A[l] = value;
+		tree[node].M.clear();
+		tree[node].M[A[l]]++;
+		tree[node].dominator = A[l];
+		return;
+	}
+
+	int mid = (l + r)/2;
+	update(2 * node , l , mid , x , value , prev);
+	update(2 * node + 1 , mid + 1 , r , x , value , prev);
+
+	int sz = (r - l + 1);
+	sz = sz/2 + 1;
+
+	tree[node].M[prev]--;
+	tree[node].M[value]++;
+
+	if (tree[2 * node].dominator) {
+		int pos = tree[2 * node].dominator;
+		if (tree[2 * node].M[pos] + tree[2 * node + 1].M[pos] >= sz) {
+			tree[node].dominator = pos;
+			return;
+		}
+	}
+	if (tree[2 * node + 1].dominator) {
+		int pos = tree[2 * node + 1].dominator;
+		if (tree[2 * node].M[pos] + tree[2 * node + 1].M[pos] >= sz) {
+			tree[node].dominator = pos;
+			return;
+		}
+	}
+
+	tree[node].dominator = 0;
+	// cout << ""
+
+}
+
+//dominator in subarray[a..b]
+vii checkNodes;
+void query(int node , int l , int r , int a , int b) {
+	
+	if (l > r || l > b || r < a || a > b) {
+		return ;		//invalid range
+	}
+
+	if (l >= a && r <= b) {
+		// cout << "range " << l << ' ' << r << '\n';
+		checkNodes.pb(node);
+		return;
+	}
+
+	int mid = (l + r)/2;
+	query(2 * node , l , mid , a , b);
+	query(2 * node  + 1, mid + 1 , r , a , b);
+
+}
+
+/*
+5 2
+2 1 2 1 2
+2 2 2
+2 2 5*/
+
+int main(int argc, char const *argv[])
+{
+	fast;
+
+	// FILE;
+
+	int n , q;
+	cin >> n >> q;
+
+	rep(i , n)
+		cin >> A[i + 1];
+
+	build(1 , 1 , n);
+
+	while (q--) {
+		int type , l , r;
+		cin >> type >> l >> r;
+		if (type == 1) {
+			update(1 , 1 , n , l , r , A[l]);
+		}
+		else {
+			bool found = false;
+			checkNodes.clear();
+			query(1 , 1 , n , l , r);
+			int req = 1 + (r - l + 1)/2;
+			rep(i , checkNodes.size()) {
+				// checkNodes checkNodes
+				// checkNodes checkNodes
+				int pos = tree[checkNodes[i]].dominator;
+				if (pos == 0)
+					continue;
+				int cnt = 0;
+				rep(j , checkNodes.size())
+					cnt += tree[checkNodes[j]].M[pos];
+				// cout << "number " << pos << " count " << cnt << '\n';
+				if (cnt >= req) {
+					cout << "Yes\n";
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+				cout << "No\n";
+		}
+	}
+
+	return 0;
+}

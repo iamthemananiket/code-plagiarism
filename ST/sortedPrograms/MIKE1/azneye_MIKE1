@@ -1,0 +1,87 @@
+/*
+ * Mike and Matrices
+ * File:   MIKE1.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on 2013-12-29, 12:34:47 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace MIKE1 {
+int a[555][555];
+int R, C;
+
+bool oob(int r, int c) {
+  return r < 1 || r > R || c < 0 || c > C;
+}
+void solve(int test_num) {
+  scanf("%d %d", &R, &C);
+  for (int r = 1; r <= R; r++)
+    for (int c = 1; c <= C; c++)
+      scanf("%d", a[r] + c);
+  int L;
+  scanf("%d", &L);
+  bool bad[2] = { false, false };
+  long long x = 0, y = 0;
+  for (int i = 0, r, c; i < L; i++) {
+    scanf("%d %d", &r, &c);
+    if (!oob(r, c))
+      x += a[r][c];
+    else
+      bad[0] = true;
+    if (!oob(c, r))
+      y += a[c][r];
+    else
+      bad[1] = true;
+  }
+  if (bad[0])
+    x = -1;
+  if (bad[1])
+    y = -1;
+  printf("%lld\n", max(x, y));
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  solve(1);
+}
+}
+
+int main() {
+  MIKE1::solve();
+  return 0;
+}

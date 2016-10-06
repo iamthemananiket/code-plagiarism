@@ -1,0 +1,66 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+typedef pair<int, char> i_c;
+struct edge { int v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 4;
+
+int main() {
+	vector<bool> p(100001, true);
+	vector<int> m(100001, 1);
+	for (int i = 2; i <= 100000; i++)
+		if (p[i]) {
+			for (int j = i; j <= 100000; j += i) {
+				p[j] = false;
+				m[j] *= -1;
+			}
+			for (ll j = (ll)i * i; j <= 100000; j += (ll)i * i)
+				m[j] = 0;
+		}
+	int N, K; cin >> N >> K;
+	vector<int> b(100001);
+	while (N--) {
+		int a; cin >> a;
+		b[a]++;
+	}
+	ll sum = 0;
+	for (int i = 1; i <= 100000; i++) {
+		if (!m[i]) continue;
+		ll x = 0;
+		for (int j = i; j <= 100000; j += i)
+			x += b[j];
+		ll y;
+		if (K == 1) y = x;
+		if (K == 2) y = x * (x - 1) / 2;
+		if (K == 3) y = x * (x - 1) * (x - 2) / 6;
+		sum += m[i] * y;
+	}
+	cout << sum << endl;
+}

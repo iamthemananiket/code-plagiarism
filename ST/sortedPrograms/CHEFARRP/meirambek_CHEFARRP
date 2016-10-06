@@ -1,0 +1,60 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 100500;
+int a[N], n;
+void solve() {
+	int ans = 0;
+	scanf("%d", &n);
+	for (int i = 1; i <= n; ++ i) {
+		scanf("%d", &a[i]);
+	}
+	for (int i = 1; i <= n; ++ i) {
+		ll sum = 0, prod = 1;
+		for (int j = i; j <= n; ++ j) {
+			sum += a[j];
+			prod *= a[j];
+			if (sum == prod) ++ans;
+		}
+	}
+	printf("%d\n", ans);
+}
+int main() {
+	#ifndef ONLINE_JUDGE
+	freopen(fname"in", "r", stdin);
+	freopen(fname"out", "w", stdout);
+	#endif
+
+	int test;
+
+	scanf("%d", &test);
+
+	while(test--) solve();
+
+	return 0;
+}

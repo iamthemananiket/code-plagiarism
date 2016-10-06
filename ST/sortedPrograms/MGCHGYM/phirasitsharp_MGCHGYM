@@ -1,0 +1,244 @@
+#include <stdio.h>
+#include <vector>
+#include <assert.h>
+
+using namespace std;
+
+const int N = 100010;
+const int K = 10;
+
+struct splay_tree {
+
+  struct node {
+    int w, size;
+    int val[K];
+    bool rev;
+    node *lf, *rg, *parent;
+    void propagate(void) {
+      if(rev == true) {
+        swap(lf, rg);
+        if(lf != NULL) lf->rev = (not lf->rev);
+        if(rg != NULL) rg->rev = (not rg->rev);
+      }
+      rev = false;
+    }
+    void fix(void) {
+      propagate();
+      for(int i = 0;i < K;i++) {
+        val[i] = 0;
+        if(lf != NULL) val[i] += lf->val[i];
+        if(rg != NULL) val[i] += rg->val[i];
+      }
+      val[w]++;
+      size = (lf != NULL ? lf->size : 0) + (rg != NULL ? rg->size : 0) + 1;
+    }
+    node(int _w) : w(_w), rev(false), 
+      lf(NULL), rg(NULL), parent(NULL) {}
+  };
+
+  node *head;
+
+  inline int get_size(node *p) {
+    return p == NULL ? 0 : p->size;
+  }
+  inline int size(void) {
+    return get_size(head);
+  }
+
+  void rotate(node *p) {
+    node *q = p->parent;
+    node *r = q->parent;
+    if(r != NULL) {
+      (r->lf == q ? r->lf : r->rg) = p;
+    }
+    p->parent = r;
+    if(q->lf == p) {
+      q->lf = p->rg;
+      if(q->lf != NULL) q->lf->parent = q;
+      p->rg = q;
+      p->rg->parent = p;
+    }else {
+      q->rg = p->lf;
+      if(q->rg != NULL) q->rg->parent = q;
+      p->lf = q;
+      p->lf->parent = p;
+    }
+    q->fix();
+    p->fix();
+  }
+  void splay(node *p) {
+    while(p->parent != NULL) {
+      node *q = p->parent;
+      node *r = q->parent;
+      if(r == NULL) {
+        rotate(p);
+      }else if((r->lf != NULL and r->lf->rg == p) or (r->rg != NULL and r->rg->lf == p)) {
+        rotate(p);
+        rotate(p);
+      }else {
+        rotate(q);
+        rotate(p);
+      }
+    }
+    head = p;
+  }
+
+  node* find(int val) {
+    if(val < 0 or (head == NULL or val > head->size)) {
+      return NULL;
+    }
+    node *p = head;
+    p->propagate();
+    while(get_size(p->lf) + 1 != val) {
+      if(val <= get_size(p->lf)) {
+        p = p->lf;
+      }else {
+        val -= get_size(p->lf) + 1;
+        p = p->rg;
+      }
+      p->propagate();
+    }
+    splay(p);
+    return p;
+  }
+  void insert(int w) {
+    if(head == NULL) {
+      head = new node(w);
+      head->fix();
+    }else {
+      node *p = find(size());
+      p->rg = new node(w);
+      p->rg->parent = p;
+      p->rg->fix();
+      splay(p->rg);
+    }
+  }
+  splay_tree split(int lf_sz) {
+    splay_tree nw_tree;
+    if(lf_sz == 0) {
+      nw_tree.head = head;
+      head = NULL;
+    }else if(lf_sz == size()) {
+      nw_tree.head = NULL;
+    }else {
+      node *p = find(lf_sz);
+      nw_tree.head = p->rg;
+      p->rg = (p->rg->parent = NULL);
+      p->fix();
+    }
+    return nw_tree;
+  }
+  void merge(splay_tree t) {
+    if(head == NULL) {
+      head = t.head;
+    }else if(t.head != NULL) {
+      node *p = find(size());
+      t.head->propagate();
+      p->rg = t.head;
+      p->rg->parent = p;
+      p->fix();
+      splay(p->rg);
+    }
+  }
+
+  // debugging tools
+  void dfs(node *p, int h = 0) {
+    if(p == NULL) return;
+    p->propagate();
+    dfs(p->lf, h + 1);
+    printf("%d ", p->w);
+    dfs(p->rg, h + 1);
+  }
+  void display(void) {
+    dfs(head);
+    printf("\n");
+  }
+
+  splay_tree(void) : head(NULL) {}
+};
+
+vector<int> weight;
+splay_tree tree;
+int p1[N], p2[N];
+int n, q;
+
+int id(int val) {
+  for(int i = 0;i < weight.size();i++) {
+    if(val == weight[i]) {
+      return i;
+    }
+  }
+  weight.push_back(val);
+  return (int) weight.size() - 1;
+}
+int cnt_solve = 0;
+bool solve(int *w, int target) {
+  cnt_solve++;
+  p1[0] = cnt_solve;
+  for(int i = 0;i < weight.size()-1 and (p1[target] != cnt_solve);i++) {
+    int val = weight[i];
+    int cnt = w[i];
+    for(int j = target;j >= 0;j--) {
+      if(p1[j] != cnt_solve) continue;
+      for(int k = 1;
+          k <= cnt and 
+          j + val * k <= target and 
+          (p1[j + val * k] != cnt_solve)
+          ;k++) {
+        p1[j + val * k] = cnt_solve;
+      }
+    }
+  }
+  int val = weight.back();
+  int cnt = w[weight.size()-1];
+  for(int i = 0;i <= cnt and target - i * val >= 0;i++) {
+    if(p1[target - i * val] == cnt_solve) {
+      return true;
+    }
+  }
+  return false;
+}
+int main() {
+  scanf("%d%d", &n, &q);
+  for(int i = 0;i < n;i++) {
+    int w;
+    scanf("%d", &w);
+    tree.insert(id(w));
+  }
+  while(q--) {
+    int type;
+    scanf("%d", &type);
+    if(type == 1) {
+      int idx, w;
+      scanf("%d%d", &idx, &w);
+      auto p = tree.find(idx);
+      p->w = id(w);
+      p->fix();
+    }else if(type == 2) {
+      int l, r;
+      scanf("%d%d", &l, &r);
+      auto t1 = tree.split(l-1);
+      auto t2 = t1.split(r-l+1);
+      /*
+      tree.display();
+      t1.display();
+      t2.display();
+      */
+      t1.head->rev = not t1.head->rev;
+      tree.merge(t1);
+      tree.merge(t2);
+    }else if(type == 3) {
+      int l, r, w;
+      scanf("%d%d%d", &l, &r, &w);
+      auto t1 = tree.split(l-1);
+      auto t2 = t1.split(r-l+1);
+      printf("%s\n", solve(t1.head->val, w) ? "Yes" : "No");
+      tree.merge(t1);
+      tree.merge(t2);
+    }else {
+      assert(false);
+    }
+    // tree.display();
+  }
+  return 0;
+}

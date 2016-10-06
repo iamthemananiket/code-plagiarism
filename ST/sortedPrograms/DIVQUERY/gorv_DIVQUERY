@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+vector<int> factorTable[100005];
+int main(){
+	int n,q;
+	cin>>n>>q;
+	for(int t=1;t<=n;t++){
+		int num;
+		cin>>num;
+		for(int i=1;i*i<=num;i++)
+		{
+			if(num%i==0)
+			{
+				factorTable[i].push_back(t);
+				if(i*i!=num)
+					factorTable[num/i].push_back(t);
+			}
+		}
+	}
+	while(q--)
+	{
+		int l,r,k;
+		cin>>l>>r>>k;
+		int leftPos =lower_bound(factorTable[k].begin(),factorTable[k].end(),l)-factorTable[k].begin();
+		int rightPos=upper_bound(factorTable[k].begin(),factorTable[k].end(),r)-factorTable[k].begin();
+		cout<<rightPos-leftPos<<"\n";
+	}
+}

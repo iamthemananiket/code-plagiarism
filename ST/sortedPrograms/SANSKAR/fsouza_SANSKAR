@@ -1,0 +1,102 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <cstring>
+#include <queue>
+#include <utility>
+#include <numeric>
+
+#define MAXN 21
+
+using namespace std;
+
+typedef long long lint;
+
+lint v[MAXN];
+
+vector<lint> state;
+vector< vector<lint> > states;
+lint each;
+bool ok;
+
+void hashit(vector<lint> &list) {
+  lint h = 0;
+  for (int i = 0; i < (int)list.size()-1; i++)
+    h = (131*h + list[i]) % 13107;
+  list.back() = h;
+}
+
+vector<lint> have, want;
+
+template<int step>
+void go(int i, int n, int gid, int k) {
+  if (i == n) {
+    if (step == 0) {
+      have = state;
+      sort(have.begin(), have.end()-1);
+      hashit(have);
+      swap(have.front(), have.back());
+      states.push_back(have);
+    } else {
+      for (int i = 0; i < k; i++)
+	want[i] = each - state[i];
+      sort(want.begin(), want.end()-1);
+      hashit(want);
+      swap(want.front(), want.back());
+      if (binary_search(states.begin(), states.end(), want))
+	ok = true;
+    }
+  } else {
+    for (int g = 0; g < k && g <= gid+1; g++)
+      if (state[g] + v[i] <= each) {
+	state[g] += v[i];
+
+	go<step>(i+1, n, max(gid, g), k);
+	if (step == 1 && ok) return;
+
+	state[g] -= v[i];
+      }
+  }
+}
+
+bool solve(int n, int k) {
+  lint sum = accumulate(v, v+n, 0LL);
+
+  if (sum%k) return false;
+  each = sum/k;
+
+  int half1 = min(n, max(2, (n)/2));
+  
+  ok = false;
+  state = vector<lint>(k+1, 0LL);
+  want = vector<lint>(k+1, 0LL);
+  have = vector<lint>(k+1, 0LL);
+
+  go<0>(0, half1, -1, k);
+  sort(states.begin(), states.end());
+  go<1>(half1, n, -1, k);
+
+  return ok;
+}
+
+int main() {
+  int nt;
+
+  scanf("%d", &nt);
+
+  for (int t = 0; t < nt; t++) {
+    int n, k;
+
+    scanf("%d %d", &n, &k);
+    for (int i = 0; i < n; i++)
+      scanf("%lld", &v[i]);
+
+    if (solve(n, k)) printf("yes\n");
+    else printf("no\n");
+  }
+  
+  return 0;
+}

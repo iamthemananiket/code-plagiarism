@@ -1,0 +1,30 @@
+#include <iostream>
+
+using namespace std;
+
+int n;
+
+int szum(int x) {
+    int ret(0);
+    while(x>0) {
+        ret += x%10;
+        x /= 10;
+    }
+    return ret;
+}
+
+int main()
+{
+    cin >> n;
+
+    int sol(0);
+    for(int i=0; i<=81; i++) {
+        int x = n - (i + szum(i));
+        if(x<0) continue;
+        sol += (szum(x) == i);
+    }
+
+    cout << sol << endl;
+
+    return 0;
+}

@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+char s[30][30];
+string ans;
+string route[30][30];
+bool visited[30][30];
+int dx[] = {-1, 0, 1, 0};
+int dy[] = {0, -1, 0, 1};
+char dir[] = {'D', 'R', 'U', 'L'};
+map<char, int> show;
+int n, m;
+bool isok(int x, int y) {
+	return (x >= 1 && x <= n && y >= 1 && y <= m);
+}
+int cx, cy;
+void getPos(int &x, int &y, string t) {
+	for(int i = 0 ; i < int(t.length()); i++) {
+		int newx = x + dx[show[t[i]]];
+		int newy = y + dy[show[t[i]]];
+		if(!isok(newx, newy) || s[newx][newy] == '*') continue;
+		x = newx;
+		y = newy;
+	}
+}
+int main() {
+	show['U'] = 0;
+	show['L'] = 1;
+	show['D'] = 2;
+	show['R'] = 3;
+	cin >> n >> m;
+	for(int i = 1; i <= n; i++) scanf("%s", s[i] + 1);
+	for(int i = 1; i <= n; i++) for(int j = 1; j <= m; j++) if(s[i][j] == 'C') cx  = i, cy = j;
+	queue<pair<int, int> > q;
+	q.push(make_pair(cx, cy));
+	visited[cx][cy] = true;
+	// cout << cx << " " << cy << endl;
+	while(!q.empty()) {
+		int x = q.front().first;
+		int y = q.front().second;
+		q.pop();
+		for(int i = 0; i < 4; i++) {
+			int newx = x + dx[i];
+			int newy = y + dy[i];
+			if(!isok(newx, newy) || visited[newx][newy] || s[newx][newy] == '*') continue;
+			visited[newx][newy] = true;
+			route[newx][newy] = route[x][y];
+			route[newx][newy].push_back(dir[i]);
+			q.push(make_pair(newx, newy));
+		}
+	}
+	for(int i = 1; i <= n; i++) for(int j = 1; j <= m; j++) reverse(route[i][j].begin(), route[i][j].end());
+	// for(int i = 1; i <= n; i++) for(int j = 1; j <= m; j++) cout << i << " " << j << " " << route[i][j] << endl;
+	for(int i = 1; i <= n; i++) {
+		for(int j = 1; j <= m; j++) {
+			if(s[i][j] == '*') continue;
+			int tmpi = i, tmpj = j;
+			getPos(tmpi, tmpj, ans);
+			ans += route[tmpi][tmpj];
+			// cout << i << " " << j << " " << ans << endl;
+		}
+	}
+	cout << ans << endl;
+}

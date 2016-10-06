@@ -1,0 +1,60 @@
+#include <iostream>
+
+#define mod 1000000007
+#define fact 100001
+
+using namespace std;
+
+char s[100001];
+int chg[100000];
+int chgv;
+
+char t[100001];
+
+int n,m,k;
+
+int main()
+{
+    cin >> s;
+    cin >> k;
+
+    for(n=0; s[n] != '\0'; n++) {}
+
+
+    for(int i=0; i<k; i++) {
+        cin >> t;
+        for(m=0; t[m] != '\0'; m++) {}
+        chgv = 0;
+
+        for(int i=1; i<m; i++) {
+            if(t[i-1] != t[i]) chg[chgv++] = i;
+        }
+
+        long long sol = 0;
+        int hamming = 0;
+        for(int i=0; i<m; i++) {
+            hamming += (s[i] != t[i]);
+        }
+        sol += hamming;
+
+        for(int i=1; i+m<=n; i++) {
+            sol = (sol*fact) % mod;
+
+            for(int j=0; j<chgv; j++) {
+                if(s[i-1+chg[j]] == t[chg[j]]) {
+                    hamming++;
+                } else {
+                    hamming--;
+                }
+            }
+            if(s[i-1] != t[0]) hamming--;
+            if(s[i+m-1] != t[m-1]) hamming++;
+
+            sol = (sol+hamming) % mod;
+        }
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

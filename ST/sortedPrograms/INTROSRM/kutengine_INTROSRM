@@ -1,0 +1,65 @@
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <ctime>
+#include <cctype>
+#include <climits>
+#include <cassert>
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <map>
+#include <set>
+#include <queue>
+#include <bitset>
+using namespace std;
+
+template <class T> inline void chkmin(T &a, T b) {
+	if (b < a) a = b;
+}
+template <class T> inline void chkmax(T &a, T b) {
+	if (a < b) a = b;
+}
+
+#define fi first
+#define se second
+#define pb push_back
+#define sz(x) ((int)(x).size())
+#define cnt1(x) __builtin_popcount(x)
+#define bit(x) (1 << (x))
+#define all(x) (x).begin(), (x).end()
+#define mset0(x) memset(x, 0, sizeof x)
+#define mset1(x) memset(x, -1, sizeof x)
+
+typedef long long LL;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+typedef vector<PII> VII;
+
+char s[2000005];
+int sn;
+
+void solve() {
+	int flg = 0;
+	LL n;
+	scanf("%lld", &n);
+	while (n) {
+		int tp = n % 10;
+		if (tp) flg = 1;
+		if (flg) s[sn++] = tp + '0';
+		n /= 10;
+	}
+	s[sn++] = '\n';
+}
+
+int main() {
+
+	int Tc;
+	for (scanf("%d", &Tc); Tc--; ) solve();
+	s[sn] = 0;
+	printf("%s\n", s);
+	
+	return 0;
+}

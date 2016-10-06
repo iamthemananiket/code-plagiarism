@@ -1,0 +1,17 @@
+#include<bits/stdc++.h>
+using namespace std;
+char s[100005];
+int main()
+{
+	int t,n;
+	cin>>t;
+	while(t--)
+	{
+		cin>>s;
+		n=strlen(s);
+		if(n%2==1 && s[n/2]=='W')
+			puts("Chef");
+		else
+			puts("Aleksa");
+	}
+}

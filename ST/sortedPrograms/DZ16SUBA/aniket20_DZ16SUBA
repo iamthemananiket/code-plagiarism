@@ -1,0 +1,111 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 1000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int tree[4*maxs];
+int arr[maxs];
+
+ll power(ll a,ll b){
+	ll t=1;
+	while(b>0){
+		if(b&1){
+			t=(t*a)%N;
+		}
+		a=(a*a)%N;
+		b>>=1;
+	}
+	return t;
+}
+
+void init(int node,int a,int b){
+	if(a>b){
+		return ;
+	}
+	if(a==b){
+		tree[node]=arr[a];
+		return;
+	}
+	init(node*2,a,(a+b)/2);
+	init(node*2+1,(a+b)/2+1,b);
+	tree[node]=(tree[node*2] | tree[node*2+1]);
+	
+}
+
+void update(int node,int a,int b,int i,int val){
+	if(a>b || a>i || b<i){
+		return ;
+	}
+	if(a>=i && b<=i){
+		tree[node]=val;
+		return ;
+	}
+	update(node*2,a,(a+b)/2,i,val);
+	update(node*2+1,(a+b)/2+1,b,i,val);
+	tree[node]=(tree[node*2] | tree[node*2+1]);
+}
+
+int query(int node,int a,int b,int i,int j){
+	if(a>b || b<i || a>j){
+		return 0;
+	}
+	if(a>=i && b<=j){
+		return tree[node];
+	}
+	int q1=query(node*2,a,(a+b)/2,i,j);
+	int q2=query(node*2+1,(a+b)/2+1,b,i,j);
+	return (q1|q2);
+}
+
+
+int main()
+{
+	int n,m,i,j,l,r,t;
+	sc("%d %d",&n,&m);
+	for(i=0;i<n;i++){
+		sc("%d",&arr[i]);
+	}
+	init(1,0,n-1);
+	for(i=0;i<m;i++){
+		sc("%d",&t);
+		if(t==1){
+			sc("%d %d",&l,&r);
+			ll q1=query(1,0,n-1,l-1,r-1);
+			q1=q1*power(2,(r-l));
+			q1%=N;
+			pr("%lld\n",q1);
+		}
+		else{
+			sc("%d %d",&l,&r);
+			update(1,0,n-1,l-1,r);
+		}
+	}
+	return 0;
+}

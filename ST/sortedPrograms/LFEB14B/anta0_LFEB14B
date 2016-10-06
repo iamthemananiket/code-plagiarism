@@ -1,0 +1,161 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <list>
+#include <cassert>
+#include <stack>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define EPS 1e-9
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii;
+typedef long long ll; typedef vector<long long> vl; typedef pair<long long,long long> pll; typedef vector<pair<long long,long long> > vpll;
+typedef vector<string> vs; typedef long double ld;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+template<typename T>T gcd(T x, T y) { return y == 0 ? x : gcd(y,x%y); }
+
+struct Ratio {
+	typedef ll T;
+	T x, y;
+	Ratio(): x(0), y(1) { }
+	Ratio(T x_): x(x_), y(1) { }
+	Ratio(T x_, T y_): x(x_), y(y_) { normalize(); }
+	double toDouble() { return double(x) / y; }
+	void normalize() {
+		T g = gcd(abs(x), abs(y));
+        if(g == 0) return;
+		x /= g; y /= g;
+		if(y < 0) x = -x, y = -y;
+		if(x == 0) y = 1;
+	}
+	bool operator==(const Ratio& q) const { return x == q.x && y == q.y; }
+	bool operator!=(const Ratio& q) const { return x != q.x || y != q.y; }
+	bool operator<(const Ratio& q) const { return x*q.y < y*q.x; }
+	bool operator<=(const Ratio& q) const { return x*q.y <= y*q.x; }
+	bool operator>(const Ratio& q) const { return x*q.y > y*q.x; }
+	bool operator>=(const Ratio& q) const { return x*q.y >= y*q.x; }
+	Ratio& operator+=(const Ratio& q) {
+		T g = gcd(y,q.y); x = q.y/g*x + y/g*q.x, y = y/g*q.y; normalize();
+		return *this;
+	}
+	Ratio& operator-=(const Ratio& q) {
+		T g = gcd(y,q.y); x = q.y/g*x - y/g*q.x, y = y/g*q.y; normalize();
+		return *this;
+	}
+	Ratio& operator*=(const Ratio& q) {
+		x = x*q.x, y = y*q.y; normalize();
+		return *this;
+	}
+	Ratio& operator/=(const Ratio& q) {
+		x = x*q.y, y = y*q.x; normalize();
+		return *this;
+	}
+	Ratio operator+(const Ratio& q) const { return Ratio(*this) += q; }
+	Ratio operator-(const Ratio& q) const { return Ratio(*this) -= q; }
+	Ratio operator*(const Ratio& q) const { return Ratio(*this) *= q; }
+	Ratio operator/(const Ratio& q) const { return Ratio(*this) /= q; }
+	Ratio operator-() const { return Ratio(-x, y); }
+};
+ostream& operator<<(ostream &o, const Ratio& p) { o << p.x << "/" << p.y; return o; }
+
+template<int MOD>
+struct ModInt {
+	static const int Mod = MOD;
+	unsigned x;
+	ModInt(): x(0) { }
+	ModInt(signed sig) { x = sig < 0 ? sig % MOD + MOD : sig % MOD; }
+	ModInt(signed long long sig) { x = sig < 0 ? sig % MOD + MOD : sig % MOD; }
+	int get() const { return (int)x; }
+	
+	ModInt &operator+=(ModInt that) { if((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator-=(ModInt that) { if((x += MOD - that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % MOD; return *this; }
+	ModInt &operator/=(ModInt that) { return *this *= that.inverse(); }
+	
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+	ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+	ModInt operator/(ModInt that) const { return ModInt(*this) /= that; }
+	
+	ModInt inverse() const {
+		long long a = x, b = MOD, u = 1, v = 0;
+		while(b) {
+			long long t = a / b;
+			a -= t * b; std::swap(a, b);
+			u -= t * v; std::swap(u, v);
+		}
+		return ModInt(u);
+	}
+	
+};
+typedef ModInt<1000000007> mint;
+
+vector<mint> fact, factinv;
+void nCr_computeFactinv(int N) {
+	N = min(N, mint::Mod - 1);
+	fact.resize(N+1); factinv.resize(N+1);
+	fact[0] = 1;
+	rer(i, 1, N) fact[i] = fact[i-1] * i;
+	factinv[N] = fact[N].inverse();
+	for(int i = N; i >= 1; i --) factinv[i-1] = factinv[i] * i;
+}
+mint nCr(int n, int r) {
+	if(n >= mint::Mod)
+		return nCr(n % mint::Mod, r % mint::Mod) * nCr(n / mint::Mod, r / mint::Mod);
+	return r > n ? 0 : fact[n] * factinv[n-r] * factinv[r];
+}
+
+int a[100000];
+ll sum[100000];
+int main() {
+	nCr_computeFactinv(100000);
+	int T;
+	scanf("%d", &T);
+	rep(ii, T) {
+		int n;
+		scanf("%d", &n);
+		rep(i, n) scanf("%d", &a[i]);
+		sort(a, a+n, greater<int>());
+		rep(i, n) sum[i] = (i == 0 ? 0 : sum[i-1]) + a[i];
+		Ratio maxavg = 0;
+		rer(k, 1, n) amax(maxavg, Ratio(sum[k-1], k));
+		mint ans = 0;
+		rer(k, 1, n) if(maxavg == Ratio(sum[k-1], k)) {
+			mint x = 1;
+			if(k != n && a[k-1] == a[k]) {
+				auto p = equal_range(a, a+n, a[k], greater<int>());
+				x = nCr(p.second - p.first, p.second - a - k);
+			}
+			ans += x;
+		}
+		printf("%d\n", ans.get());
+	}
+	return 0;
+}

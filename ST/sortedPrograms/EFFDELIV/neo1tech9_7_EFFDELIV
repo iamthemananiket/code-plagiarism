@@ -1,0 +1,240 @@
+#include <bits/stdc++.h>
+#include <assert.h>
+#define rf freopen("inp.in","r",stdin)
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, u, v, m, q, r, ql, qr, k, l, s, x, y, w, h, c, a, b, z, d;
+const int N = 1e5 + 510;
+const int LN = 20;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 57LL;
+const bool JUDGE = false;
+int Prev[N];
+vii adj[N];
+ll dist[N];
+ll dis[1002][1002];
+int Pre[1002][1002];
+int P[N], dep[N];
+int L[N][LN];
+vii cst[N];
+bool vis[N];
+vii kadj[N];
+set < pair < ll, int > > Q;
+pair < pii, pair < pii, int > > F[N];
+void dijkstra(int src, ll dist[], int Prev[]) {
+	for (int i = 1; i <= n; ++i) dist[i] = INF, Prev[i] = -1, P[i] = 0, vis[i] = false;;
+	Q.clear();
+	Q.insert(mp(0, src));
+	dist[src] = 0;
+	Prev[src] = -1;
+	while (Q.size()) {
+		int x = (*Q.begin()).snd;
+		Q.erase(Q.begin());
+		if (vis[x]) continue;
+		vis[x] = true;
+		P[x] = max(0, Prev[x]);
+		L[x][0] = P[x];
+		for (int i = 0; i < adj[x].size(); ++i) {
+			int u = adj[x][i];
+			if (dist[u] > dist[x] + cst[x][i]) {
+				dist[u] = dist[x] + cst[x][i];
+				Prev[u] = x;
+				Q.insert(mp(dist[u], u));
+			}
+		}
+	}
+}
+void dfs(int v, int depth) {
+	dep[v] = depth;
+	vis[v] = true;
+	for (int i = 0; i < kadj[v].size(); ++i) {
+		int u = kadj[v][i];
+		dfs(u, depth + 1);
+	}
+}
+vector < pair < string, int > > op;
+int lca(int u, int v) {
+	if (dep[u] > dep[v]) swap(u, v);
+	int diff = dep[v] - dep[u];
+	for (int i = 0; i < LN; ++i) {
+		if (diff & (1 << i)) v = L[v][i];
+	}
+	if (u == v) return u;
+	for (int i = LN - 1; i >= 0; --i) {
+		if (L[u][i] != L[v][i]) {
+			u = L[u][i];
+			v = L[v][i];
+		}
+	}
+	return L[u][0];
+}
+void printpath(int a, int b, int v, bool k) {
+	vii p, th;
+	int c = lca(a, b);
+	k = false;
+	int py = 0;
+	int alpha = 0, jj = 0;
+	if (c != s) {
+		int dd = c;
+		th.push_back(c);
+		while (P[dd] != 0) {
+			th.push_back(P[dd]);
+			dd = P[dd];
+		}
+		for (int i = th.size() - 2; i >= 0; --i) {
+			op.push_back(mp("0 ", th[i]));
+		}
+		dd = c;
+	}
+	if (a != c) {
+		p.push_back(a);
+		while (P[a] != c) {
+			p.push_back(P[a]);
+			a = P[a];
+		}
+		//cout << c << '\n';
+		for (int i = p.size() - 1; i >= 0; --i) {
+			op.push_back(mp("0 ", p[i]));
+		}
+		p.push_back(c);
+		op.push_back(mp("1 ", v));
+		for (int i = 1; i < p.size(); ++i) {
+			op.push_back(mp("0 ", p[i]));
+		}
+	}
+	else op.push_back(mp("1 ", v));
+	p.clear();
+	if (b != c) {
+		p.push_back(b);
+		while (P[b] != c) {
+			p.push_back(P[b]);
+			b = P[b];
+		}
+		for (int i = p.size() - 1; i >= 0; --i) {
+			op.push_back(mp("0 ", p[i]));
+		}
+		p.push_back(c);
+		op.push_back(mp("2 ", v));
+		for (int i = 1; i < p.size(); ++i) {
+			op.push_back(mp("0 ", p[i]));
+		}
+	}
+	else op.push_back(mp("2 ", v));
+	if (c != s) {
+		for (int i = 1; i < th.size(); ++i) {
+			op.push_back(mp("0 ", th[i]));
+		}
+	}
+}
+void print(int cur, int from, int to, int v) {
+	vii xy, yz;
+	int j = from;
+	//cout << "H\n";
+	while (from != cur) {
+		xy.push_back(from);
+		from = Pre[cur][from];
+		//cout << from << '\n';
+	}
+	for (int i = xy.size() - 1; i >= 0; --i) {
+		op.push_back(mp("0 ", xy[i]));
+	}
+	//cout << "H\n";
+	op.push_back(mp("1 ", v));
+	while (to != j) {
+		yz.push_back(to);
+		to = Pre[j][to];
+	}
+	//cout << "H\n";
+	for (int i = yz.size() - 1; i >= 0; --i) {
+		op.push_back(mp("0 ", yz[i]));
+	}
+	op.push_back(mp("2 ", v));
+	//cout << "H\n";
+}
+inline void _pre() {
+	for (int j = 1; j < LN; ++j) {
+		for (int i = 1; i <= n; ++i) {
+			L[i][j] = L[L[i][j - 1]][j - 1];
+		}
+	}
+}
+bool cmp(const pair < pii, pair < pii, int > > & a, const pair < pii, pair < pii, int > > & b) {
+	if (a.snd.fst.snd != b.snd.fst.snd && (abs(a.snd.fst.snd - b.snd.fst.snd) > 2000 && (max(a.snd.fst.snd, b.snd.fst.snd) > 2000) || n <= 1000))
+	return a.snd.fst.snd > b.snd.fst.snd;
+	else return dist[a.fst.fst] +  dist[a.fst.snd] - dist[lca(a.fst.fst, a.fst.snd)] < dist[b.fst.fst] + dist[b.fst.snd] - dist[lca(b.fst.fst, b.fst.snd)];
+}
+int main() {
+    csl;
+	cin >> n >> m;
+	for (int i = 0; i < m; ++i) {
+		cin >> u >> v >> c;
+		adj[u].push_back(v);
+		adj[v].push_back(u);
+		cst[v].push_back(c);
+		cst[u].push_back(c);
+	}
+	cin >> k;
+	for (int i = 1; i <= k; ++i) {
+		cin >> F[i].fst.fst >> F[i].fst.snd >> F[i].snd.fst.fst >> F[i].snd.fst.snd;
+		F[i].snd.snd = i;
+	}
+	cin >> s >> d >> w;
+	if (n <= 1000) {
+		for (int i = 1; i <= n; ++i) dijkstra(i, dis[i], Pre[i]);
+		int cur = s;
+		sort(F + 1, F + k + 1, cmp);
+		for (int i = 1; i <= k; ++i) {
+			int u = F[i].fst.fst;
+			int v = F[i].fst.snd;
+			if (F[i].snd.fst.fst <= w && dis[cur][u] + dis[u][v] <= d) {
+				print(cur, F[i].fst.fst, F[i].fst.snd, F[i].snd.snd);
+				//cout << "done\n";
+				d -= dis[cur][u] + dis[u][v];
+				/*cout << cur << ' ' << u << " "  << dis[cur][u] << '\n';
+				cout << v << " " << dis[u][v] << '\n';*/
+				cur = v;
+				if (op.size() > (int)1e7) break;
+			}
+		}
+		cout << op.size() << '\n';
+		for (int i = 0; i < op.size(); ++i) {
+		cout << op[i].fst << op[i].snd << '\n';
+		}
+		return 0;
+	}
+	dijkstra(s, dist, Prev);
+	for (int i = 1; i <= n; ++i) kadj[P[i]].push_back(i);
+	memset(vis, false, sizeof(vis));
+	P[s] = 0;
+	dfs(s, 0);
+	//cout << "done\n";
+	_pre();
+	//cout << "done\n";
+	sort(F + 1, F + k + 1, cmp);
+	for (int i = 1; i <= k; ++i) {
+		if (!vis[F[i].fst.fst] || !vis[F[i].fst.snd]) continue;
+		if (F[i].snd.fst.fst <= w && 2 * dist[F[i].fst.fst] + 2 * dist[F[i].fst.snd] - (2 * dist[lca(F[i].fst.fst, F[i].fst.snd)]) <= d) {
+			printpath(F[i].fst.fst, F[i].fst.snd, F[i].snd.snd, false);
+			//cout << "done\n";
+			d -= 2 * dist[F[i].fst.fst] + 2 * dist[F[i].fst.snd] - (2 * dist[lca(F[i].fst.fst, F[i].fst.snd)]);
+			if (op.size() > (int)1e7) break;
+		}
+	}
+	cout << op.size() << '\n';
+	for (int i = 0; i < op.size(); ++i) {
+		cout << op[i].fst << op[i].snd << '\n';
+	}
+	return 0;
+}

@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void eval()
+{
+	int n,m,k,d;
+	cin>>n>>k>>d>>m;
+	pair<long long ,long long> temp=make_pair(-1,-1);
+	vector<vector<pair<long long,long long> > > dp(n+1,vector<pair<long long,long long> > (k+1,temp));
+	
+	vector<long long> a(n+1);
+	vector<long long> cf(n+1);
+	
+	
+	for(int i=1;i<=n;i++)
+		cin>>a[i];
+	for(int i=1;i<=n;i++)
+		cf[i]=cf[i-1]+a[i];
+	
+	for(int i=1;i<=n;i++)
+	 	dp[i][0]=make_pair(cf[i],cf[i]);
+	dp[0][0]=make_pair(0,0);
+	for(int i=1;i<=n;i++)
+	 {
+	 	for(int breakNo=1;breakNo<=k;breakNo++)
+	 	 {
+	 	 		dp[i][breakNo].first=dp[i-1][breakNo-1].second;
+	 	 		
+	 	 		dp[i][breakNo].second=dp[i-1][breakNo-1].second;
+	 	 		
+				for(int j=i-1;j>=breakNo;j--)
+	 	 		 {
+	 	 		 	if(dp[j][breakNo]==temp)
+	 	 		 	  break;
+	 	 		 	long long value=dp[j][breakNo].first;
+	 	 		 	int k=j+d;
+	 	 		 	if(k>i)
+	 	 		 	  k=i;
+	 	 		 	value+=(cf[k]-cf[j])*m;
+	 	 		 	value+=(cf[i]-cf[k]);
+	 	 		 	dp[i][breakNo].second=max(dp[i][breakNo].second,value);
+	 	 		 	
+				 }
+				 
+//			cerr<<dp[i][breakNo].first<<","<<dp[i][breakNo].second<<" ";
+		 }
+//		cerr<<endl;
+	 }
+	 cout<<dp[n][k].second<<endl;
+	
+	
+}
+
+int main()
+{
+	//freopen("in.txt","r",stdin);
+	int t;
+	cin>>t;
+	while(t--)
+	 {
+	 	eval();
+	 }
+}

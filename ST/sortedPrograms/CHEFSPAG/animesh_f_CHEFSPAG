@@ -1,0 +1,82 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 20;
+const int MAX = 100 + 100 + 1;
+const int MOD = 1e9 + 9;
+const int INF = 10000;
+
+int t, n, a, b, c, d;
+int dp[MAX];
+int x[N], y[N];
+
+inline int add(int x, int y){
+    int res = x + y;
+    return (res % MOD);
+}
+
+inline int prod(int x, int y){
+    return (1LL * x * y) % MOD;
+}
+
+struct Point{
+    int x, y;
+};
+
+inline bool onSegment(Point p, Point q, Point r){
+    if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) && q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
+        return true;
+    return false;
+}
+
+inline int orientation(Point p, Point q, Point r){
+    int val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+    if (val == 0) return 0;
+    return (val > 0)? 1: 2;
+}
+
+inline bool isInside(Point arr[], int n, Point p){
+    for(int i = 0; i < n; i++){
+        if(orientation(arr[i] , arr[(i + 1) % n] , p) == 0){
+            if(onSegment(arr[i], p, arr[(i + 1) % n]))
+                return true;
+        }
+    }
+    int j = n - 1;
+    bool ok = false;
+    for(int i = 0; i < n; i++){
+        if((arr[i].y < p.y && arr[j].y >= p.y || arr[j].y < p.y && arr[i].y >= p.y) && (arr[i].x <= p.x || arr[j].x <= p.x)){
+            if(arr[i].x + 1.0 * (p.y - arr[i].y) / (arr[j].y - arr[i].y) * (arr[j].x - arr[i].x) < p.x)
+                ok = !ok;
+        }
+        j = i;
+    }
+    return ok;
+}
+
+
+int main(){
+    ios :: sync_with_stdio(false);
+    cin >> t;
+    while(t--){
+        cin >> n >> a >> b >> c >> d;
+        cin >> dp[0] >> dp[1] >> dp[2] >> dp[3];
+        for(int i = 4; i < MAX; i++){
+            dp[i] = add(prod(a, dp[i - 1]), add(prod(b, dp[i - 2]), add(prod(c, dp[i - 3]), prod(d, dp[i - 4]))));
+        }
+        Point P[n];
+        for(int i = 0; i < n; i++){
+            cin >> P[i].x >> P[i].y;
+        }
+        int ans = 0;
+        for(int i = 0; i < MAX; i++){
+            for(int j = 0; j < MAX; j++){
+                Point temp; temp.x = i; temp.y = j;
+                if(isInside(P, n, temp)){
+                    ans = add(ans, dp[i + j]);
+                }
+            }
+        }
+        cout << (ans) << '\n';
+    }
+}

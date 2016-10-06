@@ -1,0 +1,88 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 2;
+
+void visit(const vector<vector<int> > &g, int v, vector< vector<int> >& scc,
+        vector<int> &S, vector<char> &inS,
+        vector<int> &low, vector<int> &num, int& time) {
+    low[v] = num[v] = ++time;
+    S.push_back(v); inS[v] = true;
+	for (int i = 0; i < g[v].size(); i++) {
+        int w = g[v][i];
+        if (num[w] == 0) {
+            visit(g, w, scc, S, inS, low, num, time);
+            low[v] = min(low[v], low[w]);
+        } else if (inS[w])
+            low[v] = min(low[v], num[w]);
+    }
+    if (low[v] == num[v]) {
+        scc.push_back(vector<int>());
+        while (1) {
+            int w = S.back(); S.pop_back(); inS[w] = false;
+            scc.back().push_back(w);
+            if (v == w) break;
+        }
+    }
+}
+void stronglyConnectedComponents(const vector<vector<int> >& g,
+        vector< vector<int> >& scc) {
+    const int n = g.size();
+    vector<int> num(n), low(n);
+    vector<int> S;
+    vector<char> inS(n);
+    int time = 0;
+    for (int u = 0; u < n; u++) if (num[u] == 0)
+        visit(g, u, scc, S, inS, low, num, time);
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		vector<vector<int> > g(N), scc;
+		for (int i = 0; i < N; i++) {
+			string s; cin >> s;
+			for (int j = 0; j < N; j++)
+				if (s[j] == '1')
+					g[i].push_back(j);
+		}
+		stronglyConnectedComponents(g, scc);
+		vector<int> v;
+		for (int k = scc.size() - 1; k >= 0; k--) {
+			sort(scc[k].begin(), scc[k].end());
+			for (int l = 0; l < scc[k].size(); l++)
+				v.push_back(scc[k][l]);
+		}
+		for (int i = 0; i < N; i++)
+			cout << v[i] + 1 << (i + 1 < N ? ' ' : '\n');
+	}
+}

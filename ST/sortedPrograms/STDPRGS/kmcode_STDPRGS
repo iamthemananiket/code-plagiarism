@@ -1,0 +1,161 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+set<int> s;
+int countt[1000002];
+int a[500002];
+struct st {
+	int l;
+	int r;
+	int ind;
+	st(int l_, int r_,int ind_) {
+		l = l_;
+		r = r_;
+		ind = ind_;
+	}
+};
+int unit = 220;
+vector<st> v;
+bool cmp(st a, st b) {
+	if (a.l / unit == b.l / unit) {
+		//cout << a.r << " " << b.r << endl;
+		return a.r < b.r;
+
+	}
+	else {
+		return (a.l / unit) < (b.l / unit);
+	}
+}
+long long int ans = 0;
+set<int>::iterator ite;
+void push(int num) {
+	if (countt[num]) {
+		countt[num]++;
+		return;
+	}
+	countt[num] = 1;
+	if (s.size() == 0) {
+		s.insert(num);
+		return;
+	}
+	ite = s.upper_bound(num);
+	if (ite == s.end()) {
+		ite--;
+		ans += (long long int)((*ite) - num)*(long long int)((*ite) - num);
+		s.insert(num);
+		return;
+	}
+	if (ite == s.begin()) {
+		ans += (long long int)((*ite) - num)*(long long int)((*ite) - num);
+		s.insert(num);
+		return;
+	}
+	long long int val1 = (*ite);
+	ite--;
+	long long int val2 = (*ite);
+	ans -= (val1 - val2)*(val1 - val2);
+	ans += (val1 - num)*(val1 - num);
+	ans += (val2 - num)*(val2 - num);
+	s.insert(num);
+	return;
+}
+void er(long long int num) {
+	countt[num]--;
+	if (countt[num]) {
+		return;
+	}
+	if (s.size() == 1) {
+		s.erase(num);
+		return;
+	}
+	ite = s.lower_bound(num);
+	if (ite == s.begin()) {
+		ite++;
+		ans -= ((*ite) - num)*((*ite) - num);
+		s.erase(num);
+		return;
+	}
+	long long int val1 = 0;
+	ite--;
+	val1 = (*ite);
+	ite++;
+	ite++;
+	long long int val2 = -1;
+	if (ite != s.end()) {
+		val2 = (*ite);
+	}
+	s.erase(num);
+	ans -= (val1 - num)*(val1 - num);
+	if (val2 != -1) {
+		ans -= (val2 - num)*(val2 - num);
+		ans += (val1 - val2)*(val1 - val2);
+	}
+}
+long long int anss[50002];
+int main() {
+	int n, m;
+	scanf("%d", &n);
+	for (int i = 0;i < n;i++) {
+		scanf("%d", &a[i]);
+	}
+	scanf("%d", &m);
+	for (int i = 0;i < m;i++) {
+		int l, r;
+		scanf("%d%d", &l, &r);
+		l--;
+		r--;
+		v.push_back(st(l, r,i));
+	}
+	sort(v.begin(), v.end(), cmp);
+	int l = v[0].l;
+	int r = v[0].l;
+	push(a[l]);
+	for (int i = 0;i < v.size();i++) {
+		while (r < v[i].r) {
+			push(a[r + 1]);
+			r++;
+		}
+		while (l > v[i].l) {
+			push(a[l-1]);
+			l--;
+		}
+		while (r > v[i].r) {
+			er(a[r]);
+			r--;
+		}
+		while (l < v[i].l) {
+			er(a[l]);
+			l++;
+		}
+		anss[v[i].ind] = ans;
+	}
+	for (int i = 0;i < m;i++) {
+		printf("%lld\n", anss[i]);
+	}
+	return 0;
+}

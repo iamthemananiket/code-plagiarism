@@ -1,0 +1,181 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second 
+
+typedef pair<int,int> ii;
+
+const int inf=1e9+10;
+const int N=35005,M=400;
+
+int n,test;
+vector <int> v[N];
+int h[N];
+int in[N],out[N];
+int per[N<<1];
+int w[N];
+int lv[N];
+int pa[N][18];
+int _fmi[N][18];
+int _fma[N][18];
+int ans[N];
+int p[N],posw[N];
+
+int LCA(int x,int y){
+	if (lv[x]<lv[y]) swap(x,y);
+	for(int i=0,val=lv[x]-lv[y];val;i++,val>>=1) if (val&1)
+		x=pa[x][i];
+	if (x==y) return x;
+	for(int i=int(log2(lv[x]));i>=0;i--) if (pa[x][i]!=pa[y][i])
+		x=pa[x][i],y=pa[y][i];
+	return pa[x][0]; 
+}
+int query2(int x,int y){
+	int z=LCA(x,y);
+	int ansmax=0;
+	int ansmin=inf;
+	for(int i=0,val=lv[x]-lv[z]+1;val;i++,val>>=1) if (val&1){
+		ansmax=max(ansmax,_fma[x][i]);
+		ansmin=min(ansmin,_fmi[x][i]);
+		x=pa[x][i];
+	}
+	for(int i=0,val=lv[y]-lv[z]+1;val;i++,val>>=1) if (val&1){
+		ansmax=max(ansmax,_fma[y][i]);
+		ansmin=min(ansmin,_fmi[y][i]);
+		y=pa[y][i];
+	}
+	return ansmax-ansmin;
+}	
+int s[N];
+void DFS(){
+	int top=1,n1=0;
+	s[1]=1;
+	while (top){
+		int x=s[top];
+		if (!h[x]){
+			per[n1]=x;
+			in[x]=n1++;
+		}
+		if (h[x]==v[x].size()){
+			per[n1]=x;
+			out[x]=n1++;
+			top--;
+			continue;
+		}
+		int y=v[x][h[x]++];
+		if (y==pa[x][0]) continue;
+		pa[y][0]=x;
+		lv[y]=lv[x]+1;
+		s[++top]=y;
+	}
+}
+vector <ii> imp[M];
+ii q[N];
+bool comp(int x,int y){
+	return w[x]<w[y];
+}
+void prepare(){
+	scanf("%d",&n);
+	for(int i=1;i<=n;i++) scanf("%d",w+i);
+	for(int i=1;i<=n;i++) p[i]=i;
+	sort(p+1,p+n+1,comp);
+	for(int i=1;i<=n;i++) posw[p[i]]=i;
+	for(int i=1;i<=n;i++) p[posw[i]]=w[i];
+	///
+	for(int i=1;i<n;i++){
+		int x,y;
+		scanf("%d%d",&x,&y);
+		v[x].push_back(y);
+		v[y].push_back(x);
+	}
+	DFS();
+	for(int i=1;i<=n;i++) _fmi[i][0]=_fma[i][0]=w[i];
+	for(int lay=1;lay<18;lay++){
+		for(int i=1;i<=n;i++) {
+			pa[i][lay]=pa[pa[i][lay-1]][lay-1];
+			_fmi[i][lay]=min(_fmi[i][lay-1],_fmi[pa[i][lay-1]][lay-1]);
+			_fma[i][lay]=max(_fma[i][lay-1],_fma[pa[i][lay-1]][lay-1]);
+		}
+	}
+	for(int i=0;i<M;i++) imp[i].push_back(ii(i*M-1,0));
+	scanf("%d",&test);
+	for(int i=1;i<=test;i++){
+		int x,y;
+		char ch;
+		scanf("\n%c%d%d",&ch,&x,&y);
+		if (ch=='F'){
+			ans[i]=query2(x,y);
+			continue;
+		}
+		if (in[x]>in[y]) swap(x,y);
+		int z=LCA(x,y);
+		if (x==z) q[i]=ii(out[y],out[x]);
+		else q[i]=ii(out[x],in[y]);
+		imp[q[i].X/M].push_back(ii(q[i].Y,i));
+	}
+	for(int i=0;i<M;i++) sort(imp[i].begin(),imp[i].end());
+}
+struct segtree{
+	ii b[N<<2];
+	int best[N<<2],exist[N];
+	void build(int node,int L,int R){
+		best[node]=inf;
+		b[node]=ii(inf,-inf);
+		if (L==R) return;
+		build(node*2,L,(L+R)/2);
+		build(node*2+1,(L+R)/2+1,R);
+	}
+	void update(int node,int L,int R,int idx){
+		if (L>idx||R<idx) return;
+		if (L==R){
+			exist[idx]^=1;
+			if (!exist[idx]) b[node]=ii(inf,-inf);
+			else b[node]=ii(p[idx],p[idx]);
+			return;
+		}
+		update(node*2,L,(L+R)/2,idx);
+		update(node*2+1,(L+R)/2+1,R,idx);
+		best[node]=min(best[node*2],best[node*2+1]);
+		if (b[node*2].Y!=-inf&&b[node*2+1].X!=inf) 
+			best[node]=min(best[node],b[node*2+1].X-b[node*2].Y);
+		b[node]=ii(min(b[node*2].X,b[node*2+1].X),max(b[node*2].Y,b[node*2+1].Y));
+	}
+	void modified(int pos){
+		int x=per[pos];
+		update(1,1,n,posw[x]);
+	}
+	void reset(){
+		build(1,1,n);
+		memset(exist,0,sizeof(exist));
+	}
+}mseg;
+
+void solve(){
+	for(int cur=0;cur<M;cur++) if (imp[cur].size()>1){
+		mseg.reset();
+		for(int j=1,R=(cur+1)*M;j<imp[cur].size();j++){
+			int idx=imp[cur][j].Y;
+			for(int i=imp[cur][j-1].X+1;i<=imp[cur][j].X;i++)
+				mseg.modified(i);
+			for(int re=cur*M;re<q[idx].X;re++)
+				mseg.modified(re);
+			int x=per[q[idx].X],y=per[q[idx].Y];
+			int z=LCA(x,y);
+			if (y!=z) mseg.modified(in[z]);
+			// cout<<idx<<" "<<mseg.best[1]<<"\n";
+			// for(int j=1;j<=n;j++) cout<<mseg.exist[j]<<" \n"[j==n];
+			ans[idx]=mseg.best[1];
+			if (y!=z) mseg.modified(in[z]);
+			for(int re=cur*M;re<q[idx].X;re++)
+				mseg.modified(re);
+		}
+	}
+	for(int i=1;i<=test;i++) printf("%d\n",ans[i]);
+}
+int main(){
+	// freopen("input.inp","r",stdin);
+	prepare();
+	solve();
+}

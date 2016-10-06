@@ -1,0 +1,38 @@
+#include <algorithm>
+#include <climits>
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <queue>
+#include <set>
+#include <string>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> i_i;
+int MOD = 1000000007;
+
+ll f(vector<int>& a) {
+	int n = a.size();
+	sort(a.begin(), a.end());
+	ll sum = 0;
+	for (int i = 0; i < n; i++)
+		sum += (ll)(i * 2 - n + 1) * a[i];
+	return sum;
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		vector<int> a(N);
+		for (int i = 0; i < N; i++)
+			cin >> a[i];
+		vector<int> b;
+		for (int i = 0; i < N; i++)
+			for (int j = i + 1; j < N; j++)
+				b.push_back(a[i] + a[j]);
+		cout << f(b) * 2 - f(a) * (N - 2) * 2 << endl;
+	}
+}

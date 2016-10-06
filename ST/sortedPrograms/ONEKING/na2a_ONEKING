@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+
+#define F first
+#define S second
+
+#define mp make_pair
+#define pb push_back
+
+#define llong long long
+
+using namespace std;
+
+const int MXN = (int) 2e5 + 7;
+const int INF = (int) 1e9 + 7;
+
+int t, n, k;
+int smin[MXN];
+
+bool del[MXN];
+
+pair<int, int> a[MXN];
+
+int main() {
+    scanf("%d", &t);
+    while (t--) {
+        scanf("%d", &n);
+        for (int i = 1; i <= n; i++) {
+            del[i] = 0;
+            scanf("%d%d", &a[i].F, &a[i].S);
+        }
+        sort(a + 1, a + n + 1);
+
+        smin[n] = a[n].S;
+        for (int i = n - 1; i > 0; i--) {
+            smin[i] = min(smin[i + 1], a[i].S);
+            del[i] = smin[i + 1] <= a[i].S;
+        }
+        int oldn = n; n = 0;
+        for (int i = 1; i <= oldn; i++)
+            if (!del[i]) a[++n] = a[i];
+
+        int ans = 0, pos = 1;
+        while (pos <= n) {
+            ans++;
+            int cur = a[pos].S;
+            while (pos <= n && a[pos].F <= cur && cur <= a[pos].S) pos++;
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ll long long int
+#define pb push_back
+#define mp make_pair
+#define INF (ll)(1e18)
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define sz(x) ((int) (x).size())
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i = 0;i < N;i++)
+#define frep(i,a,b) for(int i = a;i <= b;i++)
+#define pii pair<int , int>
+#define pll pair<ll , ll>
+#define vii vector<int>
+#define vpii vector< pii >
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcountll(x)
+#define print(A,j,k) for(int ii=j;ii<k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+#define SQRT 350
+#define CASES int t;cin>>t;while(t--)
+#define FILE freopen("inp.txt" , "r" , stdin);
+#define ld long double
+
+const int MOD = 1e9 + 7;
+const int N = 1e5 + 5;
+
+int x[N] , y[N] , a[N] , b[N] , c[N] , d[N];
+
+ll find(ll a , ll b , ll c , ll d) {
+	return (a - c) * (a - c) + (b - d) * (b - d);
+}
+
+int main(int argc, char const *argv[])
+{
+	fast;
+
+	// cout << find(-1e9 , -1e9 , 1e9 , 1e9) << '\n';
+	// cout << INF << '\n';
+
+	CASES {
+		int n , m;
+		cin >> n >> m;
+
+		assert(n > 0);
+		assert(m > 0);
+
+		rep(i , n) {
+			cin >> x[i] >> y[i];
+		}
+
+		rep(i , m) {
+			cin >> a[i] >> b[i] >> c[i] >> d[i];
+		}
+
+
+		rep(i , m) {
+
+			ll ans = -1 , cab = -1;
+			
+			rep(j , n) {
+				ll dist = find(a[i] , b[i] , x[j] , y[j]);
+				if (ans == -1 || dist < ans) {
+					ans = dist;
+					cab = j;
+				}
+			}
+
+			assert(cab != -1);
+			cout << cab + 1 << '\n';
+			x[cab] = c[i];
+			y[cab] = d[i];
+
+		}
+
+	}
+
+	return 0;
+}

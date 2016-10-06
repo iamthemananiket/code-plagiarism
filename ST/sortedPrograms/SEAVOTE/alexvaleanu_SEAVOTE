@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 10000 + 1;
+
+int B[Nmax];
+int T, N;
+
+int main()
+{
+   /// ifstream cin("data.in");
+
+    ios_base::sync_with_stdio( false );
+
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> N;
+
+        int stop = 0;
+        int cate = 0;
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            cin >> B[i];
+
+            if ( B[i] > 100 ) stop = 1;
+            if ( B[i] != 0 ) cate++;
+        }
+
+        int sum = accumulate( B + 1, B + N + 1, 0 );
+
+        if ( stop || sum < 100 )
+        {
+            cout << "NO\n";
+            continue;
+        }
+
+        if ( sum - 100 >= cate )
+            cout << "NO\n";
+        else
+            cout << "YES\n";
+    }
+
+    return 0;
+}

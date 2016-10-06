@@ -1,0 +1,100 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 5005;
+const int mod = 1e9 + 7;
+int T;
+int N, Q;
+char S[MAX_N];
+int ans[MAX_N];
+int SA[MAX_N];
+int P[MAX_N]; // LCP
+int f[MAX_N][MAX_N];
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod)
+    a -= mod;
+}
+
+int mul(int a, int b){
+  return (1LL * a * b) % mod;
+}
+
+int cmp(int i, int j){
+  return strcmp(S + i, S + j) < 0;
+}
+
+int main(){
+  f[0][0] = 1;
+  for(int i = 1; i < MAX_N; i++){
+    f[i][0] = f[i][i] = 1;
+    for(int j = 1; j < i; j++){
+      madd(f[i][j], f[i - 1][j]);
+      madd(f[i][j], f[i - 1][j - 1]);
+    }
+  }
+
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d%d%s", &N, &Q, S);
+
+    for(int i = 0; i <= N; i++)
+      ans[i] = 0;
+    // Build SA
+    for(int i = 0; i < N; i++) SA[i] = i;
+    sort(SA, SA + N, cmp);
+    
+    for(int i = 1; i < N; i++){
+      P[i] = 0;
+      while(S[SA[i] + P[i]] == S[SA[i - 1] + P[i]])
+	P[i] ++;
+      // printf("%s\t\ti = %d P[i] = %d\n", S + SA[i], i, P[i]);
+    }
+
+    for(int len = 1; len <= N; len++){
+      int i = 0;
+      while(i < N){
+	while(i < N && N - SA[i] < len) i++;
+	if(i >= N) break;
+
+	int j = i;
+	while(j + 1 < N && P[j + 1] >= len){
+	  j ++;
+	}
+	// printf("len = %d i = %d j = %d\n", len, i, j);
+	int k = j - i + 1;
+	for(int l = 1; l <= k; l++){
+	  madd(ans[l], f[k][l]);
+	}
+	i = j + 1;
+      }
+    }
+    
+    for(int qi = 0; qi < Q; qi++){
+      int x, r;
+      scanf("%d", &x);
+      r = x > N ? 0 : ans[x];
+      printf("%d\n", r);
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int n,k;
+	cin>>n>>k;
+	vector<vector<int> > v(100005);
+	long long count=0;
+	int x;
+	int lastBlocker=-1;
+	for(int i=0;i<n;i++)
+	 {
+	 	cin>>x;
+	 	
+	 	if(x<k)
+	 	  {
+		   count+=(i-lastBlocker);
+	//	   cout<<i<<" "<<i-lastBlocker<<endl;
+		   continue;
+		  }
+		else if(x==k)
+		 {
+		   count+=(i-lastBlocker);
+	//	   cout<<i<<" "<<i-lastBlocker<<endl;
+		
+		 }
+		else 
+		   {
+		   	for(int mult=0;mult*x<=100000 && lastBlocker<i-1;mult++)
+		   	{int sz=v[mult*x].size();
+		   		for(int j=sz-1;j>=0 && lastBlocker<i-1;j--)
+		   		 {
+		   		 	if(v[mult*x][j]>lastBlocker)
+		   		 	 {
+		   		 		lastBlocker=v[mult*x][j];
+						break; 	
+					 }
+		   		 	//lastBlocker=max(lastBlocker,v[mult*x][j]);	
+				 }
+			}
+			  count+=(i-lastBlocker);
+	//	 cout<<i<<" "<<i-lastBlocker<<endl;
+		   
+		   }
+		x-=k;
+		v[x].push_back(i);
+		
+	 }
+	cout<<count<<endl;
+}

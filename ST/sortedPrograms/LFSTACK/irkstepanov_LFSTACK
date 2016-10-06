@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define mp make_pair
+#define sz(a) (int)(a).size()
+#define all(a) (a).begin(), (a).end()
+
+using namespace std;
+
+typedef long long ll;
+
+int n;
+vector<vector<int> > a;
+vector<int> res;
+
+bool f(vector<int>& curr, int pos)
+{
+    if (pos == sz(res)) {
+        return true;
+    }
+    for (int i = 0; i < n; ++i) {
+        if (curr[i] < sz(a[i]) && a[i][curr[i]] == res[pos]) {
+            ++curr[i];
+            if (f(curr, pos + 1)) {
+                return true;
+            }
+            --curr[i];
+        }
+    }
+    return false;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        cin >> n;
+        a.resize(n);
+        int sum = 0;
+        for (int i = 0; i < n; ++i) {
+            int k;
+            cin >> k;
+            sum += k;
+            a[i].resize(k);
+            for (int j = 0; j < k; ++j) {
+                cin >> a[i][j];
+            }
+        }
+        res.resize(sum);
+        for (int i = 0; i < sum; ++i) {
+            cin >> res[i];
+        }
+        reverse(all(res));
+        if (n == 1) {
+            if (res != a[0]) {
+                cout << "No\n";
+            } else {
+                cout << "Yes\n";
+            }
+            continue;
+        }
+        vector<int> curr(n);
+        if (f(curr, 0)) {
+            cout << "Yes\n";
+        } else {
+            cout << "No\n";
+        }
+    }
+
+}

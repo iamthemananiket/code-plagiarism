@@ -1,0 +1,49 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <string>
+
+using namespace std;
+
+string strs[12];
+
+string sol;
+int N;
+
+
+int main(){
+	int t;
+
+	cin >> t;
+	int i,n,j;
+
+	string ss;
+
+	while(t--){
+
+		cin >> N;
+
+		for(i = 0; i < N; ++i) cin >> strs[i];
+
+		sol.clear();
+		for(i = 0; i < strs[0].length(); ++i){
+			for(n = 0; i+n <= strs[0].length(); ++n){
+				ss = strs[0].substr(i,n);
+
+				for(j = 1; j < N; ++j){
+					if(strs[j].find(ss) == strs[j].npos) break;
+				}
+
+				if(j < N) continue;
+				if(sol.empty() || ss.length() > sol.length()) sol = ss;
+				if(ss.length() == sol.length() && ss < sol) sol = ss;
+			}
+		}
+
+		cout << sol << "\n";
+	}
+
+
+	return 0;
+}

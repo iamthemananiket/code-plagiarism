@@ -1,0 +1,20 @@
+#include <bits/stdc++.h>
+using namespace std;
+int getSum(int x) {
+	int ans = 0;
+	while(x > 0) {
+		ans += x % 10;
+		x /= 10;
+	}
+	return ans;
+}
+int main() {
+	int n;
+	cin >> n;
+	int ans = 0;
+	for(int i = max(1, n - 10000); i <= n; i++) {
+		int x = getSum(i);
+		if(i + x + getSum(x) == n) ans++;
+	}	
+	cout << ans << endl;
+}

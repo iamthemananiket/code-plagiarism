@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = 8000;
+const int base = 4000;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, s;
+int a[MAX_N], b[MAX_N];
+ull ans;
+
+ull dp[60][60][MAX_N * 2];
+
+void solve() {
+	cin >> n >> s;
+	memset(dp, 0, sizeof dp);
+	dp[0][s][0 + base] = 1;
+	for (int i = 1; i <= n; i++) {
+		cin >> a[i] >> b[i];
+		int c;
+		cin >> c;
+		b[i] = c - b[i];
+	}
+	for (int i = 1; i <= n; i++) {
+		for (int last = 0; last <= s; last++) {
+			for (int prof = (-1) * 3000; prof <= 3000; prof++) {
+			    if (!dp[i - 1][last][prof + base])
+			    	continue;
+				for (int add = 0; add * a[i] <= last; add++) {
+					assert(prof + add * b[i] + base < MAX_N);
+					dp[i][last - add * a[i]][prof + add * b[i] + base] += dp[i - 1][last][prof + base];
+					assert(dp[i][last - add * a[i]][prof + add * b[i] + base] >= 0);
+				}
+			}
+		}
+/*		for (int last = 0; last <= s; last++) {
+			for (int prof = (-1) * 2500; prof <= 2500; prof++) {
+				if (dp[i][last][prof + base]) {
+					cout << i << " last " << last << " and prof is " << prof << " is " << dp[i][last][prof + base] << endl;
+				}
+			}
+		}    */
+	}
+	ans = 0;
+	for (int i = 1; i <= 3000; i++)
+		for (int j = 0; j <= s; j++)
+			ans += dp[n][j][i + base];
+	cout << ans << endl;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

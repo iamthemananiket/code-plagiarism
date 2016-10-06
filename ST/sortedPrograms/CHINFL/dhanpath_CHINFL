@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+using namespace std;
+
+typedef  long double  LD ;
+typedef  vector<LD>  VLD ;
+typedef  pair<LD,LD>  PLD ;
+typedef  vector<PLD>  VPLD ;
+
+#define  ft  first
+#define  sd  second
+
+#define  MAX3(X,Y,Z)  max( X, max(Y,Z) )
+#define  MAX4(W,X,Y,Z)  max( max(W,X), max(Y,Z) )
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  n, m, i, j ;
+        LD  amount ;
+
+        cin >> n >> m >> amount ;
+
+        vector<VLD>  sell( n, VLD(m) ),  buy( n, VLD(m) );
+        vector<VPLD>  dp( n, VPLD(m+1) );
+
+        for( i = 0 ;  i < n ;  i++ )
+                for( j = 0 ;  j < m ;  j++ )
+                        cin >> sell[i][j] >> buy[i][j] ;
+
+        for( i = 0 ;  i < n ;  i++ )
+                dp[i][0]  =  { amount, 0.0 }  ;
+
+        for( j = 1 ;  j <= m ;  j++ )
+        {
+                for( i = 0 ;  i < n ;  i++ )    {
+                        dp[i][j].ft  =  dp[i][j-1].sd * buy[i][j-1] ;
+                        dp[i][j].sd  =  dp[i][j-1].ft / sell[i][j-1] ;    }
+
+                if( n == 1 )    {
+                        dp[0][j].ft  =  max(  dp[0][j].ft,  dp[0][j-1].ft  );
+                        dp[0][j].sd  =  max(  dp[0][j].sd,  dp[0][j-1].sd  );
+                        continue ;    }
+
+                dp[0][j].ft  =  MAX3(  dp[0][j].ft,  dp[0][j-1].ft,  dp[1][j-1].ft  );
+                dp[0][j].sd  =  MAX3(  dp[0][j].sd,  dp[0][j-1].sd,  dp[1][j-1].sd  );
+                dp[n-1][j].ft  =  MAX3(  dp[n-1][j].ft,  dp[n-1][j-1].ft,  dp[n-2][j-1].ft  );
+                dp[n-1][j].sd  =  MAX3(  dp[n-1][j].sd,  dp[n-1][j-1].sd,  dp[n-2][j-1].sd  );
+
+                for( i = 1 ;  i < n-1 ;  i++ )    {
+                        dp[i][j].ft  =  MAX4(  dp[i][j].ft,  dp[i-1][j-1].ft,  dp[i][j-1].ft,  dp[i+1][j-1].ft  );
+                        dp[i][j].sd  =  MAX4(  dp[i][j].sd,  dp[i-1][j-1].sd,  dp[i][j-1].sd,  dp[i+1][j-1].sd  );    }
+        }
+
+        LD  ans = 0.0 ;
+        for( i = 0 ;  i < n ;  i++ )
+                if( ans < dp[i].back().ft )
+                        ans = dp[i].back().ft ;
+
+        if( ans <= 1e18 )   cout << fixed << setprecision(30) << ans << endl ;
+        else  cout << "Quintillionnaire" << endl ;
+
+        return 0;
+} 

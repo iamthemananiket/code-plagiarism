@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int g[1003][1003],s[1003][1003];
+int rm[1003][1003],cm[1003][1003];
+deque<int> dek;
+int main(){
+	int n,m,i,j,tt,x,y;
+	cin >> n >> m;
+	for(i=1;i<=n;i++)
+		for(j=1;j<=m;j++){
+			scanf("%d",&g[i][j]);
+			s[i][j]=g[i][j]+s[i][j-1]+s[i-1][j]-s[i-1][j-1];
+		}
+	cin >> tt;
+	while(tt--) {
+		cin >> x >> y;
+		
+		for(i=1;i<=n;i++){
+			while(!dek.empty())
+				dek.pop_back();
+			for(j=1;j<=m;j++){
+				while(!dek.empty())
+					if(g[i][dek.back()]<=g[i][j])
+						dek.pop_back();
+					else if(dek.front()<=j-y)
+						dek.pop_front();
+					else	
+						break;
+				if(dek.empty())
+					rm[i][j]=g[i][j];
+				else
+					rm[i][j]=g[i][dek.front()];
+				dek.push_back(j);
+			}
+		}
+
+		for(j=1;j<=m;j++){
+			while(!dek.empty())
+				dek.pop_back();
+			for(i=1;i<=n;i++){
+				while(!dek.empty())
+					if(rm[dek.back()][j]<=rm[i][j])
+						dek.pop_back();
+					else if(dek.front()<=i-x)
+						dek.pop_front();
+					else
+						break;
+				if(dek.empty())
+					cm[i][j]=rm[i][j];
+				else
+					cm[i][j]=rm[dek.front()][j];
+				dek.push_back(i);
+				
+			}
+		}
+		int ans=1e9+7;
+		for(i=x;i<=n;i++)
+			for(j=y;j<=m;j++)
+				ans=min(ans,x*y*cm[i][j]-(s[i][j]-s[i-x][j]-s[i][j-y]+s[i-x][j-y]));
+		printf("%d\n",ans);
+	}
+	return 0;
+}

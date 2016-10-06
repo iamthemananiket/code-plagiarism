@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+const int N = 1e7 + 7;
+ 
+long long a[N];
+int prime[N];
+ 
+int main() {
+  for(int i = 2; i<N; i++) if(prime[i] == 0) {
+    prime[i] = i;
+    for(long long j = 1LL*i*i; j<N; j += i) 
+      if(prime[j] == 0)
+        prime[j] = i;
+  }
+  a[1] = 1;
+  for(int i = 2; i<N; i++) {
+    if(prime[i] == i) {
+      a[i] = 1LL*i*(i-1) + 1;
+      continue;
+    }
+    int x = i, k = 0, p = prime[i];
+    while(x % p == 0) {
+      k++;
+      x /= p;
+    }
+    if(x > 1)
+      a[i] = a[x]*a[i/x];
+    else {
+      a[i] = a[i/p]*p*p - p+1;
+    }
+  }
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    int n;
+    scanf("%d", &n);
+    printf("%lld\n", a[n]);
+  }
+  return 0;
+} 

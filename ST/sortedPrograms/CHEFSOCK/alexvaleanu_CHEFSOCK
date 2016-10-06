@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        ifstream cin("data.in");
+    #endif // ONLINE_JUDGE
+
+    ios_base::sync_with_stdio(false);
+
+    int N, M, K;
+    cin >> N >> M >> K;
+
+    K -= N;
+    int cate = K / M;
+
+    if (cate % 2)
+        cout << "Unlucky Chef\n";
+    else
+        cout << "Lucky Chef\n";
+
+    return 0;
+}

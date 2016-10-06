@@ -1,0 +1,75 @@
+
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <fstream>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <deque>
+#include <ctime>
+#include <cassert>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+#define fname ""
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define inf 1000000000
+#define INF 1000000000000000000ll
+#define ull unsigned long long
+#define F first
+#define S second
+
+double eps = 1e-6;
+set <pair<double, int> > s;
+set <pair<double, int> > :: iterator it;
+int was[1555];
+int timer = 0;
+void solve() {
+	++timer;
+	double angle;
+	scanf("%lf", &angle);
+//	cin >> angle;
+	it = lower_bound(s.begin(), s.end(), mp(angle, -1));
+	for (; it != s.end(); it++) {
+		if (fabs(it -> F - angle) > eps) break;
+		if (was[it -> S] != timer) {
+			was[it -> S] = timer;
+			printf("%d%d:%d%d\n", it -> S / 60 / 10, it -> S / 60 % 10, it -> S % 60 / 10, it -> S % 60 % 10);
+		}
+	}
+}
+
+int main() {
+    
+    #ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+    #endif
+    
+	for (int t = 0; t < 12 * 60; ++ t) {
+		int h = t / 60;
+		int m = t % 60;
+		double val1 = h * 30, val2 = m * 6;
+		val1 += ((double)m / 60) * 30;
+		double now = val2 - val1;
+		if (now < 0.0) now += 360;
+		s.insert(mp(now, t));
+		s.insert(mp(360 - now, t));
+	}
+
+    int test = 1;
+    scanf("%d\n", &test);
+    
+    while(test--) solve();
+    
+    return 0;
+}

@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+const int N = 200010;
+const int M = 50010;
+
+typedef pair<int, int> pii;
+typedef pair<int, pii> pi3;
+
+vector<int> adj[M];
+priority_queue<pii> heap;
+pi3 data[M];
+int ls[N], mx[M];
+int n, m;
+
+void evaluate(void) {
+  scanf("%d%d", &n, &m);
+  for(int i = 0;i < n;i++) {
+    scanf("%d", &ls[i]);
+  }
+  for(int i = 0;i < m;i++) {
+    int t, u, v;
+    scanf("%d%d%d", &t, &u, &v);
+    data[i] = pi3(t, pii(u, v));
+  }
+  sort(data, data+m);
+  for(int i = 0;i < M;i++) {
+    mx[i] = i;
+    adj[i].clear();
+  }
+  for(int i = m-1;i >= 0;i--) {
+    int idx = i;
+    for(int j = i;j >= 0 and data[i].first == data[j].first;i = j--) {
+      int u = data[j].second.first, v = data[j].second.second;
+      adj[u].push_back(v);
+      adj[v].push_back(u);
+      int val = max(mx[u], mx[v]);
+      heap.push(pii(val, u));
+      heap.push(pii(val, v));
+    }
+    while(!heap.empty()) {
+      int val = heap.top().first, u = heap.top().second;
+      heap.pop();
+      if(mx[u] >= val) continue;
+      mx[u] = val;
+      for(int v : adj[u]) {
+        if(val > mx[v]) {
+          heap.push(pii(val, v));
+        }
+      }
+    }
+    for(int j = idx;j >= i;j--) {
+      int u = data[j].second.first, v = data[j].second.second;
+      adj[u].clear(), adj[v].clear();
+    }
+  }
+  long long ans = 0ll;
+  for(int i = 0;i < n;i++) {
+    ans += mx[ls[i]];
+  }
+  printf("%lld\n", ans);
+}
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    evaluate();
+  }
+  return 0;
+}

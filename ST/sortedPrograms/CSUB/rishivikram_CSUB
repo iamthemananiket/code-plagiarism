@@ -1,0 +1,21 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	long long int t,n,i,count,ans;
+	string str;
+	cin>>t;
+	while(t--)
+	{
+		cin>>n;
+		cin>>str;
+		count=0;
+		for(i=0;i<n;i++)
+			count+=str[i]-48;
+		ans=count;
+		ans+=(count*(count-1))/2;
+		cout<<ans<<endl;
+	}
+	return 0;
+}
+		

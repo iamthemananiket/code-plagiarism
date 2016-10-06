@@ -1,0 +1,34 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */   
+    int t;
+    long long int l,k,c,ll,n;
+    long  double a,p;
+    cin>>t;
+     while(t--)
+         {
+         c=0;
+         cin>>l>>k;
+         ll=k;
+         while(ll!=0)
+             {
+             ll=ll/2;
+             c++;
+         }
+       //  cout<<c<<"\n";
+         n=pow(2,c);
+         a=(k-pow(2,c-1));
+         //cout<<a<<"\n";
+         a=2*a+1;
+         p=(a*l)/(n);
+         printf("%Lf\n",p);
+     }
+    return 0;
+}

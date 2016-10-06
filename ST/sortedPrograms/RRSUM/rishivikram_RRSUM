@@ -1,0 +1,17 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	long long int n,m,x,dif;
+	cin>>n>>m;
+	while(m--)
+	{
+		cin>>x;
+		dif=abs(2*n+1-x);
+		if(x>=n+1)
+			cout<<n-dif<<endl;
+		else
+			cout<<"0"<<endl;
+	}
+	return 0;
+}

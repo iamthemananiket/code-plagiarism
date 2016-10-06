@@ -1,0 +1,138 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+//   #include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, h, c, z, d;
+const int N = 1e5 + 5;
+const int MAGIC = 90;
+const int LN = 21;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+double F[N];
+int C[N];
+vector < pair <int, ld> > tree[MAGIC];
+void init(int j, int i, int l, int r) {
+    if (l == r) {
+        tree[j][i] = mp(C[1 + l * j], F[1 + l * j]);
+        return;
+    } else {
+        int mid = (l + r) / 2;
+        init(j, i + 1 + i, l, mid);
+        init(j, i + 2 + i, mid + 1, r);
+        tree[j][i].fst = (1LL * tree[j][i + 1 + i].fst * tree[j][i + 2 + i].fst) % mod;
+        tree[j][i].snd = tree[j][i + 1 + i].snd * tree[j][i + 2 + i].snd;
+        while (tree[j][i].snd >= 10.0)
+            tree[j][i].snd /= 10.0;
+    }
+}
+inline void modify(int j, int i, int l, int r, int v) {
+    if (l == r) {
+        tree[j][i] = mp(C[1 + l * j], F[1 + l * j]);
+        return;
+    } else {
+        int mid = (l + r) / 2;
+        if (v <= mid) {
+            modify(j, i + 1 + i, l, mid, v);
+        } else modify(j, i + 2 + i, mid + 1, r, v);
+        tree[j][i].fst = (1LL * tree[j][i + 1 + i].fst * tree[j][i + 2 + i].fst) % mod;
+        tree[j][i].snd = tree[j][i + 1 + i].snd * tree[j][i + 2 + i].snd;
+        while (tree[j][i].snd >= 10.0)
+            tree[j][i].snd /= 10.0;
+    }
+}
+vector < int > fact[N];
+int main() {
+    csl;
+    cin >> n;
+    for (int i = 1; i <= n; ++i) {
+        cin >> C[i];
+        F[i] = C[i];
+        while (F[i] >= 10.0)
+            F[i] /= 10.0;
+    }
+    for (int i = 1; i < MAGIC; ++i) {
+        tree[i].resize(4 * (1 + (n - 1) / i));
+        init(i, 0, 0, (n - 1) / i);
+    }
+    cin >> q;
+    int I= 0, J = 0;
+    for (int j = 1; j < MAGIC; ++j) {
+        for (int i = 0; i < N; i += j)
+            fact[i].push_back(j);
+    }
+    while (q--) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            double v;
+            long long V;
+            cin >> h >> V;
+            v = V;
+            while (v >= 10.0) v /= 10.0;
+            F[h] = v;
+            C[h] = V;
+            for (int i = 0; i < fact[h - 1].size(); ++i) {
+                modify(fact[h - 1][i], 0, 0, (n - 1) / fact[h - 1][i], (h - 1) / fact[h - 1][i]);
+            }
+        } else {
+            int R;
+            cin >> R;
+            if (R < MAGIC) {
+                cout << (int)tree[R][0].snd << " " << tree[R][0].fst << '\n';
+            } else {
+                double sol = 1.0;
+                int ans = 1;
+                for (int i = 1; i <= n; i += R) {
+                    sol *= F[i];
+                    ans = (1LL * ans * C[i]) % mod;
+                    while (sol >= 10.0)
+                        sol /= 10.0;
+                }
+                cout << (int)sol  << " " << ans << '\n';
+            }
+        }
+    }
+    return 0;
+}

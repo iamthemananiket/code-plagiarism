@@ -1,0 +1,53 @@
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+ 
+const int MOD = 1000000007 ;
+ 
+int getStrInpVal()
+{
+        string  s ;
+        cin >> s ;
+        int  val=0, i ;
+        for( i=0; i<10; i++ )
+                if( s[i]=='+' || s[i]=='w' )
+                        val |= (1<<i) ;
+        return val;
+}
+ 
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+        
+        int  t, n, val, i, j, p, a[1024], dp[2][1024], two[100001] ;
+        
+        two[0] = 1 ;
+        for( i=1; i<100001; i++ )
+                if( (two[i]=two[i-1]<<1) >= MOD )
+                        two[i] -= MOD ;
+        
+        for(  cin >> t ;  t-- ;  )
+        {
+                memset( a, 0, sizeof a );
+                
+                val = getStrInpVal();
+                for( cin >> n ;  n-- ; )
+                        a[getStrInpVal()]++;
+                
+                for( j=0; j<1024; j++ )
+                        dp[0][j] = 0 ;
+                
+                dp[p=0][0] = two[a[0]] ;
+                
+                for( i=1; i<1024; i++ )
+                        if( a[i] )
+                                for( p=1-p, j=0; j<1024; j++ )
+                                        dp[p][j] = ( two[a[i]-1] * 1LL * ( dp[!p][j] + dp[!p][i^j] ) ) % MOD ;
+                
+                cout << dp[p][val] << endl ;
+        }
+        
+        return 0 ;
+} 

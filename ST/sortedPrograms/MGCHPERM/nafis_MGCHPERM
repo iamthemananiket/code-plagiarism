@@ -1,0 +1,236 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+#define MX 33
+LL MODSQ = mod*mod;
+LL mul_res[MX][MX];
+void multiply(LL a[][MX], LL b[][MX]){
+    for(int i = 0; i < MX; i++){
+        for(int j = 0; j < MX; j++){
+            mul_res[i][j] = 0;
+            for(int k = 0; k < MX; k++){
+                mul_res[i][j] = (mul_res[i][j] + a[i][k] * b[k][j]);
+        		if(mul_res[i][j] >= MODSQ) mul_res[i][j] -= MODSQ;
+        	}
+        	mul_res[i][j] %= mod;
+        }
+    }
+}
+
+LL big_res[MX][MX];
+LL init[MX][MX];
+void matrix_expo(LL n){
+    if(n == 0){
+        set0(big_res);
+        REP(i, MX)big_res[i][i] = 1;
+        return;
+    }
+    if(n % 2 == 0){
+        matrix_expo(n / 2);
+        multiply(big_res, big_res);
+        REP(i, MX){
+            REP(j, MX)big_res[i][j] = mul_res[i][j];
+        }
+    }
+    else {
+        matrix_expo(n - 1);
+        multiply(big_res, init);
+        REP(i, MX){
+            REP(j, MX)big_res[i][j] = mul_res[i][j];
+        }
+    }
+
+//    set0(big_res);
+//    REP(i, MX)big_res[i][i] = 1;
+//    for(; n > 0; n >>= 1){
+//        if(n & 1){
+//            multiply(big_res, init);
+//            memcpy(big_res, mul_res, MX*MX*sizeof big_res[0][0]);
+////            REP(i, MX) REP(j, MX) big_res[i][j] = mul_res[i][j];
+//        }
+//        multiply(init, init);
+//        memcpy(init, mul_res, MX*MX*sizeof big_res[0][0]);
+////        REP(i, MX) REP(j, MX) init[i][j] = mul_res[i][j];
+//    }
+}
+
+int VVV = 1000000;
+int id[7][7];
+int dp[5000001][7], sum[5000001][7];
+LL tmp[6*7 + 1];
+LL pre[1001][MX][MX], pre2[1001][MX][MX], pre3[1001][MX][MX];
+int main() {
+//    freopen("a.in", "r", stdin);
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    dp[0][0] = sum[0][0] = 1;
+    for(int i = 1; i <= VVV; i++){
+        dp[i][0] = 1;
+        for(int j = 1; j <= 6; j++){
+            if(i < j) continue;
+            dp[i][j] = (dp[i-j][j] + dp[i-j][j-1]);
+            if(dp[i][j] >= mod) dp[i][j] -= mod;
+        }
+        REP(j, 7) {
+            sum[i][j] = (sum[i-1][j] + dp[i][j]);
+            if(sum[i][j] >= mod) sum[i][j] -= mod;
+        }
+    }
+
+
+    // special pre_calculation
+
+        int cc = 0;
+        for(int i = 0; i < 6; i++){
+            for(int j = i; j <= 6; j++){
+                id[i+1][j] = cc++;
+            }
+        }
+
+        set0(init);
+
+        init[0][0] = 1;
+        for(int i = 1; i <= 6; i++){
+            int v = (i-1)*6;
+            init[i][ id[i][i] ] = 1;
+            init[i][ id[i][i-1] ] = 1;
+        }
+        int cc1 = 7;
+        for(int i = 0; i < 5; i++){
+            for(int j = i+1; j <= 6; j++){
+                init[ cc1++ ][ id[i+1][j] ] = 1;
+            }
+        }
+
+        for(int i = 2; i <= 6; i++){
+            init[cc][cc] = 1;
+            for(int j = 0; j < 33; j++) init[cc][j] += init[i][j];
+            cc++;
+        }
+
+
+        REP(i, MX) pre3[0][i][i] = 1;
+
+        for(int i = 1; i <= 1000; i++){
+            multiply(init, pre3[i-1]);
+            REP(j, MX) REP(k, MX) pre3[i][j][k] = mul_res[j][k];
+        }
+
+        REP(i, MX) pre2[0][i][i] = 1;
+
+        for(int i = 1; i <= 1000; i++){
+            multiply(pre3[1000], pre2[i-1]);
+            REP(j, MX) REP(k, MX) pre2[i][j][k] = mul_res[j][k];
+        }
+
+        REP(i, MX) pre[0][i][i] = 1;
+
+        for(int i = 1; i <= 1000; i++){
+            multiply(pre2[1000], pre[i-1]);
+            REP(j, MX) REP(k, MX) pre[i][j][k] = mul_res[j][k];
+        }
+
+
+
+//    return 0;
+
+    int T; cin >> T;
+    while(T--){
+        int n, m; cin >> n >> m;
+        LL res = 1;
+        for(int i = 1; i <= m; i++){
+            res = (res * (n-i+1)) % mod;
+            res = (res * modinverse((LL)i, mod)) % mod;
+        }
+        m--;
+
+        if(n <= VVV){
+            res = (res - sum[n][m] + mod) % mod;
+            cout << res << "\n";
+            continue;
+        }
+        n -= VVV;
+
+        cc = 0;
+        for(int i = 0; i < 6; i++){
+            for(int j = i; j <= 6; j++){
+                tmp[cc++] = dp[VVV-i][j];
+            }
+        }
+        for(int i = 2; i <= 6; i++) tmp[cc++] = sum[VVV][m];
+//
+//        set0(init);
+//
+//        init[0][0] = 1;
+//        for(int i = 1; i <= 6; i++){
+//            int v = (i-1)*6;
+//            init[i][ id[i][i] ] = 1;
+//            init[i][ id[i][i-1] ] = 1;
+//        }
+//        int cc1 = 7;
+//        for(int i = 0; i < 5; i++){
+//            for(int j = i+1; j <= 6; j++){
+//                init[ cc1++ ][ id[i+1][j] ] = 1;
+//            }
+//        }
+//
+//        init[cc-1][cc-1] = 1;
+//        for(int i = 0; i < 28; i++) init[cc-1][i] += init[m][i];
+
+//        matrix_expo((n%VVV)%1000);
+
+        multiply(pre3[(n%VVV)%1000] , pre2[ (n%VVV)/1000 ]);
+
+        REP(i, MX) REP(j, MX) big_res[i][j] = mul_res[i][j];
+        multiply(big_res, pre[n / VVV]);
+
+        REP(i, cc){
+            res = (res - (mul_res[27+m-2][i] * tmp[i])%mod + mod) % mod;
+        }
+        cout << res << "\n";
+    }
+}

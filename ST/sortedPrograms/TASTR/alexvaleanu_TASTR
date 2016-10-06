@@ -1,0 +1,123 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+const int Nmax = 200005;
+
+int N, gap;
+int SA[Nmax], poz[Nmax], tmp[Nmax], lcp[Nmax];
+char str[Nmax];
+
+inline int cmp( int i, int j )
+{
+    if ( poz[i] != poz[j] )
+            return poz[i] < poz[j];
+
+    i += gap;
+    j += gap;
+
+    if ( i < N && j < N )
+            return poz[i] < poz[j];
+    else
+            return i > j;
+}
+
+void SuffixArray()
+{
+    for ( int i = 0; i < N; ++i )
+            SA[i] = i,
+            poz[i] = str[i];
+
+    for ( gap = 1; ; gap <<= 1 )
+    {
+        sort ( SA, SA + N, cmp );
+
+        for ( int i = 0; i < N - 1; ++i )
+                tmp[i + 1] = tmp[i] + cmp( SA[i], SA[i + 1] );
+
+        for ( int i = 0; i < N; ++i )
+                poz[ SA[i] ] = tmp[i];
+
+        if ( tmp[ N - 1 ] == N - 1 )
+                break;
+    }
+}
+
+void LCP()
+{
+    for ( int i = 0, k = 0; i < N; ++i )
+    {
+        if ( poz[i] != N - 1 )
+        {
+            for ( int j = SA[ poz[i] + 1 ]; str[i + k] == str[j + k]; ) k++;
+
+            lcp[ poz[i] ] = k;
+
+            if ( k > 0 )
+                    k--;
+        }
+    }
+}
+
+long long NrSubstr()
+{
+	long long ans = N - SA[0];
+
+	for ( int i = 1; i < N; i++)
+    {
+        ans += N - SA[i] - lcp[i - 1];
+	}
+
+	return ans;
+}
+
+char str1[100001];
+char str2[100001];
+char str3[200005];
+
+int main()
+{
+	int n1,n2,n3;
+
+	long long a,b,c;
+
+	scanf("%s", str1);
+	scanf("%s", str2);
+
+	strcat ( str3, str1 );
+	strcat ( str3, "$" );
+	strcat ( str3, str2 );
+
+	n1 = strlen ( str1 );
+	n2 = strlen ( str2 );
+	n3 = n1 + n2 + 1;
+
+	strcpy ( str, str1 );
+	N = n1;
+
+	SuffixArray();
+	LCP();
+	a = NrSubstr();
+
+	strcpy( str, str2 );
+	N = n2;
+
+	SuffixArray();
+	LCP();
+	b = NrSubstr();
+
+	strcpy( str, str3 );
+	N = n3;
+
+	SuffixArray();
+	LCP();
+
+	c = NrSubstr() - ( long long )( n1 + 1 ) * ( n2 + 1 );
+
+	printf("%lld\n", 2 * c - ( a + b ) );
+
+	return 0;
+}

@@ -1,0 +1,97 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+#define mps make_pair
+
+int a[105][105],dist1[105][105],dist2[105][105];
+queue<pii>q;
+
+int main()
+{
+	int t,n,m,k1,k2,i,j;
+	sc("%d",&t);
+	while(t--){
+		sc("%d %d %d %d",&n,&m,&k1,&k2);
+		for(i=0;i<n;i++){
+			for(j=0;j<m;j++){
+				sc("%d",&a[i][j]);
+			}
+		}
+		for(i=0;i<n;i++){
+			for(j=0;j<m;j++){
+				dist1[i][j]=imax;
+				dist2[i][j]=imax;
+			}
+		}
+		dist1[0][0]=0;
+		q.push(mps(0,0));
+		while(!q.empty()){
+			pii p1=q.front();
+			q.pop();
+			for(i=max(0,p1.F-k1);i<=min(n-1,p1.F+k1);i++){
+				for(j=max(0,p1.S-k1);j<=min(m-1,p1.S+k1);j++){
+					if(a[i][j]==0 && abs(i-p1.F)+abs(j-p1.S)<=k1 && dist1[i][j]>(dist1[p1.F][p1.S]+1)){
+						dist1[i][j]=dist1[p1.F][p1.S]+1;
+						q.push(mps(i,j));
+					}
+				}
+			}
+		}
+		dist2[0][m-1]=0;
+		q.push(mps(0,m-1));
+		while(!q.empty()){
+			pii p1=q.front();
+			q.pop();
+			for(i=max(0,p1.F-k2);i<=min(n-1,p1.F+k2);i++){
+				for(j=max(0,p1.S-k2);j<=min(m-1,p1.S+k2);j++){
+					if(a[i][j]==0 && abs(i-p1.F)+abs(j-p1.S)<=k2 && dist2[i][j]>(dist2[p1.F][p1.S]+1)){
+						dist2[i][j]=dist2[p1.F][p1.S]+1;
+						q.push(mps(i,j));
+					}
+				}
+			}
+		}
+		int ans=imax;
+
+		for(i=0;i<n;i++){
+			for(j=0;j<m;j++){
+				ans=min(ans,max(dist2[i][j],dist1[i][j]));
+			}
+		}
+		if(ans!=imax){
+			pr("%d\n",ans);
+		}
+		else{
+			pr("-1\n");
+		}
+	}
+	return 0;
+}

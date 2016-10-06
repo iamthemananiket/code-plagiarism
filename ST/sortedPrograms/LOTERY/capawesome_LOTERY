@@ -1,0 +1,87 @@
+# include <cstdio>
+
+using namespace std;
+
+const int MAX_N = 1e6 + 10;
+const int MOD = 1e9 + 7;
+
+long long n1, k1;
+long long a, b, m;
+long long c, d;
+long long lans;
+
+long long cc[MAX_N];
+long long dd[MAX_N];
+
+
+int cnt = 0;
+int prime[10000];
+bool er[100010];
+
+void sieve ()
+{
+	int i, j;
+	for (i = 2; i <= 100000; i ++)
+	{
+		if (er[i])
+			continue;
+		prime[cnt ++] = i;
+		if ((long long) ((long long) i * (long long) i) > 100000)
+			continue;
+		for (j = i * i; j <= 100000; j += i)
+			er[j] = 1;
+	}
+}
+
+long long find (int l, int r)
+{
+	long long ans = 1, x, last, c;
+	int i;
+	for (i = 0; i < cnt && prime[i] <= r; i ++)
+	{	
+		for (x = last = 1; x <= r; x *= prime[i])
+		{
+			c = (r / x) * x;
+			if (l <= c)
+			{
+				ans *= (x / last);
+				ans %= MOD;
+				last = x;
+			}
+		}
+	}
+	return ans;
+}
+
+int main ()
+{
+	int i, j, t;
+	
+	sieve ();
+	
+	scanf ("%d", &t);
+	scanf ("%lld%lld", &n1, &k1);
+	scanf ("%lld%lld%lld", &a, &b, &m);
+	k1 --;
+	lans = find (n1 - k1, n1);
+	printf ("%lld\n", lans);
+	
+	for (i = t - 1; i > 0; i --)
+		scanf ("%lld", &cc[i]);
+		
+	for (i = t - 1; i > 0; i --)
+		scanf ("%lld", &dd[i]);
+	
+	
+	t --;
+	
+	while (t --)
+	{
+		n1 = 1 + (a * lans + cc[t + 1]) % m;
+		k1 = 1 + (b * lans + dd[t + 1]) % n1;
+		k1 --;
+		lans = find (n1 - k1, n1);
+		printf ("%lld\n", lans);		
+	}
+	return 0;
+}

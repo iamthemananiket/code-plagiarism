@@ -1,0 +1,180 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <cassert>
+#define SIZE 3000005
+
+using namespace std;
+typedef pair <int,int> P;
+typedef pair <P,P> PP;
+
+struct UF
+{
+	int par[SIZE],rank[SIZE];
+	int n;
+	
+	void init(int n1)
+	{
+		n=n1;
+		for(int i=0;i<n;i++)
+		{
+			par[i]=i;
+			rank[i]=0;
+		}
+	}
+	int find(int x)
+	{
+		if(par[x]==x) return x;
+		return par[x]=find(par[x]);
+	}
+	void unite(int x,int y)
+	{
+		x=find(x);
+		y=find(y);
+		if(x==y) return;
+		if(rank[x]<rank[y])
+		{
+			par[x]=y;
+		}
+		else
+		{
+			par[y]=x;
+			if(rank[x]==rank[y]) rank[x]++;
+		}
+	}
+	bool same(int x,int y)
+	{
+		return find(x)==find(y);
+	}
+	int get_comp()
+	{
+		int ret=0;
+		for(int i=0;i<n;i++) if(find(i)==i) ret++;
+		return ret;
+	}
+};
+UF uf;
+vector <P> nd;
+vector <P> edge;
+P left[SIZE],right[SIZE];
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int r,c,W;
+		scanf("%d %d %d",&r,&c,&W);
+		nd.clear();
+		edge.clear();
+		for(int i=0;i<W;i++)
+		{
+			int a,b,c2,d;
+			scanf("%d %d %d %d",&a,&b,&c2,&d);a--,b--,c2--,d--;
+			P p=P(a,b),q=P(c2,d);
+			if(p>q) swap(p,q);
+			left[i]=P(p.first+1,p.second+1);
+			right[i]=left[i];
+			if(p.first+1==q.first) right[i].second--;
+			else right[i].first--;
+			nd.push_back(left[i]);
+			nd.push_back(right[i]);
+			//printf("%2d %2d : %2d %2d\n",left[i].first,left[i].second,right[i].first,right[i].second);
+		}
+		if(r==1&&c==1)
+		{
+			puts("Chefland is doomed");
+			continue;
+		}
+		if(r==1||c==1)
+		{
+			puts(W>0?"0":"1");
+			continue;
+		}
+		vector <P> ALL;
+		for(int i=0;i<nd.size();i++)
+		{
+			P p=nd[i];
+			ALL.push_back(p);
+			if(p.first>0) ALL.push_back(P(p.first-1,p.second));
+			if(p.first+1<=r) ALL.push_back(P(p.first+1,p.second));
+			if(p.second>0) ALL.push_back(P(p.first,p.second-1));
+			if(p.second+1<=c) ALL.push_back(P(p.first,p.second+1));
+		}nd=ALL;
+		nd.push_back(P(-1,-1));
+		sort(nd.begin(),nd.end());
+		nd.erase(unique(nd.begin(),nd.end()),nd.end());
+		uf.init(nd.size());
+		for(int i=0;i<W;i++)
+		{
+			int L=lower_bound(nd.begin(),nd.end(),left[i])-nd.begin();
+			int R=lower_bound(nd.begin(),nd.end(),right[i])-nd.begin();
+			assert(L>=R);
+			uf.unite(L,R);
+			edge.push_back(P(L,R));
+		}
+		sort(edge.begin(),edge.end());
+		edge.erase(unique(edge.begin(),edge.end()),edge.end());
+		for(int i=0;i+1<edge.size();i++) assert(edge[i]<edge[i+1]);
+		assert((int) edge.size()==W);
+		int all=edge.size();
+		for(int i=1;i<nd.size();i++)
+		{
+			P p=nd[i];
+			if(p.first==0||p.second==0||p.first==r||p.second==c)
+			{
+				uf.unite(0,i);
+				all++;
+			}
+		}
+		int nm=uf.get_comp();
+		if(nd.size()-nm<all) puts("0");
+		else
+		{
+			bool up=false;
+			//int cnt=0;
+			for(int i=1;i<nd.size();i++)
+			{
+				P p=nd[i];
+				if(p.first+1<=r&&p.second>0&&p.second<c)
+				{
+					int v=lower_bound(nd.begin(),nd.end(),P(p.first+1,p.second))-nd.begin();
+					if(v<nd.size()&&nd[v]==P(p.first+1,p.second)&&uf.same(v,i))
+					{
+						assert(v>=i);
+						//printf("%d %d : %d %d\n",nd[v].first,nd[v].second,nd[i].first,nd[i].second);
+						//cnt++;
+						int c2=lower_bound(edge.begin(),edge.end(),P(v,i))-edge.begin();
+						if(!(c2<edge.size()&&edge[c2]==P(v,i)))
+						{
+							up=true;
+							break;
+						}
+					}
+				}
+				if(p.second+1<=c&&p.first>0&&p.first<r)
+				{
+					int v=lower_bound(nd.begin(),nd.end(),P(p.first,p.second+1))-nd.begin();
+					if(v<nd.size()&&nd[v]==P(p.first,p.second+1)&&uf.same(v,i))
+					{
+						assert(v>=i);
+						//printf("%d %d : %d %d\n",nd[v].first,nd[v].second,nd[i].first,nd[i].second);
+						//cnt++;
+						int c2=lower_bound(edge.begin(),edge.end(),P(v,i))-edge.begin();
+						if(c2<edge.size()&&edge[c2]==P(v,i)) continue;
+						//printf("%d %d : %d %d\n",nd[v].first,nd[v].second,nd[i].first,nd[i].second);
+						up=true;
+						break;
+					}
+				}
+			}
+			//printf("%d\n",cnt);
+			if(up) puts("1");
+			else puts("2");
+		}
+	}
+	return 0;
+}

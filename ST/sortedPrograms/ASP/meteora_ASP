@@ -1,0 +1,44 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+
+using namespace std;
+
+int A[1000010];
+int N;
+
+
+int main(){
+	int t;
+
+	scanf("%d",&t);
+	int i,mn,pr;
+
+	while(t--){
+		scanf("%d",&N);
+		for(i =0 ; i < N; ++i){
+			scanf("%d",&A[i]);
+		}
+
+		pr = -1;
+		for(i = 0; i < N; ++i){
+			mn = A[i];
+			if(i && A[i-1] < mn) mn = A[i-1];
+			if(i+1 < N && A[i+1] < mn) mn = A[i+1];
+
+			if(A[i-1] == mn) A[i-1] = (2e9);
+			if(A[i] == mn) A[i] = (2e9);
+			if(A[i+1] == mn) A[i+1] = (2e9);
+
+			if(mn >= 2e9 || pr > mn) break;
+			pr = mn;
+		}
+
+		if(i < N) printf("NO\n");
+		else printf("YES\n");
+	}
+
+
+	return 0;
+}

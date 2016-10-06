@@ -1,0 +1,162 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define MAXN 20000
+#define LOGN 20
+int lg, n, q, p[LOGN][MAXN], sa[MAXN];
+int la[MAXN], lb[MAXN], lc[MAXN];
+int bucket[MAXN], tla[MAXN], tlb[MAXN], tlc[MAXN];
+
+//This is my nearly 25th and probably the last submission for this problem #24WA :(
+//idea for code for construction of suffix array and usage of stack to count substrings as required taken from past codechef submissions of famous coders
+
+void constructSA(int *a,int n) {
+	lg = 1;
+	for(int i=0; i<n; i++) p[0][i] = a[i];
+
+	sort(a, a+n);
+	map <int, int> M;
+
+	for(int i=0; i<n; i++) if(i==0 || (a[i] != a[i-1])) M[a[i]] = i;
+	for(int i=0; i<n; i++) p[0][i] = M[p[0][i]];
+
+	for(int skip=1; skip/2 < n; skip<<=1, lg++) {
+
+		for(int i=0; i<n; i++) {
+			la[i] = p[lg-1][i];
+			lb[i] = i+skip < n ? p[lg-1][i+skip] : -1;
+			lc[i] = i;
+		}
+
+		for(int i=0; i<n+10; i++) bucket[i] = 0;
+		for(int i=0; i<n; i++) bucket[lb[i]+1]++;
+		for(int i=1; i<n+10; i++) bucket[i] += bucket[i-1];
+		for(int i=n-1; i>=0; i--) {
+			int wer = (bucket[lb[i]+1]--)-1;
+			tla[wer] = la[i]; tlb[wer] = lb[i]; tlc[wer] = lc[i];
+		}
+
+		for(int i=0; i<n; i++) la[i] = tla[i], lb[i] = tlb[i], lc[i] = tlc[i];
+		for(int i=0; i<n+10; i++) bucket[i] = 0;
+		for(int i=0; i<n; i++) bucket[la[i]]++;
+		for(int i=1; i<n+10; i++) bucket[i] += bucket[i-1];
+		for(int i=n-1; i>=0; i--) {
+			int wer = (bucket[la[i]]--)-1;
+			tla[wer] = la[i]; tlb[wer] = lb[i]; tlc[wer] = lc[i];
+		}
+
+		for(int i=0; i<n; i++) la[i] = tla[i], lb[i] = tlb[i], lc[i] = tlc[i];
+		for(int i=0; i<n; i++)
+			p[lg][lc[i]] = (i>0 && la[i-1]==la[i] && lb[i-1]==lb[i])? p[lg][lc[i-1]] : i;
+
+	}
+
+	lg--;
+	for(int i=0; i<n; i++) sa[p[lg][i]] = i;
+}
+
+void constructSA(char *t, int leng) {
+	int *a = new int[leng];
+	for(int i=0; i<leng; i++) a[i] = int(t[i]);
+	constructSA(a, leng);
+	delete a;
+}
+
+int lcp(int i, int j) {
+	if(i==j) return n - i;
+	int ans = 0;
+	for(int k = lg; k>=0 && i<n && j<n; k--)
+		if(p[k][i] == p[k][j])
+			ans += (1<<k), i += (1<<k), j += (1<<k);
+	return ans;
+}
+
+int stk[MAXN], LCP[MAXN], L[MAXN], R[MAXN];
+vector <int> li[MAXN];
+char s[MAXN];
+long long d[MAXN],ans[MAXN];
+int mod = 1e9 + 7;
+vector<long long> c[5001];
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+
+	c[0].push_back(1);
+	for(int i=1;i<=5000;i++){
+        c[i].push_back(1);
+        for(int j=1;j<i;j++){
+            c[i].push_back(c[i-1][j] + c[i-1][j-1]);
+            if(c[i][j] >= mod)  c[i][j] %= mod;
+        }
+        c[i].push_back(1);
+	}
+
+	int t;
+	cin >> t;
+
+	while(t--) {
+        cin >> n >> q;
+        cin >> s;
+
+		constructSA(s, n);
+
+		for(int i=0; i<=n+2; i++) li[i].clear(), d[i] = 0;
+		for(int i=0; i<n-1; i++) li[ (LCP[i] = lcp(sa[i], sa[i+1])) ].push_back(i);
+		int top = 0;
+		for(int i=0; i<n-1; i++) {
+			while(top && LCP[stk[top-1]] >= LCP[i]) top--;
+			if(top == 0) L[i] = -1;
+			else L[i] = stk[top-1];
+			stk[top++] = i;
+		}
+
+		top = 0;
+		for(int i=n-2; i>=0; i--) {
+			while(top && LCP[stk[top-1]] >= LCP[i]) top--;
+			if(top == 0) R[i] = n-1;
+			else R[i] = stk[top-1];
+			stk[top++] = i;
+		}
+
+		for(int i=n; i; i--) {
+			int j = 0;
+			while(j < li[i].size()) {
+				int mini = i;
+				int k = li[i][j];
+				if(L[k] != -1 && mini > i - LCP[L[k]]) mini = i - LCP[L[k]];
+				if(R[k] != n-1 && mini > i - LCP[R[k]]) mini = i - LCP[R[k]];
+				int range = R[k] - L[k] - 1 + 1;
+				d[range] += (long long)mini * range;
+				while(j < li[i].size() && li[i][j] < R[k]) j++;
+			}
+		}
+
+        for(int i=1;i<=n;i++) {
+            d[i] /= i;
+            ans[i] = 0;
+        }
+
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=i;j++){
+                ans[j] += (long long)d[i]*c[i][j];
+                if(ans[j] >= mod) ans[j] %= mod;
+            }
+        }
+        ans[1] = n * (n + 1) / 2;
+
+		while(q--) {
+			int x;
+			cin >> x;
+			if(x <= n)
+                cout << ans[x] << '\n';
+            else
+                cout << 0 << '\n';
+		}
+
+	}
+
+	return 0;
+}

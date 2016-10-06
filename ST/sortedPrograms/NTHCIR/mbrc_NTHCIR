@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define sf(n) scanf("%Lf",&n)
+#define pf(n) printf("%.6Lf",n);
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+ld r,r1,r2,r3,r4,R;
+
+ld f(ld n) {
+	return R * r * (1-r) / (2 * (n*n * (1-r) * (1-r) + r));
+}
+
+int main() {
+	int t; s(t);
+	ll N,p,m,b; sl(N); sl(p); sl(m); sl(b);
+	sf(r1); sf(r2); sf(r3); sf(r4);
+	R = 2*r1;
+	r = r2/r1;
+	ld lft,rgt;
+	
+	ld eps = 1.0e-9;
+	/*ld l = 0, r = 2e9 + 7;
+	while (abs(rgt - lft) >= eps) {
+		ld mid = (l+r)/2;
+		ld rad = f(mid);
+		if (rad < r3) {
+			r = mid;
+		} else {
+			l = mid;
+		}
+	}*/
+	
+	ld n = sqrt( (r/(2 * (r3/R) * (1-r)))  - r / ((1-r)*(1-r)));
+	//pf(n); endc;
+	//assert(abs(f(n) - r3) < eps);
+	ll sgn = +1;
+	if ( abs(f(n+1) - r4) < eps ) { sgn = +1; } else { sgn = -1; }
+	
+	ld ans = 0.0;
+
+	while (t--) {
+		N = (p*N)%m + b;
+		if (N == 1) {
+			ans += r1;
+		} else if (N == 2) {
+			ans += r2;
+		} else {
+			ans += f(n + sgn*(N-3));
+		}
+	}
+				
+	pf(ans); endc;
+
+	return 0;
+}

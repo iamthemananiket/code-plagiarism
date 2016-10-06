@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n)	for(int i=0;i<n;i++)
+#define repn(i, n)	for(int i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx			2005
+#define inf 		1e9
+
+using namespace std;
+
+int n, a[mx];
+int bit[4][mx];
+int dp[mx][mx];
+map<int, int>mp, fp;
+
+void update(int id, int pos, int val){
+	while(pos <= n){
+		bit[id][pos] += val;
+		pos += pos & -pos;
+	}
+}
+
+int read(int id, int pos){
+	int ret = 0;
+	while(pos > 0){
+		ret += bit[id][pos];
+		pos -= pos & -pos;
+	}
+	return ret;
+}
+
+int get(int id, int x, int y){
+	int a = read(id, y);
+	int b = read(id, x-1);
+	return a - b;
+}
+
+void process(){
+	repn(i, n) mp[ a[i] ] = 1;
+	int idx = 0;
+	for(auto i : mp) fp[i.first] = ++idx;
+	repn(i, n){
+		set(bit, 0);
+		update(0, fp[a[i]], 1);
+		for(int j=i+1;j<=n;j++){
+			int x = fp[ a[j] ];
+			int a = get(0, x+1, n);
+			int b = get(1, 0, x-1);
+			int c = get(2, x+1, n);
+			int d = get(3, 0, x-1);
+			dp[i][j] = d;
+//			cout << "~~~ " << i << " <-> " << j << " ~~~\n";
+//			cout << a << " " << b << " " << c << " " << d << endl;
+			update(1, x, a);
+			update(2, x, b);
+			update(3, x, c);
+		}
+	}
+}
+
+int main(){
+	int q, x, y;
+	scanf("%d %d", &n, &q);
+	repn(i, n) scanf("%d", &a[i]);
+	process();
+//	cout << "hello\n";
+	while(q--){
+		scanf("%d %d", &x, &y);
+		printf("%d\n", dp[x][y]);
+	}
+	return 0;
+}

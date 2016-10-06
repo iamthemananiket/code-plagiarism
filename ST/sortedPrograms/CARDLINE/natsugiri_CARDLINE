@@ -1,0 +1,62 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+int T;
+int N, A[2011], B[2011], nxt[2011];
+int dp[2011][2011];
+
+int main() {
+    REP (i, 2011) REP (j, 2011) {
+	if (i>=j) amax(dp[i][j], dp[i-j][j]+j-1);
+	if (i>=j+1) amax(dp[i][j], dp[i-j-1][j]+j);
+    }
+
+
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d", &N);
+	REP (i, N) scanf("%d", A+i), A[i]--;
+	REP (i, N) scanf("%d", B+i), B[i]--;
+	REP (i, N) nxt[A[i]] = B[i];
+	
+	int ans = 0;
+	VI C;
+	REP (i, N) {
+	    int cnt = 0, k = i;
+	    while (nxt[k] != -1) {
+		int x = nxt[k];
+		nxt[k] = -1;
+		k = x;
+		cnt++;
+	    }
+	    if (cnt == 1) ans++;
+	    if (cnt > 1) C.push_back(cnt);
+	}
+
+	REP (i, N+1) {
+	    int cur = 0;
+	    EACH (e, C) cur += dp[*e][i];
+	    amax(ans, cur);
+	}
+
+	printf("%d\n", ans);
+    }
+
+    return 0;
+}
+

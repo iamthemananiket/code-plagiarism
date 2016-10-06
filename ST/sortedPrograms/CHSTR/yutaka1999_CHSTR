@@ -1,0 +1,94 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <stack>
+#define SIZE 5005
+#define MOD 1000000007
+
+using namespace std;
+typedef pair <int,int> P;
+typedef pair <P,int> PP;
+typedef long long int ll;
+
+int rank[SIZE],sa[SIZE],lcp[SIZE];
+int cnt[SIZE];
+char str[SIZE];
+ll dp[2][SIZE],ans[SIZE];
+PP pos[SIZE];
+P st[SIZE];
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int n,q;
+		scanf("%d %d",&n,&q);
+		scanf("%s",&str);
+		for(int i=0;i<n;i++) rank[i]=str[i]-'a';
+		for(int k=1;k<=n;k<<=1)
+		{
+			for(int i=0;i<n;i++)
+			{
+				pos[i]=PP(P(rank[i],i+k<n?rank[i+k]:-1),i);
+			}
+			sort(pos,pos+n);
+			for(int i=0;i<n;)
+			{
+				int s=i;
+				for(;i<n&&pos[i].first==pos[s].first;i++) rank[pos[i].second]=s;
+			}
+		}
+		for(int i=0;i<n;i++) sa[rank[i]]=i;
+		int h=0;
+		for(int i=0;i<n;i++)
+		{
+			if(h>0) h--;
+			if(rank[i]==n-1) continue;
+			int to=sa[rank[i]+1];
+			while(to+h<n&&str[i+h]==str[to+h]) h++;
+			lcp[rank[i]]=h;
+		}
+		lcp[n-1]=0;
+		memset(cnt,0,sizeof(cnt));
+		int sz=0;
+		for(int i=0;i<n;i++)
+		{
+			int last=i;
+			while(sz>0&&st[sz-1].first>lcp[i])
+			{
+				P p=st[--sz];
+				last=p.second;
+				cnt[i-p.second+1]+=p.first-max(lcp[i],(sz==0?0:st[sz-1].first));
+			}
+			st[sz++]=P(lcp[i],last);
+		}
+		int now=0;
+		memset(dp[now],0,sizeof(dp[now]));
+		memset(ans,0,sizeof(ans));
+		dp[now][0]=1;
+		for(int i=1;i<=n;i++)
+		{
+			now^=1;
+			dp[now][0]=dp[now][i]=1;
+			for(int j=1;j<i;j++) dp[now][j]=(dp[now^1][j-1]+dp[now^1][j])%MOD;
+			for(int j=1;j<=i;j++)
+			{
+				ans[j]+=(ll) cnt[i]*dp[now][j]%MOD;
+				if(ans[j]>=MOD) ans[j]-=MOD;
+			}
+		}
+		for(int i=0;i<q;i++)
+		{
+			int t;
+			scanf("%d",&t);
+			if(t>n) puts("0");
+			else if(t==1) printf("%lld\n",((ll) n*(ll) (n+1)/2)%MOD);
+			else printf("%lld\n",ans[t]);
+		}
+	}
+	return 0;
+}

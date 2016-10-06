@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+const int MAXN = 1e6+3;
+int v[3*MAXN];
+int ar[MAXN];
+ll POWER[MAXN];
+void build(int node, int start, int end) {
+	if(start==end) {
+		v[node]=ar[start];
+		return;
+	}
+	int mid=(start+end)>>1;
+	build(2*node,start,mid);
+	build(2*node+1,mid+1,end);
+	v[node]=v[2*node]|v[2*node+1];
+}
+void update(int node, int start, int end, int qs, int qe, int val) {
+	if(start>end or qs>end or qe<start) return;
+	if(start>=qs and end<=qe) {
+		v[node]=val;
+		return;
+	}
+	int mid=(start+end)>>1;
+	update(2*node,start,mid,qs,qe,val);
+	update(2*node+1,mid+1,end,qs,qe,val);
+	v[node]=v[2*node]|v[2*node+1];
+}
+int query(int node, int start, int end, int qs, int qe) {
+	if(start>end or qs>end or qe<start) return 0;
+	if(start>=qs and end<=qe) return v[node];
+	int mid=(start+end)>>1;
+	int q1=query(2*node,start,mid,qs,qe);
+	int q2=query(2*node+1,mid+1,end,qs,qe);
+	return q1|q2;
+}
+int main() {
+	//freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	int n,q;
+	cin>>n>>q;
+	for(int i=1;i<=n;i++) scanf("%d",&ar[i]);
+	build(1,1,n);
+	POWER[0]=1;
+	for(int i=1;i<MAXN;i++) {
+		POWER[i]=POWER[i-1]<<1LL;
+		if(POWER[i]>=MOD) POWER[i]%=MOD;
+	}
+	while(q--) {
+		int t,l,r;
+		scanf("%d%d%d",&t,&l,&r);
+		if(t==1) printf("%lld\n",(1LL*query(1,1,n,l,r)*POWER[r-l])%MOD);
+		else update(1,1,n,l,l,r);
+	}
+	return 0;
+}

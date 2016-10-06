@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(ll i=0;i<n;i++)
+#define REPN(i, n)	for(ll i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+#define ALL(i)		i.begin(), i.end()
+
+#define MAX			1000050
+#define pb			insert
+#define cl 			clear
+#define INF			1e9
+
+using namespace std;
+
+typedef long long ll;
+
+int n, q, X[MAX], Y[MAX];
+
+int main(){
+		scanf("%d %d", &n, &q);
+		int mn = INF, mx = -INF;
+		REPN(i, n){
+			scanf("%d", &X[i]);
+			mn = min(mn, X[i]);
+			mx = max(mx, X[i]);
+		}
+		// cout << mn << ' ' << mx << endl;
+		while(q--){
+			scanf("%d", &n);
+			if(n >= mn && n <= mx) printf("Yes\n");
+			else printf("No\n");
+		}
+	return 0;
+}

@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+#define f first
+#define s second
+ using namespace std;
+
+ const int N = 1e6 + 1;
+ pair<int,int> a[N];
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    // freopen("input.txt","r",stdin); freopen("output.txt","w",stdout);
+
+        int t;
+      cin>>t;
+       while(t--)
+       {
+           int n;
+           cin>>n;
+
+           char tt = 1;
+
+            for(int i=1;i<=n;++i) cin>>a[i].f,a[i].s=i;
+            sort(a+1,a+n+1);
+
+             for(int i=1;i<=n;++i)
+                if(abs(a[i].s - i)>1)
+             {
+                 cout<<"NO\n";
+                 tt=0;
+                 break;
+             }
+
+             if(tt) cout<<"YES\n";
+
+       }
+
+    return 0;
+  }

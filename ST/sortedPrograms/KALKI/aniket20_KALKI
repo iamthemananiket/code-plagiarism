@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define N 1000000007
+using namespace std;
+struct points
+{
+	int x;
+	int y;
+	int pos;
+};
+bool comp(points p1,points p2)
+{
+	if(p1.y<p2.y)
+	{
+		return true;
+	}
+	else if(p1.y>p2.y)
+	{
+		return false;
+	}
+	else
+	{
+		return p1.x<=p2.x;
+	}
+}
+points A[400];
+queue<points>q;
+bool marked[400];
+int main()
+{
+	int t,n,i;
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d",&n);
+		for(i=0;i<n;i++)
+		{
+			scanf("%d %d",&A[i].x,&A[i].y);
+			A[i].pos=i+1;
+			marked[i]=0;
+		}
+		sort(A,A+n,comp);
+		q.push(A[0]);
+		int cnt=0;
+		marked[0]=1;
+		while(!q.empty())
+        {
+            points temp=q.front();
+            q.pop();
+            int dist=INT_MAX;
+            int val=-1;
+            for(i=0;i<n;i++)
+            {
+                if(marked[i]!=1)
+                {
+                    if((sqrt(pow(A[i].x-temp.x,2)+pow(temp.y-A[i].y,2)))<dist)
+                    {
+                        dist=(sqrt(pow(A[i].x-temp.x,2)+pow(temp.y-A[i].y,2)));
+                        val=i;
+                    }
+                }
+            }
+            cnt++;
+            marked[val]=1;
+            printf("%d %d\n",temp.pos,A[val].pos);
+            if(cnt!=n-1)
+            {
+                q.push(A[val]);
+            }
+        }
+	}
+	return 0;
+}

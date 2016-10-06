@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 110;
+const int inf = -1u/2;
+
+char str[N];
+int n;
+
+void evaluate(void) {
+  scanf("%d", &n);
+  int mina = inf, minb = inf;
+  for(int i = 0;i < n;i++) {
+    scanf("%s", str);
+    int a = 0, b = 0;
+    for(int j = 0;str[j];j++) {
+      if(str[j] == 'a') {
+        a++;
+      }else {
+        b++;
+      }
+    }
+    mina = min(mina, a);
+    minb = min(minb, b);
+  }
+  printf("%d\n", min(mina, minb));
+}
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    evaluate();
+  }
+  return 0;
+}

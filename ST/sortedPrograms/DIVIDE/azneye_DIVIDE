@@ -1,0 +1,97 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+
+int fpow(ll b, int e) {
+  ll res = 1;
+  for (; e > 0; e >>= 1) {
+    if (e & 1)
+      res = res * b % MOD;
+    b = b * b % MOD;
+  }
+  return (int) res;
+}
+
+void solve(int test_num) {
+  static int id[1111], col[1111], adj[1111][1111];
+  vector<int> vals;
+  int N;
+  cin >> N;
+  for (int i = 0; i < N; i++)
+    cin >> id[i];
+  for (int i = 0; i < N; i++) {
+    for (int j = i + 1; j < N; j++) {
+      vals.push_back(min(fpow(id[i], id[j]), fpow(id[j], id[i])));
+      adj[i][j] = adj[j][i] = vals.back();
+    }
+  }
+  sort(vals.begin(), vals.end());
+  int res = MOD;
+  queue<int> que;
+  for (int low = 0, high = vals.size() - 1; low <= high;) {
+    const int mid = (low + high) >> 1;
+    memset(col, -1, sizeof(col));
+    bool ok = true;
+    for (int st = 0; st < N && ok; st++) {
+      if (~col[st])
+        continue;
+      que.push(st);
+      col[st] = 0;
+      for (; !que.empty(); que.pop()) {
+        const int at = que.front();
+        for (int to = 0; to < N; to++) {
+          if (at != to && adj[at][to] >= vals[mid]) {
+            if (~col[to] && col[to] == col[at])
+              ok = false;
+            if (~col[to])
+              continue;
+            col[to] = col[at] ^ 1;
+            que.push(to);
+          }
+        }
+      }
+    }
+    if (ok) {
+      res = vals[mid - 1];
+      high = mid - 1;
+    } else
+      low = mid + 1;
+  }
+  cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}
+

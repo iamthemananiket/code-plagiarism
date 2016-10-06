@@ -1,0 +1,84 @@
+/*******************************
+*  Bismillahir Rahminir Rahim  * 
+*******************************/
+ 
+#include <bits/stdc++.h>
+ 
+#define READ(x)     freopen(x, "r", stdin) 
+#define WRITE(x)    freopen(x, "w", stdout)
+
+#define REP(i, n)   for(int i=0;i<n;i++)
+#define REPN(i, n)  for(int i=1;i<=n;i++)
+#define SET(i, n)   memset(i, n, sizeof(i))
+ 
+#define MAX         100050
+#define INF         (1 << 29)
+#define pb          push_back
+ 
+using namespace std;
+ 
+typedef long long       ll;
+typedef pair<int, int>  pii;
+typedef double 			db;
+
+char str[MAX];
+int n, k, T[MAX * 4], P[MAX * 4], cnt = 0;
+
+void build(int b, int e, int node){
+	// cnt++;
+	// if(cnt > 15) return;
+	// cout << b << ' ' << e << ' ' << node << endl;
+	if(b == e){
+		T[node] = str[b-1] - 'a';
+		P[node] = b;
+		return;
+	}
+	int mid = (b + e) / 2, l = 2 * node, h = l + 1;
+	build(b, mid, l);
+	build(mid+1,e,h);
+	if(T[l] <= T[h]){
+		T[node] = T[l];
+		P[node] = P[l];
+	}
+	else{
+		T[node] = T[h];
+		P[node] = P[h];
+	}
+	// cout << node << " -> " << T[node] << ' ' << P[node] << endl;
+}
+
+int get(int b, int e, int node, int x, int y){
+	if(y < b || e < x) return -1;
+	if(b >= x && e <= y) return P[node];
+	int mid = (b + e) / 2, l = 2 * node, h = l + 1;
+		int r1 = get(b, mid, l, x, y);
+		int r2 = get(mid+1,e,h, x, y);
+		if(r1 == -1) return r2;
+		if(r2 == -1) return r1;
+		if(str[r1-1] <= str[r2-1]) return r1;
+		return r2;
+	
+}
+
+int main(){
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		scanf("%s", str);
+		scanf("%d", &k);
+		n = strlen(str);
+		build(1, n, 1);
+		int fixed = 1, left = k-1;
+		string ret = "";
+		REP(i, k){
+			// cout << "@ " << i << endl;
+			int ps = get(1, n, 1, fixed, n-left);
+			// cout << ps << ' ' << str[ps-1] << endl;
+			ret += str[ps-1];
+			fixed = ps + 1;
+			left--;
+		}
+		cout << ret << '\n';
+	}
+    return 0;
+}

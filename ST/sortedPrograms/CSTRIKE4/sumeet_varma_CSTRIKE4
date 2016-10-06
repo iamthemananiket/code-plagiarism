@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+vector<int> v;
+
+void revers(int i , int j )
+{
+    while(i <= j)
+    {
+        int temp = v[i];
+        v[i] = v[j];
+        v[j] = temp;
+        i++;
+        j--;
+    }
+}
+
+int main()
+{
+    string str;
+    cin>>str;
+    assert(1<= str.length() && str.length() <= 100000);
+    int n = str.length();
+    n++;
+    for(int i = 0 ; i < n ; i++)
+        v.push_back(n-i);
+    vector<pair<int,char> > VV;
+    int vali = 0;
+    int vald = 0;
+    for(int i= 0 ; i< str.length() ; i++)
+    {
+        if(str[i] == 'C')
+        {
+            if(vald != 0)
+            {
+                VV.push_back(make_pair(vald,'D'));
+                vald = 0;
+            }
+            vali++;
+        }
+        else
+        {
+            if(vali != 0)
+            {
+                VV.push_back(make_pair(vali,'I'));
+                vali = 0;
+            }
+            vald++;
+        }
+    }
+            if(vald != 0)
+            {
+                VV.push_back(make_pair(vald,'D'));
+                vald = 0;
+            }
+            if(vali != 0)
+            {
+                VV.push_back(make_pair(vali,'I'));
+                vali = 0;
+            }
+    int index= 0;
+    for(int i=0 ; i< VV.size() ; i++)
+    {
+        if(VV[i].second == 'D')
+        {
+                index += VV[i].first;
+        }   
+        else
+        {
+            revers(index, index+VV[i].first);
+            index += VV[i].first;
+        }
+    }
+    for(int i = 0 ; i< v.size() ; i++)
+        cout<<v[i]<<" ";
+    cout<<endl;
+    return 0;
+}

@@ -1,0 +1,53 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cassert>
+#include <vector>
+
+using namespace std;
+
+int K;
+
+long long N;
+
+int search(){
+	int low,high;
+	low = 1, high = K;
+
+	long long ss;
+	int mid;
+	while(low < high){
+		mid = (low+high+1)/2;
+		ss = (K+mid)*1LL*(K-mid+1);
+		ss /= 2;
+
+		if(ss < N){
+			high = mid-1;
+		}else{
+			low = mid;
+		}
+	}
+
+	return (K-low+1);
+}
+
+int main(){
+
+
+	long long ss;
+	int t;
+	scanf("%d",&t);
+
+	while(t--){
+		scanf("%lld%d",&N,&K);
+
+		ss = 1LL*(K)*(K+1);
+		ss /= 2;
+		if(ss < N) printf("-1\n");
+		else printf("%d\n",K-search());
+	}
+
+
+	return 0;
+}

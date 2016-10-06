@@ -1,0 +1,103 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%lld",&x)
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli long long int
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+using namespace std;
+lli pow23[2000017];
+int prog()
+{
+    lli n,i,l,j,pr,d,dd,carry,k,x,y,z,m,s,tot,ans;
+    int dig;
+    gi(n);gi(d);
+    dd=d*d;
+    ans = 0;
+    carry=0;
+    l=(2*n)-2;
+    if(d>=3)
+        l++;
+    if(d==3 && n==1)
+        l--;
+    x=1;
+    fl(i,0,n)
+        {
+            pr = carry + (x*dd);
+            carry = pr/10;
+            carry%=mod;
+            dig = pr%10;
+            ans+=(pow23[l]*dig);
+            x+=1;
+            l-=1;
+            while(ans>=mod)
+                ans-=mod;
+        }
+    x-=2;
+        fl(i,0,n-1)
+        {
+            pr = carry + (x*dd);
+            carry = pr/10;
+            carry%=mod;
+            dig = pr%10;
+            ans+=(pow23[l]*dig);
+            x-=1;
+            l-=1;
+            while(ans>=mod)
+                ans-=mod;
+        }
+    while(carry!=0)
+    {
+        pr = carry;
+        carry/=10;
+        dig= pr%10;
+        ans+=(pow23[l]*dig);
+        l-=1;
+        while(ans>=mod)
+            ans-=mod;
+    }
+    printf("%lld\n",ans);
+    r0;
+}
+int main()
+{
+   // f_in;
+   lli i;
+    pow23[0]=1;
+    fl(i,1,2000007)
+        pow23[i]=(pow23[i-1]*23)%mod;
+    lli t;
+    gi(t);
+    while(t--)
+        prog();
+    r0;
+}

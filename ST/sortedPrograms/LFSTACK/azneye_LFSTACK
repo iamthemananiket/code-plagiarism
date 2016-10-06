@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+
+bool rec(const vector<int>& all, int pos, const vector<vector<int>>& seq, vector<int>& at) {
+  if(pos==(int)all.size())return true;
+  for(int i=0;i<(int)at.size();++i){
+    if(at[i] < (int)seq[i].size() && seq[i][at[i]] == all[pos]) {
+      ++at[i];
+      if (rec(all, pos+1, seq, at)) return true;
+      --at[i];
+    }
+  }
+  return false;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N, L = 0;
+    cin >> N;
+    vector<vector<int>>seq(N);
+    for(auto& s:seq){
+      int len;
+      cin>>len;
+      s.resize(len);
+      for(int& x:s)
+        cin>>x;
+      L+=len;
+    }
+    vector<int>all(L);
+    for(int&a:all)
+      cin>>a;
+    reverse(all.begin(),all.end());
+    vector<int> at(N, 0);
+    const bool res=(N==1)? all==seq[0] : rec(all, 0, seq, at);
+    if(res)cout<<"Yes\n";
+    else cout<<"No\n";
+  }
+  return 0;
+}

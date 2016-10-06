@@ -1,0 +1,86 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         2.0*acos(0.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+vector < int > vc[11];
+char pp[100002];
+queue < int > Q;
+LL ar[100001], vis[11];
+main() {
+//    ios_base::sync_with_stdio(0); cin.tie(0);
+    LL a,b,c,d = 0,e,f = 0,g = 0,h = 0,x,y,z;
+    scanf("%s", pp);
+    a = strlen(pp);
+    REP(i, a){
+        vc[pp[i] - '0'].pb(i);
+        ar[i] = 100;
+    }
+    Q.push(0);
+    ar[0] = 0;
+    while(!Q.empty()){
+        b = Q.front();
+        Q.pop();
+        if(vis[pp[b] - '0'] == 0){
+            REP(i, vc[pp[b] - '0'].size()){
+                if(ar[vc[pp[b] - '0'][i]] > 50) {
+                    ar[vc[pp[b] - '0'][i]] = ar[b] + 1;
+                    Q.push(vc[pp[b] - '0'][i]);
+                }
+            }
+            vis[pp[b] - '0'] = 1;
+        }
+        if(b > 0 && pp[b - 1] != pp[b] && ar[b - 1] > 50){
+            ar[b - 1] = ar[b] + 1;
+            Q.push(b - 1);
+        }
+        if(b < a - 1 && pp[b + 1] != pp[b] && ar[b + 1] > 50){
+            ar[b + 1] = ar[b] + 1;
+            Q.push(b + 1);
+        }
+    }
+    cout << ar[a - 1] << endl;
+}

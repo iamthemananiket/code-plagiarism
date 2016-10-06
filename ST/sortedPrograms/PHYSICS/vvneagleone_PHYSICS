@@ -1,0 +1,89 @@
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<set>
+#include<unordered_map>
+#include<unordered_set>
+#include<map>
+using namespace std;
+typedef long long LL;
+#define MOD 1000000007LL
+
+#define gx getchar_unlocked
+#define px putchar_unlocked
+#define ps putchar_unlocked(' ')
+#define pn putchar_unlocked('\n')
+
+void scan(int &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*sign;}
+void lscan(LL &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*(LL)(sign);}
+int sscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n')a[i++]=c,c=gx();a[i]=0;return i;}
+int wscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n'&&c!=' ')a[i++]=c,c=gx();a[i]=0;return i;}
+void print(int n){if(n<0){n=-n;px('-');}int i=10;char o[10];do{o[--i]=(n%10)+'0';n/=10;}while(n);do{px(o[i]);}while(++i<10);}
+void lprint(LL n){if(n<0LL){n=-n;px('-');}int i=21;char o[21];do{o[--i]=(n%10LL)+'0';n/=10LL;}while(n);do{px(o[i]);}while(++i<21);}
+void sprint(const char*a){const char*p=a;while(*p)px(*p++);}
+
+int main() {
+    LL t, n, f;
+    int i, j, k;
+    LL a, max;
+    lscan(t);
+    
+    while(t--) {
+        unordered_map< LL, LL > N;
+        unordered_map< LL, LL >::iterator NI;
+        unordered_map< LL, LL > NN;
+        set< LL > aa;
+        set< LL >::iterator ai;
+        set< LL >::reverse_iterator rai;
+        LL ans = max = 0;
+        
+        lscan(n); lscan(f);
+        for( i = 0; i < n; ++i ) {
+            lscan(a);
+            if( max < a ) max = a;
+            ai = aa.find(a);
+            if( ai == aa.end() ) {
+                aa.insert(a);
+                N.insert(pair<LL,LL>(a,1));
+            }
+            else {
+                N[a]++;
+            }
+        }
+        
+        LL ix, x;
+        bool flag;
+        for( rai = aa.rbegin(); rai != aa.rend(); ++rai ) {
+            x = *rai;
+            ix = x*f;
+            flag = 0;
+            //cout << "X = " << x << "ix = " << ix << "max = " << max << endl;
+            while( ix <= max ) {
+                NI = N.find(ix);
+                if( NI != N.end() ) {flag = 1;break;}
+                ix *= f;
+            }
+            if( flag == 0 ) {
+                NN.insert( pair<LL,LL>(x,N[x]) );
+            }
+            else {
+                NN.insert( pair<LL,LL>(x, N[x]+NN[ix] ));
+                //cout << "inserting " << x << " " << N[x] << " " << NN[ix] << endl;
+                ans += NN[ix] * N[x];
+            }
+            ans += ( (N[x] * (N[x]-1)) >> 1 );
+        }
+        /*for( NI = N.begin(); NI != N.end(); ++NI ) {
+            cout << NI->first << " " << NI->second << " " << NN[NI->first] << endl;
+        }
+        cout << "THE ANSWER -> ";*/
+        lprint(ans); pn;
+    }
+	return 0;
+}

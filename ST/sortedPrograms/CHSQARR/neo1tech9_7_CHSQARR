@@ -1,0 +1,128 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, h, c, z, d, a, b;
+const int N = 1e3 + 50;
+const int LN = 13;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+int A[N][N];
+int B[N][N];
+int S[N][N];
+int sum[N][N];
+int t1[N][N][LN], t2[N][N][LN];
+int lg2[N];
+inline void init(int L[][LN], int n, int A[]) {
+    for (int i = 1; i <= n; ++i)
+        L[i][0] = A[i];
+    for (int j = 1; j < LN; ++j)
+        for (int i = 1; i <= n; ++i)
+            L[i][j] = max(L[i][j - 1], L[min(n, i + (int)(1LL << (j - 1)))][j - 1]);
+}
+inline int query(int L[][LN], int rl, int rr) {
+    int p = lg2[rr - rl + 1];
+    return max(L[rl][p], L[rr - (1LL << p) + 1][p]);
+}
+int main() {
+    csl;
+    int j = -1;
+    cin >> n >> m;
+    for (int i = 1; i <= max(n, m); ++i) {
+        if (1 << (j + 1) == i) j++;
+        lg2[i] = j;
+    }
+    for (int i = 1; i <= n; ++i)
+        for (int j = 1; j <= m; ++j)
+            cin >> A[i][j];
+    for (int i = 1; i <= n; ++i) {
+        for (int j = 1; j <= m; ++j) {
+            S[i][j] = S[i][j - 1] + A[i][j];
+        }
+    }
+    for (int i = 1; i <= n; ++i)
+        init(t1[i], m, A[i]);
+    cin >> q;
+    int sol  = INT_MAX;
+    while (q--) {
+        sol = INT_MAX;
+        cin >> a >> b;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = b; j <= m; ++j) {
+                B[j][i] = query(t1[i], j - b + 1, j);
+                sum[i][j] = S[i][j] - S[i][j - b];
+            }
+        }
+        for (int j = b; j <= m; ++j) {
+            int res = 0;
+            init(t2[j], n, B[j]);
+            for (int i = 0; i <= a - 1; ++i) {
+                res += sum[i][j];
+            }
+            for (int i = a; i <= n; ++i) {
+                res += sum[i][j];
+                sol = min(sol, (int)a * (int)b * query(t2[j], i - a + 1, i) - res);
+                res -= sum[i - a + 1][j];
+            }
+        }
+        cout << sol << '\n';
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

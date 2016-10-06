@@ -1,0 +1,139 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <map>
+
+#define NMAX 100010
+
+using namespace std;
+
+vector<int> child[NMAX];
+
+int cyc[NMAX];
+long long wt[NMAX];
+
+int visited[NMAX];
+int tm;
+
+int nx[NMAX];
+long long dp[NMAX];
+
+int dfs(int v){
+
+	if(visited[v]){
+		if(visited[v]^tm) return -1;
+		return v;
+	}
+	visited[v] = tm;
+
+	cyc[v] = dfs(nx[v]);
+	if(cyc[v] < 0) return -1;
+	if(cyc[v] == v){
+		nx[v]  =-1;//root
+		return -1;
+	}
+
+	wt[cyc[v]] += wt[v];
+	return cyc[v];
+}
+int N;
+int ct = 0;
+
+void init(){
+	int i;
+
+
+	tm =0 ;
+	for(i = 0; i < N; ++i){
+		++tm;
+		dfs(i);
+	}
+
+	for(i = 0; i < N; ++i) if(cyc[i] < 0) cyc[i] = i;
+	for(i = 0; i < N; ++i){
+		if(nx[i] < 0 || cyc[i] != i) continue;
+		nx[i] = cyc[nx[i]];
+		child[nx[i]].push_back(i);
+	}
+	ct = 0;
+}
+
+long long df2(int v){
+	int i;
+	assert(++ct <= N);
+	dp[v] = wt[v];
+
+	for(i = 0; i < child[v].size(); ++i){
+		dp[v] += df2(child[v][i]);
+	}
+
+	dp[v] = max(dp[v],0LL);
+	return dp[v];
+}
+
+void clear(){
+	int i;
+	for(i = 0; i < N; ++i) child[i].clear();
+	for(i = 0; i < N; ++i) visited[i] = 0;
+}
+
+int get_int(){
+	char c;
+	int i,m;
+
+	m = 1;
+	c = getchar();
+	while(c < '0' || c > '9'){
+		if(c == '-') m = -1;
+		c = getchar();
+	}
+
+	i = 0;
+	while(c >= '0' && c<='9'){
+		i *= 10;
+		i += c-'0';
+		c =getchar();
+	}
+
+	return i*m;
+}
+
+int main(){
+
+	int i,t;
+	long long sl;
+
+	t = get_int();
+
+	while(t--){
+
+		N = get_int();
+
+		for(i = 0; i < N; ++i) {
+			nx[i] = get_int();
+			--nx[i];
+		}
+
+		for(i =0; i < N; ++i){
+			wt[i] = get_int();
+		}
+
+		init();
+
+		sl =0 ;
+		for(i =0 ; i < N; ++i){
+			if(nx[i] >= 0) continue;
+			sl += df2(i);
+		}
+
+		printf("%lld\n",sl);
+		clear();
+	}
+
+
+
+	return 0;
+}

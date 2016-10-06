@@ -1,0 +1,55 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+#define MOD 1000000007
+char a[50001];
+char b[50001];
+int b_siz;
+int a_siz;
+int t;
+int main(){
+	scanf("%s", a);
+	a_siz = strlen(a);
+	scanf("%d", &t);
+	while (t--){
+		scanf("%s", b);
+		long long int hh = 0;
+		b_siz = strlen(b);
+		for (int i = 0; i <= a_siz - b_siz; i++){
+			long long int dist = 0;
+			for (int ii = 0; ii < b_siz; ii++){
+				if (a[i+ii] != b[ii]){
+					dist++;
+				}
+			}
+			hh *= 100001LL;
+			hh += dist;
+			hh %= MOD;
+		}
+		printf("%lld\n", hh);
+	}
+	return 0;
+}

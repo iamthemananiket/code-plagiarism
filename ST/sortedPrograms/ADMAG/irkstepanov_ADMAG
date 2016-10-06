@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+#define mp std::make_pair
+#define pb push_back
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int) (a).size()
+
+int max(int a, int b)
+{
+    return (a > b ? a : b);
+}
+
+int min(int a, int b)
+{
+    return (a < b ? a : b);
+}
+
+typedef long long ll;
+typedef long double ld;
+typedef std::vector <int> vi;
+
+const ll inf = 1000000000ll * 1000000000ll;
+
+int main()
+{
+
+    ll f[90];
+    f[0] = f[1] = 1;
+
+    for (int i = 2; i < 90; i++)
+        f[i] = f[i - 1] + f[i - 2];
+
+    int tt;
+    scanf("%d", &tt);
+
+    while (tt--)
+    {
+        ll n;
+        scanf("%lld", &n);
+        if (n == 1) {printf("1\n"); continue;}
+        int i = 1;
+        for (; f[i + 1] <= n; i++) ;
+        printf("%d\n", i);
+    }
+
+}

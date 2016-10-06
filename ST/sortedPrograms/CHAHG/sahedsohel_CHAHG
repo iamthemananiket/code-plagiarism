@@ -1,0 +1,215 @@
+/***************************************
+    codeforces = topcoder = sahedsohel
+    IIT,Jahangirnagar University(42)
+****************************************/
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define ull unsigned long long int
+#define inf (INT_MAX/10)
+#define linf (LLONG_MAX/10LL)
+#define sc(a) scanf("%d",&a)
+#define sc2(a,b) scanf("%d%d",&a,&b)
+#define sc3(a,b,c) scanf("%d%d%d",&a,&b,&c)
+#define sc4(a,b,c,d) scanf("%d%d%d%d",&a,&b,&c,&d)
+#define fl(c,i,n) for(i=c;i<n;i++)
+#define f(i,n) for(i=0;i<n;i++)
+#define mem(a) memset(a,0,sizeof(a))
+#define memn(a) memset(a,-1,sizeof(a))
+#define pb push_back
+#define aov(a) a.begin(),a.end()
+#define mpr make_pair
+//#define PI (2.0*acos(0.0)) //#define PI acos(-1.0)
+#define PI (3.14159265359)
+#define xx first
+#define yy second
+#define mxv(a) *max_element(aov(a))
+#define mnv(a) *min_element(aov(a))
+#define LB(a,x) (lower_bound(aov(a),x)-a.begin())
+#define UB(a,x) (upper_bound(aov(a),x)-a.begin())
+#define to_c_string(a) a.c_str()
+#define strtoint(c) atoi(&c[0])
+#define pll pair< ll , ll >
+#define pii pair< int , int >
+#define pid pair< int , double >
+#define pcs(a) printf("Case %d: ", a)
+#define nl puts("")
+#define endl '\n'
+#define dbg(x) cout<<#x<<" : "<<x<<endl
+
+template <class T> inline T bigmod(T p,T e,T M){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p) % M;p = (p * p) % M;}return (T)ret;}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}   // M is prime}
+template <class T> inline T bpow(T p,T e){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p);p = (p * p);}return (T)ret;}
+
+int toInt(string s){int sm;stringstream ss(s);ss>>sm;return sm;}
+int toLlint(string s){long long int sm;stringstream ss(s);ss>>sm;return sm;}
+
+
+///int mnth[]={-1,31,28,31,30,31,30,31,31,30,31,30,31};  //Not Leap Year
+///int dx[]={2,1,-1,-2,-2,-1,1,2};int dy[]={1,2,2,1,-1,-2,-2,-1};//Knight Direction
+///int dx[]={-1,+1,0,1,0,-1}; // Hexagonal Direction   **
+///int dy[]={-1,+1,1,0,-1,0}; //                       *#*
+///                                                     **
+///const double eps=1e-9;
+///int dx[]={0,1,0,-1};int dy[]={1,0,-1,0}; //4 Direction
+
+/*****************************************************************/
+/// ////////////////////   GET SET GO    ////////////////////// ///
+/*****************************************************************/
+
+
+#define intx(i,j,k,l) ((a[i]*b[j]-b[i]*a[j])*(a[k]-a[l])-(a[i]-a[j])*(a[k]*b[l]-b[k]*a[l]))/((a[i]-a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]-a[l]))
+#define inty(i,j,k,l) ((a[i]*b[j]-b[i]*a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]*b[l]-b[k]*a[l]))/((a[i]-a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]-a[l]))
+#define dst(u,v,x,y) sqrt((x*1.0-u*1.0)*(x*1.0-u*1.0)+(y*1.0-v*1.0)*(y*1.0-v*1.0))
+#define area(p1,p2,p3) (p1.xx*p2.yy+p2.xx*p3.yy+p3.xx*p1.yy-p1.yy*p2.xx-p2.yy*p3.xx-p3.yy*p1.xx)
+
+int ts,kk=1;
+
+#define M 200005
+#define MD 1000000007LL
+#define MX 1000000001
+
+int n;
+ll bs[12],d[12],lo,hi,nx,sn,q,x;
+vector< pll >v;
+int sz;
+
+bool chk()
+{
+    int i;
+    if( bs[0]==bs[1] )return 0;
+    if(n==2)return 1;
+
+    for(i=2;i<n;i++)
+    {
+        if(bs[i]==bs[i-1])return 0;
+        if( bs[i]-bs[i-1] < 0 )
+        {
+            if( bs[i-1]-bs[i-2] < 0 )return 0;
+        }
+        else
+        {
+            if( bs[i-1]-bs[i-2] > 0 )return 0;
+        }
+    }
+    return 1;
+}
+
+int main()
+{
+    int t,i,j,k;
+
+    sc(ts);
+    while(ts--)
+    {
+        sc(n);
+        f(i,n)sc2(j,k),bs[i]=j,d[i]=k;
+        if(n==1)
+        {
+            printf("1\n0 Inf\n");
+            continue;
+        }
+        v.clear();
+        sz=0;
+        lo=0;
+        hi=0;
+        k=100;
+        while(k--)
+        {
+            t=100;
+            while(t--&&!chk())
+            {
+                nx=LLONG_MAX;
+                q=bs[1]-bs[0];
+                x=d[0]-d[1];
+                if((q<0&&x<0)||(q>0&&x>0)||(q==0&&x!=0))
+                {
+                    nx=(q)/x;
+                }
+                for(i=2;i<n;i++)
+                {
+                    q=bs[i]-bs[i-1];
+                    x=d[i-1]-d[i];
+                    if((q<0&&x<0)||(q>0&&x>0)||(q==0&&x!=0))
+                    {
+                        x=(q)/x;
+                        nx=min(nx,x);
+                    }
+                }
+//                cout<<"inv "<<lo<<" : "<<nx<<endl;
+                if(nx==LLONG_MAX)break;
+                nx=max(1LL,nx-2);
+//                cout<<"inv "<<lo<<" : "<<nx<<endl;
+                f(i,n)bs[i]+=nx*d[i];
+                lo+=nx;
+                if(chk())break;
+//                cout<<bs[0]<<" "<<bs[1]<<endl;
+                f(i,n)bs[i]+=d[i];
+                lo+=1;
+                if(chk())break;
+//                cout<<"inv2 "<<lo<<" : "<<nx<<endl;
+            }
+            if(nx==linf||!chk())break;
+//                cout<<"ifn2 "<<lo<<" : "<<nx<<endl;
+
+            nx=LLONG_MAX;
+            q=bs[1]-bs[0];
+            x=d[0]-d[1];
+            if((q<0&&x<0)||(q>0&&x>0)||(q==0&&x!=0))
+            {
+                nx=(q)/x;
+            }
+            for(i=2;i<n;i++)
+            {
+                q=bs[i]-bs[i-1];
+                x=d[i-1]-d[i];
+                if((q<0&&x<0)||(q>0&&x>0)||(q==0&&x!=0))
+                {
+                    x=(q)/x;
+                    nx=min(nx,x);
+                }
+            }
+//            cout<<"val "<<nx<<endl;
+            if(nx==LLONG_MAX)
+            {
+                v.pb(pll(lo,-1));
+                break;
+            }
+
+            hi=lo;
+            nx=max(0LL,nx-2);
+            if(nx)
+            {
+                f(i,n)bs[i]+=nx*d[i];
+                hi+=nx;
+            }
+            t=20;
+            while(t--&&chk())
+            {
+                f(i,n)bs[i]+=d[i];
+                hi+=1;
+            }
+            if(t<0)
+            {
+                v.pb(pll(lo,-1));
+                break;
+            }
+            v.pb( pll(lo,hi-1) );
+            lo=hi;
+//            cout<<"val2 "<<lo<<" "<<nx<<endl;
+//            getchar();
+        }
+//        cerr<<"----------"<<endl;
+        printf("%d\n",v.size());
+        f(i,v.size())
+        {
+            if(v[i].yy==-1)printf("%lld Inf\n",v[i].xx);
+            else printf("%lld %lld\n",v[i].xx,v[i].yy);
+        }
+    }
+
+    return 0;
+}
+

@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int, int> ii;
+const int max_n = 1010;
+
+int n;
+
+vector<vi> al;
+int p[2];
+vi y, root, val;
+
+ii coloring(int v, int c) {
+	ii ret = make_pair(0,0);
+	queue<int> q;
+	q.push(v);
+	y[v] = c;
+	if(c)
+		ret.second++;
+	else
+		ret.first++;
+	while(!q.empty()) {
+		int u = q.front();
+		q.pop();
+		for(int i = 0; i<al[u].size(); i++) {
+			int w = al[u][i];
+			if(y[w] == -1) {
+				y[w] = 1-y[u];
+				if(y[w])
+					ret.second++;
+				else
+					ret.first++;
+				q.push(w);
+			}
+			else
+				if(y[w] == y[u])
+					return ii(-1,-1);
+		}
+	}
+	return ret;
+}
+
+bool cmp(int a, int b) {
+	return abs(val[a]) > abs(val[b]);
+}
+
+bool bipartite() {
+	vi id;
+	int s = 0;
+	id.clear();
+	root.clear();
+	val.clear();
+	for(int i = 0; i<n; i++) 
+	if(y[i] == -1)
+	{
+		id.push_back(s);
+		root.push_back(i);
+		ii res = coloring(i, 0);
+		if(res.first == -1)
+			return false;
+		val.push_back(res.first-res.second);
+		s++;
+	}
+	sort(id.begin(), id.end(), cmp);
+	y.assign(n, -1);
+	s = 0;
+	for(int i = 0; i<id.size(); i++) {
+		int j = id[i];
+		if(abs(s+val[j]) <= abs(s-val[j])) {
+			coloring(root[j], 0);
+			s += val[j];
+		}
+		else {
+			coloring(root[j], 1);
+			s -= val[j];
+		}
+	}
+	return true;
+}
+
+int main() {
+	int t, a;
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d", &n);
+		al.assign(n, vi());
+		y.assign(n, -1);
+		for(int i = 0; i<n; i++)
+			for(int j = 0; j<n; j++) {
+				scanf("%d", &a);
+				if(a) {
+					al[i].push_back(j);
+				}
+			}
+		if(bipartite()) {
+			for(int i = 0; i<n; i++) {
+				printf("%d ", y[i]);
+			}
+			printf("\n");
+		}
+		else
+			printf("-1\n");
+	}
+}

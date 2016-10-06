@@ -1,0 +1,59 @@
+#include<bits/stdc++.h>
+#define N 300
+#define M 100000
+using namespace std;
+int n,m,K,T,ans,l,r,i,tot,j,k;
+int q[M],head[N],use[N],ne[M],V[N],v[M],b[N],a[N],f[N],g[128][N],sb[N];
+void add(int x,int y){v[++l]=y;ne[l]=head[x];head[x]=l;}
+void spfa(int *dis)
+{
+	for(;l<=r;l++)
+	{
+		use[q[l]]=0;
+		for(int i=head[q[l]];i;i=ne[i])
+		if(b[v[i]]!=-1&&dis[q[l]]+V[v[i]]<dis[v[i]])
+		{
+			dis[v[i]]=dis[q[l]]+V[v[i]];
+			if(!use[v[i]])use[v[i]]=1,q[++r]=v[i];
+		}
+	}
+}
+int main()
+{
+	scanf("%d%d%d",&n,&m,&K);T=n*m;ans=1e9;
+	for(i=1;i<=T;i++)
+	{
+		if(i%m!=1)add(i,i-1),add(i-1,i);
+		if(i>m)add(i,i-m),add(i-m,i);
+		scanf("%d",&a[i]);
+		if(a[i]>0&&!use[a[i]])use[a[i]]=1,f[++tot]=a[i];
+	}
+	for(i=1;i<=tot;i++)sb[i]=sb[i-1]%K+1;
+	for(i=1;i<=T;i++)scanf("%d",&V[i]);
+	if(tot<K){puts("-1");return 0;}
+	for(int ss=300;ss;ss--)
+	{
+		memset(g,63,sizeof(g));
+		memset(use,0,sizeof(use));
+		random_shuffle(sb+1,sb+tot+1);
+		for(i=1;i<=tot;i++)use[f[i]]=i;
+		for(i=1;i<=T;i++)
+		{
+			b[i]=a[i]>=0?sb[use[a[i]]]:-1;
+			if(b[i]>=0)g[0][i]=V[i];
+			if(b[i]>0)g[1<<b[i]-1][i]=V[i];
+		}
+		for(i=1;i<1<<K;i++)
+		{
+			for(j=1;j<=T;j++)if(b[j]>=0)
+				for(k=(i-1)&i;k;k=(k-1)&i)
+					g[i][j]=min(g[i][j],g[k][j]+g[i^k][j]-V[j]);
+			l=r=0;
+			memset(use,0,sizeof(use));
+			for(j=1;j<=T;j++)if(g[i][j]<1e9)use[q[++r]=j]=1;
+			spfa(g[i]);
+		}
+		for(j=1;j<=T;j++)if(g[(1<<K)-1][j]<ans)ans=g[(1<<K)-1][j];
+	}
+	if(ans>=9e8)puts("-1");else printf("%d\n",ans);
+}

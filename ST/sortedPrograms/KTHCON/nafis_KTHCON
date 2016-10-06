@@ -1,0 +1,132 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+typedef pair<LL, LL> point;
+
+LL cw(const point &a, const point &b, const point &c) {
+    return (b.first - a.first) * (c.second - a.second) - (b.second - a.second) * (c.first - a.first);
+}
+
+vector<point> convexHull(vector<point> p) {
+    int n = p.size();
+    if (n <= 1)
+        return p;
+    sort(p.begin(), p.end());
+    int cnt = 0;
+    vector<point> q(n * 2);
+    for (int i = 0; i < n; q[cnt++] = p[i++])
+        for (; cnt >= 2 && cw(q[cnt - 2], q[cnt - 1], p[i]) >= 0; --cnt)
+            ;
+    for (int i = n - 2, t = cnt; i >= 0; q[cnt++] = p[i--])
+        for (; cnt > t && cw(q[cnt - 2], q[cnt - 1], p[i]) >= 0; --cnt)
+            ;
+    q.resize(cnt - 1 - (q[0] == q[1]));
+    return q;
+}
+
+vector < point > A, B, tmp, tmp1;
+set < point > S;
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    int T; cin >> T;
+    while(T--){
+        A.clear(); B.clear(); tmp.clear(); S.clear(); tmp1.clear();
+        int n; cin >> n;
+        REP(i, n){
+            int x, y; cin >> x >> y;
+            tmp.pb(mp(x, y));
+        }
+        A = convexHull(tmp);
+        REP(i, A.size()){
+            S.insert(A[i]);
+        }
+        REP(i, tmp.size()){
+            if(S.count(tmp[i]) == 0) tmp1.pb(tmp[i]);
+        }
+        B = convexHull(tmp1);
+
+        if(B.size() == 0){
+            cout << -1 << endl;
+            continue;
+        }
+
+        LL mx = abs(cw(A[0], A[1], B[0])), id = 0;
+        REP(i, B.size()){
+            if(abs(cw(A[0], A[1], B[i])) < mx){
+                mx = abs(cw(A[0], A[1], B[i]));
+                id = i;
+            }
+        }
+
+
+        LL res = mx;
+        for(int i = 1; i < A.size(); i++){
+            LL v = abs(cw(A[i], A[(i+1)%A.size()], B[id]));
+            while(1){
+                id = (id + 1) % B.size();
+                if(abs(cw(A[i], A[(i+1)%A.size()], B[id])) < v){
+                    v = abs(cw(A[i], A[(i+1)%A.size()], B[id]));
+                } else {
+                    id = (id - 1 + B.size()) % B.size();
+                    break;
+                }
+            }
+
+            if(v < res) res = v;
+        }
+
+        LL tv = 0;
+        REP(i, A.size()){
+            tv += A[i].xx * A[(i+1) % A.size()].yy - A[i].yy * A[(i+1) % A.size()].xx;
+        }
+        tv = abs(tv);
+        tv -= res;
+
+        cout << tv << endl;
+
+    }
+}

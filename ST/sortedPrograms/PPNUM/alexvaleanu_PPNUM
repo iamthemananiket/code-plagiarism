@@ -1,0 +1,42 @@
+#include <iostream>
+#include <fstream>
+#include <cmath>
+
+using namespace std;
+
+const long long v[] = { 0,9,99,999,9999,99999,999999,9999999,99999999,999999999,9999999999,99999999999,999999999999 };
+const long long x[] = { 0,1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000,10000000000,100000000000 };
+
+const long long mod =  1000000007;
+
+int T;
+long long L, R;
+unsigned long long suma;
+
+int main()
+{
+    //ifstream cin("date.in");
+
+    for ( cin >> T; T; T--, suma = 0 )
+    {
+        cin >> L >> R;
+
+        int nr_cifL = log10( L * 1.0 ) + 1;
+        int nr_cifR = log10( R * 1.0 ) + 1;
+
+        for ( int k = nr_cifL; k <= nr_cifR; ++k )
+        {
+            long long start = max( L, x[k] );
+            long long finish = min( R, x[k + 1] );
+
+            if ( finish == x[k + 1] )
+                    finish--;
+
+            suma = ( suma + ( finish + start ) * ( finish - start + 1 ) / 2LL * k ) % mod;
+        }
+
+        cout << suma << "\n";
+    }
+
+    return 0;
+}

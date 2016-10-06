@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+ll A[MAXN];
+
+void solve() {
+	ll n,k; sl(n); sl(k);
+	rep(i,1,n) sl(A[i]);
+	ll ans = 0;
+	ll left = 0;
+	rep(i,1,n) {
+		ll p = 0;
+		if (A[i] >= left) {
+			p = A[i] - left;
+			p/=k;
+		}
+		if (left + p*k < A[i]) p++;
+		left = left + p*k - A[i] - 1;
+		ans += p;
+		if (left < 0) left = 0;
+	}
+	prl(ans); endc;
+}
+
+int main() {
+	int t; s(t); rep(i,1,t) solve();
+}

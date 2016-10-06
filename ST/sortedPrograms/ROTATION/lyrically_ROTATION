@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int N, Q;
+int A[100010];
+
+int main() {
+	char buf[110];
+	
+	for (; ~scanf("%d%d", &N, &Q); ) {
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		int ofs = 0;
+		for (; Q--; ) {
+			scanf("%s", buf);
+			switch (buf[0]) {
+				case 'C': {
+					(ofs += in()) %= N;
+				} break;
+				case 'A': {
+					(ofs -= in()) %= N;
+				} break;
+				case 'R': {
+					int ans = ofs + (in() - 1);
+					ans = (ans % N + N) % N;
+					printf("%d\n", A[ans]);
+				} break;
+				default: assert(false);
+			}
+		}
+	}
+	
+	return 0;
+}

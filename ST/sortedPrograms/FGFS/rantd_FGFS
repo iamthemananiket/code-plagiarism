@@ -1,0 +1,55 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+int N, K;
+
+struct customer {
+	int s, f, p;
+	customer() {};
+	customer(int s, int f, int p) : s(s), f(f), p(p) {};
+	bool operator < (customer other) const {
+		if(p != other.p) return p < other.p;
+		if(f != other.f) return f < other.f;
+		return s > other.s;
+	}
+} C[100001];
+
+void solve() {
+	if(N == 0) {
+		printf("0\n");
+		return;
+	}
+	sort(C, C + N);
+	int ans = 1, ft = C[0].f;
+	for(int i = 1; i < N; ++i) {
+		if(C[i].p != C[i-1].p) {
+			ans++;
+			ft = C[i].f;
+		}
+		else {
+			if(C[i].s >= ft) {
+				ans++;
+				ft = C[i].f;
+			}
+		}
+	}
+	printf("%d\n", ans);
+}
+
+int main(int argc, char const *argv[]) {
+	
+	int ntest, s, f, p;
+	scanf("%d", &ntest);
+	for(int t = 0; t < ntest; ++t) {
+		scanf("%d %d", &N, &K);
+		for(int i = 0; i < N; ++i) {
+			scanf("%d %d %d", &s, &f, &p);
+			C[i] = customer(s, f, p);
+		}
+		solve();
+	}
+	return 0;
+}

@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+#define f first
+#define s second
+#define mkp make_pair
+
+ using namespace std;
+
+ inline void solve()
+ {
+     int n,mnb = 100000,mna = 1000000;
+    cin>>n;
+     for(int i=1;i<=n;++i)
+     {
+         string s;
+         cin>>s;
+         int a=0,b=0;
+          for(int j=0;j<s.size();++j)
+            if(s[j]=='a') ++a; else ++b;
+          mnb = min(mnb,b);
+          mna = min(mna,a);
+     }
+
+     cout<<min(mnb,mna)<<endl;
+ }
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+     //freopen("input.txt","r",stdin);freopen("output.txt","w",stdout);
+
+    int t;
+     cin>>t;
+      while(t--) solve();
+
+    return 0;
+  }

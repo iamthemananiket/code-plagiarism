@@ -1,0 +1,55 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+int TC, n, m, UF[101000], C[101000], gap;
+bool v[101000];
+int Find(int a){
+    if(a==UF[a])return a;
+    int tt = gap;
+    gap ^= C[a];
+    UF[a]=Find(UF[a]);
+    C[a] = tt^gap;
+    return UF[a];
+}
+bool Merge(int a, int b, int x){
+    int tgap, ra, rb;
+    gap = 0;ra = Find(a);tgap = gap;
+    gap = 0;rb = Find(b);
+    if(ra == rb){
+        if((tgap^gap) != x)return false;
+        return true;
+    }
+    UF[ra] = rb, C[ra] = tgap^gap^x;
+    return true;
+}
+int main(){
+    int i, a, b, x, chk, Res;
+    scanf("%d",&TC);
+    while(TC--){
+        scanf("%d%d",&n,&m);
+        for(i=1;i<n;i++){
+            scanf("%d%d",&a,&b);
+        }
+        for(i=1;i<=n;i++){
+            UF[i]=i,C[i]=0;
+            v[i]=false;
+        }
+        chk = 0;
+        for(i=0;i<m;i++){
+            scanf("%d%d%d",&a,&b,&x);
+            if(!Merge(a,b,x))chk = 1;
+        }
+        if(chk)printf("0\n");
+        else{
+            Res = 1, chk = 0;
+            for(i=1;i<=n;i++){
+                if(!v[Find(i)]){
+                    v[Find(i)]=true;
+                    if(chk)Res=(Res+Res)%1000000007;
+                    chk=1;
+                }
+            }
+            printf("%d\n",Res);
+        }
+    }
+}

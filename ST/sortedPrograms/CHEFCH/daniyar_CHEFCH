@@ -1,0 +1,54 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 100500;
+
+char c[maxn];
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	int t, n;
+	cin >> t;
+	while (t--)
+	{
+		scanf("%s", c);
+		n = (int)strlen(c);
+		int cnt1 = 0, cnt2 = 0;
+		for (int i = 0; i < n; i++)
+		{
+			if (i % 2 == 0 && c[i] == '-')
+				cnt1++;
+			else if (i % 2 == 1 && c[i] == '+')
+				cnt1++;
+			else
+				cnt2++;
+		}
+		printf("%d\n", min(cnt1, cnt2));
+	}
+	return 0;
+}

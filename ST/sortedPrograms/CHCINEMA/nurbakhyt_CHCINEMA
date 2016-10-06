@@ -1,0 +1,131 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+struct num {
+	ll a[4];
+	void in() {
+		for (int i = 0; i < 4; i++)
+			cin >> a[i];
+	}
+} init;
+
+ll get2(ll n, ll m, num &k) {
+/*    cout << "hey2 " << n << ' ' << m << endl;
+    for (int i = 0; i < 4; i++)
+  		cout << k.a[i] << ' ';
+	cout << endl;*/
+
+	ll all = n * (m / 2);
+
+	ll del = 2ll * min(all, min(k.a[0], k.a[3]));
+	all -= del / 2, k.a[0] -= del / 2, k.a[3] -= del / 2;
+
+//	cout << "del " << del << endl;
+//	cout << "all " << all << endl;
+
+	ll now = min(all, k.a[3]);
+
+	del += now;
+	k.a[3] -= now;
+	all -= now;
+
+	all = 2 * all + (m % 2 == 1 ? n : 0);
+
+	del += min(all, k.a[0]);
+	k.a[0] -= min(all, k.a[0]);
+
+//	cout << "is " << del << endl;
+
+	return del;
+}
+
+ll get(ll n, ll m, num &k) {
+    ll ans = 0;
+//    cout << "hey " << n << ' ' << m << endl;
+//    for (int i = 0; i < 4; i++)
+//	  	cout << k.a[i] << ' ';
+//	cout << endl;
+	if (m % 2 == 1) {
+		if (k.a[1] + k.a[2] < n) {
+			ll f, s;
+			f = k.a[1] + k.a[2];
+			s = n - f;
+			k.a[1] = k.a[2] = 0;
+			ans = f + get2(f, m - 1, k) + get2(s, m, k);
+//			cout << f << " and " << s << endl;
+//			cout << "is " << ans << endl;
+			return ans;
+		}
+		else {
+			k.a[1] -= n;
+			ans = n;
+			m--;
+		}
+	}
+	ll del = min(n * m, k.a[1] + k.a[2]);
+	ll last = n * m - del;
+	k.a[1] -= del;
+
+	del = min(last / 2, min(k.a[0], k.a[3]));
+//	cout << "del is " << del << endl;
+	k.a[0] -= del, k.a[3] -= del;
+	last -= 2ll * del;
+
+	ll now = min(last / 2, k.a[3]);
+
+	k.a[3] -= now;
+	last -= now;
+
+	now = min(last, k.a[0]);
+
+	k.a[0] -= now;
+	last -= now;
+//	cout << "is " << ans + n * m - last << endl;
+	return ans + n * m - last;
+}
+
+ll n, m, ans;
+
+void solve() {
+	cin >> n >> m, init.in();
+	ll nn = min(init.a[3], n);
+	init.a[3] -= nn;
+
+	ans = nn + get(nn, m - 1, init);
+	n -= nn;
+	ans += min(n * m, init.a[0] + init.a[1] + init.a[2]);
+	cout << ans << endl;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

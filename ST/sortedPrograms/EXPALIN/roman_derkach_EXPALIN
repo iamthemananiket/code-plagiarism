@@ -1,0 +1,65 @@
+#include<bits/stdc++.h>
+#define sqr(a) (a)*(a)
+#define y1 otoshol
+#define int long long
+ using namespace std;
+
+ string tt,p,s,s1;
+ int n,ans,t,j,i,k,q,l,r,W;
+
+ inline char f(string s)
+ {
+
+     l=0;
+     r=q-1;
+      while(l<r)
+      {
+          if(s[l]!=s[r]) return 0;
+          ++l;
+          --r;
+      }
+
+      return 1;
+ }
+
+   main()
+  {
+
+      ios_base::sync_with_stdio(false);
+      cin.tie(NULL);
+      cout.tie(NULL);
+
+
+        cin>>t;
+         while(t--)
+         {
+            cin>>s;
+            n=s.size();
+            ans=n;
+            int kor = n;
+            for(j=1;j<=n;++j){
+                p="";
+                p+=s[j-1];
+                W=n/j;
+                for(i=2;i<=W;++i)
+                {
+                    tt = p;
+                    q=1;
+                     for(k=j*i;k<=n;k*=i)
+                     {
+                         tt+=s[k-1];
+                         ++q;
+                         if(f(tt))
+                         {
+                            // cout<<j<<' '<<i<<' '<<k<<endl;
+                             ++ans;
+                         }
+                     }
+                }
+            }
+            cout<<ans<<endl;
+         }
+
+
+      return 0;
+  }

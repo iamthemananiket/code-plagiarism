@@ -1,0 +1,165 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(a) scanf("%d",&a)
+#define ss(a) scanf("%s",&a)
+#define sl(a) scanf("%lld",&a)
+#define clr(a) memset(a,0,sizeof(a))
+#define debug(a) printf("check%d",a)
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 50010
+
+//Circle-rectangle intersection code taken from: https://github.com/kbarbary/sep/blob/master/src/overlap.h
+
+static inline double area_arc(double x1, double y1, double x2, double y2, double r)
+{
+  double a, theta;
+
+  a = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+  theta = 2. * asin(0.5 * a / r);
+  return 0.5 * r * r * (theta - sin(theta));
+}
+
+/* Area of a triangle defined by three verticies */
+static inline double area_triangle(double x1, double y1, double x2, double y2,double x3, double y3)
+{
+  return 0.5 * fabs(x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2));
+}
+
+/* Core of circular overlap routine.
+ * Assumes that xmax >= xmin >= 0.0, ymax >= ymin >= 0.0.
+ * (can always modify input to conform to this).
+ */
+static inline double circoverlap_core(double xmin, double ymin,
+				      double xmax, double ymax, double r)
+{
+  double a, b, x1, x2, y1, y2, r2, xmin2, ymin2, xmax2, ymax2;
+
+  xmin2 = xmin*xmin;
+  ymin2 = ymin*ymin;
+  r2 = r*r;
+  if (xmin2 + ymin2 > r2)
+    return 0.;
+
+  xmax2 = xmax*xmax;
+  ymax2 = ymax*ymax;
+  if (xmax2 + ymax2 < r2)
+    return (xmax-xmin)*(ymax-ymin);
+
+  a = xmax2 + ymin2;  /* (corner 1 distance)^2 */
+  b = xmin2 + ymax2;  /* (corner 2 distance)^2 */
+
+  if (a < r2 && b < r2)
+    {
+      x1 = sqrt(r2 - ymax2);
+      y1 = ymax;
+      x2 = xmax;
+      y2 = sqrt(r2 - xmax2);
+      return ((xmax-xmin)*(ymax-ymin) -
+	      area_triangle(x1, y1, x2, y2, xmax, ymax) +
+	      area_arc(x1, y1, x2, y2, r));
+    }
+
+  if (a < r2)
+    {
+      x1 = xmin;
+      y1 = sqrt(r2 - xmin2);
+      x2 = xmax;
+      y2 = sqrt(r2 - xmax2);
+      return (area_arc(x1, y1, x2, y2, r) +
+	      area_triangle(x1, y1, x1, ymin, xmax, ymin) +
+	      area_triangle(x1, y1, x2, ymin, x2, y2));
+    }
+
+  if (b < r2)
+    {
+      x1 = sqrt(r2 - ymin2);
+      y1 = ymin;
+      x2 = sqrt(r2 - ymax2);
+      y2 = ymax;
+      return (area_arc(x1, y1, x2, y2, r) +
+	      area_triangle(x1, y1, xmin, y1, xmin, ymax) +
+	      area_triangle(x1, y1, xmin, y2, x2, y2));
+    }
+
+  /* else */
+  x1 = sqrt(r2 - ymin2);
+  y1 = ymin;
+  x2 = xmin;
+  y2 = sqrt(r2 - xmin2);
+  return (area_arc(x1, y1, x2, y2, r) +
+	  area_triangle(x1, y1, x2, y2, xmin, ymin));
+}
+
+
+
+/* Area of overlap of a rectangle and a circle */
+static double circoverlap(double xmin, double ymin, double xmax, double ymax,double r)
+{
+  /* some subroutines demand that r > 0 */
+  if (r <= 0.)
+    return 0.;
+
+  if (0. <= xmin)
+    {
+      if (0. <= ymin)
+	return circoverlap_core(xmin, ymin, xmax, ymax, r);
+      else if (0. >= ymax)
+	return circoverlap_core(-ymax, xmin, -ymin, xmax, r);
+      else
+	return (circoverlap(xmin, ymin, xmax, 0., r) +
+                circoverlap(xmin, 0., xmax, ymax, r));
+    }
+  else if (0. >= xmax)
+    {
+      if (0. <= ymin)
+	return circoverlap_core(-xmax, ymin, -xmin, ymax, r);
+      else if (0. >= ymax)
+	return circoverlap_core(-xmax, -ymax, -xmin, -ymin, r);
+      else
+	return (circoverlap(xmin, ymin, xmax, 0., r) +
+                circoverlap(xmin, 0., xmax, ymax, r));
+    }
+  else
+    {
+      if (0. <= ymin)
+	return (circoverlap(xmin, ymin, 0., ymax, r) +
+                circoverlap(0., ymin, xmax, ymax, r));
+      if (0. >= ymax)
+	return (circoverlap(xmin, ymin, 0., ymax, r) +
+                circoverlap(0., ymin, xmax, ymax, r));
+      else
+	return (circoverlap(xmin, ymin, 0., 0., r) +
+                circoverlap(0., ymin, xmax, 0., r) +
+                circoverlap(xmin, 0., 0., ymax, r) +
+                circoverlap(0., 0., xmax, ymax, r));
+    }
+}
+
+int x[N],y[N],r[N];
+
+int main()
+{
+  int n,q,i;
+  sd(n);sd(q);
+  for(i=0;i<n;++i)
+  {
+    sd(x[i]);
+    sd(y[i]);
+    sd(r[i]);
+  }
+  while(q--)
+  {
+    int x1,x2,y1,y2;
+    sd(x1);sd(y1);
+    sd(x2);sd(y2);
+    double ans=0;
+    for(i=0;i<n;++i)
+      ans+=circoverlap(x1-x[i],y1-y[i],x2-x[i],y2-y[i],r[i]);
+    printf("%.9lf\n",ans);
+  }
+}

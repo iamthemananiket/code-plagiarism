@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+
+#ifdef getchar
+#undef getchar
+#endif
+#define getchar() (*_pinp?*_pinp++:(_inp[fread(_pinp=_inp, 1, 4096, stdin)]='\0', *_pinp++))
+char _inp[4097], *_pinp=_inp;
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+
+using namespace std;
+
+int N;
+int A[1000001];
+int B[1000001];
+
+int main()
+{
+    int T;
+    scan(T);
+    while(T--)
+    {
+        scan(N);
+        for(int i=1; i<=N; i++)
+        {
+            scan(A[i]);
+            B[i]=A[i];
+        }
+        for(int i=2; i<N; i++)
+            sort(A+i-1, A+i+2);
+        bool ok=true;
+        for(int i=2; i<=N; i++) if(A[i]<A[i-1])
+        {
+            ok=false;
+            break;
+        }
+        for(int i=1; ok && i<=N; i++)
+        {
+            bool sok=false;
+            for(int j=-1; j<=1; j++) if(i+j>=1 && i+j<=N)
+                sok|=A[i]==B[i+j];
+            ok&=sok;
+        }
+        if(ok)
+            printf("YES\n");
+        else
+            printf("NO\n");
+    }
+    return 0;
+}

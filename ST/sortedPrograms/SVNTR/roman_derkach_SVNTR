@@ -1,0 +1,37 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ long long a[200][200],S,s;
+ int n,m,i,j,x,y,t,kol;
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+     cin>>t;
+      while(t--)
+      {
+        cin>>n>>m>>S;
+         for(i=1;i<=n;++i)
+          for(j=1;j<=m;++j)
+           cin>>a[i][j],a[i][j]+=a[i-1][j] +a[i][j-1] - a[i-1][j-1];
+
+
+            for(i=1;i<=n;++i)
+             for(j=1;j<=m;++j)
+              for(x=i;x<=n;++x)
+               for(y=j;y<=m;++y)
+                {
+                  s = a[x][y] - a[x][j-1] - a[i-1][y] + a[i-1][j-1];
+                  kol+=(s<=S);
+                }
+
+                cout<<kol<<endl;
+                kol=0;
+      }
+
+    return 0;
+  }

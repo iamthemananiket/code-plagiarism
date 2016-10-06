@@ -1,0 +1,59 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t;
+int r , k;
+int ansa , ansb;
+inline bool solve(int x){
+    if(x <= 0 || x >= r){
+        return 0;
+    }
+    /*
+    xx + yy <= rr - 1
+    xx + yy >= rr + kk - 2rk
+    */
+    long long rhs = 1LL * r * r - 1LL * x * x;
+    int y = sqrt(rhs);
+    while(1LL * (y + 1LL) * (y + 1LL) < rhs){
+        ++y;
+    }
+    while(1LL * y * y >= rhs){
+        --y;
+    }
+    if(10000LL * x * x + 10000LL * y * y >= 10000LL * r * r + 1LL * k * k - 200LL * r * k){
+        ansa = x;
+        ansb = y;
+        return 1;   
+    }
+    return 0;
+}
+int main(){
+    cin >> t;
+    while(t--){
+        cin >> r >> k;
+        ansa = -1;
+        ansb = -1;
+        if(r <= 810000){
+            for(int i = 1 ; i < r && ansa < 0 ; ++i){
+                solve(i);
+            }
+        }
+        else{
+            for(int i = 1 ; i < 400000 && ansa < 0 ; ++i){
+                solve(i);
+            }
+            for(int i = r - 400000 ; i < r && ansa < 0 ; ++i){
+                solve(i);
+            }
+            int x = 1.0 * r / sqrt(2);
+            for(int i = x - 200000 ; i <= x + 200000 && ansa < 0 ; ++i){
+                solve(i);
+            }
+        }
+        if(ansa > 0){
+            printf("%d %d\n" , ansa , ansb);
+        }
+        else{
+            printf("-1\n");
+        }
+    }
+}

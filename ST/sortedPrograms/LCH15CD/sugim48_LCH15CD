@@ -1,0 +1,71 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 10;
+
+ll f(int N, int D, int X, vector<ll>& memo) {
+	if (memo[X] >= 0) return memo[X];
+	vector<int> x(N);
+	int _X = X;
+	for (int i = 0; i < N; i++) {
+		x[i] = _X % D;
+		_X /= D;
+	}
+	ll mini = LLONG_MAX;
+	int y = 1;
+	for (int i = 0; i < N; i++) {
+		if (x[i]) mini = min(mini, f(N, D, X - y, memo));
+		y *= D;
+	}
+	int xr = 0, sum = 0;
+	for (int i = 0; i < N; i++) {
+		xr ^= x[i];
+		sum += x[i];
+	}
+	mini += (ll)xr * sum;
+	return memo[X] = mini;
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N, D; cin >> N >> D;
+		if (D == 1) {
+			cout << 0 << endl;
+			continue;
+		}
+		vector<ll> memo(1 << 16, -1);
+		memo[0] = 0;
+		int X = 1;
+		for (int i = 0; i < N; i++) X *= D;
+		cout << f(N, D, X - 1, memo) << endl;
+	}
+}

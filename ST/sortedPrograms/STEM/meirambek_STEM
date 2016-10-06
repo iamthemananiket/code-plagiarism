@@ -1,0 +1,74 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <fstream>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <deque>
+#include <ctime>
+#include <cassert>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+#define fname ""
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define inf 1000000000
+#define INF 1000000000000000000ll
+#define ull unsigned long long
+#define F first
+#define S second
+const int N = 200;
+int n;
+string s[N];
+void solve() {
+	scanf("%d", &n);
+	for (int i = 1; i <= n; ++ i) cin >> s[i];
+	string ans = "";
+	for (int i = 0; i < (int)s[1].size(); ++ i) {
+		for (int j = i; j < (int)s[1].size(); ++ j) {
+			string now = s[1].substr(i, j - i + 1);
+			bool ok = 1;
+			for (int it = 2; it <= n; ++ it) {
+				bool exist = 0;
+				for (int start = 0; start < (int)s[it].size() - (int)now.size() + 1; start++) {
+					if (s[it].substr(start, (int)now.size()) == now) {
+						exist = 1;
+						break;
+					}
+				}
+				if (!exist) {
+					ok = 0;
+					break;
+				}
+			}
+			if (ok && ((int)ans.size() < (int)now.size() || ((int)now.size() == (int)ans.size() && ans > now))) {
+				ans = now;
+			}
+		}
+	}
+	cout << ans << endl;
+}
+
+int main() {
+    
+    #ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+    #endif
+    
+    int test = 1;
+    scanf("%d\n", &test);
+    
+    while(test--) solve();
+    
+    return 0;
+}

@@ -1,0 +1,121 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <cstdint>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, const pair<T1, T2> &a) { return os << "(" << a.first << ", " << a.second << ")"; };
+template <typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template <typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template <typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int bitN = 100005;
+Int raw0[bitN + 10];
+Int raw1[bitN + 10];
+Int bit0[bitN + 10];
+Int bit1[bitN + 10];
+
+void bitAdd(int pos, Int val0, Int val1) {
+	raw0[pos] += val0;
+	raw1[pos] += val1;
+	for (int x = pos; x <= bitN; x += x & -x) {
+		bit0[x] += val0;
+		bit1[x] += val1;
+	}
+}
+pair<Int, Int> bitSum(int pos) {
+	Int ret0 = 0;
+	Int ret1 = 0;
+	for (int x = pos; x; x &= x - 1) {
+		ret0 += bit0[x];
+		ret1 += bit1[x];
+	}
+	return mp(ret0, ret1);
+}
+
+const int L = 100;
+int N, M;
+
+int main() {
+	
+	
+	for (; ~scanf("%d", &N); ) {
+		fill(bit0, bit0 + bitN + 1, 0);
+		fill(bit1, bit1 + bitN + 1, 0);
+		for (; N--; ) {
+			const int a = in();
+			const Int b = in();
+			bitAdd(a, b, a * b);
+		}
+		M = in();
+		for (; M--; ) {
+// cout<<"raw0 : ";pv(raw0,raw0+10);
+// cout<<"raw1 : ";pv(raw1,raw1+10);
+			char typ;
+			scanf(" %c", &typ);
+			switch (typ) {
+				case '+': {
+					const int a = in();
+					bitAdd(a, +1, +a);
+				} break;
+				case '-': {
+					const int a = in();
+					bitAdd(a, -1, -a);
+				} break;
+				case '?': {
+					const int y = in();
+					Int ans = 0;
+					for (int q = 0; q < L; ++q) {
+						/*
+							floor(y / x) = q
+							q <= y / x < q + 1
+							q x <= y < (q + 1) x
+						*/
+						const int lb = y / (q + 1);
+						const int ub = (q == 0) ? bitN : (y / q);
+						if (lb < ub) {
+// cout<<q<<" "<<lb<<" "<<ub<<endl;
+							const auto resL = bitSum(lb);
+							const auto resU = bitSum(ub);
+							ans -= (resL.first * y - resL.second * q);
+							ans += (resU.first * y - resU.second * q);
+						}
+					}
+					const int lim = y / L;
+					for (int x = 1; x <= lim; ++x) {
+						ans += (raw0[x] * y - raw1[x] * (y / x));
+					}
+					printf("%lld\n", ans);
+				} break;
+				default: assert(false);
+			}
+		}
+	}
+	
+	return 0;
+}
+

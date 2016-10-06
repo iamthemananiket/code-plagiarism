@@ -1,0 +1,21 @@
+#include <bits/stdc++.h>
+using namespace std;
+int a[100010];
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		bool ok1 = true, ok2 = false;
+		int n;
+		cin >> n;
+		int sum = 0;
+		for(int i = 0; i < n; i++) {
+			scanf("%d", a + i);
+			if(a[i] == 2) ok1 = false;
+			if(a[i] == 5) ok2 = true;
+			sum += a[i];
+		}
+		if(sum >= 4 * n && ok1 && ok2) printf("Yes\n");
+		else printf("No\n");
+	}
+}

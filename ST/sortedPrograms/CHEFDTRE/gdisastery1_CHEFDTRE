@@ -1,0 +1,109 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAXN = 4e5;
+struct node {
+  int prio;
+  int key;
+  int cnt;
+  node *l, *r;
+  node(){}
+};
+
+typedef node* pnode;
+
+pnode pool[MAXN];
+int getcnt(pnode p){
+  return p ? p->cnt : 0;
+}
+
+void update_cnt(pnode p){
+  if(p) p->cnt = 1 + getcnt(p->l) + getcnt(p->r);
+}
+
+void split(pnode cur, pnode& a, pnode& b, int key){
+  if(!cur) a = b = NULL;
+  else {
+    if(cur->key < key)
+      split(cur->r, cur->r, b, key), a = cur;
+    else
+      split(cur->l, a, cur->l, key), b = cur;
+  }
+  update_cnt(cur);
+}
+void insert(pnode& cur, pnode ins){
+  if(!cur) cur = ins;
+  else if(cur->prio < ins->prio){
+    split(cur, ins->l, ins->r, ins->key), cur = ins;
+  } else {
+    insert(cur->key < ins->key ? cur->r : cur->l, ins);
+  }
+  update_cnt(cur);
+}
+int query(pnode cur, int k){
+  if(!cur) return -1;
+  int pos = getcnt(cur->l) + 1;
+  if(pos <= k){
+    if(pos == k)
+      return cur->key;
+    return query(cur->r, k - pos);
+  } else {
+    return query(cur->l, k);
+  }
+}
+void unite(pnode cur, int ins){
+  if(!cur) return;
+  unite(cur->l, ins);
+  unite(cur->r, ins);
+  cur->l = cur->r = NULL;
+  cur->cnt = 0;
+  insert(pool[ins], cur);
+}
+
+int N, Q;
+int main(){
+  int x, y;
+  char buf[10];
+  srand(59109290);
+  scanf("%d%d", &N, &Q);
+  for(int i = 1; i <= N; i++){
+    pool[i] = new node();
+    pool[i]->prio = rand();
+    pool[i]->key = i;
+    pool[i]->cnt = 1;
+    pool[i]->l = pool[i]->r = NULL;
+  }
+  int nunions = N;
+  while(Q--){
+    scanf("%s%d%d", buf, &x ,&y);
+    if(buf[0] == 'U'){
+      if(getcnt(pool[x]) > getcnt(pool[y]))
+        swap(x, y);
+      nunions++;
+      pool[nunions] = pool[y];
+      if(x != y)
+        unite(pool[x], nunions);
+    } else {
+      printf("%d\n", query(pool[x], y));
+    }
+  }
+  return 0;
+}

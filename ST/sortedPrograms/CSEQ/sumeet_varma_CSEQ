@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+long long pow(int a, int b, int MOD){
+    long long x=1,y=a;
+    while(b > 0)
+    {
+        if(b%2 == 1)
+        {
+            x=(x*y);
+            if(x>MOD) x%=MOD;
+        }
+        y = (y*y);
+        if(y>MOD) y%=MOD;
+        b /= 2;
+    }
+    return x;
+}
+
+long long InverseEuler(int n, int MOD){
+    return pow(n,MOD-2,MOD);
+}
+
+long long C(int n, int r, int MOD,int *f){
+    return (f[n]*((InverseEuler(f[r], MOD) * InverseEuler(f[n-r], MOD)) % MOD)) % MOD;
+}
+
+
+long long Lucas(int n, int m, int p,int * f)
+{
+    if (n==0 && m==0) return 1;
+    int ni = n % p;
+    int mi = m % p;
+    if (mi>ni) return 0;
+    return Lucas(n/p, m/p, p,f) * C(ni, mi, p,f);
+}
+
+int main(){
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int t;
+    cin >> t;
+
+    int MOD = 1000003;
+    int f[1000003];
+    f[0] = f[1] = 1;
+    for(long long i=2;i<MOD;i++)
+        f[i] = (f[i-1] * i) % MOD;
+
+
+    while(t--){
+        int n,l,r;
+        cin >> n >> l >> r;
+        int N = r - l + 1;
+        int ans;
+
+        if(N + n < MOD)
+            ans = C(N+n,min(n,N),MOD,f);
+        else
+            ans = Lucas(N+n,min(n,N),MOD,f);
+        ans = (ans - 1 + MOD) % MOD;
+        cout << ans << '\n';
+    }
+    return 0;
+}

@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+#define N 2000009
+#define MOD 1000000007
+using namespace std;
+typedef long double lld;
+lld get_angle(lld x1,lld y1,lld x2,lld y2,lld x3,lld y3)
+{
+    lld ux=x1-x2;
+    lld uy=y1-y2;
+    lld vx=x3-x2;
+    lld vy=y3-y2;
+    lld num=ux*vx+uy*vy;
+    lld den=sqrtl(ux*ux+uy*uy)*sqrtl(vx*vx+vy*vy);
+    lld cosine=acos(num/den);
+    return cosine;
+}
+bool eq(lld a,lld b)
+{
+    if(fabs(a-b)<0.000001)
+        return true;
+    return false;;
+}
+int main()
+{
+    int x;
+    cin>>x;
+    int test;
+    cin>>test;
+    while(test--)
+    {
+        lld x1,y1,x2,y2,x3,y3;
+        cin>>x1>>y1>>x2>>y2>>x3>>y3;
+        lld d1=(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
+        lld d2=(x1-x3)*(x1-x3)+(y1-y3)*(y1-y3);
+        lld d3=(x3-x2)*(x3-x2)+(y3-y2)*(y3-y2);
+        if(!eq(d1,d2)&&(!eq(d2,d3))&&(!eq(d1,d3)))
+            cout<<"Scalene";
+        else
+            cout<<"Isosceles";
+        if(x==1)
+        {
+            cout<<" triangle"<<endl;
+            continue;
+        }
+        cout<<" ";
+        lld c1=get_angle(x1,y1,x2,y2,x3,y3);
+        lld c2=get_angle(x2,y2,x3,y3,x1,y1);
+        lld c3=get_angle(x2,y2,x1,y1,x3,y3);
+        if(eq(2*c1,M_PI)||eq(2*c2,M_PI)||eq(2*c3,M_PI))
+        {
+            cout<<"right triangle"<<endl;
+            continue;
+        }
+        if(2*c1>M_PI||2*c2>M_PI||2*c3>M_PI)
+        {
+            cout<<"obtuse triangle"<<endl;
+            continue;
+        }
+        if(eq(2*c1,M_PI)||eq(2*c2,M_PI)||eq(2*c3,M_PI))
+        {
+            cout<<"right triangle"<<endl;
+            continue;
+        }
+        cout<<"acute triangle"<<endl;
+    }
+    return 0;
+}

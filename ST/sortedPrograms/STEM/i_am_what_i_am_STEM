@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void eval()
+{
+	int n;
+	cin>>n;
+	string s;
+	map<string,int> mp;
+	for(int i=0;i<n;i++)
+	 {
+	 	cin>>s;
+	 	set<string> temp;
+	 	for(int j=0;j<s.size();j++)
+	 	 {
+	 	 	string str;
+	 	 	for(int k=j;k<s.size();k++)
+	 	 	  {
+	 	 	  	str+=s[k];
+	 	 	  	temp.insert(str);
+				}
+		  }
+		for(set<string>::iterator it=temp.begin();it!=temp.end();it++)
+		   mp[*it]++;
+	 }
+	int count = 0;
+	int len = 0;
+	string ans="";
+	for(map<string,int>::iterator it=mp.begin();it!=mp.end();it++)
+	 {
+	 	if(it->second==n && it->first.size()>len)
+	 	 {
+	 	 	count = it->second;
+	 	 	len=it->first.size();
+	 	 	ans = it->first;
+	 	 	
+	 	 	
+		  }
+	 }
+	 cout<<ans<<endl;
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		eval();
+	}
+}

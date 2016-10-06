@@ -1,0 +1,150 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define ry asdgasdg
+#define rx iqowputtew
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 256
+
+const int N = 250;
+
+using namespace std;
+
+int n;
+vector<pair<int, int> > g[N];
+int adj[N][N];
+int C;
+
+int tests;
+int used[N];
+int pal[N][N];
+int par[N][N];
+
+void trace(int v)
+{
+	used[v]=1;
+//	cout<<v<<endl;
+	for (int i=0;i<g[v].size();i++)
+	{
+		int to=g[v][i].first;
+		if (used[to])
+			continue;
+		par[C][to]=v;
+		trace(to);
+	}
+}
+
+int solve(int v1,int v2)
+{
+	if (v1==v2)
+		return 0;
+	if (adj[v1][v2]!=-1)
+		return 1;
+	if (pal[v1][v2]!=-1)
+		return pal[v1][v2];
+	int VV=par[v1][v2];
+	int VV2=par[v2][v1];
+	int res2=solve(VV,VV2);
+	if (adj[VV][v2]!=adj[VV2][v1])
+	{
+		pal[v1][v2]=-2;
+		return -2;
+	}
+	
+	if (res2==-2)
+	{
+		pal[v1][v2]=-2;
+		return -2;
+	}
+	pal[v1][v2]=res2+2;
+	return res2+2;
+}
+
+int main(){
+	//freopen("beavers.in","r",stdin);
+	//freopen("beavers.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>tests;
+	for (;tests;--tests)
+	{
+		
+		cin>>n;
+		for (int i=0;i<=n;i++)
+		{
+			g[i].clear();
+			for (int j=1;j<=n;j++)
+				adj[i][j]=-1;
+		}
+		
+		for (int i=1;i<n;i++)
+		{
+			int a,b,c;
+			cin>>a>>b>>c;
+			g[a].push_back(make_pair(b,c));
+			g[b].push_back(make_pair(a,c));
+			adj[a][b]=adj[b][a]=c;
+		}
+		
+		for (int root=1;root<=n;root++)
+		{
+			for (int i=1;i<=n;i++)
+				used[i]=0;
+			C=root;
+			trace(root);
+		}
+	
+		
+		for (int i=1;i<=n;i++)
+			for (int j=1;j<=n;j++)
+				pal[i][j]=-1;
+		
+		for (int i=1;i<=n;i++)
+			for (int j=1;j<=n;j++)
+			{
+				if (pal[i][j]==-1)
+					pal[i][j]=solve(i,j);	
+			}
+		
+		int ans=0;
+		for (int i=1;i<=n;i++)
+			for (int j=1;j<=n;j++)
+				if (pal[i][j]>ans)
+					ans=pal[i][j];
+		
+		cout<<ans+1<<endl;
+		
+	}
+	
+	return 0;
+}

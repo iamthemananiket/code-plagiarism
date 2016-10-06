@@ -1,0 +1,53 @@
+// LTIME
+
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+#define endl "\n"
+using namespace std;
+
+int T , N , M;
+
+int main(){
+
+	
+	cin.tie(0) , ios::sync_with_stdio(false);
+	cin >> T;
+	
+	while(T--){
+		
+		cin >> N >> M;
+		if( N == 2 ){
+			if( M == 1 ) cout << "1 2" << endl;
+			else cout << "-1 -1" << endl;
+		}
+		else if( N >= 2 and N<= 4 ){
+			if( N == M  ){
+				for(int i = 1 ; i <= N ; i++){
+					cout << i << " ";
+					if( i == N ) cout << "1";
+					else cout << (i + 1);
+					cout << endl;
+				}
+			}
+			else cout << "-1 -1" << endl;
+		}
+		else{
+			int diff = M - N;
+			if( diff >= 0 and diff <= N - 4){
+				int diff2 = N - diff;
+				for(int i = 1 ; i <= diff2 ; i++){
+					cout << i << " ";
+					if( i == diff2 ) cout << "1";
+					else cout << (i + 1);
+					cout << endl;
+				}
+				for(int i = diff2 + 1 ; i <= N ; i++){
+					cout << "1" << " " << i << endl;
+					cout << i << " " << "3" << endl;
+				}
+			}
+			else cout << "-1 -1" << endl;
+		}
+	}
+
+}

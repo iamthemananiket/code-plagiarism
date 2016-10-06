@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		string s;
+		cin >> s;
+		int cnt[2];
+		cnt[0] = cnt[1] = 0;
+		for(int i = 0; i < int(s.length()); i++) cnt[s[i] - '0']++;
+		if(cnt[0] == 1 || cnt[1] == 1) printf("Yes\n");
+		else printf("No\n");
+	}
+}

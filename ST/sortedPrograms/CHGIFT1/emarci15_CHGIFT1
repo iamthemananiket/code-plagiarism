@@ -1,0 +1,31 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int T;
+int n;
+long long maxv,minv;
+long long nmaxv,nminv;
+int x;
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&x);
+
+        maxv = minv = x;
+        for(int i=1; i<n; i++) {
+            scanf("%d",&x);
+
+            nmaxv = max(max(maxv*x,minv*x),max(maxv+x,maxv-x));
+            nminv = min(min(maxv*x,minv*x),min(minv+x,minv-x));
+            maxv = nmaxv;
+            minv = nminv;
+        }
+
+        printf("%lld\n",minv);
+    }
+
+    return 0;
+}

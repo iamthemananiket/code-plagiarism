@@ -1,0 +1,49 @@
+/*******************************
+*  Bismillahir Rahmanir Rahim  *
+*******************************/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x, "r", stdin)
+#define WRITE(x)	freopen(x, "w", stdout)
+
+#define REP(i, n)	for(int i=0;i<n;i++)
+#define REPN(i, n)	for(int i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+
+#define MAX			50
+#define INF			(1 << 29)
+#define EPS 		1e-9
+#define MOD			1000000007
+#define pb			push_back
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int>	pii;
+
+int n,m;
+char str[MAX][MAX];
+
+int nc(int x){ return (x * (x - 1)) / 2; }
+
+int main(){
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		scanf("%d %d", &n, &m);
+		REP(i, n){
+			scanf("%s", str[i]);
+		}
+		int ret = 0;
+		REP(i, m){
+			int cnt = 0;
+			REP(j, n){
+				cnt += str[j][i] == '1';
+			}
+			ret += nc(cnt);
+		}
+		printf("%d\n", ret);
+	}
+	return 0;
+}

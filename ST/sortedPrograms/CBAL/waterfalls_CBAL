@@ -1,0 +1,81 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <map>
+
+using namespace std;
+
+int N,Q;
+char P[100001];
+int pref[100001];
+map<int,int> comp;
+vector<int> where0[100001];
+vector<long long> where1[100001];
+vector<long long> where2[100001];
+int ind[100001];
+int has0[100001];
+int ans0[501][100001];
+long long has1[100001];
+long long ans1[501][100001];
+long long has2[100001];
+long long ans2[501][100001];
+
+const int SQRT = 200;
+
+int main() {
+    int T;
+    scanf("%d",&T);
+    for (int t=0;t<T;t++) {
+        scanf(" %s%d",&P,&Q);
+        N = strlen(P);
+        for (int i=1;i<=N;i++) pref[i] = pref[i-1]^(1<<(P[i-1]-'a'));
+        comp.clear();
+        for (int i=0;i<=N;i++) if (!comp.count(pref[i])) comp[pref[i]] = comp.size()-1;
+        for (int i=0;i<=N;i++) pref[i] = comp[pref[i]];
+        for (int i=0;i<=N;i++) where0[i].clear(), where1[i].clear(), where2[i].clear();
+        for (int i=0;i<=N;i++) {
+            ind[i] = where0[pref[i]].size();
+            where0[pref[i]].push_back(i);
+            where1[pref[i]].push_back(i+(ind[i]>0 ? where1[pref[i]][ind[i]-1] : 0));
+            where2[pref[i]].push_back((long long) i*i+(ind[i]>0 ? where2[pref[i]][ind[i]-1] : 0));
+        }
+        for (int i=0;i*SQRT<=N;i++) {
+            for (int j=0;j<=N;j++) has0[j] = 0, ans0[i][j] = 0, has1[j] = 0, ans1[i][j] = 0, has2[j] = 0, ans2[i][j] = 0;
+            has0[pref[i*SQRT]]+=1; has1[pref[i*SQRT]]+=i*SQRT; has2[pref[i*SQRT]]+=(long long) i*SQRT*i*SQRT;
+            for (int j=i*SQRT+1;j<=N;j++) {
+                ans0[i][j] = ans0[i][j-1]+has0[pref[j]];
+                ans1[i][j] = ans1[i][j-1]+(long long) has0[pref[j]]*j-has1[pref[j]];
+                ans2[i][j] = ans2[i][j-1]+has2[pref[j]]+(long long) has0[pref[j]]*j*j-2LL*j*has1[pref[j]];
+                has0[pref[j]]+=1;
+                has1[pref[j]]+=j;
+                has2[pref[j]]+=(long long) j*j;
+            }
+        }
+        long long A = 0;
+        long long B = 0;
+        for (int q=1;q<=Q;q++) {
+            int X,Y,type;
+            scanf("%d%d%d",&X,&Y,&type);
+            int L = (X+A)%N+1;
+            int R = (Y+B)%N+1;
+            if (L>R) swap(L,R);
+            L-=1;
+            int low = (L-1)/SQRT+1;
+            long long ans;
+            if (type==0) ans = ans0[low][R];
+            else if (type==1) ans = ans1[low][R];
+            else ans = ans2[low][R];
+            for (int j=L;j<=min(R,low*SQRT-1);j++) {
+                int lo = ind[j];
+                int hi = upper_bound(where0[pref[j]].begin(),where0[pref[j]].end(),R)-where0[pref[j]].begin()-1;
+                if (type==0) ans+=hi-lo;
+                else if (type==1) ans+=where1[pref[j]][hi]-where1[pref[j]][lo]-(long long) (hi-lo)*j;
+                else ans+=where2[pref[j]][hi]-where2[pref[j]][lo]+(long long) (hi-lo)*j*j-2LL*j*(where1[pref[j]][hi]-where1[pref[j]][lo]);
+            }
+            printf("%lld\n",ans);
+            A = B;
+            B = ans;
+        }
+    }
+}

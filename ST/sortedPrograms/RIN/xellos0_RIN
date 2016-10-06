@@ -1,0 +1,246 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+// mylittlepony
+using namespace std;
+
+pair<int,vector<int> > solveRed(int N, int M, int K, vector< vector<int> > &G, vector< vector<int> > &Gi, vector< vector<int> > &C) {
+    vector< vector<int> > L;
+    vector<int> isL(N,-1),D(N,0);
+    for(int i =0; i < N; i++) D[i] =Gi[i].size();
+    int procL =0;
+    vector<int> seq;
+    while(procL < N) {
+    	L.resize(L.size()+1);
+    	vector<int> V;
+    	for(int i =0; i < N; i++) if(D[i] == 0 && isL[i] == -1) {
+    		V.push_back(i);
+    		L[L.size()-1].push_back(i);
+    		isL[i] =L.size()-1;
+    		procL++;}
+    	ALL_THE(V,it) {
+    		ALL_THE(G[*it],jt) D[*jt]--;
+    		seq.push_back(*it);}
+    	}
+
+    vector< vector<int> > ans(N,vector<int>(K,0));
+    vector< vector< vector<int> > > ako(N,vector< vector<int> >(K,vector<int>(N,-1)));
+    for(int i =N-1; i >= 0; i--) {
+    	ALL_THE(G[seq[i]],it) if(isL[*it] == isL[seq[i]]+1) {
+    		int s =-100000, x =-1;
+    		for(int j =K-1; j > 0; j--) {
+    			if(s <= ans[*it][j]) x =j;
+    			s =max(s,ans[*it][j]);
+    			ako[seq[i]][j-1][*it] =x;
+    			ans[seq[i]][j-1] +=s;}
+    		}
+    	for(int j =0; j < K; j++) {
+    		ako[seq[i]][j][seq[i]] =j;
+    		ans[seq[i]][j] +=C[seq[i]][j];
+    		if(ans[seq[i]][j] < 0) ans[seq[i]][j] =-100000;}
+    	}
+
+    int ansT =0;
+    vector<int> akoR(N,-1);
+    ALL_THE(L[0],it) {
+    	int a =0;
+    	for(int i =0; i < K; i++) {
+    		a =max(a,ans[*it][i]);
+    		if(a == ans[*it][i]) akoR[*it] =i;}
+    	ansT +=a;}
+    for(int i =0; i < L.size(); i++) ALL_THE(L[i],it) {
+    	while(C[*it][akoR[*it]] < 0) akoR[*it]++;
+    	ALL_THE(G[*it],jt) if(isL[*jt] == isL[*it]+1) 
+    		akoR[*jt] =max(akoR[*jt],ako[*it][akoR[*it]][*jt]);
+    	}
+    ansT =0;
+    for(int i =0; i < N; i++) ansT +=C[i][akoR[i]];
+	return make_pair(ansT,akoR);}
+
+int main() {
+	srand(time(0));
+    cin.sync_with_stdio(0);
+    cin.tie(0);
+    int N,M,K;
+    cin >> N >> K >> M;
+    vector< vector<int> > C(N,vector<int>(K));
+    for(int i =0; i < N*K; i++) {
+    	cin >> C[i/K][i%K];
+    	if(C[i/K][i%K] < 0) C[i/K][i%K] =-100000;}
+    vector< vector<int> > G(N),Gi(N);
+    for(int i =0; i < M; i++) {
+    	int a,b;
+    	cin >> a >> b;
+    	G[--a].push_back(--b);
+    	Gi[b].push_back(a);}
+    	
+    vector< vector<int> > L;
+    vector<int> isL(N,-1),D(N,0);
+    for(int i =0; i < N; i++) D[i] =Gi[i].size();
+    int procL =0;
+    vector<int> seq;
+    while(procL < N) {
+    	L.resize(L.size()+1);
+    	vector<int> V;
+    	for(int i =0; i < N; i++) if(D[i] == 0 && isL[i] == -1) {
+    		V.push_back(i);
+    		L[L.size()-1].push_back(i);
+    		isL[i] =L.size()-1;
+    		procL++;}
+    	ALL_THE(V,it) {
+    		ALL_THE(G[*it],jt) D[*jt]--;
+    		seq.push_back(*it);}
+    	}
+    ALL_THE(L[0],it) for(int j =0; j < K; j++) for(int k =j+1; k < K; k++)
+    	if(C[*it][j] >= C[*it][k]) C[*it][k] =-100000;
+    ALL_THE(L[L.size()-1],it) for(int j =0; j < K; j++) for(int k =j+1; k < K; k++)
+    	if(C[*it][j] <= C[*it][k]) C[*it][j] =-100000;
+    for(int i =0; i < L.size(); i++) ALL_THE(L[i],it)
+    	for(int j =0; j < i; j++) C[*it][j] =-100000;
+
+    vector< vector<int> > ans(N,vector<int>(K,0));
+    vector< vector< vector<int> > > ako(N,vector< vector<int> >(K,vector<int>(N,-1)));
+    for(int i =N-1; i >= 0; i--) {
+    	ALL_THE(G[seq[i]],it) if(isL[*it] == isL[seq[i]]+1) {
+    		int s =-100000, x =-1;
+    		for(int j =K-1; j > 0; j--) {
+    			if(s <= ans[*it][j]) x =j;
+    			s =max(s,ans[*it][j]);
+    			ako[seq[i]][j-1][*it] =x;
+    			ans[seq[i]][j-1] +=s;}
+    		}
+    	for(int j =0; j < K; j++) {
+    		ako[seq[i]][j][seq[i]] =j;
+    		ans[seq[i]][j] +=C[seq[i]][j];
+    		if(ans[seq[i]][j] < 0) ans[seq[i]][j] =-100000;}
+    	}
+
+    int ansT =0;
+    vector<int> akoR(N,-1);
+    ALL_THE(L[0],it) {
+    	int a =0;
+    	for(int i =0; i < K; i++) {
+    		a =max(a,ans[*it][i]);
+    		if(a == ans[*it][i]) akoR[*it] =i;}
+    	ansT +=a;}
+    for(int i =0; i < L.size(); i++) ALL_THE(L[i],it) {
+    	while(C[*it][akoR[*it]] < 0) akoR[*it]++;
+    	ALL_THE(G[*it],jt) if(isL[*jt] == isL[*it]+1) 
+    		akoR[*jt] =max(akoR[*jt],ako[*it][akoR[*it]][*jt]);
+    	}
+    ansT =0;
+    for(int i =0; i < N; i++) ansT +=C[i][akoR[i]];
+
+    // iny odhad
+    vector<int> A(N,0);
+    for(int i =0; i < L.size(); i++) ALL_THE(L[i],it) {
+    	while(C[*it][A[*it]] < 0) A[*it]++;
+    	ALL_THE(G[*it],jt) if(isL[*jt] == isL[*it]+1)
+    		A[*jt] =max(A[*jt],A[*it]+1);
+    	}
+    vector<int> maxA(N,K-1);
+    for(int i =L.size()-1; i >= 0; i--) ALL_THE(L[i],it) {
+    	int x =A[*it];
+    	for(int j =A[*it]; j <= maxA[*it]; j++) if(C[*it][j] >= C[*it][x]) x =j;
+    	A[*it] =x;
+    	ALL_THE(Gi[*it],jt) if(isL[*jt] == isL[*it]-1) 
+    		maxA[*jt] =min(maxA[*jt],A[*it]-1);
+    	}
+    int ansTn =0;
+    for(int i =0; i < N; i++) ansTn +=C[i][A[i]];
+    ansT =max(ansT,ansTn);
+   	while(true) {
+   		bool opt =false;
+   		vector< pair<int,int> > pos;
+   		vector< vector<bool> > isPos(N,vector<bool>(K,false));
+   		for(int v =N-1; v >= 0; v--) {
+   			int p =C[seq[v]][A[seq[v]]];
+  			for(int h =A[seq[v]]+1; h < K; h++) if(C[seq[v]][h] > p) {
+				pos.push_back(make_pair(seq[v],h));
+				p =C[seq[v]][h];
+				isPos[seq[v]][h] =true;}
+   			}
+   		for(int r =0; r < 10; r++)
+   		for(int v =N-1; v >= 0; v--) for(int h =A[seq[v]]+1; h < K; h++) if(isPos[seq[v]][h]) {
+   			vector<int> B =A;
+   			B[seq[v]] =h;
+   			int rep =rand()%5;
+   			for(int k =0; k < rep; k++) {
+   				int in =rand()%pos.size();
+   				B[pos[in].ff] =pos[in].ss;}
+   			bool ok =true;
+		    for(int i =0; i < L.size(); i++) if(ok) ALL_THE(L[i],it) {
+			 	while(B[*it] < K && C[*it][B[*it]] < 0) B[*it]++;
+			 	if(B[*it] >= K) {ok =false; break;}
+    			ALL_THE(G[*it],jt) if(isL[*jt] == isL[*it]+1)
+			 		B[*jt] =max(B[*jt],B[*it]+1);
+    			}
+    		if(!ok) break;
+   			vector<int> maxB(N,K-1);
+		    for(int i =L.size()-1; i >= 0; i--) ALL_THE(L[i],it) {
+		    	int x =B[*it];
+		    	for(int j =B[*it]; j <= maxB[*it]; j++) if(C[*it][j] >= C[*it][x]) x =j;
+    			B[*it] =x;
+			 	ALL_THE(Gi[*it],jt) if(isL[*jt] == isL[*it]-1) 
+    				maxB[*jt] =min(maxB[*jt],B[*it]-1);
+	    		}
+   			int ansN =0;
+   			for(int i =0; i < N; i++) ansN +=C[i][B[i]];
+   			if(ansN > ansTn) {ansTn =ansN; A =B; maxA =maxB; opt =true;}}
+   		if(!opt) break;}
+    ansT =max(ansT,ansTn);
+    
+    for(int i =0; i < N; i++) {
+    	vector<int> V;
+    	ALL_THE(G[i],it) if(isL[*it] == isL[i]+1) V.push_back(*it);
+    	G[i] =V;
+    	V.clear();
+    	ALL_THE(Gi[i],it) if(isL[*it] == isL[i]-1) V.push_back(*it);
+    	Gi[i] =V;}
+    int deg =0;
+    for(int i =0; i < N; i++) deg =max(deg,(int)Gi[i].size());
+    if(deg > 2) while(N > 0) {N++; N--;}
+    for(int r =0; r < 200; r++) {
+    	// vyber kostru
+    	vector< vector<int> > Gni(N),Gn(N);
+    	for(int i =0; i < N; i++) if(Gi[i].size() > 0) {
+    		int k =rand()%Gi[i].size();
+    		Gni[i].push_back(Gi[i][k]);
+    		Gn[Gi[i][k]].push_back(i);}
+    	bool ok =true;
+    	pair<int, vector<int> > ansX =solveRed(N,M,K,Gn,Gni,C);
+	    for(int i =0; i < L.size(); i++) if(ok) ALL_THE(L[i],it) {
+	    	while(ansX.ss[*it] < K && C[*it][ansX.ss[*it]] < 0) ansX.ss[*it]++;
+	    	if(ansX.ss[*it] == K) {ok =false; break;}
+	    	ALL_THE(G[*it],jt) 
+	    		ansX.ss[*jt] =max(ansX.ss[*jt],ansX.ss[*it]+1);
+	    	}
+	    if(!ok) continue;
+	    ansX.ff =0;
+	    for(int i =0; i < N; i++) ansX.ff +=C[i][ansX.ss[i]];
+    	ansT =max(ansT,ansX.ff);}
+
+    cout << fixed << setprecision(2) << 1.0*ansT/N << "\n";
+    return 0;}
+        
+// look at my code
+// my code is amazing

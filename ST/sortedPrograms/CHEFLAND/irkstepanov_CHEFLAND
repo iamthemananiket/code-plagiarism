@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+#define forn(i, n) for (int (i) = 0; (i) < n; ++(i))
+#define ford(i, n) for (int (i) = (n) - 1; (i) >= 0; --(i))
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ld, ld> pll;
+
+int n;
+vector<vector<int> > g;
+vector<int> t_in, f_up;
+int timer = 0;
+vector<char> used;
+
+set<pii> edges;
+
+void dfs(int v, int p)
+{
+    used[v] = true;
+    t_in[v] = timer++;
+    f_up[v] = t_in[v];
+    int pp = 0;
+    for (int to : g[v]) {
+        if (to == p) {
+            ++pp;
+            continue;
+        }
+        if (used[to]) {
+            f_up[v] = min(f_up[v], t_in[to]);
+        } else {
+            dfs(to, v);
+            f_up[v] = min(f_up[v], f_up[to]);
+            if (f_up[to] > t_in[v]) {
+                edges.insert(mp(min(v, to), max(v, to)));
+            }
+        }
+    }
+    if (pp >= 2) {
+        f_up[v] = min(f_up[v], f_up[p]);
+    }
+}
+
+vector<vector<int> > g2;
+vector<int> comp;
+int cc = 0;
+
+void dfs2(int v)
+{
+    comp[v] = cc;
+    for (int to : g2[v]) {
+        if (comp[to] != -1) {
+            continue;
+        }
+        dfs2(to);
+    }
+}
+
+vector<vector<int> > g3;
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+
+    ios_base::sync_with_stdio(false);
+
+    int m;
+    cin >> n >> m;
+    g.resize(n);
+
+    while (m--) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        g[u].pb(v);
+        g[v].pb(u);
+    }
+
+    t_in.resize(n), f_up.resize(n);
+    used.assign(n, false);
+    dfs(0, -1);
+
+    g2.resize(n);
+    for (int i = 0; i < n; ++i) {
+        for (int to : g[i]) {
+            if (!edges.count(mp(min(i, to), max(i, to)))) {
+                g2[i].pb(to);
+            }
+        }
+    }
+
+    comp.assign(n, -1);
+    for (int i = 0; i < n; ++i) {
+        if (comp[i] == -1) {
+            dfs2(i);
+        }
+        ++cc;
+    }
+
+    g3.resize(cc);
+    for (auto& it : edges) {
+        int u = it.first, v = it.second;
+        g3[comp[u]].pb(comp[v]);
+        g3[comp[v]].pb(comp[u]);
+    }
+
+    for (int i = 0; i < cc; ++i) {
+        if (sz(g3[i]) > 2) {
+            cout << "NO\n";
+            return 0;
+        }
+    }
+    cout << "YES\n";
+
+}

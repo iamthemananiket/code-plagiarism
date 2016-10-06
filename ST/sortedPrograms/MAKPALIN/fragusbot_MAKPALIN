@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+const int N = 123456;
+ 
+char s[N];
+bool p[N];
+int d[2][N];
+
+int main() {
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    scanf("%s", s);
+    int n = strlen(s);
+    p[0] = true;
+    for (int i = 0; i < n / 2; ++i) {
+      p[i + 1] = p[i] && (s[i] == s[n - 1 - i]);
+    }
+    for (int j = 0; j < 2; ++j) {
+      int l = 0, r = -1;
+      for (int i = 0; i < n; ++i) {
+        int k = (i > r ? 1 : min(d[j][l + r - i + j], r - i + j) + j);
+        while (i - k >= 0 && i + k - j < n) {
+          if (s[i - k] != s[i + k - j]) {
+            break;
+          }
+          ++k;
+        }
+        d[j][i] = (j == 0 ? k-- : --k);
+        if (i + k - j > r) {
+          l = i - k;
+          r = i + k - j;
+        }
+      }
+    }
+    int ans = 0;
+    for (int i = 0; i <= n / 2; ++i) {
+      if (!p[i]) {
+        break;
+      }
+      {
+        int l = i, r = (n - 1 - i) - 1;
+        if (l > r) {
+          ++ans;
+        } else {
+          int ss = (l + r) / 2;
+          if ((r - l + 1) % 2 == 1) {
+            if (2 * d[0][ss] - 1 >= r - l + 1) {
+              ++ans;
+            }
+          } else {
+            if (2 * d[1][ss + 1] >= r - l + 1) {
+              ++ans;
+            }
+          }
+        }
+      }
+      {
+        int l = i + 1, r = (n - 1 - i);
+        if (l > r) {
+          ++ans;
+        } else {
+          int ss = (l + r) / 2;
+          if ((r - l + 1) % 2 == 1) {
+            if (2 * d[0][ss] - 1 >= r - l + 1) {
+              ++ans;
+            }
+          } else {
+            if (2 * d[1][ss + 1] >= r - l + 1) {
+              ++ans;
+            }
+          }
+        }
+      }
+ 
+    }
+    if (n % 2 == 0) {
+      if (p[n / 2]) {
+        --ans;
+      }
+    }
+    printf("%d\n", ans);
+  }
+  return 0;
+}

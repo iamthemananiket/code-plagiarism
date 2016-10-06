@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int n,m;
+    scanf("%d%d",&n,&m);
+    vector<int>vec[n+m+9];
+    for(int i=1;i<=n;i++)
+    {
+        vec[i].push_back(i);
+    }
+    int cnt=0;
+    char command[20];
+    while(m--)
+    {
+        int x,y;
+        scanf("%s%d%d",command,&x,&y);
+        if(command[0]=='U')
+        {
+            cnt++;
+            int i=0,j=0;
+            for(;i<vec[x].size()&&j<vec[y].size();)
+            {
+                if(vec[x][i]<vec[y][j])
+                {
+                    vec[n+cnt].push_back(vec[x][i]);
+                    i++;
+                }
+                else
+                {
+                    vec[n+cnt].push_back(vec[y][j]);
+                    j++;
+                }
+            }
+            for(int i1=i;i1<vec[x].size();i1++)
+            {
+                vec[n+cnt].push_back(vec[x][i1]);
+            }
+            for(int j1=j;j1<vec[y].size();j1++)
+            {
+                vec[n+cnt].push_back(vec[y][j1]);
+            }
+            vec[x].clear();
+            vec[y].clear();
+        }
+        else
+        {
+            printf("%d\n",vec[x][y-1]);
+        }
+    }
+}

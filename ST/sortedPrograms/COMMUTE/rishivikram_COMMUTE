@@ -1,0 +1,32 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	long long int t,ans,n,x,i,ti,f,temp;
+	cin>>t;
+	while(t--)
+	{
+		ans=0;
+		cin>>n;
+		cin>>x>>ti>>f;
+		ans+=x+ti;
+		for(i=1;i<n;i++)
+		{
+			cin>>x>>ti>>f;
+			if(ans>x)
+			{
+				temp=(long long int)(ceil(((double)(ans-x))/f));
+				ans=ti+x+(temp)*f;
+			}
+			else if(ans==x)
+				ans+=ti;
+			else
+			{
+				ans=x;
+				ans+=ti;
+			}
+		}
+		cout<<ans<<endl;
+	}
+	return 0;
+}

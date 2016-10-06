@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define sz(a) (int)((a).size())
+ 
+using namespace std;
+ 
+const int mod = (int)1e9 + 7;
+const int N = (int)1e7 + 123;
+ 
+vector < int > pp;
+int lp[N], mu[N];
+bool p[N];
+ 
+void Init() {
+	for (int i = 2; i < N; i++) {
+		if (!lp[i])
+			lp[i] = i,
+			pp.pb(i);
+		for (int j = 0; j < sz(pp) && pp[j] <= lp[i] && 1ll * i * pp[j] < N; j++)
+			lp[i * pp[j]] = pp[j];
+	}
+	mu[1] = 1;
+	for (int i = 2; i < N; i++) {
+		if (!mu[i / lp[i]] || lp[i / lp[i]] == lp[i])
+			mu[i] = 0;
+		else
+			mu[i] = (mu[i / lp[i]] == 1 ? -1 : 1);		
+	}
+	for (int i = 2; i * i < N; i++)
+		if (!p[i]) {
+			for (int j = i * i; j < N; j += i)
+				p[j] = 1, 
+				lp[j] = i;
+		}
+}
+ 
+int binpow(int a, int b) {
+	int res = 1;
+	while(b) {
+		if (b & 1)
+			res = (1ll * res * a) % mod;
+		a = (1ll * a * a) % mod;
+		b >>= 1;
+	}
+	return res;
+}
+ 
+int n, m;
+int b[N];
+int c[N];
+int cl;
+
+int bb(int x) {
+	if (c[x] == cl)
+		return b[x];
+	if (x < 2)
+		return x;
+	b[x] = (!p[x] ? binpow(x, n) : (1ll * b[lp[x]] * bb(x / lp[x])) % mod);
+	c[x] = cl;
+	return b[x];
+}
+ 
+int what(int x) {
+	int now = m / x;
+	int res = 0;
+	for (int i = 1; i <= now; i++) {
+		res = (res + mu[i] * bb(now / i) % mod) % mod;
+		if (res < 0)
+			res += mod;
+	}
+	return res;
+}
+  
+int l, r;
+int ans;
+ 
+void solve() {
+	scanf("%d%d%d%d", &n, &m, &l, &r);
+	cl++;
+	for (int i = 1; i * i <= m; i++)
+		b[i] = binpow(i, n),
+		c[i] = cl;
+	ans = 0;
+	for (int i = l; i <= r; i++)
+		ans = (ans + what(i)) % mod;
+	printf("%d\n", ans);
+	return;
+}
+ 
+int test;
+ 
+int main() {
+    Init();
+	scanf("%d", &test);
+	while(test--)
+		solve();
+	return 0;
+}
+ 

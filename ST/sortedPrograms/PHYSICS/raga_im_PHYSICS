@@ -1,0 +1,42 @@
+#include <cmath>
+#include <cstdio>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+map <int,int> mymap;
+map <int,int>:: iterator it;
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */ 
+    int t;
+    long long n,p,sum,f;
+    cin>>t;
+    while(t--){
+        mymap.clear();
+        sum=0;
+        cin>>n>>f;
+        while(n--){
+            cin>>p;
+            while(p%f==0){
+                p=p/f;
+            }
+            if(mymap.find(p)==mymap.end()){
+                mymap.insert( std::pair<int,int>(p,1));
+            }
+            else{
+                it=mymap.find(p);
+                it->second=it->second+1;
+            }
+            
+            
+        }
+        for(it=mymap.begin();it!=mymap.end();it++){
+            p=it->second;
+            sum=sum+p*(p-1)/2;
+        }
+        cout<<sum<<endl;
+    }
+    
+    return 0;
+}

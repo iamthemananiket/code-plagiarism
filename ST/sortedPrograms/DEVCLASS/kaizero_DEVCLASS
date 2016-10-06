@@ -1,0 +1,45 @@
+#include<stdio.h>
+#define INF 99999999999999999LL
+char p[101000];
+int type, n, TC, w1[51000], w2[51000], c1, c2;
+long long Res, S;
+long long Gap(long long a){
+	if (a < 0)a = -a;
+	if (type == 0)return 1;
+	return a;
+}
+int main(){
+	int i;
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%d", &type);
+		scanf("%s", p);
+		c1 = c2 = 0;
+		Res = INF;
+		for (i = 0; p[i]; i++){
+			if (i % 2 == 0 && p[i] == 'G')w1[c1++] = i;
+			if (i % 2 == 1 && p[i] == 'B')w2[c2++] = i;
+		}
+		if (c1 == c2){
+			S = 0;
+			for (i = 0; i < c1; i++){
+				S += Gap(w1[i] - w2[i]);
+			}
+			if (Res>S)Res = S;
+		}
+		c1 = c2 = 0;
+		for (i = 0; p[i]; i++){
+			if (i % 2 == 0 && p[i] == 'B')w1[c1++] = i;
+			if (i % 2 == 1 && p[i] == 'G')w2[c2++] = i;
+		}
+		if (c1 == c2){
+			S = 0;
+			for (i = 0; i < c1; i++){
+				S += Gap(w1[i] - w2[i]);
+			}
+			if (Res>S)Res = S;
+		}
+		if (Res == INF)printf("-1\n");
+		else printf("%lld\n", Res);
+	}
+}

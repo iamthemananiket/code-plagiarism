@@ -1,0 +1,75 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+ll a[100009],aux[100009];
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    for(int x=1;x<=test;x++)
+    {
+        int n;
+        int z,t,i,l1,l2,u1,u2,siz,k,j;
+        ll counter=0,inv;
+        scanf("%d%lld",&n,&inv);
+        counter=0;
+        map<ll,int>memo;
+        bool flag=false;
+        for(i=0;i<n;i++)
+        {
+            scanf("%lld",&a[i]);
+            memo[a[i]]++;
+            if(memo[a[i]]>1)
+                flag=true;
+        }
+        siz=1;
+        while(siz<n)
+        {
+            l1=0;
+            k=0;
+            while(l1+siz<n)
+            {
+                l2=l1+siz;
+                u1=l2-1;
+                u2=(l2+siz-1<n-1)?l2+siz-1:n-1;
+                for(i=l1,j=l2;i<=u1&&j<=u2;k++)
+                {
+                    if(a[i]<=a[j])
+                        aux[k]=a[i++];
+                    else
+                    {
+                        aux[k]=a[j++];
+                        counter+=siz-i+l1;
+                    }
+                }
+                for(;i<=u1;i++)
+                    aux[k++]=a[i];
+                for(;j<=u2;j++)
+                    aux[k++]=a[j];
+                l1=u2+1;
+            }
+            for(i=k;i<n;i++)
+                aux[i]=a[i];
+            for(i=0;i<n;i++)
+                a[i]=aux[i];
+            siz*=2;
+        }
+        printf("Case %d: ",x);
+        if(inv<=counter)
+            printf("%lld\n",counter-inv);
+        else
+        {
+            inv-=counter;
+            if(inv%2==0)
+                printf("0\n");
+            else
+            {
+                if(flag)
+                    printf("0\n");
+                else
+                    printf("1\n");
+            }
+        }
+    }
+    return 0;
+}

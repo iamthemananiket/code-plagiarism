@@ -1,0 +1,119 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int LIM = 1000000;
+const int M = 2500;
+
+bool isnp[LIM + 10];
+int primesLen;
+int primes[LIM + 10];
+
+void preparePrimes() {
+	for (int i = 2; i * i < LIM; ++i) if (!isnp[i]) for (int j = i * i; j < LIM; j += i) isnp[j] = true;
+	for (int i = 2; i < LIM; ++i) if (!isnp[i]) primes[primesLen++] = i;
+	assert(primesLen > M);
+}
+
+const int LOG_BASE = 12;
+Int TEN[LOG_BASE + 10];
+
+char NStr[1010];
+
+int len;
+int ans[M + 10];
+Int a[M + 10][1000 / LOG_BASE + 10];
+
+int main() {
+	preparePrimes();
+	
+	TEN[0] = 1;
+	for (int i = 1; i <= LOG_BASE; ++i) {
+		TEN[i] = TEN[i - 1] * 10;
+	}
+	
+	for (int TC = in(); TC--; ) {
+		scanf("%s", NStr);
+		const int NStrLen = strlen(NStr);
+		reverse(NStr, NStr + NStrLen);
+		
+		const int lim = (NStrLen - 1) / LOG_BASE + 1;
+		len = 0;
+		fill(a[0], a[0] + lim, 0);
+		for (int i = 0; i < NStrLen; ++i) {
+			a[0][i / LOG_BASE] += (NStr[i] - '0') * TEN[i % LOG_BASE];
+		}
+		
+		int idx = 0;
+		for (int m = 0; m < M; ++m) {
+// cout<<"a["<<len<<"] : ";pv(a[len],a[len]+lim);
+			Int crt = 0;
+			for (int l = lim; l--; ) {
+				crt = crt * TEN[LOG_BASE] + a[len][l];
+				a[len + 1][l] = crt / primes[idx];
+				crt %= primes[idx];
+			}
+// cout<<"  mod "<<primes[idx]<<endl;
+// cout<<"  remainder = "<<crt<<endl;
+			if (crt == 0) {
+				ans[len++] = primes[idx];
+			} else {
+				++idx;
+			}
+		}
+		
+		bool isOne = (a[len][0] == 1);
+		for (int l = 1; l < lim; ++l) {
+			isOne = isOne && (a[len][l] == 0);
+		}
+		
+		printf("%d\n", isOne ? len : (len + 1));
+		for (int j = 0; j < len; ++j) {
+			printf("%d\n", ans[j]);
+		}
+		if (!isOne) {
+			bool flg = false;
+			for (int l = lim; l--; ) {
+				if (flg) {
+					printf("%0*lld", LOG_BASE, a[len][l]);
+				} else if (l == 0 || a[len][l] != 0) {
+					flg = true;
+					printf("%lld", a[len][l]);
+				}
+			}
+			puts("");
+		}
+	}
+	
+	return 0;
+}

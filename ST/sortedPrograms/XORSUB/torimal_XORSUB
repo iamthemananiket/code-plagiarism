@@ -1,0 +1,59 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int N = 1024;
+
+int n, k;
+
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> n >> k;
+    bitset<N> cur, nxt;
+    cur[k] = true;
+    for (int i = 0; i < n; i++) {
+      int v;
+      cin >> v;
+      for (int j = 0; j < N; j++) {
+        nxt[j] = nxt[j] || cur[j];
+        nxt[j ^ v] = nxt[j ^ v] || cur[j];
+      }
+      cur = nxt;
+      nxt.reset();
+    }
+    int r = 0;
+    for (int i = 0; i < N; i++) {
+      if (cur[i]) r = i;
+    }
+    cout << r << endl;
+  }
+}

@@ -1,0 +1,74 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+const int M = 505;
+char ok[M][M],usd[M];
+int a[M],N,n,ans,i,j;
+
+inline void tt(int pos)
+{
+    if(pos == N) ++ans; else
+    {
+        for(int i=1;i<=n;++i)
+            if(!usd[i] && ok[a[pos-1]][i])
+        {
+            a[pos] = i;
+            usd[i] = 1;
+            tt(pos+1);
+            usd[i] = 0;
+        }
+    }
+}
+
+ int main()
+ {
+    fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+    int t;
+    cin>>t;
+     while(t--)
+     {
+         int m;
+         cin>>n>>m;
+          N = n + 1;
+          for(int i=1;i<=n;++i)
+            for(int j=1;j<=n;++j) ok[i][j] = 1;
+          while(m--)cin>>i>>j,ok[i][j] = ok[j][i] = 0;
+
+          memset(usd,0,sizeof(usd));
+          ans = 0;
+          for(int i=1;i<=n;++i)
+          {
+              a[1] = i;
+              usd[i] = 1;
+              tt(2);
+              usd[i] = 0;
+          }
+
+          cout<<ans<<endl;
+
+     }
+
+ }

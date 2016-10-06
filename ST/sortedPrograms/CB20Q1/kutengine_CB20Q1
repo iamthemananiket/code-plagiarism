@@ -1,0 +1,139 @@
+#include <cstdio>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <climits>
+#include <cctype>
+#include <utility>
+#include <queue>
+#include <cmath>
+#include <complex>
+using namespace std;
+
+typedef long long LL;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+typedef vector<PII> VPII;
+typedef pair<LL, LL> PLL;
+typedef pair<int, LL> PIL;
+typedef pair<LL, int> PLI;
+typedef double DB;
+
+#define pb push_back
+#define mset(a, b) memset(a, b, sizeof a)
+#define all(x) (x).begin(), (x).end()
+#define bit(x) (1 << (x))
+#define bitl(x) (1LL << (x))
+#define sqr(x) ((x) * (x))
+#define sz(x) ((int)(x.size()))
+#define cnti(x) (__builtin_popcount(x))
+#define cntl(x) (__builtin_popcountll(x))
+#define clzi(x) (__builtin_clz(x))
+#define clzl(x) (__builtin_clzll(x))
+#define ctzi(x) (__builtin_ctz(x))
+#define ctzl(x) (__builtin_ctzll(x))
+
+#define Error(x) cout << #x << " = " << x << endl
+
+#define X first
+#define Y second
+
+template <typename T, typename U> 
+inline void chkmax(T& x, U y) {
+	if (x < y) x = y;
+}
+
+template <typename T, typename U>
+inline void chkmin(T& x, U y) {
+	if (y < x) x = y;
+}
+const double EPS = 1e-8;
+struct Point {
+	double x, y, z;
+	Point(double x = 0.0, double y = 0.0, double z = 0.0) : x(x), y(y), z(z) {}
+	void input() {
+		scanf("%lf%lf%lf", &x, &y, &z);
+	}
+	bool operator==(const Point &p) const {
+		return x == p.x && y == p.y && z == p.z;
+	}
+}Big, Small, p[15];
+
+double v[15], ans;
+int a, b;
+
+bool chk(int i, int j) {
+	Point o, o1;
+	if (i < a) o = Big; else o = Small;
+	if (j < a) o1 = Big; else o1 = Small;
+	double vx, vy, vz, vx1, vy1, vz1;
+	double tt;
+	double t = sqrt(sqr(o.x - p[i].x) + sqr(o.y - p[i].y) + sqr(o.z - p[i].z)) / v[i];
+	if (t < EPS) return 0;
+	tt = t;
+	vx = (o.x - p[i].x) / t;
+	vy = (o.y - p[i].y) / t;
+	vz = (o.z - p[i].z) / t;
+	t = sqrt(sqr(o1.x - p[j].x) + sqr(o1.y - p[j].y) + sqr(o1.z - p[j].z)) / v[j];
+	if (t < EPS) return 0;
+	vx1 = (o1.x - p[j].x) / t;
+	vy1 = (o1.y - p[j].y) / t;
+	vz1 = (o1.z - p[j].z) / t;
+	chkmin(tt, t);
+	t = -1;
+	if (fabs(vx - vx1) > EPS && (p[i].x - p[j].x) / (vx1 - vx) > 0) t = (p[i].x - p[j].x) / (vx1 - vx);
+	if (fabs(vy - vy1) > EPS && (p[i].y - p[j].y) / (vy1 - vy) > 0) t = (p[i].y - p[j].y) / (vy1 - vy);
+	if (fabs(vz - vz1) > EPS && (p[i].z - p[j].z) / (vz1 - vz) > 0) t = (p[i].z - p[j].z) / (vz1 - vz);
+	Point d, d1;
+	if (t < 0) return 0;
+	
+	d = Point(p[i].x + vx * t, p[i].y + vy * t, p[i].z + vz * t);
+	d1 = Point(p[j].x + vx1 * t, p[j].y + vy1 * t, p[j].z + vz1 * t);
+	if (fabs(d.x - d1.x) > EPS || fabs(d.y - d1.y) > EPS || fabs(d.z - d1.z) > EPS) return 0;
+	if (t > tt + EPS) return 0;
+	ans = t;
+	return 1;
+}
+int vis[2222];
+int main() {
+
+	Big.input(); Small.input();
+	scanf("%d%d", &a, &b);
+	int flg = 0;
+	for (int i = 0; i < a + b; i++) {
+		p[i].input();scanf("%lf", v + i);
+		double t;
+		for (int j = 0; j < i; j++) {
+			if (p[i] == p[j]) vis[i] = 1;
+		}
+		if (vis[i]) continue;
+		while (1) {
+			int id = -1;
+			t = 1e9;
+			for (int j = 0; j < i; j++) if(!vis[j]) {
+				
+				if (chk(j, i)) {
+					if (t > ans) {
+						t = ans, id = j;
+					}
+				}
+			}
+			
+			if (id != -1) {
+				printf("plane %d crash plane %d\n", id + 1, i + 1);
+				v[i] = v[i] * t / (t + 1);
+				printf("new velocity %.2lf\n", v[i]);
+				flg = 1;
+			} else break;
+			
+		}
+	}
+	puts(flg ? "false" : "true");
+	return 0;
+}

@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+const int MOD = 100000007;
+const int MAX = 1001;
+
+int T,N,M,A[MAX],B[MAX];
+
+int main(){
+	cin.tie(0); ios::sync_with_stdio(0);
+	cin >> T;
+	while(T--){
+		cin >> N;
+		for(int i = 1 ; i <= N ; i++) cin >> A[i];
+		int ans = 0;
+		for(int i = 1 ; i <= N ; i++){
+			for(int j = i ; j <= N ; j++){
+				int sum = 0 , prod = 1;
+				for(int k = i ; k <= j ; k++)
+				sum += A[k] , prod *= A[k];
+				if(sum == prod) ans++;
+			}
+		}
+		cout << ans << endl;
+	}
+
+}

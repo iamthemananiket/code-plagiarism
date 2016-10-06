@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, a[MAX_N];
+
+void solve() {
+	cin >> n;
+	for (int i = 1; i <= n; i++)
+		cin >> a[i];
+	int ans = 0;
+	for (int i = 1; i <= n; i++) {
+		int mult = 1, sum = 0;
+		for (int j = i; j <= n; j++) {
+			mult *= a[j], sum += a[j];
+			if (mult == sum)
+				ans++;
+		}
+	}
+	cout << ans << endl;
+}
+
+int t;
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

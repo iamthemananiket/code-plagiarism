@@ -1,0 +1,102 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#define SIZE (1<<17)
+#define BT 20
+#define MX 2005
+
+using namespace std;
+typedef long long int ll;
+
+int A[SIZE],mb[SIZE];
+int ans[MX][MX];
+int memo[SIZE*BT],stL[SIZE],stR[SIZE];
+int sz=0;
+
+void make()
+{
+	for(int i=0;i<SIZE;i++)
+	{
+		int now=i;
+		mb[i]=0;
+		while(now>0)
+		{
+			mb[i]++;
+			now/=2;
+		}
+	}
+}
+void dfs(int l=0,int r=SIZE)
+{
+	if(l+1==r) return;
+	int m=(l+r)/2;
+	int now=0;
+	stR[m]=sz;
+	for(int j=m;j<r;j++)
+	{
+		now=max(now,A[j]);
+		memo[sz++]=now;
+	}
+	now=0;
+	stL[m]=sz;
+	for(int j=m-1;j>=l;j--)
+	{
+		now=max(now,A[j]);
+		memo[sz++]=now;
+	}
+	dfs(l,(l+r)/2);
+	dfs((l+r)/2,r);
+}
+inline int get(int s,int t)
+{
+	if(s==t) return A[s];
+	if(s>t) swap(s,t);
+	int pos=mb[s^t];
+	int id=((s>>pos)<<pos)|(1<<(pos-1));
+	return max(memo[stL[id]+id-s-1],memo[stR[id]+t-id]);
+}
+int main()
+{
+	int n;
+	scanf("%d",&n);
+	for(int i=0;i<n;i++) scanf("%d",&A[i]);
+	for(int i=n;i<SIZE;i++) A[i]=0;
+	make();
+	dfs();
+	int m,x1,x2;
+	scanf("%d %d %d",&m,&x1,&x2);
+	if(n<MX)
+	{
+		for(int i=0;i<n;i++)
+		{
+			for(int j=i;j<n;j++)
+			{
+				ans[i][j]=ans[j][i]=get(i,j);
+			}
+		}
+		ll ret=0;
+		for(int i=0;i<m;i++)
+		{
+			ret+=ans[x1][x2];
+			x1+=7;
+			while(x1>=n-1) x1-=n-1;
+			x2+=11;
+			while(x2>=n) x2-=n;
+		}
+		printf("%lld\n",ret);
+		return 0;
+	}
+	ll ret=0;
+	for(int i=0;i<m;i++)
+	{
+		ret+=get(x1,x2);
+		x1+=7;
+		if(x1>=n-1) x1-=n-1;
+		x2+=11;
+		if(x2>=n) x2-=n;
+	}
+	printf("%lld\n",ret);
+	return 0;
+}

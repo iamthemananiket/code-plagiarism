@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",&mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define MAX 1000010
+#define N 100010
+int mark[MAX]={0},Low[MAX];
+int a[N],maxx[4*N];
+void build_tree(int n,int si,int sj)
+{
+	if(si==sj)
+	{
+		maxx[n]=Low[a[si]];
+		return;
+	}
+	build_tree(n*2,si,(si+sj)/2);
+	build_tree(n*2+1,(si+sj)/2+1,sj);
+	maxx[n]=max(maxx[n*2],maxx[n*2+1]);
+}
+void update(int n,int si,int sj,int st,int en)
+{
+	if(maxx[n]==1)
+		return;
+	if(si>en || sj<st)
+		return;
+	if(si==sj)
+	{
+		a[si]/=Low[a[si]];
+		maxx[n]=Low[a[si]];
+		return;
+	}
+	update(n*2,si,(si+sj)/2,st,en);
+	update(n*2+1,(si+sj)/2+1,sj,st,en);
+	maxx[n]=max(maxx[n*2],maxx[n*2+1]);
+}
+int query(int n,int si,int sj,int st,int en)
+{
+	if(si>en || sj<st)
+		return 0;
+	if(si>=st && sj<=en)
+		return maxx[n];
+	return max(query(n*2,si,(si+sj)/2,st,en),query(n*2+1,(si+sj)/2+1,sj,st,en));
+}
+
+int main()
+{
+	int i,j,t,n,m;
+	Low[1]=1;
+	for(i=2;i<MAX;++i)
+		for(j=i;j<MAX;j+=i)
+		{
+			if(!mark[j])
+			{
+				Low[j]=i;
+				mark[j]=1;
+			}
+		}
+	sd(t);
+	while(t--)
+	{
+		sd(n);sd(m);
+		for(i=1;i<=n;++i)
+			sd(a[i]);
+		build_tree(1,1,n);
+		for(i=0;i<m;++i)
+		{
+			int type,x,y;
+			sd(type);sd(x);sd(y);
+			if(type==0)
+				update(1,1,n,x,y);
+			else
+				printf("%d ",query(1,1,n,x,y));
+		}
+		printf("\n");
+	}
+}

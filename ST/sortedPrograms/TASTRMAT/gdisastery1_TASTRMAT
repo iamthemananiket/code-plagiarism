@@ -1,0 +1,106 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 100000 + 1;
+const int MAX_N2 = 3333;
+typedef unsigned int uint;
+const int mod = 1e9 + 7;
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+int bc[1 << 16];
+char S[MAX_N], T[MAX_N];
+uint A[32][MAX_N2], B[MAX_N2];
+
+int Q;
+int N, n, M, m;
+
+int preprocess(char* s, uint* x){
+  int n = strlen(s);
+  int len = (n + 31) / 32;
+  for(int i = 0; i < len; i++)
+    x[i] = 0;
+  for(int i = 0; i < n; i++)
+    x[i / 32] |= ((uint) (s[i] - '0'))  << (i % 32);
+  return len;
+}
+
+#define only(x, y) ( (x) & ((1U << (y)) - 1) )
+
+int hamming(uint a, uint b){
+  uint c = a ^ b;
+  return bc[c >> 16] + bc[c & ((1 << 16) - 1)];
+}
+
+int solve(){
+  M = strlen(T);
+  m = preprocess(T, B);
+  int res = 0;
+  for(int i = 0; i < N - M + 1; i++){
+    int ans = 0;
+    uint* a = A[i % 32];
+    int mm = (M % 32 == 0) ? m : m - 1;
+    for(int j = 0; j < mm; j++)
+      madd(ans, hamming(a[i / 32 + j], B[j]));
+    
+    if(M % 32 != 0){
+      madd(ans, hamming(only(a[i / 32 + m - 1], M % 32), B[m - 1]));
+    }
+#ifndef ONLINE_JUDGE
+    printf("%d ", ans);
+#endif
+    res = mul(res, 100001);
+    madd(res, ans);
+  }
+  return res;
+}
+
+int main(){
+  for(int i = 0; i < (1 << 16); i++)
+    bc[i] = __builtin_popcount(i);
+  scanf("%s", S);
+  N = strlen(S);
+  for(int i = 0; i < 32; i++)
+    preprocess(S + i, A[i]);
+  scanf("%d", &Q);
+  while(Q--){
+    scanf("%s", T);
+    printf("%d\n", solve());
+  }
+  return 0;
+}

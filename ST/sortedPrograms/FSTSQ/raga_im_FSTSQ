@@ -1,0 +1,78 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int mod=1000000007;
+long long pow1(long long d,long long p){
+    long long ans;
+    if(p==0)
+        return 1;
+    else if(p%2==0){
+         
+        ans=pow1(d,p/2)%mod;
+        ans=((ans%mod)*(ans%mod))%mod;
+        return ans%mod;
+        
+    }
+    else
+        {
+         ans=pow1(d,p/2)%mod;
+        ans=((ans%mod)*(ans%mod))%mod;
+        ans=(ans*(d))%mod%mod;
+        return ans;
+        
+    }
+}
+int a[3000005];
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */
+    int t,n,d,k,l,c;
+    int no;
+    long long sum;
+   cin>>t;
+    while(t--){
+        cin>>n>>d;
+        no=d*d;
+        k=2*n-1;
+        for(int i=0;i<n;i++){
+            a[i]=no;
+            no=(no+d*d)%mod;
+            no=no%mod;
+            
+        }
+         no=(no%mod-2*d*d+mod)%mod;
+        for(int i=n;;i++){
+          
+            if(no==0)
+                break;
+            a[i]=no;
+            no=(no%mod-d*d+mod)%mod;
+            
+           
+        }
+        
+        int i=0;
+        c=0;
+        int l;
+        sum=0;
+        while(1){
+            if(i>=k)
+                a[i]=0;
+             if(a[i]==0&&c==0)
+                break;
+            sum=(sum%mod*23)%mod;
+            l=(a[i]+c)/10;
+            a[i]=(a[i]+c)%10;
+            c=l;
+           // cout<<a[i]<<endl;
+            sum=(sum%mod+(a[i])%mod)%mod;
+             i++;
+   }
+       
+        cout<<sum<<endl;
+        
+    }
+    return 0;
+}

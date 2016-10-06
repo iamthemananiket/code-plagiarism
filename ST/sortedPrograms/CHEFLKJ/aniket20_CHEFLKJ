@@ -1,0 +1,211 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 1e-14
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+pii tree[4*maxs];
+int counts[400][210000];
+int arr[maxs],ans[maxs];
+pii quers[maxs];
+vector<int>v;
+
+pii merge(pii p1,pii p2){
+	pii ret;
+	if(p1.F==p2.F){
+		ret.F=p1.F;
+		ret.S=p1.S+p2.S;
+	}
+	else{
+		if(p1.S>=p2.S){
+			ret.F=p1.F;
+			ret.S=p1.S-p2.S;
+		}
+		else{
+			ret.F=p2.F;
+			ret.S=p2.S-p1.S;
+		}
+	}
+	return ret;
+}
+
+void init(int node,int a,int b){
+	if(a>b){
+		return ;
+	}
+	if(a==b){
+		tree[node].F=arr[a];
+		tree[node].S=1;
+		return ;
+	}
+	init(node*2,a,(a+b)/2);
+	init(node*2+1,(a+b)/2+1,b);
+	int l=node*2,r=node*2+1;
+	tree[node]=merge(tree[l],tree[r]);
+//	cout<<tree[node].F<<" "<<tree[node].S<<" "<<a<<" "<<b<<endl;
+}
+
+void update(int node,int a,int b,int l,int r){
+	if(a==b){
+		tree[node].F=r;
+		tree[node].S=1;
+		return ;
+	}
+	int m=(a+b)/2;
+	if(l>m){
+		update(node*2+1,m+1,b,l,r);
+	}
+	else{
+		update(node*2,a,m,l,r);
+	}
+	tree[node]=merge(tree[node*2], tree[node*2+1]);
+}
+pii temp;
+
+pii query(int node,int a, int b,int i,int j){
+	if(a>b || a>j || b<i){
+		return temp;
+	}
+	if(a>=i && b<=j){
+		return tree[node];
+	}
+	pii q1=query(node*2,a,(a+b)/2,i,j);
+	pii q2=query(node*2+1,(a+b)/2+1,b,i,j);
+	return merge(q1,q2);
+}
+int sz,bl;
+
+void update_root(int x,int y){
+	int blno=x/sz;
+	counts[blno][arr[x]]--;
+	int ind=lower_bound(v.begin(),v.end(),y)-v.begin()+1;
+	counts[blno][ind]++;
+	arr[x]=ind;
+}
+int n;
+int query_root(int l,int r,int val1){
+	int sbl=l/sz;
+	int ebl=r/sz;
+	int val=lower_bound(v.begin(),v.end(),val1)-v.begin()+1;
+	int ret=0;
+	if(sbl==ebl){
+		for(int i=l;i<=r;i++){
+			if(arr[i]==val){
+				ret++;
+			}
+		}
+	}
+	else{
+		for(int i=l;i<min(n,(sbl+1)*sz);i++){
+			if(arr[i]==val){
+				ret++;
+			}
+		}
+		for(int i=sbl+1;i<ebl;i++){
+			ret+=counts[i][val];
+		}
+		for(int i=(ebl*sz);i<=r;i++){
+			if(arr[i]==val){
+				ret++;
+			}
+		}
+	}
+	return ret;
+}
+
+
+int types[maxs];
+int main()
+{
+	int q,i,j,type,x,y,l,r;
+	sc("%d %d", &n, &q);
+	for(i=0;i<n;i++){
+		sc("%d", &arr[i]);
+		v.pb(arr[i]);
+	}
+	for(i=0;i<q;i++){
+		ans[i]=-1;
+	}
+	temp.F=-1;
+	temp.S=0;
+	init(1,0,n-1);
+	for(i=0;i<q;i++){
+		sc("%d",&type);
+		types[i]=type;
+		if(type==1){
+			sc("%d %d",&x,&y);
+			quers[i].F=x;
+			quers[i].S=y;
+			v.pb(y);
+			update(1,0,n-1,x-1,y);	
+		}
+		else{
+			sc("%d %d",&l, &r);
+			quers[i].F=l;
+			quers[i].S=r;
+			pii ret = query(1,0,n-1,l-1,r-1);
+			if(ret.S!=0){
+				ans[i]=ret.F;
+			}
+		}
+	}
+	sz=sqrt(n);
+	bl=n/sz;
+	if((n%sz)!=0){
+		bl++;
+	}
+	sort(v.begin(),v.end());
+	for(i=0;i<n;i++){
+		arr[i]=lower_bound(v.begin(),v.end(),arr[i])-v.begin()+1;
+	}
+	for(i=0;i<bl;i++){
+		for(j=i*sz;j<min(n,(i+1)*sz);j++){
+			counts[i][arr[j]]++;
+		}
+	}
+	for(i=0;i<q;i++){
+		if(types[i]==1){
+			update_root(quers[i].F-1,quers[i].S);
+		}
+		else{
+			if(ans[i]==-1){
+				pr("No\n");
+				continue;
+			}
+			int cnt=query_root(quers[i].F-1,quers[i].S-1, ans[i]);
+			if(cnt>(quers[i].S-quers[i].F+1)/2){
+				pr("Yes\n");
+			}
+			else{
+				pr("No\n");
+			}
+		}
+	}
+	return 0;
+}

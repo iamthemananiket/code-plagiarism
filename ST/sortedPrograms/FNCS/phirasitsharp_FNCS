@@ -1,0 +1,93 @@
+#include <stdio.h>
+
+#define N 100010
+#define SQ_N 330
+
+#define LL long long
+#define ULL unsigned long long
+
+LL sum[SQ_N];
+LL mem[SQ_N][N];
+int L[N], R[N];
+
+LL tmp[N];
+int n, sq, q;
+
+LL tree[N];
+LL arr[N];
+
+void update(int idx, LL val) {
+	while(idx <= n) {
+		tree[idx] += val;
+		idx += idx & (-idx);
+	}
+}
+LL query(int idx) {
+	LL r = 0;
+	while(idx > 0) {
+		r += tree[idx];
+		idx -= idx & (-idx);
+	}
+	return r;
+}
+ULL calc(int idx) {
+	if(idx <= 0) {
+		return 0;
+	}
+	int id = idx / sq;
+	ULL r = sum[id];
+	for(int i = id * sq + 1;i <= idx;i++) {
+		r += (ULL) query(R[i]) - query(L[i] - 1);
+	}
+	return r;
+}
+int main() {
+	scanf("%d", &n);
+	sq = 1;
+	while((sq+1) * (sq+1) <= n) {
+		sq++;
+	}
+	for(int i = 1;i <= n;i++) {
+		scanf("%lld", &arr[i]);
+		update(i, arr[i]);
+	}
+	for(int i = 1;i <= n;i++) {
+		scanf("%d%d", &L[i], &R[i]);
+		tmp[i] = 0;
+	}
+	for(int i = 0;i <= n;i++) {
+		if(i != 0) {
+			tmp[L[i]]++;
+			tmp[R[i] + 1]--;
+		}
+		if(i % sq == 0) {
+			int id = i / sq;
+			mem[id][0] = 0;
+			sum[id] = 0;
+			for(int j = 1;j <= n;j++) {
+				mem[id][j] = mem[id][j-1] + tmp[j];
+				sum[id] += mem[id][j] * arr[j];
+			}
+		}
+	}
+	scanf("%d", &q);
+	while(q--) {
+		int type;
+		scanf("%d", &type);
+		if(type == 1) {
+			int idx, val;
+			scanf("%d%d", &idx, &val);
+			LL diff = (LL) val - arr[idx];
+			for(int i = 0;i * sq <= n;i++) {
+				sum[i] += mem[i][idx] * diff;
+			}
+			arr[idx] = val;
+			update(idx, diff);
+		}else {
+			int a, b;
+			scanf("%d%d", &a, &b);
+			printf("%llu\n", calc(b) - calc(a-1));
+		}
+	}
+	return 0;
+}

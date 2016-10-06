@@ -1,0 +1,96 @@
+/* @nazarbek.altybay */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <queue>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+
+#define pii pair<int, int>
+
+#define pb push_back
+#define mp make_pair
+
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+
+const int INF = (int) 1e9 + 7;
+const int MAXN = (int) 2e6 + 7;
+
+const int dx[] = {-1, 0, 1, 0};
+const int dy[] = {0, 1, 0, -1};
+
+int cases;
+vector<pii> g[111][222];
+bool is[111][222];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  is[1][0] = 1;
+  for (int i = 3; i <= 100; i++) {
+    is[i][i] = 1;
+    for (int j = 1; j < i; j++) g[i][i].pb(mp(j, j + 1));
+    g[i][i].pb(mp(i, 1));
+  }
+  for (int i = 0; i <= 100; i++) {
+    for (int j = 0; j <= 200; j++) {
+      for (int i1 = 0; i1 + i <= 100; i1++) {
+        for (int j1 = 0; j1 + j <= 200; j1++) {
+          if (i == 1 && j == 0) continue;
+          if (i1 == 1 && j1 == 0 && i <= 3) continue;
+          if (!is[i][j]) continue;
+          if (!is[i1][j1]) continue;
+          if (is[i + i1][j + j1 + 2]) continue;
+          int v = i + i1;
+          int e = j + j1 + 2;
+          is[v][e] = 1;
+          g[v][e] = g[i][j];
+          for (auto it : g[i1][j1])
+            g[v][e].pb(mp(it.f + i, it.s + i));
+          g[v][e].pb(mp(i, i + 1));
+          g[v][e].pb(mp(2, i + 1));
+        }
+      }
+    }
+  }
+  int cases;
+  scanf("%d", &cases);
+  while (cases--) {
+    int n, m;
+    scanf("%d%d", &n, &m);
+    if (n == 2 && m == 1) {
+      printf("1 2\n");
+      continue;
+    }
+    if (m > 200 || g[n][m].empty()) puts("-1 -1");
+    else {
+      for (auto it : g[n][m]) {
+        printf("%d %d\n", it.f, it.s);
+      }
+    }
+  }
+  return 0;
+}

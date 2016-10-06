@@ -1,0 +1,65 @@
+#include <iostream>
+#include <set>
+#include <vector>
+
+#define mp make_pair
+#define fi first
+#define se second
+
+using namespace std;
+
+int n,m,k;
+vector<pair<int,int> > h[100001];
+
+set<pair<int,int> > s;
+
+int eler[100001];
+bool ee[100001];
+int d[100001];
+
+int sol;
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin >> n >> m >> k;
+    fill(d,d+n,1000000001);
+
+    for(int i=0; i<k; i++) {
+        int x; cin >> x;
+        eler[x] = x;
+        d[x] = 0;
+        s.insert(mp(0,x));
+    }
+
+    for(int i=0; i<m; i++) {
+        int x,y,z; cin >> x >> y >> z;
+        h[x].push_back(mp(y,z));
+        h[y].push_back(mp(x,z));
+    }
+
+    sol = 1000000001;
+    while(!s.empty()) {
+        int p = s.begin()->se;
+        s.erase(s.begin());
+        ee[p] = 1;
+
+        for(auto qq:h[p]) {
+            int q = qq.fi;
+            int t = qq.se;
+            if((ee[q]) && (eler[q] == eler[p])) continue;
+            if(!ee[q]) {
+                if(d[p]+t < d[q]) {
+                    s.erase(mp(d[q],q));
+                    d[q] = d[p]+t;
+                    s.insert(mp(d[q],q));
+                    eler[q] = eler[p];
+                }
+            } else sol = min(sol,d[p]+t+d[q]);
+        }
+    }
+
+    cout << sol << endl;
+
+    return 0;
+}

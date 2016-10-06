@@ -1,0 +1,17 @@
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        int n, cont = 0 ;
+        scanf( "%d", &n );
+        while( n > 0 )
+        {
+                if( n & 1 )
+                        cont++ ;
+                n >>= 1 ;
+        }
+        printf( "%d", (1<<cont) );
+	return 0;
+}

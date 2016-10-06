@@ -1,0 +1,29 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N   = 1e5 + 5;
+const int INF = 1e8 + 8;
+
+int t, n, u;
+
+inline int solve(int n, int u){
+	if(n <= 3) return 1;
+	int niceness = 2;
+	int nodes = 4, cur = 6;
+	while(true){
+		nodes += cur;
+		if(nodes > n) return niceness;
+		niceness++;
+		cur *= 2;
+	}
+}
+
+int main(){
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d %d", &n, &u);
+		int niceness = solve(n, u);
+		if(niceness >= u) puts("Yes");
+		else puts("No");
+	}
+}

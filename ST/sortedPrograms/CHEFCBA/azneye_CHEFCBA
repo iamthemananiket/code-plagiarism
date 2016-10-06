@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  vector<int> arr(4);
+  for(int& a:arr)
+    cin>>a;
+  sort(arr.begin(),arr.end());
+  do {
+    if (arr[0] * arr[1] == arr[2] * arr[3]) {
+      cout << "Possible\n";
+      return 0;
+    }
+  } while (next_permutation(arr.begin(), arr.end()));
+  cout << "Impossible\n";
+  return 0;
+}

@@ -1,0 +1,78 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t;
+int n;
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d" , &n);
+        int mx = 0;
+        int mxcnt = 0;
+        int who;
+        for(int i = 1 ; i <= n ; ++i){
+            int x;
+            scanf("%d" , &x);
+            int score = 0;
+            int freq[7];
+            memset(freq , 0 , sizeof(freq));
+            while(x--){
+                int inp;
+                scanf("%d" , &inp);
+                ++score;
+                ++freq[inp];
+            }
+            while(1){
+                vector < pair < int , int > > v;
+                v.clear();
+                for(int i = 1 ; i <= 6 ; ++i){
+                    if(freq[i]){
+                        v.emplace_back(make_pair(freq[i] , i));
+                    }
+                }
+                sort(v.begin() , v.end());
+                reverse(v.begin() , v.end());
+                if(v.size() < 4){
+                    break;
+                }
+                if(v.size() == 6){
+                    score += v[5].first * 4;
+                    for(int i = 0 ; i < 6 ; ++i){
+                        v[i].first -= v[5].first;
+                    }
+                }
+                else if(v.size() == 5){
+                    score += v[4].first * 2;
+                    for(int i = 0 ; i < 5 ; ++i){
+                        v[i].first -= v[4].first;
+                    }
+                }
+                else if(v.size() == 4){
+                    score += v[3].first;
+                    for(int i = 0 ; i < 4 ; ++i){
+                        v[i].first -= v[3].first;
+                    }
+                }
+                for(auto it : v){
+                    freq[it.second] = it.first;
+                }
+            }
+            if(score > mx){
+                mx = score;
+                mxcnt = 0;
+                who = i;
+            }
+            mxcnt += (score == mx);
+        }
+        if(mxcnt == 1){
+            if(who == 1){
+                printf("chef\n");
+            }
+            else{
+                printf("%d\n" , who);
+            }
+        }
+        else{
+            printf("tie\n");
+        }
+    }
+}

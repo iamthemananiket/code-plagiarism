@@ -1,0 +1,226 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX_N = 510000;
+
+int n, m;
+int a[MAX_N];
+
+void solve_small() {
+  vector<int> xs;
+  for (int i = 0; i < n; i++) {
+    xs.push_back(a[i]);
+  }
+  sort(xs.begin(), xs.end());
+  xs.erase(unique(xs.begin(), xs.end()), xs.end());
+  for (int i = 0; i < n; i++) {
+    a[i] = lower_bound(xs.begin(), xs.end(), a[i]) - xs.begin();
+  }
+  int V = xs.size();
+  scanf("%d", &m);
+  while (m--) {
+    int l, r;
+    scanf("%d%d", &l, &r);
+    l--;
+    vector<int> b(V);
+    for (int i = l; i < r; i++) {
+      b[a[i]]++;
+    }
+    int p = 0;
+    while (p < V && b[p] == 0) p++;
+    int q = p + 1;
+    ll ans = 0;
+    while (p < V) {
+      while (q < V && b[q] == 0) {
+        q++;
+      }
+      if (q == V) break;
+      ll d = xs[q] - xs[p];
+      ans += d * d;
+      p = q;
+      q = p + 1;
+    }
+    printf("%lld\n", ans);
+  }
+}
+
+const int MAX_V = 50001;
+typedef long long ll;
+typedef array<unsigned short, MAX_V> Value;
+struct SegTree {
+  int n;
+  vector<Value> t;
+
+  Value zero() {
+    Value v;
+    for (int i = 0; i < MAX_V; i++) {
+      v[i] = 0;
+    }
+    return v;
+  }
+
+  Value calc(const Value &a, const Value &b) {
+    Value v;
+    for (int i = 0; i < MAX_V; i++) {
+      v[i] = a[i] + b[i];
+    }
+    return v;
+  }
+  
+  SegTree(int n_) {
+    n = 1;
+    while (n < n_) n <<= 1;
+    t.resize(2 * n - 1, zero());
+  }
+
+  void update(int k, Value v) {
+    k += n - 1;
+    t[k] = v;
+    while (k > 0) {
+      k = (k - 1) >> 1;
+      t[k] = calc(t[2 * k + 1], t[2 * k + 2]);
+    }
+  }
+
+  Value query(int a, int b, int k, int l, int r) {
+    if (b <= l || r <= a) {
+      return zero();
+    } else if (a <= l && r <= b) {
+      return t[k];
+    } else {
+      return calc(query(a, b, 2 * k + 1, l, (l + r) / 2),
+                  query(a, b, 2 * k + 2, (l + r) / 2, r));
+    }    
+  }
+
+  Value query(int a, int b) {
+    return query(a, b, 0, 0, n);
+  }
+};
+
+void solve_vsmall() {
+  const int V = 101;
+  SegTree st(n);
+  for (int i = 0; i < n; i++) {
+    Value v = st.zero();
+    v[a[i]] = 1;
+    st.update(i, v);
+  }
+  scanf("%d", &m);
+  while (m--) {
+    int l, r;
+    scanf("%d%d", &l, &r);
+    l--;
+    Value b = st.query(l, r);
+    for (int i = l; i < r; i++) {
+      b[a[i]]++;
+    }
+    int p = 0;
+    while (p < V && b[p] == 0) p++;
+    int q = p + 1;
+    ll ans = 0;
+    while (p < V) {
+      while (q < V && b[q] == 0) {
+        q++;
+      }
+      if (q == V) break;
+      ll d = q - p;
+      ans += d * d;
+      p = q;
+      q = p + 1;
+    }
+    printf("%lld\n", ans);
+  } 
+}
+
+void solve_large() {
+  vector<int> xs;
+  for (int i = 0; i < n; i++) {
+    xs.push_back(a[i]);
+  }
+  sort(xs.begin(), xs.end());
+  xs.erase(unique(xs.begin(), xs.end()), xs.end());
+  for (int i = 0; i < n; i++) {
+    a[i] = lower_bound(xs.begin(), xs.end(), a[i]) - xs.begin();
+  }
+  int V = xs.size();
+  SegTree st(n);
+  for (int i = 0; i < n; i++) {
+    Value v = st.zero();
+    v[a[i]] = 1;
+    st.update(i, v);
+  }
+  scanf("%d", &m);
+  while (m--) {
+    int l, r;
+    scanf("%d%d", &l, &r);
+    l--;
+    Value b = st.query(l, r);
+    for (int i = l; i < r; i++) {
+      b[a[i]]++;
+    }
+    int p = 0;
+    while (p < V && b[p] == 0) p++;
+    int q = p + 1;
+    ll ans = 0;
+    while (p < V) {
+      while (q < V && b[q] == 0) {
+        q++;
+      }
+      if (q == V) break;
+      ll d = xs[q] - xs[p];
+      ans += d * d;
+      p = q;
+      q = p + 1;
+    }
+    printf("%lld\n", ans);
+  } 
+}
+
+
+int main() {
+  scanf("%d", &n);
+  int max_v = 0;
+  for (int i = 0; i < n; i++) {
+    scanf("%d", &a[i]);
+    max_v = max(max_v, a[i]);
+  }
+  if (n <= 10000 && m <= 10000) {
+    solve_small();
+  } else if (max_v <= 100) {
+    solve_vsmall();
+  } else {
+    solve_large();
+  }
+}

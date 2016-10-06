@@ -1,0 +1,20 @@
+#include<stdio.h>
+int T, n;
+long long Sum, tp;
+long long Gap(long long a, int b){
+	return (a + a + b - 1)*b / 2;
+}
+int main()
+{
+	int i, st;
+	scanf("%d", &T);
+	while (T--){
+		scanf("%d%lld", &n, &Sum);
+		st = 1; tp = 0;
+		for (i = 1; i <= n; i++){
+			if (tp + st + Gap(st + 1, n - i) < Sum)st++;
+			tp += st;
+		}
+		printf("%d\n", n - st);
+	}
+}

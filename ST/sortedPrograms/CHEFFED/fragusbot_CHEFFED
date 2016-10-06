@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int get(int n) {
+  int res = 0;
+  while (n) {
+    res += n % 10;
+    n /= 10;
+  }
+  return res;
+}
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int n;
+  scanf("%d", &n);
+  set <int> s;
+  for (int i = 1; i <= 81; ++i) {
+    int j = get(i);
+    int k = n - i - j;
+    if (k <= 0) continue;
+    if (get(k) != i) continue;
+    s.insert(k);
+  }
+  printf("%d\n", (int)s.size());
+  return 0;
+}

@@ -1,0 +1,115 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+pair <int, int> a[3];
+
+int side[3];
+
+int cross (pair <int, int> x, pair <int, int> y)
+{
+	return (x.first * y.second - x.second * y.first);
+}
+
+void solve_sides ()
+{
+	int i;
+	int prv, crr;
+	for (i = 0; i < 3; i ++)
+		scanf ("%d%d", &a[i].first, &a[i].second);
+	
+	for (i = 0; i < 3; i ++)
+	{
+		prv = (i - 1 + 3) % 3;
+		crr = i;
+		
+		side[i] = (a[crr].first - a[prv].first) * (a[crr].first - a[prv].first) +
+			  (a[crr].second - a[prv].second) * (a[crr].second - a[prv].second); 
+	}
+	for (i = 0; i < 3; i ++)
+	{
+		if (side[i] == side[(i - 1 + 3) % 3])
+		{
+			printf ("Isosceles ");
+			return;
+		}
+	}
+	printf ("Scalene ");
+}
+
+void solve_angls ()
+{
+	int i, j, k, lamp, cnt = 0, t;
+	pair <int, int>  prv1, crr, prv2;
+	for (i = 0; i < 3; i ++)
+		for (j = 0; j < 3; j ++)
+			for (k = 0; k < 3; k ++)
+			{
+				if (i == j || i == k || j == k)
+					continue;
+				if (side[i] + side[j] == side[k])
+				{
+					printf ("right ");
+					return;
+				}
+			}
+	
+	for (i = 0; i < 3; i ++)
+		for (j = 0; j < 3; j ++)
+			for (k = 0; k < 3; k ++)
+			{
+				if (i == j || i == k || j == k)
+					continue;
+				if (side[i] + side[j] < side[k])
+				{
+					printf ("obtuse ");
+					return;
+				}
+			}
+	/**
+	for (i = 0; i < 3; i ++)
+	{
+		prv2 = a[(i - 2 + 3) % 3];
+		prv1 = a[(i - 1 + 3) % 3];
+		crr = a[i];
+		prv1 = {prv1.first - crr.first, prv1.second - crr.second};
+		prv2 = {prv2.first - crr.first, prv2.second - crr.second};
+		
+		t = cross (prv1, prv2);
+		
+		printf ("%d %d\n", prv1.first, prv1.second);
+		printf ("%d %d\n", prv2.first, prv2.second);
+		printf ("%d\n", t);
+		
+		if (t > 0)
+		{
+			printf ("obtuse ");
+			return;
+		}
+	}
+	**/
+	printf ("acute ");
+}
+
+int main ()
+{
+	int t, id;
+	scanf ("%d", &id);
+	scanf ("%d", &t);
+	while (t --)
+	{
+		solve_sides ();
+		if (id == 2)
+			solve_angls ();
+		printf ("triangle\n");
+	}
+	return 0;
+}

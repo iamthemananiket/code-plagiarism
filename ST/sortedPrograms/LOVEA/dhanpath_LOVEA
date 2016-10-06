@@ -1,0 +1,29 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std ;
+
+typedef long long ll ;
+
+ll sq( ll a )
+{
+        ll  x = sqrt(a);
+        if( x*x <= a ) return x ;
+        return x-1 ;
+}
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        ll  t , a, b ;
+
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> a >> b ;
+                cout << sq(b) - sq(a-1) << endl ;
+        }
+
+        return 0;
+} 

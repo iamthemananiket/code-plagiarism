@@ -1,0 +1,79 @@
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+#include<cmath>
+#include<utility>
+#include<unordered_set>
+using namespace std;
+typedef long long LL;
+#define MOD 1000000007LL
+
+#define gx getchar_unlocked
+#define px putchar_unlocked
+#define ps putchar_unlocked(' ')
+#define pn putchar_unlocked('\n')
+
+void scan(int &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*sign;}
+void lscan(LL &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*(LL)(sign);}
+int sscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n')a[i++]=c,c=gx();a[i]=0;return i;}
+int wscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n'&&c!=' ')a[i++]=c,c=gx();a[i]=0;return i;}
+void print(int n){if(n<0){n=-n;px('-');}int i=10;char o[10];do{o[--i]=(n%10)+'0';n/=10;}while(n);do{px(o[i]);}while(++i<10);}
+void lprint(LL n){if(n<0LL){n=-n;px('-');}int i=21;char o[21];do{o[--i]=(n%10LL)+'0';n/=10LL;}while(n);do{px(o[i]);}while(++i<21);}
+void sprint(const char*a){const char*p=a;while(*p)px(*p++);}
+
+int main() {
+	LL n, i, j;
+	LL x[2001], y[2001];
+
+    struct pair_hash {
+        inline std::size_t operator()(const std::pair<LL,LL> & v) const {
+            return v.first*10000000000LL+v.second;
+        }
+    };
+    unordered_set< pair<LL,LL>, pair_hash > s;
+    
+	lscan(n);
+	for( i = 0; i < n; ++i ) {
+		lscan(x[i]); lscan(y[i]);
+		s.insert( pair<LL,LL>(x[i],y[i]) );
+	}
+	
+	LL max = 0, xx, yy, ct;
+	for( i = 0; i < n-1; ++i ) {
+		for( j = i+1; j < n; ++j ) {
+			//first case
+			ct = 0;
+
+			xx = x[i] + (y[i]-y[j]);
+			yy = y[i] + (x[j]-x[i]);
+			if( s.find( pair<LL,LL>(xx,yy) ) != s.end() ) ++ct;
+			
+			xx = x[j] + (y[i]-y[j]);
+			yy = y[j] + (x[j]-x[i]);
+			if( s.find( pair<LL,LL>(xx,yy) ) != s.end() ) ++ct;
+			
+			if( ct > max ) max = ct;
+			if( max == 2 ) break;
+			
+			//second case
+			ct = 0;
+
+			xx = x[i] - (y[i]-y[j]);
+			yy = y[i] - (x[j]-x[i]);
+			if( s.find( pair<LL,LL>(xx,yy) ) != s.end() ) ++ct;
+
+			xx = x[j] - (y[i]-y[j]);
+			yy = y[j] - (x[j]-x[i]);
+			if( s.find( pair<LL,LL>(xx,yy) ) != s.end() ) ++ct;
+
+			if( ct > max ) max = ct;
+			if( max == 2 ) break;
+		}
+		if( max == 2 ) break;
+	}
+    if( n == 0 ) cout << 4 << endl;
+    else if( n == 1 ) cout << 3 << endl;
+    else cout << 2 - max << endl;
+    return 0;
+}
+

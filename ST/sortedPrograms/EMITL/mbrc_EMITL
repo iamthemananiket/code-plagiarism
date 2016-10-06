@@ -1,0 +1,50 @@
+#include <cstdio>
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <queue>
+#include <stack>
+#include <functional>
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define rep(i,x,y) for (int i = (x);i <= (y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y); i++)
+#define drep(i,x,y) for (int i = (x); i >=(y); i--)
+#define pb push_back
+#define mp make_pair
+#define s(x) scanf("%d",&x)
+#define pr(x) printf("%d",x)
+#define psp printf(" ")
+#define endc printf("\n")
+#define sl(x) scanf("%lld",&x)
+#define prl(x) printf("%lld",x)
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+int A[300];
+
+int main() {
+	int t; s(t);
+	while(t--) {
+		string s; cin>>s; int n = s.size();
+		rep(i,1,255) A[i] = 0;
+		repe(i,0,n) {
+			A[s[i]]++;
+		}
+		if ((A['L'] >= 2) and (A['T'] >= 2) and (A['I'] >= 2) and (A['M'] >= 2) and (A['E'] >= 2)) {
+			cout<<"YES"<<endl;
+		} else {
+			if ((n == 9) and (A['L'] >= 2) and (A['T']>=2) and (A['I'] >= 2) and (A['M'] >= 2) and (A['E'] >= 1)) {
+				cout<<"YES"<<endl;
+			} else {
+				cout<<"NO"<<endl;
+			}
+		}
+	}
+}

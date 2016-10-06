@@ -1,0 +1,106 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX_N = 500;
+const int MAX_M = 20001;
+const int MOD = 1000000007;
+
+int n, m;
+vector<int> g[MAX_N];
+int d[MAX_N], par[MAX_N];
+int dp[MAX_N][MAX_M];
+
+void dfs(int v, int p) {
+  for (int u : g[v]) {
+    if (u != p) {
+      par[u] = v;
+      d[u] = d[v] + 1;
+      dfs(u, v);
+    }
+  }
+}
+
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> n >> m;
+    for (int i = 0; i < n; i++) {
+      g[i].clear();
+    }
+    for (int i = 0; i < n; i++) {
+      for (int j = 1; j <= m; j++) {
+	dp[i][j] = 0;
+      }
+    }
+    for (int i = 0; i < n - 1; i++) {
+      int u, v;
+      cin >> u >> v;
+      u--, v--;
+      g[u].push_back(v);
+      g[v].push_back(u);
+    }
+    d[0] = 0;
+    dfs(0, 0);
+    vector<int> vs(n);
+    for (int i = 0; i < n; i++) {
+      vs[i] = i;
+    }
+    sort(vs.begin(), vs.end(), [&](int u, int v) {
+	return d[u] > d[v];
+      });
+    for (int v : vs) {
+      for (int x = 1; x <= m; x++) {
+	int val = 1;
+	for (int u : g[v]) {
+	  if (u == par[v]) continue;
+	  int t = 0;
+	  for (int y = x; y <= m; y += x) {
+	    t += dp[u][y];
+	    if (t >= MOD) t -= MOD;
+	  }
+	  val = ((ll)val * t) % MOD;
+	}
+	//cout << "hoge:" << v << ' ' << x << ' ' << val << endl;
+	dp[v][x] = val;
+      }
+    }
+    int ans = 0;
+    for (int x = 1; x <= m; x++) {
+      ans += dp[0][x];
+      if (ans >= MOD) ans -= MOD;
+    }
+    cout << ans << endl;
+  }
+}

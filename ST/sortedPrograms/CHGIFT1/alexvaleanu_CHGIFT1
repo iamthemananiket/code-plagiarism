@@ -1,0 +1,53 @@
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+
+using namespace std;
+
+int T, N;
+long long a[20], v[20];
+
+long long solve()
+{
+    long long minim = a[1];
+    long long maxim = a[1];
+
+    for ( int i = 2; i <= N; ++i )
+    {
+        v[1] = minim, v[2] = minim, v[3] = minim;
+
+        v[1] *= a[i];
+        v[2] -= a[i];
+        v[3] += a[i];
+
+        v[4] = maxim, v[5] = maxim, v[6] = maxim;
+
+        v[4] *= a[i];
+        v[5] -= a[i];
+        v[6] += a[i];
+
+        sort( v + 1, v + 6 + 1 );
+
+        minim = v[1];
+        maxim = v[6];
+    }
+
+    return minim;
+}
+
+int main()
+{
+    //ifstream cin("date.in");
+
+    for ( cin >> T; T; T-- )
+    {
+        cin >> N;
+
+        for ( int i = 1; i <= N; ++i )
+                cin >> a[i];
+
+        cout << solve() << "\n";
+    }
+
+    return 0;
+}

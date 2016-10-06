@@ -1,0 +1,22 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+long long L,R;
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%lld%lld",&L,&R);
+		int ans = 0;
+		if (1>=L) ans+=1;
+		for (long long a=2;a<=2e18;a*=2) for (long long b=1;b<=2e18;b*=3) {
+			if ((double) a*b<=2e18) if (a*b>=L && a*b<=R) ans+=1;
+		}
+		printf("%d\n",ans);
+	}
+
+	return 0;
+}

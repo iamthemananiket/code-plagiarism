@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)5e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, m, q;
+char tp[MAX_N];
+int x[MAX_N], y[MAX_N];
+int last[MAX_N], a[MAX_N];
+int u[MAX_N], v[MAX_N];
+bool ok[MAX_N];
+
+multiset < ll > all;
+ll sum[MAX_N];
+int h[MAX_N], pr[MAX_N];
+
+void init(int v) {
+	pr[v] = v;
+	sum[v] = a[v];
+	all.insert(sum[v]);
+	h[v] = 0;
+}
+
+int Pr(int v) {
+	if (v == pr[v])
+		return v;
+	return pr[v] = Pr(pr[v]);
+}
+
+void Union(int u, int v) {
+	u = Pr(u), v = Pr(v);
+	if (u == v)
+		return;
+	if (h[u] > h[v])
+		swap(u, v);
+	pr[u] = v;
+	all.erase(all.find(sum[u]));
+	all.erase(all.find(sum[v]));
+	sum[v] += sum[u];
+	all.insert(sum[v]);
+	if (h[u] == h[v])
+		h[v]++;					
+}
+
+void Update(int v, int val, int last) {
+	v = Pr(v);
+	all.erase(all.find(sum[v]));
+	sum[v] = sum[v] - val + last;
+	all.insert(sum[v]);
+}
+
+ll Maxi() {
+	return *all.rbegin();
+}
+
+int main() {
+    ios_base :: sync_with_stdio(NULL), cin.tie(NULL);
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	cin >> n >> m >> q;
+	for (int i = 1; i <= n; i++)
+		cin >> a[i];
+	for (int i = 1; i <= m; i++) {
+		cin >> u[i] >> v[i];
+		ok[i] = 1;
+	}
+	for (int i = 1, now; i <= q; i++) {
+		cin >> tp[i];
+		if (tp[i] == 'D') {
+			cin >> now;
+			ok[now] = 0;
+			x[i] = u[now], y[i] = v[now];
+		}
+		else {
+			cin >> x[i] >> y[i];
+			last[i] = a[x[i]];
+			a[x[i]] = y[i];
+		}
+	}
+	for (int i = 1; i <= n; i++)
+		init(i);
+	vector < ll > ans;
+	for (int i = 1; i <= m; i++)
+		if (ok[i]) {
+			Union(u[i], v[i]);
+		}
+	for (int i = q; i > 0; i--) {
+	    ans.pb(Maxi());
+		if (tp[i] == 'D') {
+			Union(x[i], y[i]);
+		}
+		else
+			Update(x[i], y[i], last[i]);
+	}
+	for (int i = sz(ans) - 1; i >= 0; i--)
+		cout << ans[i] << "\n";
+	return 0;
+}

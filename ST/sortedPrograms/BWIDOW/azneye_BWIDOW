@@ -1,0 +1,77 @@
+/*
+ * 
+ * File:   BWIDOW.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 13, 2013, 11:18:39 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace BWIDOW {
+int in[1111], out[1111];
+
+void solve(int test_num) {
+  int N;
+  scanf("%d", &N);
+  for (int i = 0; i < N; i++)
+    scanf("%d %d", in + i, out + i);
+  for (int i = 0; i < N; i++) {
+    bool ok = true;
+    for (int j = 0; j < N; j++)
+      if (i != j)
+        ok &= out[j] < in[i];
+    if (ok) {
+      printf("%d\n", i + 1);
+      return;
+    }
+  }
+  puts("-1");
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  BWIDOW::solve();
+  return 0;
+}

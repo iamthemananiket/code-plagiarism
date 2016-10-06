@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 5 * 100005;
+const int Q = 5 * 100005;
+
+int fenwick_row [2][Q] = {0};
+int fenwick_col [2][Q] = {0};
+int row_set [2][N] = {0};
+int col_set [2][N] = {0};
+int n, q;
+string id;
+int m;
+bool x;
+int sum(int * f, int idx){
+	if(idx == 0) return 0;
+	int val = 0;
+	while(idx >= 1){
+		val += f[idx];
+		idx -= (idx & (-idx));
+	}
+	return val;
+}
+int query(int * f, int l, int r){
+	return sum(f, r) - sum(f, l - 1);
+}
+void update(int * f, int idx, int val){
+	if(idx == 0) return;
+	while(idx <= q){
+		f[idx] += val;
+		idx += (idx & (-idx));
+	}
+}
+int main(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(0);
+	cin >> n >> q;
+	for(int i = 1; i <= q; ++i){
+		cin >> id;
+		if(id[3] == 'S'){
+			cin >> m >> x;
+			if(id[0] == 'R'){
+				if(row_set[x][m] > row_set[!x][m])
+					update(fenwick_row[x], row_set[x][m], -1);
+				else update(fenwick_row[!x], row_set[!x][m], -1);
+				update(fenwick_row[x], i, 1);
+				row_set[x][m] = i;
+			}
+			else{
+				if(col_set[x][m] > col_set[!x][m])
+					update(fenwick_col[x], col_set[x][m], -1);
+				else update(fenwick_col[!x], col_set[!x][m], -1);
+				update(fenwick_col[x], i, 1);
+				col_set[x][m] = i;
+			}
+		}
+		else{ 
+			cin >> m;
+			if(id[0] == 'R'){
+				if(row_set[1][m] > row_set[0][m]){
+					cout << query(fenwick_col[0], row_set[1][m], i) << '\n';
+				}
+				else cout << n - query(fenwick_col[1], row_set[0][m], i) << '\n';
+			}
+			else{
+				if(col_set[1][m] > col_set[0][m]){
+					cout << query(fenwick_row[0], col_set[1][m], i) << '\n';
+				}
+				else cout << n - query(fenwick_row[1], col_set[0][m], i) << '\n';
+			}
+		}
+	}
+	return 0;
+}

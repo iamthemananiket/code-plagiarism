@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+int A[MAXN];
+int B[MAXN];
+map<int,int> M;
+int J[MAXN];
+int bit[MAXN];
+
+void update(int x,int v) {
+	while (x < MAXN) {
+		bit[x] += v; x += x & (-x);
+	}
+}
+
+int query(int x) {
+	int ans = 0;
+	while (x > 0) {
+		ans += bit[x]; x -= x & (-x);
+	}
+	return ans;
+}
+
+void solve() {
+	repe(j,0,MAXN) bit[j] = 0;
+	int n; s(n);
+	rep(i,1,n) { s(A[i]); B[i] = A[i]; }
+	sort(B+1,B+n+1);
+	M = *new map<int,int>();
+	int idx = 0;
+	rep(i,1,n) {
+		if (M.count(B[i]) == 0) { idx++; M[B[i]] = idx; J[idx] = B[i]; }
+	}
+	rep(i,1,n) A[i] = M[A[i]];
+	rep(i,1,n) {
+		int x = A[i]; int v = query(x);
+		if (query(MAXN-1) <= v) { update(x,1); continue; }
+		int l = x+1, r = MAXN-1;
+		while (l < r) {
+			int mid = (l+r-1)/2;
+			if (query(mid) > v) {
+				r = mid;
+			} else {
+				l = mid+1;
+			}
+		}
+		update(l,-1); update(x,1);
+	}
+	pr(query(MAXN-1)); endc; bool ok = false;
+	rep(i,1,n) {
+		int y = query(i) - query(i-1);
+		rep(j,1,y) { if (ok) psp; pr(J[i]); ok = true; }
+	}	
+	endc;	
+}
+
+int main() {
+	int t; s(t); while (t--) solve();
+}

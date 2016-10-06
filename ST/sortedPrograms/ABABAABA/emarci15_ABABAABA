@@ -1,0 +1,50 @@
+#include <iostream>
+
+using namespace std;
+
+int T,n;
+char s[50002];
+int ac, bc;
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> s;
+        ac = bc = 0;
+        for(n=0; s[n]!='\0'; n++) {
+            if(s[n] == 'A') ac++;
+            if(s[n] == 'B') bc++;
+        }
+        s[n+1] = '\0';
+
+        if(ac == 2) {
+            cout << 'A' << endl;
+            continue;
+        }
+        if(bc == 2) {
+            cout << 'B' << endl;
+            continue;
+        }
+
+        char c('\0');
+        int so(-1);
+        for(int i=0; i<n; i++) {
+            if((c!=s[i]) && (s[i+1]==s[i]) && (s[i+2]!=s[i])) {
+                so = i;
+                break;
+            }
+            c = s[i];
+        }
+
+        if(so < 0) {
+            cout << -1 << endl;
+            continue;
+        }
+
+        for(int i=0; i<so; i++) cout << s[i];
+        for(int i=so+1; i<n; i++) cout << s[i];
+        cout << endl;
+    }
+
+    return 0;
+}

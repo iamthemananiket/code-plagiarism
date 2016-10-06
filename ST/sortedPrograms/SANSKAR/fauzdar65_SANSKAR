@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define ii unsigned int
+using namespace std;
+ 
+ int t;
+ll n,k,prasad;
+vector<ll> sanskar;
+vector<ii> bt;
+ 
+int mark[11][2100000];
+ 
+void aloknath(int i,ii bit,ll rem)
+{
+	if(i==n){ if(rem==0){bt.push_back(bit); } return;}
+ 
+if(sanskar[i]<=rem)aloknath(i+1,bit|(1<<i),rem-sanskar[i]);
+aloknath(i+1,bit,rem);
+	
+}	
+ 
+int main() {
+	scanf("%d",&t);
+	//cout<<(1<<0)<<" ";
+	int ch=0;
+	while(t--)
+	{
+		scanf("%lld %lld",&n,&k);
+        bt.clear();
+        sanskar.clear();
+		ll tot=0;
+		
+		for(int i=0;i<n;i++)
+		{
+			ll vv;
+			scanf("%lld",&vv);
+		    sanskar.push_back(vv);
+			tot+=vv;
+		}
+		
+		
+		
+		
+		if(n<k || tot%k!=0)
+		{
+			printf("no\n");
+		continue;
+		}
+		
+		
+		prasad= tot/k;
+		
+		aloknath(0,0,prasad);
+	
+	
+	
+	//assert(bt.size()<=8000);
+ 
+	
+	vector<ii> colors;
+	colors.push_back(0);
+
+	mark[t][0]=1;
+	
+	bool found=false;
+	
+	for(int i=0;i<bt.size();i++)
+	{
+		
+		int lim=colors.size();
+		for(int j=0;j<lim;j++)
+		{
+			if((bt[i]^colors[j])==(bt[i]|colors[j]))
+			{
+				if(!mark[t][bt[i]|colors[j]])colors.push_back(bt[i]|colors[j]);
+				
+				mark[t][bt[i]|colors[j]]=1;
+				
+				if((bt[i]|colors[j])==((1<<n) -1)){found=true; break; }
+			}
+			
+			ch++;
+			//assert(ch<=60000000);
+			
+		}
+		
+		
+		if(found)break;
+		
+	
+	}
+	
+
+	if(found)printf("yes\n");
+	else printf("no\n");
+	
+	}
+	return 0;
+}  

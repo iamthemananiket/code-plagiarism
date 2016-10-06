@@ -1,0 +1,157 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+ 
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+#define mps make_pair
+
+bool dp[505][502*502];
+
+int diffmin(int n, int sum, vector <int> arr){
+	
+	for (int i = 0; i <= n; i++)
+        dp[i][0] = true;
+
+	for (int i = 1; i <= sum; i++)
+        dp[0][i] = false;
+
+    for (int i=1; i<=n; i++){
+        for (int j=1; j<=sum; j++){
+            dp[i][j] = dp[i-1][j];
+ 
+            if (arr[i-1] <= j)
+                dp[i][j] |= dp[i-1][j-arr[i-1]];
+        }
+    }
+  
+    int diff = imax;
+     
+    for (int j=0; j<=sum;j++)
+    {
+        if (dp[n][j] == true)
+        {
+            diff = min(diff, abs(j-(sum-j)));
+        }
+    }
+
+    return diff;
+}
+
+
+int diffmin2(int n, int sum, vector <int> arr){
+	
+	for (int i = 0; i <= n; i++)
+        dp[i][0] = true;
+
+	for (int i = 1; i <= sum; i++)
+        dp[0][i] = false;
+
+	dp[1][0]=false;
+    for (int i=1; i<=n; i++){
+        for (int j=1; j<=sum; j++){
+        	if(i==1){
+        		if(arr[i-1]>j){
+        			dp[i][j] = false;
+        		}
+        		else{
+        			dp[i][j] |= dp[i-1][j-arr[i-1]];
+        		}
+        		continue;
+        	}
+            dp[i][j] = dp[i-1][j];
+ 
+            if (arr[i-1] <= j)
+                dp[i][j] |= dp[i-1][j-arr[i-1]];
+        }
+    }
+  
+     int diff = imax;
+     
+    for (int j=0; j<=sum;j++)
+    {
+        if (dp[n][j] == true)
+        {
+            diff = min(diff, abs(j-(sum-j)));
+        }
+    }
+
+    return diff;
+}
+
+vector <int> v[4];
+
+void clearit(){
+	for(int i=0; i<4; i++)v[i].clear();
+}
+vector <int> v1, v2;
+
+int main(){
+	int t;
+	sc("%d" ,&t);
+	while(t--){
+		int n,x;
+		sc("%d", &n);
+		int dir=0;
+		sc("%d ", &x);
+		
+		char y;
+	
+		v1.pb(x);
+		for(int i=0; i<n; i++){
+			sc("%c %d ", &y, &x);
+		//	cout<<i<<" "<<y<<" "<<x<<endl;
+			if((i%2)==0){
+				v2.pb(x);
+			}		
+			else{
+				v1.pb(x);
+			}
+		}
+	
+		if(v1.size()==1 || v2.size()==1){
+			printf("NO\n");
+			clearit();
+			v1.clear();
+			v2.clear();
+			continue;
+		}
+		int sum=0;
+		for(int i=0; i<v1.size(); i++){sum+=v1[i]; }
+		int diff1=diffmin(v1.size(), sum, v1);
+		sum=0;
+		for(int i=0; i<v2.size(); i++){sum+=v2[i]; }
+		int diff2=diffmin(v2.size(), sum, v2);
+ 		int ans=diff1+diff2;
+    	printf("%d\n", ans);
+		clearit();
+		v1.clear();
+		v2.clear();
+	}
+	return 0;
+}

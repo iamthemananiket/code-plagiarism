@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+
+#define mp std::make_pair
+#define pb push_back
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int) (a).size()
+
+int max(int a, int b)
+{
+    return (a > b ? a : b);
+}
+
+int min(int a, int b)
+{
+    return (a < b ? a : b);
+}
+
+typedef long long ll;
+typedef long double ld;
+typedef std::vector <int> vi;
+
+int main()
+{
+
+    int n, k;
+    scanf("%d%d", &n, &k);
+
+    std::vector <int> a(n);
+    for (int i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    std::map <int, int> m;
+    std::vector <int> right(n, n - 1);
+    std::stack <int> big;
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (i == n - 1)
+        {
+            m[a[i]] = i;
+            big.push(i);
+            continue;
+        }
+        while (!big.empty() && a[big.top()] <= a[i])
+            big.pop();
+        if (a[i] == k)
+        {
+            if (!big.empty()) right[i] = big.top() - 1;
+            big.push(i);
+            m[a[i]] = i;
+            continue;
+        }
+        big.push(i);
+        if (a[i] < k) continue;
+        int x = a[i] - k;
+        for (int d = 1; d * d <= x; d++)
+            if (x % d == 0)
+        {
+            if (d > k && m.count(d)) right[i] = min(right[i], m[d] - 1);
+            int D = x / d;
+            if (D > k && m.count(D)) right[i] = min(right[i], m[D] - 1);
+        }
+        m[a[i]] = i;
+    }
+
+    int minim = n - 1;
+    ll ans = 0;
+
+    for (int i = n - 1; i >= 0; i--)
+    {
+        minim = min(minim, right[i]);
+        ans += (ll) (minim - i + 1);
+    }
+
+    printf("%lld\n", ans);
+
+}

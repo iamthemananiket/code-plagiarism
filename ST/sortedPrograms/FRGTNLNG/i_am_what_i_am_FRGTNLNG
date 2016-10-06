@@ -1,0 +1,39 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		int n,k,c;
+		string s;
+		cin>>n>>k;
+		vector<bool> valid(n,false);
+		map<string,int> id;
+		for(int i=0;i<n;i++)
+		 {
+		 	cin>>s;
+		 	id[s]=i;
+		 }
+		for(int i=0;i<k;i++)
+		{
+			cin>>c;
+			for(int j=0;j<c;j++)
+			 {
+			 	cin>>s;
+			 	if(id.find(s)!=id.end())
+			 	valid[id[s]]=true;
+			 }
+		}
+		for(int i=0;i<n;i++)
+		 {
+		 	if(valid[i])
+		 	  cout<<"YES ";
+		 	else
+		 	 cout<<"NO ";
+		 }
+		 cout<<endl;
+	}
+}

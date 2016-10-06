@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 100010
+#define INF (1LL << 60)
+typedef long long LL;
+typedef pair <int, int> PII;
+
+vector <int> v[M];
+vector <PII> ticket[M];
+
+int n, m;
+int pa[20][M];
+
+LL mn[20][M], f[M];
+
+int jump(int x, int t) {
+	for (int i = 19; i >= 0; i--) {
+		if ((1 << i) & t) x = pa[i][x];
+	}
+	return x;
+}
+
+LL getmin(int x, int len) {
+	if (len == 1) return mn[0][x];
+	int k;
+  for (k = 1; (1 << k) < len - 1; k++);
+  return min(mn[k][x], mn[k][jump(x, (len - 1 - (1 << (k - 1))))]);
+}
+
+void dfs(int x) {
+	if (x == 1) {
+		for (int i = 0; i < 20; i++) mn[i][1] = 0;
+		f[1] = 0;
+	}
+	else {
+		f[x] = INF;
+		for (int i = 0; i < ticket[x].size(); i++) {
+			PII p = ticket[x][i];
+			f[x] = min(getmin(pa[0][x], p.first) + p.second, f[x]);
+		}
+		mn[0][x] = f[x]; mn[1][x] = min(f[x], f[pa[0][x]]);
+		for (int i = 2; i < 20; i++) mn[i][x] = min(mn[i - 1][x], mn[i - 1][pa[i - 2][x]]);
+	}
+	for (int i = 0; i < v[x].size(); i++) {
+		int u = v[x][i]; if (u == pa[0][x]) continue;
+		pa[0][u] = x;
+		for (int j = 1; j < 20; j++) pa[j][u] = pa[j - 1][pa[j - 1][u]];
+		dfs(u);
+	}
+}
+
+int main() {
+	//freopen("in.txt", "r", stdin);
+
+	scanf("%d %d", &n, &m);
+	for (int i = 1; i < n; i++) {
+		int x, y; scanf("%d %d", &x, &y);
+		v[x].push_back(y); v[y].push_back(x);
+	}
+	for (int i = 0; i < m; i++) {
+		int x, y, z;
+		scanf("%d %d %d", &x, &y, &z);
+		ticket[x].push_back(make_pair(y, z));
+	}
+	for (int i = 0; i < 20; i++) for (int j = 1; j <= n; j++) mn[i][j] = INF;
+	dfs(1);
+	int T;
+	for (scanf("%d", &T); T--; ) {
+		int x; scanf("%d", &x); cout << f[x] << endl;
+	}
+}

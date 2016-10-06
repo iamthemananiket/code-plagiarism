@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+const int MAXN = 101;
+const int MAXP = 20001;
+const int MOD  = 1000000007;
+const int FIX  = 10000;
+
+int T, N, S;
+int A[MAXN], B[MAXN], C[MAXN];
+int DP[MAXN][MAXP][MAXN], DP2[MAXN][MAXN];
+
+// DP[i][j][k] = Choosing a subset of (1..i) , profit being j , area occupied being k
+
+/* 
+   Observation for Sub task 3:
+   If profit becomes >= 10000 at any point, you can choose any combination of the
+   remaining items and profit will still remain positive. Only area matters then. 
+   Total Number of States = {100 * 20001 * 100} + {100 * 100}
+*/
+
+inline int add(int x , int y){
+	int ans = x + y;
+	if( ans >= MOD ) ans -= MOD;
+	return ans;
+}
+
+inline int solve( int i , int area ) {
+	if(area > S)   return 0;
+	if(i == N + 1) return 1;
+	if( DP2[i][area] != -1 ) return DP2[i][area];
+	
+	int res = 0;
+	res = add(res , solve( i , area + A[i]) );
+	res = add(res , solve( i + 1 , area ) );
+
+	return DP2[i][area] = res;
+}
+
+inline int compute( int i , int profit , int area ){
+	if( area > S )        return 0;
+	if( i == N + 1 )      return (profit > 0) ? 1 : 0;
+	if( profit >  10000 ) return solve(i , area);
+	if( profit < -10000 ) return 0;
+	
+	if( DP[i][profit + FIX][area] != -1 ) return DP[i][profit + FIX][area];
+	
+	int res = 0;
+	res = add(res , compute(i , profit + (C[i] - B[i]) , area + A[i]) );
+	res = add(res , compute(i + 1 , profit , area) );
+
+	return DP[i][profit + FIX][area] = res;
+}
+
+int main(){
+	
+	cin.tie(0) , ios::sync_with_stdio(false);
+	cin >> T;
+
+	while(T--){
+		
+		cin >> N >> S;
+		
+		// Cleanup
+		for(int i = 1 ; i <= N ; i++)
+			for(int j = 0 ; j < MAXP ; j++)
+				for(int k = 0 ; k <= S ; k++)
+					DP[i][j][k] = -1;
+
+		for(int i = 1 ; i <= N ; i++)
+			for(int j = 0 ; j <= S ; j++)
+				DP2[i][j] = -1;
+
+		// Input
+		for(int i = 1 ; i <= N ; i++) cin >> A[i] >> B[i] >> C[i];
+
+		// Compute number of ways
+		cout << compute(1,0,0) << '\n';
+	}
+}

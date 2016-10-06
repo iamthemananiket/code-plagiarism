@@ -1,0 +1,90 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+vector<pair<int, int> > adj[111000], rev[111000];
+ll d1[111000], d2[111000];
+
+void bfs(const vector<int>& starts, ll* dist, const vector<pair<int, int> >* g) {
+  memset(dist, 0x3F, sizeof(d1));
+  queue<int> que;
+  for (const int& st : starts) {
+    que.push(st);
+    dist[st] = 0;
+  }
+  for (; !que.empty(); que.pop()) {
+    const int at = que.front();
+    for (const pair<int, int>& e : g[at]) {
+      if (dist[at] + e.second < dist[e.first]) {
+        dist[e.first] = dist[at] + e.second;
+        que.push(e.first);
+      }
+    }
+  }
+}
+
+void solve(int test_num) {
+  int V, E, C, F;
+  cin >> V >> E >> C >> F;
+  vector<int> mids(C), ends(F);
+  for (int i = 0; i < C; i++)
+    cin >> mids[i];
+  for (int i = 0; i < F; i++)
+    cin >> ends[i];
+  while (E-- > 0) {
+    int a, b, len;
+    cin >> a >> b >> len;
+    adj[a].push_back(make_pair(b, len));
+    rev[b].push_back(make_pair(a, len));
+  }
+  srand(1337);
+  for (int v = 0; v < V; v++) {
+    random_shuffle(adj[v].begin(), adj[v].end());
+    random_shuffle(rev[v].begin(), rev[v].end());
+  }
+  vector<int> temp;
+  temp.push_back(0);
+  bfs(temp, d1, adj);
+  bfs(ends, d2, rev);
+  ll res = 1LL << 50;
+  for (const int& m : mids)
+    res = min(res, d1[m] + d2[m]);
+  if (res >= (1LL << 50))
+    cout << "-1\n";
+  else
+    cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

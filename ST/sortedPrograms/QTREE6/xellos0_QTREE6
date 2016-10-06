@@ -1,0 +1,158 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 123456789012345678LL
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+// mylittlepony
+using namespace std;
+
+int main() {
+	cin.sync_with_stdio(0);
+	int N,Q,a,b;
+	cin >> N;
+	vector< vector<int> > G(N);
+	for(int i =1; i < N; i++) {
+		cin >> a >> b;
+		G[--a].push_back(--b);
+		G[b].push_back(a);}
+	vector<int> col(N,0);
+	vector<bool> vis(N,false);
+	vector<bool> var(N,false);
+	vector<int> comp(N);
+	vector<int> L(N);
+	vector<int> CC(N); // farby
+	vector<int> SC(N); // velkosti komponentov
+	vector<int> D(N);
+	vector< pair<int,int> > Sl(N);
+
+	vector< vector<int> > Gn(N);
+	vector<int> goL(N);
+
+	cin >> Q;
+	for(int k =0; k < 100; k++) if(Q > 0) {
+		vector< pair<int,int> > nextQ(min(1000,Q));
+		vector<int> ans(min(1000,Q),0);
+		for(int i =0; i < N; i++) comp[i] =-1;
+		set<int> allVarS;
+		int c =0;
+		for(int i =0; i < min(1000,Q); i++) {
+			cin >> nextQ[i].ff >> nextQ[i].ss;
+			nextQ[i].ss--;
+			if(nextQ[i].ff == 1) {
+				var[nextQ[i].ss] =true;
+				if(allVarS.find(nextQ[i].ss) != allVarS.end()) continue;
+				allVarS.insert(nextQ[i].ss);
+				CC[c] =col[nextQ[i].ss];
+				SC[c] =1;
+				comp[nextQ[i].ss] =c++;}}
+		int varC =c; // vsetky s cislom < varC
+
+		queue<int> qu;
+		for(int i =0; i < N; i++) if(comp[i] == -1) {
+			comp[i] =c;
+			CC[c] =col[i];
+			SC[c] =0;
+			qu.push(i);
+			while(!qu.empty()) {
+				SC[c]++;
+				a =qu.front();
+				ALL_THE(G[a],it) if(comp[*it] == -1 && col[a] == col[*it]) {
+					comp[*it] =c;
+					qu.push(*it);}
+				qu.pop();}
+			c++;}
+
+		// skomprimuj
+		vector<int> allVarV;
+		allVarV.assign(allVarS.begin(),allVarS.end());
+		for(int i =0; i < c; i++) D[i] =0;
+		for(int i =0; i < allVarV.size(); i++) {
+			int v =allVarV[i];
+			ALL_THE(G[v],it) if(*it < v || !var[*it]) {
+				D[comp[*it]]++;
+				D[comp[v]]++;}
+			}
+
+		// listy, sucty danej farby v listoch
+		for(int i =0; i < varC; i++) L[i] =false;
+		for(int i =varC; i < c; i++) L[i] =(D[i] == 1);
+		for(int i =0; i < c; i++) Sl[i].ff =Sl[i].ss =0;
+
+		// skomprimuj, bez listov, rataj pocty v listoch
+		for(int i =0; i < c; i++) {
+			Gn[i].clear();
+			goL[i] =-1;}
+		for(int i =0; i < allVarV.size(); i++) {
+			int v =allVarV[i];
+			ALL_THE(G[v],it) if(*it < v || !var[*it]) {
+				if(L[comp[*it]]) {
+					if(CC[comp[*it]] == 0) Sl[comp[v]].ff +=SC[comp[*it]];
+					else Sl[comp[v]].ss +=SC[comp[*it]];
+					goL[comp[*it]] =comp[v];
+					continue;}
+				Gn[comp[v]].push_back(comp[*it]);
+				Gn[comp[*it]].push_back(comp[v]);}
+			}
+
+		for(int q =0; q < nextQ.size(); q++) {
+			if(nextQ[q].ff == 1) {
+				CC[comp[nextQ[q].ss]] =1-CC[comp[nextQ[q].ss]];
+				col[nextQ[q].ss] =1-col[nextQ[q].ss];
+				continue;}
+			// zisti suvisly komponent
+			nextQ[q].ss =comp[nextQ[q].ss];
+			if(L[nextQ[q].ss]) {
+				if(CC[goL[nextQ[q].ss]] != CC[nextQ[q].ss]) {
+					cout << SC[nextQ[q].ss] << "\n";
+					continue;}
+				nextQ[q].ss =goL[nextQ[q].ss];}
+			vector<int> allV(1,nextQ[q].ss);
+			qu.push(nextQ[q].ss);
+			vis[nextQ[q].ss] =true;
+			while(!qu.empty()) {
+				a =qu.front();
+				ALL_THE(Gn[a],it) if(CC[*it] == CC[a] && !vis[*it]) {
+					vis[*it] =true;
+					qu.push(*it);
+					allV.push_back(*it);}
+				qu.pop();}
+			// bez listov; prirataj listy
+			int ans =0;
+			if(allV.size() == 1) {
+				ans =SC[allV[0]];
+				if(!L[allV[0]]) {
+					if(CC[allV[0]] == 0) ans +=Sl[allV[0]].ff;
+					else ans +=Sl[allV[0]].ss;}
+				}
+			else ALL_THE(allV,it) if(!L[*it]) {
+				 ans +=SC[*it];
+				 if(CC[*it] == 0) ans +=Sl[*it].ff;
+				 else ans +=Sl[*it].ss;}
+			ALL_THE(allV,it) vis[*it] =false;
+			cout << ans << "\n";}
+		for(int i =0; i < nextQ.size(); i++)
+			var[nextQ[i].ss] =false;
+
+		Q -=min(Q,1000);}
+	return 0;}
+
+// look at my code
+// my code is amazing

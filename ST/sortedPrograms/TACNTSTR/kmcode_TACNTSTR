@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+string s;
+
+char buf[100002];
+vector<int> v;
+vector<int> vv;
+
+#define MOD 1000000007
+int dp[100002][2][2];
+
+int main(){
+	scanf("%s", buf);
+	s = buf;
+	for (int i = 0; i < s.size(); i++){
+		int id = s[i] - 'A';
+		v.push_back(id);
+	}
+	vv = v;
+	//reverse(vv.begin(), vv.end());
+	dp[0][0][0] = 1;
+	int n = v.size();
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < 2; j++){
+			for (int k = 0; k < 2; k++){
+				for (int kk = 0; kk < 26; kk++){
+					if (j == 0 && (kk < v[i]))continue;
+					int nex_j = j | (v[i] < kk);
+					int nex_k;
+					if (vv[i] < kk){
+						nex_k = 1;
+					}
+					else{
+						if (vv[i] == kk){
+							nex_k = k;
+						}
+						else{
+							nex_k = 0;
+						}
+					}
+					dp[i + 1][nex_j][nex_k] += dp[i][j][k];
+					if (dp[i + 1][nex_j][nex_k] >= MOD){
+						dp[i + 1][nex_j][nex_k] -= MOD;
+					}
+				}
+			}
+		}
+	}
+	cout << dp[n][1][1] << endl;
+	return 0;
+}

@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+//	freopen("in.txt","r",stdin);
+
+	
+	int t;
+	cin>>t;
+	for(int te=1;te<=t;te++)
+	{
+		
+		int n;
+		cin>>n;
+		long long ans=1;
+		int mn=INT_MAX,x;
+		for(int i=0;i<n;i++)
+		{
+			cin>>x;
+			mn=min(mn,x);
+		}
+		cout<<mn*1LL*(n-1)<<endl;
+		
+	}
+	
+	
+}

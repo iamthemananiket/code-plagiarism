@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const double eps = 1e-13;
+
+double equal(double a, double b) {
+  return abs(a - b) < eps;
+}
+
+double dist(double dx, double dy) {
+  return sqrt(dx * dx + dy * dy);
+}
+
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    int m;
+    double p;
+    scanf("%d%lf", &m, &p);
+    double pm_1 = pow(-p, m-1);
+    double pm = pm_1*(-p);
+    double ans2 = 1e9*p*(1-pm_1)/(1+p);
+    double ans1 = 1e9*(1-pm)/(1+p);
+    printf("%.7lf %.7lf\n", ans1, ans2);
+  }
+  return 0;
+}

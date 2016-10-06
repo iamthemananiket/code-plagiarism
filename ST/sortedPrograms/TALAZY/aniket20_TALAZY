@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 1e-14
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int main()
+{
+	int t;
+	sc("%d",&t);
+	ll n,b,m;
+	while(t--){
+		sc("%lld %lld %lld",&n,&b,&m);
+		ll ans=0;
+		while(n>0){
+			ll t1=(n+1)/2;
+			ans+=(m*t1);
+			ans+=b;
+			n-=t1;
+			m*=2;
+		}
+		ans-=b;
+		pr("%lld\n",ans);
+	}
+	return 0;
+}

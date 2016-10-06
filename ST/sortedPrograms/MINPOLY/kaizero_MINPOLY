@@ -1,0 +1,77 @@
+#include<stdio.h>
+#include<algorithm>
+#define INF 999999999
+using namespace std;
+int n, D[51][51][51], Res[51], CC[51][51];
+bool TT(long long x, long long y){
+	if (y > 0 || (y == 0 && x > 0))return true;
+	return false;
+}
+struct point{
+	long long x, y;
+	int c;
+	bool operator<(point &p)const{
+		return y*p.x < p.y*x;
+	}
+}w[51], P[51];
+bool ccw(point a, point b, point c){
+	return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x) > 0;
+}
+void Do(int m){
+	int i, j, k, l;
+	for (i = 1; i <= m; i++)for (j = i + 1; j <= m; j++)for (k = 1; k <= m; k++)D[i][j][k] = INF;
+	for (i = 2; i <= m; i++) D[1][i][2] = P[1].c + P[i].c;
+	for (i = 2; i <= m; i++){
+		for (j = i + 1; j <= m; j++){
+			CC[i][j] = 0;
+			for (k = 1; k <= m; k++){
+				if (ccw(P[1], P[i], P[k]) && ccw(P[i], P[j], P[k]) && ccw(P[j], P[1], P[k]))CC[i][j] += P[k].c;
+			}
+		}
+	}
+	for (i = 1; i <= m; i++){
+		for (j = i + 1; j <= m; j++){
+			for (l = j + 1; l <= m; l++){
+				if (!ccw(P[i], P[j], P[l]))continue;
+				for (k = 2; k <= m; k++){
+					if (D[i][j][k] == INF)continue;
+					D[j][l][k + 1] = min(D[j][l][k + 1], D[i][j][k] + P[l].c + CC[j][l]);
+				}
+			}
+		}
+	}
+	for (i = 2; i <= m; i++){
+		for (j = i + 1; j <= m; j++){
+			for (k = 3; k <= m; k++){
+				if (!ccw(P[i], P[j], P[1]))continue;
+				Res[k] = min(Res[k], D[i][j][k]);
+			}
+		}
+	}
+}
+int main(){
+	int i, j, cnt = 0;
+	scanf("%d", &n);
+	for (i = 1; i <= n; i++){
+		scanf("%lld%lld%d", &w[i].x, &w[i].y, &w[i].c);
+		Res[i] = INF;
+	}
+	for (i = 1; i <= n; i++){
+		cnt = 1;
+		for (j = 1; j <= n; j++){
+			if (w[j].y > w[i].y || (w[j].y == w[i].y && w[j].x > w[i].x)){
+				cnt++;
+				P[cnt] = w[j];
+				P[cnt].x -= w[i].x;
+				P[cnt].y -= w[i].y;
+			}
+		}
+		P[1] = w[i];
+		P[1].x = P[1].y = 0;
+		sort(P + 2, P + cnt + 1);
+		Do(cnt);
+	}
+	for (i = 3; i <= n; i++){
+		printf("%d ", Res[i] == INF ? -1 : Res[i]);
+	}
+}

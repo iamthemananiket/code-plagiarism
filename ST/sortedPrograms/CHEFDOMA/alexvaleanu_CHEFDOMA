@@ -1,0 +1,285 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+///---------------------------------------------------
+const int BUFFER_SIZE = (1 << 18);
+char buffer[BUFFER_SIZE];
+int position = BUFFER_SIZE;
+
+inline char getChar()
+{
+    if ( position == BUFFER_SIZE )
+    {
+        position = 0;
+        fread(buffer, BUFFER_SIZE, 1, stdin);
+    }
+
+    return buffer[position++];
+}
+
+inline int getInt()
+{
+    register int a = 0;
+    char ch;
+    int sgn = 1;
+
+    do
+    {
+        ch = getChar();
+
+    } while ( !isdigit(ch) && ch != '-' );
+
+    if ( ch == '-' )
+    {
+        sgn = -1;
+        ch = getChar();
+    }
+
+    do
+    {
+        a = (a << 3) + (a << 1) + ch - '0';
+        ch = getChar();
+
+    } while ( isdigit(ch) );
+
+    return a * sgn;
+}
+///---------------------------------------------------
+
+const int MAX_N = 500000 + 5;
+
+int A[MAX_N], B[MAX_N];
+int N, indp;
+map<int,int> Norm;
+vector<int> positions[MAX_N];
+
+int cnt[10005];
+
+int brute()
+{
+    int sol = 0;
+
+    for (int i = 1; i <= N; ++i)
+    {
+        memset(cnt, 0, sizeof(cnt));
+        int maxim = 0;
+
+        for (int j = i; j <= N; ++j)
+        {
+            cnt[ A[j] ]++;
+            maxim = max(maxim, cnt[ A[j] ]);
+
+            int lg = j - i + 1;
+
+            if (2 * maxim > lg)
+                sol++;
+        }
+    }
+
+    return sol;
+}
+
+long long getInterval(int a, int b)
+{
+    if (a > b)
+        return 0;
+    else
+        return b - a + 1;
+}
+
+long long sum(int n)
+{
+    return n * (n + 1) / 2;
+}
+
+long long getSum(int a, int b)
+{
+    if (a > b)
+        return 0;
+
+    return sum(b) - sum(a - 1);
+}
+
+long long f2(int a, int b, int dif)
+{
+    int ans = 0;
+
+    ///a < b
+
+    long long cnt = getInterval(dif - b + 1, a);
+    ans += dif * cnt - getSum(dif - b + 1, a);
+
+    long long rest = (a + 1) - cnt;
+    ans += rest * b;
+
+    return ans;
+}
+
+int f(int a, int b, int dif)
+{
+    int ans = 0;
+
+    ///a < b
+
+    /**int cnt = getInterval(dif - b + 1, a);
+    ans += dif * cnt - getSum(dif - b + 1, a);
+
+    int rest = (a + 1) - cnt;
+    ans += rest * b;**/
+
+    int cnt = 0;
+
+    for (int p = 0; p <= a; ++p)
+    {
+        if (dif - b < p)
+            ans += dif - p,
+            cout << "DA " << p << endl;
+        else
+            ans += b;
+    }
+
+    return ans;
+}
+
+int prefixSum[MAX_N];
+long long aib[2 * MAX_N + 100];
+
+int lsb(int x)
+{
+    return x & (-x);
+}
+
+void update(int pos, long long val)
+{
+    while (pos < 2 * MAX_N)
+    {
+        aib[pos] += val;
+        pos += lsb(pos);
+    }
+}
+
+long long query(int pos)
+{
+    long long s = 0;
+
+    while (pos > 0)
+    {
+        s += aib[pos];
+        pos -= lsb(pos);
+    }
+
+    return s;
+}
+
+long long density(int v)
+{
+    memset(prefixSum, -1, sizeof(prefixSum));
+
+    prefixSum[0] = 0;
+
+    for (int x : positions[v])
+        prefixSum[x] = 1;
+
+    for (int i = 1; i <= N; ++i)
+        prefixSum[i] += prefixSum[i - 1];
+
+    for (int i = 0; i <= N; ++i)
+        prefixSum[i] += MAX_N;
+
+    long long sol = 0;
+
+    memset(aib, 0, sizeof aib);
+
+    update(prefixSum[0], 1);
+
+    for (int i = 1; i <= N; ++i)
+    {
+        sol += query(prefixSum[i] - 1);
+        update(prefixSum[i], 1);
+    }
+
+    return sol;
+}
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        freopen("data.in", "r", stdin);
+    #endif // ONLINE_JUDGE
+
+    N = getInt();
+
+    for (int i = 1; i <= N; ++i)
+    {
+        A[i] = getInt();
+
+        if (Norm.count(A[i]) == 0)
+            Norm[ A[i] ] = ++indp;
+
+        A[i] = Norm[ A[i] ];
+
+       positions[ A[i] ].push_back(i);
+    }
+
+    if (N <= 10000)
+    {
+        cout << brute() << "\n";
+        return 0;
+    }
+
+    long long sol = 0;
+
+    for (int v = 1; v <= N; ++v)
+    {
+        long long ans = 0;
+        int D = positions[v].size();
+
+        if (D > 25000)
+        {
+            sol += density(v);
+            continue;
+        }
+
+        for (int i = 0; i < D; ++i)
+            for (int j = i; j < D; ++j)
+            {
+                long long cate = j - i + 1;
+                long long lg = positions[v][j] - positions[v][i] + 1;
+
+                if (cate * 2 > lg)
+                {
+                    long long st = 0;
+                    long long dr = 0;
+
+                    if (i > 0)
+                        st = positions[v][i] - positions[v][i - 1] - 1;
+                    else
+                        st = positions[v][i] - 1;
+
+                    if (j + 1 < D)
+                        dr = positions[v][j + 1] - positions[v][j] - 1;
+                    else
+                        dr = N - positions[v][j];
+
+                    long long dif = cate * 2 - lg - 1;
+
+                    st = min(st, dif);
+                    dr = min(dr, dif);
+
+                    ///cout << v << " " << positions[v][i] << " " << positions[v][j] <<  " " << dif << " " << st << " " << dr << endl;
+
+                    long long a = min(st, dr);
+                    long long b = max(st, dr);
+
+                    ans += (a + 1) + f2(a, b, dif);
+                }
+            }
+
+        sol += ans;
+    }
+
+    cout << sol << "\n";
+
+    return 0;
+}

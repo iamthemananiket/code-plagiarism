@@ -1,0 +1,194 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000009
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 200031;
+
+int tests, n, a, b, c, d;
+long long F[N];
+
+int x[N], y[N];
+
+struct pt
+{
+	int x;
+	int y;
+};
+
+pt v[N];
+
+long long need;
+
+long long get_area(pt a, pt b, pt c)
+{
+	return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x);
+}
+
+bool is_inside_convex(int x, int y)
+{
+	pt temp;
+	temp.x = x;
+	temp.y = y;
+	long long A = 0;
+	for (int i = 0; i < n; i++)
+	{
+		A = A + abs(get_area(v[i], v[(i + 1) % n], temp));
+	}
+	return (A == need);
+}
+
+inline long long area(pt a, pt b, pt c) {
+	return 1ll*(b.x - a.x) * (c.y - a.y) - 1ll*(b.y - a.y) * (c.x - a.x);
+}
+
+inline bool intersect_1(int a, int b, int c, int d) {
+	if (a > b)  swap(a, b);
+	if (c > d)  swap(c, d);
+	return max(a, c) <= min(b, d);
+}
+
+bool dif_sign(long long a, long long b)
+{
+	if (a == 0 || b == 0)
+		return true;
+	if (a<0 && b>0)
+		return true;
+	if (a > 0 && b < 0)
+		return true;
+	return false;
+}
+
+bool intersect(pt a, pt b, pt c, pt d) {
+	return intersect_1(a.x, b.x, c.x, d.x)
+		&& intersect_1(a.y, b.y, c.y, d.y)
+		&& dif_sign(area(a, b, c), area(a, b, d))
+		&& dif_sign(area(c, d, a), area(c, d, b));
+	//1ll * area(a, b, c) * area(a, b, d) <= 0
+	//	&& 1ll*area(c, d, a) * area(c, d, b) <= 0;
+}
+
+bool lies_on(int a, int b, int c)
+{
+	if (b > c)
+		swap(b, c);
+	return (a >= b&&a <= c);
+}
+
+bool lies_on(pt a, pt b, pt c)
+{
+	return (lies_on(a.x, b.x, c.x) && lies_on(a.y, b.y, c.y) && get_area(a, b, c) == 0);
+}
+
+bool is_inside_any(int x, int y)
+{
+	pt temp;
+	temp.x = x;
+	temp.y = y;
+	pt goal;
+	goal.x = x + 137;
+	goal.y = y + 147;
+	int c = 0;
+
+	for (int i = 0; i < n; i++)
+	{
+		if (lies_on(temp, v[i], v[(i + 1) % n]))
+			return true;
+	}
+
+	for (int i = 0; i < n; i++)
+	{
+		if (intersect(temp, goal, v[i], v[(i + 1) % n]))
+			++c;
+	}
+
+	return c % 2;
+}
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/in.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin >> tests;
+	for (; tests; --tests)
+	{
+		cin >> n >> a >> b >> c >> d;
+		//a = 1;
+		//b = c = d = 0;
+		cin >> F[0] >> F[1] >> F[2] >> F[3];
+		//F[0] = F[1] = F[2] = F[3] = 1;
+
+		for (int i = 4; i <= 200; i++)
+		{
+			F[i] = F[i - 1] * a + F[i - 2] * b + F[i - 3] * c + F[i - 4] * d;
+			F[i] %= bs;
+		}
+		for (int i = 0; i < n; i++)
+		{
+			cin >> x[i] >> y[i];
+			v[i].x = x[i];
+			v[i].y = y[i];
+		}
+		need = 0;
+		for (int i = 1; i + 1 < n; i++)
+		{
+			need += abs(get_area(v[0], v[i], v[i + 1]));
+		}
+
+		long long ans = 0;
+		for (int i = 0; i <= 100; i++)
+		{
+			for (int j = 0; j <= 100; j++)
+			{
+				if (is_inside_any(i, j))
+				{
+				//	cout << i << "%" << j << endl;
+					ans += F[i + j];
+				}
+				ans %= bs;
+			}
+		}
+		cout << ans << endl;
+	}
+
+	cin.get(); cin.get();
+	return 0;
+}

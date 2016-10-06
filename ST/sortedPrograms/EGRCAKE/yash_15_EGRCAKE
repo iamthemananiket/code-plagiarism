@@ -1,0 +1,15 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    	int t,n,m;
+    	cin>>t;
+    	while(t--)
+    	{
+    		cin>>n>>m;
+    		if(__gcd(m,n)==1)
+    			cout<<"Yes\n";
+    		else
+    			cout<<"No "<<n/__gcd(n,m)<<"\n";
+	} 
+}

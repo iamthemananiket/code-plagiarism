@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+#define N 100010
+using namespace std;
+const double pie=acos(-1);
+int s,t,i;
+double f;
+struct mjj{double x,y;}a[N];
+void cir(mjj x,mjj y,mjj z){printf("Circle %.9lf %.9lf %.9lf %.9lf %.9lf %.9lf\n",x.x,x.y,y.x,y.y,z.x,z.y);}
+void link(mjj x,mjj y){printf("Line %.9lf %.9lf %.9lf %.9lf\n",x.x,x.y,y.x,y.y);}
+mjj getpoint(mjj x,mjj y,double t)
+{
+	mjj ans;t=t/180*pie+atan2(y.y-x.y,y.x-x.x);
+	double r=sqrt((y.y-x.y)*(y.y-x.y)+(y.x-x.x)*(y.x-x.x));
+	ans.x=x.x+cos(t)*r;ans.y=x.y+sin(t)*r;return ans;
+}
+mjj getmid(mjj x,mjj y)
+{
+	mjj ans;
+	ans.x=(x.x+y.x)/2;ans.y=(x.y+y.y)/2;
+	return ans;
+}
+int main()
+{
+	scanf("%lf%lf%lf%lf%lf%lf",&a[1].x,&a[1].y,&a[2].x,&a[2].y,&a[3].x,&a[3].y);
+	f=atan2(a[2].y-a[1].y,a[2].x-a[1].x)-atan2(a[3].y-a[1].y,a[3].x-a[1].x);
+	if(f<0)f+=2*pie;s=(int)(f*180/pie+0.5);
+	if(s%3==0){puts("NO");return 0;}puts("YES");
+	link(a[1],a[2]);
+	link(a[1],a[3]);
+	cir(a[1],a[1],a[3]);
+	cir(a[3],a[1],a[3]);
+	a[4]=getpoint(a[1],a[3],60);
+	cir(a[4],a[1],a[3]);
+	a[5]=getpoint(a[1],a[3],120);
+	a[6]=getpoint(a[1],a[3],180);
+	cir(a[5],a[1],a[3]);
+	a[7]=getpoint(a[1],a[3],-60);
+	link(a[4],a[7]);
+	a[8]=getpoint(a[4],a[3],180);
+	link(a[1],a[8]);
+	a[9]=getpoint(a[1],a[3],90);
+	a[10]=getmid(a[1],a[3]);
+	cir(a[10],a[10],a[9]);
+	a[11]=getpoint(a[10],a[9],atan2(2,1)*180/pie);
+	cir(a[3],a[3],a[11]);
+	a[12]=getpoint(a[1],a[3],108);
+	cir(a[12],a[12],a[6]);
+	a[13]=getpoint(a[1],a[3],36);
+	a[14]=getpoint(a[3],a[1],-120);
+	link(a[14],a[1]);
+	a[15]=getpoint(a[1],a[3],30);
+	cir(a[15],a[15],a[13]);
+	cir(a[13],a[15],a[13]);
+	a[16]=getpoint(a[15],a[13],-60);
+	link(a[1],a[16]);
+	a[17]=getpoint(a[1],a[3],33);
+	a[t=18]=a[3];
+	for(i=1;i*3<s+2;i++)
+	{
+		cir(a[t],a[17],a[15]);
+		a[++t]=getpoint(a[1],a[3],i*3);
+	}
+	a[t+1]=a[3];
+	for(i=1;i<s;i++)
+	{
+		cir(a[i+t],a[t],getpoint(a[1],a[3],s));
+		a[i+t+1]=getpoint(a[1],a[3],i);
+	}
+	puts("Answer");
+	for(i=s;i>=2;i--)
+		printf("%.9lf %.9lf\n",a[i+t].x,a[i+t].y);
+}

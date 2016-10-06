@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+using namespace std;
+
+int n,t,k,a[100005],dp[100005];
+
+
+
+bool check(int dis)
+{
+    dp[0]=0;
+    dp[1]=1;
+    int cur=0;
+    if((a[2]-a[1])>=dis)cur++;
+    
+    for(int i=2;i<=n;i++)
+    {
+        dp[i]=max(dp[i-1],1+dp[cur]);
+        if(i==n)break;
+        while(cur<=i && (a[i+1]-a[cur+1])>=dis)cur++;
+        
+        if((a[i+1]-a[cur])<dis)cur--;
+        
+        if(cur<0)cur=0;
+    }
+    
+    if(dp[n]>=k)return true;
+    
+    return false;
+}
+
+int bsearch()
+{
+    int low=0,high=1000000000;
+    
+    for(int i=0;i<=31;i++)
+    {
+        if(low==high)break;
+        
+        if(low+1==high)
+        {
+            if(check(high))low=high;
+            break;
+        }
+        int mid=(low+high)/2;
+        
+        if(check(mid))low=mid;
+        else high=mid-1;
+    }
+    return low;
+}
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cin>>t;
+    
+    while(t--)
+    {
+        cin>>n>>k;
+        
+        for(int i=1;i<=n;i++)cin>>a[i];
+       sort(a+1,a+n+1);
+        
+        cout<<bsearch()<<"\n";
+    }
+
+	return 0; 
+}

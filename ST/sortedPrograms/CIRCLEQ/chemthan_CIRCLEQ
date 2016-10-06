@@ -1,0 +1,244 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return val < a ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+
+#define RL long double
+#define EPS 1e-9
+struct PT {
+	RL x, y;
+	PT() : x(0), y(0) {}
+	PT(RL x, RL y) : x(x), y(y) {}
+	PT(const PT& p) : x(p.x), y(p.y) {}
+	int operator < (const PT& rhs) const {return make_pair(y, x) < make_pair(rhs.y, rhs.x);}
+	int operator == (const PT& rhs) const {return make_pair(y, x) == make_pair(rhs.y, rhs.x);}
+	PT operator + (const PT& p) const {return PT(x + p.x, y + p.y);}
+	PT operator - (const PT& p) const {return PT(x - p.x, y - p.y);}
+	PT operator * (RL c) const {return PT(x * c, y * c);}
+	PT operator / (RL c) const {return PT(x / c, y / c);}
+};
+RL cross(PT p, PT q) {return p.x * q.y - p.y * q.x;}
+RL area(PT a, PT b, PT c) {return fabs(cross(a, b) + cross(b, c) + cross(c, a)) / 2;}
+RL area2(PT a, PT b, PT c) {return cross(a, b) + cross(b, c) + cross(c, a);}
+RL dot(PT p, PT q) {return p.x * q.x + p.y * q.y;}
+RL dist(PT p, PT q) {return sqrt(dot(p - q, p - q));}
+RL dist2(PT p, PT q) {return dot(p - q, p - q);}
+PT RotateCCW90(PT p) {return PT(-p.y, p.x);}
+PT RotateCW90(PT p) {return PT(p.y, -p.x);}
+PT RotateCCW(PT p, RL t) {return PT(p.x * cos(t) - p.y * sin(t), p.x * sin(t) + p.y * cos(t));}
+
+const int maxn = 60000 + 10;
+int n, q;
+int x[maxn];
+int y[maxn];
+int r[maxn];
+int f[maxn];
+vector<pair<pair<double, double>, pair<double, int> > > ver[maxn];
+vector<pair<pair<double, double>, pair<double, int> > > hor[maxn];
+int mx;
+
+vector<pair<int, double> > st[maxn << 2];
+void upd(int p, int i, int L, int R, int y, double area) {
+	if (i < L || i > R) return;
+	st[p].pb(mp(y, area));
+	if (L < R) {
+		upd(p << 1, i, L, L + R >> 1, y, area);
+		upd(p << 1 | 1, i, (L + R >> 1) + 1, R, y, area);
+	}
+}
+void apply(int p, int L, int R) {
+	sort(all(st[p]));
+	FOR(i, 1, sz(st[p])) {
+		st[p][i].se += st[p][i - 1].se;
+	}
+	if (L < R) {
+		apply(p << 1, L, L + R >> 1);
+		apply(p << 1 | 1, (L + R >> 1) + 1, R);
+	}
+}
+double query(int p, int l, int r, int L, int R, int y) {
+	if (l > R || r < L) return 0.0;
+	if (l <= L && r >= R) {
+		int k = upper_bound(all(st[p]), mp(y, 1e9)) - st[p].begin() - 1;
+		if (~k) return st[p][k].se;
+		return 0.0;
+	}
+	return query(p << 1, l, r, L, L + R >> 1, y) + query(p << 1 | 1, l, r, (L + R >> 1) + 1, R, y);
+}
+
+double calc(int u, int v, int ix) {
+	if (x[ix] - r[ix] >= u || y[ix] - r[ix] >= v) return 0.0;
+	if (x[ix] + r[ix] <= u && y[ix] + r[ix] <= v) return r[ix] * r[ix] * PI;
+	if ((long long) (u - x[ix]) * (u - x[ix]) + (long long) (v - y[ix]) * (v - y[ix]) < r[ix] * r[ix]) {
+		double k = sqrt(r[ix] * r[ix] - (u - x[ix]) * (u - x[ix]));
+		PT p = PT(u, y[ix] - k);
+		k = sqrt(r[ix] * r[ix] - (v - y[ix]) * (v - y[ix]));
+		PT q = PT(x[ix] - k, v);
+		double a = 2 * asin(dist(p, q) / 2.0 / r[ix]);
+		return r[ix] * r[ix] * (a - sin(a)) / 2.0 + (v - p.y) * (u - q.x) / 2.0;
+	}
+	double res = r[ix] * r[ix] * PI;
+	int insect = 0;
+	if (x[ix] + r[ix] > u) {
+		if (v >= y[ix] && (long long) (v - y[ix]) * (v - y[ix]) >= r[ix] * r[ix] - (long long) (u - x[ix]) * (u - x[ix])) {
+			insect = 1;
+			double a = 2.0 * acos(1.0 * abs(u - x[ix]) / r[ix]);
+			if (x[ix] <= u) {
+				res -= r[ix] * r[ix] * (a - sin(a)) / 2.0;
+			}
+			else {
+				res -= r[ix] * r[ix] * (PI - (a - sin(a)) / 2.0);
+			}
+		}
+	}
+	if (y[ix] + r[ix] > v) {
+		if (u >= x[ix] && (long long) (u - x[ix]) * (u - x[ix]) >= r[ix] * r[ix] - (long long) (v - y[ix]) * (v - y[ix])) {
+			insect = 1;
+			double a = 2.0 * acos(1.0 * abs(v - y[ix]) / r[ix]);
+			if (y[ix] <= v) {
+				res -= r[ix] * r[ix] * (a - sin(a)) / 2.0;
+			}
+			else {
+				res -= r[ix] * r[ix] * (PI - (a - sin(a)) / 2.0);
+			}
+		}
+	}
+	if (!insect) res = 0.0;
+	return res;
+}
+
+double calc(int u, int v) {
+	double res = query(1, 0, u, 0, maxn - 1, v);
+	int k = upper_bound(all(ver[u]), mp(mp(v + EPS, v + EPS), mp(0.0, 0))) - ver[u].begin() - 1;
+	vi his;
+	while (k >= 0) {
+		int ix = ver[u][k].se.se;
+		if (y[ix] <= v - mx) break;
+		res += calc(u, v, ix);
+		f[ix] = 1; his.pb(ix);
+		k--;
+	}
+	if (~k) {
+		res += ver[u][k].se.fi;
+	}
+	k = upper_bound(all(hor[v]), mp(mp(u + EPS, u + EPS), mp(0.0, 0))) - hor[v].begin() - 1;
+	while (k >= 0) {
+		int ix = hor[v][k].se.se;
+		if (x[ix] <= u - mx) break;
+		if (!f[ix]) {
+			res += calc(u, v, ix);
+		}
+		k--;
+	}
+	if (~k) {
+		res += hor[v][k].se.fi;
+	}
+	FOR(i, 0, sz(his)) f[his[i]] = 0;
+	return res;
+}
+
+void solve() {
+	cin >> n >> q;
+	FOR(i, 0, n) {
+		cin >> x[i] >> y[i] >> r[i];
+		assert(x[i] <= 50000 && y[i] <= 50000 && x[i] >= 0 && y[i] >= 0 && r[i] >= 1 && r[i] <= 50);
+		x[i] += 50, y[i] += 50;
+		FOR(j, x[i] - r[i] + 1, x[i] + r[i]) {
+			double k = sqrt(r[i] * r[i] - (x[i] - j) * (x[i] - j));
+			double a = 2.0 * acos(1.0 * abs(x[i] - j) / r[i]);
+			assert(a >= 0 && a <= PI);
+			if (j <= x[i]) {
+				double t = r[i] * r[i] * (a - sin(a)) / 2.0;
+				ver[j].pb(mp(mp(y[i] - k, y[i] + k), mp(t, i)));
+			}
+			else {
+				double t = r[i] * r[i] * (PI - a / 2.0 + sin(a) / 2.0);
+				ver[j].pb(mp(mp(y[i] - k, y[i] + k), mp(t, i)));
+			}
+		}
+		FOR(j, y[i] - r[i] + 1, y[i] + r[i]) {
+			double k = sqrt(r[i] * r[i] - (y[i] - j) * (y[i] - j));
+			double a = 2.0 * acos(1.0 * abs(y[i] - j) / r[i]);
+			assert(a >= 0 && a <= PI);
+			if (j <= y[i]) {
+				double t = r[i] * r[i] * (a - sin(a)) / 2.0;
+				hor[j].pb(mp(mp(x[i] - k, x[i] + k), mp(t, i)));
+			}
+			else {
+				double t = r[i] * r[i] * (PI - a / 2.0 + sin(a) / 2.0);
+				hor[j].pb(mp(mp(x[i] - k, x[i] + k), mp(t, i)));
+			}
+		}
+		upd(1, x[i] + r[i], 0, maxn - 1, y[i] + r[i], r[i] * r[i] * PI);
+		chkmax(mx, r[i]);
+	}
+	apply(1, 0, maxn - 1);
+	FOR(i, 0, maxn) {
+		sort(all(ver[i])), sort(all(hor[i]));
+		FOR(j, 1, sz(ver[i])) {
+			ver[i][j].se.fi += ver[i][j - 1].se.fi;
+		}
+		FOR(j, 1, sz(hor[i])) {
+			hor[i][j].se.fi += hor[i][j - 1].se.fi;
+		}
+	}
+	while (q--) {
+		int X[2], Y[2];
+		FOR(i, 0, 2) {
+			cin >> X[i] >> Y[i];
+			assert(X[i] >= 0 && X[i] <= 50000 && Y[i] >= 0 && Y[i] <= 50000);
+			X[i] += 50, Y[i] += 50;
+		}
+		double res = calc(X[1], Y[1]) - calc(X[0], Y[1]) - calc(X[1], Y[0]) + calc(X[0], Y[0]);
+		cout << prec(9) << res << "\n";
+	}
+}
+
+int main() {
+	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

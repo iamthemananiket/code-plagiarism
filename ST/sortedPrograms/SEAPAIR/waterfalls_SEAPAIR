@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+const int MOD = 1e9+7;
+int add(int a, int b) { return (a+b)%MOD; }
+int mult(int a, int b) { return ((ll) a*b)%MOD; }
+
+struct Bound {
+	ll low,high;
+};
+bool bylow(Bound a, Bound b) {
+	if (a.low==b.low) return a.high<b.high;
+	return a.low<b.low;
+}
+
+int N,K;
+ll X[100013], D[100013];
+vector<Bound> lower;
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%d%d",&N,&K);
+		for (int i=0;i<N;i++) scanf("%lld%lld",&X[i],&D[i]);
+		if (K==N) {
+			int ans = 1;
+			for (int i=0;i<100;i++) ans = mult(ans,10);
+			ans = add(ans,1);
+			printf("%d\n",ans);
+			continue;
+		}
+		lower.clear();
+		for (int i=0;i<N;i++) {
+			lower.push_back({X[i]*D[i],X[i]*D[i]+X[i]-1});
+		}
+		sort(lower.begin(),lower.end(),bylow);
+		ll ans = 0;
+		ll prevl = -1;
+		ll prevh = -2;
+		multiset<ll> highs;
+		for (int i=0;i<N;i++) {
+			ll tmp = -1;
+			if (highs.size()>=N-K) tmp = *highs.begin();
+			if (highs.size()>=N-K) highs.erase(highs.begin());
+			highs.insert(lower[i].high);
+			if (i<N-K-1) continue;
+			ll cur = *highs.begin();
+			if (lower[i].low<=prevh) {
+				prevh = max(prevh,cur);
+			} else if (cur>=lower[i].low) {
+				ans+=prevh-prevl+1;
+				prevl = lower[i].low, prevh = cur;
+			}
+			if (lower[i].high<tmp) {
+				highs.erase(highs.begin());
+				highs.insert(tmp);
+			}
+		}
+		ans+=prevh-prevl+1;
+		printf("%lld\n",ans%MOD);
+	}
+
+	return 0;
+}

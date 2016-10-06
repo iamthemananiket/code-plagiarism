@@ -1,0 +1,283 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define sz size()
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+const int N = 401;
+double TIME = 4.5;
+
+struct devta {
+	int x,y,idx;
+};
+
+devta D[N];
+vector<int > v;
+bool used[N];
+int dsu[N];
+vector<pair<int, pii > > dists;
+vector<pii > edges, ans;
+int n;
+int R[N];
+
+int find(int x) {
+	return dsu[x] == x ? x : dsu[x] = find(dsu[x]);
+}
+
+bool _x(const devta &a, const devta &b) {
+	if(a.x == b.x) return a.y < b.y;
+	return a.x < b.x;
+}
+
+bool _y(const devta &a, const devta &b) {
+	if(a.y == b.y) return a.x < b.x;
+	return a.y < b.y;
+}
+
+int sq(int x) {
+	return x * x;
+}
+
+int dist(int i, int j) {
+	return sq(D[i].x-D[j].x) + sq(D[i].y-D[j].y);
+}
+
+int score(vector<pii > &e) {
+
+	rep(i,0,n) R[i] = 0;
+
+	rep(i,0,e.sz) {
+		int x = e[i].first;
+		int y = e[i].second;
+
+		int d = dist(x,y);
+		R[x] = max(R[x], d);
+		R[y] = max(R[y], d);
+	}
+
+	int mx = 0;
+	rep(i,0,n) {
+		int cnt = 0;
+		rep(j,0,n) {
+			int d = dist(i,j);
+			cnt += d <= R[j];
+		}
+		mx = max(mx, cnt);
+	}
+
+	return mx;
+}
+
+void print(vector<pii > &v) {
+	rep(i,0,v.sz) {
+		printf("%d %d\n",v[i].first+1, v[i].second+1);
+	}
+}
+
+void resetDsu(int n) {
+	rep(i,0,n) dsu[i] = i;
+}
+
+// clock_t startTime = clock();
+clock_t endTime;
+// while(1) {
+// endTime = clock();
+// if(endTime - startTime >= TIME * CLOCKS_PER_SEC) break;
+
+bool change[170000];
+vector<int > changes;
+int X[444];
+
+void pre() {
+	rep(i,1,444) {
+		X[i] = 2 * i;
+		if(i > 5) X[i] = 15;
+		if(i > 50) X[i] = 20;
+		if(i > 100) X[i] = 25;
+		if(i > 200) X[i] = 30;
+	}
+	
+}
+
+int main() {
+	int t;
+	S(t);
+	clock_t startTime = clock();
+	TIME /= (double)t;
+	srand(time(NULL));
+	pre();
+	rep(tc,1,t+1) {
+		S(n);
+		int idx = -1;
+		rep(i,0,n) {
+			S(D[i].x);S(D[i].y);
+			D[i].idx = i+1;
+			if(idx == -1 || D[i].x < D[idx].x || (D[i].x == D[idx].x && D[i].y < D[idx].y)) {
+				idx = i;
+			}
+		}
+		dists.clear();
+		idx = 0;
+		rep(i,0,n) rep(j,i+1,n) {
+			int d = dist(i,j);
+			// if(d > 1000000 && j > 50 ) continue;
+			dists.push_back(make_pair(d, make_pair(i,j)));
+			change[idx++] = false;
+		}
+		sort(all(dists));
+		resetDsu(n);
+		edges.clear();
+		rep(i,0,dists.sz) {
+			int x = dists[i].second.first;
+			int y = dists[i].second.second;
+			// printf("%d %d\n",x,y);
+			int px = find(x);
+			int py = find(y);
+			if(px != py) {
+				edges.push_back(make_pair(x,y));
+				dsu[px] = py;
+			}
+		}
+
+		int sc = score(edges);
+		ans = edges;
+
+		int val = 40;
+		if(t < 5) val = 100;
+		else if(t < 10) val = 80;
+		else if(t < 20) val = 60;
+		else if(t < 30) val = 50;
+
+		val = 3;
+		rep(itr,0,val) {
+			resetDsu(n);
+			edges.clear();
+			changes.clear();
+			int cc = -1;
+			rep(i,0,dists.sz) if(!change[i]){
+				int x = dists[i].second.first;
+				int y = dists[i].second.second;
+				// printf("%d %d\n",x,y);
+				int px = find(x);
+				int py = find(y);
+				if(px != py) {
+					if(rand()%20 == 0) {
+						// if(!already[i]) {
+						// 	already[i] = true;
+						if(cc == -1) cc = i;
+						// changes.push_back(i);
+							continue;
+						// }
+					}
+					edges.push_back(make_pair(x,y));
+					dsu[px] = py;
+				}
+			}
+			// assert(edges.sz == n-1);
+
+			int sc1 = score(edges);
+			if(sc1 < sc && edges.sz == n-1) {
+				// rep(i,0,changes.sz)
+				// 	change[changes[i]] = true;
+				change[cc] = true;
+				sc = sc1;
+				ans = edges;
+			}
+		}
+
+
+		while(1) {
+			endTime = clock();
+			if(endTime - startTime >= TIME * tc * CLOCKS_PER_SEC) break;
+			resetDsu(n);
+			edges.clear();
+			changes.clear();
+			int cc = -1;
+			rep(i,0,dists.sz) if(!change[i]){
+				int x = dists[i].second.first;
+				int y = dists[i].second.second;
+				// printf("%d %d\n",x,y);
+				int px = find(x);
+				int py = find(y);
+				if(px != py) {
+					if(rand()%n == 0 && i > n/10) {
+						// if(!already[i]) {
+						// 	already[i] = true;
+						if(cc == -1) cc = i;
+						// changes.push_back(i);
+							continue;
+						// }
+					}
+					edges.push_back(make_pair(x,y));
+					dsu[px] = py;
+				}
+			}
+			// assert(edges.sz == n-1);
+
+			int sc1 = score(edges);
+			if(sc1 < sc && edges.sz == n-1) {
+				// rep(i,0,changes.sz)
+				// 	change[changes[i]] = true;
+				change[cc] = true;
+				sc = sc1;
+				ans = edges;
+			}
+			
+		}
+
+		// rep(itr,0,val) {
+		// 	resetDsu(n);
+		// 	edges.clear();
+		// 	changes.clear();
+		// 	rep(i,0,dists.sz) if(!change[i]){
+		// 		int x = dists[i].second.first;
+		// 		int y = dists[i].second.second;
+		// 		// printf("%d %d\n",x,y);
+		// 		int px = find(x);
+		// 		int py = find(y);
+		// 		if(px != py) {
+		// 			if(rand()%X[n] == 0) {
+		// 				// if(!already[i]) {
+		// 				// 	already[i] = true;
+		// 				changes.push_back(i);
+		// 					continue;
+		// 				// }
+		// 			}
+		// 			edges.push_back(make_pair(x,y));
+		// 			dsu[px] = py;
+		// 		}
+		// 	}
+		// 	// assert(edges.sz == n-1);
+
+		// 	int sc1 = score(edges);
+		// 	if(sc1 < sc && edges.sz == n-1) {
+		// 		rep(i,0,changes.sz)
+		// 			change[changes[i]] = true;
+		// 		sc = sc1;
+		// 		ans = edges;
+		// 	}
+		// }
+		print(ans);
+		// P(sc);
+		// rep(i,0,n-1) printf("%d %d\n",D[i].idx,D[i+1].idx);
+	}
+	return 0;
+}

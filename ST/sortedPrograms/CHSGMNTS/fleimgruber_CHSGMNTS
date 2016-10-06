@@ -1,0 +1,117 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <set>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 1005
+
+int n,a[MAX_N];
+vi pos[MAX_N];
+
+void compress()
+{
+	vector<pint> sm;
+	for (int i=1; i<=n; i++)
+		sm.pb(mp(a[i],i));
+	sort(all(sm));
+	int v=1;
+	for (int i=0; i<sz(sm); )
+	{
+		int j=i;
+		while (j<sz(sm)&&sm[i].fi==sm[j].fi)
+		{
+			a[sm[j].se]=v;
+			j++;
+		}
+		v++;
+		i=j;
+	}
+}
+
+int bad[MAX_N];
+set<int> s;
+int curr;
+
+void init(int r)
+{
+	s.clear();
+	s.insert(r-1);
+	s.insert(n+1);
+	int si=n-r+1;
+	curr=si*(si+1)/2;
+}
+
+void deactivate(int i)
+{
+	set<int>::iterator it=s.upper_bound(i);
+	int hi=*it;
+	it--;
+	int lo=*it;
+	int si=(hi-1)-(lo+1)+1;
+	curr-=si*(si+1)/2;
+	si=(i-1)-(lo+1)+1;
+	curr+=si*(si+1)/2;
+	si=(hi-1)-(i+1)+1;
+	curr+=si*(si+1)/2;
+	s.insert(i);
+}
+
+int query()
+{
+	return curr;
+}
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d",&n);
+		for (int i=1; i<=n; i++)
+		{
+			scanf("%d",a+i);
+			pos[i].clear();
+		}
+		compress();
+		for (int i=1; i<=n; i++)
+		{
+			pos[a[i]].pb(i);
+			bad[i]=0;
+		}
+		ll ans=0;
+		int time=1;
+		for (int r=n-1; r>0; r--)
+		{
+			init(r+1);
+			for (int l=r; l>0; l--)
+			{
+				if (bad[a[l]]<time)
+				{
+					bad[a[l]]=time;
+					for (int i=0; i<sz(pos[a[l]]); i++)
+						if (pos[a[l]][i]>r)
+							deactivate(pos[a[l]][i]);
+				} 
+				ans+=query();
+			}
+			time++;
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

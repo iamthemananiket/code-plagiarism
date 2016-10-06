@@ -1,0 +1,81 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+#define ull unsigned long long
+
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MAX_N = (int)1e5;
+
+
+int main()
+{
+    //freopen("input.in", "rt", stdin);
+    //freopen("output.out", "wt", stdout);
+    int t;
+    scanf("%d", &t);
+    while (t--) {
+        int n, m;
+        scanf("%d %d", &n, &m);
+        multiset<int> a;
+        for (int i = 0; i < m; ++i) {
+            int v;
+            scanf("%d", &v);
+            a.insert(v);
+        }
+        int res = 0;
+        while (a.size() > 1) {
+            int s1 = *a.begin();
+            if (a.size() > 2) {
+                a.erase(a.begin());
+                multiset<int> :: iterator it = a.end();
+                --it;
+                int s2 = *it;
+                a.erase(it);
+                it = a.end();
+                --it;
+                int s3 = *it;
+                a.erase(it);
+                a.insert(s2 + s3 + 1);
+                if (s1 - 1 > 0) {
+                    a.insert(s1 - 1);
+                }
+            } else {
+                a.erase(a.begin());
+                multiset<int> :: iterator it = a.end();
+                --it;
+                int s2 = *it;
+                a.erase(it);
+                a.insert(s1 + s2);
+            }
+            ++res;
+        }
+        printf("%d\n", res);
+    }
+    return 0;
+}

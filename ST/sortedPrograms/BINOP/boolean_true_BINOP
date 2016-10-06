@@ -1,0 +1,49 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int test;
+    cin>>test;
+    while(test--)
+    {
+        int n;
+        string str1,str2;
+        cin>>str1>>str2;
+        n=str1.size();
+        int one1=0,one2=0;
+        for(int i=0;i<n;i++)
+        {
+            if(str1[i]=='1')
+                one1++;
+            if(str2[i]=='1')
+                one2++;
+        }
+        int diff=0;
+        for(int i=0;i<n;i++)
+        {
+            if(str1[i]=='1'&&str2[i]=='0')
+                diff++;
+        }
+        if(one1==one2)
+            cout<<"Lucky Chef\n"<<diff<<endl;
+        if(one1>one2)
+        {
+            if(one1==n)
+            {
+                cout<<"Unlucky Chef\n";
+                continue;
+            }
+            cout<<"Lucky Chef\n"<<diff<<endl;
+        }
+        if(one1<one2)
+        {
+            if(one1==0)
+            {
+                cout<<"Unlucky Chef\n";
+                continue;
+            }
+            cout<<"Lucky Chef\n"<<diff+one2-one1<<endl;
+        }
+    }
+}
+

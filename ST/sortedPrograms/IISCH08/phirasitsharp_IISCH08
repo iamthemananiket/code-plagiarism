@@ -1,0 +1,45 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 110;
+
+int arr[N];
+int n, l, u;
+
+long long ans = -1ll;
+int idx;
+
+long long solve(int x) {
+  if(x < l or x > u) return -1ll;
+  long long val = 1ll << 60;
+  for(int i = 0;i < n;i++) {
+    val = min(val, (long long) abs(arr[i] - x));
+  }
+  return val;
+}
+void check(int x) {
+  long long k = solve(x);
+  if(k > ans or (k == ans and x < idx)) {
+    ans = k;
+    idx = x;
+  }
+}
+int main() {
+  cin >> n;
+  for(int i = 0;i < n;i++) {
+    cin >> arr[i];
+  }
+  cin >> l >> u;
+  sort(arr, arr+n);
+  check(l);
+  check(u);
+  for(int i = 0;i < n-1;i++) {
+    int hf = (arr[i] + arr[i+1]) / 2;
+    check(hf);
+    check(hf+1);
+  }
+  cout << idx << endl;
+  return 0;
+}

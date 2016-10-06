@@ -1,0 +1,87 @@
+#include<bits/stdc++.h>
+
+#define ll long long
+
+using namespace std;
+
+const int P = 1414,N = 2e6 + 121, A = 1e5 + 121, K = 1e3 + 121;
+
+char prime[P+10],usd[N];
+int pr[P+10],i,j,kol,m,mx,a[A],b[K],mn;
+
+inline void tt(int val,int mn)
+{
+    if(val<mn)return;
+    if(usd[val]) mx=max(mx,val);
+    usd[val]=1;
+    for(int i=1;i<=mn;++i)
+     if(val%b[i]==0) tt(val/b[i],i);
+}
+
+ int main()
+ {
+
+     ios_base::sync_with_stdio(false);
+     cin.tie(NULL);
+     cout.tie(NULL);
+
+      //freopen("input.txt","r",stdin);
+      //freopen("output.txt","w",stdout);
+
+      i=3;
+       while(i<P)
+       {
+           prime[i]=1;
+           i+=2;
+       }
+
+       pr[1]=2;
+       kol=1;
+       i=3;
+        while(i<P)
+        {
+             if(prime[i])
+             {
+                 ++kol;
+                 pr[kol]=i;
+                  for(j=2;j*i<=P;++j)prime[i*j]=0;
+             }
+            i+=2;
+        }
+
+        int t;
+      cin>>t;
+       while(t--)
+       {
+        int n;
+        cin>>n;
+        memset(usd,0,sizeof(usd));
+        mn=N;
+        mx=0;
+        for(j=1;j<=n;++j)
+        {
+            cin>>a[j];
+
+            if(usd[a[j]]) mx=max(mx,a[j]); else
+          {
+            m=0;
+            int kor=sqrt(a[j]);
+            int p = a[j];
+             for(i=1;i<=kol;++i)
+              {
+               if(pr[i]>kor)break;
+                 if(p%pr[i]==0)
+                  {
+                    ++m;
+                    b[m]=pr[i];
+                      while(p%pr[i]==0) p/=pr[i];
+                   }
+                if(p==1)break;
+               }
+                 if(p>1) b[++m]=p;
+                 tt(a[j],m);
+               }
+       }
+         cout<<mx<<endl;
+       }
+ }

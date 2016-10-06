@@ -1,0 +1,108 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repe(i, a, b) for (int i = (a); i <= (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+#define count_bits(x) __builtin_popcount(x)
+#define count_bitsll(x) __builtin_popcountll(x)
+#define least_bits(x) __builtin_ffs(x)
+#define least_bitsll(x) __builtin_ffsll(x)
+#define most_bits(x) 32 - __builtin_clz(x)
+#define most_bitsll(x) 64 - __builtin_clz(x)
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 100001;
+int n, maxi, a[N], nxt[N], lg[N], dp[N << 5], bk[N << 5];
+
+char pb[20];
+
+template<class T> inline void readInt(T &x) {
+    x = 0;
+    int c = getchar_unlocked();
+    while (c < '0' || c > '9')
+        c = getchar_unlocked();
+    while (c >= '0' && c <= '9') {
+        x = (x << 3) + (x << 1) + c - '0';
+        c = getchar_unlocked();
+    }
+}
+
+template<class T> inline void putInt(T x, char d) {
+    if (!x) putchar_unlocked('0');
+    int pi = 0;
+    while (x) {
+        pb[pi++] = (x % 10) + '0';
+        x /= 10;
+    }
+    while (pi) putchar_unlocked(pb[--pi]);
+    putchar_unlocked(d);
+}
+
+int main(int argc, char *argv[]) {
+    int m, x, y, t, rx, ry;
+
+    readInt(n);
+    maxi = 0;
+    repu(i, 0, n) {
+    	readInt(a[i]);
+        amax(maxi, a[i]);
+    }
+    nxt[n] = n;
+    repd(i, n - 1, -1) {
+    	nxt[i] = (a[i] == maxi) ? i : nxt[i + 1];
+    }
+
+    lg[0] = -1;
+    repe(i, 1, n) lg[i] = 1 + lg[i >> 1];
+
+	repu(i, 0, n) dp[i << 5] = bk[i << 5] = a[i];
+	repe(k, 1, lg[n]) repu(i, 0, n) {
+        int ind = (i << 5) ^ k;
+		dp[ind] = dp[ind - 1];
+		int x = i + (1 << (k - 1));
+		if (x < n) amax(dp[ind], dp[(x << 5) ^ (k - 1)]);
+		if (i + 1 >= (1 << k)) bk[(i << 5) ^ k] = dp[((i - (1 << k) + 1) << 5) ^ k];
+	}
+
+    readInt(m); readInt(x); readInt(y);
+
+    ll ans = 0;
+    int mod1 = n - 2, mod2 = n - 1;
+    int add1 = 7 % mod2, add2 = 11 % n;
+    for (; m; --m) {
+        if (x > y) {
+            if (nxt[y] <= x) ans += maxi;
+            else {
+                t = lg[x - y + 1];
+                ans += tmax(dp[(y << 5) ^ t], bk[(x << 5) ^ t]);
+            }
+        }
+        else {
+            if (nxt[x] <= y) ans += maxi;
+            else {
+                t = lg[y - x + 1];
+                ans += tmax(dp[(x << 5) ^ t], bk[(y << 5) ^ t]);
+            }
+        }
+    	x += add1;
+    	if (x > mod1) x -= mod2;
+    	y += add2;
+    	if (y > mod2) y -= n;
+    }
+    putInt(ans, '\n');
+
+    return 0;
+}

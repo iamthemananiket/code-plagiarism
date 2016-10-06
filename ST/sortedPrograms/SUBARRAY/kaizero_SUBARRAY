@@ -1,0 +1,38 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+int st[101000][2], n, rev[260];
+char p[101000];
+long long S[101000], Res, D[101000];
+int main(){
+	int i, TC, a, top;
+	rev['('] = ')';
+	rev['['] = ']';
+	rev['{'] = '}';
+	rev['<'] = '>';
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%d", &n);
+		scanf("%s", p + 1);
+		for (i = 1; i <= n; i++){
+			scanf("%d",&a);
+			S[i] = S[i - 1] + a;
+			D[i] = 0;
+		}
+		top = 0;
+		Res = 0;
+		for (i = 1; i <= n; i++){
+			if (p[i] == st[top][0]){
+				D[i] = max(D[i], D[st[top][1] - 1] + S[i] - S[st[top][1] - 1]);
+				top--;
+			}
+			else{
+				top++;
+				st[top][0] = rev[p[i]];
+				st[top][1] = i;
+			}
+			Res = max(Res, D[i]);
+		}
+		printf("%lld\n", Res);
+	}
+}

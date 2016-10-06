@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+int main() {
+	int t, n, m, now;
+	long long ans;
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d", &n);
+		ans = 0;
+		now = 0;
+		while(n--) {
+			scanf("%d", &m);
+			ans += max(m-now, 0);
+			now = m;
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

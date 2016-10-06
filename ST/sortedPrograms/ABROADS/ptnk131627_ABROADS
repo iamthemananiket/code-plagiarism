@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("draft.inp","r",stdin)
+#define OUTPUT freopen("draft.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+typedef pair<ll,int> lli;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=5e5+10;
+
+int n,m,k,w[N],v[N][2],q[N][3],t[N],mark[N];
+ll pop[N],ans[N];
+priority_queue <lli> pq;
+void prepare(){
+    scanf("%d%d%d",&n,&m,&k);
+    FOR(i,1,n) scanf("%d",w+i);
+    FOR(i,1,m)
+        FOR(j,0,1) scanf("%d",v[i]+j);
+    char ch;
+    int x,y;
+    FOR(i,1,k){
+        scanf("\n%c%d",&ch,&x);
+        q[i][1]=x;
+        if (ch=='D') {
+            mark[x]=1;
+            continue;
+        }
+        scanf("%d",&y);
+        q[i][0]=1;
+        q[i][2]=w[x];
+        w[x]=y;
+    }
+}
+int root(int x){
+    if (t[x]<0) return x;
+    t[x]=root(t[x]);
+    return t[x];
+}
+void merge(int x,int y){
+    x=root(x),y=root(y);
+    if (x==y) return;
+    if (t[x]>t[y]) swap(x,y);
+    t[x]+=t[y];
+    pop[x]+=pop[y];
+    pq.push(lli(pop[x],x));
+    t[y]=x;
+}
+void solve(){
+    memset(t,-1,sizeof(t));
+    FOR(i,1,n) {
+        pop[i]=w[i];
+        pq.push(lli(w[i],i));
+    }
+    FOR(i,1,m) if (!mark[i]) merge(v[i][0],v[i][1]);
+    FORD(i,k,1){
+        while (1){
+            lli cur=pq.top();
+            if (t[cur.Y]>0||pop[cur.Y]!=cur.X) {
+                pq.pop();
+                continue;
+            }
+            break;
+        }
+        ans[i]=pq.top().X;
+        int x=q[i][1];
+        if (!q[i][0]) merge(v[x][0],v[x][1]);
+        else {
+            int z=root(x);
+            pop[z]+=q[i][2]-w[x];
+            w[x]=q[i][2];
+            pq.push(lli(pop[z],z));
+        }
+    }
+    FOR(i,1,k) printf("%lld\n",ans[i]);
+}
+int main(){
+    prepare();
+    solve();
+}

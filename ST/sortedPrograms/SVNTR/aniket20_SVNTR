@@ -1,0 +1,112 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<ll,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll dp[155][155],arr[155],arr2[155],m;
+int a[155][155];
+pii p1[155],p2[155];
+int cnt[155];
+
+void update(int ind){
+	if(ind==0){
+		return;
+	}
+	while(ind<=m){
+		cnt[ind]+=1;
+		ind+=(ind & -ind);
+	}
+}
+
+int query(int ind){
+	int ret=0;
+	while(ind>0){
+		ret+=cnt[ind];
+		ind-=(ind & -ind);
+	}
+	return ret;
+}
+
+bool comp(pii p1,pii p2){
+	return p1.F<p2.F;
+}
+
+int main()
+{
+	ll t,n,s,curr;
+	int i,j,k,l;
+	sc("%lld",&t);
+	while(t--){
+		sc("%lld %lld %lld",&n,&m,&s);
+		for(i=1;i<=n;i++){
+			for(j=1;j<=m;j++){
+				sc("%d",&a[i][j]);
+			}
+		}
+		for(i=1;i<=n;i++){
+			curr=0;
+			for(j=1;j<=m;j++){
+				curr+=a[i][j];
+				dp[i][j]=dp[i-1][j]+curr;
+			}
+		}
+		int ans=0;
+		for(i=0;i<=n;i++){
+			for(j=i+1;j<=n;j++){
+				for(k=0;k<=m;k++){
+					arr[k]=dp[i][k]-dp[j][k];
+					arr2[k]=dp[j][k]-dp[i][k];
+					arr[k]=s-arr[k];
+					p1[k].F=arr2[k];
+					p1[k].S=k;
+					p2[k].F=arr[k];
+					p2[k].S=k;
+				}
+				sort(p1,p1+m+1,comp);
+				sort(p2,p2+m+1,comp);
+				int pos=0,tot=0;
+				for(k=0;k<=m;k++){
+					while(pos<=m && p1[pos].F<=p2[k].F){
+						update(p1[pos].S);
+						if(p1[pos].S!=0)
+							tot++;
+						pos++;
+					}
+					ans+=(tot-query(p2[k].S));
+				}
+				for(k=0;k<=m;k++){
+					cnt[k]=0;
+				}
+			}
+		}
+		pr("%d\n",ans);
+	}
+	return 0;
+}

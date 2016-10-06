@@ -1,0 +1,163 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+#define count_bits(x) __builtin_popcount(x)
+#define count_bitsll(x) __builtin_popcountll(x)
+#define least_bits(x) __builtin_ffs(x)
+#define least_bitsll(x) __builtin_ffsll(x)
+#define most_bits(x) 32 - __builtin_clz(x)
+#define most_bitsll(x) 64 - __builtin_clz(x)
+
+vector<string> split(const string &s, char c) {
+	vector<string> v;
+	stringstream ss(s);
+	string x;
+	while (getline(ss, x, c)) v.push_back(x);
+	return v;
+}
+
+#define error(args...) { vector<string> _v = split(#args, ','); err(_v.begin(), args); }
+
+void err(vector<string>::iterator it) {}
+
+template<typename T, typename... Args>
+void err(vector<string>::iterator it, T a, Args... args) {
+	cerr << it -> substr((*it)[0] == ' ', it -> length()) << " = " << a << '\n';
+	err(++it, args...);
+}
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) {return (a < b) ? a : b;}
+template<class T> inline T tmax(T a, T b) {return (a > b) ? a : b;}
+template<class T> inline void amax(T &a, T b) {if (b > a) a = b;}
+template<class T> inline void amin(T &a, T b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 1005;
+int n, m;
+int cnt[N][N][2];
+
+struct Q {
+	int id, x1, y1, x2, y2;
+};
+
+inline int thash(int x, int y) {
+	return 1001 * x + y;
+}
+
+struct UF {
+    vector<int> par, rk, sub;
+    int maxi, sz;
+    
+    UF(int _size) {
+        sz = _size;
+        par.resize(sz + 1);
+        rk.assign(sz + 1, 0);
+        sub.assign(sz + 1, 1);
+        maxi = 1;
+        for (int i = 0; i <= sz; ++i) {
+            par[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        if (x != par[x]) par[x] = find(par[x]);
+        return par[x];
+    }
+    
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+    
+    void unite(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y) return;
+        if (rk[x] < rk[y]) {
+        	par[x] = y; sub[y] += sub[x];
+        	if (sub[y] > maxi) maxi = sub[y];
+        }
+        else {
+            par[y] = x; sub[x] += sub[y];
+            if (sub[x] > maxi) maxi = sub[x];
+            if (rk[x] == rk[y]) rk[x]++;
+        }
+    }
+
+    int get_max() {
+    	return maxi;
+    }
+};
+
+int main(int argc, char *argv[]) {
+    ios_base::sync_with_stdio(false);
+    int ntest, q, id;
+    cin >> ntest;
+    while (ntest--) {
+    	cin >> n >> m >> q;
+    	vector<Q> queries(q);
+    	ll ans = 0;
+    	mem(cnt, 0);
+    	repu(i, 0, q) {
+    		cin >> id;
+    		queries[i].id = id;
+    		if (id == 1 || id == 2) {
+    			cin >> queries[i].x1 >> queries[i].y1;
+    			cnt[queries[i].x1][queries[i].y1][id - 1]++;
+    		}
+    		if (id == 3) {
+    			cin >> queries[i].x1 >> queries[i].y1 >> queries[i].x2 >> queries[i].y2;
+    		}
+    	}
+    	UF dst = UF(thash(n, m));
+    	repu(i, 1, n + 1) repu(j, 1, m) {
+    		if (cnt[i][j][0] == 0) {
+    			int d1 = thash(i, j);
+    			int d2 = thash(i, j + 1);
+    			if (!dst.same(d1, d2)) dst.unite(d1, d2);
+    		}
+    	}
+    	repu(i, 1, n) repu(j, 1, m + 1) {
+    		if (cnt[i][j][1] == 0) {
+    			int d1 = thash(i, j);
+    			int d2 = thash(i + 1, j);
+    			if (!dst.same(d1, d2)) dst.unite(d1, d2);
+    		}
+    	}
+    	repd(i, q - 1, -1) {
+    		if (queries[i].id == 1) {
+    			int d1 = thash(queries[i].x1, queries[i].y1);
+    			int d2 = thash(queries[i].x1, queries[i].y1 + 1);
+    			cnt[queries[i].x1][queries[i].y1][0]--;
+    			if (!dst.same(d1, d2) && cnt[queries[i].x1][queries[i].y1][0] == 0) {
+    				dst.unite(d1, d2);
+    			}
+    		}
+    		else if (queries[i].id == 2) {
+    			int d1 = thash(queries[i].x1, queries[i].y1);
+    			int d2 = thash(queries[i].x1 + 1, queries[i].y1);
+    			cnt[queries[i].x1][queries[i].y1][1]--;
+    			if (!dst.same(d1, d2) && cnt[queries[i].x1][queries[i].y1][1] == 0) {
+    				dst.unite(d1, d2);
+    			}
+    		}
+    		else if (queries[i].id == 3) {
+    			int d1 = thash(queries[i].x1, queries[i].y1);
+    			int d2 = thash(queries[i].x2, queries[i].y2);
+    			if (dst.same(d1, d2)) ans += 1;
+    		}
+    		else {
+    			ans += dst.get_max();
+    		}
+    	}
+    	printf("%lld\n", ans);
+    }
+    return 0;
+}

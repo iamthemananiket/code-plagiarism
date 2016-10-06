@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("long.inp","r",stdin)
+#define OUTPUT freopen("long.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=1e2+10;
+
+
+int n,m,b[N][N];
+queue <ii> q;
+int d[2][N][N];
+bool check(ii cur){
+    return (cur.X>0&&cur.X<=n&&cur.Y>0&&cur.Y<=m&&!b[cur.X][cur.Y]);
+}
+void BFS(int idx,int sx,int sy,int range){
+    FOR(i,1,n)
+        FOR(j,1,m) d[idx][i][j]=inf;
+    d[idx][sx][sy]=0;
+    q.push(ii(sx,sy));
+    while (!q.empty()){
+        ii cur=q.front();q.pop();
+//        cout<<cur.X<<" "<<cur.Y<<" "<<range<<'\n';
+        FOR(i,cur.X-range,cur.X+range){
+            int rem=range-abs(i-cur.X);
+            FOR(j,cur.Y-rem,cur.Y+rem) if (check(ii(i,j))){
+                if (d[idx][i][j]==inf){
+                    d[idx][i][j]=d[idx][cur.X][cur.Y]+1;
+                    q.push(ii(i,j));
+                }
+            }
+        }
+    }
+//    ENDL;
+}
+
+void prepare(){
+    int k1,k2;
+    scanf("%d%d%d%d",&n,&m,&k1,&k2);
+    FOR(i,1,n)
+        FOR(j,1,m) scanf("%d",b[i]+j);
+    BFS(0,1,1,k1);
+    BFS(1,1,m,k2);
+//    FOR(i,1,n)
+//        FOR(j,1,m) cout<<d[0][i][j]<<" \n"[j==m];
+}
+int solve(){
+    int ans=inf;
+    FOR(i,1,n)
+        FOR(j,1,m) ans=min(ans,max(d[0][i][j],d[1][i][j]));
+    if (ans==inf) return -1;
+    return ans;
+}
+int main(){
+    //freopen("input.inp","r",stdin);
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        cout<<solve()<<'\n';
+    }
+}

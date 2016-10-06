@@ -1,0 +1,121 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, d, b, p;
+const int N = 1e6 + 500;;
+const int LN = 19;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+vector <int> pr;
+bool f[N];
+vector <int> cnt;
+map < ll, int > M;
+ll H[N];
+ll gcd(ll a, ll b) {
+    while (a > 0 && b > 0) {
+        if (a > b) a %= b;
+        else b %= a;
+    }
+    return a + b;
+}
+int main() {
+    csl;
+    cin >> t;
+    //cout << mod * mod << '\n';
+    for (int i = 2; i < N; ++i) {
+        if (f[i]) continue;
+        pr.push_back(i);
+        for (ll j = (1LL * i * i); j < N; j += i) {
+            f[j] = true;
+        }
+    }
+    cnt.resize(pr.size(), 0);
+    while (t--) {
+        cin >> n;
+        M.clear();
+        for (int i = 1; i <= n; ++i) {
+            cin >> H[i];
+            for (int j = 0; j < pr.size(); ++j) {
+                while (H[i] % pr[j] == 0) {
+                    cnt[j]++;
+                    H[i] /= pr[j];
+                }
+            }
+            if (H[i] > 1) M[H[i]]++;
+        }
+        sort(H + 1, H + 1 + n);
+        ll ans = 1;
+        for (int i = 0; i < cnt.size(); ++i) {
+            if (cnt[i] >= 2) ans = pr[i];
+            cnt[i] = 0;
+        }
+        for (auto i = M.begin(); i != M.end(); ++i)
+            if ((i -> snd) >= 2) ans = i -> fst;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = i + 1; j <= n; ++j) {
+                ll v = gcd(H[i], H[j]);
+                if (v != 1) ans = v;
+            }
+        }
+        if (ans != 1) {
+            cout << ans << '\n';
+            continue;
+        }
+        for (int i = 1; i <= n; ++i) {
+            ll lo = 1, hi = 1e9 + 7;
+            while (lo < hi) {
+                ll mid = (lo + hi) / 2;
+                if (mid * mid < H[i]) lo = mid + 1;
+                else hi = mid;
+            }
+            if (lo * lo == H[i] && lo != 1) ans = lo;
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+
+

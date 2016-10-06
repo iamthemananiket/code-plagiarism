@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1e5 + 5;
+const int MOD = 1e9 + 7;
+
+const int LARGER = 0;
+const int EQUAL = 1;
+const int SMALLER = 2;
+
+char s[N];
+int n;
+
+int memo[N][3][3];
+
+int compare(char a, char b) {
+    if (a < b) return LARGER;
+    if (a == b) return EQUAL;
+    return SMALLER;
+}
+
+int dp(int i, int pre, int suf) {
+    int &ans = memo[i][pre][suf];
+    if (ans != -1) return ans;
+    if (i > n) {
+        return ans = pre == LARGER && suf == LARGER;
+    }
+    ans = 0;
+    for (char c = 'A'; c <= 'Z'; ++c) {
+        int nxt_pre = pre, nxt_suf = suf;
+        if (pre == EQUAL) nxt_pre = compare(s[i], c);
+        if (compare(s[i], c) != EQUAL) nxt_suf = compare(s[i], c);
+        ans += dp(i + 1, nxt_pre, nxt_suf);
+        if (ans >= MOD) ans -= MOD;
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin >> s + 1;
+    n = strlen(s + 1);
+    memset(memo, -1, sizeof memo);
+    cout << dp(1, EQUAL, EQUAL) << endl;
+    return 0;
+}

@@ -1,0 +1,47 @@
+#pragma comment(linker, "/STACK:100000000")
+#include<bits/stdc++.h>
+#define int long long
+#define pb push_back
+#define mp make_pair
+#define f first
+#define s second
+#define sqr(x) (x) * (x)
+ using namespace std;
+
+ const int N = 8e6 + 121;
+ pair<int,string> a[N];
+ int val,n,m,k,i,j,M,p[100][100],kol;
+ vector<int> v;
+
+void tt(int pos,string val,int sum)
+{
+    if(pos == M){
+        a[++kol] = mp(-sum,val);
+        return;
+        } else
+        {
+            for(int i=1;i<=n;++i)
+                tt(pos+1,val+char('a' + i - 1),sum + p[pos][i]);
+        }
+}
+  //int
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>n>>m>>k;
+
+    for(i=1;i<=m;++i)
+        for(j=1;j<=n;++j) cin>>p[i][j];
+
+        M = m + 1;
+
+        tt(1,"",0);
+
+        sort(a+1,a+kol+1);
+
+        cout<<a[k].s<<endl;
+  }

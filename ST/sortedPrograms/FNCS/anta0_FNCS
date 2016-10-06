@@ -1,0 +1,151 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+struct Query {
+	int ty;
+	int x, y;
+};
+
+struct InnerQuery {
+	int R;
+	int sign;
+	int qi;
+};
+
+int main() {
+	int N;
+	while(~scanf("%d", &N)) {
+		vector<int> A(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &A[i]);
+		vector<pair<int, int>> functions(N);
+		rep(i, N) {
+			int L; int R;
+			scanf("%d%d", &L, &R), -- L;
+			functions[i] = make_pair(L, R);
+		}
+
+		int Q;
+		scanf("%d", &Q);
+		vector<Query> queries(Q);
+		rep(i, Q) {
+			int ty;
+			scanf("%d", &ty);
+			if(ty == 1) {
+				int x; int y;
+				scanf("%d%d", &x, &y), -- x;
+				queries[i] = { ty, x, y };
+			} else if(ty == 2) {
+				int x; int y;
+				scanf("%d%d", &x, &y), -- x;
+				queries[i] = { ty, x, y };
+			} else abort();
+		}
+		int BlockSize = 300;
+		vector<bool> mark;
+		vector<uint64_t> arraySum;
+		vector<uint64_t> baseSum;
+		vector<InnerQuery> innerQueries;
+		vector<int> markNum;
+		vector<int> markCoeff;
+		vector<int> curMarkedValue;
+		vector<vector<int>> markedValueSnapshot;
+		vector<int> marked;
+		vector<uint64_t> queryAns;
+		for(int qL = 0; qL < Q; qL += BlockSize) {
+			int qR = min(Q, qL + BlockSize);
+			mark.assign(N, false);
+			reu(qi, qL, qR) {
+				const Query &q = queries[qi];
+				if(q.ty == 1)
+					mark[q.x] = true;
+			}
+			arraySum.resize(N + 1);
+			markNum.resize(N + 1);
+			arraySum[0] = 0;
+			markNum[0] = 0;
+			marked.clear();
+			rep(i, N) {
+				arraySum[i + 1] = arraySum[i];
+				markNum[i + 1] = markNum[i];
+				if(!mark[i]) {
+					arraySum[i + 1] += A[i];
+				} else {
+					marked.push_back(i);
+					markNum[i + 1] += 1;
+				}
+			}
+			int numMarks = markNum[N];
+			curMarkedValue.resize(numMarks);
+			rep(i, numMarks)
+				curMarkedValue[i] = A[marked[i]];
+
+			innerQueries.clear();
+			markedValueSnapshot.resize(qR - qL);
+			reu(qi, qL, qR) {
+				const Query &q = queries[qi];
+				if(q.ty == 1) {
+					curMarkedValue[markNum[q.x]] = q.y;
+				}else {
+					markedValueSnapshot[qi - qL] = curMarkedValue;
+					innerQueries.push_back(InnerQuery{ q.y, +1, qi - qL });
+					innerQueries.push_back(InnerQuery{ q.x, -1, qi - qL });
+				}
+			}
+			sort(innerQueries.begin(), innerQueries.end(),
+				[](InnerQuery a, InnerQuery b) { return a.R < b.R; });
+			innerQueries.push_back(InnerQuery{ INF, 0, -1 });
+
+			queryAns.assign(qR - qL, 0);
+			markCoeff.assign(numMarks + 1, 0);
+			int inneri = 0;
+			for(int fi = 0; ; ++ fi) {
+				for(; innerQueries[inneri].R == fi; ++ inneri) {
+					int qi = innerQueries[inneri].qi;
+					const vector<int> &values = markedValueSnapshot[qi];
+					int coeff = 0;
+					uint64_t sum = 0;
+					for(int i = 0; i < numMarks; ++ i) {
+						coeff += markCoeff[i];
+						sum += (ll)coeff * values[i];
+					}
+					queryAns[qi] += sum * innerQueries[inneri].sign;
+				}
+				if(fi == N) break;
+				int L, R;
+				tie(L, R) = functions[fi];
+				++ markCoeff[markNum[L]];
+				-- markCoeff[markNum[R]];
+			}
+
+			baseSum.resize(N + 1);
+			baseSum[0] = 0;
+			rep(i, N) {
+				int L, R;
+				tie(L, R) = functions[i];
+				baseSum[i + 1] = baseSum[i] + (arraySum[R] - arraySum[L]);
+			}
+
+			reu(qi, qL, qR) {
+				const Query &q = queries[qi];
+				if(q.ty == 1) {
+					A[q.x] = q.y;
+				} else {
+					int L = q.x, R = q.y;
+					uint64_t ans = 0;
+					ans += baseSum[R] - baseSum[L];
+					ans += queryAns[qi - qL];
+					printf("%llu\n", ans);
+				}
+			}
+		}
+	}
+	return 0;
+}

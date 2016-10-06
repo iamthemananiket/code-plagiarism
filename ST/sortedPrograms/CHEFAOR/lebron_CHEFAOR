@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+ 
+using namespace std;
+const int MAXL = 31;
+int arr[5005];
+int go[5005][MAXL];
+long long dp[5005][5005];
+bool bit(int mask, int x) {
+	mask &= (1 << x);
+	return mask > 0;
+}
+void solve() {
+	int n, k;
+	scanf("%d%d", &n, &k);
+//	n=k=5000;
+	for (int i = 0; i < n; ++i) {
+		scanf("%d",&arr[i]);
+		
+	//	arr[i]=(rand()<<14)+rand();
+	}
+	
+	for (int i = 0; i <= n; ++i) {
+		for (int j = 0; j <= k; ++j) {
+			dp[i][j] = 0;
+		}
+	}
+	for (int i = 0; i <= n; ++i) {
+		for (int j = 0; j < MAXL; ++j)
+			go[i][j] = n + 1;
+	}
+	for (int i = n - 1; i >= 0; --i) {
+		for (int j = 0; j < MAXL; ++j) {
+			go[i][j] = go[i + 1][j];
+			if (bit(arr[i], j)) {
+				go[i][j] = i;
+			}
+		}
+	}
+	for (int i = 0; i < n; ++i) {
+		vector < int > ret;
+		for (int j = 0; j < MAXL; ++j) {
+			if (go[i][j] != n + 1 && go[i][j] != i) ret.push_back(go[i][j]);
+		}
+		sort(ret.begin(), ret.end());
+		for (int j = 0; j <= k; ++j) {
+			dp[i + 1][j] = max(dp[i + 1][j], dp[i][j]);
+			if (j == k) continue;
+			int v = arr[i];
+			dp[i + 1][j + 1] = max(dp[i + 1][j + 1], dp[i][j] + arr[i]);
+			for (int c = 0; c < ret.size(); ++c) {
+				v = v | arr[ret[c]];
+				dp[ret[c] + 1][j + 1] = max(dp[ret[c] + 1][j + 1], dp[i][j] + v);
+			}
+		}
+	}
+	long long ans = 0;
+	for (int i = 0; i <= n; ++i)
+		for (int j = 0; j <= k; ++j)
+			ans = max(ans, dp[i][j]);
+	printf("%lld\n", ans);
+}
+int main() {
+	int T;
+	scanf("%d", &T);
+	while (T--) {
+		solve();
+	}
+} 

@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n, k;
+    scanf("%d %d", &n, &k);
+    long long ans = 0;
+    for (int i = 0; i < n; ++i) {
+      int x;
+      scanf("%d", &x);
+      int mn = k - x % k;
+      if (x >= k && x % k < mn) {
+        mn = x % k;
+      }
+      ans += mn;
+    }
+    printf("%lld\n", ans);
+  }
+  return 0;
+}

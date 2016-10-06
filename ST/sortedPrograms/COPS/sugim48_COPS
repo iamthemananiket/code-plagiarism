@@ -1,0 +1,32 @@
+#include <algorithm>
+#include <climits>
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <queue>
+#include <set>
+#include <string>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> i_i;
+int MOD = 1000000007;
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int M, x, y; cin >> M >> x >> y;
+		vector<bool> safe(100, true);
+		while (M--) {
+			int a; cin >> a; a--;
+			for (int i = 0; i < 100; i++)
+				if (abs(i - a) <= x * y)
+					safe[i] = false;
+		}
+		int cnt = 0;
+		for (int i = 0; i < 100; i++)
+			cnt += safe[i];
+		cout << cnt << endl;
+	}
+}

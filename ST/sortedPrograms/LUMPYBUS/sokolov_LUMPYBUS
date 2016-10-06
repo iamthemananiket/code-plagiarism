@@ -1,0 +1,78 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+//#include <unordered_map>
+//#include <unordered_set>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+
+vector<int> a[2];
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int t = nextInt();
+	while (t--) {
+		a[0].clear();
+		a[1].clear();
+		int n = nextInt();
+		ll p = nextLong();
+		ll q = nextLong();
+		for (int i = 1; i <= n; ++i) {
+			int v = nextInt();
+			a[v % 2].push_back(v);
+		}
+		sort(a[0].begin(), a[0].end());
+		sort(a[1].begin(), a[1].end());
+		int res = 0;
+		int i = 0;
+		int j = 0;
+		while (i < a[0].size() || j < a[1].size()) {
+			if (j < a[1].size() && (i == a[0].size() || a[1][j] < a[0][i]) && p >= 1 && (q * 2 + p) >= a[1][j]) {
+				--p;
+				if (a[1][j] - 1 > q * 2) {
+					p -= a[1][j] - 1 - q * 2;
+				}
+				q = max(q - a[1][j] / 2, (ll)0);
+				++j;
+				++res;
+			} else if (i < a[0].size() && (q * 2 + p) >= a[0][i]) {
+				if (a[0][i] > q * 2) {
+					p -= a[0][i] - q * 2;
+				}
+				q = max(q - a[0][i] / 2, (ll)0);
+				++i;
+				++res;
+			} else {
+				break;
+			}
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}

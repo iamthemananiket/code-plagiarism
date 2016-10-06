@@ -1,0 +1,95 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+struct Edge {
+  int to;
+  ll y;
+  Edge() {};
+  Edge(int to, ll y) : to(to), y(y) {}
+};
+
+const int MAX_N = 220000;
+
+int n, m;
+ll K;
+vector<Edge> g[MAX_N];
+ll x[MAX_N];
+bool used[MAX_N];
+
+void dfs(int v) {
+  used[v] = true;
+  for (const Edge &e : g[v]) {
+    if (!used[e.to]) {
+      x[e.to] = e.y ^ x[v];
+      dfs(e.to);
+    }
+  }
+}
+
+int main() {
+  scanf("%d%d%lld", &n, &m, &K);
+  for (int i = 0; i < m; i++) {
+    int u, v;
+    ll y;
+    scanf("%d%d%lld", &u, &v, &y);
+    u--, v--;
+    g[u].push_back(Edge(v, y));
+    g[v].push_back(Edge(u, y));
+  }
+  fill(x, x + n, -1LL);
+  fill(used, used + n, false);
+  int last = -1;
+  for (int v = 0; v < n; v++) {
+    if (!used[v]) {
+      x[v] = 0;
+      dfs(v);
+      last = v;
+    }
+  }
+  fill(used, used + n, false);
+  x[last] = K - 1;
+  dfs(last);
+  bool ok = true;
+  for (int v = 0; v < n; v++) {
+    for (const Edge &e : g[v]) {
+      if ((x[v] ^ x[e.to]) != e.y) {
+        ok = false;
+      }
+    }
+  }
+  if (ok) {
+    for (int v = 0; v < n; v++) {
+      printf("%lld%c", x[v], " \n"[v == n - 1]);
+    }
+  } else {
+    puts("-1");
+  }
+}

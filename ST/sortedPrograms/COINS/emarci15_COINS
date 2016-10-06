@@ -1,0 +1,44 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <cstdlib>
+
+using namespace std;
+
+//map<int,long long> mmap;
+
+long long dp[1000001];
+
+int x;
+
+long long solve(int n) {
+    if(n<=1000000) return dp[n];
+    //try {
+    //    long long ret = mmap.at(n);
+    //    return ret;
+    //} catch(exception e) {
+        long long ret = solve(n/2) + solve(n/3) + solve(n/4);
+        ret = max(ret,(long long)n);
+   //     mmap.insert(make_pair(n,ret));
+        return ret;
+    //}
+}
+
+int main()
+{
+    dp[0] = 0;
+    dp[1] = 1;
+
+    for(long long i=2; i<=1000000; i++) {
+        dp[i] = max(i,dp[i/2]+dp[i/3]+dp[i/4]);
+    }
+
+    string line;
+    while (getline(cin, line))
+    {
+        x = atoi(line.c_str());
+        cout << solve(x) << endl;
+    }
+
+    return 0;
+}

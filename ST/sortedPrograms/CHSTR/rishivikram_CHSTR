@@ -1,0 +1,513 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define MOD 1000000007
+#define maxi(a,b) (a)>(b)?(a):(b)
+#define pc(x) putchar_unlocked(x);
+struct nd;
+typedef nd *ndptr;
+long long int rr=1<<28;
+inline void writeInt (long long int n)
+{
+        long long int N = n, rev, count = 0;
+        rev = N;
+        if (N == 0) { pc('0'); pc('\n'); return ;}
+        while ((rev % 10) == 0) { count++; rev /= 10;} //obtain the count of the number of 0s
+        rev = 0;
+        while (N != 0) { rev = (rev<<3) + (rev<<1) + N % 10; N /= 10;}  //store reverse of N in rev
+        while (rev != 0) { pc(rev % 10 + '0'); rev /= 10;}
+        while (count--) pc('0');
+}
+int scan_d()
+{
+	int ip=getchar(),ret=0,flag=1;
+	for(;ip<'0'||ip>'9';ip=getchar())
+	{
+		if(ip=='-')
+		{
+			flag=-1;
+			ip=getchar();
+			break;
+		}
+		for(;ip>='0'&&ip<='9';ip=getchar())
+		{
+			ret=ret*10+ip-'0';
+			return flag*ret;
+		}
+	}
+}
+//llu scan_llu()    {int ip=getchar();llu ret=0;for(;ip<'0'||ip>'9';ip=getchar_unlocked());for(;ip>='0'&&ip<='9';ip=getchar_unlocked())ret=ret*10+ip-'0';return ret;}
+ 
+//end of fast input
+ 
+//fast output
+ 
+//no line break
+//void print_d(int n){if(n<0){n=-n;putchar_unlocked('-');}int i=10;char output_buffer[10];do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<10);}
+//void print_ld(ld n){if(n<0){n=-n;putchar_unlocked('-');}int i=11;char output_buffer[11];do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<11);}
+void print_ll(ll n)
+{
+	ll i;
+	if(n<0)
+	{
+		n=-n;
+		putchar('-');
+	}
+	i=21;
+	char output_buffer[21];
+	do
+	{
+		output_buffer[--i]=(n%10)+'0';
+		n/=10;
+	}
+	while(n);
+	do
+	{
+		putchar(output_buffer[i]);
+	}
+	while(++i<21);
+}
+//void print_llu(llu n){int i=21;char output_buffer[21];do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<21);}
+ 
+//new line
+//void println_ld(ld n){if(n<0){n=-n;putchar_unlocked('-');}int i=11;char output_buffer[12];output_buffer[11]='\n';do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<12);}
+//void println_llu(llu n){int i=21;char output_buffer[22];output_buffer[21]='\n';do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<22);}
+ 
+//special char
+//char sp;
+//void printsp_d(int n){if(n<0){n=-n;putchar_unlocked('-');}int i=10;char output_buffer[11];output_buffer[10]=sp;do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<11);}
+//void printsp_ld(ld n){if(n<0){n=-n;putchar_unlocked('-');}int i=11;char output_buffer[12];output_buffer[11]=sp;do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<12);}
+//void printsp_ll(ll n){if(n<0){n=-n;putchar_unlocked('-');}int i=21;char output_buffer[22];output_buffer[21]=sp;do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<22);}
+//void printsp_llu(llu n){int i=21;char output_buffer[22];output_buffer[21]=sp;do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<22);}typedef char C;
+ 
+inline void scan(long long int &x)
+{
+    register long long int c = getchar();
+ 
+    x = 0;
+ 
+    long long int neg = 0;
+ 
+    for(;((c<48 || c>57) && c != '-');c = getchar());
+ 
+    if(c=='-') {neg=1;c=getchar();}
+ 
+    for(;c>47 && c<58;c = getchar()) {x = (x<<1) + (x<<3) + c - 48;}
+ 
+    if(neg) x=-x;
+ 
+}
+struct nd 
+{
+    long long int z;
+	long long int b;     
+    ndptr link_ndptr;
+	ndptr last_ndptr;
+	ndptr next_ndptr;
+    nd()
+	{
+		link_ndptr = 0;
+		last_ndptr = 0;
+		next_ndptr = 0;
+	}
+    ndptr getcharac(long long int ind, char *str)
+	{
+		for (ndptr ptr = last_ndptr; ptr; ptr = ptr->next_ndptr)
+		{
+			if (str[ind] == str[ptr->z])
+				return ptr;
+		}
+        return 0;
+    }
+    void addcharac(ndptr ptr)
+	{
+		ptr->next_ndptr = last_ndptr, last_ndptr = ptr;
+	}
+    void changecharac(ndptr ptr,long long int ind, char *str)
+	{
+        if (str[last_ndptr->z] == str[ind])
+		{
+			 ptr->next_ndptr = last_ndptr->next_ndptr, last_ndptr = ptr;
+			 return;
+		}
+        for (ndptr r = 0, q = last_ndptr; q; r = q, q = q->next_ndptr)
+		{
+			if (str[q->z] == str[ind])
+			{
+           		r->next_ndptr = ptr, ptr->next_ndptr = q->next_ndptr;
+            	return;
+        	}
+		}
+    }
+};
+long long int num_nd = 0;
+nd node_arr[15000];
+ 
+long long int moduluss(long long int f,long long int s) {
+  return ((f%s)+s)%s;
+}
+long long int extended_euclid(long long int a,long long int b,long long int &x,long long int &y) {  
+  long long int xx = y = 0;
+  long long int yy = x = 1;
+  while (b) {
+    long long int q = a/b;
+    long long int t = b; b = a%b; a = t;
+    t = xx; xx = x-q*xx; x = t;
+    t = yy; yy = y-q*yy; y = t;
+  }
+  return a;
+}
+long long int inverse(long long int a,long long int n) {
+  long long int x, y;
+  long long int d = extended_euclid(a, n, x, y);
+  if (d > 1) return -1;
+  return moduluss(x,n);
+}/*
+void println_ll(ll n)
+{
+	ll i;
+	if(n<0)
+	{
+		n=-n;
+		putchar('-');
+	}
+	i=21;
+	char output_buffer[22];
+	output_buffer[21]='\n';
+	do
+	{
+		output_buffer[--i]=(n%10)+'0';
+		n/=10;
+	}
+	while(n);
+	do
+	{
+		putchar(output_buffer[i]);
+	}
+	while(++i<22);
+}*/
+ndptr g_nd(long long int srt,long long int end)
+{
+    ndptr p = node_arr + num_nd;
+    p->z = srt, p->b = end, p->link_ndptr = p->last_ndptr = p->next_ndptr = 0;
+    return node_arr + num_nd++;
+}/*
+long int scan_ld()
+{
+	int ip,flag;
+	long int ret;
+	ip=getchar(),flag=1;ret=0;
+	for(;ip<'0'||ip>'9';ip=getchar())
+	{
+		if(ip=='-')
+		{
+			flag=-1;
+			ip=getchar();
+			break;
+		}
+		for(;ip>='0'&&ip<='9';ip=getchar())
+		{
+			ret=ret*10+ip-'0';
+			return flag*ret;
+		}
+	}
+}*/
+ 
+ndptr gen(char str[],long long int n)
+{
+	long long int len,rem,i,pos,current,lz;
+    ndptr root = g_nd(-1, -1);
+    pos = -1, rem = 0, current = 0, lz = 0;
+    ndptr p = root, sl = 0;
+    for (i = 0; i < n; i++)
+	{
+        pos++, sl = 0, rem++;
+        for (; rem; )
+		{
+            if (lz == 0) current = pos;
+           	ndptr q = p->getcharac(current, str);
+            if (q == 0)
+			{
+               	ndptr q1 = node_arr + num_nd++;
+                q1->z = pos, q1->b = rr;
+                q1->link_ndptr = q1->last_ndptr = 0;
+                q1->next_ndptr = p->last_ndptr;
+                p->last_ndptr = q1;
+                if (sl)
+					sl->link_ndptr = p;
+                sl = p;
+            }
+			else
+			{
+                if (q->z + lz >= q->b)
+				{
+                    len = q->b - q->z;
+                    p = q, lz -= len, current += len;
+                    continue;
+                }
+                if (str[i] == str[q->z + lz])
+				{
+					lz++;
+					if (sl)
+						sl->link_ndptr = p;
+					sl = p;
+					break;
+				}
+                ndptr sp = g_nd(q->z, q->z + lz);
+                p->changecharac(sp, current, str);
+                sp->addcharac(q), sp->addcharac(g_nd(pos, rr));
+                q->z = q->z + lz;
+                if (sl)
+					sl->link_ndptr = sp; sl = sp;
+            }
+            rem--;
+            if (p == root && lz)
+			{
+                lz--, current = pos - rem + 1;
+            }
+			else
+			{
+                p = p->link_ndptr;
+				if (!p)
+					p = root;
+            }
+        }
+    }
+    for (i = 0; i < num_nd; i++)
+		if (node_arr[i].b >=rr)
+			node_arr[i].b = n;
+    return root;
+}
+ 
+long long int n;
+char str[10000];
+long long node_cnt[15000];
+long long int visited[15000];
+ndptr arr_stack[15000];
+ndptr *pointer;
+void ssort(ndptr p)
+{
+    long long int i,difi;
+    for (i = 0; i < num_nd; i++)
+		visited[i] = 0;
+    pointer = arr_stack;
+	*pointer++ = p;
+    while (pointer != arr_stack)
+	{
+        ndptr q = *--pointer;
+        if (visited[q - node_arr])
+		{
+            difi = q - node_arr;
+            if (q->last_ndptr == 0)
+				node_cnt[difi] = 1;
+            else
+				node_cnt[difi] = 0;
+            for (ndptr r = q->last_ndptr; r; r = r->next_ndptr)
+			{
+                node_cnt[difi] += node_cnt[r - node_arr];
+            }
+        }
+		else
+		{
+            *pointer++ = q, visited[q - node_arr] = 1;
+            for (p = q->last_ndptr; p; p = p->next_ndptr)
+				*pointer++ = p;
+        }
+    }
+}
+ 
+long long int ans[10000];
+void println_d(int n)
+{
+	if(n<0)
+	{
+		n=-n;
+		putchar('-');
+	}
+	int i=10;
+	char output_buffer[11];
+	output_buffer[10]='\n';
+	do
+	{
+		output_buffer[--i]=(n%10)+'0';
+		n/=10;
+	}
+	while(n);
+	do
+	{
+		putchar(output_buffer[i]);
+	}
+	while(++i<11);
+}
+long long int last;
+void process()
+{
+	
+	long long int c;
+    for (c = 0; c < num_nd; c++)
+	{
+        ndptr p = node_arr+c;
+        ans[node_cnt[p - node_arr]] += (long long)((*p).b - (*p).z) * node_cnt[p - node_arr];
+	//	if(ans[node_cnt[p - node_arr]]!=0)
+	//		last=maxi(last,node_cnt[p - node_arr]);
+	}
+}
+long long int ans2[5010][5010];
+long long int ans3[5010];
+void process2()
+{
+	long long int i,j;
+	for (i = 0; i <= 5000; i++)
+    {
+       	for (j = 0; j <= i; j++)
+       	{
+       	    if (j == 0 || j == i)
+       	        ans2[i][j] = 1;
+ 	        else
+ 			    ans2[i][j] = (ans2[i-1][j-1] + ans2[i-1][j])%MOD;
+ 	    }
+	}
+}
+void process3()
+{
+	long long int temp,i,j;
+	ans3[5001]=0;
+	for(i=2;i<=5000;i++)
+	{
+		ans3[i]=0;
+		for(j=i;j<=5000;j++)
+		{
+			temp=ans[j]/j;
+			ans3[i]+=(ans2[j][i]*temp)%MOD;
+			if(ans3[i]>=MOD)
+				ans3[i]%=MOD;
+		}
+	}
+}
+long long int ans_sub1[10];
+void process4()
+{
+	int i,j,temp;
+	for(i=2;i<=5;i++)
+	{
+		ans_sub1[i]=0;
+		for(j=i;j<=5;j++)
+		{
+			temp=ans[j]/j;
+			ans_sub1[i]+=temp*ans2[j][i];
+		}
+	}
+}
+void process_less()
+{
+	int i,j;
+	for(i=0;i<=5;i++)
+	{
+		for(j=0;j<=i;j++)
+		{
+			if (j == 0 || j == i)
+       	        ans2[i][j] = 1;
+ 	        else
+ 			    ans2[i][j] = (ans2[i-1][j-1] + ans2[i-1][j]);
+ 	    }
+	}
+}
+ 
+int main ()
+{
+    long long int query,temp,x,modd=1000000007,pro,i, j,copy,k,answer;
+	bool flag;
+	long long int ttt,testcases;
+	scan(testcases);
+	ttt=testcases;
+    while(testcases--)
+	{
+		scan(n);
+		copy=n;
+		scan(query);
+		if(ttt==1)
+		{
+			if(n<=5)
+			{
+				process_less();
+				flag=false;
+			}
+			else
+			{
+				process2();
+				flag=true;
+			}
+		}
+		else
+		{
+			flag=false;
+			process_less();
+		}
+		scanf("%s",str);
+        str[n] = '$', n++;
+        str[n] = 0;
+        num_nd = 0;
+        ndptr rt = gen(str, n);
+        ssort(rt);
+        for (i = 0; i <= n + 2; i++)
+			ans[i] = 0;
+		for (i = 0; i < num_nd; i++)
+			visited[i] = 0;
+        process();
+		if(flag)
+		{
+			process3();
+			while(query--)
+			{
+				answer=0;
+			//	cout<<"last is "<<last<<endl;
+				scan(k);
+				if(k<=n)
+				{
+            		if (k == 1)
+					{
+						if(n&1)
+	        	    	 	answer=((copy/2)*(copy+1))%MOD;
+						else
+							answer=(copy*((copy+1)/2))%MOD;  
+            		}
+					else
+					{
+						answer=ans3[k];		
+					}
+				}
+			//	printf("%lld\n",answer);
+				writeInt(answer);
+				printf("\n");
+			}
+		}
+		else
+		{
+			process4();
+			while(query--)
+			{
+				answer=0;
+				scan(k);
+				if(k<=n)
+				{
+					if (k == 1)
+					{
+						if(n&1)
+	        	    	 	answer=((copy/2)*(copy+1))%MOD;
+						else
+							answer=(copy*((copy+1)/2))%MOD;  
+            		}
+					else
+					{
+						answer=ans_sub1[k];
+					}
+				}
+			//	printf("%lld\n",answer);
+				writeInt(answer);
+				printf("\n");
+			}
+		}
+	
+    }
+    return 0;
+} 

@@ -1,0 +1,22 @@
+#include<stdio.h>
+long long M, F[1010000], G[1010000];
+int n, Q, r;
+int main(){
+	int i, TC;
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%d%lld%d", &n, &M, &Q);
+		if (n % 2 == 0)F[n / 2] = (n / 2 + 1)%M;
+		else F[n / 2 + 1] = 1 % M;
+		for (i = (n + 1) / 2 - 1; i >= 1; i--){
+			F[i] = F[i + 1] * (i + 1) % M * (n - i + 1) % M;
+		}
+		G[0] = 1;
+		for (i = 1; i <= (n + 1) / 2; i++)G[i] = G[i - 1] * F[i] % M;
+		while (Q--){
+			scanf("%d", &r);
+			if (r > n / 2)r = n - r;
+			printf("%lld\n", G[r]);
+		}
+	}
+}

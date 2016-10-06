@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+#define pd pair < int, ull >
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)2e5 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 7;
+
+using namespace std;
+
+int n, a[1005];
+vector < int > h, g[1005];
+set < int > q;
+int used[1005], timer;
+ll ans, val;
+
+ll F(int len) {
+    return 1ll * len * (len + 1) / 2;
+}
+
+void add(int x) {
+    auto it = q.lower_bound(x);
+    int r = *it - 1;
+    it--;
+    int l = *it + 1;
+    val = val - F(r - l + 1) + F(x - l) + F(r - x);
+    q.insert(x);
+}
+
+void solve() {
+    scanf("%d", &n);
+    h.clear();
+    for (int i = 1; i <= n; i++) {
+        scanf("%d", &a[i]);
+        h.pb(a[i]);
+    }
+    sort(h.begin(), h.end());
+    h.resize(unique(h.begin(), h.end()) - h.begin());
+    for (int i = 1; i <= n; i++)
+        a[i] = lower_bound(h.begin(), h.end(), a[i]) - h.begin();
+    for (int i = 0; i < n; i++)
+        g[i].clear();
+    for (int i = 1; i <= n; i++)
+        g[a[i]].pb(i);
+    ans = 0;
+    for (int i = 1; i <= n; i++) {
+        q.clear();
+        q.insert(0), q.insert(n + 1);
+        val = F(n);
+        timer++;
+        for (int j = i; j <= n; j++) {
+            if (used[a[j]] != timer)
+                for (auto k : g[a[j]])
+                    add(k);
+            used[a[j]] = timer;
+            ans += val;
+        }
+    }
+    assert(ans % 2 == 0);
+    printf(I64"\n", ans / 2);
+}
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+    int tests;
+    scanf("%d", &tests);
+    while(tests--)
+        solve();
+    return 0;
+}

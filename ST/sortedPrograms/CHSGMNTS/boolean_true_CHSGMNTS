@@ -1,0 +1,83 @@
+#include<iostream>
+#include<climits>
+#include<string>
+#include<algorithm>
+#include<map>
+#include<vector>
+#include<set>
+#define N 1009
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+int arr[N];
+int main()
+{
+	int test;
+	cin >> test;
+	while (test--)
+	{
+		map<int, vector<int> >mp;
+		int n;
+		cin >> n;
+		for (int i = 0; i < n; i++)
+		{
+			cin >> arr[i];
+			mp[arr[i]].push_back(i);
+		}
+		ll ans = 0;
+		for (int i = 0; i < n; i++)
+		{
+			int memo[N] = {};
+			set<int>boundaries;
+			boundaries.insert(i);
+			boundaries.insert(n);
+			ll cur = ((ll)(n - i - 1))*(n - i) / 2;
+			for (int j = i; j < n; j++)
+			{
+
+				//cout << "1: "<< i << " " << j << " " << cur << endl;
+				set<int>::iterator pt1 = boundaries.begin();
+				set<int>::iterator pt2 = pt1;
+				pt2++;
+				cur -= ((ll)((*pt2) - (*pt1) - 1))*((*pt2) - (*pt1)) / 2;
+				boundaries.erase(boundaries.begin());
+				if ((*boundaries.begin()) != j)
+				{
+					boundaries.insert(j);
+					pt1 = boundaries.begin();
+					pt2 = pt1;
+					pt2++;
+					cur += ((ll)((*pt2) - (*pt1) - 1))*((*pt2) - (*pt1)) / 2;
+				}
+				//cout << "2: " << i << " " << j << " " << cur << endl;
+				if (memo[j] == 1)
+				{
+					ans += cur;
+					continue;
+				}
+				//cout << "Going Ahead" << endl;
+				vector<int>tmp;
+				int x = arr[j];
+				int lim = mp[x].size();
+				for (int k = lim - 1; k >= 0 && mp[x][k] > j; k--)
+				{
+					//cout << "Looping for: " << mp[x][k] << endl;
+					boundaries.insert(mp[x][k]);
+					memo[mp[x][k]] = 1;
+					set<int>::iterator ptr = boundaries.find(mp[x][k]);
+					set<int>::iterator ptrl = ptr;
+					set<int>::iterator ptrr = ptr;
+					ptrl--;
+					ptrr++;
+					cur -= ((ll)((*ptrr) - (*ptrl) - 1))*((*ptrr) - (*ptrl)) / 2;
+					cur += ((ll)((*ptr) - (*ptrl) - 1))*((*ptr) - (*ptrl)) / 2 + ((ll)((*ptrr) - (*ptr) - 1))*((*ptrr) - (*ptr)) / 2;
+					//cout << "cur now: " << cur << endl;
+				}
+				ans += cur;
+				//cout << "3: " << i << " " << j << " " << cur << endl;
+			}
+		}
+		cout << ans << endl;
+	}
+	//system("pause");
+}

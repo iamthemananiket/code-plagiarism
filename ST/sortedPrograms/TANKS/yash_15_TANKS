@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int max_try=100;
+
+int main()
+{
+	int m,u12,u23,t,k,c,i;
+	int cap[21],bomb[21],pen[21],ans[21],done[21];
+	int rem,type,sno,cntr;
+	scanf("%d",&m);
+	scanf("%d",&u12);
+	while(u12--)
+		scanf("%*d");
+	scanf("%d",&u23);
+	while(u23--)
+		scanf("%*d");
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d%d",&k,&c);
+		for(i=1;i<=k;i++)
+			scanf("%d",cap+i);
+		for(i=1;i<=k;i++)
+			scanf("%d",bomb+i);
+		for(i=1;i<=k;i++)
+			scanf("%d",pen+i);
+		for(i=1;i<=k;i++)
+			ans[i]=done[i]=0;
+		/*
+		rem=k;
+		any_capture=(int)(k*0.75);
+		*/
+		int cntr=10;
+		while(cntr--)
+		{
+			printf("0\n");
+			fflush(stdout);
+			scanf("%d %d",&type,&sno);
+			if(sno==-1)
+				done[type]=1;
+		}
+		
+		for(i=1;i<=k;i++)
+		{
+			if(done[i])
+				continue;
+			cntr=0;
+			do
+			{
+				printf("%d\n",i);
+				fflush(stdout);
+				scanf("%d %d",&type,&sno);
+				cntr++;
+			} while(sno>=0 && cntr<max_try);
+			if(cntr==max_try)
+				ans[i]=(m-max_try)/4;
+		}
+		puts("-1");
+		
+		for(i=1;i<=k;i++)
+			printf("%d ",ans[i]);
+		puts("");
+		fflush(stdout);
+	}
+	return 0;
+}

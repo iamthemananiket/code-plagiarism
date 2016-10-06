@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+int a[10004],b[10004];
+ll ans[10004],res;
+int main(){
+	int t,n,m,i,j;
+	scanf("%d",&t);
+	while(t--){
+
+		scanf("%d",&n);
+		for(i=0;i<n;i++){
+			ans[i]=-10000000000000000ll;
+			scanf("%d",a+i);
+		}
+		ans[0]=res=a[0];
+		scanf("%d",&m);
+		for(i=0;i<m;i++)
+			scanf("%d",b+i);
+		sort(b,b+m);
+		for(i=0;i<n;i++){
+			if(ans[i]==-10000000000000000ll)
+				continue;
+			res=max(ans[i],res);
+			for(j=0;j<m && i+b[j]<n;j++)
+				ans[i+b[j]]=max(ans[i+b[j]],a[i+b[j]]+ans[i]);
+			//cout<<ans[i]<<" ";
+		}
+		printf("%lld\n",res);
+	}
+}

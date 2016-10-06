@@ -1,0 +1,89 @@
+/*
+ *
+ * File: TPLOT.cpp
+ * Author: Andy Y.F. Huang
+ * Created on 2013-11-14, 12:35:53 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace TPLOT {
+const int N = 6;
+
+void solve(int test_num) {
+  int a[6], b[6];
+  int bonus;
+  for (int i = 0; i < N; i++)
+    cin >> a[i];
+  cin >> bonus;
+  sort(a, a + N);
+  for (int t = 0; t < 5; t++) {
+    for (int i = 0; i < 6; i++)
+      cin >> b[i];
+    int same = 0;
+    bool bon = false;
+    for (int i = 0; i < 6; i++) {
+      same += binary_search(a, a + N, b[i]);
+      if (b[i] == bonus)
+        bon = true;
+    }
+    if (same == 6)
+      cout << "First Parking slot";
+    else if (same == 5 && bon)
+      cout << "Second Parking slot";
+    else if (same == 5)
+      cout << "Third Parking slot";
+    else if (same == 4)
+      cout << "Fourth Parking slot";
+    else if (same == 3)
+      cout << "Fifth Parking slot";
+    else
+      cout << "No Parking slot";
+    cout << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  solve(1);
+}
+}
+
+int main() {
+  TPLOT::solve();
+  return 0;
+}

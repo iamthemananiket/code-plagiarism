@@ -1,0 +1,97 @@
+/*
+ * 2013 Codechef December Challenge
+ * Cube Cakes
+ * File:   CUBE.cpp
+ * Author: Andy Y.F. Huang
+ * Created on 2013-12-06, 5:16:55 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace CUBE {
+int sum[44][44][44];
+
+int get(int x1, int y1, int z1, int x2, int y2, int z2) {
+  return sum[x2][y2][z2] - sum[x1][y2][z2] - sum[x2][y1][z2] - sum[x2][y2][z1] + sum[x1][y1][z2]
+      + sum[x1][y2][z1] + sum[x2][y1][z1] - sum[x1][y1][z1];
+}
+
+void solve(int test_num) {
+  static char a[77777], b[77777];
+  int N, P;
+  scanf("%d %d", &N, &P);
+  scanf("%s %s", a, b);
+  memset(sum, 0, sizeof(sum));
+  for (int i = 0; i < N; i++)
+    for (int j = 0; j < N; j++)
+      for (int k = 0; k < N; k++)
+        if (a[i * N * N + j * N + k] == b[i * N * N + j * N + k])
+          sum[i + 1][j + 1][k + 1] = 1;
+  for (int i = 1; i <= N; i++)
+    for (int j = 1; j <= N; j++)
+      for (int k = 1; k <= N; k++)
+        sum[i][j][k] += sum[i - 1][j][k] + sum[i][j - 1][k] + sum[i][j][k - 1]
+            - sum[i - 1][j - 1][k] - sum[i - 1][j][k - 1] - sum[i][j - 1][k - 1]
+            + sum[i - 1][j - 1][k - 1];
+  for (int s = N; s > 0; s--) {
+    int cnt = 0;
+    for (int i = s; i <= N; i++)
+      for (int j = s; j <= N; j++)
+        for (int k = s; k <= N; k++)
+          if (100 * get(i - s, j - s, k - s, i, j, k) >= P * s * s * s)
+            cnt++;
+    if (cnt > 0) {
+      printf("%d %d\n", s, cnt);
+      return;
+    }
+  }
+  puts("-1");
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  CUBE::solve();
+  return 0;
+}

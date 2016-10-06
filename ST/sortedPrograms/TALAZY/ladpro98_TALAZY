@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    int ntest;
+    cin >> ntest;
+    while (ntest--) {
+        long long n, b, m;
+        cin >> n >> b >> m;
+        long long ans = 0;
+        while (n > 0) {
+            long long mid = (n + 1) / 2;
+            ans += m * mid;
+            n -= mid;
+            m *= 2;
+            if (n > 0) {
+                ans += b;
+            }
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}

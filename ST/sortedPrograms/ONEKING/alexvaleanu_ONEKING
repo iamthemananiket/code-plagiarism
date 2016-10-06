@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 1e5 + 1;
+
+pair<int,int> v[Nmax];
+int T, N;
+
+int cmp( const pair<int,int> &a, const pair<int,int> &b )
+{
+    return a.first < b.first;
+}
+
+int main()
+{
+    ios_base::sync_with_stdio( false );
+
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> N;
+
+        for ( int i = 1; i <= N; ++i )
+            cin >> v[i].first >> v[i].second;
+
+        sort( v + 1, v + N + 1, cmp );
+
+        int bombe = 1;
+        pair<int,int> interval = v[1];
+
+        for ( int i = 2; i <= N; ++i )
+        {
+            if ( v[i].first <= interval.second )
+            {
+                interval.first = v[i].first;
+                interval.second = min( interval.second, v[i].second );
+            }
+            else
+            {
+                bombe++;
+                interval = v[i];
+            }
+        }
+
+        cout << bombe << "\n";
+    }
+
+    return 0;
+}

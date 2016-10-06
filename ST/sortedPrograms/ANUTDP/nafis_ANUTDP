@@ -1,0 +1,121 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     A.begin(), A.end()
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+int fib[40];
+LL mx = (1e8) + 7;
+vector < int > vc;
+set < int > s;
+vector < int > vvc[40000];
+int cnt = 1;
+map < int, int > mm;
+void go(int c, int l, LL v, vector < int > vv){
+    if(v > mx) return;
+    if(s.count(v) == 0) {
+        s.insert(v);
+        mm[v] = cnt;
+        vvc[cnt++] = vv;
+    }
+    if(c > l) return;
+    go(c + 1, l, v, vv);
+    vv.pb(c);
+    go(c, l, v*fib[c], vv);
+}
+void print(int c){
+    if(c == 0){
+        printf("#");
+        return;
+    }
+    if(c == 1){
+        printf("..");
+        return;
+    }
+    int a = mm[c];
+    REP(i, vvc[a].size()){
+        if(i) printf("#");
+        REP(j, vvc[a][i]){
+            printf(".");
+        }
+    }
+}
+int main() {
+//    ios_base::sync_with_stdio(0); cin.tie(0);
+    int a = 0,b,c,d = 0,e,f = 0,g,h = 0,x,y,z = 0;
+    fib[1] = 1; fib[0] = 0;
+    FOR(i, 2, 40){
+        fib[i] = fib[i - 1] + fib[i - 2];
+    }
+    s.insert(1);
+    vector < int > v;
+    go(3, 39, 1, v);
+    vc.pb(0);
+    while(s.size() > 0){
+        vc.pb((*s.begin()));
+        s.erase(s.begin());
+    }
+    scanf("%d", &a);
+    while(a--){
+        scanf("%d %d %d", &b, &c, &d);
+        x = lower_bound(vc.begin(), vc.end(), b) - vc.begin();
+        y = upper_bound(vc.begin(), vc.end(), c) - vc.begin();
+        if(x == vc.size()){
+            puts("-1");
+            continue;
+        }
+        if(y - x < d){
+            puts("-1");
+            continue;
+        }
+        e = vc[x + d - 1];
+        printf("%d ", e);
+        print(e);
+        puts("");
+    }
+}
+/*
+1
+100000000 100000000 1
+*/

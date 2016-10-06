@@ -1,0 +1,78 @@
+//Program: c
+//Author: gary
+//Date: 28/09/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+#include <ext/rope>
+using namespace __gnu_cxx;
+
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+
+int N, M, T;
+int S[MAX_N];
+rope<int> A;
+int tmp[MAX_N];
+bool calced;
+void calcS(){
+  for(int i = 1; i < N; i++) {
+    S[i] = S[i - 1] + (A[i] != A[i - 1]);
+  }
+  calced = true;
+}
+int query(int l, int r){
+  if(!calced) calcS();
+  return S[r] - S[l] + 1;
+}
+void update(int l, int r){
+  rope <int> cur = A.substr(l, r - l + 1);
+  A.erase(l, r - l + 1);
+  A.insert(A.mutable_begin(), cur);
+  calced = false;
+}
+
+int main(){
+  int x;
+  scanf("%d", &T);
+
+  while(T--){
+    A.clear();
+    scanf("%d", &N);
+    for(int i = 0; i < N; i++){
+      scanf("%d", &x);
+      A.push_back(x);
+    }
+    calced = false;
+    scanf("%d", &M);
+    for(int i = 0; i < M; i++){
+      int qt, l, r;
+      scanf("%d%d%d", &qt, &l, &r);
+      l--, r--;
+      if(qt == 1){
+	printf("%d\n", query(l, r));
+      } else {
+	update(l, r);
+      }
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int SZ=337;
+int N, Q, K;
+int A[100001];
+long long ans[100000];
+
+struct datum
+{
+    int l, r, i;
+    bool operator< (const datum& other) const
+    {
+        return make_pair(l/SZ, r)<make_pair(other.l/SZ, other.r);
+    }
+} B[100000];
+
+int bit[100001];
+
+void add(int x, int v)
+{
+    for(; x<=100000; x+=x&-x)
+        bit[x]+=v;
+}
+
+int sum(int x)
+{
+    int ret=0;
+    for(; x>0; x-=x&-x)
+        ret+=bit[x];
+    return ret;
+}
+
+int sum(int l, int r)
+{
+    l=max(l, 1);
+    r=min(r, 100000);
+    if(l>r)
+        return 0;
+    return sum(r)-sum(l-1);
+}
+
+int main()
+{
+    scanf("%d%d%d", &N, &Q, &K);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    for(int i=0; i<Q; i++)
+        scanf("%d%d", &B[i].l, &B[i].r), B[i].i=i;
+    sort(B, B+Q);
+    int l=1, r=0;
+    int pre=-1;
+    long long rans=0;
+    for(int i=0; i<Q; i++)
+    {
+        if(B[i].l/SZ!=pre)
+        {
+            rans=0;
+            l=r=B[i].l;
+            memset(bit, 0, sizeof bit);
+            add(A[l], 1);
+            pre=B[i].l/SZ;
+        }
+        while(l<B[i].l)
+        {
+            add(A[l], -1);
+            rans-=sum(A[l]-K, A[l]+K);
+            l++;
+        }
+        while(l>B[i].l)
+        {
+            l--;
+            rans+=sum(A[l]-K, A[l]+K);
+            add(A[l], 1);
+        }
+        while(r<B[i].r)
+        {
+            r++;
+            rans+=sum(A[r]-K, A[r]+K);
+            add(A[r], 1);
+        }
+        ans[B[i].i]=rans;
+    }
+    for(int i=0; i<Q; i++)
+        printf("%lld\n", ans[i]);
+    return 0;
+}

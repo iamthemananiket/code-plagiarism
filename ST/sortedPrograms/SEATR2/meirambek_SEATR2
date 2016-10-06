@@ -1,0 +1,108 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 521;
+const int mod = inf + 7;
+ll d[N][20100];
+int n, k;
+vector <int> a[N];
+int sum[20200];
+
+vector <int> del[20010];
+
+void dfs(int v, int p = 0) {
+	bool child = 1;
+	for (int i = 0; i < (int)a[v].size(); ++ i) {
+		int to = a[v][i];
+		if (to != p) {
+			child = 0;
+			dfs(to, v);
+		}
+	}
+	for (int i = 1; i <= k; ++ i) d[v][i] = 1;
+
+	if (child) return;
+
+	for (int i = 0; i < (int)a[v].size(); ++ i) {
+		int to = a[v][i];
+		if (to == p) continue;
+		for (int j = 1; j <= k; ++ j) sum[j] = 0;
+		for (int j = 1; j <= k; ++ j) {
+			for (int ss = 0; ss < (int)del[j].size(); ++ ss) {
+				sum[del[j][ss]] += d[to][j];
+				if (sum[del[j][ss]] >= mod) sum[del[j][ss]] -= mod;
+			}
+		}
+		for (int j = 1; j <= k; ++ j) {
+			d[v][j] = (d[v][j] * sum[j]) % mod;
+		}
+	}
+}
+
+void solve() {
+	scanf("%d%d", &n, &k);
+	for (int i = 1; i < n; ++ i) {
+		int x, y;
+		scanf("%d%d", &x, &y);
+		a[x].pb(y);
+		a[y].pb(x);
+	}
+	dfs(1);
+	ll ans = 0;
+	for (int i = 1; i <= k; ++ i) {
+		ans += d[1][i];
+		if (ans >= mod) ans -= mod;
+	}
+	printf("%lld\n", ans);
+	for (int i = 1; i <= n; ++ i) a[i].clear();
+}
+
+int main() {
+	#ifndef ONLINE_JUDGE
+	freopen("in", "r", stdin);
+	freopen("out", "w", stdout);
+	#endif
+
+	for (int i = 1; i <= 20000; ++ i) {
+		int bl = (int)sqrt(i + .0);
+		for (int j = 1; j <= bl; ++ j) {
+			if (i % j == 0) {
+				del[i].pb(j);
+				if (i / j != j) del[i].pb(i / j);
+			}
+		}
+	}
+
+	int test;
+
+	scanf("%d", &test);
+
+	while(test--) solve();
+
+	return 0;
+}

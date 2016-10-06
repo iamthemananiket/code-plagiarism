@@ -1,0 +1,89 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll, int> pii;
+
+const int MAX_K = 8;
+const int MAX_N = 21;
+
+int n, k;
+ll x;
+ll a[MAX_N];
+bool used[MAX_K + 1][1 << MAX_N];
+
+bool dfs(int k, int S) {
+  if (x == 0) {
+    return n >= k;
+  }
+  if (used[k][S]) return false;
+  used[k][S] = true;
+  if (k == 0) {
+    return S == (1 << n) - 1;
+  } else {
+    ll s = 0;
+    for (int i = 0; i < n; i++) {
+      if (S & (1 << i)) s += a[i];
+    }
+    s %= x;
+    for (int i = 0; i < n; i++) {
+      if (!(S & (1 << i))) {
+        int T = S | (1 << i);
+        ll t = s + a[i];
+        if (t == x) {
+          if (dfs(k - 1, T)) return true;
+        } else if (t < x) {
+          if (dfs(k, T)) return true;
+        }
+      }
+    }
+    return false;
+  }
+}
+
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> n >> k;
+    map<ll, int, greater<ll>> ct;
+    x = 0;
+    for (int i = 0; i < n; i++) {
+      cin >> a[i];
+      x += a[i];
+    }
+    memset(used, 0, sizeof(used));
+    if (x % k != 0) {
+      cout << "no" << endl;
+    } else {
+      x /= k;
+      cout << (dfs(k, 0) ? "yes" : "no") << endl;
+    }
+  }
+}

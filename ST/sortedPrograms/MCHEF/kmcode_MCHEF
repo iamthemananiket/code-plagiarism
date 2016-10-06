@@ -1,0 +1,116 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+#define MAX 100002
+int t;
+long long int a[MAX];
+vector < pair<int, long long int> > v;
+vector<int> e[MAX];
+long long int cost[MAX];
+long long int dp[MAX][502];
+int use[MAX][502];
+int u_s = 0;
+int main(){
+	scanf("%d", &t);
+	while (t--){
+		int n, k, m;
+		scanf("%d%d%d", &n, &k, &m);
+		long long int sum = 0;
+		for (int i = 0; i < n; i++){
+			scanf("%lld", &a[i]);
+			e[i].clear();
+			cost[i] = LLONG_MAX;
+			sum += a[i];
+		}
+		v.clear();
+		for (int i = 0; i < m; i++){
+			int a, b;
+			scanf("%d%d", &a, &b);
+			int c;
+			scanf("%d", &c);
+			a--;
+			b--;
+			e[a].push_back(i);
+			v.push_back(make_pair(b, c));
+		}
+		priority_queue<pair<long long int, int> > q;
+		for (int i = 0; i < n; i++){
+			for (int j = 0; j < e[i].size(); j++){
+				int &id = e[i][j];
+				q.push(make_pair(-v[id].second, id));
+			}
+			while (!q.empty()){
+				int id = q.top().second;
+				if (v[id].first < i){
+					q.pop();
+				}
+				else{
+					cost[i] = -q.top().first;
+					break;
+				}
+			}
+		}
+		u_s++;
+		use[0][0] = u_s;
+		dp[0][0] = 0;
+		for (int i = 0; i < n; i++){
+			for (int j = 0; j <= k; j++){
+				if (use[i][j] != u_s){
+					continue;
+				}
+				if (use[i + 1][j] != u_s){
+					use[i + 1][j] = u_s;
+					dp[i + 1][j] = 0;
+				}
+				dp[i + 1][j] = max(dp[i + 1][j], dp[i][j]);
+				if (cost[i] == LLONG_MAX){
+					continue;
+				}
+				if (a[i] < 0LL){
+					long long int val = abs(a[i]);
+					int jj = j + cost[i];
+					if (jj > k){
+						continue;
+					}
+					if (use[i + 1][jj] != u_s){
+						use[i + 1][jj] = u_s;
+						dp[i + 1][jj] = 0;
+					}
+					dp[i + 1][jj] = max(dp[i + 1][jj], dp[i][j] + val);
+				}
+			}
+		}
+		long long int mint = 0;
+		for (int i = 0; i <= k; i++){
+			if (use[n][i] == u_s){
+				mint = max(mint, dp[n][i]);
+			}
+		}
+		sum += mint;
+		printf("%lld\n", sum);
+	}
+	return 0;
+}

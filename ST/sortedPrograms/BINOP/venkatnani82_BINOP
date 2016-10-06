@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+    int test;
+    cin >> test;
+    while(test--) {
+        string a, b;
+        cin >> a >> b;
+        int cnt[2];
+        cnt[0] = cnt[1] = 0;
+        for(int i = 0; i < int(a.length()); i++) cnt[a[i] - '0']++;
+        if(cnt[0] == 0 || cnt[1] == 0) {
+            printf("Unlucky Chef\n");
+            continue;
+        }
+        cnt[0] = cnt[1] = 0;
+        for(int i = 0; i < int(a.length()); i++) {
+            if(a[i] == b[i]) continue;
+            cnt[a[i] - '0']++;
+        }
+        printf("Lucky Chef\n%d\n", max(cnt[0], cnt[1]));
+    }
+}

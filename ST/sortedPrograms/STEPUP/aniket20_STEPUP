@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+using namespace std;
+vector<int>adj[10001];
+queue<int>q;
+int marked[10001];
+int main()
+{
+	int t,n,m,i,j,x,y;
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d %d",&n,&m);
+		for(i=0;i<m;i++)
+		{
+			scanf("%d %d",&x,&y);
+			adj[x].push_back(y);
+		}
+		for(i=0;i<=n;i++)
+		{
+			marked[i]=-1;
+		}
+		int c=0;
+		int fl=0;
+		int ans=0;
+		for(j=1;j<=n;j++)
+		{
+			c=0;
+			if(marked[j]==-1)
+			{
+				q.push(j);
+				marked[j]=1;
+				c=1;
+				while(!q.empty())
+				{
+					int t=q.front();
+					q.pop();
+					for(i=0;i<adj[t].size();i++)
+					{
+						if(marked[adj[t][i]]<marked[t] && marked[adj[t][i]]!=-1)
+						{
+							printf("IMPOSSIBLE\n");
+							fl=1;
+							break;
+						}
+						else
+						{
+							q.push(adj[t][i]);
+							marked[adj[t][i]]=marked[t]+1;
+							if(marked[adj[t][i]]>c)
+							{
+								c=marked[adj[t][i]];
+							}
+						//	cout<<c<<" ";
+						}
+					}
+					if(fl==1)
+					{
+						break;
+					}
+				}
+			}
+			if(ans<c && fl==0)
+			{
+				ans=c;
+			}
+			else
+			{
+				break;
+			}
+		}
+		if(fl==0)
+		{
+			printf("%d\n",ans);
+		}
+		for(i=1;i<=n;i++)
+		{
+			adj[i].clear();
+		}
+		while(!q.empty())
+		{
+			q.pop();
+		}
+	}
+	return 0;
+}

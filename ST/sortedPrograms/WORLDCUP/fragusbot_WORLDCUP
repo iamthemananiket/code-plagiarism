@@ -1,0 +1,64 @@
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+
+using namespace std;
+
+const int mod = 1e9 + 7;
+const int N = 333;
+
+int fac[N];
+int inv[N];
+
+int pw(int x, int n) {
+  int res = 1;
+  while (n > 0) {
+    if (n & 1) {
+      res = 1LL * res * x % mod;
+    }
+    x = 1LL * x * x % mod;
+    n >>= 1;
+  }
+  return res;
+}
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  fac[0] = 1;
+  inv[0] = 1;
+  for (int i = 1; i < N; ++i) {
+    fac[i] = 1LL * fac[i - 1] * i % mod;
+    inv[i] = pw(fac[i], mod - 2);
+  }
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int R, B, L;
+    scanf("%d %d %d", &R, &B, &L);
+    int ans = 0;
+    for (int q = 0; q <= B; ++q) {
+      if ((R - 6 * q) >= 0 && (R - 6 * q) % 4 == 0) {
+        int p = (R - 6 * q) / 4;
+        if (q + p <= B) {
+          for (int w = 0; w <= L && q + p + w <= B; ++w) {
+            int z = B - (q + p + w);
+            ans += 1LL * fac[B] * inv[q] % mod * inv[p] % mod * inv[w] % mod * inv[z] % mod;
+            if (ans >= mod) {
+              ans -= mod;
+            }
+          }
+        }
+      }
+    }
+    printf("%d\n", ans);
+  }
+  return 0;
+}

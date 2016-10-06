@@ -1,0 +1,76 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+const int N = 1e4, M = N + 121;
+char prime[M];
+vector<int> pr;
+int a[N+1];
+
+ int main()
+ {
+    fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+      for(int i=3;i<=N;i+=2)
+        prime[i] = 1;
+
+      pr.pb(2);
+       for(int i=3;i<=N;i+=2)
+        if(prime[i])
+       {
+            for(int j=i * i;j<=N;j+=i)
+                prime[j] = 0;
+            pr.pb(i);
+       }
+
+      // cout<<pr.size()<<endl;
+
+      int t;
+       cin>>t;
+        while(t--)
+        {
+            int n;
+            cin>>n;
+             for(int i=1;i<=n;++i) cin>>a[i];
+             int mn = 2e9;
+              for(int i=0;i<pr.size();++i)
+              {
+                  int md = pr[i],ans = 0, last = 0;
+                   for(int j=1;j<=n;++j)
+                   {
+                     if(last>a[j]) ans+=last - a[j]; else
+                     {
+                         if(a[j] % md ==0) last = a[j]; else{
+                         int ost = md - (a[j] % md);
+                         ans+=ost;
+                         last = a[j] + ost;
+                         }
+                     }
+                   }
+                   mn = min(mn,ans);
+              }
+              cout<<mn<<endl;
+        }
+
+ }

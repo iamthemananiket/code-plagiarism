@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 1000010
+ 
+int N, idx, n, Q;
+int H[M], sz[M], to[M], head[M], nxt[M], pa[M], dp[M], top[M], pos[M];
+ 
+void AddEdge(int x, int y) {
+  ++N; to[N] = y; nxt[N] = head[x]; head[x] = N;
+}
+ 
+void read(int &x) {
+  x = 0;
+  char c = getchar();
+  while (c < '0' || c > '9') c = getchar();
+  while (c <= '9' && c >= '0') x = 10 * x + c - '0', c = getchar();
+}
+ 
+int dt[M], ft[M], T, f[M], g[M];
+ 
+int cnt[M];
+ 
+int calc(int x) {
+  int rlt = 0;
+  while (x) {
+    rlt += f[x]; x -= (x & -x);
+  }
+  return rlt;
+}
+ 
+void upd(int x, int val) {
+  while (x <= T) {
+    f[x] += val; x += (x & -x);
+  }
+}
+ 
+void init() {
+  idx = 0; N = 0;
+  for (int i = 1; i <= n; i++) head[i] = 0, sz[i] = 0, pa[i] = 0;
+}
+ 
+void dfs(int x, int fa) {
+  sz[x] = 1; dt[x] = ++T;
+  for (int i = head[x]; i; i = nxt[i]) {
+    int u = to[i];
+    if (u == fa) continue;
+    pa[u] = x; dp[u] = dp[x] + 1;
+    dfs(u, x); sz[x] += sz[u];
+    if (sz[H[x]] < sz[u]) H[x] = u;
+  }
+  ft[x] = T;
+}
+ 
+void rebuild(int x, int I) {
+  top[x] = I; pos[x] = ++idx;
+  if (H[x]) rebuild(H[x], I);
+  for (int i = head[x]; i; i = nxt[i]) {
+    int u = to[i];
+    if (u != H[x] && u != pa[x]) rebuild(u, u);
+  }
+}
+ 
+void Build() {
+  dfs(1, 0);
+  rebuild(1, 1);
+}
+ 
+int LCA(int x, int y) {
+  while (top[x] != top[y]) {
+    if (dp[top[x]] > dp[top[y]]) x = pa[top[x]];
+    else y = pa[top[y]];
+  }
+  if (dp[x] > dp[y]) swap(x, y);
+  return x;
+}
+ 
+int get(int x) {
+  int rlt = 0;
+  while (x) {rlt += g[x]; x -= (x & -x);}
+  return rlt;
+}
+ 
+void add(int x, int val) {
+  while (x <= n) {g[x] += val; x += (x & -x);}
+}
+ 
+void update(int x, int y) {
+  while (top[x] != top[y]) {
+    if (dp[top[x]] > dp[top[y]]) {
+      add(pos[top[x]], 1); add(pos[x] + 1, -1); x = pa[top[x]];
+    }
+    else {
+      add(pos[top[y]], 1); add(pos[y] + 1, -1); y = pa[top[y]];
+    }
+  }
+  if (dp[x] > dp[y]) swap(x, y);
+  if (x != y) add(pos[x] + 1, 1), add(pos[y] + 1, -1);
+}
+ 
+int main() {
+  int x, y;
+  //freopen("in.txt", "r", stdin);
+  scanf("%d", &n);
+  for (int i = 0; i < n - 1; i++) {
+    read(x); read(y);
+    AddEdge(x, y); AddEdge(y, x);
+  }
+  Build();
+  read(Q);
+  while (Q--) {
+    scanf("%d %d", &x, &y);
+    int z = LCA(x, y);
+    int rlt = 0;
+    rlt += calc(dt[x]) - calc(dt[z]);
+    rlt += calc(dt[y]) - calc(dt[z]);
+    rlt += cnt[z];
+    printf("%d\n", rlt + get(pos[z]));
+    cnt[z]++;
+    upd(dt[z], 1);
+    upd(ft[z] + 1, -1);
+    update(x, y);
+  }
+}

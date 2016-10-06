@@ -1,0 +1,128 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+struct st{
+	st *linkk[2];
+	int countt = 0;
+	st(){
+		linkk[0] = linkk[1] = NULL;
+	}
+};
+
+st linkk[2000000];
+int ord = 0;
+#define M 40
+st *neww(){
+	ord++;
+	if (ord >= 2000000){
+		return new st();
+	}
+	return &linkk[ord - 1];
+}
+
+void insert(st *root,long long int val){
+	st *b = root;
+	b->countt++;
+	for (int i = M; i >= 0; i--){
+		long long int ne = ((val >> i) & 1);
+		if (b->linkk[ne] == NULL){
+			b->linkk[ne] = neww();
+		}
+		b = b->linkk[ne];
+		b->countt++;
+	}
+}
+long long int fi(st *root,long long int val){
+	long long int r = 0;
+	st *b = root;
+	for (int i = M; i >= 0; i--){
+		int ne = ((val >> i) & 1);
+		ne ^= 1;
+		if (b->linkk[ne] == NULL){
+			ne ^= 1;
+		}
+		if (b->linkk[ne]->countt == 0){
+			ne ^= 1;
+		}
+		r |= (ne << i);
+		b = b->linkk[ne];
+	}
+	return r;
+}
+void er(st *root,long long int val){
+	st *b = root;
+	b->countt--;
+	for (int i = M; i >= 0; i--){
+		long long int ne = ((val >> i) & 1);
+		b = b->linkk[ne];
+		b->countt--;
+	}
+}
+int t;
+
+int n;
+
+#define MAX 100002
+int val[MAX];
+
+vector<int> v[MAX];
+vector<int> vv[MAX];
+
+int ans[MAX];
+
+st roots[MAX];
+
+inline void dfs(int b,int pr=-1,int sum=0){
+	ans[b] = val[b];
+	vv[b].clear();
+	sum ^= val[b];
+	insert(&roots[b], sum);
+	vv[b].push_back(sum);
+	for (int i = 0; i < v[b].size(); i++){
+		if (v[b][i] == pr)continue;
+		dfs(v[b][i],b,sum);
+		if (vv[b].size() < vv[v[b][i]].size()){
+			swap(vv[b], vv[v[b][i]]);
+			swap(roots[b], roots[v[b][i]]);
+		}
+		int siz = vv[v[b][i]].size();
+		for (int ii = 0; ii < siz; ii++){
+			ans[b] = max((long long int)ans[b], fi(&roots[b], vv[v[b][i]][ii] ^ val[b]) ^ vv[v[b][i]][ii] ^ val[b]);
+		}
+		ans[b] = max(ans[b], ans[v[b][i]]);
+		for (int ii = 0; ii < siz; ii++){
+			insert(&roots[b], vv[v[b][i]][ii]);
+			vv[b].push_back(vv[v[b][i]][ii]);
+		}
+	}
+}
+int main(){
+	cin >> t;
+	while (t--){
+		cin >> n;
+		for (int i = 0; i < n; i++){
+			int a;
+			scanf("%d", &a);
+			val[i] = a;
+		}
+		for (int i = 0; i < n; i++){
+			v[i].clear();
+			vv[i].clear();
+			roots[i] = *neww();
+		}
+		for (int i = 1; i < n; i++){
+			int u, vv;
+			scanf("%d%d", &u, &vv);
+			u--;
+			vv--;
+			v[u].push_back(vv);
+			v[vv].push_back(u);
+		}
+		dfs(0);
+		for (int i = 0; i < n; i++){
+			printf("%d\n", ans[i]);
+		}
+	}
+	return 0;
+}

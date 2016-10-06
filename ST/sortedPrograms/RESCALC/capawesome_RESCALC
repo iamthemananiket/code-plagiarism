@@ -1,0 +1,89 @@
+# include <cstdio>
+# include <algorithm>
+
+using namespace std;
+
+const int MAX_N = 1e2 + 10;
+
+int n;
+int c;
+int type;
+
+int ans, idx, fl;
+
+int cnt[6];
+
+void solve ()
+{
+    ans = -1;
+    idx = -1;
+    fl = 0;
+    int i, j, crr;
+    scanf ("%d", &n);
+    for (i = 1; i <= n; i ++)
+    {
+        for (j = 0; j < 6; j ++)
+            cnt[j] = 0;
+        crr = 0;
+        scanf ("%d", &c);
+        crr += c;
+        for (j = 0; j < c; j ++)
+        {
+            scanf ("%d", &type);
+            type --;
+            cnt[type] ++;
+        }
+        while (1)
+        {
+            sort (cnt, cnt + 6);
+            if (cnt[0])
+            {
+                for (j = 0; j < 6; j ++)
+                    cnt[j] --;
+                crr += 4;
+                continue;
+            }
+            if (cnt[1])
+            {
+                for (j = 1; j < 6; j ++)
+                    cnt[j] --;
+                crr += 2;
+                continue;
+            }
+            if (cnt[2])
+            {
+                for (j = 2; j < 6; j ++)
+                    cnt[j] --;
+                crr += 1;
+                continue;
+            }
+            break;
+        }
+        if (crr == ans)
+            fl = 1;
+        if (crr > ans)
+        {
+            ans = crr;
+            idx = i;
+            fl = 0;
+        }
+    }
+    if (fl)
+        printf ("tie\n");
+    else
+    {
+        if (idx == 1)
+            printf ("chef\n");
+        else
+            printf ("%d\n", idx);
+    }
+}
+
+int main ()
+{
+    int t;
+    scanf ("%d", &t);
+    while (t --)
+        solve ();
+    return 0;
+}

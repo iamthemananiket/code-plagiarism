@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <bitset>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define travel(x) for(edge *p=fir[x]; p; p=p->n)
+#define all(x) (x).begin,(x).end
+#define pb push_back
+#define fi first
+#define se second
+#define l(x) Left[x]
+#define r(x) Right[x]
+#define lowbit(x) (x&-x)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> Pii;
+typedef long double ld;
+typedef unsigned long long ull;
+
+inline int read()
+{
+    int x=0; bool f=0; char ch=getchar();
+    while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+    while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+    return f?-x:x;
+}
+
+#define maxn 1000009
+
+int g[maxn], k[maxn], c[maxn], p[maxn]; bool b[maxn];
+
+vector<int>val[maxn];
+
+inline int Get(int x, int c){return val[c][x%p[c+1]/p[c]];}
+
+int main()
+{
+	int t=read(); while (t--)
+	{
+		int n=read(), sum=0;
+		rep(i, 1, n)
+		{
+			g[i]=read(); sum+=g[i]; val[i].pb(-1);
+			rep(j, 1, g[i]) val[i].pb(read());
+		}
+		p[1]=1; rep(i, 1, n) p[i+1]=p[i]*(g[i]+1);
+		rep(i, 1, sum) k[i]=read();
+		queue<int>q; clr(b,0); clr(c,0); q.push(p[n+1]-1); b[p[n+1]-1]=1;
+		while (!q.empty())
+		{
+			int x=q.front(); q.pop();
+			rep(i, 1, n) if (Get(x,i)==k[c[x]+1] && !b[x-p[i]])
+				b[x-p[i]]=1, c[x-p[i]]=c[x]+1, q.push(x-p[i]);
+		}
+		if (b[0]) puts("Yes"); else puts("No");
+		rep(i, 1, n) val[i].clear();
+	}
+	
+    return 0;
+}

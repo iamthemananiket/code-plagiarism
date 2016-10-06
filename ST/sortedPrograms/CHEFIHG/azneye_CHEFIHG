@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+
+const int DR[4] = {-1, 1, 0, 0};
+const int DC[4] = {0, 0, 1, -1};
+const string DIR = "UDRL";
+bool was[22][22];
+int pred[22][22];
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int R, C;
+  cin >> R >> C;
+  vector<string> grid(R);
+  for(auto& row : grid)
+    cin >> row;
+  string res;
+  vector<pair<int,int>> robots;
+  int er, ec;
+  for(int r=0;r<R;++r){
+    for(int c=0;c<C;++c){
+      if(grid[r][c]=='.'){
+        robots.push_back({r,c});
+      } else if (grid[r][c] == 'C') {
+        er=r;
+        ec=c;
+      }
+    }
+  }
+  for(int i=0;i<(int)robots.size();++i) {
+    queue<pair<int,int>> que;
+    memset(was,false,sizeof(was));
+    memset(pred,-1,sizeof(pred));
+    que.push({robots[i].first, robots[i].second});
+    was[robots[i].first][robots[i].second] = true;
+    while (true) {
+      int r,c;
+      tie(r,c)=que.front();
+      que.pop();
+      if(r==er&&c==ec) {
+        break;
+      }
+      for(int d=0;d<4;++d) {
+        const int nr = r+DR[d],nc=c+DC[d];
+        if(grid[nr][nc] != '*' && !was[nr][nc]) {
+          was[nr][nc] = true;
+          pred[nr][nc] = d;
+          que.push({nr,nc});
+        }
+      }
+    }
+    vector<int> now;
+    for(int r=er,c=ec; ~pred[r][c];) {
+      const int dir = pred[r][c];
+      now.push_back(dir);
+      r -= DR[dir];
+      c -= DC[dir];
+    }
+    reverse(now.begin(), now.end());
+    for(int dir : now) {
+      res += DIR[dir];
+      for(auto& r : robots) {
+        const int nr = r.first + DR[dir];
+        const int nc = r.second + DC[dir];
+        if(grid[nr][nc] != '*') {
+          r = {nr, nc};
+        }
+      }
+    }
+  }
+  cout << res << endl;
+  return 0;
+}

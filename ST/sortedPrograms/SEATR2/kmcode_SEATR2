@@ -1,0 +1,134 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_map>
+#include<unordered_set>
+using namespace std;
+template<unsigned MOD>
+struct ModInt {
+	unsigned x;
+	ModInt() : x(0) { }
+	ModInt(signed sig) { if ((x = sig % MOD + MOD) >= MOD) x -= MOD; }
+	unsigned get() const { return x; }
+
+	ModInt &operator+=(ModInt that) { if ((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % MOD; return *this; }
+
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+};
+typedef ModInt<1000000007> mint;
+int t;
+#define MAX 502
+vector<int> v[MAX];
+int per[MAX];
+bool use[MAX];
+int dep[MAX];
+short int ind[MAX];
+mint dp[502][20002];
+bool cmp(short int a, short int b) {
+	return dep[a] > dep[b];
+}
+vector<int> V[20002];
+short int V_siz[20002];
+mint tmp[20002];
+int main() {
+	scanf("%d", &t);
+	for (int i = 1;i <= 20000;i++) {
+		for (int j = 1;;j ++) {
+			if (j*i <= 20000) {
+				V[j*i].push_back(i);
+			}
+			else {
+				break;
+			}
+		}
+	}
+	for (int i = 1;i <= 20000;i++) {
+		V_siz[i] = V[i].size();
+	}
+	while (t--) {
+		int n,m;
+		scanf("%d%d", &n,&m);
+		for (int i = 0;i < n;i++) {
+			use[i] = false;
+			v[i].clear();
+			ind[i] = i;
+		}
+		for (int i = 1;i < n;i++) {
+			int a, b;
+			scanf("%d%d", &a, &b);
+			a--;
+			b--;
+			v[a].push_back(b);
+			v[b].push_back(a);
+		}
+		
+		queue<int> q;
+		q.push(0);
+		dep[0] = 0;
+		for (int i = 0;i < n;i++) {
+			for (int j = 1;j <= m;j++) {
+				dp[i][j] = 1;
+			}
+		}
+		use[0] = true;
+		while (!q.empty()) {
+			int b = q.front();
+			q.pop();
+			for (int i = 0;i < v[b].size();i++) {
+				if (use[v[b][i]] == false) {
+					use[v[b][i]] = true;
+					dep[v[b][i]] = dep[b] + 1;
+					per[v[b][i]] = b;
+					q.push(v[b][i]);
+				}
+			}
+		}
+		sort(ind, ind + n, cmp);
+		n--;
+		for (short int j = m;j >= 1;j--) {
+			tmp[j] = 0;
+		}
+		for (short int i = 0;i < n;i++) {
+			short int &a = ind[i];
+			for (short int j = m;j >= 1;j--) {
+				for (short int k = 0;k < V_siz[j];k++) {
+					tmp[V[j][k]] += dp[a][j];
+				}
+			}
+			for (short int j = m;j >= 1;j--) {
+				dp[per[a]][j] *= tmp[j];
+				tmp[j] = 0;
+			}
+		}
+		mint ans = 0;
+		for (int i = 1;i <= m;i++) {
+			ans += dp[0][i];
+		}
+		printf("%d\n", ans.get());
+	}
+	return 0;
+}

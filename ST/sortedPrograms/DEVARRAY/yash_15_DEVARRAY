@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+	int minV  = 1000000009, maxV = -1;
+	int n,q,i,v;
+	cin >> n >> q;
+	for(i=0;i<n;i++){
+		scanf("%d",&v);
+		minV= min (minV, v);
+		maxV= max (maxV, v);
+	}
+	while(q--){
+		scanf("%d",&v);
+		puts((minV<=v && maxV>=v)?"Yes":"No");
+	}
+	return 0;
+}

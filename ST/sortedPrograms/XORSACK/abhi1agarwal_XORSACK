@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+int A[211];
+int n,k;
+void disp(int);
+int gaus(int x)
+{
+	int i,j,p=0;
+	//disp(x);
+	for (i=31;i>=0;i--)
+	{
+		for (j=p;j<x;j++)
+		{
+			if (A[j]&(1<<i))
+				break;
+		}
+		if (j>=x)
+		continue;
+		if (j!=p)
+			swap(A[p],A[j]);
+		//disp(x);
+		for (j=p+1;j<x;j++)
+		{
+		/*
+			if(j!=p&&((A[j]>>i)&(A[p]>>i)))
+				A[j]^=A[p];*/
+			if(j!=p&&(A[j]&(1<<i)))
+			{
+				A[j]^=A[p];
+			}
+		}
+		p++;
+	}
+	for (i=x-1;i>=0;i--)
+	{
+		if (A[i]>0)
+			return i+1;
+	}
+	return 0;
+}
+void disp(int x)
+{
+	int i,j;
+	for (i=0;i<x;i++)
+	{
+		for (j=31;j>=0;j--)
+			printf("%d",(A[i]&(1<<j))>0?1:0);
+		printf("\n");	
+	}
+	printf("------\n");
+}
+int main()
+{
+	int i,j;
+	scanf("%d%d",&n,&k);
+	for (i=0;i<n;i++)
+	{
+		scanf("%d",&A[i]);
+	}
+	int r1=gaus(n);
+//	disp(n);
+	A[n]=k;
+	//disp(n+1);
+	int r2=gaus(n+1);
+	//disp(n+1);
+	if (r1==r2)
+		printf("Yes\n");
+	else printf("No\n");
+	return 0;
+}
+
+	

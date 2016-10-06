@@ -1,0 +1,11 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		long long n, m, z, l, r, b;
+		scanf("%lld %lld %lld %lld %lld %lld", &n, &m, &z, &l, &r, &b);
+		printf("%lld\n", z + l + r + min(n * m - z - l - r, min(min(b, (m + 1) / 2 * n), (n * m - l - r + n) / 2)));
+	}
+}

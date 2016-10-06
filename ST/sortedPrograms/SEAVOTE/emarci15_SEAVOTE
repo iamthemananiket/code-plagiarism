@@ -1,0 +1,34 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+
+int n;
+
+int ubound, lbound;
+
+int x;
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+        ubound = lbound = 0;
+
+        for(int i=0; i<n; i++) {
+            cin >> x;
+            if(!x) continue;
+            ubound += x;
+            lbound += x-1;
+        }
+
+        if((lbound < 100) && (100 <= ubound)) {
+            cout << "YES" << endl;
+        } else {
+            cout << "NO" << endl;
+        }
+    }
+
+    return 0;
+}

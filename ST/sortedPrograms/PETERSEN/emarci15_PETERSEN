@@ -1,0 +1,81 @@
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
+
+using namespace std;
+
+char s[100001];
+
+int T;
+
+int val(char c) {
+    return (c-'A');
+}
+
+bool szomszed(int a, int b) {
+    if(b>a) swap(a,b);
+    if((a<5) && (b>=5)) return (b == a+5);
+    if(a<5) {
+        return ((((a+1)%5) == b) || (((b+1)%5) == a));
+    } else {
+        return !((((a+1)%5) == b) || (((b+1)%5) == a));
+    }
+}
+
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("\n%s",&s[0]);
+        int emas = -1;
+        int len = 0;
+        for(int i=0; s[i] != '\0'; i++) {
+            len++;
+            s[i] = val(s[i]);
+            if((s[i] != s[0]) && (emas == -1)) {
+                emas = i;
+            }
+        }
+
+        if(emas == -1) {
+            for(int i=0; i<len; i++) {
+                printf("%d",s[i]+(i%2)*5);
+            }
+            printf("\n");
+            continue;
+        }
+
+        bool kint = (((s[emas]+1)%5) == s[0]) || (((s[0]+1)%5) == s[emas]);
+        bool kkezd = ((emas-1)%2);
+        kkezd = (kkezd ^ kint);
+
+        bool jo = 1;
+        bool bent = !kkezd;
+        for(int i=0; i<(len-1); i++) {
+            if(s[i+1] == s[i]) {
+                jo &= szomszed(s[i]+bent*5,s[i+1]+(!bent)*5);
+                bent = !bent;
+            } else {
+                jo &= szomszed(s[i]+bent*5,s[i+1]+bent*5);
+            }
+        }
+        if(!jo) {
+            printf("-1\n");
+            continue;
+        }
+        bent = !kkezd;
+        for(int i=0; i<(len-1); i++) {
+            if(s[i+1] == s[i]) {
+                printf("%d",s[i]+bent*5);
+                bent = !bent;
+            } else {
+                printf("%d",s[i]+bent*5);
+            }
+        }
+        printf("%d",s[len-1]+bent*5);
+        printf("\n");
+
+    }
+
+    return 0;
+}

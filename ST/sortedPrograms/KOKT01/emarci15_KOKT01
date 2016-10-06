@@ -1,0 +1,132 @@
+#include <cstdio>
+#include <algorithm>
+
+#define mp make_pair
+#define fi first
+#define se second
+
+using namespace std;
+
+int rnde;
+int rnd[100000];
+
+int n,q;
+int a[100000];
+
+struct Treap {
+    Treap *left, *right;
+    int num;
+    int pr;
+    int db;
+
+    Treap(int num): num(num) {
+        db = 1;
+        left = right = NULL;
+        pr = rnd[rnde++];
+    }
+};
+
+int tdb(Treap* tr) {
+    if(tr == NULL) return 0;
+    return tr->db;
+}
+int tpr(Treap* tr) {
+    if(tr == NULL) return -1;
+    return tr->pr;
+}
+
+void add(Treap* &tr, Treap* ntr) {
+    if(ntr->pr > tpr(tr)) {
+        ntr->left = tr;
+        ntr->db = tdb(tr)+1;
+        tr = ntr;
+    } else {
+        tr->db++;
+        add(tr->right,ntr);
+    }
+}
+
+Treap* unio(pair<Treap*,Treap*> t) {
+    if((t.fi == NULL) && (t.se == NULL)) return NULL;
+    if(tpr(t.fi) > tpr(t.se)) {
+        t.fi->right = unio(mp(t.fi->right,t.se));
+        t.fi->db = 1+tdb(t.fi->left)+tdb(t.fi->right);
+        return t.fi;
+    } else {
+        t.se->left = unio(mp(t.fi,t.se->left));
+        t.se->db = 1+tdb(t.se->left)+tdb(t.se->right);
+        return t.se;
+    }
+}
+
+pair<Treap*, Treap*> split(Treap* tr, int l) {
+    pair<Treap*, Treap*> ret(NULL,NULL);
+    if(tr == NULL) return ret;
+
+    if(tdb(tr->left) > l) {
+        ret = split(tr->left,l);
+        tr->left = ret.se;
+        tr->db = 1+tdb(tr->left)+tdb(tr->right);
+        return mp(ret.fi,tr);
+    } else if(tdb(tr->left) == l) {
+        ret.fi = tr->left;
+        ret.se = tr;
+        tr->left = NULL;
+        tr->db = 1+tdb(tr->left)+tdb(tr->right);
+        return ret;
+    } else {
+        ret = split(tr->right,(l-1)-tdb(tr->left));
+        tr->right = ret.fi;
+        tr->db = 1+tdb(tr->left)+tdb(tr->right);
+        return mp(tr,ret.se);
+    }
+}
+
+int pn;
+void print(Treap* tr) {
+    if(tr == NULL) return;
+    print(tr->left);
+    printf("%d",tr->num);
+    if((++pn)<n) printf(" ");
+    print(tr->right);
+}
+
+Treap* root;
+
+int main()
+{
+    scanf("%d%d",&n,&q);
+    srand((n>>1)^(q<<2));
+    for(int i=0; i<n; i++) rnd[i] = i;
+    for(int i=0; i<n-1; i++) swap(rnd[i],rnd[i+rand()%(n-i)]);
+
+    for(int i=0; i<n; i++) {
+        scanf("%d",&a[i]);
+        Treap* ntr = new Treap(a[i]);
+        add(root,ntr);
+    }
+
+    for(int i=0; i<q; i++) {
+        //pn = 0;
+        //print(root);
+        int t,l,r;
+        scanf("%d%d%d",&t,&l,&r); l--; r--;
+
+        if(t == 1) {
+            pair<Treap*,Treap*> r1 = split(root,l);
+            pair<Treap*,Treap*> r2 = split(r1.se,r+1-l);
+            root = unio(mp(r2.fi,r1.fi));
+            root = unio(mp(root,r2.se));
+        } else {
+            pair<Treap*,Treap*> r1 = split(root,l);
+            pair<Treap*,Treap*> r2 = split(r1.se,r+1-l);
+            root = unio(mp(r1.fi,r2.se));
+            root = unio(mp(root,r2.fi));
+        }
+    }
+
+    pn = 0;
+    print(root);
+
+    return 0;
+}

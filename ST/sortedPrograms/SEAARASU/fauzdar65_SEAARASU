@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb emplace_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+using namespace std;
+const int N=100000;
+
+
+
+int main()
+{
+  finp;
+  int t,n;
+  cin>>t;
+  while(t--)
+  {
+  	cin>>n;
+  	ll gc=0;
+  	afor(i,1,n)
+  	{
+  		ll val;
+  		cin>>val;
+  		gc=__gcd(gc,val);
+  	}
+  	cout<<(gc*n)<<"\n";
+  }
+
+return 0;
+}

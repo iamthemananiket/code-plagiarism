@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 100010
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+	while(t>=48 && t<=57)
+	{
+		x=(x<<3)+(x<<1)+t-48;
+		t=getchar();
+	}
+	if (neg) x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+ll a[N],backsum[N];
+
+int main()
+{
+	ll t,n,x,ans,y;
+	t=input();
+	while(t--)
+	{
+		n=input();
+		REP(i,n+1) a[i]=input();
+		x=1;
+		ans=0;
+		REP(i,n)
+		{
+			backsum[n-i-1]=x*a[n-i];
+			if (i!=0) backsum[n-i-1]+=backsum[n-i];
+			backsum[n-i-1]%=mod;
+			x*=2;
+			x%=mod;
+		}
+		x=1;
+		REP(i,n)
+		{
+			y=x*a[i];
+			if (i==0) y*=2;
+			y%=mod;
+			x*=2;
+			x%=mod;
+			ans+=(y*backsum[i]);
+			ans%=mod;
+		}
+		output(ans);
+	}
+return 0;
+}

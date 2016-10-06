@@ -1,0 +1,46 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define N 1010
+#define M 40
+using namespace std;
+map<ll,int>mp;
+double g[M][N],ans,tot,p[N][N];
+int ln,n,sum[N],gs[M],i,f[N][M],m,j,k;
+int dfs(ll x)
+{
+	if(mp[x])return mp[x];
+	mp[x]=++ln;int t=ln;
+	for(int i=0;i<1<<n;i++)
+		if(x>>i&1)sum[t]=max(sum[t],gs[i]);
+	for(int i=0;i<1<<n;i++)
+	{
+		ll y=x;
+		for(int j=0;j<1<<n;j++)
+			for(int k=0;k<n;k++)
+				if((j>>k&1)&&(i>>k&1)&&(x>>(j-(1<<k))&1))y|=1<<j;
+		f[t][i]=dfs(y);
+	}
+	return mp[x];
+}
+int main()
+{
+	scanf("%d%d",&n,&m);
+	for(i=1;i<1<<n;i++)gs[i]=gs[i>>1]+(i&1);
+	dfs(1);
+	for(i=1;i<=n;i++)
+		for(j=1;j<=m;j++)
+			scanf("%lf",&g[i][j]);
+	p[0][1]=1;
+	for(i=1;i<=m;i++)
+		for(j=0;j<1<<n;j++)
+		{
+			tot=1;
+			for(k=0;k<n;k++)
+				if(j>>k&1)tot=tot*g[k+1][i];
+				else tot=tot*(1-g[k+1][i]);
+			for(k=1;k<=ln;k++)
+				p[i][f[k][j]]+=p[i-1][k]*tot;
+		}
+	for(i=1;i<=ln;i++)ans+=p[m][i]*sum[i];
+	printf("%lf\n",ans);
+}

@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+int n;
+char s[500013];
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int test=0;test<T;test++) {
+		scanf(" %s",s+1);
+		n = strlen(s+1);
+		ll ans = 0;
+		for (int i=1;i<=n;i++) {
+			for (int j=2;i*j<=n;j++) {
+				int num = 0;
+				ll on = i;
+				while (on<=n) {
+					num+=1;
+					on*=j;
+				}
+				bitset<20> has,sah;
+				on = i;
+				int mun = num-1;
+				num = 0;
+				while (on<=n) {
+					if (s[on]=='1') {
+						has[num] = 1;
+						sah[mun] = 1;
+					}
+					num+=1;
+					mun-=1;
+					on*=j;
+				}
+				for (int l=num+1;l>=3;l--) {
+					if (has==sah) ans+=1;
+					has[l-2] = 0;
+					sah>>=1;
+				}
+			}
+		}
+		printf("%lld\n",ans+n);
+	}
+
+	return 0;
+}

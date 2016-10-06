@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+inline int scan(){
+    int x = 0;
+    char c = getchar_unlocked();
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x << 3) + (x << 1) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+
+const int MOD = (int)(1e9 + 7);
+static int DP[501][20001];
+static int T , N , M;
+vector < int > adjList[501];
+
+inline int add( int x , int y ){
+	int res = x + y;
+	if( res >= MOD ) res -= MOD;
+	return res;
+}
+
+inline int prod( int x, int y){
+	long long res = x * 1LL * y;
+	if( res >= MOD ) res %= MOD;
+	return res;
+}
+
+inline void dfs( int node , int par){
+
+
+	for( auto next : adjList[node] ){
+		
+		if( next == par ) continue;
+		dfs( next , node );
+		
+		for(int i = 1 ; i <= M ; i++){
+			
+			int val = 0;
+			
+			for(int j = i ; j <= M ; j += i )
+				val = add( val ,DP[next][j]);
+			
+			DP[node][i] = prod( DP[node][i] , val );
+		}
+	}
+
+}
+
+
+int main(){
+	
+	T = scan();
+	
+	while(T--){
+		
+		N = scan() , M = scan();
+		
+		for(int i = 0 ; i <= 500 ; i++) adjList[i].clear();
+		
+		for(int i = 0 ; i <= N ; i++)
+			for(int j = 1 ; j <= M ; j++) DP[i][j] = 1;
+		
+		for(int i = 1 ; i < N ; i++){
+			int u , v;
+			u = scan(), v = scan();
+			adjList[u].push_back(v);
+			adjList[v].push_back(u);
+		}
+
+		dfs(1,-1);
+		
+		int ans = 0;
+		for(int i = 1 ; i <= M ; i++) ans = add(ans , DP[1][i] );
+		printf("%d\n",ans);
+	}
+}

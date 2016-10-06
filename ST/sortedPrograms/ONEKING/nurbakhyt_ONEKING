@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+const int N = (int)1e5 + 123;
+
+using namespace std;
+
+struct num {
+	int x, id;
+	bool t;
+ 	num() {}
+	num(int x, int id, bool t) : x(x), id(id), t(t) {}
+} a[2 * N];
+
+bool cmp(num x, num y) {
+	if (x.x < y.x || (x.x == y.x && x.t < y.t))
+		return 1;
+	return 0;
+}
+
+int n;
+int wh[N];
+
+void solve() {
+	scanf("%d", &n);	
+	for (int i = 1, j = 1; i <= n; i++) {
+	    int l, r;
+		scanf("%d%d", &l, &r);
+		a[j++] = num(l, i, 0);
+		a[j++] = num(r, i, 1);
+	}
+	sort(a + 1, a + 2 * n + 1, &cmp);
+	int ans = 0;
+	int last = -1;
+	for (int i = 1, j = 1; i <= 2 * n; i++) {
+		if (!a[i].t)
+			wh[a[i].id] = j++; 
+		else {
+			if (wh[a[i].id] <= last)
+				continue;
+			ans++;
+			last = j - 1;
+		}
+	}
+	printf("%d\n", ans);
+}
+
+int test;
+
+int main() {
+    scanf("%d", &test);
+    while(test--)
+    	solve();
+	return 0;
+}

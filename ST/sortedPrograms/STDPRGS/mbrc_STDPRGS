@@ -1,0 +1,124 @@
+#include <cstdio>
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <queue>
+#include <stack>
+#include <functional>
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define rep(i,x,y) for (int i = (x);i <= (y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y); i++)
+#define drep(i,x,y) for (int i = (x); i >=(y); i--)
+#define pb push_back
+#define mp make_pair
+#define s(x) scanf("%d",&x)
+#define pr(x) printf("%d",x)
+#define psp printf(" ")
+#define endc printf("\n")
+#define sl(x) scanf("%lld",&x)
+#define prl(x) printf("%lld",x)
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int MAXN = 5e4 + 10;
+const int NSQ = 3e2;
+
+ll A[MAXN];
+int C[MAXN];
+pair<pii,int> Q[MAXN];
+multiset<ll> S;
+ll ans[MAXN];
+
+bool mosort(pair<pii,int> a, pair<pii,int> b) {
+	if (C[a.first.first]!=C[b.first.first]) {
+		return C[a.first.first] < C[b.first.first];
+	} else {
+		return a.first.second < b.first.second;
+	}
+}
+
+inline ll addval(ll x) {
+	if (S.size() == 0) { S.insert(x); return 0; }
+	ll a = *S.begin(), b = *S.rbegin();
+	if (x <= a) {
+		S.insert(x); return a*x; 
+	}
+	if (x >= b) {
+		S.insert(x); return b*x;
+	}
+	set<ll>::iterator v = S.lower_bound(x);
+	a = *v; b = *(--v);
+	S.insert(x);
+	return (x*a + x*b - a*b);
+}
+
+inline ll remval(ll x) {
+	set<ll>::iterator v = S.find(x);
+	if (S.size() == 1) { S.erase(v); return 0; }
+	ll a = *S.begin(), b = *S.rbegin();
+	if (x == a) {
+		S.erase(v);
+		return -(x * (*S.begin()));
+	}
+	if (x == b) {
+		S.erase(v);
+		return -(x * (*S.rbegin()));
+	}
+	set<ll>::iterator it = v; it--;
+	a = *(it); it = v; it++; b = *(it);
+	S.erase(v);
+	return (-x*a - x*b + a*b);
+}
+
+int main() {
+	int n; s(n); C[0] = 0;
+	rep(i,1,n) {
+		sl(A[i]);
+		C[i] = C[i-1];
+		if (i%NSQ == 1) C[i]++;
+	}
+	int m; s(m);
+	rep(i,1,m) {
+		s(Q[i].first.first); s(Q[i].first.second);
+		Q[i].second = i;
+	}
+	sort(Q+1,Q+m+1,mosort);
+	int l = 1,r = 0; ll prod = 0; ll sq = 0;
+	rep(q,1,m) {
+		int z = Q[q].second;			
+		int s = Q[q].first.first, t = Q[q].first.second;
+		while (r < t) {
+			r++; prod += addval(A[r]);
+			//cout<<r<<" :r "<<prod<<endl;
+			sq += A[r]*A[r];
+		}
+		while (l > s) {
+			l--; prod += addval(A[l]);
+			//cout<<l<<" :l "<<prod<<endl;
+			sq += A[l]*A[l];
+		}
+		while (r > t) {
+			prod += remval(A[r]); sq-=A[r]*A[r]; r--;
+			//cout<<r<<" :r "<<prod<<endl;
+		}
+		while (l < s) {
+			prod += remval(A[l]); sq-=A[l]*A[l]; l++;
+			//cout<<l<<" :l "<<prod<<endl;
+		}
+		//cout<<s<<" : "<<t<<" : "<<prod<<endl;
+		ans[z] = 2*sq -2*prod - (*S.begin())*(*S.begin()) - (*S.rbegin())*(*S.rbegin());
+		//if (S.size() == 1) ans[z] += (*S.begin())*(*S.begin());
+	}
+
+	rep(i,1,m) {
+		prl(ans[i]); endc;
+	}
+
+}

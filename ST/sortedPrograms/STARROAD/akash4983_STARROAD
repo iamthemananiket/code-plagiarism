@@ -1,0 +1,365 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef long double LD;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int N = 202;
+LL A[N][N], B[N][N], C[N][N];
+int sz;
+LL ways[N][N];
+LL LP[N/2][N/2], copyLP[N/2][N/2];
+
+vector<int > g[N];
+
+LL _pow(LL a, LL b, LL p) {
+  if(!b) return 1;
+  if(b == 1) return a;
+  if(b == 2) return a * a % p;
+  if(b & 1) {
+    return a * _pow(a,b-1,p) % p;
+  }
+  return _pow(_pow(a,b/2,p),2,p);
+}
+
+void solve(LL n, int mod) {
+  if(n == 1) {
+    memcpy(B, A, sizeof(A));
+    return;
+  }
+  if(!n) {
+    memset(B, 0, sizeof(B));
+    rep(i,0,sz) B[i][i] = 1;
+    return;
+  }
+
+  solve(n>>1, mod);
+
+  memset(C, 0, sizeof(C));
+  rep(i,0,sz) rep(j,0,sz) {
+    int x = sz >> 1;
+    if(i < x && j < x && i > j) {
+      C[i][j] = C[j][i];
+      continue;
+    }
+    if(i < x && j > x && i > j - x) {
+      C[i][j] = C[j-x][i+x];
+      continue;
+    }
+    if(i > x && j < x && i > j + x) {
+      C[i][j] = C[j+x][i-x];
+      continue;
+    }
+    if(i > x && j > x && i > j) {
+      C[i][j] = C[j][i];
+      continue;
+    }
+    rep(k,0,sz) {
+      C[i][j] += B[i][k] * B[k][j];
+    }
+  }
+  rep(i,0,sz) rep(j,0,sz) B[i][j] = C[i][j] % mod;
+
+  if(n & 1) {
+    memset(C, 0, sizeof(C));
+    rep(i,0,sz) rep(j,0,sz) {
+      int x = sz >> 1;
+      if(i < x && j < x && i > j) {
+        C[i][j] = C[j][i];
+        continue;
+      }
+      if(i < x && j > x && i > j - x) {
+        C[i][j] = C[j-x][i+x];
+        continue;
+      }
+      if(i > x && j < x && i > j + x) {
+        C[i][j] = C[j+x][i-x];
+        continue;
+      }
+      if(i > x && j > x && i > j) {
+        C[i][j] = C[j][i];
+        continue;
+      }
+      rep(k,0,sz) {
+        C[i][j] += B[i][k] * A[k][j];
+      }
+    }
+    rep(i,0,sz) rep(j,0,sz) B[i][j] = C[i][j] % mod;
+  }
+}
+
+LL determinant(int n, int p) {
+
+  LL ans = 1;
+
+  // lower
+  rep(i,0,n) {
+    if(!LP[i][i]) {
+      return 0;
+    }
+    LL inv = _pow(LP[i][i], p-2, p);
+    rep(j,i+1,n) {
+      LP[i][j] *= inv;
+      LP[i][j] %= p;
+    }
+    ans *= LP[i][i];
+    ans %= p;
+    LP[i][i] = 1;
+
+    rep(j,i+1,n) if(LP[j][i] != 0) {
+      rep(k,i+1,n) {
+        LP[j][k] -= LP[i][k] * LP[j][i];
+        LP[j][k] %= p;
+        if(LP[j][k] < 0) {
+          LP[j][k] += p;
+        }
+      }
+      LP[j][i] = 0;
+    }
+  }
+  assert(ans > 0);
+  return ans;
+}
+
+LL D[N];
+vector<int > primes;
+
+bool isPrime(int x) {
+  for(int i = 2; i * i <= x; i++) if(x % i == 0) {
+    return false;
+  }
+  return true;
+}
+
+string str(LL x) {
+  string res = "";
+  while(x) {
+    res += (x % 10) + '0';
+    x /= 10;
+  }
+  reverse(all(res));
+  return res;
+}
+
+void multiply(string& s, int x) {
+  if(!x) {
+    s = "";
+    return;
+  }
+  reverse(all(s));
+
+  LL carry = 0;
+  rep(i,0,s.size()) {
+    LL val = (s[i] - '0') * 1LL * x + carry;
+    s[i] = (val % 10) + '0';
+    carry = val / 10;
+  }
+  while(carry) {
+    s += (carry % 10) + '0';
+    carry /= 10;
+  }
+  while(s.size() && s.back() == '0') {
+    s.pop_back();
+  }
+  reverse(all(s));
+}
+
+void add(string &s, string t) {
+  reverse(all(s));
+  reverse(all(t));
+
+  int carry = 0;
+  rep(i,0,max(s.size(), t.size())) {
+    int val = carry;
+    if(i < s.size()) val += s[i] - '0';
+    if(i < t.size()) val += t[i] - '0';
+
+    if(i < s.size()) {
+      s[i] = (val % 10) + '0';
+    } else {
+      s += (val % 10) + '0';
+    }
+    carry = val / 10;
+  }
+  while(carry) {
+    s += (carry % 10) + '0';
+    carry /= 10;
+  }
+  reverse(all(s));
+}
+
+int compare(const string &s, const string &t) {
+  if(s.size() > t.size()) return 1;
+  if(t.size() > s.size()) return -1;
+  rep(i,0,s.size()) {
+    if(s[i] > t[i]) return 1;
+    if(t[i] > s[i]) return -1;
+  }
+  return 0;
+}
+
+int div(string s, string t) {
+  int ans = -1;
+  int lo = 0, hi = 1000000011;
+  while(lo <= hi) {
+    string tmp = t;
+    int mi = (lo + hi) >> 1;
+    multiply(tmp, mi);
+    if(compare(s, tmp) >= 0) {
+      ans = mi;
+      lo = mi + 1;
+    } else {
+      hi = mi - 1;
+    }
+  }
+  if(ans == -1) {
+    cout << s << " " << t << "\n";
+  }
+  assert(ans != -1);
+  // P(ans);
+  return ans;
+}
+
+void subtract(string &s, string t) {
+  reverse(all(s));
+  reverse(all(t));
+  int carry = 1;
+  rep(i,0,s.size()) {
+    int val = carry + (s[i] - '0') + 9;
+    if(i < t.size()) {
+      val -= t[i] - '0';
+    }
+    s[i] = (val % 10) + '0';
+    carry = val / 10;
+  }
+  while(s.size() && s.back() == '0') {
+    s.pop_back();
+  }
+  reverse(all(s));
+}
+
+void modulo(string &s, string t) { // s % t
+  int x = div(s, t);
+  string tmp = t;
+  multiply(tmp, x);
+  subtract(s, tmp);
+}
+
+void computeAns(int n) {
+  primes.push_back(1000000009);
+  primes.push_back(1000000007);
+
+  int num = 1000000003;
+  int itr = 90;
+  while(itr && num > 2) {
+    if(isPrime(num)) {
+      primes.push_back(num);
+      itr--;
+    }
+    assert(num > 777777700);
+    num -= 2;
+  }
+
+  rep(i,0,primes.size()) {
+    memcpy(copyLP, LP, sizeof(copyLP));
+    D[i] = determinant(n - 1, primes[i]);
+    memcpy(LP, copyLP, sizeof(copyLP));
+    // printf("%lld %lld\n",primes[i], D[i]);
+  }
+
+  string den = "1";
+  rep(i,0,primes.size()) {
+    multiply(den, primes[i]);
+  }
+  // cout << den << "\n";
+
+  string ans = "";
+  rep(i,0,primes.size()) if(D[i]) {
+    LL tmp = 1;
+    string cur = str(D[i]);
+    rep(j,0,primes.size()) if(i != j) {
+      // bigInt mu;tiply
+      tmp = tmp * primes[j] % primes[i];
+      multiply(cur, primes[j]);
+    }
+    multiply(cur, _pow(tmp, primes[i] - 2, primes[i]));
+    add(ans, cur);
+    modulo(ans, den);
+  }
+  if(!ans.size()) ans = "0";
+  cout << ans << "\n";
+}
+
+int main() {
+  int n,m,x;
+  LL k;
+  scanf("%d%d%d%lld",&n,&m,&x,&k);
+
+  while(m--) {
+    int u,v;
+    S2(u,v);
+    u--; v--;
+    g[u].push_back(v);
+    g[v].push_back(u);
+  }
+
+  memset(A, 0, sizeof(A));
+  int mod = x; sz = 2 * n;
+  rep(i,0,n) {
+    A[i][i] = 1;
+    A[n + i][i] = 1;
+    rep(j,0,g[i].size()) {
+      A[i][g[i][j]] = 1;
+      A[i][n + g[i][j]] = mod - 1;
+    }
+  }
+  solve(k-1, mod);
+  rep(i,0,n) {
+    rep(j,0,n) if(i != j) {
+      ways[i][j] = (B[j][n+i] + B[j][i]) % mod;
+      rep(k,0,g[i].size()) {
+        ways[i][j] += B[j][g[i][k]];
+        if(ways[i][j] >= mod) ways[i][j] -= mod;
+      }
+    }
+  }
+
+  rep(i,0,n) rep(j,0,n) {
+    assert(ways[i][j] == ways[j][i]);
+  }
+
+  rep(i,0,n) {
+    rep(j,0,n) {
+      if(i == j) {
+        rep(k,0,n) LP[i][i] += ways[i][k];
+      } else {
+        LP[i][j] = -ways[i][j];
+      }
+    }
+  }
+
+  computeAns(n);
+
+  return 0;
+}

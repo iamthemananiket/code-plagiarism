@@ -1,0 +1,146 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int mark[505][35];
+int a[maxs];
+int ans[maxs];
+int sz,bl,n;
+
+void update_block(int bl,int x){
+	int i;
+	for(i=0;i<32;i++){
+		if((x&(1<<i))==0 && mark[bl][i]==0){
+			ans[bl]=imax;
+			for(int i=bl*sz;i<min(n,(bl+1)*sz);i++){
+				a[i]=a[i]&x;
+				ans[bl]=min(ans[bl],a[i]);
+			}
+			mark[bl][i]=1;
+		}
+	}
+}
+
+void update(int l,int  r,int x){
+	int sbl=l/sz;
+	int ebl=r/sz,i;
+	if(sbl==ebl){
+		for(i=l;i<=r;i++){
+			a[i]=a[i]&x;
+		}
+		ans[sbl]=a[sbl*sz];
+		for(i=sbl*sz;i<min((sbl+1)*sz,n);i++){
+			ans[sbl]=min(ans[sbl],a[i]);
+		}
+	}
+	else{
+		for(i=l;i<min(n,(sbl+1)*sz);i++){
+			a[i]=a[i]&x;
+		}
+		ans[sbl]=a[sbl*sz];
+		for(i=sbl*sz;i<min((sbl+1)*sz,n);i++){
+			ans[sbl]=min(ans[sbl],a[i]);
+		}
+		for(i=ebl*sz;i<=r;i++){
+			a[i]=a[i]&x;
+		}
+		ans[ebl]=a[ebl*sz];
+		for(i=ebl*sz;i<min((ebl+1)*sz,n);i++){
+			ans[ebl]=min(ans[ebl],a[i]);
+		}
+		for(i=sbl+1;i<ebl;i++){
+			update_block(i,x);
+		}
+	}
+
+}
+int query(int l,int r){
+	int ret=imax;
+	int sbl=l/sz;
+	int ebl=r/sz,i;
+	if(sbl==ebl){
+		for(i=l;i<=r;i++){
+			ret=min(ret,a[i]);
+		}
+	}
+	else{
+		for(i=l;i<min(n,(sbl+1)*sz);i++){
+			ret=min(ret,a[i]);
+		}
+		for(i=ebl*sz;i<=r;i++){
+			ret=min(ret,a[i]);
+		}
+		for(i=sbl+1;i<ebl;i++){
+			ret=min(ret,ans[i]);
+		}
+	}
+	return ret;
+}
+
+int main()
+{
+	int q,i,j,type,l,r,x;
+	sc("%d %d",&n,&q);
+	for(i=0;i<n;i++){
+		sc("%d",&a[i]);
+	}
+	sz=sqrt(n);
+	bl=n/sz;
+	if((n%sz)!=0){
+		bl++;
+	}
+	for(i=0;i<bl;i++){
+		int mn=a[i*sz];
+		for(j=i*sz;j<min(n,(i+1)*sz);j++){
+			mn=min(a[j],mn);
+		}
+		ans[i]=mn;
+	}
+	for(i=0;i<bl;i++){
+		for(j=0;j<32;j++){
+			mark[i][j]=0;
+		}
+	}
+	for(i=0;i<q;i++){
+		sc("%d %d %d",&type,&l,&r);
+		l--;
+		r--;
+		if(type==0){
+			int ans=query(l,r);
+			pr("%d\n",ans);
+		}
+		else{
+			sc("%d",&x);
+			update(l,r,x);
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+#define ui unsigned int
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+const long long MOD = (long long)( 1LL << 32LL );
+const int MAX = 11111111;
+ui S1,Q,A,B;
+pair < int , pair < int , ui > > FFS[MAX];
+
+int main(){
+	
+	cin.tie(0); ios::sync_with_stdio(0);
+	cin >> Q >> S1 >> A >> B;
+	
+	long long ans = 0;
+	long long res = 0;
+	FFS[1] = make_pair( S1 >> 1  , make_pair( 1 , S1 & 1) );
+
+	for(int i = 2 ; i <= Q ; i++){
+		res = S1 * 1LL * A + B;
+		if( res >= MOD ) res %= MOD;
+		S1 = res;
+		FFS[i] = make_pair( S1 >> 1 , make_pair( i , S1 & 1) );
+	}
+	
+	sort(   FFS + 1 , FFS + 1 + Q );
+	reverse( FFS + 1 , FFS + 1 + Q);
+
+	for(int i = 1 ; i <= Q ; i++){
+		if( FFS[i].second.second == 1 ) ans += FFS[i].first;
+		int j = i;
+		while( j <= Q and FFS[j].first == FFS[i].first ) j++;
+		i = j - 1;
+	}
+
+	cout << ans << endl;
+}

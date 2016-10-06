@@ -1,0 +1,47 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+int A[55];
+
+int main() {
+  int t;
+  S(t);
+  while(t--) {
+    int n;
+    string s;
+    cin >> n >> s;
+    rep(i,0,n) {
+      S(A[i]);
+    }
+    if(n == 1) {
+      if(A[0] & 1) cout << "Dum\n";
+      else cout << s << "\n";
+    } else {
+      cout << "Dum\n";
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,104 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+const int N = 1000;
+int usd[N],a[N],tt,d,l,r,i,n,sum,len,a1;
+
+inline int t(int x)
+{
+    while(x>9)
+    {
+        int y = x;
+        x = 0;
+         while(y)
+         {
+             x+=y%10;
+             y/=10;
+         }
+    }
+    return x;
+}
+
+inline int f(int x)
+{
+    if(!x) return 0;
+    if(x<=20)
+    {
+        int p = a1;
+        int ans = 0;
+        for(int i=1;i<=x;++i)
+        {
+            ans+=t(p);
+            p+=d;
+        }
+      return ans;
+    }
+
+    ll ans  = sum;
+
+     x-=usd[a[n]] - 1;
+
+    int d = x / len;
+     for(i=usd[a[n]];i<n;++i)
+        ans+=a[i] * d;
+     x%=len;
+     for(i=usd[a[n]];i<=usd[a[n]]+x-1;++i)
+        ans+=a[i];
+     return ans;
+}
+
+ main()
+ {
+    fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+    int tt;
+     cin>>tt;
+      while(tt--)
+      {
+        cin>>a1>>d>>l>>r;
+         memset(usd,0,sizeof(usd));
+         a[1] = t(a1);
+         usd[a[1]] = 1;
+         sum=a[1];
+         int p = a1;
+         for(i=2;;++i)
+         {
+           p+=d;
+            a[i] = t(p);
+            if(usd[a[i]]>0)
+            {
+                n=i;
+                break;
+            }
+            usd[a[i]]=i;
+            sum+=a[i];
+         }
+
+         for(i=usd[a[n]];i<n;++i) sum-=a[i];
+         len = n - usd[a[n]];
+         cout<<f(r)-f(l-1)<<endl;
+      }
+
+    return 0;
+ }

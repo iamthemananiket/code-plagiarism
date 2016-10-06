@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef double dd;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while(T-- > 0) {
+    int N;
+    ll P, Q;
+    cin >> N >> P >> Q;
+    vector<int> arr(N);
+    for(int& a:arr)
+      cin >> a;
+    sort(arr.begin(), arr.end());
+    int res = 0;
+    for(int a : arr) {
+      const ll twos = min(Q, ll(a) >> 1);
+      if (P >= a - 2 * twos) {
+        Q -= twos;
+        a -= 2*twos;
+        P -= a;
+        ++res;
+      }
+    }
+    cout << res << endl;
+  }
+  return 0;
+}

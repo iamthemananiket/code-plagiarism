@@ -1,0 +1,65 @@
+#include<bits/stdc++.h>
+#define author rajat1603
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+const int mod = 1e9 + 7;
+const int N = 1e5 + 5;
+long long power[N];
+long long arr[N];
+long long t,n,ans,sum,neg;
+void pre(){
+	power[0]=1;
+	for(int i=1;i<N;++i){
+		power[i] = power[i-1] + power[i-1];
+		if(power[i]>=mod){
+			power[i]-=mod;
+		}
+	}
+}
+int main(){
+	pre();
+    t=scan();
+    while(t--){
+    	n=scan();
+    	sum=0;
+    	for(int i=1;i<=n;++i){
+    		arr[i]=scan();
+    	}
+        sort(arr+1,arr+1+n);
+    	ans = sum = 0;
+        neg = 1LL*(power[n-1] - 1LL ) * arr[1] ;
+        if(neg>=mod){
+            neg%=mod;
+        }
+        for(int i = 2; i<n ; ++i ){
+            sum += 1LL*(power[i-1]-1)*arr[i];
+            if(sum>=mod){
+                sum%=mod;
+            }
+            neg += 1LL*(power[n-i]-1)*arr[i];
+            if(neg>=mod){
+                neg%=mod;
+            }
+        }
+        sum += 1LL*(power[n-1]-1)*arr[n];
+        sum%=mod;
+        ans = sum - neg;
+        if(ans<0){
+            ans+=mod;
+        }
+        printf("%lld\n",ans);
+    }
+}

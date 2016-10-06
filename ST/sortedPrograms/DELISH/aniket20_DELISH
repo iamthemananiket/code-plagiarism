@@ -1,0 +1,62 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll frightmax[10001],frightmin[10001],fleftmax[10001],fleftmin[10001],leftmin[10001],leftmax[10001],A[10001];
+int main()
+{
+	int t;
+	ll n,i,j,ans;
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%lld",&n);
+		for(i=0;i<n;i++)
+		{
+			scanf("%lld",&A[i]);
+		}
+		for(i=0;i<n;i++)
+		{
+			if(i-1>=0){
+			fleftmin[i]=min(fleftmin[i-1]+A[i],A[i]);
+			fleftmax[i]=max(fleftmax[i-1]+A[i],A[i]);
+			}
+			else
+			{
+				fleftmin[i]=A[i];
+				fleftmax[i]=A[i];
+			}
+		}
+		for(i=n-1;i>=0;i--)
+		{
+			if(i<n-1){
+			frightmin[i]=min(frightmin[i+1]+A[i],A[i]);
+			frightmax[i]=max(frightmax[i+1]+A[i],A[i]);
+			}
+			else
+			{
+				frightmin[i]=A[i];
+				frightmax[i]=A[i];
+			}
+		}
+		for(i=0;i<n;i++)
+		{
+			if(i>0){
+			leftmin[i]=min(fleftmin[i],leftmin[i-1]);
+			leftmax[i]=max(fleftmax[i],leftmax[i-1]);
+			}
+			else
+			{
+				leftmin[i]=fleftmin[i];
+				leftmax[i]=fleftmax[i];
+			}
+		}
+		ans=0;
+		for(i=0;i<n-1;i++)
+		{
+			ans=max(leftmax[i]-frightmin[i+1],ans);
+			ans=max(frightmax[i+1]-leftmin[i],ans);
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

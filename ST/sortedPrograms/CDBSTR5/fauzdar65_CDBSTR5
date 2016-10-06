@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+using namespace std;
+int t,n;
+vector<int> adj[10005];
+pp dfs(int pos,int par)
+{
+    pp ret=mp(1,1);
+    int ma=-1,sma=-1;
+    pp temp;
+    for(int i=0;i<adj[pos].size();i++)
+    {
+        if(adj[pos][i]==par)continue;
+        
+        temp=dfs(adj[pos][i],pos);
+        
+        ret.second=max(ret.second,1+temp.second);
+        ret.first=max(ret.first,temp.first);
+        
+        if(temp.second>ma){ sma=ma; ma=temp.second;  }
+        else if(temp.second>sma){ sma=temp.second; }
+    }
+    
+    if(ma>=0 && sma>=0)
+    {
+        ret.first=max(ret.first,ma+sma+1);
+    }
+    else if(ma>=0)ret.first=max(ret.first,ret.second);
+    return ret;
+}
+
+int main() {
+    
+    cin>>t;
+    
+    while(t--)
+    {
+        cin>>n;
+        
+        for(int i=0;i<n-1;i++)
+        {
+            int v1,v2;
+            cin>>v1>>v2;
+            adj[v1].pb(v2);
+            adj[v2].pb(v1);
+        }
+        
+        pp t=dfs(1,0);
+        
+        cout<<t.first-1<<"\n";
+        
+        for(int i=1;i<=n;i++)adj[i].clear();
+    }
+
+	return 0; 
+}

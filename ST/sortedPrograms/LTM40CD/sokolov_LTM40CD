@@ -1,0 +1,62 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+typedef long long ll;
+typedef unsigned long long ull;
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MOD = (int)1e9 + 7;
+
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int r;
+	scanf("%d", &r);
+	const int MAX_LEN = 500;
+	vector<int> ans;
+	for (int a = 1; a <= MAX_LEN; ++a) {
+		for (int b = a; b <= MAX_LEN; ++b) {
+			for (int c = b; c <= MAX_LEN && c < a + b; ++c) {
+				ll nom = ((ll)-a + b + c) * ((ll)a - b + c) * ((ll)a + b - c);
+				ll denom = 4 * ((ll)a + b + c);
+				if (nom % denom == 0 && r * r == nom / denom) {
+					ans.push_back(a);
+					ans.push_back(b);
+					ans.push_back(c);
+				}
+			}
+		}
+	}
+	printf("%d\n", ans.size() / 3);
+	for (int i = 0; i < ans.size(); i += 3) {
+		printf("%d %d %d\n", ans[i], ans[i + 1], ans[i + 2]);
+	}
+	return 0;
+}

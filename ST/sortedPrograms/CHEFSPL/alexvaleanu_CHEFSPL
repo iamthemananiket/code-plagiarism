@@ -1,0 +1,405 @@
+#include <iostream>
+#include <type_traits>
+#include <cassert>
+
+template<unsigned int MOD>
+class ModInteger
+{
+public:
+
+    ModInteger() : data(0) {
+    }
+
+    ModInteger(const ModInteger &rhs) : data(rhs.data) {
+    }
+
+    ModInteger(const std::string& str) : data(0) {
+
+        assert(str.size() > 0);
+
+        bool flag = false;
+        std::string a = str;
+
+        if (str[0] == '-')
+        {
+            flag = true;
+            a.erase(a.begin());
+        }
+
+        for (const char &c : a)
+            this->data = (this->data * 10 + (c - '0')) % MOD;
+
+        if (flag && this->data > 0)
+            this->data = MOD - this->data;
+    }
+
+    explicit ModInteger(const unsigned int &rhs) : data(rhs % MOD) {
+    }
+
+    explicit ModInteger(const unsigned long long &rhs) : data(rhs % MOD) {
+    }
+
+    ModInteger(const long long &rhs) : data(0) {
+
+        if (rhs < 0)
+        {
+            this->data = (-rhs) % MOD;
+            this->data = (MOD -this->data) % MOD;
+        }
+        else
+        {
+            this->data = rhs % MOD;
+        }
+    }
+
+    ModInteger operator + (const ModInteger &rhs) const
+    {
+        return ModInteger(this->data + rhs.data);
+    }
+
+    ModInteger& operator += (const ModInteger &rhs)
+    {
+        *this = *this + rhs;
+        return *this;
+    }
+
+    ModInteger operator - (const ModInteger &rhs) const
+    {
+        return ModInteger(static_cast<long long>(this->data) - rhs.data);
+    }
+
+    ModInteger& operator -= (const ModInteger &rhs)
+    {
+        *this = *this - rhs;
+        return *this;
+    }
+
+    ModInteger operator * (const ModInteger &rhs) const
+    {
+        return ModInteger(static_cast<long long>(this->data) * rhs.data);
+    }
+
+    ModInteger& operator *= (const ModInteger &rhs)
+    {
+        *this = *this * rhs;
+        return *this;
+    }
+
+    ModInteger operator / (const ModInteger &rhs) const
+    {
+        ///fails if MOD is not prime
+        return ModInteger(*this * power(rhs, MOD - 2));
+    }
+
+    ModInteger& operator /= (const ModInteger &rhs)
+    {
+        *this = *this / rhs;
+        return *this;
+    }
+
+    ModInteger inverseMod(void) const
+    {
+        return power(*this, MOD - 2);
+    }
+
+    bool operator == (const ModInteger &rhs) const
+    {
+        return this->data == rhs.data;
+    }
+
+    bool operator != (const ModInteger &rhs) const
+    {
+        return this->data != rhs.data;
+    }
+
+    template<class T>
+    ModInteger operator ^ (T p) const
+    {
+        static_assert(std::is_integral<T>::value, "Integer required.");
+        return power(*this, p);
+    }
+
+    unsigned int toInteger(void) const
+    {
+        return this->data;
+    }
+
+    friend std::ostream& operator << (std::ostream& stream, const ModInteger& rhs)
+    {
+        stream << rhs.data;
+        return stream;
+    }
+
+    friend std::istream& operator >> (std::istream& stream, ModInteger& rhs)
+    {
+        std::string tmp;
+        stream >> tmp;
+        rhs = ModInteger(tmp);
+
+        return stream;
+    }
+
+    template<class T>
+    static ModInteger power(ModInteger a, T p)
+    {
+        ModInteger solution(1U);
+
+        while (p > 0)
+        {
+            if (p & 1)
+                solution *= a;
+
+            a *= a;
+            p >>= 1;
+        }
+
+        return solution;
+    }
+
+private:
+
+    unsigned int data;
+};
+
+using namespace std;
+#include <bits/stdc++.h>
+
+constexpr unsigned int MOD1 = 666013;
+constexpr unsigned int MOD2 = 1000000000 + 9;
+constexpr unsigned int BASE = 137;
+
+class Node
+{
+public:
+
+    ModInteger<MOD1> h1;
+    ModInteger<MOD2> h2;
+    unsigned int length;
+
+    ModInteger<MOD1> invH1;
+    ModInteger<MOD2> invH2;
+
+    Node() : h1(), h2(), length(0), invH1(), invH2() {
+    }
+
+    Node(const char &c) : h1(static_cast<unsigned int>(c)),
+        h2(static_cast<unsigned int>(c)), length(1),
+        invH1(static_cast<unsigned int>(c)), invH2(static_cast<unsigned int>(c)) {
+    }
+
+    bool operator == (const Node &rhs) const
+    {
+        return (h1 == rhs.h1) && (h2 == rhs.h2) && (length == rhs.length) &&
+               (invH1 == rhs.invH1) && (invH2 == rhs.invH2);
+    }
+
+    friend std::ostream& operator << (std::ostream &stream, const Node &T)
+    {
+        stream << T.h1 << " " << T.h2 << " " << T.length << " ";
+        stream << T.invH1 << " " << T.invH2;
+        return stream;
+    }
+};
+
+vector<ModInteger<MOD1>> bases1;
+vector<ModInteger<MOD2>> bases2;
+
+void initBases(const unsigned int N)
+{
+    bases1.resize(N);
+    bases2.resize(N);
+
+    bases1[0] = ModInteger<MOD1>(1U);
+    bases2[0] = ModInteger<MOD2>(1U);
+
+    for (unsigned int i = 1; i < N; ++i)
+    {
+        bases1[i] = ModInteger<MOD1>(BASE) * bases1[i - 1];
+        bases2[i] = ModInteger<MOD2>(BASE) * bases2[i - 1];
+    }
+}
+
+Node join(const Node &L, const Node &R)
+{
+    Node T;
+
+    if (L.length == 0)
+        T = R;
+    else if (R.length == 0)
+        T = L;
+    else
+    {
+        T.h1 = L.h1 * bases1[R.length] + R.h1;
+        T.h2 = L.h2 * bases2[R.length] + R.h2;
+
+        T.length = L.length + R.length;
+
+        T.invH1 = L.invH1 + R.invH1 * bases1[L.length];
+        T.invH2 = L.invH2 + R.invH2 * bases2[L.length];
+    }
+
+    return T;
+}
+
+class HashTree
+{
+public:
+
+    HashTree(const string &str) : tree(vector<Node>()), N(str.size()) {
+
+        tree.resize(4 * N);
+        build(1, 0, N - 1, str);
+    }
+
+    void update(const unsigned int position, const char c)
+    {
+        assert(position < this->N);
+        update(1, 0, N - 1, position, c);
+    }
+
+    Node query(const unsigned int x, const unsigned int y)
+    {
+        assert(x <= y && y < N);
+        return query(1, 0, N - 1, x, y);
+    }
+
+private:
+
+    vector<Node> tree;
+    unsigned int N;
+
+    void build(unsigned int node, unsigned int l, unsigned int r, const string &str)
+    {
+        if (l == r)
+            tree[node] = Node(str[l]);
+        else
+        {
+            unsigned int m = (l + r) / 2;
+
+            build(2 * node, l, m, str);
+            build(2 * node + 1, m + 1, r, str);
+
+            tree[node] = join(tree[2 * node], tree[2 * node + 1]);
+        }
+    }
+
+    void update(unsigned int node, unsigned int l, unsigned int r, unsigned int pos, const char c)
+    {
+        if (l == r)
+            tree[node] = Node(c);
+        else
+        {
+            unsigned int m = (l + r) / 2;
+
+            if (pos <= m)
+                update(2 * node, l, m, pos, c);
+            else
+                update(2 * node + 1, m + 1, r, pos, c);
+
+            tree[node] = join(tree[2 * node], tree[2 * node + 1]);
+        }
+    }
+
+    Node query(unsigned int node, unsigned int l, unsigned int r, unsigned int i, unsigned int j)
+    {
+        if (i <= l && r <= j)
+            return tree[node];
+        else
+        {
+            unsigned int m = (l + r) / 2;
+
+            if (i <= m && m < j)
+                return join(query(2 * node, l, m, i, j), query(2 * node + 1, m + 1, r, i, j));
+
+            if (i <= m)
+                return query(2 * node, l, m, i, j);
+            else
+                return query(2 * node + 1, m + 1, r, i, j);
+        }
+    }
+};
+
+const int MAX_L = 2000000;
+
+int main()
+{
+    initBases(MAX_L);
+
+    ///ifstream cin("data.in");
+    ios_base::sync_with_stdio(false);
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        string s;
+        cin >> s;
+
+        if (s.size() == 1)
+        {
+            cout << "NO\n";
+            continue;
+        }
+
+        if (s.size() % 2 == 0)
+        {
+            HashTree tree(s);
+            int N = s.size();
+
+            if (tree.query(0, N / 2 - 1) == tree.query(N / 2, N - 1))
+                cout << "YES\n";
+            else
+                cout << "NO\n";
+        }
+        else
+        {
+            HashTree tree(s);
+            int mid = s.size() / 2;
+            int N = s.size();
+
+            bool valid = false;
+
+            Node H = tree.query(mid + 1, N - 1);
+
+            for (int i = 0; i <= mid && !valid; ++i)
+            {
+                ///we erase i
+                Node solution;
+
+                if (i >= 1)
+                    solution = join(solution, tree.query(0, i - 1));
+
+                if (i + 1 <= mid)
+                    solution = join(solution, tree.query(i + 1, mid));
+
+                if (solution.h1 == H.h1 && solution.h2 == H.h2)
+                    valid = true;
+            }
+
+            H = tree.query(0, mid - 1);
+
+            for (int i = mid; i < N && !valid; ++i)
+            {
+                ///we erase i
+                Node solution;
+
+                if (mid <= i - 1)
+                    solution = join(solution, tree.query(mid, i - 1));
+
+                if (i + 1 <= N - 1)
+                    solution = join(solution, tree.query(i + 1, N - 1));
+
+                if (solution.h1 == H.h1 && solution.h2 == H.h2)
+                    valid = true;
+            }
+
+            if (valid)
+                cout << "YES\n";
+            else
+                cout << "NO\n";
+        }
+    }
+
+    return 0;
+}

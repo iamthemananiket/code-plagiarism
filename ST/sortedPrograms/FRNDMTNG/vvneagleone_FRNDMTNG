@@ -1,0 +1,202 @@
+// Program and program template by vvneagleone
+
+#include<cstdio>
+#include<iostream>
+#include<iomanip>
+#include<algorithm>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<climits>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<set>
+#include<map>
+using namespace std;
+typedef long long LL;
+typedef long double LD;
+#define MOD 1000000007LL
+
+#ifdef __GNUC__
+    #if ( __GNUC__ >= 4 && __GNUC_MINOR__ >= 7 && __cplusplus > 201100L )
+        #include<unordered_set>
+        #include<unordered_map>
+    #endif
+#endif // __GNUC__
+
+#ifdef __WIN32
+    #define gx getchar
+    #define px putchar
+    #define ps putchar(' ')
+    #define pn putchar('\n')
+#else
+    #define gx getchar_unlocked
+    #define px putchar_unlocked
+    #define ps putchar_unlocked(' ')
+    #define pn putchar_unlocked('\n')
+#endif // __WIN32
+
+void scan(int &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*sign;}
+void lscan(LL &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*(LL)(sign);}
+int sscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n')a[i++]=c,c=gx();a[i]=0;return i;}
+int wscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n'&&c!=' ')a[i++]=c,c=gx();a[i]=0;return i;}
+void print(int n){if(n<0){n=-n;px('-');}int i=10;char o[10];do{o[--i]=(n%10)+'0';n/=10;}while(n);do{px(o[i]);}while(++i<10);}
+void lprint(LL n){if(n<0LL){n=-n;px('-');}int i=21;char o[21];do{o[--i]=(n%10LL)+'0';n/=10LL;}while(n);do{px(o[i]);}while(++i<21);}
+void sprint(const char*a){const char*p=a;while(*p)px(*p++);}
+LL power(LL b,LL e,LL m=MOD){LL r=1;while(e){if(e&1)r=(r*b)%m;b=(b*b)%m;e>>=1;}return r;}
+LL minv(LL a,LL m=MOD){LL c,t,q,x,y;c=m;x=0;y=1;while(a>1){q=a/c;t=c;c=a%c;a=t;t=x;x=y-q*x;y=t;}if(y<0)y+=m;return y;}
+LL mmul(LL a,LL b,LL m=MOD){LL x=0,y=a%m;while(b){if(b&1)x=(x+y)%m;y=(y<<1)%m;b>>=1;}return x%m;}
+LL absll(LL x){if(x<0)return -x;return x;}
+
+class point {
+public:
+    LL xx;
+    LL yy;
+    LD x;
+    LD y;
+    void ldify() {
+        x = (LD)(xx);
+        y = (LD)(yy);
+    }
+} P[10];
+
+LD get_area( point a, point b, point c ) {
+    LD ar = a.x*(b.y-c.y) + b.x*(c.y-a.y) + c.x*(a.y-b.y);
+    ar /= (LD)(2);
+    return ar;
+}
+
+int main() {
+    LL T, T1, T2, t1, t2;
+    lscan(T);
+    while(T--) {
+        lscan(T1);
+        lscan(T2);
+        lscan(t1);
+        lscan(t2);
+
+        string mys;
+
+        int j = 0;
+        // A
+        mys += 'A';
+        P[j].xx = 0; P[j].yy = 0;
+        P[j].ldify();
+        ++j;
+
+        if( t1 < T2 ) { // aB
+            mys += 'B';
+            P[j].xx = 0; P[j].yy = t1;
+            P[j].ldify();
+            ++j;
+            if( T2-t1 < T1 ) { // abD
+                mys += 'D';
+                P[j].xx = T2-t1; P[j].yy = T2;
+                P[j].ldify();
+                ++j;
+                if( T2+t2 <= T1 ) { //abdJH
+                    mys += 'J';
+                    P[j].xx = T2+t2; P[j].yy = T2;
+                    P[j].ldify();
+                    ++j;
+                    mys += 'H';
+                    P[j].xx = t2; P[j].yy = 0;
+                    P[j].ldify();
+                    ++j;
+                }
+                else { // abdE
+                    mys += 'E';
+                    P[j].xx = T1; P[j].yy = T2;
+                    P[j].ldify();
+                    ++j;
+                    if( T1-t2 > 0 ) { // abdeFH
+                        mys += 'F';
+                        P[j].xx = T1; P[j].yy = T1-t2;
+                        P[j].ldify();
+                        ++j;
+                        mys += 'H';
+                        P[j].xx = t2; P[j].yy = 0;
+                        P[j].ldify();
+                        ++j;
+                    }
+                    else { // abdeG
+                        mys += 'E';
+                        P[j].xx = T1; P[j].yy = 0;
+                        P[j].ldify();
+                        ++j;
+                    }
+                }
+            }
+            else { // abI
+                mys += 'I';
+                P[j].xx = T1; P[j].yy = T1+t1;
+                P[j].ldify();
+                ++j;
+                if( T1-t2 > 0 ) { // abiFH
+                    mys += 'F';
+                    P[j].xx = T1; P[j].yy = T1-t2;
+                    P[j].ldify();
+                    ++j;
+                    mys += 'H';
+                    P[j].xx = t2; P[j].yy = 0;
+                    P[j].ldify();
+                    ++j;
+                }
+                else { // abiG
+                    mys += 'G';
+                    P[j].xx = T1; P[j].yy = 0;
+                    P[j].ldify();
+                    ++j;
+                }
+            }
+        }
+        else { // aC
+            mys += 'C';
+            P[j].xx = 0; P[j].yy = T2;
+            P[j].ldify();
+            ++j;
+            if( T2+t2 > T1 ) { // acE
+                mys += 'E';
+                P[j].xx = T1; P[j].yy = T2;
+                P[j].ldify();
+                ++j;
+                if( T1-t2 > 0 ) { // aceFH
+                    mys += 'F';
+                    P[j].xx = T1; P[j].yy = T1-t2;
+                    P[j].ldify();
+                    ++j;
+                    mys += 'H';
+                    P[j].xx = t2; P[j].yy = 0;
+                    P[j].ldify();
+                    ++j;
+                }
+                else { // aceG
+                    mys += 'G';
+                    P[j].xx = T1; P[j].yy = 0;
+                    P[j].ldify();
+                    ++j;
+                }
+            }
+            else { // acJH
+                mys += 'J';
+                P[j].xx = T2+t2; P[j].yy = T2;
+                P[j].ldify();
+                ++j;
+                mys += 'H';
+                P[j].xx = t2; P[j].yy = 0;
+                P[j].ldify();
+                ++j;
+            }
+        }
+        LD area = 0; LL m = j;
+        for( j = 1; j < m-1; ++j ) {
+            area += get_area( P[0], P[j], P[j+1] );
+            //cout << get_area( P[0], P[j], P[j+1] ) << endl;
+        }
+        if( area < (LD)0 ) area = (LD)0 - area;
+        //cout << "String : " << mys << endl;
+        cout << ( area / ((LD)(T1)*(LD)(T2)) ) << endl;
+    }
+    return 0;
+}

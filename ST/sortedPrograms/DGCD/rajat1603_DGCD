@@ -1,0 +1,236 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+#define each(x) for(typeof(x.begin()) it = x.begin() ; it != x.end() ; ++it)
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+inline char scanc(){
+    char c = getchar_unlocked();
+    while(c < 'C' || c > 'F'){
+        c = getchar_unlocked();
+    }
+    return c;
+}
+const int N = 50001;
+inline int gcd(int a , int b){
+    b = max(b , -b);
+    a = max(a , -a);
+    while(b){
+        int temp = a % b;
+        a = b;
+        b = temp;
+    }
+    return a;
+}
+struct node{
+    int start;
+    int finish;
+    int gcd1;
+};
+inline void combine(node &l , node &r,node &temp){
+    temp.start = l.start;
+    temp.finish = r.finish;
+    temp.gcd1 = gcd(gcd(r.start - l.finish , r.gcd1 ) , l.gcd1);
+}
+struct tree{
+    node segtree[N<<2];
+    int lazy[N<<2];
+    int arr[N];
+    int n;
+    void build(int l , int r , int node){
+        lazy[node] = 0;
+        if(l == r){
+            segtree[node].start = arr[l];
+            segtree[node].finish = arr[r];
+            segtree[node].gcd1 = 0;
+        }
+        else{
+            int mid = (l + r) >> 1;
+            int lc = node + node;
+            int rc = lc | 1;
+            build(l , mid , lc);
+            build(mid + 1 , r , rc);
+            combine(segtree[lc] , segtree[rc] , segtree[node]);
+        }
+    }
+    void push(int l , int r , int node){
+        if(lazy[node]){
+            segtree[node].start += lazy[node];
+            segtree[node].finish += lazy[node];
+            if(l ^ r){
+                int lc = node + node;
+                int rc = lc | 1;
+                lazy[lc] += lazy[node];
+                lazy[rc] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    void update(int l , int r , int node , int ql ,int qr , int val){
+        push(l,r,node);
+        if(l > qr || r < ql){
+            return;
+        }
+        if(l >= ql && r <= qr){
+            lazy[node] += val;
+            push(l,r,node);
+            return;
+        }
+        int mid = (l + r) >> 1;
+        int lc = node + node;
+        int rc = lc | 1;
+        update(l,mid,lc,ql,qr,val);
+        update(mid+1,r,rc,ql,qr,val);
+        combine(segtree[lc] , segtree[rc] , segtree[node]);
+    }
+    int query(int l , int r , int node, int ql , int qr){
+        push(l,r,node);
+        if(l > qr || r < ql){
+            return 0;
+        }
+        if(l >= ql && r <= qr){
+            return gcd(segtree[node].start , segtree[node].gcd1);
+        }
+        int mid = (l + r) >> 1;
+        int lc = node + node;
+        int rc = lc | 1;
+        return gcd(query(l,mid,lc,ql,qr),query(mid+1,r,rc,ql,qr));
+    }
+    inline void update(int l , int r , int val){
+        update(1,n,1,l,r,val);
+    }
+    inline int query(int l , int r){
+        return query(1,n,1,l,r);
+    }
+};
+tree st;
+//SEGMENTREE STUFF FINISH
+//HLD START
+int val[N];
+int n , q;
+list<int> v[N];
+static int chainhead[N];
+int timer = 0;
+static int entry[N];
+static int depth[N];
+static int subtree[N];
+static int parent[N];
+void dfs(int node,int paren,int level){
+    depth[node] = level;
+    parent[node] = paren;
+    subtree[node] = 1;
+    each(v[node]){
+        if(*it != paren){
+            dfs(*it,node,level+1);
+            subtree[node] += subtree[*it];
+        }
+    }
+}
+void hld(int node){
+    entry[node] = ++timer;
+    st.arr[timer] = val[node];
+    int mx = -1 , id = -1;
+    each(v[node]){
+        if(*it != parent[node]){
+            if(subtree[*it] > mx){
+                mx = subtree[*it];
+                id = *it;
+            }
+        }
+    }
+    if(id != -1){
+        chainhead[id] = chainhead[node];
+        hld(id);
+    }
+    each(v[node]){
+        if(*it != parent[node] && *it != id){
+            chainhead[*it] = *it;
+            hld(*it);
+        }
+    }
+}
+inline void upd(int a , int b,int val){
+    int count = 0;
+    while(chainhead[a] ^ chainhead[b]){
+        ++count;
+        if(depth[chainhead[a]] > depth[chainhead[b]]){
+            //cout << a << " " << chainhead[a] << " " << entry[a] << " " <<entry[chainhead[a]] << endl;
+            st.update(entry[chainhead[a]],entry[a],val);
+            a = parent[chainhead[a]];
+        }
+        else{
+           // cout << b << " " << chainhead[b] << " " << entry[b] << " " <<entry[chainhead[b]] << endl;
+            st.update(entry[chainhead[b]],entry[b],val);
+            b = parent[chainhead[b]];
+        }
+       // cout << a << " " << b << endl;
+        assert(count <= 20);
+    }
+    if(depth[a] > depth[b]){
+        swap(a,b);
+    }
+    //cout << a << " " << b << " " << entry[a] << " " << entry[b] << endl << endl;
+    st.update(entry[a],entry[b],val);
+}
+inline int solve(int a,int b){
+    int count = 0;
+    int res = 0;
+    while(chainhead[a] ^ chainhead[b]){
+        ++count;
+        if(depth[chainhead[a]] > depth[chainhead[b]]){
+            res = gcd(res,st.query(entry[chainhead[a]],entry[a]));
+            a = parent[chainhead[a]];
+        }
+        else{
+            res = gcd(res,st.query(entry[chainhead[b]],entry[b]));
+            b = parent[chainhead[b]];
+        }
+        assert(count <= 20);
+    }
+    if(depth[a] > depth[b]){
+        swap(a,b);
+    }
+    res = gcd(res , st.query(entry[a] , entry[b]) );
+    return res;
+}
+int main(){
+    n = scan();
+    st.n = n;
+    st.arr[0] = 0;
+    for(int i = 1 ; i < n ; ++i){
+        int a = scan() + 1 , b = scan() + 1;
+        v[a].pb(b);
+        v[b].pb(a);
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        val[i] = scan();
+    }
+    depth[0] = 0;
+    dfs(1,0,1);
+    chainhead[1] = 1;
+    hld(1);
+    st.build(1,n,1);
+    q = scan();
+    while(q--){
+        char type = scanc();
+        if(type=='F'){
+            int l = scan() + 1 , r = scan() + 1;
+            printf("%d\n",solve(l,r));
+        }
+        else{
+            int l = scan() + 1 , r = scan() + 1 , val = scan();
+            upd(l,r,val);
+        }
+    }
+}

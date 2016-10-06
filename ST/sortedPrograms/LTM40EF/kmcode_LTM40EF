@@ -1,0 +1,128 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+int n;
+int m;
+
+long long int k;
+
+vector<vector<long long int> > mat[2];
+
+vector<long long int> emp;
+#include<unordered_map>
+
+unordered_map<long long int, vector<string> > mp[2];
+vector<pair<long long int, string> > C[2];
+bool cmp2(pair<long long int, string> & p1, pair<long long int, string> &p2){
+	return p1.first < p2.first;
+}
+void init(int id){
+	int siz = mat[id].size();
+	long long int f = 1;
+	for (int i = 0; i < siz; i++){
+		f *= n;
+	}
+	char tmp[12];
+	for (int i = 0; i < f; i++){
+		long long int cost = 0;
+		int ii = i;
+		for (int j = 0; j < siz; j++){
+			tmp[j] = ('a' + (ii%n));
+			cost += mat[id][j][ii%n];
+			ii /= n;
+		}
+		tmp[siz] = '\0';
+		if (id)mp[id][cost].emplace_back(tmp);
+		if(id==0)C[id].emplace_back(make_pair(cost, tmp));
+		else C[id].emplace_back(make_pair(cost, ""));
+	}
+	sort(C[id].begin(), C[id].end(),cmp2);
+}
+long long int S(long long int val){
+	int siz = C[0].size();
+	long long int w = 0;
+	int las = C[1].size();
+	las--;
+	int sss = C[1].size();
+	for (int i = 0; i < siz; i++){
+		if (val < C[0][i].first)break;
+		long long int need = val - C[0][i].first;
+		while (las >= 0 && C[1][las].first >= need){
+			las--;
+		}
+		w += sss - (las + 1);
+	}
+	return w;
+}
+void output(string A, string B){
+	printf("%s%s\n", A.c_str(), B.c_str());
+}
+bool cmp(pair<long long int, string> &p1, pair<long long int, string> &p2){
+	return p1.second < p2.second;
+}
+int main(){
+	cin >> n >> m;
+	scanf("%lld", &k);
+	emp.assign(n, 0);
+	int lef = m / 2;
+	long long int sum = 0;
+	for (int i = 0; i < m; i++){
+		int f = 0;
+		if (i >= lef){
+			f = 1;
+		}
+		mat[f].push_back(emp);
+		long long int c = 0;
+		for (int j = 0; j < n; j++){
+			long long int p;
+			scanf("%lld", &p);
+			mat[f].back()[j] = p;
+			c = max(c, (long long int)p);
+		}
+		sum += c;
+	}
+	init(0);
+	init(1);
+	long long int mint = -1;
+	long long int maxt = sum + 10;
+	while (mint + 1LL < maxt){
+		long long int mid = (mint + maxt) >> 1LL;
+		if (S(mid) >= k){
+			mint = mid;
+		}
+		else{
+			maxt = mid;
+		}
+	}
+	if (S(mint) < k){
+		maxt = mint;
+	}
+	else{
+		mint = maxt;
+	}
+	long long int search_for = maxt - 1LL;
+	k -= S(maxt);
+	vector<pair<long long int, string> > &vv = C[0];
+	sort(vv.begin(), vv.end(), cmp);
+	int ssz = C[0].size();
+	for (int i = 0; i < ssz; i++){
+		long long int need = search_for - vv[i].first;
+		long long int f = mp[1][need].size();
+		if (f < k){
+			k -= f;
+			continue;
+		}
+		vector<string> &V = mp[1][need];
+		sort(V.begin(), V.end());
+		int sz = V.size();
+		for (int j = 0; j < sz; j++){
+			k--;
+			if (k == 0){
+				output(vv[i].second, V[j]);
+				return 0;
+			}
+		}
+	}
+	return 0;
+}

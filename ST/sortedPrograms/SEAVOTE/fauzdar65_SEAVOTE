@@ -1,0 +1,19 @@
+#include <iostream>
+#define ll long long
+using namespace std;
+int t,n,b[100005];
+
+int main() {
+	cin>>t;
+	while(t--)
+	{
+		cin>>n;
+		ll su=0;
+		int d=n;
+		for(int i=1;i<=n;i++){cin>>b[i]; su+=b[i]-1; if(b[i]==0){su++;d--;}}
+		
+		if(su<100 && su>=(100-d))cout<<"YES\n";
+		else cout<<"NO\n";
+	}
+	return 0;
+}

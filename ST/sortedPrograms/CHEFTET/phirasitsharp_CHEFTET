@@ -1,0 +1,70 @@
+#include <iostream>
+
+using namespace std;
+
+const int N = 10010;
+
+int use[N];
+
+int A[N], B[N];
+int n;
+
+void solve( void ) {
+	cin >> n;
+	for ( int i = 0 ; i < n ; i++ ) {
+		cin >> B[i];
+	}
+	for ( int i = 0 ; i < n ; i++ ) {
+		cin >> A[i];
+	}
+
+	long long sum = 0ll;
+	for ( int i = 0 ; i < n ; i++ ) {
+		sum += A[i] + B[i];
+		use[i] = 0;
+	}
+
+	sum /= n;
+	bool err = false;
+	for ( int i = 0 ; i < n and !err ; i++ ) {
+		if ( i > 0 and !use[i-1] and A[i] + B[i-1] == sum ) {
+			use[i-1] = true;
+		} else if ( i > 0 and !use[i-1] and !use[i] and A[i] + B[i-1] + B[i] == sum ) {
+			use[i-1] = use[i] = true;
+		} else if ( i > 0 and i+1 < n and !use[i-1] and !use[i+1] and A[i] + B[i-1] + B[i+1] == sum ) {
+			use[i-1] = use[i+1] = true;
+		} else if ( i > 0 and i+1 < n and !use[i-1] and !use[i] and !use[i+1] and A[i] + B[i-1] + B[i] + B[i+1] == sum ) {
+			use[i-1] = use[i] = use[i+1] = true;
+		} else if ( i > 0 and !use[i-1] ) {
+			err = true;
+		} else if ( !use[i] and A[i] + B[i] == sum ) {
+			use[i] = true;
+		} else if ( i+1 < n and !use[i] and !use[i+1] and A[i] + B[i] + B[i+1] == sum ) {
+			use[i] = use[i+1] = true;
+		} else if ( i+1 < n and !use[i+1] and A[i] + B[i+1] == sum ) {
+			use[i+1] = true;
+		} else if ( A[i] != sum ) {
+			err = true;
+		}
+	}
+
+	for ( int i = 0 ; i < n ; i++ ) {
+		if ( !use[i] ) {
+			err = true;
+		}
+	}
+	
+	cout << ( err ? -1 : sum ) << endl;
+}
+
+int main() {
+
+	ios::sync_with_stdio( false );
+	int test_num;
+	cin >> test_num;
+	while( test_num-- ) {
+		solve();
+	}
+
+	return 0;
+}

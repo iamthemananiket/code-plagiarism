@@ -1,0 +1,19 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int t;
+    scanf("%d",&t);
+    while(t--)
+    {
+        int n,m,ans=0;
+        scanf("%d%d",&n,&m);
+        for(int i=1;i<=n;i++)
+        for(int j=i;j<=n;j++)
+        {
+            if(__gcd(i,j)==m)
+                ans++;
+        }
+        printf("%d\n",ans);
+    }
+}

@@ -1,0 +1,113 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+vector<int> sqrtSort(const vector<pair<int, int> > &q, const int S) {
+	int n = q.size();
+	vector<long long> pack(n);
+	for(int i = 0; i < n; i ++) {
+		pack[i] =
+			(long long)(q[i].first / S) << 50 |
+			(long long)((q[i].first / S & 1) == 0 ? q[i].second : (1 << 25) - 1 - q[i].second) << 25 |
+			i;
+	}
+	sort(pack.begin(), pack.end());
+	vector<int> res(n);
+	for(int i = 0; i < n; i ++)
+		res[i] = pack[i] & ((1 << 25) - 1);
+	return res;
+}
+
+int main() {
+	mt19937 re;
+	int N; int M; int K;
+	while(~scanf("%d%d%d", &N, &M, &K)) {
+		vector<int> A(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &A[i]), -- A[i];
+		vector<pair<int, int>> queries(K);
+		rep(i, K) {
+			int L; int R;
+			scanf("%d%d", &L, &R), -- L, -- R;
+			queries[i] = make_pair(L, R);
+		}
+		vector<int> ord = sqrtSort(queries, 300);
+		vector<vi> indices(M);
+		rep(i, N)
+			indices[A[i]].push_back(i);
+		int L = 0, R = -1;
+		vector<int> ans(K, -1);
+		const int BucketSize = 300;
+		vector<pair<const int *, const int *>> ranges(M);
+		rep(i, M) if(!indices[i].empty())
+			ranges[i] = make_pair(indices[i].data(), indices[i].data());
+		vector<int> bucket((N - 1) / BucketSize + 1, 0);
+		vector<int> cnt(((N - 1) / BucketSize + 1) * BucketSize, 0);
+
+		auto addcnt = [&](pair<const int*, const int*> &r, int sign) {
+			unsigned diff = r.first == r.second ? 0 : *(r.second - 1) - *r.first;
+			cnt[diff] += sign;
+			bucket[diff / BucketSize] += sign;
+		};
+
+		auto add = [&](int i, int dir) {
+			int a = A[i];
+			auto &r = ranges[a];
+			addcnt(r, -1);
+			if(dir == 0)
+				++ r.second;
+			else
+				-- r.first;
+			addcnt(r, +1);
+		};
+
+		auto remove = [&](int i, int dir) {
+			int a = A[i];
+			auto &r = ranges[a];
+			addcnt(r, -1);
+			if(dir == 0)
+				-- r.second;
+			else
+				++ r.first;
+			addcnt(r, +1);
+		};
+
+		rep(i, M) if(ranges[i].first != nullptr)
+			addcnt(ranges[i], 1);
+
+		for(int ii = 0; ii < K; ii ++) {
+			int q = ord[ii];
+			int qL = queries[q].first, qR = queries[q].second;
+			while(R < qR) {
+				R ++;
+				add(R, 0);
+			}
+			while(L > qL) {
+				L --;
+				add(L, 1);
+			}
+			while(R > qR) {
+				remove(R, 0);
+				R --;
+			}
+			while(L < qL) {
+				remove(L, 1);
+				L ++;
+			}
+			int bi = (N - 1) / BucketSize;
+			while(bucket[bi] == 0) -- bi;
+			int diff = (bi + 1) * BucketSize - 1;
+			while(cnt[diff] == 0) -- diff;
+			ans[q] = diff;
+		}
+		for(int i = 0; i < K; ++ i)
+			printf("%d\n", ans[i]);
+	}
+	return 0;
+}

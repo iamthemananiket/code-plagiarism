@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+ll sum[100013];
+int l,r;
+
+void solve() {
+	scanf("%d%d",&l,&r);
+	ll ans = 0;
+	for (int i=l;i<=r;i++) ans+=sum[i];
+	printf("%lld\n",ans);
+}
+
+int main() {
+	for (int i=1;i<100013;i+=2) {
+		for (int j=i;j<100013;j+=i) sum[j]+=i;
+	}
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		solve();
+	}
+
+	return 0;
+}

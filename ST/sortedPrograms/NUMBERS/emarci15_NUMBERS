@@ -1,0 +1,38 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int T;
+
+int n;
+
+pair<int,string> said[10000];
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+
+        for(int i=0; i<n; i++) {
+            cin >> said[i].second >> said[i].first;
+        }
+
+        sort(said,said+n);
+
+        bool found = 0;
+        for(int i=0; i<n; i++) {
+            if((i) && (said[i-1].first == said[i].first)) continue;
+            if((i<n-1) && (said[i+1].first == said[i].first)) continue;
+            cout << said[i].second << endl;
+            found = 1;
+            break;
+        }
+
+        if(!found) {
+            cout << "Nobody wins." << endl;
+        }
+    }
+
+    return 0;
+}

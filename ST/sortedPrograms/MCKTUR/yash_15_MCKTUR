@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define mod 1000000007
+#define ll long long
+
+int a[100005],b[100005],fac[500005];
+
+pair<int,int> tree[400000];
+int n,beg;
+
+void build(){
+	int i;
+	for(beg=1;beg<n;beg+=beg);
+	for(i=0;i<n;i++){
+		tree[beg+i].first=a[i];
+		tree[beg+i].second=b[i];
+	}
+	for(;i<beg;i++){
+		tree[beg+i].first=0;
+		tree[beg+i].second=mod;
+	}
+	for(i=beg-1;i;i--){
+		tree[i].first=max(tree[i+i].first,tree[i+i+1].first);
+		tree[i].second=min(tree[i+i].second,tree[i+i+1].second);
+	}
+}
+
+pair<int,int> query(int x, int y, int idx=1,int l=beg, int r=beg+beg-1){
+	if(x<=l && y>=r)
+		return tree[idx];
+	if(x>r || y<l)
+		return make_pair(0,mod);
+	int mid = (l+r)/2;
+	pair<int,int> v1 = query(x,y,idx+idx,l,mid);
+	pair<int,int> v2 = query(x,y,idx+idx+1,mid+1,r);
+	return make_pair(max(v1.first,v2.first),min(v1.second,v2.second));
+}
+
+int rev(long long x){
+	int ans=1,exp=mod-2;x%=mod;
+	while(exp){
+		if(exp&1)
+			ans=(ans*x)%mod;
+		x=(x*x)%mod;
+		exp>>=1;
+	}
+	return ans;
+}
+
+void solve(pair<int,int> z){
+	//cout<<z.first<<" "<<z.second<<" :: ";
+	int k,l;
+	l=z.first/2,k=z.second;
+	if(k>l)
+		printf("0\n");
+	else
+	printf("%d\n",(((fac[2*l-k-1]*1ll*k)%mod)*rev((fac[l-k]*1ll*fac[l])%mod))%mod);
+}
+
+int main(){
+	int t,i,l,r;
+	cin >> n >> t;
+	for(i=0;i<n;i++)
+		scanf("%d",a+i);
+	for(i=0;i<n;i++)
+		scanf("%d",b+i);
+	build();
+	fac[0]=1;
+	for(ll li=1;li<=400000;li++)
+		fac[li]=(fac[li-1]*li)%mod;
+	while(t--){
+		scanf("%d%d",&l,&r);
+		solve(query(l+beg-1,r+beg-1));
+	}
+}

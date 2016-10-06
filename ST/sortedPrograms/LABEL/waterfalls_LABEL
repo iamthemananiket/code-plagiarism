@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MOD = 1e9+7;
+int add(int a, int b) { return a+b-(a+b>=MOD)*MOD; }
+int sub(int a, int b) { return a-b+(a-b<0)*MOD; }
+int mult(int a, int b) { return (1LL*a*b)%MOD; }
+
+int BAD;
+const int MAX = 31113;
+
+int n,m,d;
+vector<int> adj[113];
+int small[113][MAX];
+int bad[113];
+
+void dfseasy(int x, int p=0) {
+	if (p) adj[x].erase(find(adj[x].begin(),adj[x].end(),p));
+	for (int i: adj[x]) dfseasy(i,x);
+	for (int j=1;j<=m;j++) {
+		small[x][j] = 1;
+		for (int i: adj[x]) {
+			int cur = 0;
+			if (j-d>=1) cur = add(cur,small[i][j-d]);
+			if (j+d<=m) cur = add(cur,sub(small[i][m],small[i][j+d-1]));
+			small[x][j] = mult(small[x][j],cur);
+		}
+	}
+	for (int j=1;j<MAX;j++) small[x][j] = add(small[x][j],small[x][j-1]);
+}
+void dfs(int x, int p=0) {
+	if (p) adj[x].erase(find(adj[x].begin(),adj[x].end(),p));
+	for (int i: adj[x]) dfs(i,x);
+	for (int j=1;j<=BAD;j++) {
+		small[x][j] = 1;
+		for (int i: adj[x]) {
+			int cur = 0;
+			cur = add(cur,small[i][BAD]);
+			cur = add(cur,mult(m-2*BAD,bad[i]));
+			if (j-d>=1) cur = add(cur,small[i][j-d]);
+			cur = add(cur,sub(small[i][BAD],small[i][j+d-1]));
+			small[x][j] = mult(small[x][j],cur);
+		}
+	}
+	bad[x] = 1;
+	for (int i: adj[x]) {
+		int cur = 0;
+		cur = add(cur,small[i][BAD]);
+		cur = add(cur,small[i][BAD]);
+		cur = add(cur,mult(m-2*BAD-2*d+1,bad[i]));
+		bad[x] = mult(bad[x],cur);
+	}
+	for (int j=BAD+1;j<MAX;j++) small[x][j] = bad[x];
+	for (int j=1;j<MAX;j++) small[x][j] = add(small[x][j],small[x][j-1]);
+}
+
+void solve() {
+	memset(small,0,sizeof small);
+	memset(bad,0,sizeof bad);
+	for (int i=0;i<113;i++) adj[i].clear();
+	scanf("%d%d%d",&n,&m,&d);
+	for (int i=1;i<n;i++) {
+		int a,b;
+		scanf("%d%d",&a,&b);
+		adj[a].push_back(b);
+		adj[b].push_back(a);
+	}
+	if (d==0) {
+		int ans = 1;
+		for (int i=1;i<=n;i++) ans = mult(ans,m);
+		printf("%d\n",ans);
+		return;
+	}
+	BAD = n*d+10*d;
+	if (m<=2*BAD+20*d) {
+		dfseasy(1);
+		printf("%d\n",small[1][m]);
+		return;
+	} else dfs(1);
+	printf("%d\n",add(mult(small[1][BAD],2),mult(bad[1],m-2*BAD)));
+}
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	while (T--) {
+		solve();
+	}
+
+	return 0;
+}

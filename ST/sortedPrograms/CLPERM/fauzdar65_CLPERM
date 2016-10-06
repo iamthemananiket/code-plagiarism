@@ -1,0 +1,107 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <algorithm>
+#define ll long long
+using namespace std;
+
+int t;
+ll n,k;
+vector<ll> pos;
+int main() {
+	cin>>t;
+	
+	while(t--)
+	{
+		cin>>n>>k;
+		ll v;
+		//map<ll,int> fallen;
+		
+		pos.clear();
+		ll su=0;
+		for(ll i=0;i<k;i++)
+		{
+			cin>>v;
+			su+=v;
+			pos.push_back(v);
+			//if(v<=5000)fallen[v]=1;
+		}
+		
+		
+		ll an;
+		bool found=false;
+		
+		if(k>0)
+		{
+			sort(pos.begin(),pos.end());
+		ll cur=((pos[0]-1)*(pos[0]))/2;
+		
+		if(pos[0]==1)
+		{
+			cout<<"Chef\n"; 
+			continue;
+		}
+		if(pos[0]==2)
+		{
+			cout<<"Mom\n";
+			continue;
+		}
+		
+		
+		
+		for(ll i=1;i<pos.size();i++)
+		{
+			if((pos[i]-pos[i-1])>1)
+			{
+				cur+= ((pos[i]-1)*(pos[i]))/2 - ((pos[i-1])*(pos[i-1]+1))/2;
+				
+			
+			}
+			
+				if(pos[i]>cur)
+				{
+					found=true;
+					an=pos[i];
+					break;
+				}
+			
+		}
+		
+		//map<ll,int> reachable;
+		
+		
+		/*
+		for(ll i=1;i<=min((ll)1000,2*k +1);i++)
+		{
+			if(fallen.count(i) && !reachable.count(i))
+			{
+				found=true;
+				an=i;
+				break;
+				
+			}
+			
+			if(!fallen.count(i))
+			{
+			
+					
+				for(map<ll,int>::iterator it=reachable.begin();it!=reachable.end();++it )
+				{
+					if((it->first + i)<=max((ll)1000,2*k +1))reachable[it->first+i]=1;
+				}
+				
+				reachable[i]=1;
+		
+			}
+		}
+		*/
+		}
+		
+		if(!found)an= (n*(n+1))/2 - su+1;
+		
+		
+		if(an%2==1)cout<<"Chef\n";
+		else cout<<"Mom\n";
+	}
+	return 0;
+}

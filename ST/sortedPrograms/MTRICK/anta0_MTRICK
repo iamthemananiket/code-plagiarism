@@ -1,0 +1,146 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <list>
+#include <cassert>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define EPS 1e-9
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii;
+typedef long long ll; typedef vector<long long> vl; typedef pair<long long,long long> pll; typedef vector<pair<long long,long long> > vpll;
+typedef vector<string> vs; typedef long double ld;
+
+ll MOD;
+ll add(ll x, ll y) {
+	ll z = x + y;
+	if(z >= MOD) z -= MOD;
+	return z;
+}
+ll mult(ll x, ll y) {
+	ll a = x, r = 0;
+	while(y) {
+		if(y & 1)
+			if((r += a) >= MOD) r -= MOD;
+		if((a += a) >= MOD) a -= MOD;
+		y >>= 1;
+	}
+	return r;
+}
+struct Val {
+	//a + bx
+	ll a, b;
+	Val(): a(0), b(1) { }
+	Val(ll a_, ll b_): a(a_ % MOD), b(b_ % MOD) { }
+	Val &operator*=(const Val &that) {
+		//a' + b'(a + bx) = (a' + ab') + bb'x
+		a = add(that.a, mult(a, that.b));
+		b = mult(b, that.b);
+		return *this;
+	}
+	void clear() { a = 0, b = 1; }
+};
+const int logSegsSize = 10;
+Val segs[2<<logSegsSize];
+bool segslazy[2<<logSegsSize];
+int segN;
+
+void rangeAdd(int ql, int qr, const Val &p, int sl = 0, int sr = segN, int si = 0) {
+	if(sr <= ql || qr <= sl) ;
+	else if(ql <= sl && sr <= qr) {
+		segs[si] *= p;
+		segslazy[si] = true;
+	} else {
+		if(segslazy[si]) {
+			segs[si * 2 + 1] *= segs[si];
+			segs[si * 2 + 2] *= segs[si];
+			segslazy[si * 2 + 1] = true;
+			segslazy[si * 2 + 2] = true;
+			segs[si].clear();
+			segslazy[si] = false;
+		}
+		rangeAdd(ql, qr, p, sl, (sl + sr) / 2, si * 2 + 1);
+		rangeAdd(ql, qr, p, (sl + sr) / 2, sr, si * 2 + 2);
+	}
+}
+
+
+const Val &access(int q, int sl = 0, int sr = segN, int si = 0) {
+	if(sl == q && q+1 == sr) return segs[si];
+	if(segslazy[si]) {
+		segs[si * 2 + 1] *= segs[si];
+		segs[si * 2 + 2] *= segs[si];
+		segslazy[si * 2 + 1] = true;
+		segslazy[si * 2 + 2] = true;
+		segs[si].clear();
+		segslazy[si] = false;
+	}
+	if(q < (sl + sr) / 2)
+		return access(q, sl, (sl + sr) / 2, si * 2 + 1);
+	else
+		return access(q, (sl + sr) / 2, sr, si * 2 + 2);
+}
+
+ll L[1001];
+char S[1001];
+int main() {
+	int T;
+	scanf("%d", &T);
+	rep(ii, T) {
+		int N;
+		ll A, B, C;
+		cin >> N;
+		segN = 1;
+		while(segN < N) segN *= 2;
+		rep(i, segN*2) segs[i].clear();
+		rep(i, segN*2) segslazy[i] = false;
+		rep(i, N)
+			scanf("%lld", &L[i]);
+		cin >> A >> B >> C;
+		MOD = C;
+		rep(i, N) rangeAdd(i, i+1, Val(L[i], 1));
+		scanf("%s", S);
+		int left = 0, right = N; bool rev = false;
+		rep(i, N) {
+			if(S[i] == 'R') {
+				rev ^= true;
+			}else if(S[i] == 'A') {
+				rangeAdd(left, right, Val(A, 1));
+			}else if(S[i] == 'M') {
+				rangeAdd(left, right, Val(0, B));
+			}
+			int index = !rev ? left : right-1;
+			if(i != 0) putchar(' ');
+			ll x = access(index).a;
+			printf("%lld", x);
+			if(!rev) left ++; else right --;
+		}
+		puts("");
+	}
+	return 0;
+}

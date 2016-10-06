@@ -1,0 +1,93 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cassert>
+#include <cstring>
+
+#define x first
+#define y second
+
+using namespace std;
+
+typedef pair<int,int> pt;
+typedef unsigned long long ull;
+
+
+ull msk[110][110][50];
+ull cur[50];
+
+int V[110];
+int K,Q,N,B,M;
+
+pt red[110];
+pt bl[3010];
+
+int cross(pt p0, pt p1, pt p2){
+	return (1LL*(p1.x-p0.x)*(p2.y-p0.y)>1LL*(p1.y-p0.y)*(p2.x-p0.x));
+}
+
+int pop[(1<<22)+10];
+
+const int cc = (1<<22)-1;
+
+inline int popcount(ull n){
+	return ( pop[n&cc] + pop[(n>>22)&cc] + pop[n>>44]  );
+}
+
+void init(){
+	int i,j,k;
+
+	B = (M+63)/64;
+
+	for(i = 1; i < (1<<22); ++i){
+		for(k = 0; k < 22; ++k) if(i&(1<<k)) break;
+		pop[i] = pop[i^(1<<k)]+1;
+	}
+
+	for(i = 0; i < N; ++i){
+		for(j = 0; j < N; ++j){
+			if(j == i) continue;
+			for(k = 0 ; k < M; ++k){
+				if(cross(red[i],bl[k],red[j])) msk[i][j][k>>6] |= (1LL<<(k&63));
+			}
+		}
+	}
+}
+
+int query(){
+	int i;
+	memset(cur,-1,sizeof(ull)*B);
+
+	int k;
+	for(i = 0; i < K; ++i){
+		for(k = 0; k < B; ++k) cur[k]&=msk[V[i]][V[i+1]][k];
+	}
+
+	int sl =0;
+	for(k = 0; k < B; ++k) sl += popcount(cur[k]);
+	return sl;
+}
+
+int main(){
+
+	scanf("%d%d",&N,&M);
+
+	int i;
+	for(i =0 ; i < N; ++i) scanf("%d%d",&red[i].x,&red[i].y);
+	for(i = 0; i < M; ++i) scanf("%d%d",&bl[i].x,&bl[i].y);
+
+	init();
+
+	scanf("%d",&Q);
+	while(Q--){
+		scanf("%d",&K);
+		for(i = 0; i < K; ++i){
+			scanf("%d",&V[i]);
+			--V[i];
+		}
+		V[K] = V[0];
+		printf("%d\n",query());
+	}
+
+	return 0;
+}

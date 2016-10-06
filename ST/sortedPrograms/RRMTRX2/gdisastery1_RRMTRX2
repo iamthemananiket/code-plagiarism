@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 50;
+const int mod = 10000007;
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+int n, m;
+int A[MAX_N][MAX_N];
+
+int main(){
+  scanf("%d%d", &n, &m);
+  for(int i = 0; i < n; i++)
+    for(int j = 0; j < m; j++){
+      scanf("%d", &A[i][j]);
+      A[i][j] = (A[i][j] + mod) % mod;
+    }
+  int sum = 0;
+  for(int i = 0; i < n; i++)
+    madd(sum, A[i][0]);
+  for(int j = 1; j < m; j++){
+    int nsum = 0;
+    for(int i = 0; i < n; i++){
+      madd(nsum, mul(A[i][j], sum));
+    }
+    sum = nsum;
+  }
+  printf("%d\n", sum);
+  return 0;
+}

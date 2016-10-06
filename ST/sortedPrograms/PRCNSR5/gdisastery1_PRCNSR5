@@ -1,0 +1,9 @@
+#include <cstdio>
+#include <cstring>
+
+char s[100005];
+int main()
+{
+   scanf("%s", s);
+   puts((s[strlen(s)-1]-'0')%2 == 0 ? "YES" : "NO");
+}

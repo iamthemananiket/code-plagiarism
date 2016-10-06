@@ -1,0 +1,45 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int n;
+pair<int,int> a[100000];
+int aa[100000];
+int bb[100000];
+int x,y;
+
+int main()
+{
+    scanf("%d%d%d",&n,&x,&y);
+
+    for(int i=0; i<n; i++) {
+        scanf("%d",&aa[i]);
+    }
+    int j;
+    for(int i=0; i<n; i++) {
+        scanf("%d",&bb[i]);
+        a[i].first = bb[i]-aa[i];
+        a[i].second = bb[i];
+    }
+
+    sort(a,a+n);
+
+    int szum = 0;
+
+    int i=0; j=0;
+    int jj = n-1;
+    while((i+j) < n) {
+        if((((a[jj].first+a[i].first)>0) && (j<y)) || (i==x)) {
+            j++;
+            szum+=a[jj--].second;
+        } else {
+            szum+=a[i].second-a[i].first;
+            i++;
+        }
+    }
+
+    printf("%d\n",szum);
+
+    return 0;
+}

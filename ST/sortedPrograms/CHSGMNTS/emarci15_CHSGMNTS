@@ -1,0 +1,61 @@
+#include <cstdio>
+#include <set>
+#include <algorithm>
+
+using namespace std;
+
+int T,n;
+int a[1000];
+pair<int,int> pos[1001];
+
+set<int> sz;
+set<int> ins;
+
+long long Db(long long x, long long y) {
+    return ((y-x)*(y-(x+1ll)))/2ll;
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d",&n);
+        for(int i=0; i<n; i++) {
+            scanf("%d",&a[i]);
+            pos[i].first = a[i];
+            pos[i].second = i;
+        }
+        sort(pos,pos+n);
+        pos[n].first = 1000001;
+
+        long long sol(0ll);
+        for(int i=0; i<n; i++) {
+            sz.clear();
+            sz.insert(i-1);
+            sz.insert(n);
+            ins.clear();
+            long long db(Db(i-1,n));
+            for(int j=i; j<n; j++) {
+                if(ins.insert(a[j]).second) {
+                    for(auto in = lower_bound(pos,pos+n,make_pair(a[j],j)); in->first == a[j]; in++) {
+                        auto it = sz.lower_bound(in->second);
+                        int v = *it;
+                        it--;
+                        int k = *it;
+
+                        db -= Db(k,v);
+
+                        sz.insert(in->second);
+                        db += Db(k,in->second); db += Db(in->second,v);
+                    }
+                }
+                sol += db;
+            }
+
+        }
+
+        printf("%lld\n",sol);
+    }
+
+
+    return 0;
+}

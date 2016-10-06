@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+long long mulmod(long long a,long long b,long long c){
+    long long x = 0,y=a%c;
+    while(b > 0){
+        if(b%2 == 1){
+            x = (x+y)%c;
+        }
+        y = (y*2)%c;
+        b /= 2;
+    }
+    return x%c;
+}
+int main()
+{
+	//freopen("in.txt","r",stdin);
+	int n;
+	cin>>n;
+	vector<int> arr;
+	for(int i=0;i<n;i++){
+		int x;
+		cin>>x;
+		arr.push_back(x);
+	}
+	long long DP[n][n];
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			DP[i][j]=0;
+		}
+	}
+	for(int len=2;len<=n;len++){
+		for(int i=0;i<=n-len;i++){
+			int j=i+len-1;
+			DP[i][j]=DP[i][j-1];
+			if(arr[j]<0) continue;
+			for(int k=i;k<j;k++){
+				if(arr[k]+arr[j]==0){	
+					if(k>i+1)
+					{
+						long long int a=DP[i][k-1];
+						long long int b=DP[k+1][j-1];
+						DP[i][j]=DP[i][j] + mulmod(a+1,b+1,MOD);
+						DP[i][j]%=MOD;
+					}
+					else{
+						DP[i][j]++;
+						DP[i][j]+=DP[k+1][j-1];
+						DP[i][j]%=MOD;
+					}
+				}
+			}		
+		}
+	}
+	cout<<DP[0][n-1]+1;
+}

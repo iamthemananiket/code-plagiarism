@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 30;
+
+string A[maxn];
+int n; int K;
+int dp[maxn][maxn][4];
+
+bool check() {
+	rep(i,1,n) {
+		rep(j,1,n) {
+			if (A[i][j] == 'X') { dp[i][j][0] = dp[i][j][1] = dp[i][j][2] = dp[i][j][3] = 1; } 
+			else { dp[i][j][0] = dp[i][j][1] = dp[i][j][2] = dp[i][j][3] = 0; }
+			if (A[i][j] == 'X') {
+				if (i > 1) { dp[i][j][0]+=dp[i-1][j][0]; }
+				if (j > 1) { dp[i][j][1]+=dp[i][j-1][1]; }
+				if (i > 1 && j > 1) { dp[i][j][2]+=dp[i-1][j-1][2]; }
+				if (j < n && i > 1) { dp[i][j][3]+=dp[i-1][j+1][3]; }
+			}
+
+			//cout<<i<<" : "<<j<<" "<<dp[i][j][0]<<" : "<<dp[i][j][1]<<" : "<<dp[i][j][2]<<" : "<<dp[i][j][3]<<endl;
+
+			if (dp[i][j][1] >= K || dp[i][j][2] >= K || dp[i][j][3] >= K || dp[i][j][0] >= K) {
+				return true;
+			}
+		}
+	}
+	return false;
+
+
+}
+
+
+int solve() {
+	s(n); s(K);
+	rep(i,1,n) {
+		cin>>A[i]; A[i] = " " + A[i];
+	}
+	rep(i,1,n) {
+		rep(j,1,n) {
+			if (A[i][j] == '.') {
+				A[i][j] = 'X';
+				if (check()) {
+					cout<<"YES"<<endl; return 0;
+				}
+				A[i][j] = '.';
+			}
+		}
+	}
+	cout<<"NO"<<endl; return 0;
+}
+
+int main() {
+	int t; s(t); while (t--) solve();
+
+
+}

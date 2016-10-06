@@ -1,0 +1,169 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+const int base = 7, osn = 10000;
+
+using namespace std;
+
+struct Long {
+	vector < int > a;
+	Long() {
+		a.pb(0);
+	}
+	Long(vector < int > a) : a(a) {}
+	Long(string b) {
+		a.clear();
+		for (int i = sz(b) - 1; i >= 0; i--)
+		    a.pb(b[i] - '0');
+	}
+	Long operator * (int b) {
+	    vector < int > c = a;
+		for (int i = 0, carry = 0, cur; i < sz(c) || carry; i++) {
+			if (i == sz(c))
+				c.pb(0);
+			cur = carry + c[i] * b;
+			c[i] = cur % base;
+			carry = cur / base;
+		}
+		while(sz(c) > 1 && c.back() == 0)
+			c.pp();		
+		return c;
+	}
+	Long operator * (Long &b) {
+		vector < int > c(sz(a) + sz(b.a));
+		for (int i = 0, cur; i < sz(a); i++)
+			for (int j = 0, carry = 0; j < sz(b.a) || carry; j++) {
+				cur = c[i + j] + a[i] * (j < sz(b.a) ? b.a[j] : 0) + carry;
+				c[i + j] = cur % base;
+				carry = cur / base;
+			}
+		while(sz(c) > 1 && c.back() == 0)
+			c.pp();
+		return c;				
+	}
+	Long operator + (Long &b) {
+		vector < int > c = a;
+		for (int i = 0, carry = 0; i < max(sz(c), sz(b.a)) || carry; i++) {
+			if (i == sz(c))
+				c.pb(0);
+			c[i] += carry + (i < sz(b.a) ? b.a[i] : 0);
+			carry = c[i] >= base;
+			if (carry)
+				c[i] -= base;
+		}
+		return c;
+	}
+	Long operator - (Long b) {
+		vector < int > c = a;
+		for (int i = 0, carry = 0; i < sz(b.a) || carry; i++) {
+			c[i] -= carry + (i < sz(b.a) ? b.a[i] : 0);
+			carry = c[i] < 0;
+			if (carry)
+				c[i] += base;
+		}
+		while(sz(c) > 1 && c.back() == 0)
+			c.pp();                                         
+		return c;
+	}
+	Long operator / (int b) {
+		vector < int > c = a;
+		for (int i = sz(c) - 1, carry = 0, cur; i >= 0; i--) {
+			cur = c[i] + carry * base;
+			c[i] = cur / b;
+			carry = cur % b;
+		}
+		while(sz(c) > 1 && c.back() == 0)
+			c.pp();
+		return c;
+	}
+	bool operator < (Long &b) {
+		if (sz(a) < sz(b.a))
+			return 1;
+		if (sz(a) > sz(b.a))
+			return 0;
+		for (int i = sz(a) - 1; i >= 0; i--) {
+			if (a[i] < b.a[i])
+				return 1;
+			if (a[i] > b.a[i])
+				return 0;					
+		}
+		return 0;
+	}
+	Long operator / (Long b) { 	
+  		Long cur, curValue;
+  		vector < int > res = a;
+  		curValue.a.clear();
+  		for (int i = sz(a) - 1; i >= 0; i--) {
+  			curValue.a.insert(curValue.a.begin(), a[i]);
+  			while(sz(curValue.a) > 1 && !curValue.a.back())
+  				curValue.a.pp();
+		   	int x = 0;
+		   	int l = 0, r = osn, m;
+   			while(l <= r) {
+		   		m = (l + r) >> 1;
+		     	cur = b * m;
+	      		if (cur < curValue || cur.a == curValue.a) {
+   	     			x = m;
+   	     			l = m + 1;
+   	   			}          
+				else
+		    	    r = m - 1;
+			}
+	    	res[i] = x;
+	    	curValue = curValue - b * x;
+	    }
+		while(sz(res) > 1 && !res.back())
+			res.pp();
+		return Long(res);
+	}
+	void out(int len) {
+	    vector < int > q;
+		for (int i = 0; i < min(len, sz(a)); i++)
+			q.pb(a[i]);
+		while(sz(q) > 1 && q.back() == 0)
+			q.pp();
+		for (int i = sz(q) - 1; i >= 0; i--)
+			cout << q[i];
+		cout << endl;				
+	}
+};
+
+string a, b;
+int len;
+
+void solve() {
+	cin >> a >> b >> len;
+	(Long(a) / Long(b)).out(len);
+	return;
+}
+
+int main() {
+	ios_base :: sync_with_stdio(0), cin.tie(NULL);
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

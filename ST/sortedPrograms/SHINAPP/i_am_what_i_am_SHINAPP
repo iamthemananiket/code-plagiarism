@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+long long MOD=1e9+7;
+long long dp[302][100005]={{0}};
+void eval()
+{
+	dp[0][0]=1;
+	for(int i=1;i<=300;i++)
+	 {
+	 	for(int j=0;j<=100000;j++)
+	 	{
+	 		dp[i][j]=dp[i-1][j];
+	 		if(j>=i)
+	 			{
+	 				dp[i][j]+=dp[i][j-i];
+	 				dp[i][j]%=MOD;
+				 }
+		 }
+	 }	
+}
+long long fact[500]={0};
+int main()
+{
+	eval();
+	int t;
+	fact[0]=1;
+	for(int i=1;i<=300;i++)
+		fact[i]=(fact[i-1]*i)%MOD;
+	cin>>t;
+	while(t--)
+	{
+		int n,m;
+		cin>>n>>m;
+		m-=(n*(n+1))/2;
+		if(m>=0)
+		cout<<(dp[n][m]*fact[n])%MOD<<endl;
+		else
+		cout<<0<<endl;
+	}
+}

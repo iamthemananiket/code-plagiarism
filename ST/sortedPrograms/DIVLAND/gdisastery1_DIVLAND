@@ -1,0 +1,169 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <queue>
+#include <set>
+#include <vector>
+#include <algorithm>
+using namespace std;
+const int MAXN = 1000005;
+#define SZ(x) ((int)(x).size())
+#define pb push_back
+
+typedef long long ll;
+
+struct edge
+{
+    int v, w;
+    bool operator<(const edge& rhs) const
+    {
+        return w > rhs.w;
+    }
+};
+
+int N, M;
+vector<edge> E[MAXN];
+ll msum[MAXN];
+
+struct msum_comparator
+{
+    bool operator()(const int& u, const int& v) const
+    {
+        if(msum[u] != msum[v])
+            return msum[u] < msum[v];
+        return u < v;
+    }
+};
+
+vector<int> heuristic(int u)
+{
+    static bool inset[MAXN];
+    memset(inset, 0, sizeof inset);
+    vector<int> S;
+    set<int, msum_comparator> T;
+
+    for(int i = 0; i < N && SZ(S) < N / 2; i++)
+    {
+        if(SZ(E[i]) == 0)
+        {
+            inset[i] = 1;
+            S.pb(i);
+        }
+    }
+
+    while(inset[u])
+        u = rand() % N;
+    T.insert(u);
+
+    while(SZ(S) < N / 2)
+    {
+        u = *T.begin();
+        T.erase(T.begin());
+        inset[u] = 1;
+        S.push_back(u);
+
+        for(const edge& e: E[u])
+        {
+            if(inset[e.v])
+                continue;
+            if(M > 100000)
+            {
+
+            }
+            else
+            {
+                if(T.find(e.v) != T.end())
+                    T.erase(e.v);
+                msum[e.v] += e.w;
+                T.insert(e.v);
+            }
+        }
+    }
+
+    return S;
+}
+
+ll cost(vector<int>& S)
+{
+    ll res = 0;
+    static bool inset[MAXN];
+    memset(inset, 0, sizeof inset);
+
+    for(int u: S)
+        inset[u] = 1;
+    for(int u: S)
+        for(edge e: E[u])
+            if(!inset[e.v])
+                res += e.w;
+    return res;
+}
+
+int S[MAXN], n;
+int vis[MAXN];
+
+bool dfs(int u)
+{
+    vis[u] = 1;
+    S[n++] = u;
+    if(n == N / 2)
+        return true;
+    sort(E[u].begin(), E[u].end());
+    for(int i = 0; i < SZ(E[u]); i++)
+        if(!vis[E[u][i].v] && dfs(E[u][i].v))
+            return true;
+    return false;
+}
+
+int main()
+{
+    srand(12990121);
+    scanf("%d%d", &N, &M);
+
+    for(int i = 0; i < M; i++)
+    {
+        int u, v, w;
+        scanf("%d%d%d", &u, &v, &w);
+        E[u].pb({v, w});
+        E[v].pb({u, w});
+    }
+
+    for(int i = 0; i < N; i++)
+        if(!vis[i] && dfs(i))
+            break;
+
+    for(int i = 0; i < N / 2; i++)
+        printf("%d ", S[i]);
+
+    return 0;
+
+    ll bestCost = -1;
+    vector<int> bestS;
+
+    if(M > 100000)
+    {
+        for(int i = 0; i < N / 2; i++)
+            bestS.pb(i);
+    }
+    else
+    {
+        for(int i = 0; i < 10; i++)
+        {
+            int u = rand() % N;
+            vector<int> s = heuristic(u);
+            ll c = cost(s);
+            if(bestCost == -1 || c < bestCost)
+            {
+                bestCost = c;
+                bestS = s;
+            }
+        }
+    }
+
+    for(int i = 0; i < N / 2; i++)
+    {
+        printf("%d%c", bestS[i], " \n"[i + 1 == N / 2]);
+    }
+
+    // fprintf(stderr, "bestCost = %lld\n", bestCost);
+    return 0;
+}

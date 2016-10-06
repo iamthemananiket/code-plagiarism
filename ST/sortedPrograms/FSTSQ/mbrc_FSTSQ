@@ -1,0 +1,65 @@
+#include <cstdio>
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <queue>
+#include <stack>
+#include <functional>
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define rep(i,x,y) for (int i = (x);i <= (y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y); i++)
+#define drep(i,x,y) for (int i = (x); i >=(y); i--)
+#define pb push_back
+#define mp make_pair
+#define s(x) scanf("%d",&x)
+#define pr(x) printf("%d",x)
+#define psp printf(" ")
+#define endc printf("\n")
+#define sl(x) scanf("%lld",&x)
+#define prl(x) printf("%lld",x)
+
+const int MAXN = 3e6;
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+int A[MAXN];
+
+void solve() {
+	int cur = 0;
+	int n,D; s(n); s(D);
+	rep(i,1,2*n - 1) {
+		int x = (i <= n) ? i : (n - (i - n));
+		A[i] = (cur + x)%10;
+		cur = (cur + x)/10;
+	}
+	cur = 0; D*=D;
+	rep(i,1,2*n - 1) {
+		int x  = A[i]*D;
+		A[i] = (x + cur)%10;
+		cur = (x + cur)/10;
+	}
+	int idx = 2*n - 1;
+	while (cur > 0) {
+		idx++; A[idx] = cur%10; cur/=10;
+	}
+	ll p = 23, md = 1e9 + 7;
+	ll ans = 0; ll pp = 1;
+	drep(i,idx,1) {
+		ans = (ans + pp*A[i])%md;
+		pp = (pp*p)%md;
+		//cout<<A[i];
+	}
+	cout<<ans<<endl;
+
+}
+
+int main() {
+	int t; s(t); while (t--) solve();	
+}

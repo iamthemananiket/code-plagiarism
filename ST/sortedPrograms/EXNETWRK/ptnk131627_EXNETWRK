@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("draft.inp","r",stdin)
+#define OUTPUT freopen("draft.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=0;
+
+int n,m;
+void solve(){
+    if (n==1){
+        if (m) printf("-1 -1\n");
+        return;
+    }
+    if (n==2){
+        if (m!=1) printf("-1 -1\n");
+        else printf("1 2\n");
+        return;
+    }
+    if (n==3){
+        if (m!=3) printf("-1 -1\n");
+        else printf("1 2\n2 3\n1 3\n");
+        return;
+    }
+    if (m<n||m>2*(n-2)){
+        printf("-1 -1\n");
+        return;
+    }
+    int head=1;
+    FOR(i,2,n) if ((n-i)*2>=m-1){
+        printf("%d %d\n",i,head);
+        head=i;
+        m--;
+    }else {
+        printf("%d 1\n%d %d\n",i,i,head);
+        m-=2;
+    }
+}
+int main(){
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        scanf("%d%d",&n,&m);
+        solve();
+    }
+}

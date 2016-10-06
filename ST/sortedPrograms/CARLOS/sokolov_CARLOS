@@ -1,0 +1,93 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+
+const int INF = (int)1e9;
+const int N = (int)2e5;
+const int M = 200;
+
+bool d[M + 5][M + 5];
+int a[N + 5];
+int dp[N + 5][M + 5];
+
+int main() {
+	//freopen("INPUT.TXT", "rt", stdin);
+	//freopen("OUTPUT.TXT", "wt", stdout);
+	int t = nextInt();
+	for (int tt = 0; tt < t; ++tt) {
+		int m = nextInt();
+		int k = nextInt();
+		int n = nextInt();
+		for (int i = 1; i <= m; ++i) {
+			for (int j = 1; j <= m; ++j) {
+				d[i][j] = false;
+			}
+		}
+		for (int i = 0; i < k; ++i) {
+			int x = nextInt();
+			int y = nextInt();
+			if (x != y) {
+				d[x][y] = true;
+				d[y][x] = true;
+			}
+		}
+		for (int i = 1; i <= n; ++i) {
+			a[i] = nextInt();
+		}
+		for (int z = 1; z <= m; ++z) {
+			for (int x = 1; x <= m; ++x) {
+				for (int y = 1; y <= m; ++y) {
+					if (d[x][z] && d[z][y]) {
+						d[x][y] = true;
+					}
+				}
+			}
+		}
+		for (int i = 1; i <= n; ++i) {
+			dp[i][0] = INF;
+			for (int j = 1; j <= m; ++j) {
+				if (a[i] == j) {
+					dp[i][j] = dp[i - 1][j];
+				} else if (d[a[i]][j]) {
+					dp[i][j] = dp[i - 1][j] + 1;
+				} else {
+					dp[i][j] = INF;
+				}
+			}
+			for (int j = 1; j <= m; ++j) {
+				dp[i][j] = min(dp[i][j - 1], dp[i][j]);
+			}
+		}
+		if (dp[n][m] == INF) {
+			printf("-1\n");
+		} else {
+			printf("%d\n", dp[n][m]);
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,79 @@
+
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 987654321
+#define bsize 512
+
+const int N = 10500000;
+
+using namespace std;
+
+unsigned int Q,S[N],A,B;
+vector<pair<unsigned int, unsigned int> > v;
+unsigned long long ans;
+
+int main(){
+//	freopen("path2.in","r",stdin);
+//	freopen("path2.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>Q;
+	cin>>S[1]>>A>>B;
+	for (int i=2;i<=Q;i++)
+	{
+		S[i]=S[i-1]*A+B;
+	}
+	
+	for (int i=1;i<=Q;i++)
+	{
+		v.push_back(make_pair(S[i]/2,i));
+	}
+	
+	sort(v.begin(),v.end());
+	
+	for (int i=0;i<v.size();i++)
+	{
+		if (i+1==v.size()||v[i].first!=v[i+1].first)
+		{
+			int id=v[i].second;
+			if (S[id]%2)
+				ans+=S[id]/2;
+		}
+	}
+	
+	cout<<ans<<endl;
+	
+	return 0;
+}

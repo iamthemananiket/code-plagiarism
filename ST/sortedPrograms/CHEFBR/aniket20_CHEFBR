@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define N 1000000007
+using namespace std;
+ll A[101],cnt[101][101];
+int main()
+{
+	ll n,i,j,k,p1,k1,k2;
+	ll temp,temp2,temp3;
+	scanf("%lld",&n);
+	for(i=0;i<n;i++)
+	{
+		scanf("%lld",&A[i]);
+	}
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n;j++)
+		{
+			cnt[i][j]=0;
+		}
+	}
+	for(i=1;i<n;i++)
+	{
+		for(j=0;j<n-i;j++)
+		{
+			k1=j;
+			k2=j+i;
+		//	cout<<k1<<" "<<k2<<endl;
+			for(k=k2-1;k>=k1;k--)
+			{
+				if(A[k2]==-A[k] && A[k]<0)
+				{
+					ll temp=1;
+					if(k2-k>=2)
+					{
+						temp=(temp+cnt[k+1][k2-1])%N;
+					}
+					ll temp2=(cnt[k1][k-1]*temp)%N;
+				//	cout<<temp<<" "<<temp2<<" "<<k1<<" "<<k2<<" "<<cnt[k1][k-1]<<endl;
+					cnt[k1][k2]=(cnt[k1][k2]+temp+temp2)%N;
+				}
+			}
+			cnt[k1][k2]=(cnt[k1][k2-1]+cnt[k1][k2])%N;
+		}
+	}
+/*	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n;j++)
+		{
+			cout<<cnt[i][j]<<" ";
+		}
+		cout<<endl;
+	}*/
+	ll ans=(cnt[0][n-1]+1)%N;
+	printf("%lld",ans);
+	return 0;
+}
+/*
+10
+-1 -2 1 -3 2 3 1 -4 1 2      -1 -2 2 -3 -4 4 3 1
+*/

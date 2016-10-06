@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const ll INF = (ll) 1e18;
+const int N = 100005, D = 18;
+int par[D][N];
+ll cost[D][N];
+
+struct Ticket {
+	int k, w;
+};
+
+vector<Ticket> ts[N];
+vector<int> g[N];
+
+inline ll calc(int v, int d) {
+	ll ans = INF;
+	REPD(i, D, -1) {
+		int jump = 1 << i;
+		if (d >= jump) {
+			amin(ans, cost[i][v]);
+			v = par[i][v];
+			d -= jump;
+		}
+	}
+	return ans;
+}
+
+void dfs(int v) {
+	if (v == 1) {
+		cost[0][v] = 0;
+	}
+	else {
+		ll mini = INF;
+		for (Ticket &t : ts[v]) {
+			amin(mini, t.w + calc(par[0][v], t.k));
+		}
+		cost[0][v] = mini;
+		REPU(d, 1, D) {
+			cost[d][v] = tmin(cost[d - 1][v], cost[d - 1][par[d - 1][v]]);
+		}
+	}
+	for (int u : g[v]) dfs(u);
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+
+	int n, m;
+
+	cin >> n >> m;
+	REPU(_, 1, n) {
+		int a, b; cin >> a >> b;
+		g[b].push_back(a);
+		par[0][a] = b;
+	}
+	REPU(d, 1, D) {
+		REPU(i, 1, n + 1) {
+			par[d][i] = par[d - 1][par[d - 1][i]];
+		}
+	}
+	REPU(i, 0, m) {
+		int v, k, w; cin >> v >> k >> w;
+		ts[v].push_back((Ticket) {k, w});
+	}
+
+	dfs(1);
+	
+	int q; cin >> q;
+	REPU(i, 0, q) {
+		int v; cin >> v;
+		printf("%lld\n", cost[0][v]);
+	}
+
+	return 0;
+}

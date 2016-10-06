@@ -1,0 +1,91 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+#define INFLL LLONG_MAX
+
+using namespace std;
+
+typedef long long lint;
+
+lint divdown(lint a, lint b) {
+  if (b < 0) a = -a, b = -b;
+  if (a >= 0) return a/b;
+  return -(((-a) + (b-1))/b);
+}
+
+lint divup(lint a, lint b) {
+  if (b < 0) a = -a, b = -b;
+  if (a >= 0) return (a+b-1)/b;
+  return -((-a)/b);
+}
+
+int main() {
+  int nt;
+  scanf("%d", &nt);
+  for (int t = 0; t < nt; ++t) {
+    int n;
+    scanf("%d", &n);
+    vector<int> start(n), rate(n);
+    for (int i = 0; i < n; ++i)
+      scanf("%d %d", &start[i], &rate[i]);
+
+    auto calc_range = [&start, &rate](int small, int big) -> pair<lint, lint> {
+      lint s0 = start[small], r0 = rate[small];
+      lint s1 = start[big], r1 = rate[big];
+
+      if (r0 == r1) {
+	if (s0 < s1) return make_pair(0LL, INFLL);
+	else return make_pair(0LL, -1LL);
+      } else if (r0 < r1) {
+	return make_pair(max(0LL, divdown(s0-s1, r1-r0) + 1LL), INFLL);
+      } else {
+	return make_pair(0LL, divup(s0-s1, r1-r0) - 1LL);
+      }
+    };
+
+    vector<pair<lint, lint>> result;
+    if (n == 1) result.push_back(make_pair(0LL, INFLL));
+    else {
+      for (int kind = 0; kind < 2; ++kind) {
+	pair<lint, lint> res = make_pair(0LL, INFLL);
+	for (int i = 0; i+1 < n; ++i) {
+	  pair<lint, lint> range;
+	  if ((i%2 == 1) ^ (kind == 1)) range = calc_range(i, i+1);
+	  else range = calc_range(i+1, i);
+	  res.first = max(res.first, range.first);
+	  res.second = min(res.second, range.second);
+	}
+	if (res.first <= res.second) result.push_back(res);
+      }
+    }
+
+    sort(result.begin(), result.end());
+    if ((int)result.size() == 2 && result[1].first <= result[0].second+1)
+      result = {{result[0].first, result[1].second}};
+
+    printf("%d\n", (int)result.size());
+    for (pair<lint, lint> res : result) {
+      printf("%lld ", res.first);
+      if (res.second == INFLL) printf("Inf\n");
+      else printf("%lld\n", res.second);
+    }
+  }
+
+  return 0;
+}

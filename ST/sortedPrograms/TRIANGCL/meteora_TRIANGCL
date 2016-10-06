@@ -1,0 +1,60 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+
+#define x first
+#define y second
+
+using namespace std;
+
+typedef pair<int,int> pt;
+
+int dist(pt a, pt b){
+	return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
+}
+
+int a,b,c;
+
+char angle_typ[3][10] = {"right","acute","obtuse"};
+
+int angle(){
+	int cos = (c-a-b);
+	if(!cos) return 0;
+	return cos > 0 ? 2 : 1;
+}
+
+
+char side_typ[2][10] = {"Scalene", "Isosceles"};
+
+int side(){
+	return (a==b) || (b==c) || (c==a);
+}
+
+int main(){
+	int s,t;
+
+	scanf("%d%d",&s,&t);
+
+	pt p1,p2,p3;
+	while(t--){
+		scanf("%d%d%d%d%d%d",&p1.x,&p1.y,&p2.x,&p2.y,&p3.x,&p3.y);
+		a = dist(p1,p2); b = dist(p2,p3); c = dist(p3,p1);
+		if(a > c) swap(a,c);
+		if(b > c) swap(b,c);
+
+
+		int i,j;
+		i = side();
+		j = angle();
+
+		if(s == 1) printf("%s triangle\n",side_typ[i]);
+		else printf("%s %s triangle\n",side_typ[i],angle_typ[j]);
+
+	}
+
+
+
+
+	return 0;
+}

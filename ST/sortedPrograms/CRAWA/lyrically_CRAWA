@@ -1,0 +1,84 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+Int Abs(Int r) { return (r < 0) ? -r : +r; }
+
+Int X, Y;
+
+bool solve() {
+	const Int n = max(abs(X), abs(Y)) / 2;
+	for (Int dn = -2; dn <= +2; ++dn) {
+		const Int nn = n + dn;
+		if (nn >= 0) {
+			Int x = -2 * nn;
+			Int y = -2 * nn;
+			Int k = nn * 4;
+			++k;
+			if (x <= X && X <= x + k && Y == y) {
+				return true;
+			}
+			x += k;
+			++k;
+			if (X == x && y <= Y && Y <= y + k) {
+				return true;
+			}
+			y += k;
+			++k;
+			if (x - k <= X && X <= x && Y == y) {
+				return true;
+			}
+			x -= k;
+			++k;
+			if (X == x && y - k <= Y && Y <= y) {
+				return true;
+			}
+			y -= k;
+		}
+	}
+	return false;
+}
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		X = in();
+		Y = in();
+		const bool res = solve();
+		puts(res ? "YES" : "NO");
+	}
+	
+	return 0;
+}
+

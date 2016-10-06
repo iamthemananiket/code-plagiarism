@@ -1,0 +1,82 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+#define uint unsigned int
+// mylittlepony
+using namespace std;
+
+vector<long long> fac;
+long long mod;
+
+long long Pow(long long a, long long e, long long m) {
+	if(e <= 0) return 1;
+	long long x =Pow(a,e/2,m);
+	x =(x*x)%m;
+	if(x < 0) x +=m;
+	if(e%2 != 0) x =(x*a)%m;
+	return x;}
+
+long long countC(long long a, long long b) {
+	long long ret =(fac[b]*fac[a-b])%mod;
+	ret =Pow(ret,mod-2,mod);
+	ret =(ret*fac[a])%mod;
+	return ret;}
+
+int main() {
+	cin.sync_with_stdio(0);
+	int T;
+	cin >> T;
+	mod =1000000007;
+	fac.resize(100000,1);
+	for(int i =0; i < 50000; i++) fac[i+1] =(fac[i]*(i+1))%mod;
+	vector< vector<long long> > C(2000, vector<long long>(2000,0));
+	for(int i =0; i < 2000; i++) C[i][0] =1;
+	for(int i =1; i < 1000; i++) for(int j =1; j < 1000; j++)
+		C[i][j] =(C[i-1][j-1]+C[i-1][j])%mod;
+
+	for(int t =0; t < T; t++) {
+		int A[4];
+		int S;
+		cin >> A[0] >> A[1] >> A[2] >> A[3] >> S;
+
+		vector<long long> ans(S+1,0);
+		ans[S] =1;
+		for(int i =1; i <= S; i++) {
+			long long a =A[0]+i*(A[1]+i*(A[2]+i*A[3]));
+			long long b =1;
+			vector<long long> ans0 =ans;
+			for(int j =1; j <= S/i; j++) {// j objektov
+				b =(b*(a+j-1))%mod;
+				if(b < 0) b +=mod;
+				long long c =(b*Pow(fac[j],mod-2,mod))%mod;
+				if(c < 0) c +=mod;
+				for(int k =S; k >= 0; k--) if(k-j*i >= 0) { // zo suctu k
+					ans0[k-j*i] =(ans0[k-j*i]+ans[k]*c)%mod;
+					}
+				else break;}
+			ans =ans0;}
+		cout << ans[0] << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing

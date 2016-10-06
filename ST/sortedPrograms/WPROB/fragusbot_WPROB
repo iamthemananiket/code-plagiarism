@@ -1,0 +1,129 @@
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+
+using namespace std;
+
+const int N = 1e6 + 10;
+
+char s[N];
+int a[N];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    scanf("%s", s);
+    int n = strlen(s);
+    int r = 0, g = 0, b = 0;
+    for (int i = 0; i < n; ++i) {
+      if (s[i] == 'r') {
+        a[i] = 0;
+        r = 1;
+      }
+      if (s[i] == 'g') {
+        a[i] = 1;
+        g = 1;
+      }
+      if (s[i] == 'b') {
+        a[i] = 2;
+        b = 1;
+      }
+    }
+    if (r + g + b == 1) {
+      printf("%d\n", 0);
+    } else
+    if (r + g + b == 2) {
+      if (b == 1) {
+        for (int i = 0; i < n; ++i) {
+          if (a[i] == 2) {
+            if (r == 0) {
+              a[i] = 0;
+            } else {
+              a[i] = 1;
+            }
+          }
+        }
+      }
+      long long ans = 1e18;
+      int p[] = {0, 1};
+      do {
+        {
+          long long cur = 0;
+          for (int i = 0, cnt = 0; i < n; ++i) {
+            if (a[i] == p[0]) {
+              cur += i - cnt;
+              ++cnt;
+            }
+          }
+          ans = min(ans, cur);
+        }
+        {
+          long long cur = 0;
+          for (int i = n - 1, cnt = 0; i >= 0; --i) {
+            if (a[i] == p[1]) {
+              cur += (n - 1 - i) - cnt;
+              ++cnt;
+            }
+          }
+          ans = min(ans, cur);
+        }
+      } while (next_permutation(p, p + 2));
+      printf("%lld\n", ans);
+    } else {
+      long long ans = 1e18;
+      int p[] = {0, 1, 2};
+      do {
+        {
+          long long cur = 0;
+          for (int i = 0, cnt = 0; i < n; ++i) {
+            if (a[i] == p[0]) {
+              cur += i - cnt;
+              ++cnt;
+            }
+          }
+          for (int i = n - 1, cnt = 0, k = 0; i >= 0; --i) {
+            if (a[i] == p[0]) {
+              ++k;
+            }
+            if (a[i] == p[2]) {
+              cur += (n - 1 - i) - cnt - k;
+              ++cnt;
+            }
+          }
+          ans = min(ans, cur);
+        }
+        {
+          long long cur = 0;
+          for (int i = n - 1, cnt = 0; i >= 0; --i) {
+            if (a[i] == p[2]) {
+              cur += (n - 1 - i) - cnt;
+              ++cnt;
+            }
+          }
+          for (int i = 0, cnt = 0, k = 0; i < n; ++i) {
+            if (a[i] == p[2]) {
+              ++k;
+            }
+            if (a[i] == p[0]) {
+              cur += (n - 1 - i) - cnt - k;
+              ++cnt;
+            }
+          }
+          ans = min(ans, cur);
+        }
+      } while (next_permutation(p, p + 3));
+      printf("%lld\n", ans);
+    }
+  }
+  return 0;
+}

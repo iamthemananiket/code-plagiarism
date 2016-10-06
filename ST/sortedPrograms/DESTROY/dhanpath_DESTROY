@@ -1,0 +1,50 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll;
+typedef  vector<ll>  vll ;
+typedef  vector<vll>  vvll ;
+
+const  ll  MOD = 1000000007 ;
+
+#define  ft  first
+#define  sd  second
+#define  sz(X)  ( (int) (X).size() )
+#define  LB  lower_bound
+#define  UB  upper_bound
+#define  all(X)  (X).begin(), (X).end()
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  t ;
+        cin >> t ;
+        while(t--)
+        {
+                int n;
+                cin >> n ;
+
+                map<int,int>  mm ;
+                for( int i=0; i<n; i++ )
+                {
+                        int  v ;
+                        cin >> v ;
+                        mm[v] ++  ;
+                }
+
+                int  mx = 0 ;
+                for( auto &z: mm )
+                        if( mx < z.sd )
+                                mx = z.sd ;
+
+                cout << max( n/2 + n%2, mx ) << endl ;
+        }
+
+        return 0;
+} 

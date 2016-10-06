@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+using namespace std;
+const int N=100000;
+
+
+
+int main()
+{
+  finp;
+
+  int t,n;
+
+  cin>>t;
+
+  while(t--)
+  {
+  	cin>>n;
+  	vi v;
+  	int ans=0;
+  	afor(i,1,n)
+  	{
+  		vi temp;
+  		int val;
+  		cin>>val;
+  		if(!val)
+  		{
+  			temp.pb(i);
+  			for(auto j:v)temp.pb(j);
+  			v=temp;
+  			
+  		}
+  		else
+  		{
+  			int sp=-1;
+  			afor(j,0,v.size()-1)
+  			{
+  				if(v[j]==val)
+  				{
+  					sp=j;
+  					break;
+  				}
+  			}
+  			ans+=min(sp+1,(int)v.size() - sp -1);
+
+  			afor(j,0,sp)temp.pb(v[j]);
+  			temp.pb(i);
+  			afor(j,sp+1,v.size()-1)temp.pb(v[j]);
+  			v=temp;
+  			
+  		}
+  	}
+  	cout<<ans<<"\n";
+  }
+
+return 0;
+}

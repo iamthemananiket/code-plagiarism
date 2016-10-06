@@ -1,0 +1,149 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 50000 + 50;
+const double pi = acos(-1);
+int n, q, a1, b1, a2, b2;
+int x[N], y[N], r[N];
+bool subtask_checker = true;
+
+// Template to compute area of intersection of a circle and a rectangle.
+
+inline double section(double h, double r){
+    return (h < r)? sqrt(r * r - h * h) : 0;
+}
+
+inline double get(double x, double h, double r){
+    return .5* (sqrt(1 - x * x / (r * r)) * x * r + r * r * asin(x / r) - 2 * h * x);
+}
+
+inline double area(double x0, double x1, double h, double r){
+    if(x0 > x1){
+        x0 = x0 + x1;
+        x1 = x0 - x1;
+        x0 = x0 - x1;
+    }
+    double s = section(h, r);
+    return get(max(-s, min(s, x1)), h, r) - get(max(-s, min(s, x0)), h, r);
+}
+
+inline double area(double x0, double x1, double y0, double y1, double r){
+    if(y0 > y1){
+        y0 = y0 + y1;
+        y1 = y0 - y1;
+        y0 = y0 - y1;
+    }
+    if(y0 < 0){
+        if(y1 < 0) return area(x0, x1, -y0, -y1, r);
+        else return area(x0, x1, 0, -y0, r) + area(x0, x1, 0, y1, r);
+    }
+    else{
+        return area(x0, x1, y0, r) - area(x0, x1, y1, r);
+    }
+}
+
+
+inline double area_intersection(double x0, double x1, double y0, double y1, double cx, double cy, double r){
+    x0 -= cx; x1 -= cx;
+    y0 -= cy; y1 -= cy;
+    return area(x0, x1, y0, y1, r);
+}
+
+// End of template
+
+inline void brute_force(){
+    double ans = 0.0;
+    for(int i = 1; i <= n; i++){
+        ans += area_intersection(a1, a2, b1, b2, x[i], y[i], r[i]);
+    }
+    printf("%.10f\n", ans);
+}
+
+vector < int > pts[N];
+
+struct node{
+    node *lc, *rc;
+    int sum;
+    node(node *l = NULL, node *r = NULL, int s = 0){
+        lc = l;
+        rc = r;
+        sum = s;
+    }
+    inline void create(node* &x){
+        if(!x) x = new node();
+    }
+    inline node* update(int l, int r, int pos, int add){
+        if(l == r){
+            return new node(NULL, NULL, this -> sum + 1);
+        }
+        int mid = (l + r) >> 1;
+        if(mid >= pos){
+            create(lc);
+            return new node(lc -> update(l, mid, pos, add), rc, this -> sum + 1);
+        }
+        else{
+            create(rc);
+            return new node(lc, rc -> update(mid + 1, r, pos, add), this -> sum + 1);
+        }
+    }
+    inline int query(int l, int r, int qs, int qe){
+        if(l > qe || r < qs) return 0;
+        if(l >= qs and r <= qe) return sum;
+        int mid = (l + r) >> 1, ans = 0;
+        if(lc) ans += lc -> query(l, mid, qs, qe);
+        if(rc) ans += rc -> query(mid + 1, r, qs, qe);
+        return ans;
+    }
+};
+
+node* root[N];
+
+inline int query(int p1, int q1, int p2, int q2){
+    return root[p2] -> query(1 , N , q1 , q2) - root[p1 - 1] -> query(1 , N , q1 , q2);
+}
+
+inline void lol(){
+    for(int i = 1; i <= n; i++){
+        x[i]++, y[i]++;
+        pts[x[i]].push_back(y[i]);
+    }
+    root[0] = new node();
+    for(int i = 1; i < N; i++){
+        root[i] = root[i - 1];
+        for(int py : pts[i])
+            root[i] = root[i] -> update(1, N, py, 1);
+    }
+    while(q--){
+        int x1, y1, x2, y2;
+        scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
+        ++x1, ++x2, ++y1, ++y2;
+        int inside = 0, boundary = 0, vertex = 0;
+        inside = query(x1 + 1 , y1 + 1 , x2 - 1 , y2 - 1);
+        boundary += query(x1 , y1 + 1 , x1 , y2 - 1);
+        boundary += query(x2 , y1 + 1 , x2 , y2 - 1);
+        boundary += query(x1 + 1 , y1 , x2 - 1 , y1);
+        boundary += query(x1 + 1 , y2 , x2 - 1 , y2);
+        vertex += query(x1 , y1 , x1 , y1);
+        vertex += query(x1 , y2 , x1 , y2);
+        vertex += query(x2 , y1 , x2 , y1);
+        vertex += query(x2 , y2 , x2 , y2);
+        cout << fixed << setprecision(10) << (pi * (inside + 0.5 * boundary + 0.25 * vertex));
+        cout << endl;
+    }
+}
+
+int main(){
+    scanf("%d %d", &n, &q);
+    for(int i = 1; i <= n; i++){
+        scanf("%d %d %d", x + i, y + i, r + i);
+        if(r[i] != 1) subtask_checker = false;
+    }
+    if(subtask_checker){
+            lol();
+            return 0;
+    }
+    while(q--){
+        scanf("%d %d %d %d", &a1, &b1, &a2, &b2);
+        brute_force();
+    }
+}

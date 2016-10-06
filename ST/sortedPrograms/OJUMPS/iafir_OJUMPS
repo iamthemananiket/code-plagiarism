@@ -1,0 +1,23 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+
+#define mod 1000000009
+using namespace std;
+
+long long a,b;
+
+int main()
+{
+//	freopen("in.txt","r",stdin);
+//	freopen("out.txt","w",stdout);
+	cin >> a;
+	b = a % 6;
+	if(b== 0 || b==1 || b==3 )
+		cout << "yes\n";
+	else
+		cout << "no\n";
+		
+	return 0;
+}

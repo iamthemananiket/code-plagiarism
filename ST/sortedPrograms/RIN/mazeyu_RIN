@@ -1,0 +1,66 @@
+#include<bits/stdc++.h>
+#define INF 1e9
+using namespace std;
+int lc[1000010],rc[1000010],root[1000010],hash[1000010],now,flow,cs[1000010],kt[1000010],m,k,j,x,y;
+int n,S,T,tot,ln,a[50010],b[50010],w[50010],l[50010],r[50010],p[50010],flag,ans,pre[1000010];
+int nn,ww[5010],i,v[2000010],ne[2000010],head[1000010],flo[2000010],fro[2000010],max1;
+void add(int x,int y,int f)
+{
+	v[++ln]=y;ne[ln]=head[x];head[x]=ln;flo[ln]=f;fro[ln]=x;
+	v[++ln]=x;ne[ln]=head[y];head[y]=ln;flo[ln]=0;fro[ln]=y;
+}
+void sap()
+{
+    hash[0]=tot;now=S;flow=INF;cs[0]=INF;
+    for(i=1;i<=tot;i++)kt[i]=head[i];
+    while(cs[S]<=tot)
+    {
+        flag=0;w[now]=flow;
+        for(i=kt[now];i;i=ne[i])
+        if(cs[v[i]]+1==cs[now]&&flo[i])
+        {
+            flow=min(flo[i],flow);kt[now]=i;
+            pre[v[i]]=i;now=v[i];flag=1;
+            if(now==T)
+            {
+                ans+=flow;
+                for(;now!=S;now=fro[pre[now]])
+                {
+                    flo[pre[now]]-=flow;
+                    flo[pre[now]^1]+=flow;
+                }
+				flow=INF;
+            }
+			break;
+        }
+		if(flag)continue;max1=0;
+        for(i=head[now];i;i=ne[i])
+            if(flo[i]&&cs[v[i]]<cs[v[max1]])max1=i;
+        hash[cs[now]]--;if(!hash[cs[now]])return;
+        cs[now]=cs[v[max1]]+1;kt[now]=max1;
+        if(cs[now]<tot)hash[cs[now]]++;
+        if(now!=S)now=fro[pre[now]];flow=w[now];
+    }
+}
+int main()
+{
+	scanf("%d%d%d",&n,&m,&k);
+	S=n*(m+1)+1;T=tot=S+1;ln=1;
+	for(i=1;i<=n;i++)
+		add(S,(i-1)*(m+1)+1,INF),add(i*(m+1),T,INF);
+	for(i=1;i<=n;i++)
+		for(j=1;j<=m;j++)
+		{
+			scanf("%d",&x);
+			if(x==-1)add((i-1)*(m+1)+j,(i-1)*(m+1)+j+1,INF);
+			else add((i-1)*(m+1)+j,(i-1)*(m+1)+j+1,1000-x);
+		}
+	while(k--)
+	{
+		scanf("%d%d",&x,&y);
+		for(i=1;i<=m;i++)
+			add((x-1)*(m+1)+i,(y-1)*(m+1)+i+1,INF);
+	}
+	sap();
+	printf("%.2lf\n",1000-(double)ans/n);
+}

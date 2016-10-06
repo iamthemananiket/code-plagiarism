@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return a > val ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+
+vii g[20];
+int f[20][20];
+int fr[20];
+int fc[20];
+int a[3];
+int x, y;
+
+void init() {
+	g[1].pb(mp(0, 0));
+	g[2].pb(mp(0, 0)); g[2].pb(mp(1, 0));
+	g[3].pb(mp(0, 0)); g[3].pb(mp(0, 1));
+	g[4].pb(mp(0, 0)); g[4].pb(mp(1, 0)); g[4].pb(mp(2, 0));
+	g[5].pb(mp(0, 0)); g[5].pb(mp(0, 1)); g[5].pb(mp(0, 2));
+	g[6].pb(mp(0, 0)); g[6].pb(mp(1, 0)); g[6].pb(mp(2, 0)); g[6].pb(mp(3, 0));
+	g[7].pb(mp(0, 0)); g[7].pb(mp(0, 1)); g[7].pb(mp(0, 2)); g[7].pb(mp(0, 3));
+	g[8].pb(mp(0, 0)); g[8].pb(mp(1, 0)); g[8].pb(mp(2, 0)); g[8].pb(mp(3, 0)); g[8].pb(mp(4, 0));
+	g[9].pb(mp(0, 0)); g[9].pb(mp(0, 1)); g[9].pb(mp(0, 2)); g[9].pb(mp(0, 3)); g[9].pb(mp(0, 4));
+	FOR(i, 0, 2) FOR(j, 0, 2) g[10].pb(mp(i, j));
+	FOR(i, 0, 3) FOR(j, 0, 3) g[11].pb(mp(i, j));
+	g[12].pb(mp(2, 0)); g[12].pb(mp(2, 1)); g[12].pb(mp(2, 2)); g[12].pb(mp(1, 2)); g[12].pb(mp(0, 2));
+	g[13].pb(mp(0, 0)); g[13].pb(mp(0, 1)); g[13].pb(mp(0, 2)); g[13].pb(mp(1, 2)); g[13].pb(mp(2, 2));
+	g[14].pb(mp(0, 0)); g[14].pb(mp(1, 0)); g[14].pb(mp(2, 0)); g[14].pb(mp(0, 1)); g[14].pb(mp(0, 2));
+	g[15].pb(mp(0, 0)); g[15].pb(mp(1, 0)); g[15].pb(mp(2, 0)); g[15].pb(mp(2, 1)); g[15].pb(mp(2, 2));
+	g[16].pb(mp(0, 0)); g[16].pb(mp(1, 0)); g[16].pb(mp(1, 1));
+	g[17].pb(mp(1, 0)); g[17].pb(mp(1, 1)); g[17].pb(mp(0, 1));
+	g[18].pb(mp(0, 0)); g[18].pb(mp(0, 1)); g[18].pb(mp(1, 1));
+	g[19].pb(mp(0, 0)); g[19].pb(mp(1, 0)); g[19].pb(mp(0, 1));
+}
+
+int inside(int u, int v) {
+	return u >= 1 && u <= 10 && v >= 1 && v <= 10;
+}
+
+int getscore(int x, int y) {
+	return x * x + y * y + 5 * x * y;
+}
+
+pair<int, pi> place(int u) {
+	pair<int, pi> res = mp(-1, mp(-1, -1));
+	FOR(i, 1, 11) FOR(j, 1, 11) {
+		int found = 0;
+		vii his;
+		FOR(k, 0, sz(g[u])) {
+			if (!inside(i - g[u][k].fi, j + g[u][k].se) || f[i - g[u][k].fi][j + g[u][k].se] == 1) {
+				found = 1;
+				break;
+			}
+			his.pb(mp(i - g[u][k].fi, j + g[u][k].se));
+		}
+		if (!found) {
+			FOR(k, 0, sz(his)) {
+				f[his[k].fi][his[k].se] = 1;
+			}
+			ms(fr, 0); ms(fc, 0);
+			FOR(k, 1, 11) FOR(l, 1, 11) {
+				if (f[k][l] == 0) fr[k] = fc[l] = 1;
+			}
+			int cr = 0, cc = 0;
+			FOR(k, 1, 11) cr += fr[k] == 0, cc += fc[k] == 0;
+			chkmax(res, mp(getscore(x + cr, y + cc) - getscore(x, y), mp(i, j)));
+			FOR(k, 0, sz(his)) {
+				f[his[k].fi][his[k].se] = 0;
+			}
+		}
+	}
+	return res;
+}
+
+void apply() {
+	ms(fr, 0); ms(fc, 0);
+	FOR(i, 1, 11) FOR(j, 1, 11) {
+		if (f[i][j] == 0) fr[i] = fc[j] = 1;
+	}
+	FOR(i, 1, 11) x += fr[i] == 0, y += fc[i] == 0;
+	FOR(i, 1, 11) FOR(j, 1, 11) {
+		if (fr[i] == 0 || fc[j] == 0) {
+			f[i][j] = 0;
+		}
+	}
+}
+
+void solve() {
+	init();
+	while (1) {
+		int found = 0;
+		FOR(i, 0, 3) cin>>a[i];
+		if (a[0] == -1 || a[1] == -1 || a[2] == -1) {
+			break;
+		}
+		if (1.0 * clock() / CLOCKS_PER_SEC > 4.95) {
+			printf("-1 -1 -1 -1 -1 -1 -1 -1 -1");
+			printf("\n");
+			fflush(stdout);
+			break;
+		}
+		vector<pair<int, pi> > sub, ign;
+		FOR(i, 0, 3) {
+			int u = a[i];
+			pair<int, pi> res = place(u);
+			if (res.fi == -1) {
+				ign.pb(mp(-1, mp(-1, -1)));
+			}
+			else {
+				int x = res.se.fi;
+				int y = res.se.se;
+				sub.pb(mp(i + 1, mp(x, y)));
+				FOR(j, 0, sz(g[u])) {
+					f[x - g[u][j].fi][y + g[u][j].se] = 1;
+				}
+			}
+		}
+		if (sz(ign)) {
+			FOR(i, 0, sz(sub)) {
+				printf("%d %d %d ", sub[i].fi, sub[i].se.fi, sub[i].se.se);
+			}
+			FOR(i, 0, sz(ign)) {
+				printf("%d %d %d ", ign[i].fi, ign[i].se.fi, ign[i].se.se);
+			}
+			printf("\n");
+			fflush(stdout);
+			break;
+		}
+		else {
+			FOR(i, 0, sz(sub)) {
+				int u = a[sub[i].fi - 1];
+				int x = sub[i].se.fi;
+				int y = sub[i].se.se;
+				FOR(j, 0, sz(g[u])) {
+					f[x - g[u][j].fi][y + g[u][j].se] = 0;
+				}
+			}
+			FOR(i, 0, sz(sub)) {
+				int u = a[sub[i].fi - 1];
+				int x = sub[i].se.fi;
+				int y = sub[i].se.se;
+				FOR(j, 0, sz(g[u])) {
+					f[x - g[u][j].fi][y + g[u][j].se] = 1;
+				}
+				apply();
+				printf("%d %d %d ", sub[i].fi, sub[i].se.fi, sub[i].se.se);
+			}
+			printf("\n");
+			fflush(stdout);
+		}
+	}
+}
+
+int main() {
+//	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

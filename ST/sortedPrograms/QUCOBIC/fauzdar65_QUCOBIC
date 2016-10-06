@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+string s;
+
+int main() {
+	int t;
+	cin>>t;
+	
+	while(t--)
+	{
+		ll sec1,sec;
+		cin>>s>>sec1;
+		
+		ll ma=-1,houra,mina;
+		
+		for(int i=0;i<60;i++)
+		{
+		
+		ll hour=(s[0]-'0')*10 + s[1]-'0';
+		ll min=(s[2]-'0')*10 + s[3]-'0';
+		
+		sec=sec1+i;
+		
+		hour+= sec/3600;
+		hour%=24;
+		
+		sec%=3600;
+		
+		min+= sec/60;
+		
+		hour+= min/60;
+		
+		hour%=24;
+		
+		min%=60;
+		
+		ll val= hour*60 + min;
+		
+		if(val>ma)
+		{
+			ma=val;
+			
+			houra=hour;
+			mina=min;
+		}
+		
+		}
+		
+		if((houra/10)==0)cout<<"0";
+		
+		cout<<houra;
+		
+		if((mina/10)==0)cout<<"0";
+		
+		cout<<mina<<endl;
+	}
+	return 0;
+}

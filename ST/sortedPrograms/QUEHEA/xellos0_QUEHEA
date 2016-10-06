@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+struct fin {
+	vector<int> T;
+	fin() {}
+	fin(int N) {T.resize(N+tisic,0);}
+
+	int lastone(int x) {return x&(x^(x-1));}
+
+	void put(int pos) {
+		for(int i =pos+1; i < (int)T.size(); i +=lastone(i)) T[i]++;}
+
+	int get(int pos) {
+		int ret =0;
+		for(int i =pos+1; i > 0; i -=lastone(i)) ret +=T[i];
+		return ret;}
+	};
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	int N,Q;
+	cin >> N >> Q;
+/*	v intervale [a,b) je k stromov, c cyklov: k+c
+	hran b-a-k=e: k=b-a-e
+	pre kazdy cyklus 1 interval
+*/	vector<int> nxt(N);
+	for(int i =0; i < N; i++) {
+		cin >> nxt[i];
+		nxt[i]--;}
+	vector< pair<int,int> > P1,Pc;
+	for(int i =0; i < N; i++) P1.push_back(make_pair(min(i,nxt[i]),max(i,nxt[i])));
+	vector<int> vis(N,0);
+	for(int i =0; i < N; i++) if(vis[i] == 0) {
+		int akt =i;
+		while(vis[akt] == 0) {
+			vis[akt] =2;
+			akt =nxt[akt];}
+		if(vis[akt] == 2) {
+			int mi =N+1, mx =-1;
+			while(vis[akt] == 2) {
+				vis[akt] =1;
+				mx =max(mx,akt);
+				mi =min(mi,akt);
+				akt =nxt[akt];}
+//			cout << mx << " " << mi << "\n";
+			Pc.push_back(make_pair(mi,mx));
+			}
+		akt =i;
+		while(vis[akt] == 2) {
+			vis[akt] =1;
+			akt =nxt[akt];}
+		}
+
+	vector< vector< pair<int,int> > > toq(N);
+	vector<int> ans(Q,0);
+	for(int i =0; i < Q; i++) {
+		int L,R;
+		cin >> L >> R;
+		L--, R--;
+		L--;
+		ans[i] =R-L;
+		toq[R].push_back(make_pair(R,i));
+		toq[R].push_back(make_pair(L,i));
+		if(L >= 0) {
+			toq[L].push_back(make_pair(R,i));
+			toq[L].push_back(make_pair(L,i));}
+		}
+
+	fin F1(N),Fc(N);
+	vector< vector<int> > P1v(N),Pcv(N);
+	ALL_THE(P1,it) P1v[it->ff].push_back(it->ss);
+	ALL_THE(Pc,it) Pcv[it->ff].push_back(it->ss);
+	for(int i =0; i < N; i++) {
+		ALL_THE(P1v[i],it) F1.put(*it);
+		ALL_THE(Pcv[i],it) Fc.put(*it);
+		ALL_THE(toq[i],it) {
+			int sgn =(it->ff == i)?1:-1;
+			ans[it->ss] +=sgn*Fc.get(it->ff);
+			ans[it->ss] -=sgn*F1.get(it->ff);}
+		}
+	for(int i =0; i < Q; i++) cout << ans[i] << "\n";
+	return 0;}
+
+// look at my code
+// my code is amazing

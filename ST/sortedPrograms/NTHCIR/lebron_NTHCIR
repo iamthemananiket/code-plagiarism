@@ -1,0 +1,139 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+#define MAG 5000
+ 
+using namespace std;
+ 
+int tests;
+long long n0,p,m,b;
+long double r[MAG+7],k[MAG+7];
+long double s1,s2;
+long double mrat;
+ 
+pair<long double, long double> get(long double k1,long double k2,long double k3)
+{
+	pair<long double, long double> res;
+	res.first=k1+k2+k3;
+	res.second=4*(k1*k2+k2*k3+k3*k1);
+	return res;
+}
+ 
+long double get1(long long x)
+{
+	long double res=1;
+	while (x>=MAG)
+	{
+		res*=mrat;x/=2;
+	}
+	return res*r[x];
+}
+ 
+double get2(long long x)
+{
+	return r[x];
+}
+
+int main(){
+//freopen("enigmatic.in","r",stdin);
+//freopen("enigmatic.out","w",stdout);
+//freopen("F:/in.txt","r",stdin);
+//freopen("F:/output.txt","w",stdout);
+ios_base::sync_with_stdio(0);
+//cin.tie(0);
+ 
+cin>>tests;
+cin>>n0>>p>>m>>b;
+cin>>r[1]>>r[2]>>r[3]>>r[4];
+	
+/*	r[1]=2231221525;
+	r[2]=235235;
+	r[3]=424235235;
+*/
+	k[1]=-1.0/r[1];
+	k[2]=1.0/r[2];
+	k[3]=1.0/r[3];
+ 
+//	pair<long double,long double> P=get(k[1],k[2],k[3]);
+//	long double T1=P.first-sqrt(P.second);
+	//r[4]=1.0/T1;
+	k[4]=1.0/r[4];
+ 
+cout.precision(12);
+ 
+for (int i=5;i<=5;i++)
+{
+	pair<long double,long double> P=get(k[1],k[2],k[i-1]);
+	long double T1=P.first-sqrt(P.second);
+	long double T2=P.first+sqrt(P.second);
+	long double R1=1.0/T1;
+	long double R2=1.0/T2;
+	if (fabs(R1-r[i-2])<1e-12)
+		r[i]=R2;
+	else
+		r[i]=R1;
+		
+	
+//	cout<<i<<" "<<R1<<"  "<<R2<<endl;
+	k[i]=1.0/r[i];
+	/*if (i%100000==0)
+		cout<<r[i]/r[i/2]<<endl;*/
+//	cout<<r[i]<<" "<<r[i]*(i*i+2*i+1)<<" "<<r[i]/r[i-1]<<endl;
+}
+ 
+long double ans=0;
+ 
+mrat=r[MAG]/r[MAG/2];
+
+long double M1=k[4]-k[3];
+long double M2=k[5]-k[4];
+
+long double dif=M2-M1;
+
+for (;tests;--tests)
+{
+	n0=(n0*p)%m+b;
+	if (n0<=4)
+		ans+=get1(n0);
+	else
+	{
+		double M=1.0*(n0-4)*(n0-3)/2;
+//		cout<<M<<endl;
+		ans+=1.0/(k[4]+(n0-4)*M1+M*dif);
+	}
+}
+ 
+cout.precision(6);
+cout<<fixed<<ans<<endl;
+ 
+//cin.get();cin.get();
+return 0;} 

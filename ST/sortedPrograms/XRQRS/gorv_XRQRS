@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	ios::sync_with_stdio(false);
+	int q;
+	cin>>q;
+	vector<int> arr;
+	while(q--){
+		int type;
+		cin>>type;
+		if(type==0){
+			int x;
+			cin>>x;
+			arr.push_back(x);
+		}
+		else if(type==1){
+			int L,R,x;
+			cin>>L>>R>>x;
+			L--;
+			R--;
+			int maxi=INT_MIN;
+			int ans;
+			for(int i=L;i<=R;i++){
+				int current=x ^ arr[i];
+				if(maxi<current){
+					maxi=current;
+					ans=arr[i];
+				}
+				
+			}
+			cout<<ans<<"\n";
+		}
+		else if(type==2){
+			int k;
+			cin>>k;
+			while(k--){
+				arr.pop_back();
+			}
+		}
+		else if(type==3){
+			int L,R,x;
+			cin>>L>>R>>x;
+			L--;
+			R--;
+			int count=0;
+			for(int i=L;i<=R;i++){
+				if(arr[i]<=x){
+					count++;
+				}
+			}
+			cout<<count<<"\n";
+		}
+		else if(type==4){
+			int L,R,k;
+			cin>>L>>R>>k;
+			L--;
+			R--;
+			k--;
+			vector<int> temp;
+			for(int i=L;i<=R;i++){
+				temp.push_back(arr[i]);
+			}
+			nth_element (temp.begin(),temp.begin()+k,temp.end());
+			cout<<temp[k]<<"\n";
+		}
+	}
+}

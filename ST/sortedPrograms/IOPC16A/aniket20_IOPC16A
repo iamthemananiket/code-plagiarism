@@ -1,0 +1,101 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 1e-10
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+#define VD vector<int>	// Change for double matrix
+#define VVD vector<VD>
+
+
+int GaussDetrminant(VVD A){	// Currently returning det%2
+	int n=A.size();
+	int i,j,k;
+	int det=1.0;
+	for(i=0;i<n;i++){
+		int pos=i;
+		for(j=i;j<n;j++){
+			if(A[pos][i]<A[j][i]){
+				pos=j;
+			}
+		}
+	//	cout<<i<<" "<<A[pos][i]<<endl;
+		if(A[pos][i]==0){
+			return 0;
+		}
+		swap(A[pos],A[i]);
+		if(pos!=i){
+			det=det*(-1);
+		}
+		int vals=A[i][i];
+		det*=A[i][i];
+		det%=2;
+		if(det<0){
+			det+=2;
+		}
+		for(j=i+1;j<n;j++){
+			int temp=A[j][i];
+			for(k=0;k<n;k++){
+				A[j][k]=A[j][k]*vals-A[i][k]*temp;
+				A[j][k]%=2;
+				if(A[j][k]<0){
+					A[j][k]+=2;
+				}
+			}
+		}
+	}
+	return det;
+}
+
+VVD A;
+
+int main()
+{
+	int t,i,x,y,w,n,m,j;
+	sc("%d",&t);
+	while(t--){
+		sc("%d %d",&n,&m);
+		A.resize(n);
+		for(i=0;i<n;i++){
+			A[i].resize(n);
+		}
+		for(i=0;i<n;i++){
+			for(j=0;j<n;j++){
+				A[i][j]=0;
+			}
+		}
+		for(i=0;i<m;i++){
+			sc("%d %d %d",&x,&y,&w);
+			x--,y--;
+			A[x][y]=(w%2);
+		}
+		int ans=GaussDetrminant(A);
+		pr("%d\n",ans);
+	}
+	return 0;
+}

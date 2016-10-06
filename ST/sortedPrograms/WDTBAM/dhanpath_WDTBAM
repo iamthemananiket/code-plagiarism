@@ -1,0 +1,29 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  t, n, i, val[1001], cor ;
+        string  s1, s2 ;
+
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> n >> s1 >> s2 ;
+
+                for( i=0; i<=n; i++ )
+                        cin >> val[i] ;
+
+                cor = 0 ;
+                for( i=0; i<n; i++ )
+                        if( s1[i] == s2[i] )
+                                cor++ ;
+
+                cout << ( cor==n ? val[n] : *max_element( val, val+cor+1 ) ) << endl ;
+        }
+
+        return 0;
+} 

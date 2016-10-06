@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n)	for(ll i=0;i<n;i++)
+#define repn(i, n)	for(ll i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx			17
+#define inf			(1 << 30)
+#define pb  		emplace_back
+#define mod			1000000007
+
+using namespace std;
+
+typedef pair<int, int> pii;
+typedef long long ll;
+
+ll n, k, l, a[100];
+ll dp[17][17][1 << 17];
+ll gp[1 << 17];
+
+ll gcd(ll a, ll b){
+	return b == 0 ? a : gcd(b, a % b);
+}
+
+bool OK(ll mask){
+	if(gp[mask] != -1) return gp[mask];
+	for(ll i=1;i<=25;i++){
+		for(ll j=1;j<=25;j++){
+			if((mask & (1 << i)) && (mask & (1 << j))){
+				if(!(mask & (1 << gcd(i, j)))) return gp[mask] = 0;
+			}
+		}
+	}
+	return gp[mask] = 1;
+}
+
+ll recur(ll st, ll left, ll mask){
+	if(left == 0){
+		if(OK(mask)) return 1;
+		else return 0;
+	}
+	if(dp[st][left][mask] != -1) return dp[st][left][mask];
+	ll ret = 0;
+	for(ll i=st;i<=l;i++){
+		for(ll f=1;f<=left;f++){
+			ret += recur(i+1, left-f, mask | (1 << i));
+			ret %= mod;
+		}
+		
+	}	
+	return dp[st][left][mask] = ret;
+}
+
+int main(){
+	ll tc;
+	set(gp, -1);
+	scanf("%lld", &tc);
+	while(tc--){
+		set(dp, -1);
+		ll mask = 0;
+		scanf("%lld %lld %lld", &n, &k, &l);
+		rep(i, n){
+			scanf("%lld", &a[i]);
+			mask |= (1 << a[i]);
+		}
+		ll ret = recur(1, k, mask);
+		printf("%lld\n", ret);
+	}
+	return 0;
+}

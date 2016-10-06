@@ -1,0 +1,93 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
+#include <deque>
+#include <set>
+
+#define NMAX 250010
+using namespace std;
+
+typedef long long lli;
+
+int bit[NMAX];
+
+
+set<pair<int,int> > rng[NMAX];
+
+int N,Q;
+
+
+int read(int x){
+	int val=0;
+	for(; x>= 0; x-=(x&-x)){
+		val += bit[x];
+		if(!x) break;
+	}
+	return val;
+}
+
+void upd(int x, int val){
+	for(; x <= N; x+=(x&-x)){
+		bit[x] += val;
+		if(!x) break;
+	}
+}
+void range_upd(int i, int j,int val){
+	upd(j+1,-val);
+	upd(i,val);
+}
+
+void add_range(int x, int l, int r){
+
+	set<pair<int,int> >::iterator it,it1;
+
+	it = rng[x].upper_bound(make_pair(l,N));
+
+	if(it != rng[x].begin()){
+		it1 = it;
+		--it1;
+		l = max(l,it1->second+1);
+	}
+
+	if(l > r) return;
+
+	while(it != rng[x].end()){
+		if(it->second >= r){
+			r = min(r,it->first-1);
+			break;
+		}
+
+		range_upd(it->first,it->second,-1);
+		rng[x].erase(it);
+		it = rng[x].upper_bound(make_pair(l,-1));
+	}
+
+	if(l <= r){
+		rng[x].insert(make_pair(l,r));
+		range_upd(l,r,1);
+	}
+}
+
+
+int main(){
+
+	scanf("%d%d",&N,&Q);
+	int l,r,i,t;
+	while(Q--){
+		scanf("%d",&t);
+		if(!t){
+			scanf("%d%d%d",&l,&r,&i);
+			--i,--l,--r;
+			add_range(i,l,r);
+			continue;
+		}
+
+		scanf("%d",&i);
+		--i;
+		printf("%d\n",read(i));
+	}
+
+	return 0;
+}

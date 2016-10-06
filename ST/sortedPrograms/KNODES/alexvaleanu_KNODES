@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 1e5 + 1;
+const int MAX_K = 1e6 + 1;
+
+bool chosen[MAX_K];
+int nodes[MAX_K];
+int depth[MAX_N];
+vector<int> G[MAX_N];
+
+int tata[MAX_N];
+int size[MAX_N];
+int nrPaths;
+int length_path[MAX_N], pos_in_path[MAX_N], path[MAX_N];
+int start_node[MAX_N];
+
+int in[MAX_N];
+int out[MAX_N];
+int ceas;
+
+int T, N, K;
+
+void dfs(int nod, int dad)
+{
+    int hson = 0;
+    size[nod] = 1;
+
+    in[nod] = ++ceas;
+
+    for (auto it: G[nod])
+    {
+        if (it != dad)
+        {
+            depth[it] = depth[nod] + 1;
+            tata[it] = nod;
+
+            dfs(it, nod);
+
+            size[nod] += size[it];
+
+            if (size[it] > size[hson])
+                hson = it;
+        }
+    }
+
+    if (hson == 0)
+        path[nod] = nrPaths++;
+    else
+        path[nod] = path[hson];
+
+    pos_in_path[nod] = length_path[ path[nod] ]++;
+
+    out[nod] = ++ceas;
+}
+
+int cmp(int x, int y)
+{
+    return depth[x] < depth[y];
+}
+
+bool isAncestor(int x, int y) ///x stramos?
+{
+    return in[x] <= in[y] && out[y] <= out[x];
+}
+
+int getNode()
+{
+    for (int i = K - 1; i >= 0; i--)
+        if (!chosen[i])
+            return i;
+
+    return -1;
+}
+
+void heavy_path()
+{
+    depth[1] = 0;
+    tata[1] = 0;
+
+    dfs(1, -1);
+
+    for (int i = 1; i <= N; ++i)
+    {
+        pos_in_path[i] = length_path[ path[i] ] - pos_in_path[i] - 1;
+
+        if (pos_in_path[i] == 0)
+            start_node[ path[i] ] = i;
+    }
+}
+
+int lca( int x, int y )
+{
+    while ( path[x] != path[y] )
+    {
+        if ( depth[ start_node[ path[x] ] ] < depth[ start_node[ path[y] ] ] )
+            y = tata[ start_node[ path[y] ] ];
+        else
+            x = tata[ start_node[ path[x] ] ];
+    }
+
+    return pos_in_path[x] < pos_in_path[y] ? x : y;
+}
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N;
+        ceas = 0; nrPaths = 0;
+
+        for (int i = 1; i <= N; ++i)
+            G[i].clear();
+
+        for (int i = 1; i < N; ++i)
+        {
+            int a, b;
+            cin >> a >> b;
+
+            G[a].push_back(b);
+            G[b].push_back(a);
+        }
+
+        heavy_path();
+
+        int Q;
+        cin >> Q;
+
+        while (Q--)
+        {
+            cin >> K;
+
+            for (int i = 0; i < K; ++i)
+            {
+                cin >> nodes[i];
+                chosen[i] = false;
+            }
+
+            sort(nodes, nodes + K, cmp);
+
+            int p = getNode();
+            int lastA = nodes[p];
+            int A = lastA;
+            chosen[p] = true;
+
+            for (int i = p - 1; i >= 0; i--)
+            {
+                if (isAncestor(nodes[i], lastA))
+                {
+                    chosen[i] = true;
+                    lastA = nodes[i];
+                }
+            }
+
+            p = getNode();
+
+            if (p == -1)
+            {
+                cout << "Yes\n";
+                continue;
+            }
+
+            int lastB = nodes[p];
+            int B = lastB;
+            chosen[p] = true;
+
+            for (int i = p - 1; i >= 0; i--)
+                if (chosen[i] == false)
+                {
+                    if (isAncestor(nodes[i], lastB))
+                    {
+                        chosen[i] = true;
+                        lastB = nodes[i];
+                    }
+                }
+
+            bool isPath = true;
+
+            for (int i = 0; i < K; ++i)
+                isPath &= chosen[i];
+
+            int L = lca(A, B);
+
+            if (depth[L] > depth[ nodes[0] ])
+                isPath = false;
+
+            if (isPath)
+                cout << "Yes\n";
+            else
+                cout << "No\n";
+        }
+    }
+
+    return 0;
+}

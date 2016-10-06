@@ -1,0 +1,28 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int t,n;
+
+int main()
+{
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d",&n);
+		if(360 % n)
+			printf("n ");
+		else
+			printf("y ");
+		if(n>0 && n<361)
+			printf("y ");
+		else
+			printf("n ");
+		if(n*(n+1)<=720)
+			printf("y\n");
+		else
+			printf("n\n");
+	}
+}

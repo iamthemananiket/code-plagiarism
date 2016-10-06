@@ -1,0 +1,123 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 400005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+
+ll fun(int val){
+	if(val&1){
+		ll t1=(val+1)/2;
+		t1=t1*t1;
+		return t1;
+	}
+	ll t1=val/2;
+	t1=t1*(t1+1);
+	return t1;
+}
+
+char str[maxs];
+int lps[maxs],chnge[maxs];
+
+int main()
+{
+	int t,i,j,k,right,center,corr,m1,fl,n,req;
+	ll ans=0;
+	sc("%d",&t);
+	while(t--){
+		sc("%d %d %s",&n,&k,str);
+		center=1;
+		req=n;
+		fl=0;
+		ans=1;
+		right=2;
+		n=2*n+1;
+		for(i=0;i<n;i++){
+			lps[i]=0;
+		}
+		lps[0]=0;
+		lps[1]=1;
+		for(i=2;i<n;i++){
+			m1=right-i;
+			corr=2*center-i;
+			int t1=0;
+			if(m1>0){
+				if(lps[corr]<m1){
+					lps[i]=lps[corr];
+					t1=chnge[corr];
+				}
+				else if(lps[corr]>m1){
+					lps[i]=m1;
+					fl=1;
+					t1=chnge[corr];
+				}
+				else if(lps[corr]==m1 && i==(n-1)){
+					lps[i]=lps[corr];
+					t1=chnge[corr];
+				}
+				else{
+					lps[i]=lps[corr];
+					fl=1;
+					t1=chnge[corr];
+				}
+			}
+			else{
+				t1=0;
+				lps[i]=0;
+				fl=1;
+			}
+			chnge[i]=t1;
+		//	cout<<i<<" "<<lps[i]<<" ";
+			if(fl){
+				while((i+lps[i])<n && (i-lps[i])>0 && (((i+lps[i]+1)%2)==0 || (str[(i+lps[i]+1)/2]==str[(i-lps[i]-1)/2]))){
+					lps[i]++;
+				}
+				chnge[i]=t1;
+			}
+			if((i+lps[i])>right){
+				right=i+lps[i];
+				center=i;
+			}
+			int temp=lps[i];
+			t1=0;
+			while((i+temp)<n && (i-temp)>0 && (((i+temp+1)%2)==0 || (str[(i+temp+1)/2]==str[(i-temp-1)/2] || t1<k))){
+				if(((i+temp+1)%2)!=0 && ((i+temp+1)/2)>=req || ((i-temp-1)/2)<0){
+					break;
+				}
+				if(((i+temp+1)%2)!=0 && (str[(i+temp+1)/2]!=str[(i-temp-1)/2])){
+					t1++;
+				}
+				temp++;
+			}
+			ans+=fun(temp);
+		}
+		pr("%lld\n",ans);
+	}
+	return 0;
+}

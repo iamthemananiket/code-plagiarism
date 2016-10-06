@@ -1,0 +1,143 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <queue>
+#include <functional>
+#include <set>
+#include <cmath>
+#define MOD 1000000007
+#define SIZE 1005
+
+using namespace std;
+typedef long long int ll;
+typedef pair <int,int> P;
+
+ll C[SIZE][SIZE],B[SIZE],inv[SIZE];
+
+void init()
+{
+	for(int i=0;i<SIZE;i++)
+	{
+		C[i][0]=C[i][i]=1;
+		for(int j=1;j<i;j++)
+		{
+			C[i][j]=(C[i-1][j-1]+C[i-1][j])%MOD;
+		}
+	}
+	inv[0]=inv[1]=1;
+	for(int i=2;i<SIZE;i++)
+	{
+		inv[i]=MOD-inv[MOD%i]*(MOD/i)%MOD;
+	}
+	B[0]=1;
+	for(int i=1;i<SIZE-1;i++)
+	{
+		ll sum=0;
+		for(int j=0;j<i;j++)
+		{
+			ll vl=C[i+1][j]*B[j]%MOD;
+			if(j%2==0) sum+=MOD-vl;
+			else sum+=vl;
+			sum%=MOD;
+		}
+		if(i%2==0)
+		{
+			B[i]=sum*inv[i+1]%MOD;
+		}
+		else
+		{
+			B[i]=MOD-(sum*inv[i+1]%MOD);
+			if(B[i]==MOD) B[i]=0;
+		}
+	}
+}
+ll Sn(ll n,int k)
+{
+	ll ret=0;
+	ll now=n%MOD;
+	for(int i=k;i>=0;i--)
+	{
+		ret+=C[k+1][i]*B[i]%MOD*now%MOD;
+		ret%=MOD;
+		now*=n%MOD;
+		now%=MOD;
+	}
+	return ret*inv[k+1]%MOD;
+}
+ll mpow(ll m,ll t)
+{
+	if(t==0) return 1;
+	ll ret=mpow(m,t/2);
+	ret=ret*ret%MOD;
+	if(t%2==1) ret=ret*m%MOD;
+	return ret;
+}
+ll gcd(ll x,ll y)
+{
+	if(x==0) return y;
+	return gcd(y%x,x);
+}
+int main()
+{
+	init();
+	//int a,b;
+	//scanf("%d %d",&a,&b);
+	//printf("%lld\n",Sn(a,b));
+	//return 0;
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		ll n;
+		int k;
+		scanf("%lld %d",&n,&k);
+		if(n<=10000)
+		{
+			ll ret=0;
+			for(int i=1;i<=n;i++)
+			{
+				if(gcd(i,n)==1)
+				{
+					ret+=mpow(i,k);
+					ret%=MOD;
+				}
+			}
+			printf("%lld\n",ret);
+			continue;
+		}
+		ll N=n;
+		vector <ll> pr;
+		for(ll i=2;i*i<=N;i++)
+		{
+			if(N%i==0)
+			{
+				pr.push_back(i);
+				while(N%i==0) N/=i;
+			}
+		}
+		if(N!=1) pr.push_back(N);
+		int sz=pr.size();
+		ll ret=0;
+		for(int S=0;S<1<<sz;S++)
+		{
+			int cnt=0;
+			ll tm=1;
+			for(int i=0;i<sz;i++)
+			{
+				if(S>>i&1)
+				{
+					cnt++;
+					tm*=pr[i];
+				}
+			}
+			ll pl=Sn(n/tm,k)*mpow(tm%MOD,k)%MOD;
+			if(cnt%2==0) ret+=pl;
+			else ret+=MOD-pl;
+			ret%=MOD;
+		}
+		printf("%lld\n",ret);
+	}
+	return 0;
+}

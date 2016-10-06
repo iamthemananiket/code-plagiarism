@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    int T, N, M;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%d", &N, &M);
+        if(N==1)
+            printf("Yes\n");
+        else if(M==0)
+            printf("No 1\n");
+        else if(__gcd(N, M)==1)
+            printf("Yes\n");
+        else
+            printf("No %d\n", N/__gcd(N, M));
+    }
+    return 0;
+}

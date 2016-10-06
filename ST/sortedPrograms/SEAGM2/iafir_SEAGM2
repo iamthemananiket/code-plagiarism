@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const long double eps = 1e-7;
+long double a, p, px[14][10004], mul[14];
+int t, n, m;
+
+int main() {
+	cin.sync_with_stdio(0);
+	cout << fixed << setprecision(6);
+	cin >> t;
+	while(t--) {
+		cin >> n >> m;
+		for(int i = 0; i<n; i++) {
+			for(int j = 0; j<m; j++)
+				cin >> px[i][j];
+			mul[i] = 1;
+		}
+		bool isZero = false;
+		for(int i = 0; i<m; i++)
+			if(px[0][i] < eps) {
+				isZero = true; break;
+			}
+		if(isZero) {
+			cout << 0 << "\n";
+			continue;
+		}
+		p = 1;
+		for(int i = 1; i<n; i++) {
+			for(int j=0;j<m;j++)
+				mul[i] *= px[i][j] / px[0][j];
+			p += mul[i];
+		}
+		cout << 1/p << "\n";
+	}
+
+}

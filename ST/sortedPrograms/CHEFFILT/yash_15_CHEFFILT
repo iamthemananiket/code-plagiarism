@@ -1,0 +1,57 @@
+#include <cstdio>
+#include <cstring>
+using namespace std;
+const int mod = 1000000007;
+
+int hash(char a[], char one, int l=10)
+{
+	int ans=0,i;
+	for(i=0;i<l;i++)
+		ans=ans*2+((a[i]==one)?1:0);
+	return ans;
+}
+
+int dp[1024][1024],c[1024],aux[1024];
+
+int main()
+{
+	int t,n,i,j,val0,val;
+	char inp[11];
+	scanf("%d",&t);
+	while(t--)
+	{
+		memset(dp,0,sizeof dp);
+		memset(aux,0,sizeof aux);
+		for(i=0;i<(1<<10);i++)
+			c[i]=1;
+		scanf(" %s",inp);
+		val0=hash(inp,'w');
+		
+		scanf("%d",&n);
+		for(i=0;i<n;i++)
+		{
+			scanf(" %s",inp);
+			val=hash(inp,'+');
+			if(aux[val])
+				c[val]=(2ll*c[val])%mod;
+			aux[val]=1;
+		}
+		if(aux[0])
+			dp[0][val0]=(c[0]+c[0])%mod;
+		else
+			dp[0][val0]=1;
+		for(i=0;i<1023;i++)
+		{
+			if(aux[i+1])
+				for(j=0;j<1024;j++)
+				{
+					dp[i+1][j]=(dp[i+1][j]+dp[i][j]*1ll*c[i+1])%mod;
+					dp[i+1][j^(i+1)]=(dp[i+1][j^(i+1)]+dp[i][j]*1ll*c[i+1])%mod;
+				}
+			else
+				for(j=0;j<1024;j++)
+					dp[i+1][j]=dp[i][j];
+		}
+		printf("%d\n",dp[1023][0]);
+	}
+}

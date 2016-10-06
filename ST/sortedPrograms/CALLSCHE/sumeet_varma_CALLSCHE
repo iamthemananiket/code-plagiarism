@@ -1,0 +1,268 @@
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <cstdlib>
+#include <cstdio>
+#include <string>
+#include <utility>
+#include <iomanip>
+
+using namespace std;
+
+struct edge {
+	int a, b, f, c;
+};
+
+const int inf = 1000 * 1000 * 1000;
+const int MAX = 70;
+const int MAXN =  1 + MAX + MAX*MAX + MAX*MAX*MAX + MAX*MAX + MAX*MAX + 1;
+
+vector <edge> e;
+int pt[MAXN]; // very important performance trick
+vector <int> g[MAXN];
+int flow;
+queue <int> q;
+int d[MAXN];
+int lim;
+int s, t;
+
+int p,D,h,n;
+int L[MAX];
+int LTBegin, LTEnd;
+int r[MAX][MAX];
+int f[MAX][MAX][MAX];
+int cap[MAX][MAX];
+int idx[MAX][MAX][MAX];
+int idx2[MAX][MAX];
+bool yes;
+
+void addEdge(int a, int b, int c) {
+	edge ed;
+
+	//keep edges in vector: e[ind] - direct edge, e[ind ^ 1] - back edge
+
+	ed.a = a; ed.b = b; ed.f = 0; ed.c = c;
+	g[a].push_back(e.size());
+	e.push_back(ed);
+
+	ed.a = b; ed.b = a; ed.f = c; ed.c = c;
+	g[b].push_back(e.size());
+	e.push_back(ed);
+}
+
+bool bfs() {
+	for (int i = s; i <= t; i++)
+		d[i] = inf;
+	d[s] = 0;
+	q.push(s);
+	while (!q.empty() && d[t] == inf) {
+		int cur = q.front(); q.pop();
+		for (size_t i = 0; i < g[cur].size(); i++) {
+			int id = g[cur][i];
+			int to = e[id].b;
+
+			//printf("cur = %d id = %d a = %d b = %d f = %d c = %d\n", cur, id, e[id].a, e[id].b, e[id].f, e[id].c);
+
+			if (d[to] == inf && e[id].c - e[id].f >= lim) {
+				d[to] = d[cur] + 1;
+				q.push(to);
+			}
+		}
+	}
+	while (!q.empty())
+		q.pop();
+	return d[t] != inf;
+}
+
+bool dfs(int v, int flow) {
+	if (flow == 0)
+		return false;
+	if (v == t) {
+		//cout << v << endl;
+		return true;
+	}
+	for (; pt[v] < g[v].size(); pt[v]++) {
+		int id = g[v][pt[v]];
+		int to = e[id].b;
+
+		//printf("v = %d id = %d a = %d b = %d f = %d c = %d\n", v, id, e[id].a, e[id].b, e[id].f, e[id].c);
+
+		if (d[to] == d[v] + 1 && e[id].c - e[id].f >= flow) {
+			int pushed = dfs(to, flow);
+			if (pushed) {
+				e[id].f += flow;
+				e[id ^ 1].f -= flow;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void dinic() {
+	for (lim = (1 << 30); lim >= 1;) {
+		if (!bfs()) {
+			lim >>= 1;
+			continue;
+		}
+
+		for (int i = s; i <= t; i++)
+			pt[i] = 0;
+
+		int pushed;
+
+		while (pushed = dfs(s, lim))
+			flow = flow + lim;
+	}
+}
+
+void init(){
+    flow = 0;
+    for(int i = 0; i < MAXN; i++){
+        pt[i] = d[i] = 0;
+        g[i].clear();
+    }
+    e.clear();
+    q.empty();
+    lim = 0;
+    yes = true;
+}
+
+void solve(){
+   // cout << "starting scanning" << endl;
+
+    scanf("%d %d %d %d",&p,&D,&h,&n);
+
+    for(int i = 0; i < p; i++)
+        scanf("%d",&L[i]);
+
+    for(int i = 0; i < p; i++)
+        L[i] += D;
+
+    scanf("%d %d", &LTBegin, &LTEnd);
+    LTBegin--;
+    LTEnd--;
+
+    for(int i = 0; i < D; i++)
+        for(int j = 0; j < h;j++)
+        scanf("%d", &r[i][j]);
+
+    for(int i = 0; i < p; i++)
+        for(int j = 0; j < D; j++)
+           cap[i][j] = n + 1;
+
+    //cout << "4";
+
+    for(int i = 0; i < p; i++){
+        for(int j = 0; j < D; j++){
+            for(int k = 0; k < h; k++){
+                scanf("%d",&f[i][j][k]);
+                if(f[i][j][k] == 0){
+                    cap[i][j]--;
+                    yes &= cap[i][j] >= 0;
+                }
+            }
+        }
+    }
+
+   // cout << "Done scanning" << endl;
+
+    if(!yes){
+        cout << "No" << endl;
+        return;
+    }
+
+            int nodes = 1 + p + p*D + p*D*h + p*D + D*h + 1;
+			int maxFlow = 0;
+
+			int src = s = 0, sink = t = nodes - 1;
+			int now = 1;
+
+			for(int i = 0; i < p; i++)
+				addEdge(src, i + 1, L[i]);
+
+			now += p;
+
+			for(int i = 0; i < p; i++){
+				for(int j = 0; j < D; j++){
+					addEdge(i + 1, now++, cap[i][j]);
+				}
+			}
+
+			now = 1 + p + p*D;
+
+			for(int i = 0; i < p; i++){
+				for(int j = 0; j < D; j++){
+					for(int k = 0; k < h; k++){
+						if(f[i][j][k] == 1){
+							addEdge(1 + p + D*i + j, now, 1);
+							idx[i][j][k] = now;
+						}
+						else
+                            idx[i][j][k] = 0;
+						now++;
+					}
+				}
+			}
+
+			now = 1 + p + p*D + p*D*h;
+
+			for(int i = 0; i < p; i++){
+				for(int j = 0; j < D; j++){
+					for(int k = LTBegin; k <= LTEnd; k++){
+						if(idx[i][j][k] != 0){
+							addEdge(idx[i][j][k], now, 1);
+						}
+					}
+					addEdge(now, sink , 1);
+					maxFlow++;
+					now++;
+				}
+			}
+
+			now = 1 + p + p*D + p*D*h + p*D;
+
+			for(int i = 0; i < D; i++){
+				for(int j = 0; j < h; j++){
+					idx2[i][j] = now;
+					addEdge(idx2[i][j], sink, r[i][j]);
+					maxFlow += r[i][j];
+					now++;
+				}
+			}
+
+			for(int i = 0; i < p; i++){
+				for(int j = 0; j < D; j++){
+					for(int k = 0; k < h; k++){
+						if(idx[i][j][k] != 0)
+							addEdge(idx[i][j][k], idx2[j][k], 1);
+					}
+				}
+			}
+
+            //cout << "here" << endl;
+			dinic();
+		//	cout << "not here" << endl;
+			if(flow == maxFlow)
+                cout << "Yes" << endl;
+            else
+                cout << "No" << endl;
+}
+
+int main() {
+    int t;
+    scanf("%d", &t);
+
+    while(t--){
+       init();
+       solve();
+    }
+
+    return 0;
+}

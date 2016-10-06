@@ -1,0 +1,56 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+const int INF = 1e9;
+const int MAX_N = 1000 + 10;
+
+
+int T;
+char A[MAX_N];
+char O[MAX_N];
+int B[MAX_N], N, M;
+
+int main(){
+  srand(time(NULL));
+  scanf("%d", &T);
+  while(T--){
+    scanf("%s%d", A, &M);
+    for(int i = 0; i < M; i++)
+      scanf("%d", B + i);
+    N = strlen(A);
+    int bval = INF;
+    for(int i = 0; i < 100; i++){
+      random_shuffle(A, A + N);
+      int val = 0;
+      for(int k = 0; k < M; k++){
+	int c = 0;
+	for(int j = N - 1; j >= 0; j--){
+	  c = (c * 10 + A[j] - '0') % B[k];
+	}
+	val += c;
+      }
+      if(val < bval){
+	memcpy(O, A, sizeof A);
+      }
+    }
+    printf("%s\n", O);
+  }
+  return 0;
+}

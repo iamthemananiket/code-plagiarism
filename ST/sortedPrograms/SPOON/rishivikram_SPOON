@@ -1,0 +1,127 @@
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include <string.h>
+using namespace std;
+typedef long long int64;
+const double pi=acos(-1.0);
+const double eps=1e-11;
+#define si(x) scanf("%d",&x)
+#define mp(A,B) make_pair(A,B)
+#define pb(X) push_back(X)
+#define INF 1000000000
+#define MOD 1000000007
+#define SET(x,y) memset(x,y,sizeof(x));
+#define getchar_unlocked getchar //uncomment when compiling on DEV c++
+inline void sc(int* x)
+{
+	register char c = getchar_unlocked();
+	*x = 0;
+	int neg = 0;
+	for(; ((c<48 || c>57) && c != '-');c = getchar_unlocked());
+	if(c=='-') {
+        neg = 1;
+        c = getchar_unlocked();
+    }
+	for(; (c>47)&&(c<58);c = getchar_unlocked())
+		*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+    if(neg)
+        *x = -*x;
+}
+inline void scl(long long int* x)
+{
+	register char c = getchar_unlocked();
+	*x = 0;
+	int neg = 0;
+	for(; ((c<48 || c>57) && c != '-');c = getchar_unlocked());
+	if(c=='-') {
+        neg = 1;
+        c = getchar_unlocked();
+    }
+	for(; (c>47)&&(c<58);c = getchar_unlocked())
+		*x = (long long int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+    if(neg)
+        *x = -*x;
+}
+int main()
+{
+	int t,r,c,pos,i;
+	bool flag;
+	string stri="spoon";
+	si(t);
+	while(t--)
+	{
+		flag=false;
+		si(r);si(c);
+		string str[r];
+		for(i=0;i<r;i++)
+		{
+			cin>>str[i];
+			transform(str[i].begin(),str[i].end(),str[i].begin(),::tolower);
+			if(str[i].find(stri)!=-1)
+			{
+				flag=true;
+			//	cout<<"Found here "<<i<<endl;
+			}
+		}
+		if(flag)
+			printf("There is a spoon!\n");
+		else
+		{
+			for(i=0;i<r&&!flag;i++)
+			{
+				pos=str[i].find('s');
+				while(pos!=-1&&!flag)
+				{
+					if((i+5<=r)&&str[i+1][pos]=='p'&&str[i+2][pos]=='o'&&str[i+3][pos]=='o'&&str[i+4][pos]=='n')
+						flag=true;
+					pos=str[i].find('s',pos+1);
+				}
+			}
+			if(flag)
+				printf("There is a spoon!\n");
+			else
+				printf("There is indeed no spoon!\n");
+		}
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

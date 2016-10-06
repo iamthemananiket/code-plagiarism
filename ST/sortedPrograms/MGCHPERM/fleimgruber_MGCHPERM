@@ -1,0 +1,149 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_K 10
+#define DMAT 5
+#define LOG 30
+#define M_SIZE (MAX_K*MAX_K)
+#define MOD 1000000007
+
+int v[M_SIZE],tmp[M_SIZE];
+int p[DMAT][LOG][M_SIZE][M_SIZE];
+
+int dp[MAX_K][MAX_K];
+int f(int n, int k)
+{
+	if (n<0)
+		return 0;
+	if (k==0)
+		return 1;
+	if (dp[n][k]!=-1)
+		return dp[n][k];
+	return dp[n][k]=(f(n-k,k)+f(n,k-1))%MOD;
+}
+
+ll fpow(ll a, ll b)
+{
+	ll r=1;
+	for (;b;b/=2,a=(a*a)%MOD)
+		if (b&1)
+			r=(r*a)%MOD;
+	return r;
+}
+
+int bnk(int n, int k)
+{
+	int p1=1,p2=1;
+	for (int i=1; i<=k; i++)
+	{
+		p1=(p1*1LL*(n-i+1))%MOD;
+		p2=(p2*1LL*i)%MOD;
+	}
+	return (p1*fpow(p2,MOD-2))%MOD;
+}
+
+int size;
+void build_transform(int a[M_SIZE][M_SIZE], int K)
+{
+	size=K*K+2;
+	for (int i=1; i<=size; i++)
+		for (int j=1; j<=size; j++)
+			a[i][j]=0;
+	a[1][1]=a[1][size-1]=1; //f(n,1)+1
+	for (int k=2; k<=K; k++)
+	{
+		//f(n+1,k)=f(n+1-k,k)+f(n+1,k-1)
+		for (int i=1; i<=size; i++) //f(n+1,k-1)
+			a[k][i]=a[k-1][i];
+		a[k][(k-1)*K+k]++;
+	}
+	for (int d=1; d<K; d++)
+		for (int k=1; k<=K; k++)
+			a[d*K+k][(d-1)*K+k]=1;
+	a[size-1][size-1]=1;
+	for (int i=1; i<=size; i++)
+		a[size][i]=a[K][i];
+	a[size][size]=1;
+}
+
+int main()
+{
+	for (int i=0; i<MAX_K; i++)
+		for (int j=0; j<MAX_K; j++)
+			dp[i][j]=-1;
+	for (int K=3; K<=7; K++)
+	{
+		build_transform(p[K-3][0],K-1);
+		for (int l=1; l<30; l++)
+			for (int i=1; i<=size; i++)
+				for (int j=1; j<=size; j++)
+				{
+					int sum=0;
+					for (int k=1; k<=size; k++)
+						sum=(sum+p[K-3][l-1][i][k]*1LL*p[K-3][l-1][k][j])%MOD;
+					p[K-3][l][i][j]=sum;
+				}
+	}
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		int N,K;
+		scanf("%d %d",&N,&K);
+		K--;
+		size=K*K+2;
+		int bad=0;
+		int c=K*(K+1)/2;
+		//sum i=0 to N-c: f(i,K)
+		if (N-c>=0)
+		{
+			int b=N-c-K+1;
+			if (b>0)
+			{
+				v[size]=0;
+				v[size-1]=1;
+				for (int d=0; d<K; d++)
+					for (int k=1; k<=K; k++)
+					{
+						int here=f(K-d-1,k);
+						v[d*K+k]=here;
+						if (k==K)
+							v[size]=(v[size]+here)%MOD;
+					}
+				for (int i=0; i<30; i++)
+					if (b&(1<<i))
+					{
+						for (int j=1; j<=size; j++)
+						{
+							tmp[j]=0;
+							for (int k=1; k<=size; k++)
+								tmp[j]=(tmp[j]+v[k]*1LL*p[K-2][i][j][k])%MOD;
+						}
+						for (int j=1; j<=size; j++)
+							v[j]=tmp[j];
+					}
+				bad=v[size];
+			}
+			else
+				for (int i=0; i<=N-c; i++)
+					bad=(bad+f(i,K))%MOD;
+		}
+		printf("%d\n",(bnk(N,K+1)-bad+MOD)%MOD);
+	}
+	return 0;
+}

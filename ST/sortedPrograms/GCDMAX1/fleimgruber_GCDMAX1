@@ -1,0 +1,117 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 500005
+
+int n,k,a[MAX_N];
+
+struct gcdstack
+{
+	stack<pint> s;
+
+	void push(int a)
+	{
+		int b=a;
+		if (!s.empty())
+			b=__gcd(b,s.top().se);
+		s.push(mp(a,b));
+	}
+
+	void pop() { s.pop(); }
+
+	pint top() { return s.top(); }
+
+	bool empty() { return s.empty(); }
+};
+
+struct gcdqueue
+{
+	gcdstack in,out;
+
+	void move()
+	{
+		if (out.empty())
+			for (;!in.empty(); in.pop())
+				out.push(in.top().fi);
+	}
+
+	void push(int a) { in.push(a); }
+
+	void pop()
+	{
+		move();
+		out.pop();
+	}
+
+	int front()
+	{
+		move();
+		int ans=out.top().se;
+		if (!in.empty())
+			ans=__gcd(ans,in.top().se);
+		return ans;
+	}
+
+	bool empty() { return in.empty()&&out.empty(); }
+
+};
+
+bool f(int s)
+{
+	gcdqueue q;
+	for (int i=1; i<=s; i++)
+		q.push(a[i]);
+	if (q.front()>=k)
+		return true;
+	for (int i=s+1; i<=n; i++)
+	{
+		q.pop();
+		q.push(a[i]);
+		if (q.front()>=k)
+			return true;
+	}
+	return false;
+}
+
+int main()
+{
+	scanf("%d %d",&n,&k);
+	int mx=0;
+	for (int i=1; i<=n; i++)
+	{
+		scanf("%d",a+i);
+		mx=max(mx,a[i]);
+	}
+	if (mx<k)
+	{
+		printf("0\n");
+		return 0;
+	}
+	int lo=1,hi=n,m;
+	while (lo<hi)
+	{
+		m=(lo+hi+1)/2;
+		if (f(m))
+			lo=m;
+		else
+			hi=m-1;
+	}
+	printf("%d\n",lo);
+	return 0;
+}

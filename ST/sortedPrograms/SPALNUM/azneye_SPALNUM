@@ -1,0 +1,71 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+
+bool is_palin(int x) {
+  stringstream ss;
+  ss << x;
+  string str;
+  ss >> str;
+  for (int i = 0; i < (int) str.size(); ++i) {
+    if (str[i] != str[str.size() - i - 1]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void solve(int test_num) {
+  const int MAX = 111000;
+  vector<ll> sum(MAX, 0);
+  for (int i = 1; i < MAX; ++i) {
+    sum[i] = sum[i - 1];
+    if (is_palin(i)) {
+      sum[i] += i;
+    }
+  }
+  int Q;
+  cin >> Q;
+  while (Q-- > 0) {
+    int L, R;
+    cin >> L >> R;
+    const ll res = sum[R] - sum[L - 1];
+    cout << res << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

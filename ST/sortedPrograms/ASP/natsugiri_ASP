@@ -1,0 +1,48 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+int T, N;
+int main() {
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d", &N);
+
+	bool yes = true;
+	
+	int last = -1, a;
+	bool flip = false;
+	
+	REP (i, N) {
+	    scanf("%d", &a);
+	    if (yes) {
+		if (last > a) {
+		    if (flip) {
+			yes = false;
+		    } else {
+			flip = true;
+		    }
+		} else {
+		    last = a;
+		    flip = false;
+		}
+	    }
+	}
+	puts(yes? "YES": "NO");
+    }
+    return 0;
+}

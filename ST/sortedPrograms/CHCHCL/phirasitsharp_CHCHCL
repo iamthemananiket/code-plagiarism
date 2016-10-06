@@ -1,0 +1,18 @@
+#include <iostream>
+
+int main( void ) {
+
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	int t;
+	std::cin >> t;
+	while( t-- ) {
+		int a, b;
+		std::cin >> a >> b;
+		std::cout << ( ( a % 2 == 0 ) or ( b % 2 == 0 ) ? "Yes" : "No" ) << "\n";
+	}
+
+	return 0;
+}

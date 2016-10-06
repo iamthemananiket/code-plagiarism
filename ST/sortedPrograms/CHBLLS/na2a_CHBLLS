@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+
+using namespace std;
+
+const int N = (int) 1e5 + 7;
+const int MOD = (int) 1e9 + 7;
+
+int main() {
+  #ifdef LOCAL
+  //freopen("in", "r", stdin);
+  //freopen("out", "w", stdout);
+  #endif // LOCAL
+
+  int res[] = {4, 3, 5, 1, 2};
+  puts("1");
+  puts("3 1 2 2");
+  puts("3 3 4 4");
+  fflush(stdout);
+  int in;
+  scanf("%d", &in);
+  printf("2\n%d\n", res[in + 2]);
+  fflush(stdout);
+  return 0;
+}

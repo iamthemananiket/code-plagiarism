@@ -1,0 +1,163 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, x, y, d, c, p;
+const int N = 5e4 + 5;
+const int NN = N + N + N;
+const int LN = 21;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+string str;
+struct node {
+    ll c[10];
+    ll ca[10][10];
+    ll cb[10][10];
+    ll cc[10][10];
+    ll cd[10][10];
+    node () {
+        memset(c, 0, sizeof(c));
+        memset(ca, 0, sizeof(ca));
+        memset(cb, 0, sizeof(cb));
+        memset(cc, 0, sizeof(cc));
+        memset(cd, 0, sizeof(cd));
+    }
+}tree[4 * N], res1, res2;
+void merge(node & res, node & A, node & B) {
+    for (int j = 0; j < 10; ++j) {
+        res.c[j] = A.c[j] + B.c[j];
+        for (int k = 0; k < 10; ++k) {
+            res.ca[j][k] = A.ca[j][k] + B.ca[j][k];
+            res.ca[j][k] += A.c[j] * B.c[k];
+            
+            res.cb[j][k] = A.cb[j][k] + B.cb[j][k];
+            res.cb[j][k] += A.ca[j][k] * B.c[k];
+            res.cb[j][k] += A.c[j] * B.ca[k][k];
+            
+            
+            res.cc[j][k] = A.cc[j][k] + B.cc[j][k];
+            res.cc[j][k] += A.ca[j][j] * B.c[k];
+            res.cc[j][k] += A.c[j] * B.ca[j][k];
+            
+            res.cd[j][k] = A.cd[j][k] + B.cd[j][k];
+            res.cd[j][k] += A.ca[j][k] * B.ca[k][j];
+            res.cd[j][k] += A.cb[j][k] * B.c[j];
+            res.cd[j][k] += A.c[j] * B.cc[k][j];
+        }
+    }
+}
+void init(int l, int r, int i) {
+    if (l == r) {
+        tree[i].c[str[l] - '0']++;
+        return;
+    }
+    int mid = (l + r) / 2;
+    init(l, mid, i + 1 + i);
+    init(mid + 1, r, i + 2 + i);
+    int L = i + 1 + i, R = i + 2 + i;
+    merge(tree[i], tree[L], tree[R]);
+}
+void modify(int l, int r, int i, int pos, int v) {
+    if (l == r) {
+        tree[i].c[str[l] - '0']--;
+        tree[i].c[v]++;
+        return;
+    }
+    int mid = (l + r) / 2;
+    if (pos <= mid) modify(l, mid, i + 1 + i, pos, v);
+    else modify(mid + 1, r, i + 2 + i, pos, v);
+    merge(tree[i], tree[i + 1 + i], tree[i + 2 + i]);
+}
+void query(int l, int r, int i, int rl, int rr) {
+    if (l > rr || rl > r) return;
+    if (rl <= l && r <= rr) {
+        merge(res1, res2, tree[i]);
+        res2 = res1;
+        return;
+    }
+    int mid = (l + r) / 2;
+    query(l, mid, i + 1 + i, rl, rr);
+    query(mid + 1, r, i + 2 + i, rl, rr);
+}
+int main() {
+    csl;
+    cin >> str >> q;
+    init(0, str.size() - 1, 0);
+    while (q--) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            cin >> u >> v;
+            u--, v--;
+            res1 = node();
+            res2 = node();
+            /*for (int i = 0; i < 10; ++i) {
+             for (int j = 0; j < 10; ++j) {
+             cout << res2.cd[i][j] << ' ';
+             }
+             cout << '\n';
+             }*/
+            query(0, str.size() - 1, 0, u, v);
+            ll ans = 0;
+            for (int i = 0; i < 10; ++i) for (int j = 0; j < 10; ++j) ans += res1.cd[i][j];
+            /*for (int i = 0; i < 10; ++i) {
+             for (int j = 0; j < 10; ++j) {
+             cout << res2.cd[i][j] << ' ';
+             }
+             cout << '\n';
+             }*/
+            cout << ans % mod << '\n';
+        } else {
+            int idx, ch;
+            cin >> idx >> ch;
+            idx--;
+            modify(0, str.size() - 1, 0, idx, ch);
+            str[idx] = ch + '0';
+        }
+    }
+    return 0;
+}
+
+

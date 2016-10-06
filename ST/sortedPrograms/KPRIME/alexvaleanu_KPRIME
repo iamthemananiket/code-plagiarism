@@ -1,0 +1,76 @@
+#include <cstdio>
+
+const int Nmax = 100005;
+const int Kmax = 6;
+
+int sieve[Nmax];
+int sum[Kmax][Nmax];
+int T, A, B, K;
+
+inline void read( int &n )
+{
+    n = 0;
+
+    int ch = getchar();
+    int sign = 1;
+
+    while ( ch < '0' || ch > '9' )
+    {
+        if ( ch == '-')
+            sign = -1;
+
+        ch = getchar();
+    }
+
+    while (  ch >= '0' && ch <= '9' )
+    {
+        n = ( n << 3 ) + ( n << 1) + ch - '0';
+        ch = getchar();
+    }
+
+    n = n * sign;
+}
+
+void gen()
+{
+    for ( int i = 2; i < Nmax; ++i )
+            if( sieve[i] == 0 )
+                for ( int j = i; j < Nmax; j += i )
+                        sieve[j]++;
+
+    for ( int t = 1; t < Kmax; ++t )
+    {
+        for ( int i = 2; i < Nmax; ++i )
+        {
+            sum[t][i] = sum[t][i - 1];
+
+            if ( sieve[i] == t )
+                    sum[t][i]++;
+        }
+    }
+}
+
+int main()
+{
+    gen();
+
+    read( T );
+
+    while ( T-- )
+    {
+        read( A );
+        read( B );
+        read( K );
+
+        if ( K >= Kmax )
+        {
+            printf("0\n");
+        }
+        else
+        {
+            printf("%d\n", sum[K][B] - sum[K][A - 1]);
+        }
+    }
+
+    return 0;
+}

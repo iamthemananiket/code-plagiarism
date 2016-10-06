@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+#define ll unsigned long long
+
+int nextInt() {
+	int n;
+	scanf("%d", &n);
+	return n;
+}
+
+ll nextLong() {
+	ll n;
+	scanf("%llu", &n);
+	return n;
+}
+
+ll mulmod(ll a, ll b, ll MOD) {
+	ll res = 0;
+	while (b) {
+		if (b & 1) {
+			res = (res + a) % MOD;
+		}
+		a = (a << 1) % MOD;
+		b >>= 1;
+	}
+	return res;
+}
+
+const int N = 1005;
+
+ll a[N];
+char s[N];
+
+int main() {
+	int t = nextInt();
+	while (t--) {
+		int n = nextInt();
+		for (int i = 0; i < n; i++) {
+			a[i] = nextLong();
+		}
+		ll A = nextLong();
+		ll B = nextLong();
+		ll C = nextLong();
+		scanf("%*c");
+		gets(s);
+		ll m1 = 1;
+		ll m2 = 0;
+		for (int i = 0; i < n; i++) {
+			if (s[i] == 'R') {
+				int l = i;
+				int r = n-1;
+				while (l < r) {
+					swap(a[l++], a[r--]);
+				}
+			} else if (s[i] == 'A') {
+				m2 = (m2 + A) % C;
+			} else {
+				m1 = mulmod(m1, B, C);
+				m2 = mulmod(m2, B, C);
+			}
+			a[i] = mulmod(a[i], m1, C);
+			a[i] = (a[i] + m2) % C;
+			if (i == n-1) {
+				printf("%llu\n", a[i]);
+			} else {
+				printf("%llu ", a[i]);
+			}
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 3e5 + 10;
+vector<int> g[N];
+int depth[N];
+int start[N];
+int end[N];
+bool visited[N];
+int qx[N], qy[N];
+int l[N];
+int P[N][21];
+int tim = 0;
+int n;
+void dfs(int root) {
+	visited[root] = true;
+	tim++;
+	start[root] = tim;
+	for(int i = 0; i < g[root].size(); i++) {
+		int child = g[root][i];
+		if(visited[child]) continue;
+		depth[child] = depth[root] + 1;
+		P[child][0] = root;
+		dfs(child);
+	}
+	end[root] = tim;
+	tim++;
+}
+void preprocess()
+{
+	for(int j=1;j<20;j++)
+	{
+		for(int i=1;i<=n;i++)
+		{
+			P[i][j]=P[P[i][j-1]][j-1];
+		}
+	}
+}
+int kth(int p,int k)
+{
+	for(int j=20;j>=0;j--)
+	{
+		int x = 1<<j;
+		if(k>=x)
+		{
+			k-=x;
+			p=P[p][j];
+		}
+	}
+	return p;
+}
+int lca(int p,int q)
+{
+	if(depth[p]>depth[q])
+		p=kth(p,depth[p]-depth[q]);
+	else if (depth[q] > depth[p])
+		q=kth(q,depth[q]-depth[p]);
+	for(int j=19;j>=0;j--)
+	{
+		if(P[p][j]!=P[q][j])
+		{
+			p=P[p][j];q=P[q][j];
+		}
+	}
+	if(p!=q)
+		p=P[p][0];
+	return p;
+}
+bool intersect(int x1, int y1, int x2, int y2) {
+	if(x1 > y1) swap(x1, y1);
+	if(x2 > y2) swap(x2, y2);
+	if(y1 < x2 || y2 < x1) return false;
+	return true;
+}
+bool between(int x, int y, int z) {
+	if(y > z) swap(y, z);
+	return (x >= y && x <= z);
+}
+bool check(int i, int j) {
+	if(intersect(start[qx[j]], start[l[j]], start[l[i]], start[qx[i]]) 
+		&& intersect(end[qx[j]], end[l[j]], end[l[i]], end[qx[i]])) return true;
+
+	if(intersect(start[qy[j]], start[l[j]], start[l[i]], start[qx[i]]) 
+		&& intersect(end[qy[j]], end[l[j]], end[l[i]], end[qx[i]])) return true;
+
+	if(intersect(start[qx[j]], start[l[j]], start[l[i]], start[qy[i]]) 
+		&& intersect(end[qx[j]], end[l[j]], end[l[i]], end[qy[i]])) return true;
+
+	if(intersect(start[qy[j]], start[l[j]], start[l[i]], start[qy[i]]) 
+		&& intersect(end[qy[j]], end[l[j]], end[l[i]], end[qy[i]])) return true;
+
+	return false;
+}
+int main() {
+	cin >> n;
+	int x, y;
+	for(int i = 0; i < n - 1; i++) {
+		scanf("%d %d", &x, &y);
+		g[x].push_back(y);
+		g[y].push_back(x);
+	}
+	dfs(1);
+	preprocess();
+	int q;
+	cin >> q;
+	for(int i = 0; i < q; i++) {
+		scanf("%d %d", qx + i, qy + i);
+		l[i] = lca(qx[i], qy[i]);
+	}
+	for(int i = 0; i < q; i++) {
+		int cnt = 0;
+		for(int j = 0; j < i; j++) {
+			if(check(i, j)) cnt++;
+		}
+		printf("%d\n", cnt);
+	}
+}

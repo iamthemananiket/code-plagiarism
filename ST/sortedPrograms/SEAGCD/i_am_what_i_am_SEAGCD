@@ -1,0 +1,81 @@
+#include<iostream>
+#include<vector>
+#include<climits>
+using namespace std;
+
+#define MAX 10000001
+#define MOD 1000000007
+long long power[MAX];
+bool isPrime[MAX];
+int minimumPrime[MAX];
+
+void generatePrimes(){
+	for(int i=2;i<MAX;i++){
+		isPrime[i]=true;
+		minimumPrime[i]=INT_MAX;
+	}
+	for(int i=2;i<10000;i++)
+		if(isPrime[i]){
+			for(int j=i+i;j<MAX;j+=i){
+				isPrime[j]=false;
+				minimumPrime[j]=min(minimumPrime[j],i);
+			}
+		}
+}
+
+long long p(long long i,int n){
+	if(n==0)
+		return 1;
+	long long x=p(i,n/2);
+	x*=x;
+	x%=MOD;
+	if(n&1){
+		x*=i;
+		x%=MOD;
+	}
+	return x;
+}
+void generatePower(int n,int m){
+	power[1]=1;
+	power[0]=1;
+	
+	for(int i=2;i<=m;i++){
+		if(isPrime[i])
+			power[i]=p(i,n);
+		else
+			power[i]=(power[minimumPrime[i]]*power[i/minimumPrime[i]])%MOD;
+	}
+} 
+
+int a[MAX];
+int main()
+ {
+ generatePrimes();
+ 	ios::sync_with_stdio(false);
+ 	int n, m,i,j,l,r,t;
+ 	cin>>t;
+ 	
+ 	while(t--)
+ 	{
+ 	   	cin>>n>>m>>l>>r;
+ 	   	generatePower(n,m);
+ 	   	long long sum=0,ans=0;
+ 	   	for(j=m;j>1;j--)
+ 	   	  {	 
+ 	   	      a[j]=power[m/j];
+ 	   	  	  for(int k=j+j;k<=m;k+=j){
+					a[j]=a[j]-a[k];
+					if(a[j]<0)
+						a[j]+=MOD;
+						
+ 	   	  	  }	
+ 	   	  	 sum+=a[j];
+ 	   	  }
+ 	   	a[1]=(power[m]-sum+MOD)%MOD;
+ 	   	
+		for(i=l;i<=r;i++)
+ 	   	  ans=ans+a[i];
+ 	   	cout<<(ans)%MOD<<endl;
+ 	   }
+ 	
+ }

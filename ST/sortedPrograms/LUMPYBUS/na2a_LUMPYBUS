@@ -1,0 +1,89 @@
+/* GG */
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <string>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <climits>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <sstream>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+//#include <unordered_set>
+//#include <unordered_map>
+
+#define f first
+#define s second
+
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<int, int> pii;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int N = (int) 1e6 + 7;
+const int MOD = (int) 1e9 + 7;
+
+int t;
+int n;
+ll one, two;
+ll a[N];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  ios_base::sync_with_stdio(0);
+
+  cin >> t;
+  while (t--) {
+    cin >> n >> one >> two;
+    for (int i = 1; i <= n; i++) {
+      cin >> a[i];
+    }
+    sort(a + 1, a + n + 1);
+    ll csum = 0;
+    ll odds = 0;
+    int ans = 0;
+    for (int i = 1; i <= n; i++) {
+      if (a[i] % 2 == 1) {
+        if (odds < one && 2 * two + one >= csum + a[i]) {
+          csum += a[i];
+          odds++;
+          ans++;
+        }
+      }
+      if (a[i] % 2 == 0) {
+        if (2 * two + one >= csum + a[i]) {
+          csum += a[i];
+          ans++;
+        }
+      }
+    }
+    cout << ans << "\n";
+  }
+
+  return 0;
+}

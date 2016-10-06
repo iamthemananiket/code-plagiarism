@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+int a[100005];
+bool used[100005];
+int p[100005];
+
+void factorize(int n) {
+	for (int i = 2; i*i <= n; ++i) {
+		if (n % i == 0) {
+			int cnt = 0;
+			while (n % i == 0) {
+				++cnt;
+				n /= i;
+			}
+			p[i] = max(cnt, p[i]);
+		}
+	}
+	if (n != 1) {
+		p[n] = max(1, p[n]);
+	}
+}
+
+int const MOD = 1e9 + 7;
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n;
+		scanf("%d", &n);
+		for (int i = 1; i <= n; ++i) {
+			scanf("%d", &a[i]);
+		}
+		for (int i = 1; i <= n; i++) {
+			p[i] = 0;
+			used[i] = false;
+		}
+		for (int i = 1; i <= n; ++i) {
+			if (!used[i]) {
+				int len = 0;
+				int j = a[i];
+				while (!used[j]) {
+					used[j] = true;
+					++len;
+					j = a[j];
+				}
+				factorize(len);
+			}
+		}
+		int res = 1;
+		for (int i = 2; i <= n; ++i) {
+			//printf("p[%d] = %d\n", i, p[i]);
+			for (int j = 1; j <= p[i]; ++j) {
+				res = ((long long)res * i) % MOD;
+			}
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}

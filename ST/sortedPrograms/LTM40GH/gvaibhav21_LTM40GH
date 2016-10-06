@@ -1,0 +1,135 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 100010
+int trie[200*N][2];
+int r[N],maxx[N];
+int path_xor[N];
+int a[N];
+vector<int> children[N];
+int node_cnt;
+int pos[N];
+vector<int> v[N];
+int query(int root,int x)
+{
+	int ret=0;
+	int cur=root;
+	for(int i=30;i>=0;--i)
+	{
+		int f=0;
+		if(x&(1<<i))
+			f=1;
+		if(trie[cur][1-f]>=0)
+		{
+			ret+=(1<<i);
+			cur=trie[cur][1-f];
+		}
+		else
+			cur=trie[cur][f];
+	}
+	return ret;
+}
+
+int add(int root,int x)
+{
+	int cur=root;
+	for(int i=30;i>=0;--i)
+	{
+		int f=0;
+		if(x&(1<<i))
+			f=1;
+		if(trie[cur][f]==-1)
+		{
+			trie[cur][f]=node_cnt++;
+			trie[node_cnt-1][0]=trie[node_cnt-1][1]=-1;
+		}
+		cur=trie[cur][f];
+	}
+}
+
+void go(int cur,int par)
+{
+	int maxsz=-1,maxi,i;
+	for(i=0;i<v[cur].size();++i)
+	{
+		if(v[cur][i]==par)	continue;
+		path_xor[v[cur][i]]=(a[v[cur][i]]^path_xor[cur]);
+		go(v[cur][i],cur);
+		if((int)children[pos[v[cur][i]]].size() > maxsz)
+			maxi=i;
+		maxx[cur]=max(maxx[cur],maxx[v[cur][i]]);
+		maxsz=max(maxsz, (int)children[pos[v[cur][i]]].size());
+	}
+
+	if(maxsz==-1)
+	{
+		trie[node_cnt][0]=trie[node_cnt][1]=-1;
+		r[cur]=node_cnt;
+		node_cnt++;
+		pos[cur]=cur;
+		children[cur].PB(cur);
+		maxx[cur]=a[cur];
+		add(r[cur],path_xor[cur]);
+		return;
+	}
+	pos[cur]=pos[v[cur][maxi]];
+	maxx[cur]=max(a[cur],maxx[cur]);
+	for(i=0;i<v[cur].size();++i)
+	{
+		if(i==maxi || v[cur][i] == par)	continue;
+		for(auto x:children[pos[v[cur][i]]])
+			maxx[cur]=max(maxx[cur],query(r[pos[cur]],(a[cur]^path_xor[x])));
+		for(auto x:children[pos[v[cur][i]]])
+		{
+			children[pos[cur]].PB(x);
+			add(r[pos[cur]],path_xor[x]);
+		}
+	}
+	maxx[cur]=max(maxx[cur],query(r[pos[cur]],(a[cur]^path_xor[cur])));
+	add(r[pos[cur]],path_xor[cur]);
+	children[pos[cur]].PB(cur);
+}
+
+int main()
+{
+	int t,n,i;
+	for(i=0;i<200*N;++i)
+		trie[i][0]=trie[i][1]=-1;
+	sd(t);
+	while(t--)
+	{
+		sd(n);
+		node_cnt=0;
+		for(i=0;i<=n;++i)
+		{
+			maxx[i]=-1;
+			children[i].clear();
+			v[i].clear();
+		}
+		for(i=1;i<=n;++i)
+			sd(a[i]);
+		for(i=0;i<n-1;++i)
+		{
+			int x,y;
+			sd(x);sd(y);
+			v[x].PB(y);
+			v[y].PB(x);
+		}
+		path_xor[1]=a[1];
+		go(1,0);
+		for(i=1;i<=n;++i)
+			printf("%d\n",maxx[i]);
+		for(i=0;i<=node_cnt;++i)
+			trie[i][0]=trie[i][1]=-1;
+	}
+}

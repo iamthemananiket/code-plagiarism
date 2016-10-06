@@ -1,0 +1,106 @@
+# include <cstdio>
+# include <cstring>
+# include <map>
+# include <set>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 1024;
+
+int n;
+int a[MAX_N];
+int lst[MAX_N];
+int nxt[MAX_N];
+int used[MAX_N];
+map <int, int> comp;
+int num;
+set <int> s;
+long long ans;
+long long crr;
+
+inline long long calc (long long len)
+{
+	return len * (len + 1) / 2;
+}
+
+void add (int x)
+{
+	///printf ("add %d = %lld\n", x, crr);
+	int lx, rx;
+	set <int> :: iterator it, left, right;
+	left = s.lower_bound (x);
+	right = left;
+	right --;
+	lx = *left;
+	rx = *right;
+	/**
+	for (it = s.begin (); it != s.end (); it ++)
+		printf ("%d ", *it);
+	printf ("\n");
+	**/
+	swap (lx, rx);
+	
+	///printf ("%d %d\n", lx, rx);
+	
+	crr -= calc (rx - lx - 1);
+	
+	s.insert (x);
+	crr += calc (x - lx - 1);
+	crr += calc (rx - x - 1);
+	///printf ("=> %lld\n", crr);
+}
+
+void solve ()
+{
+	ans = 0;
+	comp.clear ();
+	memset (nxt, 0, sizeof (nxt));
+	memset (lst, 0, sizeof (lst));
+	int i, j, k;
+	scanf ("%d", &n);
+	for (i = 1; i <= n; i ++)
+	{
+		scanf ("%d", &a[i]);
+		if (!comp[a[i]])
+			comp[a[i]]= ++ num;
+		a[i] = comp[a[i]];
+		nxt[lst[a[i]]] = i;
+		lst[a[i]] = i;
+	}
+	
+	for (i = 1; i <= n; i ++)
+	{
+		memset (used, 0, sizeof (used));
+		s.clear ();
+		s.insert (i - 1);
+		s.insert (n + 1);
+		crr = calc ((n + 1) - (i - 1) - 1);
+		for (j = i; j <= n; j ++)
+		{
+			///printf ("%d %lld\n", j, crr);
+			if (used[a[j]])
+			{
+				ans += crr;
+				continue;
+			}
+			for (k = j; k <= n && k; k = nxt[k])
+				add (k);
+			used[a[j]] = 1;
+			ans += crr;
+			///printf ("- %lld\n", crr);
+		}
+		///printf ("-- %lld\n", ans);
+	}
+	printf ("%lld\n", ans);
+}
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+		solve ();
+	return 0;
+}

@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+constexpr int MAX_N = 1000 + 1;
+constexpr int MOD = 1'000'000'000 + 7;
+
+int A[MAX_N];
+int dp[MAX_N][MAX_N];
+int N, M, S;
+
+int memo(int dog, int passes)
+{
+    if (passes == 0)
+    {
+        if (dog == S)
+            return 1;
+        else
+            return 0;
+    }
+
+    if (dp[dog][passes] != -1)
+        return dp[dog][passes];
+
+    dp[dog][passes] = 0;
+
+    if (1 <= dog - A[passes])
+        dp[dog][passes] = (dp[dog][passes] + memo(dog - A[passes], passes - 1)) % MOD;
+
+    if (dog + A[passes] <= N)
+        dp[dog][passes] = (dp[dog][passes] + memo(dog + A[passes], passes - 1)) % MOD;
+
+    return dp[dog][passes];
+}
+
+int main()
+{
+    ///freopen("data.in", "r", stdin);
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N >> M >> S;
+
+        for (int i = 1; i <= M; ++i)
+            cin >> A[i];
+
+        for (int i = 0; i < MAX_N; ++i)
+            for (int j = 0; j < MAX_N; ++j)
+                dp[i][j] = -1;
+
+        for (int i = 1; i <= N; ++i)
+            cout << memo(i, M) << " ";
+
+        cout << "\n";
+    }
+
+    return 0;
+}

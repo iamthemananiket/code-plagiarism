@@ -1,0 +1,86 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+typedef long long ll;
+typedef unsigned long long ull;
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MOD = (int)1e9 + 7;
+
+int p[19][19];
+
+struct Word {
+	ll w;
+	string s;
+
+	Word() {}
+
+	Word(ll _w, string _s) {
+		w = _w;
+		s = _s;
+	}
+
+	const bool operator<(Word other) const {
+		if (w == other.w) {
+			return s < other.s;
+		}
+		return w > other.w;
+	}
+};
+
+vector<Word> words;
+char s[19];
+
+void f(int pos, const int n, const int m, ll w) {
+	if (pos == n) {
+		words.push_back(Word(w, s));
+		return;
+	}
+	for (int c = 0; c < m; ++c) {
+		s[pos] = (char) ('a' + c);
+		f(pos + 1, n, m, w + p[pos][c]);
+	}
+}
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int n, m, k;
+	scanf("%d %d %d", &m, &n, &k);
+	--k;
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < m; ++j) {
+			scanf("%d", &p[i][j]);
+		}
+	}
+	f(0, n, m, 0);
+	sort(words.begin(), words.end());
+	printf("%s\n", words[k].s.c_str());
+	return 0;
+}

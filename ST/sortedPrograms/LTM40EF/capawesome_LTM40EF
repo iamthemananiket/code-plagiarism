@@ -1,0 +1,75 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 17;
+const int MAX_M = 11;
+const int MAX_L = 2e6 + 10;
+
+int n, m, k;
+
+int p[MAX_M][MAX_N];
+
+int ans;
+int ansa[MAX_M];
+int a[MAX_M];
+
+int len;
+pair <int, string> b[MAX_L];
+pair <int, int> ppp[MAX_M][MAX_N];
+
+void check ()
+{
+    int i, crr = 0;
+    string s = "";
+    for (i = 1; i <= m; i ++)
+    {
+        crr += p[i][a[i]];
+        s = s + char (a[i] + 'a' - 1);
+    }
+    b[len ++] = {-crr, s};
+}
+
+void go (int idx)
+{
+    if (idx == m + 1)
+    {
+        check ();
+        return;
+    }
+    int i;
+    for (i = 1; len < (MAX_L - 5) && i <= n; i ++)
+    {
+        a[idx] = ppp[idx][i].second;
+        go (idx + 1);
+    }
+}
+
+int main ()
+{
+    int i, j;
+    scanf ("%d%d%d", &n, &m, &k);
+    for (i = 1; i <= m; i ++)
+        for (j = 1; j <= n; j ++)
+            scanf ("%d", &p[i][j]);
+    for (i = 1; i <= m; i ++)
+    {
+        for (j = 1; j <= n; j ++)
+            ppp[i][j] = {p[i][j], j};
+        sort (ppp[i] + 1, ppp[i] + n + 1);
+    }
+    go (1);
+    sort (b, b + len);
+    for (i = 0; i < m; i ++)
+        printf ("%c", b[k - 1].second[i]);
+    printf ("\n");
+    return 0;
+}

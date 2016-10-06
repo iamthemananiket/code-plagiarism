@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 1000001;
+int a[N], f[N];
+
+struct node {
+    int maxi;
+    bool isOne;
+};
+
+struct SegmentTree {
+  vector<node> seg;
+
+  SegmentTree(int n) {
+  	int tn = 1;
+    while (tn <= n) tn = tn << 1;
+    seg.resize(tn << 1);
+  }
+
+  void build_tree(int ind, int s, int e) {
+    if (e - s == 1) {
+      seg[ind].maxi = f[a[s]];
+      seg[ind].isOne = a[s] == 1;
+      return;
+    }
+    int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+    build_tree(c1, s, m);
+    build_tree(c2, m, e);
+    seg[ind].maxi = tmax(seg[c1].maxi, seg[c2].maxi);
+    seg[ind].isOne = seg[c1].isOne && seg[c2].isOne;
+  }
+
+  /* interval [s, e) */
+  void update(int ind, int s, int e, int ss, int ee) {
+    if (seg[ind].isOne) return;
+    if (s >= ee || e <= ss || s >= e) return;
+    int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+    if (e - s == 1) {
+      if (a[s] > 1) a[s] /= f[a[s]];
+      if (a[s] == 1) seg[ind].isOne = true;
+      seg[ind].maxi = f[a[s]];
+      return;
+    }
+    update(c1, s, m, ss, ee);
+    update(c2, m, e, ss, ee);
+    seg[ind].maxi = tmax(seg[c1].maxi, seg[c2].maxi);
+    seg[ind].isOne = seg[c1].isOne && seg[c2].isOne;
+  }
+
+  /* interval [s, e) */
+  int query(int ind, int s, int e, int ss, int ee) {
+    if (s >= ee || e <= ss) return 1;
+    if (s >= ss && e <= ee) return seg[ind].maxi;
+    int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+    int vl = query(c1, s, m, ss, ee);
+    int vr = query(c2, m, e, ss, ee);
+    return tmax(vl, vr);
+  }
+};
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+
+	int T, n, m, op, l, r;
+
+	MEM(f, 0);
+	f[1] = 1;
+	REPU(i, 2, N) {
+		if (!f[i]) {
+			for (int j = i; j < N; j += i) {
+				if (!f[j]) f[j] = i;
+			}
+		}
+	}
+
+	cin >> T;
+	while (T--) {
+		cin >> n >> m;
+		REPU(i, 0, n) cin >> a[i];
+		SegmentTree st(n);
+		st.build_tree(1, 0, n);
+		REPU(i, 0, m) {
+			cin >> op >> l >> r;
+			--l;
+			if (op == 0) st.update(1, 0, n, l, r);
+			else {
+			  int ans = st.query(1, 0, n, l, r);
+			  printf("%d%c", ans, " \n"[i == m - 1]);
+			}
+		}
+	}
+
+	return 0;
+}

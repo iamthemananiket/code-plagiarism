@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 10;
+const int MAX_K = 100;
+
+const int MOD = 1000000007;
+
+int dp[MAX_K + 1][1 << MAX_N];
+int Sets[MAX_K + 1];
+string s;
+
+int N;
+
+bool isSet(const int mask, const int b)
+{
+    return (mask >> b) & 1;
+}
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        memset(dp, 0, sizeof(dp));
+
+        for (int i = 1; i <= MAX_K; ++i)
+            Sets[i] = 0;
+
+        cin >> N;
+        getline(cin, s);
+
+        for (int i = 0; i < N; ++i)
+        {
+            getline(cin, s);
+            s.push_back(' ');
+
+            int x = 0;
+
+            for (char c : s)
+            {
+                if (c == ' ')
+                {
+                    Sets[x] |= (1 << i);
+                    x = 0;
+                }
+                else
+                    x = x * 10 + (c - '0');
+            }
+        }
+
+        dp[0][0] = 1;
+
+        for (int i = 1; i <= MAX_K; ++i)
+        {
+            for (int j = 0; j < (1 << N); ++j)
+                dp[i][j] = dp[i - 1][j];
+
+            for (int j = 0; j < N; ++j)
+            {
+                if (isSet(Sets[i], j))
+                {
+                    for (int conf = 0; conf < (1 << N); ++conf)
+                    {
+                        if (isSet(conf, j) == 0)
+                        {
+                            dp[i][conf ^ (1 << j)] = (dp[i][conf ^ (1 << j)] + dp[i - 1][conf]) % MOD;
+                        }
+                    }
+                }
+            }
+        }
+
+        cout << dp[MAX_K][(1 << N) - 1] << "\n";
+    }
+
+    return 0;
+}

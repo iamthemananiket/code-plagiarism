@@ -1,0 +1,79 @@
+/* GG */
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <string>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <climits>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <sstream>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+//#include <unordered_set>
+//#include <unordered_map>
+
+#define f first
+#define s second
+
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<int, int> pii;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int N = (int) 200 + 7;
+const int MOD = (int) 1e9 + 7;
+
+int t, n, k;
+int a[N];
+int cnt[N];
+bool bad[N];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  scanf("%d", &t);
+  while (t--) {
+    memset(cnt, 0, sizeof cnt);
+    memset(bad, 0, sizeof bad);
+    scanf("%d%d", &n, &k);
+    for (int i = 1; i <= n; i++) {
+      scanf("%d", &a[i]);
+      if (a[i] == i)
+        bad[i] = 1;
+      else
+        cnt[a[i]]++;
+    }
+    int ans = 0;
+    for (int i = 1; i <= n; i++) {
+      if (cnt[i] >= k && !bad[i])
+        ++ans;
+    }
+    printf("%d\n", ans);
+  }
+
+  return 0;
+}

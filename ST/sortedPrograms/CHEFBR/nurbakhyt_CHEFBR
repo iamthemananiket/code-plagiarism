@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ 
+#define pb push_back
+ 
+using namespace std;
+ 
+typedef long long ll;
+ 
+const int N = 105;
+const int mod = (int)1e9 + 7;
+ 
+int n;
+int a[N];
+int d[N][N], dm[N][N];
+
+int D(int l, int r);
+int D_m(int l, int r);
+
+int D_m(int l, int r) {
+	if (l >= r)
+		dm[l][r] = 0;
+	if (r - l == 1)
+		dm[l][r] = (abs(a[l]) == abs(a[r]) && a[l] < 0 && a[r] > 0);
+	if (dm[l][r] != -1)
+		return dm[l][r];
+	int res = (D_m(l + 1, r) + D_m(l, r - 1)) % mod;
+	res -= D_m(l + 1, r - 1);
+	if (res < 0)
+		res += mod;
+	if (abs(a[l]) == abs(a[r]) && a[l] < 0 && a[r] > 0)
+		res = (res + D(l + 1, r - 1) + 1) % mod;
+	dm[l][r] = res;
+	return res;
+}
+ 
+int D(int l, int r) {
+	if (l >= r)
+		d[l][r] = 0;
+	if (r - l == 1)
+		d[l][r] = (abs(a[l]) == abs(a[r]) && a[l] < 0 && a[r] > 0);
+	if (d[l][r] != -1)
+		return d[l][r];
+	int res = (D(l + 1, r) + D(l, r - 1)) % mod;
+	res -= D(l + 1, r - 1);
+	if (res < 0)
+		res += mod;
+	if (abs(a[l]) == abs(a[r]) && a[l] < 0 && a[r] > 0)
+		res = (res + D(l + 1, r - 1) + 1) % mod;
+	for (int i = l + 1; i + 1 < r; i++) {
+		for (int j = i + 1; j + 1 <= r; j++) {
+			int f = D_m(l, i) - D_m(l + 1, i) - D_m(l, i - 1) + D_m(l + 1, i - 1);
+			int s = D(j, r) - D(j + 1, r) - D(j, r - 1) + D(j + 1, r - 1);
+//			if (l == 1 && r == 9 && 1ll * f * s > 0)
+//				cout << "hey\n" << l << ' ' << i << " and " << f << endl,
+//				cout << j << ' ' << r << " and " << s << endl;
+			res = (res + 1ll * f * s % mod) % mod;
+			if (res < 0)
+				res += mod;
+		}
+	}
+	d[l][r] = res;
+	return res;
+}
+ 
+int main() {
+//	freopen("input.txt","r",stdin);
+//	freopen("output.txt","w",stdout);
+	cin >> n;
+	for (int i = 1; i <= n; i++)
+		cin >> a[i];
+	memset(d, -1, sizeof d);
+	memset(dm, -1, sizeof dm);
+	cout << D(1, n) + 1 << endl;
+//	for (int i = 1; i <= n; i++)
+//		for (int j = i; j <= n; j++) {
+//			cout << i << ' ' << j << " D " << D(i, j) << endl;
+//		}
+	return 0;
+}
+ 

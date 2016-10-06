@@ -1,0 +1,138 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+
+int n;
+int m;
+int q;
+vector<pair<int, int> > v;
+#define MAX 500002
+int belong[MAX];
+long long int sum[MAX];
+bool use[MAX];
+long long int a[MAX];
+char buf[4];
+struct st{
+	int ty;
+	int A;
+	int b;
+	st(){
+		scanf("%s", buf);
+		if (buf[0] == 'D'){
+			ty = 1;
+		}
+		else{
+			ty = 2;
+		}
+		if (ty == 1){
+			scanf("%d", &A);
+			A--;
+			use[A] = true;
+		}
+		else{
+			scanf("%d%d", &A, &b);
+			A--;
+			b = b - a[A];
+			a[A] += (long long int)(b);
+			sum[A] += (long long int)(b);
+		}
+	}
+};
+inline int root(int b){
+	if (belong[b] == -1){
+		return b;
+	}
+	belong[b] = root(belong[b]);
+	return belong[b];
+}
+map<long long int, int> mp;
+void ins(long long int a, int x){
+	mp[a]+=x;
+	if (mp[a] == 0){
+		mp.erase(a);
+	}
+}
+void merge(int a, int b){
+	a = root(a);
+	b = root(b);
+	if (a == b){
+		return;
+	}
+	belong[b] = a;
+	ins(sum[a], -1);
+	ins(sum[b], -1);
+	sum[a] += sum[b];
+	ins(sum[a], 1);
+}
+vector<st> query;
+long long int ans[MAX];
+int main(){
+	cin >> n >> m >> q;
+	for (int i = 0; i < n; i++){
+		belong[i] = -1;
+		scanf("%lld", &a[i]);
+		sum[i] = a[i];
+	}
+	for (int i = 0; i < m; i++){
+		int a, b;
+		scanf("%d%d", &a, &b);
+		a--;
+		b--;
+		v.push_back(make_pair(a, b));
+	}
+	for (int i = 0; i < q; i++){
+		query.push_back(st());
+	}
+	for (int i = 0; i < n; i++){
+		ins(sum[i], 1);
+	}
+	for (int i = 0; i < m; i++){
+		if (use[i] == false){
+			merge(v[i].first, v[i].second);
+		}
+	}
+	for (int i = query.size() - 1; i >= 0; i--){
+		auto it = mp.end();
+		it--;
+		ans[i] = (*it).first;
+		if (query[i].ty == 2){
+			int b = root(query[i].A);
+			ins(sum[b], -1);
+			sum[b] -= (long long int)query[i].b;
+			ins(sum[b], 1);
+			continue;
+		}
+		else{
+			merge(v[query[i].A].first, v[query[i].A].second);
+		}
+	}
+	for (int i = 0; i < q; i++){
+		printf("%lld\n", ans[i]);
+	}
+	return 0;
+}

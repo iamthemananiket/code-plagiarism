@@ -1,0 +1,48 @@
+#include<bits/stdc++.h>
+#define author rajat1603
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+const int mod = 1e9 + 7;
+int t;
+long long a,b;
+char ans[2][4]={"No","Yes"};
+long long gcd(long long a,long long b){
+    while(b){
+        long long temp = a%b;
+        a= b;
+        b = temp;
+    }
+    return a;
+}
+int main(){
+    t=scan();
+    while(t--){
+    	scanf("%lld %lld",&a,&b);
+        bool f = 1;
+        while(1){
+            long long x = gcd(a,b);
+            if(b==1){
+                break;
+            }
+            if(x==1&&a%b!=0){
+                f=0;
+                break;
+            }
+            b/=x;
+        }
+        printf("%s\n",ans[f]);
+    }
+}

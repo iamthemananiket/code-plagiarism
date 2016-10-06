@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N;
+int A[100000];
+int B[100000];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d", &N);
+        for(int i=0; i<N; i++)
+            scanf("%d", A+i);
+        int x=1;
+        B[N-1]=1;
+        for(int i=N-2; i>=0; i--)
+        {
+            if((A[i]<0)^(A[i+1]<0))
+                x++;
+            else
+                x=1;
+            B[i]=x;
+        }
+        for(int i=0; i<N; i++)
+            printf("%d ", B[i]);
+        printf("\n");
+    }
+    return 0;
+}

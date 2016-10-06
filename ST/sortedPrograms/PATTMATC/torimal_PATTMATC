@@ -1,0 +1,153 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+ 
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+ 
+using namespace std;
+ 
+typedef long long ll;
+ 
+template<typename T>
+struct KMP {
+ 
+  int m;
+  T t;
+  vector<int> fail;
+  
+  KMP(const T &t) : m(t.size()), t(t) {
+    
+    fail.resize(m + 1);    
+    int p = fail[0] = -1;
+    for (int i = 1; i <= m; i++) {
+      while (p >= 0 && t[p] != t[i - 1]) p = fail[p];
+      p++;
+      fail[i] = p;
+    }
+    
+  }
+ 
+  vector<bool> match(const T &s) {
+    const int n = s.size();
+    vector<bool> res(n);
+    int p = 0;
+    for (int i = 0; i < n; i++) {
+      while (p >= 0 && t[p] != s[i]) p = fail[p];
+      p++;
+      if (p >= m) {
+        res[i - m + 1] = true;
+        p = fail[p];
+      }
+    }
+    return res;
+  }
+};
+ 
+ 
+const int MAX_N = 110000;
+const int MAX_W = 550;
+ 
+int n, m;
+string s, t;
+vector<string> pats;
+vector<vector<bool>> matches;
+ 
+int match(int p, int q);
+int wildcard(int p, int q);
+ 
+ 
+int memo[MAX_N][MAX_W];
+int memo2[MAX_N][MAX_W];
+int wildcard(int p, int q) {
+  if (p >= n) return n + 1;
+  if (memo2[p][q] != -1) return memo2[p][q];
+  return memo2[p][q] = min(match(p, q), wildcard(p + 1, q));
+}
+ 
+int match(int p, int q) {
+  if (p >= n) return n + 1;
+  if (memo[p][q] != -1) return memo[p][q];
+  bool ok = matches[q][p];
+  if (!ok) return memo[p][q] = n + 1;
+  int np = p + pats[q].size();
+  int nq = q + 1;
+  if (nq == (int)pats.size()) {
+    return memo[p][q] = (np - (pats[q].size() == 0 ? 0 : 1));
+  } else {
+    return memo[p][q] = wildcard(np, nq);
+  }
+}
+ 
+ 
+int main() {
+  int T;
+  cin >> T;
+  while (T--) {
+    cin >> t;
+    cin >> s;
+    n = s.size();
+    m = t.size();
+    pats.clear();
+    matches.clear();
+    
+    int p = 0;
+    while (p < m) {
+      string buf = "";
+      while (p < m && t[p] == '*') {
+        p++;
+      }      
+      while (p < m && t[p] != '*') {
+        buf.push_back(t[p]);
+        p++;
+      }
+      if (buf == "") continue;
+      pats.push_back(buf);
+    }
+    if (pats.empty()) {
+      for (int i = 0; i < n; i++) {
+        cout << i + 1 << " \n"[i == n - 1];
+      }
+      continue;
+    }
+    
+    for (const string &pat : pats) {
+      assert(pat != "");
+      KMP<string> kmp(pat);
+      matches.push_back(kmp.match(s));
+    }
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < (int)pats.size(); j++) {
+        memo[i][j] = -1;
+        memo2[i][j] = -1;
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      int t = wildcard(i, 0);
+      cout << (t == n + 1 ? -1 : t + 1) << " \n"[i == n - 1];
+    }
+  }
+}

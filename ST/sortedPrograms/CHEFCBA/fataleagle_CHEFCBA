@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int A[4];
+
+int main()
+{
+    for(int i=0; i<4; i++)
+        scanf("%d", A+i);
+    sort(A, A+4);
+    do
+    {
+        if(A[0]*A[1]==A[2]*A[3])
+        {
+            printf("Possible\n");
+            return 0;
+        }
+    }
+    while(next_permutation(A, A+4));
+    printf("Impossible\n");
+    return 0;
+}

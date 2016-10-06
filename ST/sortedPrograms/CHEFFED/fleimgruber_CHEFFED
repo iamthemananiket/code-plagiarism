@@ -1,0 +1,41 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+int f(int x)
+{
+	int ans=0;
+	for (;x;x/=10)
+		ans+=x%10;
+	return ans;
+}
+
+int main()
+{
+	int n;
+	scanf("%d",&n);
+	int ans=0;
+	for (int sx=1; sx<=81; sx++)
+	{
+		int ssx=f(sx);
+		int x=n-sx-ssx;
+		if (f(x)==sx)
+			ans++;
+	}
+	printf("%d\n",ans);
+	return 0;
+}

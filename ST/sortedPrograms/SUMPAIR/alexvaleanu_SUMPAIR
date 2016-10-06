@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 1e5;
+
+int A[MAX_N];
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    int T, N, D;
+
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N >> D;
+
+        for (int i = 0; i < N; ++i)
+            cin >> A[i];
+
+        sort(A, A + N);
+
+        long long sum = 0;
+
+        int i = N - 1;
+
+        while (i >= 1)
+        {
+            if (A[i] - A[i - 1] < D)
+            {
+                sum += (A[i] + A[i - 1]);
+                i -= 2;
+            }
+            else
+                i--;
+        }
+
+        cout << sum << "\n";
+    }
+
+    return 0;
+}

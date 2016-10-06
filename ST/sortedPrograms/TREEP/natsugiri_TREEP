@@ -1,0 +1,384 @@
+#include<set>
+#define NDEBUG
+#include<cassert>
+#include<stack>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+const int MAXN = 100011;
+
+typedef unsigned long long ULL;
+//typedef __int128 ULL;
+const ULL H = 13333;
+const ULL MOD = 1e9+7;
+ULL E[MAXN];
+
+struct Seg {
+    int len;
+    ULL a, b;
+    Seg(): len(0), a(0), b(0) {}
+    Seg(char c): len(1), a(c), b(c) {}
+    Seg(int l, ULL a_, ULL b_): len(l), a(a_), b(b_) {}
+    Seg rev() {
+	return Seg(len, b, a);
+    }
+};
+Seg unit = Seg();
+
+Seg operator+(const Seg &x, const Seg &y) {
+    return Seg(x.len + y.len,
+	       (x.a * E[y.len] + y.a) % MOD,
+	       (x.b + y.b * E[x.len]) % MOD);
+};
+Seg operator*(Seg x, int y) {
+    Seg r = unit;
+    for (; y; y>>=1) {
+	if (y&1) r = r + x;
+	x = x + x;
+    }
+    return r;
+}
+ULL seg_power_a(Seg x, int y) {
+    ULL a = x.a, r = 0;
+    int len = x.len;
+    for (; y; y>>=1) {
+	if (y&1) r = (r * E[len] + a) % MOD;
+	a = (a * E[len] + a) % MOD;
+	len *= 2;
+    }
+    return r;
+}
+
+// struct SegmentTree {
+//     int n, m;
+//     vector<Seg> d;
+//     SegmentTree(int n_=1): n(n_), m(2<<__lg(max(1, n))), d(2*m) {
+//     }
+//     void modify(int x, const Seg s) {
+// 	x += m;
+// 	d[x] = s;
+// 	for (x/=2; x; x/=2) d[x] = d[x*2] + d[x*2+1];
+//     }
+//     Seg query(int x, int y) { return query(x, y, 1, 0, m); }
+//     Seg query(int x, int y, int k, int l, int r) {
+// 	if (r<=x || y<=l) return unit;
+// 	if (x<=l && r<=y) return d[k];
+// 	return query(x, y, k*2, l, (l+r)/2) + query(x, y, k*2+1, (l+r)/2, r);
+//     }
+// };
+
+struct SegmentTree {
+    int n;
+    vector<Seg> d;
+    SegmentTree(int n_=1): n(n_), d(2*n+1) {
+    }
+    void modify(int x, const Seg s) {
+	x += n;
+	d[x] = s;
+	for (x/=2; x; x/=2) d[x] = d[x*2] + d[x*2+1];
+    }
+    Seg query(int x, int y) {
+	Seg l = unit, r = unit;
+	x += n; y += n;
+	for (; x<y; x>>=1, y>>=1) {
+	    if (y&1) r = d[--y] + r;
+	    if (x&1) l = l + d[x++];
+	}
+	return l + r;
+    }
+};
+
+typedef vector<vector<int> > Adj;
+
+const int EMPTY=-1, LIGHT=0, HEAVY=1;
+struct HLD {
+    int N;
+    vector<int> parent, subsize, depth, color, head, file, rank;
+    Adj group;
+    HLD(){}
+    HLD(const Adj &G, int root = 0) { // G:tree
+	N = G.size();
+	parent = subsize = depth = color = head = vector<int>(N);
+	file = rank = vector<int>(N);
+	init(G, root);
+	paint(G, root);
+	link(G, root);
+    }
+    void init(const Adj &G, int root) {
+	stack<int> kk, pp, st;
+	kk.push(root); pp.push(-1);
+	while (!kk.empty()) {
+	    int k = kk.top(), p = pp.top(); kk.pop(); pp.pop();
+	    st.push(k);
+	    parent[k] = p;
+	    if (p >= 0) depth[k] = depth[p] + 1;
+	    for (int i=0; i<int(G[k].size()); i++) {
+		if (G[k][i] == p) continue;
+		kk.push(G[k][i]); pp.push(k);
+	    }
+	}
+	while (!st.empty()) {
+	    int k = st.top(); st.pop();
+	    subsize[k]++;
+	    for (int i=0; i<int(G[k].size()); i++)
+		subsize[k] += subsize[G[k][i]];
+	}
+    }
+    void paint(const Adj &G, int root) {
+	color[root] = EMPTY;
+	for (int k=0; k<N; k++) {
+	    if (k == root) continue;
+	    if (subsize[parent[k]] <= 2*subsize[k]) color[k] = HEAVY;
+	    else color[k] = LIGHT;
+	}
+    }
+    void link(const Adj &G, int root) {
+	stack<int>st; st.push(root);
+	for (;!st.empty();) {
+	    int k = st.top(); st.pop();
+	    if (color[k] == HEAVY) {
+		head[k] = head[parent[k]];
+		file[k] = file[parent[k]];
+		rank[k] = rank[parent[k]] + 1;
+		group[file[k]].push_back(k);
+	    } else {
+		head[k] = k;
+		file[k] = group.size();
+		rank[k] = 0;
+		group.push_back(vector<int>(1, k));
+	    }
+	    for (int i=0; i<int(G[k].size()); i++)
+		if (G[k][i] != parent[k]) st.push(G[k][i]);
+	}
+    }
+    int lca(int u, int v) {
+	int uu = u, vv = v;
+	while (u != v) {
+	    if (depth[u] > depth[v]) swap(u, v), swap(uu, vv);
+	    vv = v;
+	    if (color[v] == LIGHT) v = parent[v];
+	    else v = head[v];
+	}
+	if (file[vv] == file[uu]) return depth[vv] < depth[uu]? vv: uu;
+	return u;
+    }
+    int dist(int u, int v) { // number of edges
+	return depth[u] + depth[v] - 2*depth[lca(u, v)];
+    }
+};
+
+// Segment Tree (RMQ)
+const LL INF = 1LL<<60;
+struct HLDSegTree {
+    HLD hld;
+    vector<SegmentTree> data;
+    HLDSegTree(const Adj &G, int root = 0): hld(HLD(G, root)) {
+	int M = hld.group.size();
+	for (int i=0; i<M; i++)
+	    data.push_back(SegmentTree(hld.group[i].size()));
+    }
+    void update(int x, Seg v) { // Ver -> Val -> ()
+	data[hld.file[x]].modify(hld.rank[x], v);
+    }
+    // LL minimum(int x, int y) { // Ver -> Ver -> Val
+    // 	int z = hld.lca(x, y);
+    // 	LL ret = INF;
+    // 	while (hld.file[x] != hld.file[z]) {
+    // 	    ret = min(ret, data[hld.file[x]].minimum(0, hld.rank[x]+1));
+    // 	    x = hld.parent[hld.head[x]];
+    // 	}
+    // 	while (hld.file[y] != hld.file[z]) {
+    // 	    ret = min(ret, data[hld.file[y]].minimum(0, hld.rank[y]+1));
+    // 	    y = hld.parent[hld.head[y]];
+    // 	}
+    // 	if (hld.depth[y] < hld.depth[x]) swap(x, y);
+    // 	ret = min(ret, data[hld.file[x]].minimum(hld.rank[x], hld.rank[y]+1));
+    // 	// for edge
+    // 	// ret=min(ret,data[hld.file[x]].minimum(hld.rank[x]+1, hld.rank[y]+1));
+    // 	return ret;
+    // }
+
+    Seg query(int x, int y, int z=-1) {
+	if (z==-1) z = hld.lca(x, y);
+	Seg x_seg = unit, y_seg = unit;
+	while (hld.file[x] != hld.file[z]) {
+	    x_seg = data[hld.file[x]].query(0, hld.rank[x]+1) + x_seg;
+	    x = hld.parent[hld.head[x]];
+	}
+	while (hld.file[y] != hld.file[z]) {
+	    y_seg = data[hld.file[y]].query(0, hld.rank[y]+1) + y_seg;
+	    y = hld.parent[hld.head[y]];
+	}
+	if (hld.depth[y] > hld.depth[x]) { // x == z
+	    // Seg z_seg = data[hld.file[x]].query(hld.rank[x], hld.rank[y]+1);
+	    // for edge
+	    Seg z_seg=data[hld.file[x]].query(hld.rank[x]+1, hld.rank[y]+1);
+	    return x_seg.rev() + z_seg + y_seg;
+	} else { // y == z
+	    // Seg z_seg = data[hld.file[y]].query(hld.rank[y], hld.rank[x]+1);
+	    Seg z_seg=data[hld.file[y]].query(hld.rank[y]+1, hld.rank[x]+1);
+	    return (z_seg + x_seg).rev() + y_seg;
+	}	    
+    }
+};
+
+const int LOG_V = 18;
+
+struct LCA {
+    vector<int> depth;
+    vector<vector<int> > par; // par[v][i] : v's 2^i ancestor
+    LCA() {}
+    LCA(const Adj &G, int r=0) {
+	int n = G.size();
+	par = vector<vector<int> >(n, vector<int>(LOG_V, -1));
+	depth = vector<int>(n);
+	vector<int> ord; ord.reserve(n);
+	ord.push_back(r);
+	par[r][0] = r;
+	REP (i, n) {
+	    int v = ord[i];
+	    EACH (e, G[v]) if (*e != par[v][0]) {
+		par[*e][0] = v;
+		ord.push_back(*e);
+		depth[*e] = depth[v]+1;
+	    }
+	}
+	for (int i=1; i<LOG_V; i++) {
+	    for (int v=0; v<n; v++) par[v][i] = par[par[v][i-1]][i-1];
+	}
+    }
+    int operator()(int x, int y) {
+	if (depth[x] < depth[y]) swap(x, y); // x must be deeper
+	for (int i=0; depth[x] != depth[y]; i++) {
+	    if ((depth[x]-depth[y]) & (1<<i)) x = par[x][i];
+	}
+	if (x == y) return x;
+	for (int i=LOG_V; i--;) {
+	    if (par[x][i] != par[y][i]) { x=par[x][i]; y=par[y][i]; }
+	}
+	return par[x][0];
+    }
+    int lca(int x, int y) {
+	return (*this)(x, y);
+    }
+    int dist(int x, int y, int z=-1) { // number of edges in {x -- y}
+	if (z == -1) z = lca(x, y);
+	return depth[x] + depth[y] - 2 * depth[z];
+    }
+    int kth(int x, int y, int k, int z=-1) { // assert( dist(x, y) >= k );
+	if (z == -1) z = lca(x, y);
+	if (depth[x] - depth[z] < k) {
+	    k = depth[x] + depth[y] - 2 * depth[z] - k;
+	    x = y;
+	}
+	for (int i=LOG_V; i--;)
+	    if (k & (1<<i)) x = par[x][i];
+	return x;
+    }
+};
+
+int N, M;
+int A[MAXN], B[MAXN];
+char C[MAXN+10];
+VI factor[MAXN+10];
+Adj G;
+
+void MAIN() {
+    scanf("%d", &N);
+    G = Adj(N);
+    REP (i, N-1) {
+	scanf("%d%d%s", A+i, B+i, C+i);
+	A[i]--; B[i]--;
+	G[A[i]].push_back(B[i]);
+	G[B[i]].push_back(A[i]);
+    }
+    HLDSegTree X(G, 0);
+    LCA lca(G, 0);
+    assert(X.hld.depth == lca.depth);
+    
+    REP (i, N-1) {
+	int v;
+	if (X.hld.depth[A[i]] < X.hld.depth[B[i]]) v = B[i];
+	else v = A[i];
+	X.update(v, Seg(C[i]));
+    }
+    
+    scanf("%d", &M);
+    REP ($, M) {
+	int op, u, v;
+	scanf("%d%d%d", &op, &u, &v);
+	u--; v--;
+	if (op == 1) {
+	    int l = lca(u, v);
+	    int len = lca.dist(u, v, l);
+	    int ans = len;
+	    Seg s = X.query(u, v, l);
+	    set<int> se;
+	    while (true) {
+		bool update = false;
+		EACH (e, factor[ans]) {
+		    if (se.count(*e)) continue;
+		    int p = ans / *e;
+		    int g = lca.kth(u, v, p, l);
+		    // Seg ss = X.query(u, g) * (len / p);
+		    ULL aa = seg_power_a(X.query(u, g), (len / p));
+
+		    if (s.a == aa) {
+			ans = p;
+			update = true;
+			break;
+		    } else {
+			se.insert(*e);
+		    }
+		}
+		
+		if (!update) break;
+	    }
+	    printf("%d\n", ans);
+	} else {
+	    scanf("%s", C+N);
+	    int z;
+	    if (lca.depth[u] < lca.depth[v]) z = v;
+	    else z = u;
+	    X.update(z, C[N]);
+	}
+    }
+}
+
+int main() {
+    E[0] = 1;
+    REP (i, MAXN-1) E[i+1] = E[i] * H % MOD;
+
+    for (int i=2; i<MAXN; i++) {
+	if (factor[i].size()) continue;
+	for (int j=i; j<MAXN; j+=i) {
+	    factor[j].push_back(i);
+	}
+    }
+    // for (int i=1; i<MAXN; i++) {
+    // 	for (int j=2*i; j<MAXN; j+=i) {
+    // 	    divisor[j].push_back(i);
+    // 	}
+    // }
+
+
+    int T;
+    scanf("%d", &T);
+    REP (i, T) MAIN();
+    return 0;
+}

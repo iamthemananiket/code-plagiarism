@@ -1,0 +1,56 @@
+//Program: devarray
+//Author: gary
+//Date: 03/06/2016
+#include <cstdio>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+const int INF = 1e9;
+// const int MAXN = ;
+
+int n, q;
+int a, b;
+
+int main()
+{
+    scanf("%d%d", &n, &q);
+    a = INF;
+    b = 0;
+    for(int i = 0; i < n; i++)
+    {
+        int x;
+        scanf("%d", &x);
+        a = min(a, x);
+        b = max(b, x);
+    }
+
+    for(int i = 0; i < q; i++)
+    {
+        int x;
+        scanf("%d", &x);
+        printf("%s\n", a <= x && x <= b ? "Yes" : "No");
+                
+    }
+
+    return 0;
+}

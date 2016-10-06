@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+using namespace std;
+int arr[100009];
+int main()
+{
+    int n,k,d,m,test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int ans=0;
+        scanf("%d%d%d%d",&n,&k,&d,&m);
+        for(int i=0;i<n;i++)
+            scanf("%d",&arr[i]);
+        for(int i=0;i<(1<<n);i++)
+        {
+            int tmp=0,cur=INT_MIN;
+            if(__builtin_popcount(i)!=k)
+                continue;
+            for(int j=0;j<n;j++)
+            {
+                if(i&(1<<j))
+                    cur=j;
+                else
+                {
+                    if(cur<j-d)
+                        tmp+=arr[j];
+                    else
+                        tmp+=arr[j]*m;
+                }
+            }
+            ans=max(ans,tmp);
+        }
+        printf("%d\n",ans);
+    }
+    return 0;
+}

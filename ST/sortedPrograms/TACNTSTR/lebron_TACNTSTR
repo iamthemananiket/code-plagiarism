@@ -1,0 +1,85 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-7
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 100031;
+
+string st;
+long long cnt_les, cnt_eq;
+long long DP[N];
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/input.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+
+	cin >> st;
+
+	cnt_les = 0;
+	cnt_eq = 1;
+	for (int i = st.size() - 1; i >= 0; --i)
+	{
+		cnt_les = cnt_les * 26 + cnt_eq*('Z' - st[i]);
+		cnt_les %= bs;
+		cnt_eq = 1;
+		DP[i] = cnt_les;
+	}
+	/*
+	for (int i = 0; i < st.size(); i++)
+	{
+		cout << DP[i] << " ";
+	}
+	cout << endl;
+	*/
+	long long ans = 0;
+
+	for (int i = 0; i < st.size(); i++)
+	{
+		ans += ('Z' - st[i])*DP[i + 1];
+		ans += ('Z' - st[i]);
+		ans %= bs;
+	}
+
+	cout << ans << endl;
+
+	cin.get(); cin.get();
+	return 0;
+}

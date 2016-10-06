@@ -1,0 +1,237 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+
+struct node{
+    int v, c, sum, l, r, p, sz;
+} T[100001];
+int A[100001], F[100001];
+
+struct SplayTree{
+    int n, root;
+    SplayTree(){
+        n = root = 0;
+        T[0].c = T[0].v = T[0].sum = 0;
+        T[0].sz = T[0].l = T[0].r = 0;
+    }
+    int newNode(int v, int c,int p){
+        n++;
+        T[n].c = T[n].sum = c;
+        T[n].v = v;
+        T[n].l = T[n].r = 0;
+        T[n].sz = 1;
+        T[n].p = p;
+        return n;
+    }
+    void update(int c){
+        T[c].sz = 1 + T[ T[c].l ].sz + T[ T[c].r ].sz;
+        T[c].sum = T[c].c + T[ T[c].l ].sum + T[ T[c].r ].sum;
+    }
+    void Zig(int c){
+        int p = T[c].p, q = T[p].p;
+        T[p].l = T[c].r;
+        if(T[p].l != 0) T[T[p].l].p = p;
+        T[c].r = p; T[c].p = q; T[p].p = c;
+        if(q != 0){
+            if(T[q].l == p) T[q].l = c;
+            else T[q].r = c;
+        }
+        update(p);
+    }
+    void Zag(int c){
+        int p = T[c].p, q = T[p].p;
+        T[p].r = T[c].l;
+        if(T[p].r != 0) T[T[p].r].p = p;
+        T[c].l = p; T[c].p = q; T[p].p = c;
+        if(q != 0){
+            if(T[q].l == p) T[q].l = c;
+            else T[q].r = c;
+        }
+        update(p);
+    }
+    void splay(int c){
+        while(T[c].p != 0){
+            int p = T[c].p, q = T[p].p;
+            if(q != 0 && T[q].l == p){
+                if(T[p].l == c) Zig(p),Zig(c);
+                else Zag(c),Zig(c);
+            } else if(q != 0 && T[q].r == p){
+                if(T[p].r == c) Zag(p),Zag(c);
+                else Zig(c),Zag(c);
+            } else {
+                if(T[p].l == c) Zig(c);
+                else Zag(c);
+            }
+        }
+        root = c;
+        update(c);
+    }
+    int search(int p){
+        if(T[root].sz == 0) return 0;
+        int c = root;
+        while(p > 0){
+            if(T[ T[c].l ].sz >= p) c = T[c].l;
+            else {
+                p -= T[ T[c].l ].sz + 1;
+                if(p == 0) {
+                    splay(c);
+                    return T[c].v;
+                }
+                c = T[c].r;
+            }
+        }
+    }
+    int build(int l, int r, int p){
+        if(l > r) return 0;
+        int mid = (l + r) / 2;
+        int c = newNode(A[mid], F[mid], p);
+        if(p == 0) root = c;
+        if(l < mid) T[c].l = build(l, mid - 1, c);
+        if(r > mid) T[c].r = build(mid + 1, r, c);
+        update(c);
+        return c;
+    }
+    int query(int l, int r){
+        if((r - l + 1) == T[root].sz) return T[root].sum;
+        if(l == 1){
+            search(r + 1);
+            return T[ T[root].l ].sum;
+        }
+        if(r == T[root].sz){
+            search(l - 1);
+            int ret = T[ T[root].r ].sum;
+            search(l);
+            if(T[root].c == 1) ret--;
+            return ret;
+        }
+        search(l - 1);
+        int tmp = root;
+        root = T[root].r;
+        T[root].p = 0;
+        search(r - l + 2);
+        T[tmp].r = root;
+        T[root].p = tmp;
+        root = tmp;
+        update(root);
+        int ret = T[ T[ T[root].r ].l ].sum;
+        search(l);
+        if(T[root].c == 1) ret--;
+        return ret;
+    }
+    void replace(int l, int r){
+        if(l == 1) return;
+        search(1);
+        int v1 = T[root].v;
+        search(r);
+        int vr = T[root].v;
+        search(l);
+        T[root].c = 0;
+        update(root);
+        if(r == T[root].sz){
+            search(l - 1);
+            int tmp = T[root].r;
+            T[root].r = 0;
+            update(root);
+            search(1);
+            T[root].l = tmp;
+            T[tmp].p = root;
+            if(v1 != vr) T[root].c = 1;
+            update(root);
+            return;
+        }
+
+        search(l - 1);
+        int tmp = root;
+        root = T[root].r;
+        T[root].p = 0;
+        search(r - l + 2);
+        T[root].p = tmp;
+        T[tmp].r = root;
+        root = tmp;
+        update(root);
+        tmp = T[ T[root].r ].l;
+        T[ T[root].r ].l = 0;
+        update(T[root].r);
+        update(root);
+        int vlm1 = T[root].v;
+        search(l);
+        int vnl = T[root].v;
+        if(vnl != vlm1) T[root].c = 1;
+        else T[root].c = 0;
+        update(root);
+        search(1);
+        T[root].l = tmp;
+        T[tmp].p = root;
+        if(v1 != vr) T[root].c = 1;
+        update(root);
+    }
+};
+
+int main() {
+//    ios_base::sync_with_stdio(0); cin.tie(0);
+    int a,b = 0,c,d = 0,e,f = 0,g,h = 0,x,y,z = 0;
+    scanf("%d", &a);
+    while(a--){
+        SplayTree SP = SplayTree();
+        scanf("%d", &b);
+        FOR(i, 1, b + 1){
+            scanf("%d", &A[i]);
+            if(i > 1) F[i] = (A[i] != A[i - 1] ? 1 : 0);
+        }
+        SP.build(1, b, 0);
+        scanf("%d", &c);
+        REP(i, c){
+            scanf("%d %d %d", &d, &e, &f);
+            if(d == 1){
+                printf("%d\n", SP.query(e, f)+1);
+            } else {
+                SP.replace(e, f);
+            }
+        }
+    }
+}

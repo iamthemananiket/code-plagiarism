@@ -1,0 +1,123 @@
+# include <cstdio>
+
+using namespace std;
+
+const int MAX_N = 100010;
+const int MAX_Q = 100010;
+const int MOD = 1e9 + 7;
+
+int n, q;
+int a[MAX_N];
+int sum[MAX_N];
+unsigned short int used[500000000], key;
+
+int pos;
+int b[MAX_N], c[MAX_N];
+
+int main ()
+{
+	int i, j, type, x, y, ans, l, r, csum;
+	long long t, k;
+	scanf ("%d%d", &n, &q);
+	for (i = 1; i <= n; i ++)	
+	{
+		scanf ("%d", &a[i]);
+		sum[i] = sum[i - 1] + a[i];
+		if (a[i] >= MOD)
+			a[i] -= MOD;
+	}
+	
+	for (i = 1; i <= q; i ++)
+	{
+		scanf ("%d%d", &type, &x);
+		if (type == 1)
+		{
+			scanf ("%d", &y);
+			l = x;
+			r = y;
+			ans = 0;
+			pos = 0;
+			csum = 0;
+			
+			key ++;
+			for (j = x; j <= y; j ++)
+			{
+				if (used[a[j]] < key)
+				{
+					b[++ pos] = a[j];
+					c[pos] = c[pos - 1] + b[pos];
+					if (c[pos] >= MOD)
+						c[pos] -= MOD;
+					used[a[j]] = key;
+				}				
+			}
+			for (j = pos; j >= 1; j --)
+			{
+				k = csum;
+				k = (k * c[j - 1]) % MOD;
+				k = (k * b[j]) % MOD;
+				ans += k;
+				if (ans >= MOD)
+					ans -= MOD;
+				
+				csum += b[j];
+				if (csum >= MOD)
+					csum -= MOD;
+			}
+			printf ("%d\n", ans);
+		}
+		if (type == 2)
+		{
+			scanf ("%d", &y);
+			a[x] = y;
+			for (j = x; j <= n; j ++)
+			{
+				sum[j] = sum[j - 1] + a[j];
+				if (sum[j] >= MOD)
+					sum[j] -= MOD;
+			}
+		}
+		if (type == 3)
+		{
+			for (j = x; j < n; j ++)
+			{
+				a[j] = a[j + 1];
+				sum[j] = sum[j - 1] + a[j];
+				if (sum[j] >= MOD)
+					sum[j] -= MOD;
+			}
+			n --;
+		}
+		if (type == 4)
+		{
+			x ++;
+			scanf ("%d", &y);
+			for (j = n + 1; j > x; j --)
+				a[j] = a[j - 1];
+			a[x] = y;
+			for (j = x; j <= n + 1; j ++)
+			{
+				sum[j] = sum[j - 1] + a[j];
+				if (sum[j] >= MOD)
+					sum[j] -= MOD;
+			}
+			n ++;
+		}
+		if (type == 5)
+		{
+			scanf ("%d", &y);
+			ans = 0;
+			key ++;
+			for (j = x; j <= y; j ++)
+			{
+				if (used[a[j]] < key)
+				{
+					ans ++;
+					used[a[j]] = key;
+				}				
+			}
+			printf ("%d\n", ans);
+		}
+	}
+	return 0;
+}

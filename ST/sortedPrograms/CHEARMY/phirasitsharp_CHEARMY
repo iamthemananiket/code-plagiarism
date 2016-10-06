@@ -1,0 +1,42 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int LEN = 20;
+const int D = 10;
+
+int main ( void ) {
+
+	ios :: sync_with_stdio ( false );
+
+	int test_num;
+	cin >> test_num;
+
+	while ( test_num-- ) {
+
+		long long k;
+		cin >> k;
+
+		long long ans = 0ll;
+
+		for ( int i = LEN ; i >= 0 ; i-- ) {
+			long long pw = 1ll;
+			for ( int j = 0 ; j < i ; j++ ) {
+				pw *= 5ll;
+			}
+			for ( int j = 0 ; j < D ; j += 2 ) {
+				if ( pw < k ) {
+					k -= pw;
+				} else {
+					ans = 10ll * ans + j;
+					break;
+				}
+			}
+		}
+
+		cout << ans << "\n";
+	}
+
+	return 0;
+}

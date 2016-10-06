@@ -1,0 +1,23 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+
+#define Nx 1001001
+using namespace std;
+
+int t,n;
+long long fib[Nx];
+
+int main()
+{
+	fib[0]=fib[1]=1;
+	for(int i=2; i<Nx; i++)
+		fib[i]= (fib[i-1]+fib[i-2]) % 1000000007;
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d",&n);
+		printf("%lld\n",fib[n]);
+	}
+	return 0;
+}

@@ -1,0 +1,50 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <string>
+#define MX 100005
+
+using namespace std;
+typedef long long int ll;
+
+bool pal(int n)
+{
+	string s="";
+	while(n>0)
+	{
+		s+='0'+(n%10);
+		n/=10;
+	}
+	int L=s.size();
+	for(int l=0,r=L-1;l<=r;l++,r--) if(s[l]!=s[r]) return false;
+	return true;
+}
+bool P[MX];
+ll sum[MX];
+void make()
+{
+	for(int i=0;i<MX;i++)
+	{
+		P[i]=pal(i);
+		if(P[i]) sum[i]=i;
+		else sum[i]=0;
+		if(i>0) sum[i]+=sum[i-1];
+	}
+}
+ll get(int L,int R)
+{
+	return sum[R]-sum[L-1];
+}
+int main()
+{
+	make();
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int L,R;
+		scanf("%d %d",&L,&R);
+		printf("%lld\n",get(L,R));
+	}
+	return 0;
+}

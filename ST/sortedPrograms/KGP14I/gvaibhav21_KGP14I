@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define K 12
+
+int m[K],pos[K],c[K];
+int Sum;
+ll p[K][K];
+int mark[K][K];
+int pi[K],pj[K];
+int Cnt;
+int k,s,C;
+ll maxx;
+inline void func(int stx,int sty,int dx,int dy,int l)
+{
+	for(int x=0;stx+x>=0 && stx+x<k && abs(x)<l;x+=dx)
+	{
+		for(int y=0;sty+y>=0 && sty+y<k && abs(y)<l;y+=dy)
+		{
+			mark[stx+x][sty+y]=Cnt;
+		}
+	}
+}
+
+void go(int l)
+{
+	int i,j;
+	if(l==s)
+	{
+		Cnt++;
+		for(i=0;i<s;++i)
+		{
+			func(pi[i],pj[i],-1,-1,c[i]);
+			func(pi[i]+1,pj[i],1,-1,c[i]);
+			func(pi[i]+1,pj[i]+1,1,1,c[i]);
+			func(pi[i],pj[i]+1,-1,1,c[i]);
+		}
+		ll ans=0;
+		for(int x=0;x<k;++x)
+			for(int y=0;y<k;++y)
+				if(mark[x][y]==Cnt)
+					ans+=p[x][y];
+		maxx=max(maxx,ans);
+		return;
+	}
+
+	for(i=0;i<=m[l];++i)
+	{
+		c[l]=i;
+		Sum+=i;
+		if(Sum <= C)
+			go(l+1);
+		Sum-=i;
+	}
+}
+
+int main()
+{
+	int t;
+	sd(t);
+	for(int tt=1;tt<=t;tt++)
+	{
+		Cnt=0;
+		int i,j;
+		for(i=0;i<K;++i)
+			for(j=0;j<K;++j)
+				mark[i][j]=0;
+		maxx=0;
+		Sum=0;
+		sd(k);sd(s);sd(C);
+		for(i=0;i<s;++i)
+			sd(m[i]);
+		for(i=0;i<s;++i)
+		{
+			sd(pos[i]);
+			pi[i]=(pos[i]-1)/k;
+			pj[i]=(pos[i]-1)%k;
+		}
+		for(i=0;i<k;++i)
+			for(j=0;j<k;++j)
+				sl(p[i][j]);
+		go(0);
+		printf("Case %d: %lld\n",tt,maxx);
+	}
+}

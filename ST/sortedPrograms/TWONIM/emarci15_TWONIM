@@ -1,0 +1,24 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int T,n;
+int a;
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+        int s(0);
+        for(int i=0; i<n; i++) {
+            cin >> a;
+            s ^= a;
+        }
+        if((n%2) && (s)) {
+            cout << "Second" << endl;
+        } else cout << "First" << endl;
+    }
+
+    return 0;
+}

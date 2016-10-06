@@ -1,0 +1,197 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <map>
+#include <cassert>
+ 
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+ 
+#define eprintf(...) fprintf(stderr,__VA_ARGS__)
+ 
+using namespace std;
+ 
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+ 
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+ 
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+ 
+inline int read(){int x;scanf(" %d",&x);return x;}
+ 
+const int mod = 1e9 + 7;
+
+inline void add(int &x,int y) {
+  x += y;
+  if (x >= mod)
+    x -= mod;
+}
+
+inline int mul(int x,int y) {
+  return ll(x) * y % mod;
+}
+
+inline int power(int x,int n) {
+  int res = 1;
+  while (n > 0) {
+    if (n & 1)
+      res = mul(res, x);
+    x = mul(x, x);
+    n >>= 1;
+  }
+  return res;
+}
+
+const int MAX = 1e5 + 100;
+const int N = 14;
+
+int f[2][N + 1][2][1 << N][N + 1];//pos, last, back, mask, total inter-ones
+bool g[N][N];
+
+int c[MAX][20];
+int fact[MAX];
+
+int ways[MAX][N + 1][N + 1];
+
+int stupid(int n,vector<ii> es) {
+  vi ord(n);
+  for (int i = 0; i < n; i++)
+    ord[i] = i + 1;
+  int res = 0;
+  do {
+    bool ok = 1;
+    for (int i = 0; i < n - 1; i++) {
+      for (auto e : es) {
+        if (e.first == ord[i] && e.second == ord[i + 1])
+          ok = 0;
+        if (e.second == ord[i] && e.first == ord[i + 1])
+          ok = 0;
+      }
+    }
+    res += ok;
+  } while(next_permutation(all(ord)));
+  return res;
+}
+
+int getprod(int from,int k) {
+  return mul(fact[from + k - 1], power(fact[from - 1], mod - 2));
+}
+
+int calc(int n,int k,int tot) {
+  int res = 0;
+  for (int i = 0; i <= tot; i++) {
+    int tmp = mul(c[tot][i], getprod(k + 1 - i, n));
+    if (i % 2 == 0) {
+      add(res, tmp);
+    } else {
+      add(res, mod - tmp);
+    }
+  }
+  return res;
+}
+
+void solve() {
+  int n = read();
+  int m = read();
+  map<int, int> id;
+  int k = 0;
+  memset(g, 0, sizeof g);
+  vector<ii> es;
+  for (int i = 0; i < m; i++) {
+    int u = read();
+    int v = read();
+    //eprintf("%d %d\n", u, v);
+    es.push_back({u, v});
+    for (int x : {u, v})
+     if (id.count(x) == 0)
+        id[x] = k++;
+    g[id[u]][id[v]] = true;
+    g[id[v]][id[u]] = true;
+  }
+  //int resStupid = stupid(n, es);
+  if (k == 0) {
+    int ans = 1;
+    for (int i = 2; i <= n; i++) {
+      ans = mul(ans, i);
+    }
+    printf("%d\n", ans);
+    return;
+  }
+  //eprintf("k = %d\n", k);
+  memset(f, 0, sizeof f);
+  f[0][0][0][0][0] = 1;
+  for (int i = 0; i < k; i++) {
+    memset(f[i + 1 & 1], 0, sizeof f[i + 1 & 1]);
+    for (int mask = 0; mask < (1 << k); mask++) {
+      if (__builtin_popcount(mask) != i)
+        continue;
+      for (int b = 0; b < 2; b++) {
+        for (int px = 0; px < k; px++) {
+          for (int tot = 0; tot < k; tot++) {
+            int ft = f[i & 1][px][b][mask][tot];
+            if (ft == 0) 
+              continue;
+            for (int x = 0; x < k; x++) {
+              if ((mask >> x) & 1)
+                continue;
+              if (i > 0 && b == 0 && g[px][x])
+                continue;
+              if (b == 1 && g[px][x] == 0)
+                continue;
+              for (int nb = 0; nb < 2; nb++) {
+                add(f[i + 1 & 1][x][nb][mask | (1 << x)][tot + nb], ft);    
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  n -= k;
+  int res = 0;
+  for (int x = 0; x < k; x++) {
+    for (int tot = 0; tot < k && tot <= n; tot++) {
+      int ft = f[k & 1][x][0][(1 << k) - 1][tot];
+      //eprintf("x = %d, tot = %d, ft = %d, coef = %d\n", x, tot, ft, calc(n, k, tot));
+      add(res, mul(ft, calc(n, k, tot)));
+    }
+  }
+  /*if (res != resStupid) {
+    eprintf("shit!!\n");
+    eprintf("%d - %d\n", res, resStupid);
+    eprintf("n = %d\n", n);
+    for (auto e : es) {
+      eprintf("%d %d\n", e.first, e.second);
+    }
+    assert(0);
+  }*/
+  printf("%d\n", res);
+}
+
+int main(){
+
+  c[0][0] = 1;
+  fact[0] = 1;
+  for (int i = 1; i < MAX; i++) {
+    c[i][0] = 1;
+    fact[i] = mul(fact[i - 1], i);
+    for (int j = 1; j <= i && j < 20; j++) {
+      c[i][j] = c[i - 1][j];
+      add(c[i][j], c[i - 1][j - 1]);
+    }
+  }
+
+  int t = read();
+  for (int i = 0; i < t; i++) {
+    solve();
+  }
+
+  return 0;
+}

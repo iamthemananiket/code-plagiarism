@@ -1,0 +1,71 @@
+#include<bits/stdc++.h>
+
+#define int long long
+#define ll long long
+#define sqr(a) (a) * (a)
+#define all(a) (a).begin(), (a).end()
+#define mkp make_pair
+#define pb push_back
+
+ using namespace std;
+
+const int md = 1e9 + 7,N = 2e5 + 1,M = N + 120,fmd = md - 2;
+ string s;
+ int n,t;
+ int p[M],ans[N],a[N],b[N],i,j,ANS,res,sum[N];
+
+ inline void add(int &a,int b)
+ {
+     a+=b;
+     if(a>=md) a-=md;
+ }
+
+ int bin_pow(int a,int n)
+ {
+     res = 1;
+      while(n)
+      {
+          if(n & 1) res = res * a % md;
+          a = (a * a) % md;
+          n>>=1;
+      }
+      return res;
+ }
+
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    p[0] = 1;
+    for(i=1;i<=N;++i) p[i] = p[i-1] * 26 % md;
+
+    for(i=0;i<26;++i)
+        ans[i] = 25 - i;
+
+      cin>>s;
+      n = (int)s.size();
+
+      for(i=0;i<n;++i) a[i+1] = s[i] - 'A',b[i+1] = ans[a[i+1]];
+
+      for(j=n;j>0;--j)
+      {
+          sum[j] = sum[j+1];
+          if(b[j]>0) add(sum[j],b[j] * p[j - 1] % md);
+      }
+
+       for(i=1;i<=n;++i)
+        if(b[i]>0)
+       {
+           add(ANS,b[i]);
+           if(i==n)continue;
+           add(ANS,b[i] * (sum[i+1] * bin_pow(26,i * fmd) % md ) % md);
+           //for(j=i+1;j<=n;++j)
+           // if(b[j]>0) add(ANS,b[i] * b[j] * p[j - i - 1] % md);
+       }
+
+       cout<<ANS<<endl;
+
+  }

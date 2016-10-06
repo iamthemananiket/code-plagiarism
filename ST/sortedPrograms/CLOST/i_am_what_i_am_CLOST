@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void eval()
+{
+	int n,k;
+	cin>>n>>k;
+	vector<char> s(n,'-');
+	int l,r;
+	vector<pair<int,int> > v(k);
+	
+	vector< pair<int,pair<int,int> > > balanced;
+	
+	for(int i=0;i<k;i++)
+	{
+		cin>>l>>r;
+		v[i]={l,r};
+		s[l]='(';
+		s[r]=')';
+		
+		balanced.push_back({r-l,{l,r}});
+		
+	}
+	
+	sort(balanced.begin(),balanced.end());
+	
+	
+	for(int i=0;i<k;i++)
+	{
+		int left=balanced[i].second.first;
+		int right=balanced[i].second.second;
+		int open=0;
+		for(int j=left;j<=right;j++)
+		{
+		//	cout<<left<<" "<<right<<endl;
+			if(s[j]=='-')
+			 {
+			 	if(open%2==0)
+			 	  {s[j]='(';open++;}
+			 	else
+			 	 {s[j]=')';open--;}
+			 
+			 }
+			else if(s[j]=='(')
+			 open++;
+			else open--;
+		}
+		
+	}
+	/*
+	for(int i=0;i<n;i++)
+	 cout<<s[i];
+	cout<<endl;
+	*/
+	
+	int open=0;
+	for(int i=0;i<n;i++)
+	{
+		if(s[i]=='-')
+		 {
+		 	if(open%2==0)
+		 	  {
+			   s[i]='(';
+			   open++;
+			  }
+		 	else
+		 	 {
+			  s[i]=')';
+			  open--;
+			  }
+		 	//c++;
+		 }
+		 else if(s[i]=='(')
+		   open++;
+		else
+		  open--;
+		 cout<<s[i];
+	}
+	cout<<endl;
+	
+}
+
+int main()
+{
+#ifndef ONLINE_JUDGE
+	freopen("in.txt","r",stdin);
+//	freopen("out.txt","w",stdout);
+	#endif
+	
+	int t;
+	cin>>t;
+	for(int te=1;te<=t;te++)
+	{
+		eval();
+	}
+	
+	
+}

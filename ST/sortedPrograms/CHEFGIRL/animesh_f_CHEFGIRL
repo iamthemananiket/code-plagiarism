@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#define MP make_pair
+#define F first
+#define S second
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+const int MAX = 1e5 + 50;
+const int INF = 1e7 + 7;
+
+vector < pair < int , pair < int , int > >  > adjList[MAX];
+int N , M;
+int DP[32 + 1] , C[32 + 1][32 + 1];
+
+inline int check( int node , int qs , int qe ){
+
+	int cost = 0;
+	while( adjList[node].size() != 0 ){
+		int child = adjList[node][0].F;
+		int ll = adjList[node][0].S.F , rr = adjList[node][0].S.S;
+		cost += max( ll - qs , 0 ) + max( qe - rr , 0 );
+		node = child;
+	}
+	return cost;
+}
+
+inline int compute( int node , int qs , int qe ){
+	
+	int cost = 0;
+	int minm = INF;
+
+	for( auto next : adjList[node] ){
+		int child = next.F , ll = next.S.F , rr = next.S.S;
+		cost = 	max( ll - qs , 0 ) + max( qe - rr , 0 );
+		minm =  min( minm , cost + check( child , qs , qe ) );
+	}
+
+	return minm;
+}
+
+int main(){
+	
+	cin.tie(0) , ios::sync_with_stdio(0);
+	
+	cin >> N >> M;
+
+	for(int i = 1 ; i <= M ; i++){
+		int u , v , l , r;
+		cin >> u >> v >> l >> r;
+		adjList[u].push_back( MP( v , MP(l,r) ) );
+	}
+	
+	for(int i = 1 ; i <= 32 ; i++)
+		for(int j = 1 ; j <= 32 ; j++)
+			C[i][j] = compute( 1 , i , j );
+
+	DP[0] = 0;
+	
+	for(int i = 1 ; i <= 32 ; i++){
+		DP[i] = INF;
+		for(int j = 0 ; j < i ; j++ )
+			DP[i] = min( DP[i] , DP[j] + C[j + 1][i] ); 
+	}
+
+	cout << DP[32] << endl;
+
+}

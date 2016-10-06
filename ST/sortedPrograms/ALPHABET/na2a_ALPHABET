@@ -1,0 +1,76 @@
+/* GG */
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <string>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <climits>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <sstream>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+//#include <unordered_set>
+//#include <unordered_map>
+
+#define f first
+#define s second
+
+#define pb push_back
+#define mp make_pair
+
+template <class T = int> inline T readInt(); // skip spaces, read signed int
+
+using namespace std;
+
+typedef pair<int, int> pii;
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int N = (int) 3e5 + 7;
+const int MOD = (int) 1e9 + 7;
+
+bool good[256];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  ios_base::sync_with_stdio(0);
+
+  string dic;
+  cin >> dic;
+  for (auto it : dic)
+    good[it] = 1;
+  int t;
+  cin >> t;
+  while (t--) {
+    string s;
+    cin >> s;
+    bool valid = 1;
+    for (auto it : s)
+      valid &= (good[it]);
+    if (valid) puts("Yes");
+    else puts("No");
+  }
+
+  return 0;
+}

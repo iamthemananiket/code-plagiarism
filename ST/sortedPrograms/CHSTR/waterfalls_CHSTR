@@ -1,0 +1,92 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <cassert>
+
+using namespace std;
+
+int N;
+char S[5013];
+int cur[5013];
+long long cur2[5013];
+int ways[5013][5013];
+short has[199999991];
+short last[199999991];
+vector<int> where;
+vector<long long> has2;
+
+const int MOD = 1000000007;
+int MOD2;
+
+int main() {
+    int T;
+    scanf("%d",&T);
+    for (int t=0;t<T;t++) {
+        int N,Q;
+        scanf("%d%d %s",&N,&Q,&S);
+        if (N>500 && N!=5000) {
+            long long MOD3 = 999999999999989;
+            for (int i=0;i<=N;i++) cur2[i] = 0;
+            for (int i=0;i<=N;i++) for (int j=0;j<=N;j++) ways[i][j] = 0;
+            for (int i=1;i<=N;i++) {
+                has2.clear();
+                for (int j=0;j<=N-i;j++) cur2[j] = (cur2[j]*29+S[j+i-1]-'a'+1)%MOD3;
+                for (int j=0;j<=N-i;j++) has2.push_back(cur2[j]);
+                sort(has2.begin(),has2.end());
+                int have = 1;
+                for (int j=1;j<has2.size();j++) {
+                    if (has2[j]==has2[j-1]) have+=1;
+                    else ways[have][0]+=1, have = 1;
+                }
+                ways[have][0]+=1;
+            }
+        } else if (N<=500 || (N==5000 && S[0]!='h' && S[0]!='j')) {
+            if (N<=500) MOD2 = 199999991;
+            else if (N==5000 && S[0]!='h' && S[0]!='j') MOD2 = 4999991;
+            else MOD2 = 16999999;
+            for (int i=0;i<=N;i++) cur[i] = 0;
+            for (int i=0;i<=N;i++) ways[i][0] = 0;
+            for (int i=1;i<=N;i++) {
+                where.clear();
+                for (int j=0;j<=N-i;j++) cur[j] = ((long long) cur[j]*27+S[j+i-1]-'a'+1)%MOD2;
+                for (int j=0;j<=N-i;j++) {
+                    if (last[cur[j]]!=t*N+i) last[cur[j]] = t*N+i, has[cur[j]] = 0, where.push_back(cur[j]);
+                    has[cur[j]]+=1;
+                }
+                for (int j=0;j<where.size();j++) ways[has[where[j]]][0]+=1;
+            }
+        } else {
+            MOD2 = 199999991;
+            for (int i=0;i<=N;i++) cur[i] = 0;
+            for (int i=0;i<=N;i++) ways[i][0] = 0;
+            for (int i=1;i<=N;i++) {
+                if (i<=500) {
+                    where.clear();
+                    for (int j=0;j<=N-i;j++) cur[j] = ((long long) cur[j]*29+S[j+i-1]-'a'+1)%MOD2;
+                    for (int j=0;j<=N-i;j++) {
+                        if (last[cur[j]]!=t*N+i) last[cur[j]] = t*N+i, has[cur[j]] = 0, where.push_back(cur[j]);
+                        has[cur[j]]+=1;
+                    }
+                    for (int j=0;j<where.size();j++) ways[has[where[j]]][0]+=1;
+                } else for (int j=0;j<=N-i;j++) ways[1][0]+=1;
+            }
+        }
+        for (int i=N-1;i>=0;i--) for (int j=0;j<=N;j++) {
+            if (j!=0) ways[i][j] = 0;
+            ways[i][j]+=ways[i+1][j];
+            if (ways[i][j]>=MOD) ways[i][j]-=MOD;
+            if (j) {
+                ways[i][j]+=ways[i+1][j-1];
+                if (ways[i][j]>=MOD) ways[i][j]-=MOD;
+            }
+        }
+        for (int q=0;q<Q;q++) {
+            int K;
+            scanf("%d",&K);
+            if (K>N) printf("0\n");
+            else printf("%d\n",ways[0][K]);
+        }
+    }
+
+    return 0;
+}

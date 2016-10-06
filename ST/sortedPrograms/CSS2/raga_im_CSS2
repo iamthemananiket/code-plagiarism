@@ -1,0 +1,72 @@
+#include <cmath>
+#include <cstdio>
+#include <set>
+#include <map>
+#include <iostream>
+#include <algorithm>
+#include <limits>
+using namespace std;
+typedef struct idat{
+    int id;
+    int attr;
+    const inline bool operator==(const idat& other)const{
+        return (id==other.id and attr == other.attr);
+    }
+ const inline bool operator>(const idat& other)const{
+      if(id==other.id)
+          return attr>other.attr;
+     else
+     (id>other.id);
+    }
+ const inline bool operator<(const idat& other)const{
+      if(id==other.id)
+          return attr>other.attr;
+     else
+        return (id<other.id);
+    }
+}idat;
+typedef struct value{
+    int pr;
+    int val;
+}value;
+ 
+map<idat,value> mymap;
+map<idat,value> :: iterator it;
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */ 
+    int idd,at,p,v,n,m;
+    idat k;
+    value t;
+    cin>>n>>m;
+    for(int i=0;i<n;i++){
+        cin>>idd>>at>>v>>p;
+        k.id=idd;
+        k.attr=at;
+        if(mymap.find(k)==mymap.end()){
+            t.pr=p;
+            t.val=v;
+            mymap.insert ( std::pair<idat,value>(k,t) );
+        }
+        else{
+            it=mymap.find(k);
+            if((it->second).pr<=p){
+                //cout<<"yes"<<endl;
+                    
+                 t.pr=p;
+                 t.val=v;
+                mymap.erase(it);
+                 mymap.insert ( std::pair<idat,value>(k,t) );
+            }
+        }
+        
+    }
+    while(m--){
+        cin>>idd>>at;
+         k.id=idd;
+        k.attr=at;
+         it=mymap.find(k);
+        cout<<(it->second).val<<endl;
+    }
+      
+    return 0;
+}

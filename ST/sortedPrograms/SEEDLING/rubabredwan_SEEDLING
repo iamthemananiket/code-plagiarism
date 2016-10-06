@@ -1,0 +1,84 @@
+/*
+__________           .___
+\______   \ ____   __| _/_  _  _______    ____
+ |       _// __ \ / __ |\ \/ \/ /\__  \  /    \
+ |    |   \  ___// /_/ | \     /  / __ \|   |  \
+ |____|_  /\___  >____ |  \/\_/  (____  /___|  /
+        \/     \/     \/              \/     \/
+
+handle	: rubabredwan (Codeforces/CodeChef/HackerRank)
+task 	: ...............
+
+*/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(x,"w",stdout)
+#define SF(x)		scanf("%d", &x)
+#define PF(x)		printf("%d", x)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			100050
+#define INF			1e9
+#define EPS			1e-9
+
+#define xx 			first
+#define yy	 		second
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+
+using namespace std;
+
+typedef long long 		ll;
+typedef unsigned long long	ull;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+ull n, s, A[60], B[60], C[60];
+ull prof[60];
+ull dp[60][60][6000];
+ll vp[60][60][6000], t = 1;
+
+ull recur(ll at, ll left, ll profit){
+    if(at == n){
+        if(profit>0) return 1;
+        return 0;
+    }
+    if(vp[at][left][profit+3000] == t) return dp[at][left][profit+3000];
+
+    ull ret = 0;
+
+    if(left >= A[at])ret += recur(at, left - A[at], profit + prof[at] );
+    ret += recur(at+1, left, profit);
+
+    vp[at][left][profit+3000] = t;
+    return dp[at][left][profit+3000] = ret;
+
+}
+
+int main(){
+    //READ("in.txt");
+    ll tc;
+    scanf("%lld", &tc);
+    while(tc--){
+        scanf("%llu %llu", &n, &s);
+        REP(i, n){
+            scanf("%llu %llu %llu", &A[i], &B[i], &C[i]);
+            prof[i] = C[i] - B[i];
+        }
+        ull ret = recur(0, s, 0);
+        printf("%llu\n", ret);
+        t++;
+    }
+	return 0;
+}

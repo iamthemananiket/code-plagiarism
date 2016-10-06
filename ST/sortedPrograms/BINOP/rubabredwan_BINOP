@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(ll i=0;i<n;i++)
+#define REPN(i, n)	for(ll i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+#define ALL(i)		i.begin(), i.end()
+
+#define MAX			1000050
+#define pb			insert
+#define cl 			clear
+
+using namespace std;
+
+typedef long long ll;
+
+char A[MAX], B[MAX];
+int n, X[MAX], Y[MAX];
+
+set<int>ZO, OZ, OO, ZZ;
+
+int main(){
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+
+		OZ.clear();
+		OO.clear();
+		ZZ.clear();
+		ZO.clear();
+
+		scanf("%s", A);
+		scanf("%s", B);
+		n = strlen(A);
+		
+		/*
+
+		process zeroes first
+
+		1 -> swap with a position containing 0 but needed 1
+		2 -> and with a position containing 0 and needed 0
+
+		ones next
+
+		1 -> or with any position containing ones
+
+		*/
+
+		REP(i, n){
+			X[i] = A[i] - '0';
+			Y[i] = B[i] - '0';
+			if(X[i] == Y[i]){
+				if(X[i] == 0) ZZ.insert(i);
+				else OO.insert(i);
+			}
+			else{
+				if(X[i] == 0) ZO.insert(i);
+				if(X[i] == 1) OZ.insert(i);
+			}
+		}
+		int ret = 0, flag = 0;
+		set<int>::iterator it;
+		REP(i, n){
+			if(X[i] == Y[i]);
+			else if(Y[i] != 0);
+			else{
+
+				OZ.erase(OZ.find(i));
+				ret++;
+				if(ZO.size()){
+					it = ZO.begin();
+					int pos = *it;
+					X[pos] = Y[pos] = 1;
+					X[i] = Y[i] = 0;
+					ZO.erase(it);
+					OO.insert(pos);
+					ZZ.insert(i);
+				}
+				else if(ZZ.size()){
+					it = ZZ.begin();
+					int pos = *it;
+					X[pos] = Y[pos] = X[i] = Y[i] = 0;
+					ZZ.insert(i);
+				}
+				else{
+					flag = true;
+				}
+
+			}
+
+			if(flag) break;
+		}
+		
+		REP(i, n){
+			if(X[i] == Y[i]) continue;
+			if(flag) break;
+
+			ret++;
+			if(!OO.size()) flag = true;
+
+		}
+
+		if(flag) printf("Unlucky Chef\n");
+		else printf("Lucky Chef\n%d\n", ret);
+
+	}
+	return 0;
+}

@@ -1,0 +1,114 @@
+///# include <cstdio>
+# include <algorithm>
+# include <stdio.h>
+# include <stdlib.h>
+# include <cstring>
+# include <set>
+
+using namespace std;
+
+const int MAX_N = 1e5 + 10;
+const int MAX_A = 1e6 + 10;
+
+int n, m;
+int a[MAX_N];
+
+int lp[MAX_A];
+
+int tree[MAX_N * 4];
+
+set <pair <int, int>> s;
+
+void update (int idx, int l, int r, int p, int q)
+{
+    int mid = (l + r) >> 1;
+    if (p > r || l > p)
+        return;
+    if (l == r)
+    {
+        tree[idx] = q;
+        return;
+    }
+    update (idx * 2, l, mid, p, q);
+    update (idx * 2 + 1, mid + 1, r, p, q);
+    tree[idx] = max (tree[idx * 2], tree[idx * 2 + 1]);
+}
+
+int fnd (int idx, int l, int r, int p, int q)
+{
+    int mid = (l + r) >> 1, al, ar;
+    if (l > r || p > r || l > q)
+        return -1;
+    if (p <= l && r <= q)
+        return tree[idx];
+    al = fnd (idx * 2, l, mid, p, q);
+    ar = fnd (idx * 2 + 1, mid + 1, r, p, q);
+    return max (al, ar);
+}
+
+void sieve ()
+{
+    long long i, j;
+    lp[1] = 1;
+    for (i = 2; i < MAX_A; i ++)
+    {
+        if (lp[i])
+            continue;
+        lp[i] = i;
+        for (j = i * i; j < MAX_A; j += i)
+        {
+            if (!lp[j])
+                lp[j] = i;
+        }
+    }
+}
+
+void solve ()
+{
+    s.clear ();
+    set <pair <int, int>> :: iterator it, nxt;
+    int i, j, type, p, q, idx, crr;
+    scanf ("%d%d", &n, &m);
+    for (i = 1; i <= n; i ++)
+    {
+        scanf ("%d", &a[i]);
+        s.insert ({i, a[i]});
+        update (1, 1, n, i, lp[a[i]]);
+    }
+
+    while (m --)
+    {
+        scanf ("%d%d%d", &type, &p, &q);
+        if (!type)
+        {
+            for (it = s.lower_bound ({p, -1}); it != s.end () && it->first <= q; it = nxt)
+            {
+                idx = it->first;
+                crr = it->second;
+                crr = crr / lp[crr];
+                update (1, 1, n, idx, lp[crr]);
+                nxt = it;
+                nxt ++;
+                s.erase (it);
+                if (crr != 1)
+                    s.insert ({idx, crr});
+            }
+        }
+        else
+            printf ("%d ", fnd (1, 1, n, p, q));
+    }
+
+    printf ("\n");
+
+    memset (tree, 0, 4 * n * sizeof (int));
+}
+
+int main ()
+{
+    int t;
+    sieve ();
+    scanf ("%d", &t);
+    while (t --)
+        solve ();
+    return 0;
+}

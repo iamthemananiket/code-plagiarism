@@ -1,0 +1,23 @@
+#include <cstdio>
+
+using namespace std;
+
+int T;
+int n,m;
+int a[100000];
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&m);
+        for(int i=0; i<n; i++) scanf("%d",&a[i]);
+        long long s(0ll);
+        for(int i=0; i<m; i++) s += a[i];
+        for(int i=m; i<n; i++) s -= ((a[i]+1ll)/2);
+        if(s >= 0ll) {
+            printf("VICTORY\n");
+        } else printf("DEFEAT\n");
+    }
+
+    return 0;
+}

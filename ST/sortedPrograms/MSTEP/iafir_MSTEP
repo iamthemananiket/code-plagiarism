@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int x[505*505], y[505*505];
+
+int main() {
+  int t; scanf("%d", &t);
+  while(t--) {
+    int n; scanf("%d", &n);
+    for(int i = 0; i<n; i++) {
+      for(int j = 0; j<n; j++) {
+        int v;
+        scanf("%d", &v); v--;
+        x[v] = i; y[v] = j;
+      }
+    }
+    int ans = 0;
+    for(int i = 1; i<n*n; i++) {
+      ans += abs(x[i]-x[i-1]) + abs(y[i]-y[i-1]);
+    }
+    printf("%d\n", ans);
+  }
+
+
+  return 0;
+}

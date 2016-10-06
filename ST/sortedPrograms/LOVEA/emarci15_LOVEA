@@ -1,0 +1,33 @@
+#include <cstdio>
+
+using namespace std;
+
+int T;
+long long l,r;
+
+long long findsqrrt(long long x) {
+    long long lb = 1ll;
+    long long ub = 1000000001ll;
+
+    while(lb < ub) {
+        long long f = (lb+ub) / 2;
+
+        if((f*f) < x) {
+            lb = f+1;
+        } else ub = f;
+    }
+
+    return lb;
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%lld%lld",&l,&r);
+        r++;
+
+        printf("%lld\n",(findsqrrt(r)-findsqrrt(l)));
+    }
+
+    return 0;
+}

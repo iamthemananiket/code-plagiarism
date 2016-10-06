@@ -1,0 +1,245 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+class SchieberVishkinLCA {
+public:
+	typedef unsigned Word;
+	typedef int Vertex;
+private:
+
+	static inline Word lowestOneBit(Word v) {
+		return v & (~v + 1);
+	}
+	static inline Word highestOneBitMask(Word v) {
+		v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v |= v >> 16;
+		return v >> 1;
+	}
+
+	std::vector<Word> indices;			//Vertex -> index
+	std::vector<Word> maxHIndices;		//Vertex -> index
+	std::vector<Word> ancestorHeights;	//Vertex -> Word
+	std::vector<Vertex> pathParents;	//index-1 -> Vertex
+public:
+
+	void build(const std::vector<Vertex> &preorder, const std::vector<Vertex> &parents, Vertex root) {
+		Vertex N = static_cast<Vertex>(preorder.size());
+
+		ancestorHeights.resize(N);
+		maxHIndices.resize(N);
+		indices.resize(N);
+		pathParents.resize(N);
+
+		for(Vertex ix = 0; ix < N; ++ ix)
+			indices[preorder[ix]] = ix + 1;
+
+		for(Vertex i = 0; i < N; ++ i)
+			maxHIndices[i] = indices[i];
+		for(Vertex ix = N - 1; ix > 0; -- ix) {
+			Vertex v = preorder[ix], parent = parents[v];
+			if(lowestOneBit(maxHIndices[parent]) < lowestOneBit(maxHIndices[v]))
+				maxHIndices[parent] = maxHIndices[v];
+		}
+
+		ancestorHeights[root] = 0;
+		for(Vertex ix = 1; ix < N; ++ ix) {
+			Vertex v = preorder[ix], parent = parents[v];
+			ancestorHeights[v] = ancestorHeights[parent] | lowestOneBit(maxHIndices[v]);
+		}
+
+		pathParents[0] = root;
+		for(Vertex ix = 1; ix < N; ++ ix) {
+			Vertex v = preorder[ix], parent = parents[v];
+			if(maxHIndices[v] != maxHIndices[parent])
+				pathParents[indices[v] - 1] = parent;
+			else
+				pathParents[indices[v] - 1] = pathParents[indices[parent] - 1];
+		}
+	}
+
+	Vertex query(Vertex v, Vertex u) const {
+		Word Iv = maxHIndices[v], Iu = maxHIndices[u];
+		Word hIv = lowestOneBit(Iv), hIu = lowestOneBit(Iu);
+		Word hbMask = highestOneBitMask((Iv ^ Iu) | hIv | hIu);
+		Word j = lowestOneBit(ancestorHeights[v] & ancestorHeights[u] & ~hbMask);
+		Vertex x, y;
+		if(j == hIv) x = v;
+		else {
+			Word kMask = highestOneBitMask(ancestorHeights[v] & (j - 1));
+			x = pathParents[(indices[v] & ~kMask | (kMask + 1)) - 1];
+		}
+		if(j == hIu) y = u;
+		else {
+			Word kMask = highestOneBitMask(ancestorHeights[u] & (j - 1));
+			y = pathParents[(indices[u] & ~kMask | (kMask + 1)) - 1];
+		}
+		return indices[x] < indices[y] ? x : y;
+	}
+};
+
+vector<int> t_parent;
+vi t_ord;
+
+void tree_getorder(const vector<vi> &g, int root) {
+	int n = g.size();
+	t_parent.assign(n, -1);
+	t_ord.clear();
+
+	vector<int> stk; stk.push_back(root);
+	while(!stk.empty()) {
+		int i = stk.back(); stk.pop_back();
+		t_ord.push_back(i);
+		for(int j = (int)g[i].size() - 1; j >= 0; j --) {
+			int c = g[i][j];
+			if(t_parent[c] == -1 && c != root)
+				stk.push_back(c);
+			else
+				t_parent[i] = c;
+		}
+	}
+}
+
+
+template<int MOD>
+struct ModInt {
+	static const int Mod = MOD;
+	unsigned x;
+	ModInt() : x(0) {}
+	ModInt(signed sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	ModInt(signed long long sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	int get() const { return (int)x; }
+
+	ModInt &operator+=(ModInt that) { if((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator-=(ModInt that) { if((x += MOD - that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % MOD; return *this; }
+	ModInt &operator/=(ModInt that) { return *this *= that.inverse(); }
+
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+	ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+	ModInt operator/(ModInt that) const { return ModInt(*this) /= that; }
+
+	ModInt inverse() const {
+		signed a = x, b = MOD, u = 1, v = 0;
+		while(b) {
+			signed t = a / b;
+			a -= t * b; std::swap(a, b);
+			u -= t * v; std::swap(u, v);
+		}
+		if(u < 0) u += Mod;
+		ModInt res; res.x = (unsigned)u;
+		return res;
+	}
+};
+typedef ModInt<1000000007> mint;
+
+struct UnionFind {
+	vector<int> data;
+	void init(int n) { data.assign(n, -1); }
+	bool unionSet(int x, int y) {
+		x = root(x); y = root(y);
+		if(x != y) {
+			if(data[y] < data[x]) swap(x, y);
+			data[x] += data[y]; data[y] = x;
+		}
+		return x != y;
+	}
+	bool findSet(int x, int y) { return root(x) == root(y); }
+	int root(int x) { return data[x] < 0 ? x : data[x] = root(data[x]); }
+	int size(int x) { return -data[root(x)]; }
+};
+
+int main() {
+	int N;
+	while(~scanf("%d", &N)) {
+		vector<int> W(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &W[i]);
+		vector<vector<int> > g(N);
+		vpii edges(N - 1);
+		for(int i = 0; i < N - 1; ++ i) {
+			int u, v;
+			scanf("%d%d", &u, &v), -- u, -- v;
+			edges[i] = { u, v };
+			g[u].push_back(v);
+			g[v].push_back(u);
+		}
+		tree_getorder(g, 0);
+		vector<int> sum = W;
+		for(int ix = 1; ix < (int)t_ord.size(); ++ ix) {
+			int i = t_ord[ix], p = t_parent[i];
+			sum[i] += sum[p];
+		}
+		SchieberVishkinLCA lca;
+		lca.build(t_ord, t_parent, 0);
+
+		auto getdist = [&](int i, int j) {
+			int k = lca.query(i, j);
+			return sum[i] + sum[j] - sum[k] * 2 + W[k];
+		};
+
+		vector<pii> XYs(N - 1);
+		rep(i, N - 1) {
+			int K;
+			scanf("%d", &K), -- K;
+			XYs[i] = edges[K];
+		}
+		UnionFind uf; uf.init(N);
+		vector<pii> diamPair(N);
+		rep(i, N) diamPair[i] = { i, i };
+
+		auto add = [&](pii &diam, int w) {
+			int u, v;
+			tie(u, v) = diam;
+			typedef pair<int, pii> P;
+			P mx(-1, make_pair(-1, -1));
+			amax(mx, P{ getdist(u, v), { u, v } });
+			amax(mx, P{ getdist(u, w), { u, w } });
+			amax(mx, P{ getdist(v, w), { v, w } });
+			diam = mx.second;
+		};
+
+		vector<int> que(N);
+		vector<vi> curg(N);
+		vector<int> par(N);
+		mint curProd = 1;
+		rep(i, N)
+			curProd *= W[i];
+		vector<mint> ans(N);
+		ans[N - 1] = curProd;
+		for(int qi = N - 2; qi >= 0; -- qi) {
+			int X, Y;
+			tie(X, Y) = XYs[qi];
+			if(uf.size(X) < uf.size(Y))
+				swap(X, Y);
+			que[0] = Y;
+			par[Y] = X;
+			pii diamX = diamPair[uf.root(X)], diamY = diamPair[uf.root(Y)];
+			curProd /= getdist(diamX.first, diamX.second);
+			curProd /= getdist(diamY.first, diamY.second);
+			for(int qh = 0, qt = 1; qh != qt; ++ qh) {
+				int i = que[qh], p = par[i];
+				add(diamX, i);
+				for(int j : curg[i]) if(j != p) {
+					que[qt ++] = j;
+					par[j] = i;
+				}
+			}
+			curg[X].push_back(Y);
+			curg[Y].push_back(X);
+			uf.unionSet(X, Y);
+			curProd *= getdist(diamX.first, diamX.second);
+			diamPair[uf.root(X)] = diamX;
+			ans[qi] = curProd;
+		}
+		for(int i = 0; i < N; ++ i)
+			printf("%d\n", ans[i].get());
+	}
+	return 0;
+}

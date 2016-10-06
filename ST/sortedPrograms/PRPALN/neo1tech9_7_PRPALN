@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+int t;
+string ss;
+bool check(int k, int pos);
+bool first_char[2] = {0};
+int main(){
+	std::ios_base::sync_with_stdio(false);
+	cin.tie(0);
+	cin >> t;
+	while(t--){
+		cin >> ss;
+	    first_char[1] = first_char[0] = true;
+		for(int i = 0, j = ss.size() - 1; i <= j; ++i,--j){
+			if(ss[i] != ss[j]){
+				check(i,1);
+				check(j,0);
+				break;
+			}
+		}
+		if(first_char[0] || first_char[1])
+			cout << "YES\n";
+		else cout << "NO\n";
+	}
+	return 0;
+}
+bool check(int k, int pos){
+	for(int i = 0, j = ss.size() - 1; i <= j; ++i,--j){
+		if(i == k){
+			++j;
+			continue;
+		}
+		if(j == k){
+			--i;
+			continue;
+		}
+		if(ss[i] != ss[j]){
+			first_char[pos] = false;
+			return false;
+		}
+	}
+	return true;
+}

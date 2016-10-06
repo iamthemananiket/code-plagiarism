@@ -1,0 +1,86 @@
+#include<stdio.h>
+#include<iostream>
+#include<vector>
+#include<cmath>
+#include<algorithm>
+#include<memory.h>
+#include<map>
+#include<set>
+#include<queue>
+#include<deque>
+#include<list>
+#include<sstream>
+#include<cstring>
+#include<unordered_map>
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+#define sqr(x) ((x)*(x))
+#define SET(a,b) memset((a),(b),sizeof((a)))
+#define pw(x) (1ll<<(x))
+#define buli(x) __builtin_popcountll(x)
+#define endl "\n"
+
+const int MOD = 1e9+7;
+const int N = 1e5+3;
+
+using namespace std;
+
+typedef long long ll;
+typedef vector<int> vi;
+typedef map<int,int> mii;
+typedef map<string,int> msi;
+typedef pair<int,int> pii;
+typedef vector<pii> vpii;
+
+inline bool EQ(double a,double b) { return fabs(a - b) < 1e-9; }
+inline void set_bit(int & n, int b) { n |= pw(b); }
+inline void unset_bit(int & n, int b) { n &= ~pw(b); }
+int dp[2][51][251][251];
+int a[51],c[51],p[51];
+int main() {
+	// freopen("TASK.in","r",stdin);	
+	// freopen("TASK.out","w",stdout);
+	int t;
+	scanf("%d",&t);
+	while(t--) {
+		int n,s;
+		scanf("%d%d",&n,&s);
+		for(int i=1;i<=n;i++)
+			scanf("%d%d%d",&a[i],&c[i],&p[i]);
+		for(int i=0;i<=0;i++)
+			for(int j=0;j<=s;j++)
+				for(int k=0;k<=11*s;k++)
+					for(int l=0;l<=11*s;l++)
+						dp[i][j][k][l]=0;
+		dp[0][0][0][0]=1;
+		ll ans=0;
+		for(int i=1;i<=n;i++) {
+			for(int j=0;j<=s;j++) {
+				for(int k=0;k<=11*s;k++) {
+					for(int l=0;l<=11*s;l++) {
+						dp[i%2][j][k][l]=dp[(i-1)%2][j][k][l];
+						for(int m=1;m*a[i]<=j&&m*c[i]<=k&&m*p[i]<=l;m++) {
+							dp[i%2][j][k][l]+=dp[(i-1)%2][j-m*a[i]][k-m*c[i]][l-m*p[i]];
+						}
+					}
+				}
+			}
+		}
+		for(int j=0;j<=s;j++) {
+			for(int k=0;k<=11*s;k++) {
+				for(int l=0;l<=11*s;l++) {
+					if(l>k)
+						ans+=dp[n%2][j][k][l];
+				}
+			}
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

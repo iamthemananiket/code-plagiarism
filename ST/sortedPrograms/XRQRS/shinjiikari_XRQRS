@@ -1,0 +1,228 @@
+#include <cstdio>
+#include <map>
+#include <vector>
+#include <malloc.h>
+#include <cstring>
+using namespace std;
+
+inline int fast_input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void fast_output(int x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+struct node
+{
+    int first, last, count;
+    node*left;
+    node*right;
+    node*parent;
+};
+
+inline int check(node a, int x)
+{
+    //fast_output(a.first);
+    //fast_output(a.last);
+    //putchar('\n');
+    if (a.first==a.last)
+    {
+        if (a.first<=x) return a.count;
+        else return 0;
+    }
+    if (a.last<=x) return a.count;
+    if (a.left->last<=x)
+        return (a.left->count+check(*a.right,x));
+    if (a.left->last>x)
+        return check(*a.left,x);
+}
+
+int main()
+{
+int i,j,m,l,r,k,x,q,size=1,maxsize=0,cnt;
+node* root[500005];
+node curr,prev;
+char a[21];
+root[0]=(node *)malloc((2*524288-1)*sizeof(node));
+root[0][1].count=0;
+root[0][1].first=0;
+root[0][1].last=524287;
+root[0][1].left=&root[0][2];
+root[0][1].right=&root[0][3];
+k=1;
+for(i=1;i<=19;i++)
+{
+    k=2*k;
+    for(j=0;j<k;j++)
+    {
+        root[0][k+j].count=0;
+        if (j%2==0)
+        {
+        root[0][k+j].first=root[0][(k+j)/2].first;
+        root[0][k+j].last=(root[0][(k+j)/2].last-root[0][(k+j)/2].first+1)/2-1+root[0][(k+j)/2].first;
+        }
+        else
+        {
+        root[0][k+j].first=(root[0][(k+j)/2].last-root[0][(k+j)/2].first+1)/2+root[0][(k+j)/2].first;
+        root[0][k+j].last=root[0][(k+j)/2].last;
+        }
+        root[0][k+j].left=&root[0][2*(k+j)];
+        root[0][k+j].right=&root[0][2*(k+j)+1];
+        root[0][k+j].parent=&root[0][(k+j)/2];
+    }
+}
+m=fast_input();
+for(j=0;j<m;j++)
+{
+    q=fast_input();
+    if (q==0)
+    {
+        x=fast_input();
+        if (size>maxsize) root[size]=(node *)malloc((21)*sizeof(node));
+        else
+        {
+            free(root[size]);
+            root[size]=(node *)malloc((21)*sizeof(node));
+        }
+        curr=root[size-1][1];
+        for(i=1;i<=20;i++)
+        {
+            root[size][i].count=curr.count+1;
+            root[size][i].first=curr.first;
+            root[size][i].last=curr.last;
+            if (curr.first!=curr.last)
+            {
+                if (x>curr.left->last)
+                {
+                    root[size][i].left=curr.left;
+                    root[size][i].right=&root[size][i+1];
+                    curr=*curr.right;
+                }
+                else
+                {
+                    root[size][i].left=&root[size][i+1];
+                    root[size][i].right=curr.right;
+                    curr=*curr.left;
+                }
+            }
+            if (i!=1) root[size][i].parent=&root[size][i-1];
+        }
+        if (size>maxsize) maxsize=size;
+        size++;
+    }
+    if (q==1)
+    {
+        l=fast_input();
+        r=fast_input();
+        x=fast_input();
+        for(i=1;i<=19;i++)
+        {
+            if (x%2) a[19-i]='1';
+            else a[19-i]='0';
+            x/=2;
+        }
+        a[19]='\0';
+        prev=root[l-1][1];
+        curr=root[r][1];
+        for(i=0;curr.first!=curr.last;i++)
+        {
+            if (a[i]=='0')
+            {
+                if (curr.right->count-prev.right->count>0)
+                {
+                    curr=*curr.right;
+                    prev=*prev.right;
+                }
+                else
+                {
+                    curr=*curr.left;
+                    prev=*prev.left;
+                }
+            }
+            if (a[i]=='1')
+            {
+                if (curr.left->count-prev.left->count>0)
+                {
+                    curr=*curr.left;
+                    prev=*prev.left;
+                }
+                else
+                {
+                    curr=*curr.right;
+                    prev=*prev.right;
+                }
+            }
+        }
+        fast_output(curr.first);
+    }
+    if (q==2)
+    {
+        k=fast_input();
+        size-=k;
+    }
+    if (q==3)
+    {
+        l=fast_input();
+        r=fast_input();
+        x=fast_input();
+        fast_output(check(root[r][1],x)-check(root[l-1][1],x));
+    }
+    if (q==4)
+    {
+        l=fast_input();
+        r=fast_input();
+        k=fast_input();
+        curr=root[r][1];
+        prev=root[l-1][1];
+        while(curr.first!=curr.last)
+        {
+            cnt=curr.left->count-prev.left->count;
+            if (cnt>=k)
+            {
+                curr=*curr.left;
+                prev=*prev.left;
+            }
+            else
+            {
+                k-=cnt;
+                curr=*curr.right;
+                prev=*prev.right;
+            }
+        }
+        fast_output(curr.first);
+    }
+}
+return 0;
+}

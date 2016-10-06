@@ -1,0 +1,183 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+#define sc(x) scanf("%d",&x)
+#define sc2(x,y) scanf("%d%d",&x,&y)
+#define sc3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define scl(x) scanf("%lld",&x)
+#define scl2(x,y) scanf("%lld%lld",&x,&y)
+#define scl3(x,y,z) scanf("%lld%lld%lld",&x,&y,&z)
+#define scstr(x) scanf("%s",x)
+#define pd(x) printf("%d",x)
+#define pstr(x) printf("%s",x)
+#define newl() printf("\n")
+#define fl(i,n) for (i=0;i<n;i++)
+#define fle(i,n) for (i=1;i<=n;i++)
+#define fla(i,a,n) for (i=a;i<n;i++)
+#define mem(a,i) memset(a,i,sizeof(a))
+#define fi first
+#define se second
+typedef pair<int,int> pii;
+typedef pair<int,pair<int,int> > piii ;
+typedef pair<ll,ll> pll;
+typedef pair<ll,int> pli;
+#define gcd __gcd
+#define wl(n) while (n--)
+#define debug(x) cout<<"debug->"<<#x<<"::"<<x<<endl
+#define debug2(x,y) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\n"
+#define debug3(x,y,z) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\t"<<#z<<" :: "<<z<<"\n"
+#define tr(container, it)  for(typeof(container.begin()) it = container.begin(); it != container.end(); it++) 
+#define all(v) v.begin(),v.end()
+const double eps=0.000000000000001 ;
+#define MOD 1000000007
+typedef long double LF;
+typedef double lF;
+//-------------
+int A[100010];
+int n,m;
+struct query
+{
+	int x,y,ind;
+};
+int B[10010]={0};
+query qq[10010];
+ll bit[2][10010];
+ll que(int id,int x)
+{
+	ll ret=0;
+	while (x>0)
+	{
+		ret+=bit[id][x];
+		x-=(x&-x);
+	}
+	return ret;
+}
+void upd(int id,int x,ll val)
+{
+	while (x<=n)
+	{
+		bit[id][x]+=val;
+		x+=(x&-x);
+	}
+
+}
+bool cmp(query a,query b);
+int sqn;
+ll gans[10010];
+ll ans=0;
+int hs[10010];
+void rem(int x)
+{
+	hs[x]--;
+	if (hs[x]==0)
+	{
+		ll lol=que(0,x-1);
+		ans-=(lol+1)*B[x];
+		//if (x<n)
+		ans-=que(1,n)-que(1,x);
+		upd(0,x,-1);
+		upd(1,x,-B[x]);
+	}
+}
+void add(int x)
+{
+	hs[x]++;
+	if (hs[x]==1)
+	{
+		ll lol=que(0,x-1);
+		ans+=(lol+1)*B[x];
+		ans+=que(1,n)-que(1,x);
+		upd(0,x,1);
+		upd(1,x,B[x]);
+	}
+}
+int main()
+{
+	int t;sc(t);
+	wl(t)
+	{
+		int i,j;
+		sc(n);
+		for (i=0;i<=n;i++)
+		{	hs[i]=0;
+			bit[0][i]=bit[1][i]=0;
+			B[i]=0;
+		}
+		sqn=1.5*sqrtl(n);
+		map<int,int>ma;
+		map<int,int>::iterator it=ma.begin();
+		for(i=1;i<=n;i++)
+		{
+			sc(A[i]);
+			ma[A[i]];
+		}
+		sc(m);
+		for (i=0;i<m;i++)
+		{
+			sc2(qq[i].x,qq[i].y);
+			qq[i].ind=i;
+		}int cc=0;
+		it=ma.begin();
+		while (it!=ma.end())
+		{
+			it->se=++cc;
+			B[cc]=it->fi;
+			it++;
+		}
+		for (i=1;i<=n;i++)
+		{
+			A[i]=ma[A[i]];
+			//printf("%d-> ",A[i]);
+		}
+		//debug(n);
+		sort(qq,qq+m,cmp);
+		int l=1,r=1;ans=0;
+		add(A[1]);
+		for (i=0;i<m;i++)
+		{
+			// ... // ... /// ... 
+			int lx=qq[i].x,rx=qq[i].y;
+			
+			while (l>lx)
+			{
+				l--;
+				add(A[l]);
+			}
+			while (r<rx)
+			{
+				r++;
+				add(A[r]);
+			}
+			while (l<lx)
+			{
+				rem(A[l]);
+				l++;
+
+			}
+			while (r>rx)
+			{
+				rem(A[r]);
+				r--;
+			}
+			gans[qq[i].ind]=ans;
+
+		}
+		for (i=0;i<m;i++)
+			printf("%lld\n",gans[i]);
+	}		
+
+
+	return 0;
+
+}
+bool cmp(query a,query b)
+{
+	if (a.x/sqn==b.x/sqn)
+		return a.y<b.y;
+	return a.x/sqn<b.x/sqn;
+}

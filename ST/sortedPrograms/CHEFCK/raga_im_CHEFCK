@@ -1,0 +1,76 @@
+#include<iostream>
+#include<stdio.h>
+#include <string>
+#include <stdlib.h>
+#include<cmath>
+#include <math.h>
+using namespace std;
+const int  md= 1000000007;
+ int A[10000001],B[10000001],LR[10000001],RL[10000001];
+int main(){
+A[0]=0;
+long long int N,K,Q,a, b, c, d, e, f, r, s, t, m,p,p1, L1, La, Lc, Lm, D1, Da, Dc, Dm,mini,L,R,p2;
+long long int sum,product;
+sum=0;
+product=1;
+//cin>>N>>K>>Q;
+scanf("%lld %lld %lld",&N,&K,&Q);
+//cin>>a>>b>>c>>d>>e>>f>>r>>s>>t>>m>>A[1];
+scanf("%lld %lld %lld %lld %lld %lld %lld %lld %lld %lld  %d",&a,&b,&c,&d,&e,&f,&r,&s,&t,&m,&A[1]);
+//cout<<"cin completed"<<endl;
+p=t;
+for(int x=2;x<=N;x++)
+{
+
+
+      p=((p%s)*(t%s))%s;
+
+
+
+    p=p%s;
+    p2=A[x-1]%m;
+    p1=A[x-1]%m*A[x-1]%m;
+    if(  p<= r)        // Here t^x signifies "t to the power of x"
+		A[x] = (((a)*p1)%m + ((b)*p2)%m + c%m)% m;
+     else
+		A[x] = (((d)*p1)%m + ((e)*p2)%m + f%m)%m;
+		//cout<<A[x]<<endl;
+
+}
+
+  for(int i = 1; i <= N; i++){ // for maximum Left to Right
+        if(i % K == 1) // that means START of a block
+            LR[i] = A[i];
+        else
+            LR[i] = min(LR[i - 1], A[i]);
+    }
+     for(int i = N; i >= 1; i--){ // for maximum Right to Left
+        if(i == N) // Maybe the last block is not of size 'W'.
+            RL[i] = A[i];
+        else if(i %K == 0) // that means END of a block
+            RL[i] = A[i];
+        else
+            RL[i] = min(RL[i+1], A[i]);
+    }
+     for(int i = 1; i <= N-K+1; i++)    // maximum
+        {
+            B[i] = min(RL[i], LR[i + K - 1]);
+            //cout<<B[i]<<" "<<endl;
+        }
+//cin>>L1>>La>>Lc>>Lm>>D1>>Da>>Dc>>Dm;
+scanf("%lld %lld %lld %lld %lld %lld %lld %lld ",&L1,&La,&Lc,&Lm,&D1,&Da,&Dc,&Dm);
+while(Q--){
+	L1 = ((La %Lm)* L1%Lm + Lc%Lm)%Lm;
+	D1 = ((Da%Dm) * (D1%Dm) + Dc%Dm)%Dm;
+	L = L1 + 1;
+	R = min(L + K - 1 + D1, N);
+	//cout<<L<<R<<endl;
+	 mini=min(B[L],B[R-K+1]);
+     sum=sum+mini;
+     product=((product%md)*(mini%md))%md;
+
+}
+//cout<<sum<<" "<<product<<endl;
+
+printf("%lld %lld ",sum,product);
+}

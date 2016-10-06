@@ -1,0 +1,49 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll arr[2001];
+int main()
+{
+	ll t,x,x1,x2,v1,v2;
+	scanf("%lld",&t);
+	while(t--)
+	{
+		scanf("%lld %lld %lld %lld",&x1,&x2,&v1,&v2);
+		if(x1==x2)
+		{
+			cout<<"("<<x1<<","<<0<<")"<<endl;
+			continue;
+		}
+		if(x2>x1)
+		{
+			if((v1-v2)<=0)
+			{
+				printf("not possible\n");
+				continue;
+			}
+			else
+			{
+				ll t=(x2-x1)/(v1-v2);
+				x=x1+t*v1;
+				cout<<"("<<x<<","<<0<<")"<<endl;
+				continue;
+			}
+		}
+		else
+		{
+			if((v1-v2)<=0)
+			{
+				printf("not possible\n");
+				continue;
+			}
+			else
+			{
+				ll t=(x1-x2)/(v1-v2);
+				x=x1-t*v1;
+				cout<<"("<<x<<","<<0<<")"<<endl;
+				continue;
+			}
+		}
+	}
+	return 0;
+}

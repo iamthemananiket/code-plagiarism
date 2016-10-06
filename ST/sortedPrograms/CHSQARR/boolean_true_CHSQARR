@@ -1,0 +1,82 @@
+#include<bits/stdc++.h>
+#define N 1009
+#define LIM 100000
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+ll mat[N][N];
+ll dp[N][N];
+int table[N][N][11][11];
+int n,m;
+void build_sparse_table_2D()
+{
+    for(int i=1;i<=n;i++)
+    {
+        for(int j=1;j<=m;j++)
+            table[i][j][0][0]=mat[i][j];
+    }
+    for(int k=1;(1<<k)<=n;k++)
+    {
+        for(int i=1;i+(1<<k)-1<=n;i++)
+        {
+            for(int j=1;j<=m;j++)
+                table[i][j][k][0]=max(table[i][j][k-1][0],table[i+(1<<(k-1))][j][k-1][0]);
+        }
+    }
+    for(int k=0;(1<<k)<=n;k++)
+    {
+        for(int i=1;i+(1<<k)-1<=n;i++)
+        {
+            for(int l=1;(1<<l)<=m;l++)
+            {
+                for(int j=1;j+(1<<l)-1<=m;j++)
+                {
+                    if(table[i][j][k][l-1]>=table[i][j+(1<<(l-1))][k][l-1])
+                        table[i][j][k][l]=table[i][j][k][l-1];
+                    else
+                        table[i][j][k][l]=table[i][j+(1<<(l-1))][k][l-1];
+                }
+            }
+        }
+    }
+}
+int main()
+{
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=n;i++)
+    {
+        for(int j=1;j<=m;j++)
+            scanf("%lld",&mat[i][j]);
+    }
+    build_sparse_table_2D();
+    for(int i=1;i<=n;i++)
+    {
+        for(int j=1;j<=m;j++)
+        {
+            dp[i][j]=LIM-mat[i][j]+dp[i-1][j]+dp[i][j-1]-dp[i-1][j-1];
+        }
+    }
+    int q;
+    scanf("%d",&q);
+    while(q--)
+    {
+        ll a,b;
+        scanf("%lld%lld",&a,&b);
+        int k1=(int)log2(a);
+        int k2=(int)log2(b);
+        ll ab=a*b;
+        ll ans=LONG_LONG_MAX;
+        for(int i=1;i+a-1<=n;i++)
+        {
+            for(int j=1;j+b-1<=m;j++)
+            {
+                ll tmp=dp[i+a-1][j+b-1]-dp[i+a-1][j-1]-dp[i-1][j+b-1]+dp[i-1][j-1];
+                int maxm=max(max(table[i][j][k1][k2],table[i][j+b-(1<<k2)][k1][k2]),max(table[i+a-(1<<k1)][j][k1][k2],table[i+a-(1<<k1)][j+b-(1<<k2)][k1][k2]));
+                tmp-=ab*(LIM-maxm);
+                ans=min(ans,tmp);
+            }
+        }
+        printf("%lld\n",ans);
+    }
+}
+

@@ -1,0 +1,170 @@
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 100500;
+
+struct Point {
+	ll x, y;
+	Point() {}
+	Point(ll x, ll y) : x(x), y(y) {}
+
+	bool operator < (Point T) const {
+		if (x == T.x) return y < T.y;
+		return x < T.x;
+	}
+	bool operator == (Point T) {
+		return (x == T.x && y == T.y);
+	}
+	bool operator > (Point T) const {
+		return (x > T.x || (x == T.x && y > T.y));
+	}
+}a[N], P, Start;
+
+inline ll CrossProd(Point A, Point B) {
+	return A.x * B.y - A.y * B.x;
+}
+
+inline ll GetLength(Point A, Point B) {
+	return (A.x - B.x) * (A.x - B.x) + (A.y - B.y) * (A.y - B.y);
+}
+
+inline bool cmp(Point A, Point B) {
+	Point t1 = Point(A.x - Start.x, A.y - Start.y);
+	Point t2 = Point(B.x - Start.x, B.y - Start.y);
+	if (CrossProd(t1, t2) == 0) {
+		return GetLength(A, Start) < GetLength(B, Start);
+	}
+	return CrossProd(t1, t2) < 0;
+}
+
+int n = 0, q[N], h = 0;
+
+inline void add() {
+	if (n == 0) {
+		a[++n] = P;
+		Start = P;
+		return;
+	}
+	if (P < Start) {
+		Start = P;
+		a[++n] = P;
+		sort(a + 1, a + 1 + n, &cmp);
+		return;
+	}
+	int id = n + 1;
+	for (int i = 2; i <= n; ++ i) {
+		if (cmp(P, a[i])) {
+			id = i;
+			break;
+		}
+	}
+	for (int i = n + 1; i > id; -- i) swap(a[i], a[i - 1]);
+	a[id] = P;
+	++n;
+}
+
+inline void del() {
+	int id = -1;
+	for (int i = 1; i <= n; ++ i) {
+		if (a[i] == P) {
+			id = i;
+			break;
+		}
+	}
+	if (id == -1) return;
+	
+	for (int i = id; i < n; ++ i) swap(a[i], a[i + 1]);
+	--n;
+	if (id == 1) {
+		Start = Point(inf, inf);
+		for (int i = 1; i <= n; ++ i) {
+			if (Start > a[i]) Start = a[i];
+		}
+		sort(a + 1, a + 1 + n, &cmp);
+	}
+}
+
+inline void Compute() {
+	h = 0;
+	for (int i = 1; i <= n; ++ i) {
+		while (h >= 2) {
+			int t1 = q[h];
+			int t2 = q[h - 1];
+			Point n1 = Point(a[t1].x - a[t2].x, a[t1].y - a[t2].y);
+			Point n2 = Point(a[i].x - a[t2].x, a[i].y - a[t2].y);
+			if (CrossProd(n1, n2) >= 0) --h;
+			else break;
+		}
+		q[++h] = i;
+	}
+	
+	double area = 0;
+
+	for (int i = 1; i <= h; ++ i) {
+		int j = i + 1;
+		if (j > h) j = 1;
+		area += (a[q[j]].x - a[q[i]].x) * (a[q[j]].y + a[q[i]].y);
+	}
+	area /= 2.0;
+	area = fabs(area);
+	cout.precision(1);
+	cout << fixed;
+	cout << area << endl;
+}
+
+inline void solve() {
+	n = 0;
+	int Query;
+	cin >> Query;
+	while (Query--) {
+		char ch;
+		cin >> ch >> P.x >> P.y;
+		if (ch == '+') {
+			add();
+		}
+		else del();
+		Compute();
+	}
+}
+
+int main() {
+	#ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+	#endif
+
+	ios_base::sync_with_stdio(0);
+	cin.tie(0);
+
+	int test;
+
+	cin >> test;
+	while(test--) solve();
+    
+    return 0;
+}

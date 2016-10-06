@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+int st[18][100005];
+int sz[100005];
+
+int main() {
+
+	int n, m, x, y;
+
+	// clock_t ts = clock();
+	scanf("%d", &n);
+	for(int i =0; i< n; i++) {
+		scanf("%d", &st[0][i]);
+	}
+	int b = log2(n) + 1;
+	for(int i = 1; i<b; i++) {
+		int bb = n - (1 << i), b2 = (1 << (i-1));
+		for(int j = 0; j <= bb; j++) {
+			st[i][j] = max(st[i-1][j], st[i-1][j+b2]);
+		}
+	}
+	// printf("Time : %lf\n", (double)(clock()-ts)/CLOCKS_PER_SEC);
+	scanf("%d%d%d", &m, &x, &y);
+	long long sum = 0;
+	int k, l, r;
+	k = 2;
+	while(k < n) {
+		sz[k] = 1;
+		k <<= 1;
+	}
+	for(int j = 3; j<n; j++)
+		sz[j] += sz[j-1];
+	while(m--) {
+		if(x < y)
+			l = x, r = y;
+		else
+			l = y, r = x;
+		k = sz[r-l+1];
+		int a = st[k][l], b = st[k][r-(1 << k)+1];
+		int rmq =((a >= b) ? a : b);
+		sum += rmq;
+		x = (x + 7) % (n-1);
+		y = (y + 11) % n;
+	}
+	printf("%lld\n", sum);
+	// printf("Time : %lf\n", (double)(clock()-ts)/CLOCKS_PER_SEC);
+	return 0;
+}

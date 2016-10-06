@@ -1,0 +1,102 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <bitset>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define travel(x) for(edge *p=fir[x]; p; p=p->n)
+#define all(x) (x).begin,(x).end
+#define pb push_back
+#define fi first
+#define se second
+#define l(x) Left[x]
+#define r(x) Right[x]
+#define lowbit(x) (x&-x)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> Pii;
+typedef pair<ll,int> Pli;
+typedef long double ld;
+typedef unsigned long long ull;
+
+inline int read()
+{
+    int x=0; bool f=0; char ch=getchar();
+    while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+    while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+    return f?-x:x;
+}
+
+#define maxn 2000009
+
+int n, m, k[29][29], tot, cnt, c[maxn]; ll K; Pli L[maxn], R[maxn]; Pii tmp[maxn]; char s[60];
+
+inline ll jub(ll x)
+{
+	ll A=0; int now=cnt;
+	rep(i, 1, tot)
+	{
+		while (now && L[i].fi+R[now].fi>=x) now--;
+		A+=now;
+	}
+	return A;
+}
+
+int main()
+{
+	n=read(), m=read(); scanf("%lld", &K);
+	rep(i, 1, m) rep(j, 1, n) k[i][j]=read();
+	
+	L[tot=1]=Pii(0,0);
+	rep(o, 1, m/2) dow(i, tot, 1) 
+	{
+		dow(j, n, 2) L[++tot]=L[i], L[tot].fi-=k[o][j], L[tot].se=L[tot].se*16+j-1;
+		L[i].fi-=k[o][1], L[i].se=L[i].se*16;
+	}
+	sort(L+1, L+1+tot);
+	
+	R[cnt=1]=Pii(0,0);
+	rep(o, m/2+1, m) dow(i, cnt, 1)
+	{
+		dow(j, n, 2) R[++cnt]=R[i], R[cnt].fi-=k[o][j], R[cnt].se=R[cnt].se*16+j-1;
+		R[i].fi-=k[o][1], R[i].se=R[i].se*16;
+	}
+	sort(R+1, R+1+cnt);
+	
+	ll l=-1LL*1e5*1e5, r=0; while (l<r)
+	{
+		ll mid=(l+r)>>1;
+		if (jub(mid+1)<K) l=mid+1; else r=mid;
+	}
+	
+	ll Ans=l; K-=jub(Ans);
+	
+	rep(i, 1, cnt) if (i==1 || R[i].fi!=R[i-1].fi) c[i]=1; else c[i]=c[i-1]+1;
+	
+	int now=cnt; cnt=0;
+	rep(i, 1, tot)
+	{
+		while (now && L[i].fi+R[now].fi>Ans) now--;
+		if (L[i].fi+R[now].fi!=Ans) continue;
+		tmp[++cnt]=Pii(L[i].se,now);
+	}
+	sort(tmp+1, tmp+1+cnt);
+	int x; rep(i, 1, cnt) if (K>c[tmp[i].se]) K-=c[tmp[i].se]; else
+	{
+		x=R[tmp[i].se-c[tmp[i].se]+K].se;
+		dow(o, m, m/2+1) s[o-1]=x%16+'a', x/=16;
+		x=tmp[i].fi;
+		dow(o, m/2, 1) s[o-1]=x%16+'a', x/=16;
+		break;
+	}
+	
+	printf("%s\n", s);
+	
+	
+    return 0;
+}

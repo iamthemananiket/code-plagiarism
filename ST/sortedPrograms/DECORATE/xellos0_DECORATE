@@ -1,0 +1,207 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+#define uint unsigned int
+// mylittlepony
+using namespace std;
+
+struct Bigint {
+	vector<int> C;
+
+	Bigint(int a) {
+		while(a > 0) {
+			C.push_back(a%10);
+			a /=10;}
+		}
+	Bigint() {}
+
+	void print() {
+		while(C.size() > 1 && *C.rbegin() == 0) C.pop_back();
+		for(auto it =C.rbegin(); it != C.rend(); it++) cout << *it;
+		cout << "\n";}
+	};
+
+Bigint operator+(Bigint A, Bigint B) {
+	Bigint ret;
+	ret.C.resize(max(A.C.size(),B.C.size()),0);
+	for(uint i =0; i < A.C.size(); i++) ret.C[i] +=A.C[i];
+	for(uint i =0; i < B.C.size(); i++) ret.C[i] +=B.C[i];
+	for(uint i =0; i < ret.C.size(); i++) if(ret.C[i] >= 10) {
+		if(i == ret.C.size()-1) ret.C.push_back(0);
+		ret.C[i+1] +=ret.C[i]/10;
+		ret.C[i] %=10;}
+	return ret;}
+
+Bigint operator-(Bigint A, Bigint B) {
+	Bigint ret;
+	ret.C.resize(max(A.C.size(),B.C.size()),0);
+	for(uint i =0; i < A.C.size(); i++) ret.C[i] +=A.C[i];
+	for(uint i =0; i < B.C.size(); i++) ret.C[i] -=B.C[i];
+	for(uint i =0; i < ret.C.size(); i++) {
+		if(ret.C[i] >= 10) {
+			if(i == ret.C.size()-1) ret.C.push_back(0);
+			ret.C[i+1] +=ret.C[i]/10;
+			ret.C[i] %=10;}
+		if(ret.C[i] < 0) {
+			if(i == ret.C.size()-1) ret.C.push_back(0);
+			ret.C[i+1] -=(-ret.C[i])/10;
+			ret.C[i] +=((-ret.C[i])/10)*10;
+			while(ret.C[i] < 0) {
+				ret.C[i+1]--;
+				ret.C[i] +=10;}}
+		}
+	return ret;}
+
+Bigint operator*(int A, Bigint B) {
+	Bigint ret =B;
+	for(uint i =0; i < B.C.size(); i++) ret.C[i] *=A;
+	for(uint i =0; i < ret.C.size(); i++) if(ret.C[i] >= 10) {
+		if(i == ret.C.size()-1) ret.C.push_back(0);
+		ret.C[i+1] +=ret.C[i]/10;
+		ret.C[i] %=10;}
+	return ret;}
+
+Bigint operator*(Bigint A, Bigint B) {
+	Bigint ret;
+	ret.C.resize(A.C.size()+B.C.size(),0);
+	for(uint i =0; i < A.C.size(); i++) for(uint j =0; j < B.C.size(); j++)
+		ret.C[i+j] +=A.C[i]*B.C[j];
+	for(uint i =0; i < ret.C.size(); i++) if(ret.C[i] >= 10) {
+		if(i == ret.C.size()-1) ret.C.push_back(0);
+		ret.C[i+1] +=ret.C[i]/10;
+		ret.C[i] %=10;}
+	return ret;}
+
+Bigint bigfastultrapow(Bigint B, int e) {
+	if(e <= 0) return Bigint(1);
+	Bigint b =bigfastultrapow(B,e/2);
+	b =b*b;
+	if(e%2 != 0) b =B*b;
+	return b;}
+
+// delenie
+Bigint operator/(Bigint B, int D) {
+	Bigint ret;
+	ret.C.resize(B.C.size(),0);
+	int a =0;
+	for(int i =B.C.size()-1; i >= 0; i--) {
+		a =10*a+B.C[i];
+		if(a >= D) {
+			int q =a/D;
+			for(uint j =i; j < ret.C.size(); j++) {
+				ret.C[j] +=q%10;
+				q /=10;
+				if(q == 0) break;}}
+		a %=D;}
+	for(uint i =0; i < ret.C.size(); i++) if(ret.C[i] >= 10) {
+		if(i == ret.C.size()-1) ret.C.push_back(0);
+		ret.C[i+1] +=ret.C[i]/10;
+		ret.C[i] %=10;}
+	return ret;}
+
+int tot(int n) {
+	int ans =1;
+	for(int i =2; i <= n; i++) if(n%i == 0) {
+		int x =0;
+		while(n%i == 0) {n /=i; x++;}
+		for(int j =0; j < x-1; j++) ans *=i;
+		ans *=(i-1);}
+	return ans;}
+
+int main() {
+	cin.sync_with_stdio(0);
+	string T;
+	cin >> T;
+	int N =T.length();
+
+	// palindromy
+	set< pair<long long,long long> > palin;
+
+	long long p =999983;
+	long long mod[] ={1000000007,1000000009};
+	vector<long long> H[2];
+	H[0].resize(N+1,0); H[1].resize(N+1,0);
+	vector<long long> Hr[2];
+	Hr[0].resize(N+1,0); Hr[1].resize(N+1,0);
+	vector<long long> powP[2];
+	powP[0].resize(N+1,1); powP[1].resize(N+1,1);
+	for(int k =0; k < 2; k++) {
+		for(int i =0; i < N; i++) {
+			H[k][i+1] =(H[k][i]*p+T[i]-'a'+1)%mod[k];}
+		for(int i =N-1; i >= 0; i--) {
+			Hr[k][i] =(Hr[k][i+1]*p+T[i]-'a'+1)%mod[k];}
+		for(int i =0; i < N; i++) {
+			powP[k][i+1] =(powP[k][i]*p)%mod[k];}
+		}
+
+	for(int i =0; i < N; i++) {
+		int a =1, b =min(i+1,N-i)+1;
+		while(b-a > 1) {
+			int c =(b+a)/2;
+			if((H[0][i+c]-H[0][i]*powP[0][c]-Hr[0][i-c+1]+Hr[0][i+1]*powP[0][c])%mod[0] == 0 &&
+				(H[1][i+c]-H[1][i]*powP[1][c]-Hr[1][i-c+1]+Hr[1][i+1]*powP[1][c])%mod[1] == 0)
+				a =c;
+			else b =c;}
+		for(int j =a; j > 0; j--) {
+			long long h1 =(H[0][i+j]-H[0][i-j+1]*powP[0][2*j-1])%mod[0];
+			if(h1 < 0) h1 +=mod[0];
+			long long h2 =(H[1][i+j]-H[1][i-j+1]*powP[1][2*j-1])%mod[1];
+			if(h2 < 0) h2 +=mod[1];
+			if(palin.find(make_pair(h1,h2)) == palin.end())
+				palin.insert(make_pair(h1,h2));
+			else break;}
+		}
+	for(int i =0; i < N; i++) {
+		int a =0, b =min(i,N-i)+1;
+		while(b-a > 1) {
+			int c =(b+a)/2;
+			if((H[0][i+c]-H[0][i]*powP[0][c]-Hr[0][i-c]+Hr[0][i]*powP[0][c])%mod[0] == 0 &&
+				(H[1][i+c]-H[1][i]*powP[1][c]-Hr[1][i-c]+Hr[1][i]*powP[1][c])%mod[1] == 0)
+				a =c;
+			else b =c;}
+		for(int j =a; j > 0; j--) {
+			long long h1 =(H[0][i+j]-H[0][i-j]*powP[0][2*j])%mod[0];
+			if(h1 < 0) h1 +=mod[0];
+			long long h2 =(H[1][i+j]-H[1][i-j]*powP[1][2*j])%mod[1];
+			if(h2 < 0) h2 +=mod[1];
+			if(palin.find(make_pair(h1,h2)) == palin.end())
+				palin.insert(make_pair(h1,h2));
+			else break;}
+		}
+
+	int K =palin.size();
+	cin >> N;
+	Bigint ans(0);
+	Bigint k(K);
+	for(int i =1; i <= N; i++) if(N%i == 0) {
+		Bigint q =bigfastultrapow(k,N/i);
+		ans =ans+tot(i)*q;}
+	ans =ans/N;
+	if(N%2 == 0) ans =ans+((k*(k+Bigint(1)))/2)*bigfastultrapow(k,N/2-1);
+	else ans =ans+bigfastultrapow(k,N/2+1);
+	ans =ans/2;
+	ans.print();
+	return 0;}
+
+// look at my code
+// my code is amazing

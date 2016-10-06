@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+ 
+using namespace std;
+#define int long long
+const int MAXN = 1e5+3;
+ 
+vector< int > FIRST;
+int adj[MAXN];
+vector<int> leaves;
+int cost[33][33];
+ 
+pair<int,int> ran[MAXN];
+bool vis[MAXN];
+int parent[MAXN];
+ 
+void DFS(int s) {
+	vis[s]=true;
+	if(s==1) {
+		for(int i=0;i<FIRST.size();i++) {
+			int vert=FIRST[i];
+			if(!vis[vert])
+				DFS(vert);
+		}
+	}
+	else {
+		int vert=adj[s];
+		if(vert!=-1&&!vis[vert])
+			DFS(vert);
+		if(vert==-1)
+			leaves.push_back(s);
+	}	
+}
+#undef int
+int main() {
+	#define int long long
+	int n,m,i,j,k;
+	scanf("%lld%lld",&n,&m);
+	FIRST.clear();
+	leaves.clear();
+	for(int i=1;i<=n;i++)
+		vis[i]=false,adj[i]=-1;
+	for(int i=0;i<m;i++) {
+		int a,b,c,d;
+		scanf("%lld%lld%lld%lld",&a,&b,&c,&d);
+		if(a==1)
+			FIRST.push_back(b);
+		else
+			adj[a]=b;
+		parent[b]=a;
+		ran[b]=make_pair(c,d);
+ 
+	}	
+	DFS(1);
+	if(leaves.empty())
+		cout<<"0\n";
+	else {
+		for(i=1;i<=32;i++) {
+			for(j=i;j<=32;j++) {
+				int mini=100000000;
+				for(k=0;k<leaves.size();k++) {
+					int lf=leaves[k];
+					int temp=0;
+					while(lf!=1) {
+						if(i<ran[lf].first)
+							temp+=abs(i-ran[lf].first);
+						if(j>ran[lf].second)
+							temp+=abs(ran[lf].second-j);
+						lf=parent[lf];
+					}
+					mini=min(mini,temp);
+				}
+				cost[i][j]=mini;
+				//cout<<i<<" "<<j<<" "<<cost[i][j]<<endl;
+			}
+		}
+		vector<int> best(33,100000000);
+		best[0]=0;
+		for(i=1;i<=32;i++) {
+			for(j=0;j<i;j++)
+				best[i]=min(best[i],best[j]+cost[j+1][i]);
+		}
+		cout<<best[32]<<"\n";
+	}
+	return 0;
+}

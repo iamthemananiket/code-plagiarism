@@ -1,0 +1,60 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y123
+#define y1 y1234
+#define ll long long
+#define PI 3.1415926535897932384626433832795
+#define EPS 1e-9
+#define INF 2147483647
+
+ll gcd(ll a, ll b) { return (!b) ? a : gcd(b, a % b); }
+int lcm(int a, int b) { return a / gcd(a,b) * b; }
+
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%I64d", &n); return n; }
+
+const int N = 1e6;
+const int H = 4e6;
+const int MOD = 1e9 + 9;
+
+int a[N + 5], cnt[2 * H + 5];
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; ++tt) {
+		int n = nextInt();
+		for (int i = 0; i < n; ++i) {
+			a[i] = nextInt();
+			if (i > 0) {
+				a[i - 1] = a[i] - a[i - 1];
+			}
+		}
+		int res = 1;
+		for (int i = 0; i < n - 1; ++i) {
+			int minus = cnt[a[i] + H];
+			cnt[a[i] + H] = res;
+			res = (((2 * res) % MOD) - minus + MOD) % MOD;
+		}
+		for (int i = 0; i < n - 1; ++i) {
+			cnt[a[i] + H] = 0;
+		}
+		printf("%d\n", (res - 1 + MOD) % MOD);
+	}
+	return 0;
+}

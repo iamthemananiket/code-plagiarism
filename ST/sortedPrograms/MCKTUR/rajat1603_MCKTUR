@@ -1,0 +1,100 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 2e5 + 5;
+const int mod = 1e9 + 7;
+int add(int a , int b){
+    int res = a + b;
+    if(res >= mod){
+        return res - mod;
+    }
+    return res;
+}
+int mult(int a , int b){
+    long long res = a;
+    res *= b;
+    if(res >= mod){
+        return res % mod;
+    }
+    return res;
+}
+int power(int a , int b){
+    int res = 1;
+    while(b){
+        if(b & 1){
+            res = mult(res , a);
+        }
+        a = mult(a , a);
+        b >>= 1;
+    }
+    return res;
+}
+int fact[N + N];
+int ifact[N + N];
+void pre(){
+    fact[0] = 1;
+    for(int i = 1 ; i < N + N ; ++i){
+        fact[i] = mult(fact[i - 1] , i);
+    }
+    ifact[N + N - 1] = power(fact[N + N - 1] , mod - 2);
+    for(int i = N + N - 2 ; i >= 0 ; --i){
+        ifact[i] = mult(ifact[i + 1] , i + 1);
+    }
+}
+int catalantriangle(int n , int k){
+    if(k < 0){
+        return 0;
+    }
+    return mult(mult(fact[n + k] , n - k + 1) , mult(ifact[k] , ifact[n + 1]));
+}
+int getans(int n , int k){
+    //cout << n << " " << k << " " << catalantriangle(n - 2 >> 1 , (n - 2 >> 1) - k + 1) << endl;
+    return catalantriangle(n - 2 >> 1 , (n - 2 >> 1) - k + 1);
+}
+const int SN = 1 << 18;
+int n , q;
+int a[N];
+int b[N];
+int seg1[SN];
+int seg2[SN];
+void build(int l , int r , int node){
+    if(l == r){
+        seg1[node] = a[l];
+        seg2[node] = b[r];
+    }
+    else{
+        int mid = l + r >> 1;
+        build(l , mid , node + node);
+        build(mid + 1 , r , node + node + 1);
+        seg1[node] = max(seg1[node + node] , seg1[node + node + 1]);
+        seg2[node] = min(seg2[node + node] , seg2[node + node + 1]);
+    }
+}
+pair < int , int > query(int l , int r , int node , int ql , int qr){
+    if(l > qr || r < ql){
+        return {0 , N};
+    }
+    if(l >= ql && r <= qr){
+        return {seg1[node] , seg2[node]};
+    }
+    int mid = l + r >> 1;
+    auto it1 = query(l , mid , node + node , ql , qr);
+    auto it2 = query(mid + 1 , r , node + node + 1 , ql , qr);
+    return {max(it1.first , it2.first) , min(it1.second , it2.second)};
+}
+int main(){
+    pre();
+    scanf("%d %d" , &n , &q);
+    for(int i = 1 ; i <= n ; ++i){
+        scanf("%d" , a + i);
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        scanf("%d" , b + i);
+    }
+    build(1 , n , 1);
+    while(q--){
+        int l , r;
+        scanf("%d %d" , &l , &r);
+        auto it = query(1 , n , 1 , l , r);
+        printf("%d\n" , getans(it.first , it.second));
+    }
+}

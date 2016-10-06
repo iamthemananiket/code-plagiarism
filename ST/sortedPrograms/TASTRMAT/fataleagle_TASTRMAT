@@ -1,0 +1,179 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct FastComplex
+{
+    long double r, i;
+    inline FastComplex(long double a=0.0, long double b=0.0):
+        r(a),
+        i(b)
+    {
+        //
+    }
+    inline long double& real()
+    {
+        return r;
+    }
+    inline long double& imag()
+    {
+        return i;
+    }
+    inline FastComplex& operator+= (const FastComplex& other)
+    {
+        r+=other.r;
+        i+=other.i;
+        return *this;
+    }
+    inline FastComplex operator+ (const FastComplex& other) const
+    {
+        FastComplex tmp=*this;
+        tmp+=other;
+        return tmp;
+    }
+    inline FastComplex& operator-= (const FastComplex& other)
+    {
+        r-=other.r;
+        i-=other.i;
+        return *this;
+    }
+    inline FastComplex operator- (const FastComplex& other) const
+    {
+        FastComplex tmp=*this;
+        tmp-=other;
+        return tmp;
+    }
+    inline FastComplex& operator*= (const FastComplex& other)
+    {
+        long double nr=r*other.r-i*other.i;
+        long double ni=r*other.i+i*other.r;
+        r=nr;
+        i=ni;
+        return *this;
+    }
+    inline FastComplex operator* (const FastComplex& other) const
+    {
+        FastComplex tmp=*this;
+        tmp*=other;
+        return tmp;
+    }
+    inline FastComplex& operator/= (const double other)
+    {
+        r/=other;
+        i/=other;
+        return *this;
+    }
+    inline FastComplex operator/ (const double other) const
+    {
+        FastComplex tmp=*this;
+        tmp/=other;
+        return tmp;
+    }
+};
+
+typedef FastComplex complex_t;
+
+int lg2(int x)
+{
+    int ret=0;
+    while((1<<ret)<x)
+        ret++;
+    return ret;
+}
+
+void fft(int n, complex_t *A, int invert)
+{
+    int lgn=lg2(n);
+    for(int i=0; i<n; i++)
+    {
+        int x=0;
+        for(int j=0; j<lgn; j++)
+            x|=((i>>j)&1)<<(lgn-j-1);
+        if(i<x)
+            swap(A[i], A[x]);
+    }
+    static const long double PI=acos(-1.0);
+    static complex_t w[262144];
+    w[0].r=1;
+    w[0].i=0;
+    for(int len=2; len<=n; len*=2)
+    {
+        int hlen=len/2;
+        complex_t root;
+        root.r=cos(invert*2*PI/len);
+        root.i=sin(invert*2*PI/len);
+        for(int i=1; i<hlen; i++)
+            w[i]=w[i-1]*root;
+        for(int i=0; i<n; i+=len)
+            for(int j=0; j<hlen; j++)
+            {
+                complex_t u=A[i+j], v=A[i+j+hlen]*w[j];
+                A[i+j]=u+v;
+                A[i+j+hlen]=u-v;
+            }
+    }
+}
+
+void convolve(int n, long double *A, long double *B, long double *C)
+{
+    // for(int i = 0; i < n; i++) {
+    //     c[i] = 0;
+    //     for(int j = 0; j < n; j++)
+    //         c[i] += a[j] * b[(i - j + n) % n];
+    // }
+    static complex_t X[262144], Y[262144], Z[262144];
+    for(int i=0; i<n; i++)
+    {
+        X[i].r=A[i], X[i].i=0;
+        Y[i].r=B[i], Y[i].i=0;
+    }
+    fft(n, X, 1);
+    fft(n, Y, 1);
+    for(int i=0; i<n; i++)
+        Z[i]=X[i]*Y[i];
+    fft(n, Z, -1);
+    for(int i=0; i<n; i++)
+        C[i]=Z[i].r/n;
+}
+
+int N, M;
+char S[100001];
+char T[100001];
+long double A[262144];
+long double B[262144];
+long double C[262144];
+
+int main()
+{
+    scanf("%s", S);
+    N=strlen(S);
+    for(int i=0; i<N; i++)
+        if(S[i]=='0')
+            A[i]=-1.0;
+        else
+            A[i]=1.0;
+    int maxn=1;
+    while(maxn<=N)
+        maxn*=2;
+    int K;
+    scanf("%d", &K);
+    while(K--)
+    {
+        scanf("%s", T);
+        M=strlen(T);
+        reverse(T, T+M);
+        for(int i=0; i<M; i++)
+            if(T[i]=='0')
+                B[i]=-1.0;
+            else
+                B[i]=1.0;
+        for(int i=M; i<maxn; i++)
+            B[i]=0.0;
+        convolve(maxn, A, B, C);
+        long long ans=0;
+        for(int i=M-1; i<N; i++)
+            ans=(ans*100001+(long long)(M-roundl(C[i]))/2)%1000000007;
+        printf("%lld\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+typedef pair<pair<int, int>, pair<int, int>> P;
+#define X first
+#define Y second
+#define EPS 1e-10
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, n, a, b, c, g, f, ret, cnt;
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n;
+		vector<P> lines(n);
+		REPU(i, 0, n) {
+			cin >> a >> b >> c;
+			if (a < 0) a = -a, b = -b, c = -c;
+			else if (a == 0 && b < 0) b = -b, c = -c;
+			
+			g = gcd(tabs(a), tabs(b));
+			a /= g, b /= g;
+			lines[i].X.X = a, lines[i].X.Y = b;
+			f = gcd(tabs(c), g);
+			lines[i].Y.X = c / f, lines[i].Y.Y = g / f;
+		}
+		
+		sort(ALL(lines));
+		UNIQUE(lines);
+		
+		ret = 0, cnt = 1;
+		REPU(i, 1, lines.size()) {
+			if (lines[i].X == lines[i - 1].X) cnt++;
+			else {
+				amax(ret, cnt); cnt = 1;
+			}
+		}
+		amax(ret, cnt);
+		printf("%d\n", ret);
+	}
+	
+	return 0;
+}

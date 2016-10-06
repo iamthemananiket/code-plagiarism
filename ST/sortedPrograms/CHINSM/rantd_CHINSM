@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 100005;
+int n, k, a[N], mini[N], p[N], cnt[N], seek_min;
+bool is_prime[N];
+
+void generate(int ind, int ret, vector<int> &primes, vector<int> &ord) {
+	if (ind == primes.size()) {
+		if (ret > k) amin(seek_min, mini[ret]);
+		return;
+	}
+	repu(i, 0, ord[ind] + 1) {
+		generate(ind + 1, ret, primes, ord);
+		ret *= primes[ind];
+	}
+}
+
+struct SegmentTree {
+    vector<int> maxi;
+    
+    SegmentTree(int _n) {
+        int tn = 1;
+        while (tn <= _n) tn = tn << 1;
+        maxi.assign(tn << 1, 0);
+    }
+    
+    void update(int ind, int s, int e, int idx, int val) {
+        if (e - s == 1) {
+            maxi[ind] = val;
+            return;
+        }
+        int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+        if (m > idx) update(c1, s, m, idx, val);
+        else update(c2, m, e, idx, val);
+        maxi[ind] = max(maxi[c1], maxi[c2]);
+    }
+    
+    /* interval [s, e) */
+    int query(int ind, int s, int e, int ss, int ee) {
+        if (s >= ee || e <= ss) return 0;
+        if (s >= ss && e <= ee) return maxi[ind];
+        int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+        int ret = max(query(c1, s, m, ss, ee), query(c2, m, e, ss, ee));
+        return ret;
+    }
+};
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	repu(i, 2, N) {
+		if (!is_prime[i]) {
+			p[i] = i;
+			for (int j = i + i; j < N; j += i) {
+				is_prime[j] = true;
+				p[j] = i;
+			}
+		}
+	}
+	
+	cin >> n >> k;
+	repu(i, 0, n) cin >> a[i];
+	a[n] = N;
+	repu(i, 0, N) mini[i] = n;
+	
+	ll ret = 0;
+	SegmentTree st(n + 1);
+	st.update(1, 0, n + 1, n, a[n]);
+	cnt[n] = 0;
+	
+	repd(i, n - 1, -1) {
+		if (a[i] < k) {
+			cnt[i] = cnt[i + 1] + 1;
+		}
+		// find first x > k
+		else if (a[i] == k) {
+			int lb = i, rb = n;
+			while (rb > lb) {
+				int mb = (lb + rb) >> 1;
+				if (st.query(1, 0, n + 1, i, mb + 1) > k) rb = mb;
+				else lb = mb + 1;
+			}
+			cnt[i] = min(cnt[i + 1] + 1, rb - i);
+		}
+		// generate divisor of a[i] - k
+		else {
+			seek_min = n;
+			vector<int> primes, ord;
+			int tmp = a[i] - k;
+			while (tmp > 1) {
+				int tp = p[tmp], cnt = 0;
+				primes.push_back(tp);
+				while (tmp % tp == 0) {
+					cnt++; tmp /= tp;
+				}
+				ord.push_back(cnt);
+			}
+			generate(0, 1, primes, ord);
+			cnt[i] = min(cnt[i + 1] + 1, seek_min - i);
+		}
+		ret += cnt[i];
+		mini[a[i]] = i;
+		st.update(1, 0, n + 1, i, a[i]);
+	}
+	
+	printf("%lld\n", ret);
+	
+	
+	return 0;
+}

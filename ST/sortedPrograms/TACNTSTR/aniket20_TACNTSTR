@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 1e-14
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll powerMOD(ll a,ll b,ll c){
+	ll ret=1;
+	while(b>0){
+		if(b&1){
+			ret=(ret*a)%c;
+		}
+		a=(a*a)%c;
+		b>>=1;
+	}
+	return ret;
+}
+string str;
+ll vals[maxs];
+
+int main()
+{
+	iosbase;
+	ll i,j,ans=0;
+	cin>>str;
+	ll n=str.size();
+	vals[n]=0;
+	for(i=(n-1);i>=0;i--){
+		vals[i]=vals[i+1]*26+(26-(str[i]-'A'+1));
+		vals[i]%=N;
+	}
+	for(i=0;i<n;i++){
+		ans+=(26-(str[i]-'A'+1))*(vals[i+1]+1);
+		ans%=N;
+	}
+	pr("%lld\n",ans);
+	return 0;
+}

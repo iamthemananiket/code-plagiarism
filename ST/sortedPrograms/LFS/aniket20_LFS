@@ -1,0 +1,120 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define vi vector<int>
+#define sc scanf
+#define lld I64d
+#define F first
+#define S second
+#define mkpr make_pair
+#define N 1000000007
+#define maxs 100005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 1000000000
+#define lmax 1000000000000000000ll
+inline int getint(){
+	char c;
+	while((c=getchar())<'0'||c>'9'); return c-'0';
+}
+
+/* Palindromin Tree */
+
+struct node
+{
+	int edge[26];
+	int slink;
+	int len;
+	int cnt; 		// to store the no of times this palindrome occurs if required
+};
+node tree[maxs];
+int suff;
+int tot,n,ans;
+char s[maxs];
+int vals[maxs];
+// Add character by character
+void addNode(int i)
+{
+	int curr=suff;
+	while(1){
+		if(i-tree[curr].len-1>=0 && s[i-tree[curr].len-1]==s[i]){
+			break;
+		}
+		curr=tree[curr].slink;
+	}
+	int req=s[i]-'a';
+	if(tree[curr].edge[req]){
+		suff=tree[curr].edge[req];
+		tree[suff].cnt++;
+		return;
+	}
+	
+	tot++;
+	suff=tot;
+	tree[curr].edge[req]=tot;
+	tree[tot].len=tree[curr].len+2;
+	
+	
+	if(tree[tot].len==1){
+		tree[tot].slink=2;
+	}
+	else{
+		curr=tree[curr].slink;
+		while(1){
+			if(i-tree[curr].len-1>=0 && s[i-tree[curr].len-1]==s[i]){
+				tree[tot].slink=tree[curr].edge[req];
+				break;
+			}
+			curr=tree[curr].slink;
+		}	
+	}
+	
+	tree[tot].cnt = 1;	// to count same palindrome as many times as it appears
+}
+
+void buildTree() // If using with multiple teastcases dont forget to clear the edges array
+{
+	int i;
+	n=strlen(s);
+	tree[1].len=-1;
+	tree[2].len=0;
+	tree[2].slink=1;
+	tree[1].slink=1;
+	suff=2;
+	tot=2;
+	for(i=0;i<n;i++){
+		addNode(i);
+	}
+	for(i=tot;i>=1;i--){
+		tree[tree[i].slink].cnt+=tree[i].cnt;
+	}
+	for(i=3;i<=tot;i++){
+	//	cout<<tree[i].cnt<<" ";
+		vals[tree[i].cnt]=max(vals[tree[i].cnt],tree[i].len);
+	}
+}
+
+int main()
+{
+	ans=0;
+	int i,t1;
+	scanf("%s",s);
+	buildTree();
+	for(i=n-1;i>=1;i--){
+		vals[i]=max(vals[i],vals[i+1]);
+	}
+	int q;
+	sc("%d",&q);
+	for(i=0;i<q;i++){
+		sc("%d",&t1);
+		printf("%d\n",vals[t1]);
+	}
+	return 0;
+}

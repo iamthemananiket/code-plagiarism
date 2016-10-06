@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+vector<pair<int, int> > swaps[200010]; 
+vector<int> neigh[200010], curr, comp; 
+bool visited[200010];
+int val[200010], init[200010], x, y, z;
+void dfs(int root){
+	visited[root] = true;
+	comp.push_back(root);
+	for (int i = 0; i < (int)neigh[root].size(); i++) {
+		if(visited[neigh[root][i]]) continue;
+		dfs(neigh[root][i]);
+	}
+}
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		int n, m;
+		scanf("%d %d", &n, &m);
+		for (int i = 0; i <= 50010; i++) swaps[i].clear(), val[i] = i, neigh[i].clear(), visited[i] = false; 
+		for (int i = 0; i < n; i++) scanf("%d", init + i);
+		for (int i = 0; i < m; i++) {
+			scanf("%d %d %d", &x, &y, &z);
+			swaps[x].push_back(make_pair(y, z));
+		}
+		for (int i = 50001; i > 0; i--) {
+			curr.clear();
+			for (int j = 0; j < (int)swaps[i].size(); j++) {
+				neigh[swaps[i][j].first].push_back(swaps[i][j].second);
+				neigh[swaps[i][j].second].push_back(swaps[i][j].first);
+				curr.push_back(swaps[i][j].first);
+				curr.push_back(swaps[i][j].second);
+			}
+			for (int j = 0; j < (int)curr.size(); j++) {
+				if(visited[curr[j]]) continue;
+				dfs(curr[j]);
+				int maxi = 0;
+				for (int k = 0; k < (int)comp.size(); k++) maxi = max(maxi, val[comp[k]]);
+				for (int k = 0; k < (int)comp.size(); k++) val[comp[k]] = maxi;
+				comp.clear();
+			}
+			for (int j = 0; j < (int)curr.size(); j++) {
+				neigh[curr[j]].clear();
+				visited[curr[j]] = false;
+			}
+		}
+		long long ans = 0;
+		for (int i = 0; i < n; i++) ans += val[init[i]];
+		printf("%lld\n", ans);
+	}	
+}

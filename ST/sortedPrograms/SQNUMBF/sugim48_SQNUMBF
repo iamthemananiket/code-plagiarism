@@ -1,0 +1,82 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+ll gcd(ll a, ll b) {
+	return b ? gcd(b, a % b) : a;
+}
+
+int f(ll x) {
+	ll rx = sqrt(x);
+	if (rx * rx == x) return rx;
+	rx--;
+	if (rx * rx == x) return rx;
+	rx++; rx++;
+	if (rx * rx == x) return rx;
+	return -1;
+}
+
+ll solve(int N, vector<ll>& a, vector<int>& ps) {
+	for (int i = 0; i < N; i++)
+		for (int j = i + 1; j < N; j++)
+			if (gcd(a[i], a[j]) != 1)
+				return gcd(a[i], a[j]);
+	for (ll x: a) {
+		for (int p: ps)
+			if (x % p == 0) {
+				x /= p;
+				if (x % p == 0) return p;
+			}
+		int rx = f(x);
+		if (rx != -1 && rx != 1) return rx;
+	}
+	return -1;
+}
+
+int main() {
+	vector<bool> p(1000001, true);
+	for (int i = 2; i <= 1000000; i++)
+		if (p[i])
+			for (int j = i * 2; j <= 1000000; j += i)
+				p[j] = false;
+	vector<int> ps;
+	for (int i = 2; i <= 1000000; i++)
+		if (p[i])
+			ps.push_back(i);
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		vector<ll> a(N);
+		for (ll& x: a) cin >> x;
+		cout << solve(N, a, ps) << endl;
+	}
+}

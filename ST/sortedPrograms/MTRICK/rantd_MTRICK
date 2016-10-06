@@ -1,0 +1,91 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+typedef long long LL;
+
+int N;
+LL A, B, C, l[1001];
+char c[1001];
+
+LL multi(LL a, LL b, LL p) {
+	a %= p;
+	b %= p;
+	LL ans = 0;
+	while(b > 0) {
+		if(b & 1) {
+			ans += a;
+			if(ans >= p) ans -= p;
+		}
+		a <<= 1; b >>= 1;
+		if(a >= p) a -= p;
+	}
+	return ans;
+}
+
+void solve() {
+	LL ans, x, y;
+	int ind, total = N + 1, cur = 1;
+	bool check = 1, mod = 0;
+	x = 1; y = 0;
+	for(int i = 1; i <= N; ++i) {
+		if(c[i-1] == 'A') {
+			mod = 1;
+			y = (y + A) % C;
+			ans = (multi(x, l[cur], C) + y) % C;
+			printf("%lld ", ans);
+			if(check) {
+				cur++; total++;
+			}
+			else {
+				cur--; total--;
+			}
+		}
+		else if(c[i-1] == 'M') {
+			mod = 1;
+			x = multi(x, B, C);
+			y = multi(y, B, C);
+			ans = (multi(x, l[cur], C) + y) % C;
+			printf("%lld ", ans);
+			if(check) {
+				cur++; total++;
+			}
+			else {
+				cur--; total--;
+			}
+		}
+		else {
+			ind = total - cur;
+			if(check) {
+				check = 0;
+				cur = total - cur - 1;
+				total--;
+			}
+			else {
+				check = 1;
+				cur = total - cur + 1;
+				total++;
+			}
+			ans = multi(x, l[ind], C) + y;
+			if(mod) ans = ans % C;
+			printf("%lld ", ans);
+		}
+	}
+	printf("\n");
+}
+
+int main(int argc, char const *argv[]) {
+	
+	int ntest;
+	scanf("%d", &ntest);
+	for(int t = 0; t < ntest; ++t) {
+		scanf("%d", &N);
+		for(int i = 1; i <= N; ++i)
+			scanf("%lld", &l[i]);
+		scanf("%lld %lld %lld", &A, &B, &C);
+		scanf("%s", c);
+		solve();
+	}
+	return 0;
+}

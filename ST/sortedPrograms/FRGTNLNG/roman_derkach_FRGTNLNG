@@ -1,0 +1,44 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ map<string,char> mp;
+ string s[102];
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    // freopen("input.txt","r",stdin);
+    // freopen("output.txt","w",stdout);
+
+        int t;
+     cin>>t;
+      while(t--)
+      {
+         int n,k;
+        cin>>n>>k;
+         for(int i=1;i<=n;++i) cin>>s[i];
+         mp.clear();
+         for(int i=1;i<=k;++i)
+         {
+           int m;
+            cin>>m;
+             for(int j=1;j<=m;++j)
+             {
+              string p;
+              cin>>p;
+              mp[p]=1;
+             }
+         }
+          if(mp[s[1]]) cout<<"YES"; else cout<<"NO";
+          for(int i=2;i<=n;++i)
+          if(mp[s[i]]) cout<<" YES"; else cout<<" NO";
+          cout<<"\n";
+      }
+
+
+    return 0;
+  }

@@ -1,0 +1,99 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+struct Matrix {
+	typedef long double Num;
+	static const int MaxN = 26;
+	int hei, wid;
+	Num v[MaxN][MaxN];
+	Matrix() {}
+	Matrix(int n, int m) : hei(n), wid(m) {
+		memset(v, 0, sizeof(v));
+	}
+	inline int height() const { return hei; }
+	inline int width() const { return wid; }
+	inline Num& at(int i, int j) { return v[i][j]; }
+	inline const Num& at(int i, int j) const { return v[i][j]; }
+	static Matrix identity(int n) {
+		Matrix A(n, n);
+		rep(i, n) A.at(i, i) = 1;
+		return A;
+	}
+	inline static Matrix identity(const Matrix& A) { return identity(A.height()); }
+	void normalize() {
+		int n = height(), m = width();
+		rep(i, n) {
+			Num inv = 1. / accumulate(v[i], v[i] + m, Num());
+			rep(j, m)
+				v[i][j] *= inv;
+		}
+	}
+	Matrix& operator*=(const Matrix& B) {
+		int n = height(), m = B.width(), p = B.height();
+		assert(p == width());
+		Num w[MaxN][MaxN];
+		rep(i, n) rep(j, m) {
+			Num x = 0;
+			rep(k, p) x += at(i, k) * B.at(k, j);
+			w[i][j] = x;
+		}
+		memcpy(v, w, sizeof(v));
+		normalize();
+		return *this;
+	}
+};
+Matrix operator^(const Matrix& t, ll k) {
+	Matrix A = t, B = Matrix::identity(t);
+	while(k) {
+		if(k & 1) B *= A;
+		A *= A;
+		k >>= 1;
+	}
+	return B;
+}
+
+
+int main() {
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int N; int K;
+		scanf("%d%d", &N, &K);
+		char S[4];
+		scanf("%s", S);
+		int len = strlen(S);
+		Matrix A(26, 26);
+		rep(i, 26) rep(j, 26) {
+			double x;
+			scanf("%lf", &x);
+			A.at(i, j) = x;
+		}
+		vector<string> words(N);
+		rep(i, N) {
+			char buf[4];
+			scanf("%s", buf);
+			if(strlen(buf) == len)
+				words[i] = buf;
+		}
+		words.erase(remove(words.begin(), words.end(), string()), words.end());
+		sort(words.begin(), words.end());
+		words.erase(unique(words.begin(), words.end()), words.end());
+		A = A ^ K;
+		double ans = 0;
+		for(const string &word : words) {
+			double prob = 1;
+			rep(i, len)
+				prob *= A.at(S[i] - 'a', word[i] - 'a');
+			ans += prob;
+		}
+		printf("%.10f\n", ans);
+	}
+	return 0;
+}

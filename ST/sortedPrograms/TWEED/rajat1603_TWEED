@@ -1,0 +1,58 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t , n;
+/*bool solve(vector < int > v , bool turn){
+    for(int i = 0 ; i < n ; ++i){
+        for(int j = 1 ; j <= v[i] ; ++j){
+            if((j & 1) == turn){
+                v[i] -= j;
+                if(!solve(v , !turn)){
+                    if(turn == 0){
+                        cout << "Even wins\n";
+                        v[i] += j;
+                        for(int x : v){
+                            cout << x << " ";
+                        }
+                        cout << endl;
+                    }
+                    return 1;
+                }
+                v[i] += j;
+            }
+        }
+    }
+    return 0;
+}*/
+int main(){
+    cin >> t;
+    while(t--){
+        cin >> n;
+        string str = "";
+        cin >> str;
+        vector < int > v;
+        v.clear();
+        v.resize(n);
+        for(int i = 0 ; i < n ; ++i){
+            cin >> v[i];
+        }
+        if(str == "Dee"){
+            if(n == 1){
+                if(v[0] & 1){
+                    cout << "Dum";
+                }
+                else{
+                    cout << "Dee";
+                }
+            }
+            else{
+                cout << "Dum";
+            }
+            //cout << (solve(v , 0) ? "Dee" : "Dum");
+        }
+        else{
+            cout << "Dum";
+            //cout << (solve(v , 1) ? "Dum" : "Dee");
+        }
+        cout << endl;
+    }
+}

@@ -1,0 +1,80 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 19101995;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+void dfs(int u, int p, vector<vector<int> >& G, vector<vector<ll> >& a) {
+	vector<int> ch;
+	for (int i = 0; i < G[u].size(); i++) {
+		int v = G[u][i];
+		if (v == p) continue;
+		ch.push_back(v);
+		dfs(v, u, G, a);
+	}
+	int n = ch.size();
+	if (n == 0) {
+		for (int j = 0; j < 20; j++)
+			a[u][j] = 1;
+		return;
+	}
+	vector<vector<ll> > l(n + 1, vector<ll>(20, 1)), r(n + 1, vector<ll>(20, 1));
+	for (int i = 1; i <= n; i++) {
+		int v = ch[i - 1];
+		for (int j = 0; j < 20; j++)
+			l[i][j] = l[i - 1][j] * a[v][j] % MOD;
+	}
+	for (int i = n - 1; i >= 0; i--) {
+		int v = ch[i];
+		for (int j = 0; j < 20; j++)
+			r[i][j] = r[i + 1][j] * a[v][j] % MOD;
+	}
+	for (int i = 0; i < n; i++) {
+		int v = ch[i];
+		if (n == 1) a[u][0] = a[v][0];
+		for (int j = 1; j < 20; j++)
+			a[u][j] = (a[u][j] + l[i][j - 1] * r[i + 1][j - 1] % MOD * a[v][j]) % MOD;
+	}
+}
+
+int main() {
+	int N; cin >> N;
+	vector<vector<int> > G(N);
+	for (int i = 0; i < N - 1; i++) {
+		int u, v; cin >> u >> v;
+		u--; v--;
+		G[u].push_back(v);
+		G[v].push_back(u);
+	}
+	vector<vector<ll> > a(N, vector<ll>(20));
+	dfs(0, -1, G, a);
+	int j = -1;
+	for (; N > 0; N /= 2) j++;
+	cout << a[0][j] << endl;
+}

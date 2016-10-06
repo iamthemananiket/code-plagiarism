@@ -1,0 +1,84 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 200020;
+
+int dp[maxn][202], Mn[maxn][202];
+
+int a[maxn];
+
+int b[222][222];
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	int T;
+	int m, k, n;
+	cin >> T;
+	while (T--)
+	{
+		scanf("%d%d%d", &m, &k, &n);
+		memset(b, 0, sizeof(b));
+		int x, y;
+		for (int i = 1; i <= k; i++)
+		{
+			scanf("%d%d", &x, &y);
+			b[x][y] = b[y][x] = 1;
+		}
+		for (int i = 1; i <= n; i++)
+			scanf("%d", &a[i]);
+		for (int l = 1; l <= m; l++)
+			for (int i = 1; i <= m; i++)
+				for (int j = 1; j <= m; j++)
+					if (b[i][l] && b[l][j] && i != j && j != l && i != l)
+						b[i][j] = 1;
+		for (int i = 0; i <= n; i++)
+			for (int j = 0; j <= m; j++)
+				dp[i][j] = Mn[i][j] = inf;
+		dp[0][0] = 0;
+		Mn[0][0] = 0;
+		for (int i = 1; i <= m; i++)
+			Mn[0][i] = min(Mn[0][i - 1], dp[0][i]);
+		for (int i = 1; i <= n; i++)
+		{
+			dp[i][a[i]] = Mn[i - 1][a[i]];
+			for (int j = 1; j <= m; j++)
+			{
+				if (j != a[i])
+				{
+					if (b[a[i]][j])
+						dp[i][j] = Mn[i - 1][j] + 1;
+				}
+				Mn[i][j] = min(Mn[i][j - 1], dp[i][j]);
+			}
+		}
+		if (Mn[n][m] == inf)
+			Mn[n][m] = -1;
+		printf("%d\n", Mn[n][m]);
+	}
+	return 0;
+}

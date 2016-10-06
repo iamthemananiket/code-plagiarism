@@ -1,0 +1,52 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <algorithm>
+#include <fstream>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
+#include <string>
+#include <ctime>
+#include <queue>
+#include <stack>
+#include <vector>
+#include <map>
+#include <set>
+#include <deque>
+#define ll long long
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz size()
+#define INF 1000*1000*1000
+#define _USE_MATH_DEFINES
+#define fname ""
+const int  MAXN=1000*1000;
+const double eps=1e-6;
+
+using namespace std;
+int i,n,x,y,x2,y2,x3,y3,indmax,indmin;
+double s,a,b,c,maxi=-INF,mini=INF,p;
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen(fname".in","r",stdin);
+	freopen(fname".out","w",stdout);
+	#endif
+	cin>>n;
+	for(i=0;i<n;i++)
+	{
+		cin>>x>>y>>x2>>y2>>x3>>y3;
+		a=sqrt((x-x2)*(x-x2)+(y-y2)*(y-y2));
+		b=sqrt((x2-x3)*(x2-x3)+(y2-y3)*(y2-y3));
+		c=sqrt((x-x3)*(x-x3)+(y-y3)*(y-y3));
+		p=(a+b+c)/2;
+		s=sqrt(p*(p-a)*(p-b)*(p-c));
+		if(s-maxi>eps||(fabs(s-maxi)<eps))maxi=s,indmax=i+1;
+		if(mini-s>eps||(fabs(mini-s)<eps))mini=s,indmin=i+1;
+	}                         
+	cout<<indmin<<" "<<indmax;
+	return 0;
+}

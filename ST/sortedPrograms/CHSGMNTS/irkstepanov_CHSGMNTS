@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+ 
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+ll f(const pii& p)
+{
+    return (ll)(p.second - p.first + 2) * (ll)(p.second - p.first + 1) / 2;
+}
+
+int main()
+{
+ 
+    int tt;
+    scanf("%d", &tt);
+    
+    while (tt--) {
+        int n;
+        scanf("%d", &n);
+        vector<int> a(n);
+        map<int, vector<int> > m;
+        for (int i = 0; i < n; ++i) {
+            scanf("%d", &a[i]);
+            m[a[i]].pb(i);
+        }
+        ll ans = 0;
+        for (int i = 0; i < n; ++i) { // left border of the first segment
+            vector<char> alive(n, true);
+            set<int> used;
+            for (int j = 0; j < i; ++j) {
+                alive[j] = false;
+            }
+            ll curr = f(mp(i, n - 1));
+            set<pii> segs;
+            segs.insert(mp(i, n - 1));
+            for (int j = i; j < n; ++j) {
+                if (alive[j]) {
+                    pii p = *(segs.begin());
+                    curr -= f(p);
+                    segs.erase(segs.begin());
+                    ++p.first;
+                    if (p.first <= p.second) {
+                        segs.insert(p);
+                        curr += f(p);
+                    }
+                    alive[j] = false;
+                }
+                if (!used.count(a[j])) {
+                    for (int pos : m[a[j]]) {
+                        if (alive[pos]) {
+                            set<pii>::iterator it = segs.lower_bound(mp(pos + 1, pos + 1));
+                            --it;
+                            pii p = *it;
+                            segs.erase(it);
+                            curr -= f(p);
+                            pii x = mp(p.first, pos - 1);
+                            if (x.first <= x.second) {
+                                segs.insert(x);
+                                curr += f(x);
+                            }
+                            pii y = mp(pos + 1, p.second);
+                            if (y.first <= y.second) {
+                                segs.insert(y);
+                                curr += f(y);
+                            }
+                            alive[pos] = false;
+                        }
+                    }
+                    used.insert(a[j]);
+                }
+                ans += curr;
+                //cout << curr << " ";
+            }
+        }
+        printf("%lld\n", ans);
+    }
+
+}

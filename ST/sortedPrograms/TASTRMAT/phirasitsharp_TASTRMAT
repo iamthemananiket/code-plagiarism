@@ -1,0 +1,29 @@
+#include <stdio.h>
+#include <string.h>
+
+#define C 100001
+#define MOD 1000000007
+
+#define N 100010
+
+char str[N], s[N];
+int ans[N];
+int t;
+
+int main() {
+	scanf("%s%d", str, &t);
+	while(t--) {
+		scanf("%s", s);
+		int l = strlen(s);
+		long long v = 0;
+		for(int i = l-1;str[i];i++) {
+			int cnt = 0;
+			for(int k = 0;k < l;k++)  {
+				cnt += (str[i-(l-1)+k] != s[k]);
+			}
+			v = (C * v + cnt) % MOD;
+		}
+		printf("%lld\n", v);
+	}
+	return 0;
+}

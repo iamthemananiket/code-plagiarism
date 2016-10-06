@@ -1,0 +1,107 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	//freopen("in.txt","r",stdin);
+	ios::sync_with_stdio(false);
+	long long  t;
+	cin>>t;
+	while(t--){
+		long long  N,K,Q;
+		cin>>N>>K>>Q;
+		vector<long long > leftStore(N+10);
+		vector<long long > rightStore(N+10);
+		vector<long long > prefixeRight(N+10);
+		vector<long long > prefixeLeft(N+10);
+		vector<long long > positions(N+10);
+		string s;
+		cin>>s;
+		long long  zeroCount=0;
+		long long  oneCount=0;
+		long long  pos=s.size();
+		for(long long  i=0;i<s.size();i++){
+			if(s[i]=='0')
+			{
+				zeroCount++;
+			}
+			else{
+				oneCount++;
+			}
+			if(zeroCount>K)
+    		{
+    			zeroCount--;
+    			pos=i;
+    			break;
+    		}
+    		if(oneCount>K)
+    		{
+    			oneCount--;
+    			pos=i;
+    			break;
+    		}
+		}
+		leftStore[1]=pos;
+		for(long long  i=1;i<s.size();i++){
+			long long previousPos=i-1;
+			if(s[previousPos]=='0'){
+				zeroCount--;
+			}
+			else{
+				oneCount--;
+			}
+			while(pos<N){
+				if(s[pos]=='0')
+				{
+					zeroCount++;
+				}
+				else{
+					oneCount++;
+				}
+				if(zeroCount>K)
+    			{
+    				zeroCount--;
+    				break;
+    			}
+ 		   		if(oneCount>K)
+    			{
+    				oneCount--;
+    				break;
+    			}
+				pos++;
+			}
+			leftStore[i+1]=pos-i;
+			rightStore[i]=leftStore[i]+i-1;
+			prefixeRight[i]=prefixeRight[i-1]+rightStore[i];
+			prefixeLeft[i]=prefixeLeft[i-1]+leftStore[i];
+		}
+		rightStore[N]=leftStore[N]+N-1;
+		prefixeRight[N]=prefixeRight[N-1]+rightStore[N];
+		prefixeLeft[N]=prefixeLeft[N-1]+leftStore[N];
+		
+		for(long long  i=1;i<=s.size();i++)
+    	{
+    		for(long long  j=positions[i-1];j<=i;j++)
+    		{
+    			if(rightStore[j]>=i){
+    				positions[i]=j;
+    				break;
+    			}
+    		}
+    	}
+    	
+    	/*
+    	for(long long  i=0;i<=N;i++){
+    		cout<<leftStore[i]<<" "<<rightStore[i]<<" "<<prefixeLeft[i]<<" "<<prefixeRight[i]<<" "<<positions[i]<<"\n";
+    	}
+    	*/
+    	
+    	
+    	while(Q--){
+    		long long  L,R;
+    		cin>>L>>R;
+    		long long  currentPos=max(L,positions[R]);
+    		long long ans=(prefixeLeft[R]-prefixeLeft[L-1])-((prefixeRight[R]-prefixeRight[currentPos-1])-(R*(R-currentPos+1)));
+    		cout<<ans<<"\n";
+    	}
+		
+	}
+}

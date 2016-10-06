@@ -1,0 +1,132 @@
+#include <stdio.h>
+#include <vector>
+#include <math.h>
+
+#define N 100010
+#define LG_N 20
+
+using namespace std;
+
+vector<int> E2;
+int F[N], M[LG_N][4*N];
+
+vector<int> Euler;
+vector<int> adj[N];
+int Edge[N][3];
+int pos[N][2];
+int H[N];
+int tree[4*N];
+int n, q;
+
+int next_node(int e, int u) {
+	return (Edge[e][0] == u ? Edge[e][1] : Edge[e][0]);
+}
+void dfs_init(int u, int p, int h) {
+	H[u] = h;
+	Euler.push_back(u);
+	
+	E2.push_back(u);
+	F[u] = E2.size() - 1;
+	
+	pos[u][0] = Euler.size() - 1;
+	for(int i = 0;i < adj[u].size();i++) {
+		int e = adj[u][i];
+		int v = next_node(e, u);
+		if(v == p) {
+			continue;
+		}
+		dfs_init(v, u, h+1);
+		E2.push_back(u);
+	}
+	
+	Euler.push_back(u);
+	pos[u][1] = Euler.size() - 1;
+}
+void init_TB(void) {
+	for(int i = 0;i < LG_N;i++) {
+		for(int j = 0;j < E2.size();j++) {
+			if(i == 0) {
+				M[i][j] = E2[j];
+			}else {
+				M[i][j] = M[i-1][j];
+				int k = M[i-1][min((int)E2.size() - 1, j + (1 << (i-1)))];
+				if(H[k] < H[M[i][j]]) {
+					M[i][j] = k;
+				}
+			}
+		}
+	}
+}
+int LCA(int a, int b) {
+	if(F[a] > F[b]) {
+		swap(a, b);
+	}
+	int l = F[b] - F[a] + 1;
+	int lg = floor(log(l) / log(2));
+	int u = M[lg][F[a]], v = M[lg][F[b] - (1 << lg) + 1];
+	if(H[u] < H[v]) {
+		return u;
+	}else {
+		return v;
+	}
+}
+void update(int idx, int val) {
+	while(idx < Euler.size()) {
+		tree[idx] += val;
+		idx += idx & (-idx);
+	}
+}
+int query(int idx) {
+	int ans = 0;
+	while(idx > 0) {
+		ans += tree[idx];
+		idx -= idx & (-idx);
+	}
+	return ans;
+}
+int main() {
+	scanf("%d", &n);
+	Euler.push_back(0);
+	for(int i = 1;i < n;i++) {
+		int u, v, w;
+		scanf("%d%d%d", &u, &v, &w);
+		Edge[i][0] = u;
+		Edge[i][1] = v;
+		Edge[i][2] = w;
+		adj[u].push_back(i);
+		adj[v].push_back(i);
+	}
+	dfs_init(1, -1, 0);
+	init_TB();
+	
+	for(int i = 1;i < n;i++) {
+		int u = Edge[i][0], v = Edge[i][1], w = Edge[i][2];
+		if(H[u] < H[v]) {
+			u = v;
+		}
+		update(pos[u][0], w);
+		update(pos[u][1], -w);
+	}
+	scanf("%d", &q);
+	while(q--) {
+		int c;
+		scanf("%d", &c);
+		if(c == 1) {
+			int e, w;
+			scanf("%d%d", &e, &w);
+			int u = Edge[e][0], v = Edge[e][1];
+			if(H[u] < H[v]) {
+				u = v;
+			}
+			update(pos[u][0], w - Edge[e][2]);
+			update(pos[u][1], - w + Edge[e][2]);
+			Edge[e][2] = w;
+		}else {
+			int u, v;
+			scanf("%d%d", &u, &v);
+			int lca = LCA(u, v);
+			printf("%d\n", query(pos[u][0]) + query(pos[v][0]) - 2 * query(pos[lca][0]));
+		}
+	}
+	return 0;
+}

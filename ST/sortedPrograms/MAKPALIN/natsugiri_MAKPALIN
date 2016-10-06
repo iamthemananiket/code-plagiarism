@@ -1,0 +1,78 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+struct Manacher {
+    vector<int>rad;
+    Manacher(){}
+    Manacher(const string &t) {
+	int n = t.size(), i, j, k;
+	rad = vector<int>(2*n);
+	for (i=0, j=0; i<2*n; i+=k, j=max(j-k, 0)) {
+	    while (i-j >= 0 && i+j+1 < 2*n && t[(i-j)/2] == t[(i+j+1)/2]) j++;
+	    rad[i] = j;
+	    for (k=1; i-k >= 0 && rad[i]-k >= 0 && rad[i-k] != rad[i]-k; k++)
+		rad[i+k] = min(rad[i-k], rad[i]-k);
+	}
+    }
+    bool ok(int l, int r) { // [l, r)
+        return r-l <= rad[l+r-1];
+    }
+    pair<int, int> span(int mid, bool ev/*=even length str*/) { 
+	if (ev) { // [mid-2, mid-1, mid, mid+1]
+	    return make_pair(mid - rad[mid*2+1]/2, mid + rad[mid*2+1]/2);
+	} else { // [mid-1, mid, mid+1]
+	    return make_pair(mid - rad[mid*2]/2, mid + rad[mid*2]/2 + 1);
+	}
+    }
+};
+
+int T;
+char S[100011];
+int N;
+
+void MAIN() {
+    scanf("%s", S);
+    N = strlen(S);
+    int E = 0;
+    REP (i, N) {
+	if (S[i] != S[N-1-i]) break;
+	E++;
+    }
+    Manacher M(S);
+    int ans = 0;
+    REP (i, N+1) {
+	if (min(i, N-i) > E) continue;
+	int L, R;
+	if (2*i < N) {
+	    L = i;
+	    R = N-1-i;
+	} else if (2*i == N) {
+	    L = R = N/2;
+	} else {
+	    L = N-i+1;
+	    R = i;
+	}
+	if (M.ok(L, R)) ans++;
+    }
+    printf("%d\n", ans);
+}
+int main() {
+    scanf("%d", &T);
+    REP ($, T) MAIN();
+    return 0;
+}

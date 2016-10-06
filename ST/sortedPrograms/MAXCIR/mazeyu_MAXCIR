@@ -1,0 +1,118 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define ull unsigned long long
+#define Pud pair<ull,double>
+#define mp make_pair
+#define eps 1e-12
+#define N 1010
+#define M 1000010
+using namespace std;
+struct node{int x,y,z;}a[N];
+struct vec{int u,v,x,y;}b[M];
+Pud ans;
+char s[10010];
+ll px[N],py[N];
+int n,k,Ax,Ay,Bx,By,Cx,Cy,i,l,r,m,j,u,v,wz[N];
+int A[N][N],B[N][N],q[M],t,ux,uy;
+bool cmp(vec x,vec y){return 1ll*x.u*y.v>1ll*y.u*x.v;}
+bool cp(node x,node y){return x.x==y.x?x.y<y.y:x.x>y.x;}
+Pud operator+(Pud x,Pud y)
+{
+	Pud z;
+	z.first=x.first+y.first;
+	z.second=x.second+y.second;
+	if(z.second>1)z.second-=1,z.first++;
+	return z;
+}
+Pud sqt(ull x)
+{
+	if(!x)return mp(0,0);
+	ull t=(ull)sqrt(x);
+	for(;(t+1)*(t+1)<=x;t++);
+	return mp(t,(x-t*t)/(t+sqrt(x)));
+}
+ull sqr(ll x)
+{
+	if(x<0)x=-x;
+	return (ull)x*x;
+}
+void Get(int x,int y){if(A[x][y]<i)q[++r]=A[x][y];}
+void getans(int x,int y)
+{
+	for(l=0,r=k;l<r;)
+	{
+		int mid=l+r+1>>1;
+		if(1ll*a[mid].x*x+1ll*a[mid].y*y>=0)l=mid;
+		else r=mid-1;
+	}
+	Pud ax=sqt(sqr(px[l]-Bx)+sqr(py[l]-By)),
+		ay=sqt(sqr(px[l]-Cx)+sqr(py[l]-Cy));
+	ans=max(ans,ax+ay);
+}
+int main()
+{
+	scanf("%d%d",&n,&k);
+	scanf("%d%d%d%d%d%d",&Ax,&Ay,&Bx,&By,&Cx,&Cy);
+	Bx-=Ax;By-=Ay;Cx-=Ax;Cy-=Ay;
+	for(i=1;i<=n;i++)
+	{
+		scanf("%d%d",&a[i].x,&a[i].y);
+		a[i].z=i;
+	}
+	l=0;r=n*n+n+1;m=n*n+n;
+	for(i=0;i<=n;i++)
+		for(j=0;j<=n;j++)if(i!=j)
+		{
+			u=a[i].y-a[j].y;
+			v=a[j].x-a[i].x;
+			if(!v&&!u)u=a[i].x,v=a[i].y;
+			if(v>0||(v==0&&u>0))
+				b[++l].u=u,b[l].v=v,b[l].x=i,b[l].y=j;
+			else b[--r].u=u,b[r].v=v,b[r].x=i,b[r].y=j;
+		}
+	sort(b+1,b+l+1,cmp);
+	sort(b+l+1,b+m+1,cmp);
+	sort(a+1,a+n+1,cp);wz[0]=-1;
+	for(i=1;i<=m;i++)
+	{
+		if(!A[b[i].x][b[i].y])
+			A[b[i].x][b[i].y]=A[b[i].y][b[i].x]=i;
+		else B[b[i].x][b[i].y]=B[b[i].y][b[i].x]=i;
+	}
+	for(i=1;i<=n;i++)
+	{
+		px[i]=px[i-1]+a[i].x;
+		py[i]=py[i-1]+a[i].y;
+		wz[a[i].z]=i;
+	}
+	b[m+1]=b[1];
+	for(i=1;i<=m;i++)
+	{
+		if(abs(wz[b[i].x]-wz[b[i].y])==1)
+		{
+			for(q[l=r=1]=i;l<=r;l++)
+			{
+				ux=b[q[l]].x;uy=b[q[l]].y;
+				if(abs(wz[ux]-wz[uy])!=1)continue;
+				if(A[ux][uy]==B[ux][uy])A[ux][uy]=A[uy][ux]=m+1;
+				else A[ux][uy]=A[uy][ux]=B[ux][uy];
+				t=min(wz[ux],wz[uy]);
+				swap(a[t],a[t+1]);
+				wz[a[t].z]=t;wz[a[t+1].z]=t+1;
+				px[t]=px[t-1]+a[t].x;
+				py[t]=py[t-1]+a[t].y;
+				if(t>1)Get(a[t-1].z,a[t].z);
+				if(t+1<n)Get(a[t+1].z,a[t+2].z);
+			}
+		}
+		ux=b[i].u+b[i+1].u;
+		uy=b[i].v+b[i+1].v;
+		if(1ll*b[i].u*b[i+1].v==1ll*b[i].v*b[i+1].u)
+			if(1ll*b[i].u*b[i+1].u<0||1ll*b[i].v*b[i+1].v<0)
+				ux=-b[i].v,uy=b[i].u;
+		getans(ux,uy);
+	}
+	ans=ans+sqt(sqr(Bx-Cx)+sqr(By-Cy));
+	sprintf(s+1,"%.13lf",ans.second);
+	printf("%llu%s\n",ans.first,s+2);
+}

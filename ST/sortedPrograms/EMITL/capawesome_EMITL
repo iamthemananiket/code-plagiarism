@@ -1,0 +1,69 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+
+int n;
+int cnt[256];
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		int i, pcnt = 0;
+		char c[1024];
+		memset (cnt, 0, sizeof (cnt));
+		scanf ("%s", c);
+		n = strlen (c);
+		for (i = 0; i < n; i ++)
+			cnt[c[i]] ++;
+		if (cnt['L'] < 2)
+		{
+			printf ("NO\n");
+			continue;
+		}
+		if (cnt['T'] < 2)
+		{
+			printf ("NO\n");
+			continue;
+		}
+		if (cnt['I'] < 2)
+		{
+			printf ("NO\n");
+			continue;
+		}
+		if (cnt['M'] < 2)
+		{
+			printf ("NO\n");
+			continue;
+		}
+		if (n - cnt['L'] - cnt['T'] - cnt['I'] - cnt['M'] - cnt['E'] == 0)
+		{
+			if (cnt['E'] < 1)
+			{
+				printf ("NO\n");
+				continue;
+			}
+		}
+		else
+		{
+			if (cnt['E'] < 2)
+			{
+				printf ("NO\n");
+				continue;
+			}
+		}
+		printf ("YES\n");
+	}
+	return 0;
+}

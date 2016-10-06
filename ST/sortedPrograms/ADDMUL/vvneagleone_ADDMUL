@@ -1,0 +1,315 @@
+// Template and program by vvneagleone
+
+#include<cstdio>
+#include<cstdlib>
+#include<iostream>
+#include<iomanip>
+#include<algorithm>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<climits>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<set>
+#include<map>
+#include<iostream>
+#include<iostream>
+using namespace std;
+typedef long long LL;
+typedef long double LD;
+#define MOD 1000000007LL
+
+#ifdef __GNUC__
+    #if ( __GNUC__ >= 4 && __GNUC_MINOR__ >= 7 && __cplusplus > 201100L )
+        #include<unordered_set>
+        #include<unordered_map>
+    #endif
+#endif // __GNUC__
+
+#ifdef __WIN32
+    #define gx getchar
+    #define px putchar
+    #define ps putchar(' ')
+    #define pn putchar('\n')
+#else
+    #define gx getchar_unlocked
+    #define px putchar_unlocked
+    #define ps putchar_unlocked(' ')
+    #define pn putchar_unlocked('\n')
+#endif // __WIN32
+
+void scan(int &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*sign;}
+void lscan(LL &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*(LL)(sign);}
+int sscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n')a[i++]=c,c=gx();a[i]=0;return i;}
+int wscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n'&&c!=' ')a[i++]=c,c=gx();a[i]=0;return i;}
+void print(int n){if(n<0){n=-n;px('-');}int i=10;char o[10];do{o[--i]=(n%10)+'0';n/=10;}while(n);do{px(o[i]);}while(++i<10);}
+void lprint(LL n){if(n<0LL){n=-n;px('-');}int i=21;char o[21];do{o[--i]=(n%10LL)+'0';n/=10LL;}while(n);do{px(o[i]);}while(++i<21);}
+void sprint(const char*a){const char*p=a;while(*p)px(*p++);}
+LL power(LL b,LL e,LL m=MOD){LL r=1;while(e){if(e&1)r=(r*b)%m;b=(b*b)%m;e>>=1;}return r;}
+LL minvp(LL n, LL m=MOD){return power(n,m-2,m);}
+LL minv(LL a,LL m=MOD){LL c,t,q,x,y;c=m;x=0;y=1;while(a>1){q=a/c;t=c;c=a%c;a=t;t=x;x=y-q*x;y=t;}if(y<0)y+=m;return y;}
+LL mmul(LL a,LL b,LL m=MOD){LL x=0,y=a%m;while(b){if(b&1)x=(x+y)%m;y=(y<<1)%m;b>>=1;}return x%m;}
+LL absll(LL x){if(x<0)return -x;return x;}
+
+const int maxn = 100004;
+const int maxst = 262150;
+
+LL a[maxn];
+LL st[maxst];
+LL lazyset[maxst];
+LL lazyadd[maxst];
+LL lazymul[maxst];
+int n, ql, qr;
+
+void sti_build( int l, int r, int i ) {
+    if( l > r ) return;
+    if( l == r ) {
+        st[i] = a[l];
+        return;
+    }
+    int m = (l+r)/2;
+    sti_build(l,m,(i<<1));
+    sti_build(m+1,r,(i<<1)+1);
+    st[i] = (st[i<<1] + st[(i<<1)+1]) % MOD;
+    return;
+}
+
+void st_build() {
+    for( int i = 0; i < maxst; ++i ) {
+        lazyset[i] = lazyadd[i] = 0;
+        lazymul[i] = 1;
+    }
+    sti_build(1,n,1);
+}
+
+void sti_add( int l, int r, LL val, int i ) {
+    if( lazyset[i] != 0 ) {
+        st[i] = ((LL)(r-l+1) * lazyset[i]) % MOD;
+        if( l != r ) {
+            lazyset[i<<1] = lazyset[i];
+            lazyset[(i<<1)+1] = lazyset[i];
+            lazyadd[i<<1] = 0;
+            lazyadd[(i<<1)+1] = 0;
+            lazymul[i<<1] = 1;
+            lazymul[(i<<1)+1] = 1;
+        }
+        lazyset[i] = 0;
+    }
+    if( lazymul[i] != 1 ) {
+        st[i] = (st[i] * lazymul[i]) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] * lazymul[i] ) % MOD;
+            lazymul[i<<1] = ( lazymul[i<<1] * lazymul[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] * lazymul[i] ) % MOD;
+            lazymul[(i<<1)+1] = ( lazymul[(i<<1)+1] * lazymul[i] ) % MOD;
+        }
+        lazymul[i] = 1;
+    }
+    if( lazyadd[i] != 0 ) {
+        st[i] = ( st[i] + (((LL)(r-l+1)*lazyadd[i])%MOD) ) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] + lazyadd[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] + lazyadd[i] ) % MOD;
+        }
+        lazyadd[i] = 0;
+    }
+    if( l>r || qr<l || ql>r ) return; // Current fully outside query
+    if( l >= ql && r <= qr ) { // Current fully inside query
+        st[i] = ( st[i] + (((LL)(r-l+1)*val)%MOD) ) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] + val ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] + val ) % MOD;
+        }
+        return;
+    }
+    int m = (l+r)/2;
+    sti_add(l,m,val,i<<1);
+    sti_add(m+1,r,val,(i<<1)+1);
+    st[i] = ( st[i<<1] + st[(i<<1)+1] ) % MOD;
+}
+
+void st_add( int l, int r, LL val ) {
+    ql = l; qr = r;
+    sti_add( 1, n, val, 1 );
+}
+
+void sti_mul( int l, int r, LL val, int i ) {
+    if( lazyset[i] != 0 ) {
+        st[i] = ((LL)(r-l+1) * lazyset[i]) % MOD;
+        if( l != r ) {
+            lazyset[i<<1] = lazyset[i];
+            lazyset[(i<<1)+1] = lazyset[i];
+            lazyadd[i<<1] = 0;
+            lazyadd[(i<<1)+1] = 0;
+            lazymul[i<<1] = 1;
+            lazymul[(i<<1)+1] = 1;
+        }
+        lazyset[i] = 0;
+    }
+    if( lazymul[i] != 1 ) {
+        st[i] = (st[i] * lazymul[i]) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] * lazymul[i] ) % MOD;
+            lazymul[i<<1] = ( lazymul[i<<1] * lazymul[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] * lazymul[i] ) % MOD;
+            lazymul[(i<<1)+1] = ( lazymul[(i<<1)+1] * lazymul[i] ) % MOD;
+        }
+        lazymul[i] = 1;
+    }
+    if( lazyadd[i] != 0 ) {
+        st[i] = ( st[i] + (((LL)(r-l+1)*lazyadd[i])%MOD) ) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] + lazyadd[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] + lazyadd[i] ) % MOD;
+        }
+        lazyadd[i] = 0;
+    }
+    if( l>r || qr<l || ql>r ) return; // Current fully outside query
+    if( l >= ql && r <= qr ) { // Current fully inside query
+        st[i] = ( st[i] * val ) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] * val ) % MOD;
+            lazymul[i<<1] = ( lazymul[i<<1] * val ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] * val ) % MOD;
+            lazymul[(i<<1)+1] = ( lazymul[(i<<1)+1] * val ) % MOD;
+        }
+        return;
+    }
+    int m = (l+r)/2;
+    sti_mul(l,m,val,i<<1);
+    sti_mul(m+1,r,val,(i<<1)+1);
+    st[i] = ( st[i<<1] + st[(i<<1)+1] ) % MOD;
+}
+
+void st_mul( int l, int r, LL val ) {
+    ql = l; qr = r;
+    sti_mul( 1, n, val, 1 );
+}
+
+void sti_set( int l, int r, LL val, int i ) {
+    if( lazyset[i] != 0 ) {
+        st[i] = ((LL)(r-l+1) * lazyset[i]) % MOD;
+        if( l != r ) {
+            lazyset[i<<1] = lazyset[i];
+            lazyset[(i<<1)+1] = lazyset[i];
+            lazyadd[i<<1] = 0;
+            lazyadd[(i<<1)+1] = 0;
+            lazymul[i<<1] = 1;
+            lazymul[(i<<1)+1] = 1;
+        }
+        lazyset[i] = 0;
+    }
+    if( lazymul[i] != 1 ) {
+        st[i] = (st[i] * lazymul[i]) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] * lazymul[i] ) % MOD;
+            lazymul[i<<1] = ( lazymul[i<<1] * lazymul[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] * lazymul[i] ) % MOD;
+            lazymul[(i<<1)+1] = ( lazymul[(i<<1)+1] * lazymul[i] ) % MOD;
+        }
+        lazymul[i] = 1;
+    }
+    if( lazyadd[i] != 0 ) {
+        st[i] = ( st[i] + (((LL)(r-l+1)*lazyadd[i])%MOD) ) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] + lazyadd[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] + lazyadd[i] ) % MOD;
+        }
+        lazyadd[i] = 0;
+    }
+    if( l>r || qr<l || ql>r ) return; // Current fully outside query
+    if( l >= ql && r <= qr ) { // Current fully inside query
+        st[i] = ((LL)(r-l+1) * val) % MOD;
+        if( l != r ) {
+            lazyset[i<<1] = val;
+            lazyset[(i<<1)+1] = val;
+            lazyadd[i<<1] = 0;
+            lazyadd[(i<<1)+1] = 0;
+            lazymul[i<<1] = 1;
+            lazymul[(i<<1)+1] = 1;
+        }
+        return;
+    }
+    int m = (l+r)/2;
+    sti_set(l,m,val,i<<1);
+    sti_set(m+1,r,val,(i<<1)+1);
+    st[i] = ( st[i<<1] + st[(i<<1)+1] ) % MOD;
+}
+
+void st_set( int l, int r, LL val ) {
+    ql = l; qr = r;
+    sti_set( 1, n, val, 1 );
+}
+
+LL sti_query( int l, int r, int i ) {
+    if( lazyset[i] != 0 ) {
+        st[i] = ((LL)(r-l+1) * lazyset[i]) % MOD;
+        if( l != r ) {
+            lazyset[i<<1] = lazyset[i];
+            lazyset[(i<<1)+1] = lazyset[i];
+            lazyadd[i<<1] = 0;
+            lazyadd[(i<<1)+1] = 0;
+            lazymul[i<<1] = 1;
+            lazymul[(i<<1)+1] = 1;
+        }
+        lazyset[i] = 0;
+    }
+    if( lazymul[i] != 1 ) {
+        st[i] = (st[i] * lazymul[i]) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] * lazymul[i] ) % MOD;
+            lazymul[i<<1] = ( lazymul[i<<1] * lazymul[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] * lazymul[i] ) % MOD;
+            lazymul[(i<<1)+1] = ( lazymul[(i<<1)+1] * lazymul[i] ) % MOD;
+        }
+        lazymul[i] = 1;
+    }
+    if( lazyadd[i] != 0 ) {
+        st[i] = ( st[i] + (((LL)(r-l+1)*lazyadd[i])%MOD) ) % MOD;
+        if( l != r ) {
+            lazyadd[i<<1] = ( lazyadd[i<<1] + lazyadd[i] ) % MOD;
+            lazyadd[(i<<1)+1] = ( lazyadd[(i<<1)+1] + lazyadd[i] ) % MOD;
+        }
+        lazyadd[i] = 0;
+    }
+    if( l>r || qr<l || ql>r ) return 0; // Current fully outside query
+    if( ql <= l && qr >= r ) return st[i]; // Current fully inside query
+    int m = (l+r)/2;
+    LL q1 = sti_query(l,m,i<<1);
+    LL q2 = sti_query(m+1,r,(i<<1)+1);
+    return ( q1 + q2 ) % MOD;
+}
+
+LL st_query( int l, int r ) {
+    ql = l; qr = r;
+    return sti_query(1,n,1);
+}
+
+int main() {
+    int q, i, j, type, x, y;
+    LL v;
+    scan(n); scan(q);
+    for( i = 1; i <= n; ++i ) lscan(a[i]);
+    st_build();
+    while(q--) {
+        scan(type); scan(x); scan(y);
+        if( type == 1 ) {
+            lscan(v);
+            st_add(x,y,v);
+        }
+        else if( type == 2 ) {
+            lscan(v);
+            st_mul(x,y,v);
+        }
+        else if( type == 3 ) {
+            lscan(v);
+            st_set(x,y,v);
+        }
+        else {
+            lprint( (((st_query(x,y))%MOD)+MOD)%MOD ); pn;
+        }
+    }
+    return 0;
+}

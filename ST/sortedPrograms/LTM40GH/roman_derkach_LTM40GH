@@ -1,0 +1,91 @@
+#include<bits/stdc++.h>
+#define int long long
+#define pb push_back
+#define mp make_pair
+#define f first
+#define s second
+#define sqr(x) (x) * (x)
+ using namespace std;
+
+ const int N = 2e5 + 121;
+ int a[N],b[N],last[N],kol,X[N],G[N],Ans[N],v,u,i,n,t;
+
+ inline void add(int v,int u)
+ {
+     a[++kol] = u;
+     b[kol] = last[v];
+     last[v] = kol;
+ }
+
+  void dfs1(int v,int pred)
+ {
+     G[v] = G[pred] + 1;
+     int x = last[v];
+      while(x)
+      {
+          if(a[x]!=pred) dfs1(a[x],v);
+          x = b[x];
+      }
+ }
+
+ void dfs2(int v,int pr,int ans,int pos)
+ {
+    if(G[pos] > G[v]) pos = v;
+    Ans[pos] = max(Ans[pos],ans);
+     int x = last[v];
+      while(x)
+      {
+          if(a[x]!=pr) dfs2(a[x],v,ans ^ X[a[x]],pos);
+          x = b[x];
+      }
+ }
+
+ void dfs3(int v,int pr)
+ {
+     int x = last[v];
+      while(x)
+      {
+          if(a[x]!=pr)
+          {
+              dfs3(a[x],v);
+              Ans[v]=max(Ans[v],Ans[a[x]]);
+          }
+           x = b[x];
+      }
+ }
+
+  //int
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>t;
+     while(t--)
+     {
+         cin>>n;
+         for(i=1;i<=n;++i)cin>>X[i];
+         for(i=1;i<=n;++i)last[i] = Ans[i] = 0;
+         kol = 0;
+         for(i=1;i<n;++i)
+         {
+             cin>>v>>u;
+             add(v,u);
+             add(u,v);
+         }
+
+         dfs1(1,0);
+
+         for(i=1;i<=n;++i)
+            dfs2(i,0,X[i],i);
+
+            dfs3(1,0);
+
+            for(i=1;i<=n;++i) cout<<Ans[i]<<'\n';
+
+     }
+
+
+  }

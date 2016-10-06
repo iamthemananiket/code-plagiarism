@@ -1,0 +1,111 @@
+/*******************************
+*  Bismillahir Rahmanir Rahim  *
+*******************************/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x, "r", stdin)
+#define WRITE(x)	freopen(x, "w", stdout)
+
+#define REP(i, n)	for(ll i=0;i<n;i++)
+#define REPN(i, n)	for(ll i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+
+#define MAX			10000050
+#define INF			(1 << 29)
+#define EPS 		1e-9
+#define MOD			1000000007
+#define pb			push_back
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll, ll>	pii;
+
+ll n, A[MAX], P[MAX];
+
+void seive(){
+	int sq = sqrt(MAX);
+	for(int i=2;i<=sq;i++){
+		if(!P[i]){
+			for(int j=i*i;j<MAX;j+=i) P[j] = true;
+		}
+	}
+}
+
+ll gcd(ll a, ll b){
+	return b == 0 ? a : gcd(b, a%b);
+}
+
+int Can(ll val){
+	ll sq = sqrt(val);
+	if(sq * sq == val) return sq;
+	int cnt = 0;
+	while(val % 2 == 0){
+		val /= 2;
+		cnt++;
+		if(cnt > 1) return 2;
+	}
+	sq = sqrt(val);
+	for(ll i=3;i<=sq;i+=2){
+		cnt=0;
+		while(val % i == 0){
+			cnt++;
+			val /= i;
+			if(cnt > 1) return i;
+		}
+	}
+	return 0;
+}
+
+ll bigmod(ll a, ll b, ll c){
+	if(b == 0) return 1;
+	if(b % 2 == 0){
+		ll ret = bigmod(a, b/2, c);
+		return (ret * ret) % c;
+	}
+	else return ( a * bigmod(a, b-1, c) ) % c;
+}
+ 
+bool isPrime(ll p){
+    if(p == 1) return false;
+    for(int i=0;i<1000;i++){
+        ll a = rand() % (p-1) + 1; 
+        if(bigmod(a, p-1, p) != 1) return false;
+    }
+    return true;
+}
+
+int main(){
+	seive();
+	int tc; ll x;
+	cin >> tc;
+	while(tc--){
+		cin >> n;
+		REPN(i, n){
+			cin >> A[i];
+		}
+		ll ret = 1;
+		REPN(i, n){
+			REPN(j, n){
+				if(i == j) continue;
+				ll g = gcd(A[i], A[j]);
+				if(g > 1) ret = g;
+	
+			}
+		}
+		if(ret == 1){
+			REPN(i, n){
+				if(!isPrime(A[i])){
+					ll f = Can(A[i]);
+					if(f){
+						ret = f;
+						break;
+					}
+				}
+			}
+		}
+		printf("%lld\n", ret);
+	}
+	return 0;
+}

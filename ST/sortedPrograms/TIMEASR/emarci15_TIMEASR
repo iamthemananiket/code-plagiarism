@@ -1,0 +1,56 @@
+#include <iostream>
+#include <list>
+
+using namespace std;
+
+int T;
+double a;
+int x,m;
+
+list<int> s[361];
+
+inline int abs(int x) {
+    return (x>=0)?x:-x;
+}
+
+int main()
+{
+    ios::sync_with_stdio(0);
+
+    int hd(0),md(0);
+    for(int i=0; i<720; i++) {
+        int d = abs(md - hd);
+        if(d > 360) d = 720-d;
+        if(d < 0) {
+            cout << -1 << endl;
+            return 0;
+        }
+        s[d].push_back(i);
+
+        hd += 1;
+        hd %= 720;
+        md += 12;
+        md %= 720;
+    }
+
+    for(cin >> T; T--;) {
+        cin >> a;
+        x = (a*20000);
+        int y = x / 10000;
+        if(x-y*10000 > 166) {
+            y++;
+            if(y*10000-x > 166) continue;
+        }
+
+        for(int j:s[y]) {
+            int h = j/60;
+            int m = j%60;
+            if(h<10) cout << "0";
+            cout << h << ":";
+            if(m<10) cout << "0";
+            cout << m << endl;
+        }
+    }
+
+    return 0;
+}

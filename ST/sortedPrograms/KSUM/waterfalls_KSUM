@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MP make_pair
+#define A first
+#define B second
+typedef long long ll;
+
+int n,k;
+int a[100013];
+ll sums[100013];
+int on[100013];
+priority_queue<pair<ll,int> > best;
+
+int main() {
+	scanf("%d%d",&n,&k);
+	for (int i=1;i<=n;i++) {
+		scanf("%d",&a[i]);
+		sums[i] = sums[i-1]+a[i];
+	}
+	for (int i=1;i<=n;i++) {
+		on[i] = 0;
+		best.push(MP(sums[i]-sums[on[i]],i));
+	}
+	for (int i=0;i<k;i++) {
+		auto p = best.top();
+		best.pop();
+		printf("%lld ",p.A);
+		on[p.B]+=1;
+		best.push(MP(sums[p.B]-sums[on[p.B]],p.B));
+	}
+	printf("\n");
+
+	return 0;
+}

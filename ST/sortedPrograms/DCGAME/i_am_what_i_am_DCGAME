@@ -1,0 +1,254 @@
+#include<bits/stdc++.h>
+using namespace std;
+int m,n;
+
+	 vector< int > cfIndex;
+	 vector< long long > cfValue;
+
+ #define getcx getchar_unlocked
+//#define getcx getchar
+ inline int inp ( )//fast input function
+    {
+    int n=0;
+    int ch=getcx();//int sign=1;
+    while( ch < '0' || ch > '9' ){ ch=getcx();}
+    while( ch >= '0' && ch <= '9' )
+    n = (n<<3)+(n<<1) + ch-'0', ch=getcx();
+    //n=n*sign;
+    return n;
+    }
+
+struct Player
+{
+	char sign;
+	int k;
+	char chance;
+};
+
+	Player b[1000006];
+	long long totalCount;
+	map<int,long long> mp;
+	
+void eval()
+{
+	char chi;
+	int sz=cfIndex.size();
+//	str[m]='\0';
+	for(int i=0;i<m;i++) 
+	{
+		long long moves;
+		if(b[i].sign=='=')
+		  { // map<int,long long>::iterator it=mp.find(b[i].k);
+			 int ind=(int)(std::lower_bound(cfIndex.begin(),cfIndex.end(),b[i].k)-cfIndex.begin());
+		  	if(cfIndex[ind]!=b[i].k)
+		  	  moves=0;
+		  	else
+		  	 {
+		  	   moves=cfValue[ind]-cfValue[ind-1];
+			 	
+			 }
+		  }
+		else if(b[i].sign=='>')
+		  {
+		  	int ind=(int)(std::lower_bound(cfIndex.begin(),cfIndex.end(),b[i].k)-cfIndex.begin());
+	
+		  	if(cfIndex[ind]==b[i].k)
+		  	  moves=totalCount-cfValue[ind];
+		  	else
+		  	 {
+		  	   moves=totalCount-cfValue[ind-1];
+			   	
+			 }
+		  }
+		else
+		  {	  int ind=(int)(std::lower_bound(cfIndex.begin(),cfIndex.end(),b[i].k)-cfIndex.begin());
+	
+		  	if(cfIndex[ind]==b[i].k)
+		  	  {
+				 
+				moves=cfValue[ind-1];
+			  }
+		  	else
+		  	 {
+		  	   moves=cfValue[ind-1];
+			 }
+		  }
+		if(b[i].chance=='D')
+		 moves++;
+		if(moves%2==0)
+		 chi='D';
+		else
+		   chi='C';
+		putchar(chi);
+	}
+}
+	
+/*
+void eval()
+{
+//	for(map<int,long long>::iterator it=subArr.begin();it!=subArr.end();it++)
+//	  cf[it->first] = it->second;
+	str[m]='\0';
+	for(int i=0;i<m;i++) 
+	{
+		long long moves;
+		if(b[i].sign=='=')
+		  {  map<int,long long>::iterator it=mp.find(b[i].k);
+			 
+		  	if(it==mp.end())
+		  	  moves=0;
+		  	else
+		  	 {
+		  	   moves=it->second;
+			   it--;
+			   moves-=it->second;	
+			 }
+		  //	moves=cf[b[i].k]-cf[b[i].k-1];
+		  }
+		else if(b[i].sign=='>')
+		  {
+		  	if(mp.find(b[i].k)!=mp.end())
+		  	  moves=mp[b[i].k];
+		  	else
+		  	 {
+		  	 	mp[b[i].k];
+		  	   map<int,long long>::iterator it=mp.find(b[i].k);
+			   moves=totalCount;
+			   it--;
+			   moves-=it->second;
+			   mp.erase(b[i].k);	
+			 }
+		  //	moves=totalCount-cf[b[i].k];
+		  }
+		else
+		  {
+		  	if(mp.find(b[i].k)!=mp.end())
+		  	  {
+				
+				 map<int,long long>::iterator it=mp.find(b[i].k);
+				 it--;
+				moves=it->second;
+			  }
+		  	else
+		  	 {
+		  	 	mp[b[i].k];
+		  	   map<int,long long>::iterator it=mp.find(b[i].k);
+			   it--;
+			   moves=it->second;
+			   mp.erase(b[i].k);	
+			 }
+		  //	moves=cf[b[i].k-1];
+		  }
+		  
+		  
+		if(b[i].chance=='D')
+		 moves++;
+		if(moves%2==0)
+		 str[i]='D';
+		else
+		   str[i]='C';
+		putchar(str[i]);
+	}
+//	puts(str);
+	//cout<<str;
+}
+*/
+int main()
+{
+//	freopen("in.txt","r",stdin);
+	
+	n=inp();
+	m=inp();
+     //cin>>n>>m;
+	//a.resize(n);
+	//b.resize(m);
+	vector<int> a(n);
+	vector<int> left(n);
+	vector<int> right(n);
+
+	for(int i=0;i<n;i++)
+	  {
+	  	a[i]=inp();
+	  //	scanf("%d ",&a[i]);
+	 //cin>>a[i];
+	  }		
+	for(int i=0;i<m;i++)
+	{
+		char ch=getcx();
+		while(!(ch=='=' || ch=='<' || ch=='>' ))
+		  ch=getcx();
+		b[i].sign=ch;
+	//	scanf("%d",&b[i].k);
+		b[i].k=inp();	
+		ch=getcx();
+		while(!(ch=='C' || ch=='D'))
+		 ch=getcx();
+		b[i].chance=ch;
+	    //scanf("%c %d %c",&b[i].sign,&b[i].k,&b[i].chance);
+		//cin>>b[i].sign>>b[i].k>>b[i].chance;
+	}
+	
+   
+	stack<int> stk;
+	
+	for(int i=0;i<n;i++) 
+	{
+		while(!stk.empty())
+		 {
+		 	int last=stk.top();
+		 	if(a[last]<a[i])
+		 	  stk.pop();
+		 	else
+		 	  break;
+		 }
+		int lastLeft=-1;
+		if(!stk.empty())
+		  lastLeft = stk.top();
+		left[i]=i-lastLeft;
+		stk.push(i);
+	}
+    while(!stk.empty())
+     stk.pop();
+    for(int i=n-1;i>=0;i--) 
+	{
+		while(!stk.empty())
+		 {
+		 	int last=stk.top();
+		 	if(a[last]<=a[i])
+		 	  stk.pop();
+		 	else
+		 	  break;
+		 }
+		int lastRight=n;
+		if(!stk.empty())
+		  lastRight = stk.top();
+		right[i]=lastRight-i;
+		stk.push(i);
+	}
+	totalCount=(n*1LL*(n+1))/2;
+	for(int i=0;i<n;i++)
+	 {
+	 	mp[a[i]]+=left[i]*1LL*right[i];
+	 }
+	 long long prev=0;
+	 
+	 cfIndex.resize(mp.size()+3);
+	 cfValue.resize(mp.size()+3,0);
+	 
+	 cfIndex[0]=-2;
+	 cfIndex[1]=-1;
+	 cfIndex[mp.size()+2]=INT_MAX-2;
+	 cfValue[mp.size()+2]=totalCount;
+	 
+	 int pp=2;
+	for(map<int,long long>::iterator it=mp.begin();it!=mp.end();it++)
+	 {
+	 	prev+=it->second;
+	//	 it->second=prev;
+	    cfIndex[pp]=it->first;
+	    cfValue[pp++]=prev;
+	 }
+	 //mp[-1]=0;
+	 //mp[-2]=0;
+	 eval();
+}

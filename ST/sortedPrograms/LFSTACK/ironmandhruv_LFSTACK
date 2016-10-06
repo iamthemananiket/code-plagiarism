@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ll long long int
+#define pb push_back
+#define mp make_pair
+#define INF (ll)(1e18)
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define sz(x) ((int) (x).size())
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i = 0;i < N;i++)
+#define frep(i,a,b) for(int i = a;i <= b;i++)
+#define pii pair<int , int>
+#define pll pair<ll , ll>
+#define vii vector<int>
+#define vpii vector< pii >
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcountll(x)
+#define print(A,j,k) for(int ii=j;ii<k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+#define SQRT 350
+#define CASES int t;cin>>t;while(t--)
+#define FILE freopen("inp.txt" , "r" , stdin);
+#define ld long double
+
+const int N = 1e6 + 5;
+const int MOD = 1e9 + 7;
+
+vector<int> v[30];
+vector<int> seq;
+
+bool f(int in, int n) {
+	if (in >= seq.size())
+		return 1;
+
+	rep(i, n) 	{
+		if (v[i].size() == 0)
+			continue;
+		if (v[i].back() == seq[in]) {
+			v[i].pop_back();
+			if (f(in + 1, n))
+				return 1;
+			v[i].pb(seq[in]);
+		}
+	}
+	return 0;
+}
+
+int main()
+{
+	fast;
+
+	CASES {
+		rep(i, 30)
+			v[i].clear();
+		int n;
+		cin >> n;
+		int s = 0;
+		rep(i , n) {
+			int m , x; 
+			cin >> m;
+			s += m;
+			rep(j , m) {
+				cin >> x;
+				v[i].pb(x);
+			}
+			reverse(all(v[i]));
+		}
+		int x;
+		seq.clear();
+		rep(i, s) {
+			cin >> x;
+			seq.pb(x);
+		}
+		reverse(all(seq));
+		if(n == 1) {
+			reverse(all(seq));
+			int fl=0;
+			rep(i , v[0].size())
+				if(v[0][i]!=seq[i])
+					fl=1;
+			if(fl)
+				cout<<"No\n";
+			else 
+				cout<<"Yes\n";
+			continue;
+		}
+		if (f(0, n)) {
+			cout << "Yes\n";
+		}
+		else cout << "No\n";
+	}
+	return 0;
+}

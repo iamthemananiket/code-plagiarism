@@ -1,0 +1,82 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int SZ = 33;
+const int inf = 1e9;
+int n , m;
+vector < int > v[N];
+int inp;
+int to[N];
+int l[N];
+int r[N];
+int dp[SZ][SZ];
+int arrs[SZ];
+int arre[SZ];
+int pres[SZ];
+int pree[SZ];
+int tarrs[SZ];
+int tarre[SZ];
+void dfs(int node){
+    bool b = 0;
+    for(int edge : v[node]){
+        int next = to[edge];
+        ++arrs[l[edge]];
+        ++arre[r[edge]];
+        dfs(next);
+        --arrs[l[edge]];
+        --arre[r[edge]];
+        b = 1;
+    }
+    if(!b){
+        pres[0] = 0;
+        for(int i = 1 ; i <= 32 ; ++i){
+            pres[i] = pres[i - 1] + arrs[i];
+        }
+        pree[0] = 0;
+        for(int i = 1 ; i <= 32 ; ++i){
+            pree[i] = pree[i - 1] + arre[i];
+        }
+        tarrs[0] = 0;
+        for(int i = 1 ; i <= 32 ; ++i){
+            tarrs[i] = arrs[i] * i + tarrs[i - 1];
+        }
+        tarre[0] = 0;
+        for(int i = 1 ; i <= 32 ; ++i){
+            tarre[i] = arre[i] * i + tarre[i - 1];
+        }
+        for(int i = 1 ; i <= 32 ; ++i){
+            for(int j = i ; j <= 32 ; ++j){
+                int cst = 0;
+                cst += tarrs[32] - tarrs[i];
+                cst -= (pres[32] - pres[i]) * i;
+                cst += j * pree[j - 1];
+                cst -= tarre[j - 1];
+                dp[i][j] = min(dp[i][j] , cst);
+            }
+        }
+    }
+}
+int main(){
+    scanf("%d %d" , &n , &m);
+    for(int i = 1 ; i <= m ; ++i){
+        scanf("%d %d %d %d" , &inp , to + i , l + i , r + i);
+        v[inp].emplace_back(i);
+    }
+    for(int i = 1 ; i <= 32 ; ++i){
+        for(int j = 1 ; j <= 32 ; ++j){
+            dp[i][j] = inf;
+        }
+        arrs[i] = 0;
+        arre[i] = 0;
+    }
+    dfs(1);
+    for(int sz = 2 ; sz <= 32 ; ++sz){
+        for(int s = 1 ; s + sz - 1 <= 32 ; ++s){
+            int e = s + sz - 1;
+            for(int k = s ; k < e ; ++k){
+                dp[s][e] = min(dp[s][e] , dp[s][k] + dp[k + 1][e]);
+            }
+        }
+    }
+    printf("%d\n" , dp[1][32]);
+}

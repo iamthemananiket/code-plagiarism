@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+ll pw[4][100];
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input","r",stdin);
+  freopen("f.output","w",stdout);
+  freopen("error","w",stderr);
+#endif
+
+  for (int p = 2; p <= 3; p++) {
+    pw[p][0] = 1;
+    for (int i = 1; i < 100; i++) {
+      pw[p][i] = pw[p][i - 1] * p;
+    }
+  }
+
+  int t = read();
+
+  for (int tt = 1; tt <= t; tt++) {
+    ll l, r;
+    cin >> l >> r;
+    int res = 0;
+    for (int i = 0; pw[2][i] <= r; i++) {
+      for (int j = 0; pw[2][i] * pw[3][j] <= r; j++) {
+        if (pw[2][i] * pw[3][j] >= l) {
+          ll phi = 1;
+          if (i > 0) {
+            phi *= pw[2][i] - pw[2][i - 1];
+          }
+          if (j > 0) {
+            phi *= pw[3][j] - pw[3][j - 1];
+          }
+          if ((pw[2][i] * pw[3][j]) % phi == 0) {
+            ++res;
+          }
+        }
+      }
+    }
+    printf("%d\n", res);
+  }
+
+  return 0;
+}

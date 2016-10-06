@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+using namespace std;
+int  a[1000001]={0};
+int prime[1000005];
+int p=1;
+void generate(int y)
+    {int i,j;
+     prime[0]=2;
+	 for(i=3;i*i<=y;i+=2)
+        {if(a[i])
+          continue;
+         prime[p++]=i;
+		for(j=i*i;j<=y;j+=2*i)
+           {a[j]=1;
+           }
+        }
+        for(i;i<=y;i+=2)
+          if(!a[i])
+            prime[p++]=i;
+     //   for(i=0;i<p;i++)
+             ;//cout<<prime[i]<<" ";
+    }
+  int main()
+    {
+	 generate(100000);
+	 int t;
+	 cin>>t;
+	 while(t--)
+	 {
+	 	int n;
+	 	cin>>n;
+	 	int c=0;
+	 	for(int i=0;i<p;i++)
+	 	 {
+	 	 	while(n%prime[i]==0)
+	 	 	  {
+	 	 	  	n/=prime[i];
+				c++;
+			  }
+		  }
+		  if(n>1)
+		    c++;
+		    cout<<c<<endl;
+	 }
+	 
+}

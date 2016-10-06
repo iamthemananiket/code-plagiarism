@@ -1,0 +1,101 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 100005
+#define MAX_A 33
+
+int n,m,go[MAX_N];
+pint edge[MAX_N],par[MAX_N];
+vi root;
+int dpf[MAX_N][MAX_A];
+int dpg[MAX_N][MAX_A];
+
+int f(int i, int a)
+{
+	if (!i)
+		return 0;
+	int ra=par[i].fi;
+	return f(go[i],a)+max(0,ra-a);
+}
+
+int g(int i, int b)
+{
+	if (!i)
+		return 0;
+	int rb=par[i].se;
+	return g(go[i],b)+max(0,b-rb);
+}
+
+int cost(int i, int a, int b)
+{
+	int r=0;
+	if (dpf[i][a]!=-1)
+		r=dpf[i][a];
+	else
+		r=f(i,a);
+	if (dpg[i][b]!=-1)
+		r+=dpg[i][b];
+	else
+		r+=g(i,b);
+	return r;
+}
+
+int dp[MAX_N][MAX_A][MAX_A];
+
+int solve(int i, int l, int it)
+{
+	if (l==32)
+		return 0;
+	if (it==33)
+		return 123456;
+	if (dp[i][l][it-1]!=-1)
+		return dp[i][l][it-1];
+	if (i==sz(root))
+		return dp[i][l][it-1]=solve(0,l,it+1);
+	int ans=solve(i+1,l,it);//not
+//	for (int k=l+1; k<=32; k++) //take [l+1,k]
+//		ans=min(ans,solve(i+1,k,it)+cost(root[i],l+1,k));
+	ans=min(ans,solve(i+1,it,it)+cost(root[i],l+1,it));
+	ans=min(ans,solve(i,l,it+1));
+	return dp[i][l][it-1]=ans;
+}
+
+int main()
+{
+	scanf("%d %d",&n,&m);
+	while (m--)
+	{
+		int a,b,l,r;
+		scanf("%d %d %d %d",&a,&b,&l,&r);
+		par[b]=mp(l,r);
+		if (a==1)
+		{
+			root.pb(b);
+			for (int i=1; i<=32; i++)
+				dpf[b][i]=dpg[b][i]=-1;
+		}
+		else
+			go[a]=b;
+	}
+	for (int i=0; i<=sz(root); i++)
+		for (int j=0; j<=32; j++)
+			for (int k=0; k<=32; k++)
+				dp[i][j][k]=-1;
+	printf("%d\n",solve(0,0,1));
+	return 0;
+}

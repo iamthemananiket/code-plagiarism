@@ -1,0 +1,32 @@
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  while (T-- > 0) {
+    int M;
+    ll n1, n2;
+    cin >> n1 >> n2 >> M;
+    const ll x = min(min(n1, n2), M * (M + 1LL) / 2);
+    const ll res = max(0LL, n1 - x) + max(0LL, n2 - x);
+    cout << res << endl;
+  }
+  return 0;
+}

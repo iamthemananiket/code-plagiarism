@@ -1,0 +1,44 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+ll doxor(ll x)
+{
+	if (x==0)
+		return 0;
+	if (x&1)
+	{
+		if (((x+1)/2)&1)
+			return 1;
+		else
+			return 0;
+	}
+	return x^doxor(x-1);
+
+}
+int main()
+{
+	int t;
+	scanf("%d",&t);
+	while (t--)
+	{
+		ll x,m;
+		int i,j;
+		scanf("%lld%lld",&x,&m);
+		ll d=((x&1));
+		ll a=x-2,b=x+2*(m-1);
+		ll ans=doxor(a>>1)^doxor(b>>1);
+		ans<<=1;
+		if (x&1)
+		{
+			if(m&1)
+				ans^=1;
+		}
+		if (ans==0)
+		{
+			printf("BOB\n");
+		}
+		else
+			printf("ALICE\n");
+	}
+	return 0;
+}

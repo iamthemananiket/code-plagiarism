@@ -1,0 +1,118 @@
+#include<bits/stdc++.h>
+#define mod 998244353
+#define maxn 50010
+#define maxm 55
+using namespace std;
+int Ans[maxm][maxn],F[maxm][maxn],k,l,G[maxm][maxn],cf,vis[maxm],ln,q[maxm];
+int N,i,t,g[maxn],n,m,p,a[maxn],s,f[maxn],A[maxm][maxn],j,B[maxm][maxn];
+int powmod(int x,int y)
+{
+    int ans=1;
+    for(;y;y>>=1,x=1ll*x*x%mod)
+        if(y&1)ans=1ll*ans*x%mod;
+    return ans;
+}
+void Init()
+{
+    for(int i=1;i<N;i++)
+        g[i]=g[i>>1]>>1|((i&1)<<cf);
+}
+void NTT(int *A,int f)
+{
+    int i,j,k,b=0,w,w0,x;
+    for(i=0;i<N;i++)
+        if(g[i]>i)swap(A[i],A[g[i]]);
+    for(i=1;i<N;i<<=1)
+    {
+        b++;
+        w=powmod(3,(1<<23-b)*119);
+        if(f<0)w=powmod(w,mod-2);
+        for(j=0;j<N;j+=i<<1)
+        {
+            w0=1;
+            for(k=0;k<i;k++)
+            {
+                x=A[j+k];
+                A[j+k]=(x+1ll*A[j+k+i]*w0)%mod;
+                A[j+k+i]=(x-1ll*A[j+k+i]*w0)%mod;
+                if(A[j+k+i]<0)A[j+k+i]+=mod;
+                w0=1ll*w0*w%mod;
+            }
+        }
+    }
+    if(f<0)
+    {
+        int v=powmod(N,mod-2);
+        for(i=0;i<N;i++)
+            A[i]=1ll*A[i]*v%mod;
+    }
+}
+void getit()
+{
+	for(a[s=1]=1;!vis[a[s]];s++)
+		vis[a[s]]=s,a[s+1]=a[s]*10%p;s--;
+	int t1=n-vis[a[s+1]]+1,t2=(s-vis[a[s+1]]+1);
+	for(i=1;i<=s;i++)
+	{
+		f[i]=i<vis[a[s+1]]?1:t1/t2+(t1%t2>=i-vis[a[s+1]]+1);
+		for(j=0;j<ln;j++)if(q[j]==f[i]){f[i]=j;break;}
+		if(j>=ln)q[ln]=f[i],f[i]=ln++;
+	}
+	for(j=0;j<ln;j++)t=max(t,q[j]);
+	for(i=0;i<=9&&i<=m;i++)A[0][i]=1;
+	NTT(A[0],1);
+	for(i=1;1<<i<=t;i++)
+	{
+		for(j=0;j<N;j++)
+			A[i][j]=1ll*A[i-1][j]*A[i-1][j]%mod;
+		NTT(A[i],-1);
+		for(j=m+1;j<N;j++)A[i][j]=0;
+		NTT(A[i],1);
+	}
+	cf=i;
+	for(k=0;k<ln;k++)
+	{
+		t=q[k];B[k][0]=1;
+		for(i=cf;i>=0;i--)if(t>>i&1)
+		{
+			NTT(B[k],1);
+			for(j=0;j<N;j++)
+				B[k][j]=1ll*B[k][j]*A[i][j]%mod;
+			NTT(B[k],-1);
+			for(j=m+1;j<N;j++)B[k][j]=0;
+		}
+	}
+}
+int main()
+{
+	scanf("%d%d%d",&n,&p,&m);
+	for(N=1;N<=m<<1;N<<=1)cf++;cf--;
+	Init();getit();
+	Ans[0][0]=1;
+	for(i=1;i<=s;i++)
+	{
+		for(j=0;j<p;j++)NTT(Ans[j],1);
+		memset(F,0,sizeof(F));
+		for(j=0;j<=m;j++)
+			F[a[i]*j%p][j]=B[f[i]][j];
+		for(j=0;j<p;j++)NTT(F[j],1);
+		memset(G,0,sizeof(G));
+		for(j=0;j<p;j++)
+			for(k=0;k<p;k++)
+				for(l=0;l<N;l++)
+					G[(j+k)%p][l]=(G[(j+k)%p][l]+1ll*Ans[j][l]*F[k][l])%mod;
+		memset(Ans,0,sizeof(Ans));
+		for(j=0;j<p;j++)
+		{
+			NTT(G[j],-1);
+			for(k=0;k<=m;k++)Ans[j][k]=G[j][k];
+		}
+	}
+	for(i=1;i<=m;i++)
+	{
+		Ans[0][i]+=Ans[0][i-1];
+		if(Ans[0][i]>=mod)Ans[0][i]-=mod;
+	}
+	for(i=0;i<=m;i++)
+		printf("%d ",Ans[0][i]);
+}

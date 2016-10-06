@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+#define X first
+#define Y second
+
+const int N=1e5+10;
+const ll linf=1e16;
+
+int n;
+vector <int> v[N];
+vector <ii> a[N];
+
+int depth[N];
+int s[N],top;
+int hi[N];
+
+int sf[N],topf;
+int stopf[N],recs[N];
+ll f[N];
+void prepare(){
+    int m;
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<n;i++){
+        int x,y;
+        scanf("%d%d",&x,&y);
+        v[x].push_back(y);
+        v[y].push_back(x);
+    }
+    while (m--){
+        int x,tmpk,wei;
+        scanf("%d%d%d",&x,&tmpk,&wei);
+        a[x].push_back(ii(tmpk,wei));
+    }
+}
+void solve(){
+    top=1;
+    s[1]=1;
+    f[0]=-1;
+    depth[1]=1;
+    while (top){
+        int x=s[top];
+//        cout<<x<<"=> "<<topf<<'\n';
+//            for(int i=1;i<=topf;i++) cout<<sf[i]<<" "<<f[sf[i]]<<'\n';
+        if (!hi[x]){
+            stopf[top]=topf;
+            while (f[sf[topf]]>=f[x]) topf--;
+            recs[top]=sf[++topf];
+            sf[topf]=x;
+        }
+        if (hi[x]==v[x].size()){
+            sf[topf]=recs[top];
+            topf=stopf[top--];
+            continue;
+        }
+        int y=v[x][hi[x]++];
+        if (depth[y]) continue;
+        depth[y]=depth[x]+1;
+
+        ///
+        f[y]=linf;
+        for(auto ticket:a[y]){
+            int L=1,R=topf;
+            while (L<=R){
+                int mid=(L+R)/2;
+                if (depth[y]-depth[sf[mid]]>ticket.X) L=mid+1;
+                else R=mid-1;
+            }
+            f[y]=min(f[y],f[sf[L]]+ticket.Y);
+        }
+        s[++top]=y;
+    }
+}
+int main(){
+    prepare();
+    solve();
+    ///
+    int test,x;
+    scanf("%d",&test);
+    while (test--){
+        scanf("%d",&x);
+        printf("%lld\n",f[x]);
+    }
+}

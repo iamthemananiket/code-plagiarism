@@ -1,0 +1,208 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, u, v, m, q, r, ql, qr, k, l, s, x, y, w, h, c, a, b, z;
+const int N = 1e5 + 11;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 57LL;
+const bool JUDGE = false;
+struct node{
+        node * l;
+        node * r;
+        int s;
+        int pr;
+        bool rev;
+        int val[11];
+                int x;
+        node (int s, node * l, node * r, bool rev, int x) : s(s), l(l), r(r), rev(rev), x(x) {
+                for (int i = 0; i <= 10; ++i) val[i] = 0;
+                val[x]++;
+                pr = rand();
+        }
+        node () {
+                l = r = NULL;
+                rev = false;
+                memset(val, 0, sizeof(val));
+                pr = rand();
+        }
+};
+bool CK[N];
+pii f[N];
+typedef node * pn;
+inline void push(pn t) {
+        if (!t || !(t -> rev)) return;
+        swap(t -> l, t -> r);
+        if (t -> l) t -> l -> rev ^= 1;
+        if (t -> r) t -> r -> rev ^= 1;
+        t -> rev = 0;
+}
+inline int sz(pn t) {
+        if (t) return t -> s;
+		else return 0;
+}
+inline void mod_s(pn t) {
+        if (t) t -> s = sz(t -> l) + 1 + sz(t -> r);
+        if (t) {
+                for (int i = 0; i < 10; ++i) {
+                        t -> val[i] = 0;
+                        if (t -> l) t -> val[i] += t -> l -> val[i];
+                        if (t -> r) t -> val[i] += t -> r -> val[i];
+                }
+        }
+        if (t) t -> val[t -> x]++;
+}
+void split(pn t, pn & l, pn & r, int add, int by) {
+        push(t);
+        if (!t) {
+                l = r = NULL;
+                return;
+        }
+        int pos = add + sz(t -> l);
+
+        if (pos <= by) {
+                l = t;
+                split(t -> r, l -> r, r, pos + 1, by);
+        }
+        else {
+                r = t;
+                split(t -> l, l, r -> l, add, by);
+        }
+        mod_s(t);
+}
+void merge(pn & t, pn l, pn r) {
+        push(l), push(r);
+        if (!l || !r) {
+                t = l ? l : r;
+        }
+        else if (l -> pr > r -> pr) {
+                t = l;
+                merge(t -> r, l -> r, r);
+        }
+        else {
+                t = r;
+                merge(t -> l, l, r -> l);
+        }
+        mod_s(t);
+}
+map < int, int > M;
+int rm[30];
+void inorder(pn t) {
+    if (!t) return;
+	push(t);
+    inorder (t -> l);
+    cout << rm[t -> x] << " ";
+    inorder(t -> r);
+}
+int main(){
+	csl;
+	if (JUDGE) {
+		freopen("cricket.in", "r", stdin);
+		freopen("cricket.out", "w", stdout);
+	}
+	int H = 0;
+	cin >> n >> q;
+	pn treap = NULL;
+	for (int i = 0; i < n; ++i) {
+        cin >> x;
+        if (M.find(x) == M.end()) { M[x] = H++;
+			rm[H - 1] = x;
+		}
+        merge(treap, treap, new node(1, NULL, NULL, 0, M[x]));
+		//assert(H <= 10);
+	}
+	while (q--) {
+        int id;
+        cin >> id;
+        if (id == 1) {
+            cin >> u >> v;
+            if (M.find(v) == M.end()) { M[v] = H++;
+				rm[H - 1] = v;
+			}
+            pn A = NULL, B = NULL, C = NULL;
+            split(treap, A, B, 1, u - 1);
+            split(B, C, treap, u, u);
+            C -> val[C -> x]--;
+            C -> val[M[v]]++;
+            C -> x = M[v];
+            merge(B, C, treap);
+            merge(treap, A, B);
+			//assert(H <= 10);
+        }
+        else if (id == 2) {
+            cin >> l >> r;
+            pn A = NULL, B = NULL, C = NULL, D = NULL;
+            split(treap, A, B, 1, l - 1);
+			/*inorder(A);
+			cout << '\n';
+			inorder(B);
+			cout << '\n';*/
+            split(B, C, D, l, r);
+            C -> rev ^= 1;
+            merge(B, C, D);
+            merge(treap, A, B);
+        }
+        else {
+            cin >> l >> r >> w;
+            for (int i = 0; i <= w; ++i) CK[i] = false, f[i] = mp(-1, -1);
+            f[0] = mp(-1, 0);
+            CK[0] = true;
+            pn A = NULL, B = NULL, C = NULL, D = NULL;
+            split(treap, A, B, 1, l - 1);
+            split(B, C, D, l, r);
+            for (int i = 0; i < H; ++i) {
+                if (C -> val[i] == 0) continue;
+                for (int j = 0; j < w; ++j) {
+                    if (!CK[j]) continue;
+                    if (j + rm[i] > w) continue;
+                    if (CK[j + rm[i]]) continue;
+                    if (f[j].fst != i || (f[j].fst == i && f[j].snd < C -> val[i])) {
+                        CK[j + rm[i]] = true;
+                       // cout << j + rm[i] << " ";
+                        f[j + rm[i]] = mp(i, f[j].fst == i ? f[j].snd + 1 : 1);
+                       // cout << f[j + rm[i]].snd << '\n';
+                    }
+                }
+            }
+            if (CK[w]) cout << "Yes\n";
+            else cout << "No\n";
+            merge(B, C, D);
+            merge(treap, A, B);
+        }
+		/*inorder(treap);
+		cout << '\n';*/
+	}
+	return 0;
+}
+/*#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, u, v, m, q, r, ql, qr, k, d, l, w, c, x;
+const int N = 1e5 + 500;
+const ll mod = 1e9 + 7;
+const ll INF = 1LL << 57LL;
+struct {
+{
+}
+};*/

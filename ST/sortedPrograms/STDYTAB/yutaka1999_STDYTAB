@@ -1,0 +1,58 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#define SIZE 4005
+#define MOD 1000000000
+
+using namespace std;
+typedef long long int ll;
+
+ll dp[2][SIZE];
+ll C[SIZE][SIZE];
+
+void make()
+{
+	for(int i=0;i<SIZE;i++)
+	{
+		C[i][0]=C[i][i]=1;
+		for(int j=1;j<i;j++)
+		{
+			C[i][j]=(C[i-1][j-1]+C[i-1][j])%MOD;
+		}
+	}
+}
+int main()
+{
+	make();
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int n,m;
+		scanf("%d %d",&n,&m);
+		int pos=0;
+		memset(dp[pos],0,sizeof(dp[pos]));
+		dp[pos][0]=1;
+		for(int i=0;i<n;i++)
+		{
+			pos^=1;
+			ll cnt=0;
+			for(int j=0;j<=m;j++)
+			{
+				cnt+=dp[pos^1][j];
+				cnt%=MOD;
+				dp[pos][j]=cnt*C[j+m-1][j]%MOD;
+			}
+		}
+		ll ret=0;
+		for(int j=0;j<=m;j++)
+		{
+			ret+=dp[pos][j];
+			ret%=MOD;
+		}
+		printf("%lld\n",ret);
+	}
+	return 0;
+}

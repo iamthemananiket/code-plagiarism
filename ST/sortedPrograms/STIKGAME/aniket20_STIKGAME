@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll arr[2001];
+int main()
+{
+	int n;
+	ll ans,i,j;
+	ll *p;
+	scanf("%d",&n);
+	while(n!=0)
+	{
+		for(i=0;i<n;i++)
+		{
+			scanf("%lld",&arr[i]);
+		}
+		sort(arr,arr+n);
+		ans=0;
+		for(i=0;i<n;i++)
+		{
+			for(j=i+1;j<n;j++)
+			{
+				 p=upper_bound(arr,arr+n,arr[i]+arr[j]);
+				 ll val=p-arr;
+			//	 cout<<val<<" ";
+			//cout<<val<<" ";
+				ans+=(n-val);
+			}
+		}
+		printf("%lld\n",ans);
+		scanf("%d",&n);
+	}
+	return 0;
+}

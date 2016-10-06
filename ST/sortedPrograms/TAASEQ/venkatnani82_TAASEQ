@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+using namespace std;
+int a[100010];
+set<int> s;
+map<int, int> m;
+void rem(int x) {
+	// cout << x << " &&" << endl;
+	assert(m[x] > 0);
+	// if(m[x] == 0) return;
+	m[x]--;
+	if(m[x] == 0) s.erase(x);
+}
+void add(int x) {
+	m[x]++;
+	s.insert(x);
+}
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		int n;
+		cin >> n;
+		for(int i = 0; i < n; i++) scanf("%d", a + i);
+		s.clear();
+		m.clear();
+		for(int i = 1; i < n; i++) add(a[i] - a[i - 1]);
+		int ans = 2e9;
+		for(int i = 1; i + 1 < n; i++) {
+			rem(a[i + 1] - a[i]);
+			rem(a[i] - a[i - 1]);
+			add(a[i + 1] - a[i - 1]);
+			// cout << i << endl;
+			// set<int> :: iterator it = s.begin();
+			// while(it != s.end()) {
+			// 	cout << (*it) << " " << m[(*it)] << " * ";
+			// 	it++;
+			// }
+			// cout << endl;
+			// cout << " * \n";
+			if(int(s.size()) == 1) {
+				ans = min(ans, a[i]);
+				// break;
+			}
+			rem(a[i + 1] - a[i - 1]);
+			add(a[i + 1] - a[i]);
+			add(a[i] - a[i - 1]);
+			// it = s.begin();
+			// while(it != s.end()) {
+			// 	cout << (*it) << " " << m[(*it)] << " * ";
+			// 	it++;
+			// }
+			// cout << endl;
+		}
+		rem(a[1] - a[0]);
+		if(int(s.size()) <= 1) ans = min(ans, a[0]);
+		add(a[1] - a[0]);
+		rem(a[n - 1] - a[n - 2]);
+		if(int(s.size()) <= 1) ans = min(ans, a[n - 1]);
+		if(ans == 2e9) cout << -1 << endl;
+		else cout << ans << endl;
+	}
+}

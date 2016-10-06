@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+int phi[MAXN];
+
+void solve() {
+	int n,d; s(n); s(d);
+	ll ans = 0;
+	rep(i,1,n) {
+		ans += phi[i/d] * (i%d == 0);
+	}
+	prl(ans); endc;
+}
+	
+int main() {
+	phi[0] = 0;
+	repe(i,1,MAXN) {
+		phi[i] = 1;
+	}
+	repe(i,2,MAXN) {
+		if (phi[i] == 1) {
+			//pr(i); endc;
+			phi[i] = i-1;
+			int j = 2*i;
+			while (j < MAXN) {
+				int x = j; int k = 1;
+				while (x%i == 0) {
+					k *= i; x /= i;
+				}
+				phi[j] *= (k - k/i);
+				j += i;
+			}
+		}
+	}
+	/*repe(i,1,MAXN) {
+		pr(i); psp; pr(phi[i]); endc;
+	}*/
+	int t; s(t); while (t--) solve();
+	return 0;
+}

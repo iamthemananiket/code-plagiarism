@@ -1,0 +1,127 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+//#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, x, y, d;
+const int N = 105;
+const int K = 1001;
+const int LN = 20;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+ll mem[19][1 << 9][504][2];
+int nxt[504][10];
+ll sol = 0;
+int R[N];
+ll rec(int pos, int mask, int rem, bool lo, bool ss) {
+    if (pos == n) {
+        int hk = 0;
+        for (int i = 1; i <= 9; ++i) {
+            if (i == 5) continue;
+            if (mask & (1 << (i - 1))) {
+                if (rem % i == 0) hk++;
+            }
+        }
+        if (ss && (mask & (1 << 4))) hk++;
+        return (hk >= k);
+    }
+    ll & ret = mem[pos][mask][rem][lo];
+    if (ret != -1) return ret;
+    ret = 0;
+    for (int i = 0; i <= 9; ++i) {
+        if (!lo && (i > R[pos])) continue;
+        int nmask = mask;
+        if (i > 0) nmask |= (1 << (i - 1));
+        bool nlo = lo | (i < R[pos]);
+        int nrem = nxt[rem][i];
+        ret += rec(pos + 1, nmask, nrem, nlo, i == 0 || i == 5);
+    }
+    return ret;
+}
+bool f[10];
+int main() {
+    csl;
+    cin >> t;
+    for (int i = 0; i < 504; ++i) {
+        for (int j = 0; j <= 9; ++j) {
+            nxt[i][j] = (i * 10 + j) % 504;
+        }
+    }
+    while (t--) {
+        memset(mem, -1, sizeof(mem));
+        cin >> l >> r >> k;
+        u = l, v = r;
+        sol = 0;
+        n = 0;
+        while (r) {
+            R[n++] = r % 10;
+            r /= 10;
+        }
+        reverse(R, R + n);
+        sol += rec(0, 0, 0, 0, 0);
+        n = 0;
+        while (l) {
+            R[n++] = l % 10;
+            l /= 10;
+        }
+        reverse(R, R + n);
+        memset(mem, -1, sizeof(mem));
+        sol -= rec(0, 0, 0, 0, 0);
+        l = u;
+        int hk = 0;
+        for (int i = 0; i <= 9; ++i) f[i] = 0;
+        while (l) {
+            int x = (l % 10);
+            l /= 10;
+            if (!x) continue;
+            f[x] += ((u % x)== 0);
+        }
+        for (int i = 1; i <= 9; ++i) if (f[i]) hk++;
+        if (hk >= k) sol++;
+        cout << sol << '\n';
+    }
+    return 0;
+}
+
+

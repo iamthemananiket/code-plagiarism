@@ -1,0 +1,158 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct pt;
+
+struct line
+{
+    long long A, B, C;
+    line(): A(0), B(0), C(0) {}
+    line(long long a, long long b, long long c): A(a), B(b), C(c) {}
+    long long eval(const pt& p);
+};
+
+struct pt
+{
+    int x, y;
+    pt(): x(0), y(0) {}
+    pt(int a, int b): x(a), y(b) {}
+    pt operator- (const pt& other) const { return pt(x-other.x, y-other.y); }
+    line make_line(const pt& other) const { return line(y-other.y, other.x-x, cross(other)); }
+    long long cross(const pt& other) const { return 1LL*x*other.y-1LL*y*other.x; }
+    bool operator< (const pt& other) const
+    {
+        if(x!=other.x)
+            return x<other.x;
+        return y<other.y;
+    }
+} A[100000];
+
+long long line::eval(const pt& p)
+{
+    return A*p.x+B*p.y+C;
+}
+
+int N;
+
+long long cross(const pt& a, const pt& b, const pt& c)
+{
+    return (b-a).cross(c-b);
+}
+
+pair<vector<pt>, vector<pt>> convex_hull2(const vector<pt>& V)
+{
+    int n=V.size();
+    vector<pt> lower, upper;
+    for(int i=0; i<n; i++)
+    {
+        while(lower.size()>=2 && cross(lower[lower.size()-2], lower.back(), V[i])<=0)
+            lower.pop_back();
+        lower.push_back(V[i]);
+    }
+    for(int i=n-1; i>=0; i--)
+    {
+        while(upper.size()>=2 && cross(upper[upper.size()-2], upper.back(), V[i])<=0)
+            upper.pop_back();
+        upper.push_back(V[i]);
+    }
+    return make_pair(lower, upper);
+}
+
+vector<pt> convex_hull(const vector<pt>& V)
+{
+    auto ret=convex_hull2(V);
+    ret.first.pop_back();
+    ret.second.pop_back();
+    vector<pt> hull;
+    for(auto& it: ret.first)
+        hull.push_back(it);
+    for(auto& it: ret.second)
+        hull.push_back(it);
+    return hull;
+}
+
+void _main()
+{
+    scanf("%d", &N);
+    for(int i=0; i<N; i++)
+        scanf("%d%d", &A[i].x, &A[i].y);
+    sort(A, A+N);
+    auto hull=convex_hull(vector<pt>(A, A+N));
+    if((int)hull.size()==N)
+    {
+        printf("-1\n");
+        return;
+    }
+    double cenX=0.0, cenY=0.0;
+    for(auto& it: hull)
+        cenX+=it.x, cenY+=it.y;
+    cenX/=hull.size();
+    cenY/=hull.size();
+    vector<line> lines;
+    long long area=0;
+    for(int i=0; i<(int)hull.size(); i++)
+    {
+        pt a=hull[i], b=hull[(i+1)%hull.size()];
+        line l=a.make_line(b);
+        if(l.A*cenX+l.B*cenY+l.C<0.0)
+            l.A*=-1, l.B*=-1, l.C*=-1;
+        area+=a.cross(b);
+        lines.push_back(l);
+    }
+    set<pt> hullpt;
+    for(auto& it: hull)
+        hullpt.insert(it);
+    vector<pt> interior;
+    for(int i=0; i<N; i++) if(!hullpt.count(A[i]))
+        interior.push_back(A[i]);
+    auto ihull=convex_hull2(interior);
+    auto& lower=ihull.first;
+    auto& upper=ihull.second;
+    long long mini=0x3f3f3f3f3f3f3f3fLL;
+    for(auto& l: lines)
+    {
+        if(!lower.empty())
+        {
+            int lo=1, mid, hi=lower.size()-1;
+            while(lo<hi)
+            {
+                mid=(lo+hi+1)/2;
+                if(l.eval(lower[mid-1])>l.eval(lower[mid]))
+                    lo=mid;
+                else
+                    hi=mid-1;
+            }
+            mini=min(mini, l.eval(lower[lo-1]));
+            if(lo<(int)lower.size())
+                mini=min(mini, l.eval(lower[lo]));
+        }
+        if(!upper.empty())
+        {
+            int lo=1, mid, hi=upper.size()-1;
+            while(lo<hi)
+            {
+                mid=(lo+hi+1)/2;
+                if(l.eval(upper[mid-1])>l.eval(upper[mid]))
+                    lo=mid;
+                else
+                    hi=mid-1;
+            }
+            mini=min(mini, l.eval(upper[lo-1]));
+            if(lo<(int)upper.size())
+                mini=min(mini, l.eval(upper[lo]));
+        }
+    }
+    printf("%lld\n", area-mini);
+    //printf("(%lld) (%lld) %lld\n", area, mini, area-mini);
+}
+
+int main()
+{
+    //freopen("in2.txt", "r", stdin);
+    int T;
+    scanf("%d", &T);
+    while(T--)
+        _main();
+    return 0;
+}

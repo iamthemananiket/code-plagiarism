@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    int T, N;
+
+    cin >> T;
+
+    while (T--)
+    {
+        int N;
+
+        cin >> N;
+
+        int last = 0;
+        int val;
+        long long answer = 0;
+        int length = 0;
+
+        for (int i = 1; i <= N; ++i)
+        {
+            cin >> val;
+
+            if (last <= val)
+            {
+                answer += (length + 1);
+                length++;
+            }
+            else
+            {
+                length = 1;
+                answer += 1;
+            }
+
+            last = val;
+        }
+
+        cout << answer << "\n";
+    }
+
+    return 0;
+}

@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <vector>
+#include <queue>
+#include <stack>
+
+using namespace std;
+
+const int N = 210;
+
+struct MaxFlow {
+  struct edge {
+    int u, v, c, f;
+    int next(int x) {
+      return u ^ v ^ x;
+    }
+    int flow(void) {
+      return c - f;
+    }
+    edge(int _u, int _v, int _c, int _f) :
+      u(_u), v(_v), c(_c), f(_f) {}
+  };
+  vector<edge> e;
+  vector<int> edge_id[N];
+  queue<int> que;
+  stack<int> stk;
+
+  int P[N], depth[N];
+  int source, sink, n;
+
+  int bfs(void) {
+    for(int i = source;i <= sink;i++) {
+      depth[i] = -1;
+    }
+    depth[source] = 0;
+    que.push(source);
+    while(!que.empty()) {
+      int u = que.front();
+      que.pop();
+      for(int id : edge_id[u]) {
+        int v = e[id].next(u);
+        if(e[id].flow() == 0) continue;
+        if(depth[v] == -1) {
+          depth[v] = depth[u] + 1;
+          que.push(v);
+        }
+      }
+    }
+    return depth[sink] != -1;
+  }
+  int dfs(void) {
+    for(int i = source;i <= sink;i++) {
+      P[i] = -1;
+    }
+    P[source] = -2;
+    stk.push(source);
+    while(!stk.empty()) {
+      int u = stk.top();
+      stk.pop();
+      for(int id : edge_id[u]) {
+        int v = e[id].next(u);
+        if(e[id].flow() == 0) continue;
+        if(depth[v] != depth[u] + 1) continue;
+        if(P[v] != -1) continue;
+        P[v] = id;
+        stk.push(v);
+      }
+    }
+    return P[sink] != -1;
+  }
+  int max_flow(void) {
+    int ans = 0;
+    while(bfs()) {
+      while(dfs()) {
+        ans++;
+        for(int i = sink;i != source;i = e[P[i]].next(i)) {
+          e[P[i]].f++;
+          e[e[P[i]].c == 1 ? P[i]+1 : P[i]-1].f--;
+        }
+      }
+    }
+    return ans;
+  }
+  void connect(int u, int v, int weight = 1) {
+    e.push_back(edge(u, v, weight, 0));
+    edge_id[u].push_back(e.size() - 1);
+    e.push_back(edge(v, u, 0, 0));
+    edge_id[v].push_back(e.size() - 1);
+  }
+  void init(int _n) {
+    n = _n;
+    source = 0;
+    sink = _n + 1;
+    e.clear();
+    for(int i = source;i <= sink;i++) {
+      edge_id[i].clear();
+    }
+  }
+} Graph;
+
+void evaluate(void) {
+  int n, m;
+  scanf("%d%d", &n, &m);
+  Graph.init(2*n);
+  for(int i = 1;i <= n;i++) {
+    Graph.connect(Graph.source, i);
+  }
+  for(int i = n+1;i <= 2*n;i++) {
+    Graph.connect(i, Graph.sink);
+  }
+  for(int i = 0;i < m;i++) {
+    int u, v;
+    scanf("%d%d", &u, &v);
+    Graph.connect(u, n+v);
+  }
+  int ans = Graph.max_flow();
+  printf("%d\n", n - ans);
+}
+int main() {
+  int t;
+  scanf("%d", &t);
+  for(int i = 0;i < t;i++) {
+    evaluate();
+  }
+  return 0;
+}

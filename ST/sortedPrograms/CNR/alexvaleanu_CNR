@@ -1,0 +1,181 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+using namespace std;
+
+const int Nmax = 350;
+
+int T, N, K, M;
+
+class BI
+{
+public:
+
+    int n[150];
+
+    BI()
+    {
+        memset( n, 0, sizeof ( n ) );
+    }
+
+    bool operator = ( int val )
+    {
+        while ( val )
+        {
+            n[ ++n[0] ] = val % 10;
+            val /= 10;
+        }
+
+        return true;
+    }
+
+    bool operator = ( BI B )
+    {
+        memcpy( n, B.n, sizeof ( B.n ) );
+
+        return true;
+    }
+
+    bool operator += ( BI B )
+    {
+        int T = 0;
+
+        n[0] = max( n[0], B.n[0] );
+
+        for ( int i = 1; i <= n[0]; ++i )
+        {
+            n[i] = n[i] + T + B.n[i];
+            T = n[i] / 10;
+            n[i] %= 10;
+        }
+
+        while ( T )
+        {
+            n[ ++n[0] ] = T % 10;
+            T /= 10;
+        }
+
+        return true;
+    }
+
+    bool operator -= ( BI B )
+    {
+        int T = 0;
+
+        for ( int i = 1; i <= n[0]; ++i )
+        {
+            n[i]  = n[i] - ( B.n[i] + T );
+
+            if ( n[i] < 0 )
+                    T = 1;
+            else
+                    T = 0;
+
+            if ( T )
+                    n[i] += 10;
+        }
+
+        while ( !n[ n[0] ] ) n[0]--;
+
+        return true;
+    }
+
+    bool compare( BI B )
+    {
+        if ( n[0] < B.n[0] )
+                return true;
+
+        if ( n[0] > B.n[0] )
+                return false;
+
+        for ( int i = n[0]; i >= 1; i-- )
+        {
+            if ( n[i] < B.n[i] )
+                    return true;
+
+            if ( n[i] > B.n[i] )
+                    return false;
+        }
+
+        return false;
+    }
+
+    bool convert( string s )
+    {
+        n[0] = s.size();
+
+        for ( int i = n[0] - 1; i >= 0; --i )
+        {
+            n[ n[0] - i ] = s[i] - 48;
+        }
+
+        return true;
+    }
+
+    void print()
+    {
+        for ( int i = n[0]; i >= 1; i-- )
+                cout << n[i];
+    }
+};
+
+BI C[Nmax][Nmax];
+
+void gen()
+{
+    C[1][0] = 1;
+    C[1][1] = 1;
+
+    for ( int i = 2; i < Nmax; ++i )
+    {
+        C[i][0] = 1;
+
+        for ( int j = 1; j <= i; ++j )
+        {
+            C[i][j] += C[i - 1][j];
+            C[i][j] += C[i - 1][j - 1];
+        }
+    }
+}
+
+int main()
+{
+    gen();
+
+    for ( cin >> T; T; T-- )
+    {
+        string sir, M;
+
+        cin >> N >> K >> M;
+
+        BI MM;
+
+        MM.convert( M );
+
+        while ( N > 1 )
+        {
+            if ( C[N - 1][K].compare( MM ) )
+            {
+                MM -= C[N - 1][K];
+                sir += "1";
+                K--;
+            }
+            else
+            {
+                sir += "0";
+            }
+
+            N--;
+        }
+
+        if ( K == 0 )
+                sir += "0";
+        else
+                sir += "1";
+
+        cout << sir << "\n";
+    }
+
+    return 0;
+}

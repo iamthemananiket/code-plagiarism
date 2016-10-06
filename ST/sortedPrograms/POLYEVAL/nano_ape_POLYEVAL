@@ -1,0 +1,65 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <set>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define pb push_back
+#define all(x) (x).begin(),(x).end()
+
+using namespace std;
+typedef long long ll;
+inline int read()
+{
+	int x=0; bool f=false; char ch=getchar();
+	while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+	while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+	return f?-x:x;
+}
+
+#define maxn 786499
+#define Q 786433
+#define g 10
+
+int rev[maxn], n, k[maxn], A[maxn], B[maxn], C[maxn], D[maxn], v[maxn];
+
+inline int Pow(int x, int t){int k=1; while (t) {if (t&1) k=1LL*k*x%Q; t>>=1, x=1LL*x*x%Q;} return k;}
+ 
+inline void dft(int *a)
+{
+    rep(i, 0, n-1) if (i<rev[i]) swap(a[i],a[rev[i]]);
+    for(int i=2; i<=n; i<<=1)
+    {
+        int wn=Pow(g,(Q-1)/i);
+        for(int j=0; j<n; j+=i)
+        {
+            int w=1;
+            for(int x=j,y=j+(i>>1); y<j+i; x++,y++)
+            {
+                int X=a[x], Y=1LL*a[y]*w%Q;
+                a[x]=(X+Y)%Q, a[y]=(X-Y+Q)%Q, w=1LL*w*wn%Q;
+            }
+        }
+    }
+}
+
+int main()
+{
+	n=read(); k[0]=v[0]=read(); rep(i, 1, n) (k[i%(Q-1)]+=read())%=Q;
+	
+	n=(Q-1)/3; rep(i,0,n-1) A[i]=k[i*3], B[i]=k[i*3+1], C[i]=k[i*3+2];
+	rep(i, 1, n-1) rev[i]=(rev[i>>1]>>1)+(i&1?(n>>1):0);
+	dft(A); dft(B); dft(C);
+	
+	int wn=g, w=1;
+	rep(i, 0, 3*n-1) D[i]=(A[i%n] + 1LL*w*B[i%n]%Q + 1LL*w*w%Q*C[i%n]%Q)%Q, w=1LL*w*wn%Q;
+	
+	n*=3;
+	for(int i=0,a=1; i<n; i++,a=1LL*a*g%Q) v[a]=D[i];
+	
+	int m=read(); while (m--) printf("%d\n", v[read()%Q]);
+	return 0;
+}

@@ -1,0 +1,59 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+const int Nmax = 1000002;
+const int Kmax = 100002;
+const int mod = 1000000007;
+const int inf = 1e8;
+
+int N, K, answer = 1;
+int a[Nmax];
+int BIT[Nmax];
+
+inline int lsb( int x )
+{
+    return ( x & ( -x ) );
+}
+
+void update( int poz, int val )
+{
+    for ( int i = poz; i < Kmax; i += lsb( i ) )
+            BIT[i] = min ( BIT[i], val );
+}
+
+int query( int poz )
+{
+    int sol = inf;
+
+    for ( int i = poz; i >= 1; i -= lsb( i ) )
+            sol = min ( sol, BIT[i] );
+
+    return sol;
+}
+
+int main()
+{
+    cin >> N >> K;
+
+    for ( int i = 1; i < Kmax; ++i )
+            BIT[i] = inf;
+
+    for ( int i = 1; i <= N; ++i )
+            cin >> a[i];
+
+    for ( int i = N; i >= 1; --i )
+    {
+        int x = query( a[i] - 1 );
+
+        update( a[i], i );
+
+        if ( x != inf )
+            answer = ( 1LL * answer * ( x - i + 1 ) ) % mod;
+    }
+
+    cout << answer << "\n";
+
+    return 0;
+}

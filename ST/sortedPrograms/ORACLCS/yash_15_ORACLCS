@@ -1,0 +1,31 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+string str;
+
+int main()
+{
+	int t,n,m,ans,c1,c2,i,j;
+	cin>>t;
+	while(t--)
+	{
+		cin>>n;
+		ans=101;
+		m=0;
+		while(n--)
+		{
+			cin>>str;
+			if(!m)
+				m=str.length();
+			for(i=0,c1=c2=0;i<m;i++)
+				if(str[i]=='a')
+					c1++;
+				else
+					c2++;
+			ans=min(ans,min(c1,c2));
+		}
+		cout<<ans<<endl;
+	}
+}

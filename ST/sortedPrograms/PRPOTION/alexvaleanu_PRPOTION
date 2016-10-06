@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 100 + 2;
+
+int T, R, G, B, M;
+int r, g, b;
+
+int main()
+{
+    ///ifstream cin("data.in");
+
+    cin.sync_with_stdio( false );
+
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> R >> G >> B >> M;
+
+        r = 0;
+        g = 0;
+        b = 0;
+
+        for ( int i = 1, a; i <= R; ++i )
+        {
+            cin >> a;
+            r = max( r, a );
+        }
+
+        for ( int i = 1, a; i <= G; ++i )
+        {
+            cin >> a;
+            g = max( g, a );
+        }
+
+        for ( int i = 1, a; i <= B; ++i )
+        {
+            cin >> a;
+            b = max( b, a );
+        }
+
+        int best = 1e9;
+
+        while ( M-- )
+        {
+            int m = max( max( r, g ), b );
+
+            if ( r == m ) r /= 2;
+            else if ( g == m ) g /= 2;
+                 else if ( b == m ) b /= 2;
+
+        }
+
+        cout << max( max( r, g ), b ) << "\n";
+    }
+
+    return 0;
+}

@@ -1,0 +1,129 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <set>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const long long MAX_N = (1LL << 20);
+
+long long n, m, q;
+
+long long par[MAX_N];
+long long sum[MAX_N];
+long long ppp[MAX_N];
+long long ans[MAX_N];
+
+pair <long long, long long> e[MAX_N];
+pair <long long, pair <long long, long long>> qq[MAX_N];
+
+multiset <long long> ss;
+multiset <long long> :: iterator it;
+set <long long> t;
+
+long long prv[MAX_N];
+
+long long root (long long x)
+{
+	return (x == par[x]) ? x : par[x] = root (par[x]);
+}
+
+int main ()
+{
+	long long i, xr, yr;
+	char c;
+	scanf ("%lld%lld%lld", &n, &m, &q);
+	for (i = 1; i <= n; i ++)
+		scanf ("%lld", &ppp[i]), prv[i] = ppp[i];
+	for (i = 1; i <= m; i ++)
+	{
+		scanf ("%lld%lld", &e[i].first, &e[i].second);
+	}
+	for (i = 1; i <= q; i ++)
+	{
+		scanf ("\n%c %lld", &c, &qq[i].second.first);
+		if (c == 'P')
+		{
+			scanf ("%lld",  &qq[i].second.second);
+			long long tmp = qq[i].second.second;
+			qq[i].second.second = prv[qq[i].second.first];
+			prv[qq[i].second.first] = tmp;
+			qq[i].first = 0;
+		}
+		else
+		{
+			qq[i].first = 1;
+			t.insert (qq[i].second.first);
+			
+			qq[i].second.second = e[qq[i].second.first].second;
+			qq[i].second.first = e[qq[i].second.first].first;
+		}
+	}
+	
+	
+	for (i = 1; i <= n; i ++)
+		par[i] = i, sum[i] = prv[i], ss.insert (sum[i]);
+	
+	for (i = 1; i <= m; i ++)
+	{
+		if (t.find (i) != t.end ())
+			continue;
+		xr = root (e[i].first);
+		yr = root (e[i].second);
+			
+		if (xr != yr)			
+		{
+			ss.erase (sum[xr]);
+			ss.erase (sum[yr]);
+			
+			sum[xr] += sum[yr];
+			par[yr] = xr;
+			
+			ss.insert (sum[xr]);
+		}
+	}
+	
+	for (i = q; i >= 1; i --)
+	{
+		it = ss.end ();
+		it --;
+		ans[i] = (*it);
+		if (!qq[i].first)
+		{
+			xr = root (qq[i].second.first);
+			
+			ss.erase (sum[xr]);
+			sum[xr] = sum[xr] - prv[qq[i].second.first];
+			prv[qq[i].second.first] = qq[i].second.second;
+			sum[xr] = sum[xr] + prv[qq[i].second.first];
+			
+			ss.insert (sum[xr]);
+		}
+		else
+		{
+			xr = root (qq[i].second.first);
+			yr = root (qq[i].second.second);
+			
+			if (xr != yr)			
+			{
+				ss.erase (sum[xr]);
+				ss.erase (sum[yr]);
+				
+				sum[xr] += sum[yr];
+				par[yr] = xr;
+				
+				ss.insert (sum[xr]);
+			}
+		}
+	}
+	
+	for (i = 1; i <= q; i ++)
+		printf ("%lld\n", ans[i]);
+	
+	return 0;
+}

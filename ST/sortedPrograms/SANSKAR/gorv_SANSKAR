@@ -1,0 +1,142 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+bool recur(vector<long long> arr,int pos,int n,long long remain){
+	//cout<<"AM IN";
+	//cout<<pos<<" "<<n<<" "<<remain<<"\n";
+	if(remain==0){
+		
+		return true;
+	}
+	if(pos==n || remain<0)
+	 return false;
+	if(recur(arr,pos+1,n,remain-arr[pos]) || recur(arr,pos+1,n,remain))
+	{
+		//cout<<"TAKE "<<pos<<"\n";
+		return true;	
+	}
+	  
+	return false;
+}
+bool erase(vector<long long> &arr,int pos,int n,long long remain){
+	if(remain==0){
+		return true;
+	}
+	if(pos==n)
+	 return false;
+	if(erase(arr,pos+1,n,remain-arr[pos]))
+		{
+			//cout<<"DELETING "<<arr[pos]<<"\n";
+			arr[pos]=0;
+			return true;
+		}
+	else
+		return erase(arr,pos+1,n,remain);
+	
+	return false;
+	
+}
+bool eval(vector<long long> arr,int n,int k,long long share){
+	for(int i=0;i<n;i++){
+		if(arr[i]){
+			if(recur(arr,i+1,n,share-arr[i])){
+				 erase(arr,i+1,n,share-arr[i]);
+			}
+			 
+			else
+			 return false;
+			k--;
+		}
+	}
+	if(k==0)
+	return true;
+	else
+	return false;
+}
+int main(){
+	
+	ios::sync_with_stdio(false);
+	//freopen("in.txt","r",stdin);
+	int t;
+	cin>>t;
+	while(t--){
+		long long int n,k;
+		cin>>n>>k;
+		vector<long long> arr;
+		long long sum=0;
+		//int count=0;
+		for(int i=0;i<n;i++){
+			int x;
+			cin>>x;
+			sum+=x;
+			//if(x!=0){
+			//	count++;
+				arr.push_back(x);
+		//	}
+		}
+		//n=count;
+		vector<long long> copy=arr;
+		sort(copy.rbegin(),copy.rend());
+		int flag=0;
+		for(int i=0;i<n;i++){
+			if(arr[i]>sum/k)
+			{
+				
+				flag=1;
+				break;
+			}
+		}
+		if(flag || n<k){
+			//cout<<"yooo";
+			cout<<"no\n";
+			continue;
+		}
+		if(sum%k!=0)
+		{
+			//cout<<"yooo";
+				cout<<"no\n";
+		}
+		
+		else{		
+			long long totalshareCount=0;
+			long long share=sum/k;
+			long long total=(long long)1<<n;
+			for(long long i=0;i<total;i++)
+			{
+				long long currentsum=0;
+				for(long long j=0;j<n;j++)
+				{
+					long long temp=(long long)1<<j;
+					if(temp & i)
+						currentsum=currentsum+arr[j];
+				}
+				if(currentsum==share)
+				{
+					for(long long j=0;j<n;j++){
+						long long  temp=(long long)1<<j;
+						if(temp & i)
+							arr[j]=0;
+					}
+					totalshareCount++;
+					if (totalshareCount==k)
+						break;
+				}
+			}
+			if (totalshareCount==k)
+				cout<<"yes\n";
+			else
+			{
+				/*if(eval(copy,n,k,share)){
+					
+					cout<<"yes\n";
+				}
+				else{
+					//assert(0);
+				*/	
+					cout<<"no\n";
+				//}
+			}
+				
+		}	
+	}
+}

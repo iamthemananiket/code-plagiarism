@@ -1,0 +1,131 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int PW = 1 << 17;
+ll sum[2 * PW];
+int high[2 * PW], low[2 * PW];
+bool inc[2 * PW], dec[2 * PW];
+int diff[111000];
+
+void update(int pos, int val) {
+  pos += PW;
+  sum[pos] = low[pos] = high[pos] = val;
+  inc[pos] = dec[pos] = true;
+  for (int i = pos >> 1; i > 0; i >>= 1) {
+    sum[i] = sum[i + i] + sum[i + i + 1];
+    high[i] = max(high[i + i], high[i + i + 1]);
+    low[i] = min(low[i + i], low[i + i + 1]);
+    inc[i] = inc[i + i] && inc[i + i + 1] && high[i + i] <= low[i + i + 1];
+    dec[i] = dec[i + i] && dec[i + i + 1] && low[i + i] >= high[i + i + 1];
+  }
+}
+
+void solve(int test_num) {
+  int N, Q;
+  cin >> N >> Q;
+  for (int i = 1; i <= N; i++)
+    cin >> diff[i];
+  memset(sum, 0, sizeof(sum));
+  memset(high, 0xC0, sizeof(high));
+  memset(low, 0x3F, sizeof(low));
+  memset(inc, false, sizeof(inc));
+  memset(dec, false, sizeof(dec));
+  for (int i = 1; i <= N; i++) {
+    sum[i + PW] = high[i + PW] = low[i + PW] = diff[i];
+    inc[i + PW] = dec[i + PW] = true;
+  }
+  for (int i = PW - 1; i > 0; i--) {
+    sum[i] = sum[i + i] + sum[i + i + 1];
+    high[i] = max(high[i + i], high[i + i + 1]);
+    low[i] = min(low[i + i], low[i + i + 1]);
+    inc[i] = inc[i + i] && inc[i + i + 1] && high[i + i] <= low[i + i + 1];
+    dec[i] = dec[i + i] && dec[i + i + 1] && low[i + i] >= high[i + i + 1];
+  }
+  for (int q = 0, l, r, x, d; q < Q; q++) {
+    static vector<int> lef_pos, rig_pos, pos;
+    char type;
+    cin >> type;
+    if (type == 'U') {
+      cin >> x >> d;
+      update(x, d);
+      diff[x] = d;
+    } else {
+      cin >> l >> r;
+      lef_pos.clear();
+      rig_pos.clear();
+      for (l += PW, r += PW + 1; l < r; l >>= 1, r >>= 1) {
+        if (l & 1)
+          lef_pos.push_back(l++);
+        if (r & 1)
+          rig_pos.push_back(--r);
+      }
+      reverse(rig_pos.begin(), rig_pos.end());
+      pos = lef_pos;
+      for (const int & p : rig_pos)
+        pos.push_back(p);
+      ll res = 0;
+      if (type == 'M')
+        for (const int & p : pos)
+          res = max(res, (ll) high[p]);
+      else if (type == 'S')
+        for (const int & p : pos)
+          res += sum[p];
+      else if (type == 'I') {
+        res = inc[pos.front()];
+        int v = high[pos.front()];
+        for (int i = 1; i < (int) pos.size(); i++) {
+          if (!inc[pos[i]] || low[pos[i]] < v) {
+            res = 0;
+            break;
+          }
+          v = high[pos[i]];
+        }
+      } else if (type == 'D') {
+        res = dec[pos.front()];
+        int v = low[pos.front()];
+        for (int i = 1; i < (int) pos.size(); i++) {
+          if (!dec[pos[i]] || high[pos[i]] > v) {
+            res = 0;
+            break;
+          }
+          v = low[pos[i]];
+        }
+      }
+      cout << res << endl;
+    }
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

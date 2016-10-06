@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+#define rep(i,a,b) for (int i=a;i<=b;++i)
+#define dep(i,a,b) for (int i=a;i>=b;--i)
+#define re(i,a,b) for (int i=a;i<b;++i)
+#define mp make_pair
+#define pb push_back
+using namespace std;
+template<class T> inline void read(T&x){char c;bool fu=0;for(c=getchar();c<=32;c=getchar());if(c=='-')fu=1,c=getchar();for(x=0;c>32;c=getchar())x=x*10+c-'0';if(fu)x*=-1;}
+template<class T> inline void read(T&x,T&y){read(x);read(y);}
+template<class T> inline void read(T&x,T&y,T&z) {read(x,y);read(z);}
+typedef long long ll;
+typedef pair<int,int> pii;
+const int N=111111,INF=0x7fffffff;
+int n,x,T;
+int main() {
+	read(T);
+	while(T--) {
+		read(n);
+		bool bad=0,ba=0;
+		int sum=0;
+		rep(i,1,n){
+			read(x);sum+=x;
+			if(x==5)ba=1;
+			if(x==2)bad=1;
+		}
+		if(sum<4*n)bad=1;
+		if(bad||(!ba))puts("No");else puts("Yes");
+	}
+	return 0;
+}

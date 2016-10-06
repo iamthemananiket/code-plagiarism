@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<int>adj[5001];
+int dp1[5001]; // dp1[u] =Best you can do in the subtree rooted at 'u' by including u
+int dp2[5001]; // dp2[u] =Best you can do in the subtree rooted at 'u' by excluding u
+
+void dfs(int node , int parent)
+    {
+    dp1[node] = 1;
+    dp2[node] = 0;
+    int next,sz;
+    sz = adj[node].size();
+    if(sz==0)return; // If leaf node
+    for(int i=0;i<sz;i++)
+        {
+        next=adj[node][i];
+        if(next!=parent)
+            dfs(next,node);
+        dp1[node]+=dp2[next];
+        dp2[node]+=max(dp1[next],dp2[next]);
+    }
+  }
+int main()
+    {
+    int T,N,u,v;
+    scanf("%d",&T);
+    while(T--)
+        {
+        for(int i=0;i<5001;i++)adj[i].clear();
+          scanf("%d",&N);
+            for(int i=1;i<N;i++)
+                {
+                    scanf("%d%d",&u,&v);
+                    adj[v].push_back(u);
+                }
+          dfs(0,-1);
+         printf("%d\n",max(dp1[0],dp2[0]));   
+        }
+    }

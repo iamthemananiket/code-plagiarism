@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+#define pd pair < int, ull >
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)2e5 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 7;
+
+using namespace std;
+
+int n, m, a, b;
+bool ok[105][105];
+int d[2][105][105];
+queue < pi > q;
+
+void bfs(int x, int y, bool tp, int len) {
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+            d[tp][i][j] = mod;
+    d[tp][x][y] = 0;
+    q.push(mp(x, y));
+    while(!q.empty()) {
+        pi now = q.front();
+        q.pop();
+        for (int i = max(1, now.f - len); i <= min(n, now.f + len); i++)
+            for (int j = max(1, now.s - len); j <= min(m, now.s + len); j++)
+                if (abs(i - now.f) + abs(j - now.s) <= len && d[tp][i][j] == mod && !ok[i][j]) {
+                    q.push(mp(i, j));
+                    d[tp][i][j] = d[tp][now.f][now.s] + 1;
+                }
+    }
+}
+
+void solve() {
+    cin >> n >> m >> a >> b;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+            cin >> ok[i][j];
+    bfs(1, 1, 0, a);
+    bfs(1, m, 1, b);
+    int ans = mod;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+            if (!ok[i][j])
+                ans = min(ans, max(d[0][i][j], d[1][i][j]));
+    if (ans == mod)
+        cout << "-1\n";
+    else
+        cout << ans << '\n';
+}
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+    int tests;
+    cin >> tests;
+    while(tests--)
+        solve();
+    return 0;
+}

@@ -1,0 +1,19 @@
+#include<iostream>
+using namespace std;
+
+int main() {
+	long long int t, n, i, a, sum;
+	cin >> t;
+	while(t--) {
+		cin >> n;
+		i = 0;
+		sum = 0;
+		while(n--) {
+			cin >> a;
+			sum += max( a-i, 0LL );
+			i = a;
+		}
+		cout << sum << endl;
+	}
+	return 0;
+}

@@ -1,0 +1,250 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef long long lint;
+typedef long double ldouble;
+
+const ldouble pi = acos(ldouble(-1.0)), E = 1e-12l;
+
+lint binom(int a, int b) {
+  if (b < 0 || b > a) return 0;
+  lint result = 1;
+  for (int i = 1; i <= b; ++i)
+    result = result * (a-i+1) / i;
+  return result;
+}
+
+struct treap_t {
+  enum endpoint_t { OPEN = 0, CLOSED = 1 };
+  struct node {
+    node *l, *r;
+    ldouble x;
+    int y, size;
+    int score, lazyscore;
+    lint scoresum;
+
+    node(ldouble x, int score)
+      : l(nullptr), r(nullptr), x(x), y(rand()), size(1), score(score), lazyscore(0)
+      , scoresum(score) { }
+    void propagate() {
+      if (this && lazyscore) {
+	scoresum += (lint)lazyscore * size;
+	score += lazyscore;
+	if (l) l->lazyscore += lazyscore;
+	if (r) r->lazyscore += lazyscore;
+	lazyscore = 0;
+      }
+    }
+    node *updated() {
+      if (this) {
+	assert(lazyscore == 0);
+	size = 1;
+	scoresum = score;
+	if (l) {
+	  l->propagate();
+	  size += l->size;
+	  scoresum += l->scoresum;
+	}
+	if (r) {
+	  r->propagate();
+	  size += r->size;
+	  scoresum += r->scoresum;
+	}
+      }
+      return this;
+    }
+  } *root = nullptr;
+
+  template<endpoint_t endpoint>
+  void split(node *tree, node *&l, node *&r, ldouble x) {
+    tree->propagate();
+    if (tree == nullptr) {
+      l = r = nullptr;
+    } else if (endpoint == OPEN
+	       ? tree->x < x-E
+	       : tree->x <= x+E) {
+      split<endpoint>(tree->r, tree->r, r, x);
+      l = tree->updated();
+    } else {
+      split<endpoint>(tree->l, l, tree->l, x);
+      r = tree->updated();
+    }
+  }
+
+  node *merge(node *l, node *r) {
+    l->propagate(), r->propagate();
+    if (l == nullptr) return r;
+    if (r == nullptr) return l;
+    if (l->y > r->y) {
+      l->r = merge(l->r, r);
+      return l->updated();
+    } else {
+      r->l = merge(l, r->l);
+      return r->updated();
+    }
+  }
+
+  pair<lint, int> queryoo(ldouble a, ldouble b) {
+    node *left, *mid, *right, *leftmid;
+    split<OPEN>(root, leftmid, right, b);
+    split<CLOSED>(leftmid, left, mid, a);
+    pair<lint, int> result;
+    if (mid) result = make_pair(mid->scoresum, mid->size);
+    root = merge(merge(left, mid), right);
+    return result;
+  }
+  void add(ldouble x, int score) {
+    node *left, *right;
+    split<OPEN>(root, left, right, x);
+    node *mid = new node(x, score);
+    root = merge(merge(left, mid), right);
+  }
+  void updatec(ldouble a, int scoredelta) {
+    node *left, *right;
+    split<OPEN>(root, left, right, a);
+    if (right) {
+      right->lazyscore += scoredelta;
+      right->propagate();
+    }
+    root = merge(left, right);
+  }
+};
+
+struct rangecounter_t {
+  template <typename T, typename Cmp=less<T>>
+    using oset = tree<T, null_type, Cmp, rb_tree_tag,
+		      tree_order_statistics_node_update>;
+  int nop = 0;
+  oset<pair<ldouble, int>> values;
+
+  void add(ldouble x) {
+    values.insert(make_pair(x, nop++));
+  }
+  int countoo(ldouble a, ldouble b) {
+    return (values.order_of_key(make_pair(b-E, INT_MIN))
+	    - values.order_of_key(make_pair(a+E, INT_MAX)));
+  }
+  int countcc(ldouble a, ldouble b) {
+    return (values.order_of_key(make_pair(b+E, INT_MAX))
+	    - values.order_of_key(make_pair(a-E, INT_MIN)));
+  }
+  int countco(ldouble a, ldouble b) {
+    return (values.order_of_key(make_pair(b-E, INT_MIN))
+	    - values.order_of_key(make_pair(a-E, INT_MIN)));
+  }
+};
+
+struct lesspi_solver_t {
+  lint result = 0;
+  rangecounter_t counter;
+  treap_t treap;
+
+  void add(ldouble origang) {
+    ldouble ang;
+    if (origang < pi-E) ang = origang + 2*pi;
+    else ang = origang;
+
+    int nleft = counter.countoo(ang - pi, ang);
+    int nmiddle = counter.countcc(ang, ang);
+    int nright = counter.countoo(ang, ang + pi);
+
+    result += binom(nleft, 2) + binom(nmiddle, 2) + binom(nright, 2);
+    result += (lint)nmiddle * nleft + (lint)nmiddle * nright;
+
+    int nwholeleft = counter.countco(0.0, ang);
+    lint rightscoresum;
+    int nrightcheck;
+    tie(rightscoresum, nrightcheck) = treap.queryoo(ang, ang + pi);
+    assert(nright == nrightcheck);
+
+    result += (lint)nright * nwholeleft - rightscoresum;
+
+    internal_add(origang);
+    internal_add(origang + 2*pi);
+  }
+  void internal_add(ldouble ang) {
+    int score = counter.countcc(0.0, ang - pi);
+    treap.add(ang, score);
+    counter.add(ang);
+    treap.updatec(ang + pi, +1);
+  }
+};
+
+struct eqpi_solver_t {
+  int n = 0;
+  lint result_a0 = 0, result_a1 = 0;
+  map<ldouble, pair<int, int>> entries;
+
+  pair<int, int> &find(ldouble ang) {
+    auto it = entries.lower_bound(ang-E);
+    if (it != entries.end() && it->first <= ang+E) return it->second;
+    else return entries[ang];
+  }
+  void add(ldouble ang) {
+    int side = 0;
+    if (ang >= pi-E) {
+      ang -= pi;
+      side = 1;
+    }
+    pair<int, int> &entry = find(ang);
+    account_for(entry, -1);
+    if (side == 0) ++entry.first;
+    else ++entry.second;
+    ++n;
+    account_for(entry, +1);
+  }
+  void account_for(pair<int, int> entry, lint mult) {
+    int a, b;
+    tie(a, b) = entry;
+    result_a0 += ((lint)a*b*(-a-b) + binom(a, 2)*b + binom(b, 2)*a) * mult;
+    result_a1 += (lint)a*b*mult;
+  }
+  lint get_result() {
+    return result_a0 + result_a1 * n;
+  }
+};
+
+int main() {
+  lesspi_solver_t solver1;
+  eqpi_solver_t solver2;
+
+  int n;
+  scanf("%d", &n);
+
+  for (int i = 0; i < n; ++i) {
+    int x, y;
+    scanf("%d %d", &x, &y);
+    ldouble ang = atan2(ldouble(y), ldouble(x));
+    if (ang < 0-E) ang += 2*pi;
+    assert(ang >= 0-E && ang < 2*pi-E);
+    solver1.add(ang);
+    solver2.add(ang);
+    lint result = binom(i+1, 3) - solver1.result - solver2.get_result();
+    printf("%lld\n", result);
+    fflush(stdout);
+  }
+
+  return 0;
+}

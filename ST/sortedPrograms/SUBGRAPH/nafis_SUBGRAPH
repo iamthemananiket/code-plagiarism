@@ -1,0 +1,238 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+
+vector<int>vc[5001], vp[5001];
+int vis[5001], is_brdge[10001];
+int cnt,in[5001],val[5001];
+stack < int > S;
+void dfs(int v,int p)
+{
+    S.push(v);
+	vis[v] = 1;
+	in[v] = val[v] = cnt++;
+	REP(i, vc[v].size())
+    {
+		if(vc[v][i] == p)continue;
+		if(vis[vc[v][i]])val[v] = min(val[v], in[vc[v][i]]);
+		else{
+			dfs(vc[v][i], v);
+			val[v] = min(val[v], val[vc[v][i]]);
+			if (val[vc[v][i]] > in[v]){
+                is_brdge[vp[v][i]] = 1;
+            }
+		}
+	}
+}
+pair < int, int > pp[10001];
+vector < int > com[5001], adj[5001];
+int vis1[5001];
+void dfs1(int c, int p){
+    vis1[c] = p;
+    com[p].pb(c);
+    REP(i, vc[c].size()){
+        if(is_brdge[ vp[c][i] ] || vis1[vc[c][i]]) continue;
+        dfs1(vc[c][i], p);
+    }
+}
+int pre[5001];
+void dfs2(int c, int p, int s){
+    pre[c] = p;
+    int N = com[c].size();
+    REP(i, N) com[c].pb(com[c][i]);
+    REP(i, N){
+        if(com[c][i] != s) continue;
+        for(int j = i; j < i + N; j++){
+            com[c][j-i] = com[c][j];
+        }
+        break;
+    }
+    com[c].resize(N);
+
+    REP(i, adj[c].size()){
+        if(vis1[adj[c][i]] == p) continue;
+        dfs2(vis1[adj[c][i]], c, adj[c][i]);
+        adj[c][i] = vis1[adj[c][i]];
+    }
+}
+
+LL dp[5001][33][2];
+map < int, LL > mm[5001][51][51];
+vector < LL > dp2[5001][33];
+LL go(int c, int s, int p, int f);
+LL go2(int c, int s, int v){
+    if(v == 0) return 1;
+    if(s == vc[c].size()){
+        return 0;
+    }
+    if(dp2[c][v][s] != -1) return dp2[c][v][s];
+    dp2[c][v][s] = 0;
+    if(is_brdge[ vp[c][s] ] == 0) return dp2[c][v][s] = go2(c, s+1, v);
+
+    dp2[c][v][s] = (dp2[c][v][s] + go2(c, s + 1, v)) % mod;
+    for(int i = 1; i <= v; i++){
+        if(vis1[ vc[c][s] ] == pre[ vis1[c] ]) continue;
+        dp2[c][v][s] = (dp2[c][v][s] + go( vis1[vc[c][s]], i - 1, vis1[c], 1) * go2(c, s + 1, v - i)) % mod;
+    }
+    return dp2[c][v][s];
+}
+LL go1(int c, int l, int r, int v){
+    if(mm[c][l][r].count(v)) return mm[c][l][r][v];
+//    if(v == 0) return mm[c][l][r][v] = 1;
+    if(l == r) return mm[c][l][r][v] = go2(com[c][l], 0, v);
+    LL res = 0;
+    for(int i = 0; i <= v; i++){
+        res = (res + go2(com[c][l], 0, i) * go1(c, l + 1, r, v - i)) % mod;
+    }
+    return mm[c][l][r][v] = res;
+}
+LL go(int c, int s, int p, int f){
+    LL &ret = dp[c][s][f];
+    if(ret != -1) return ret;
+    ret = 0;
+//    cout << c << " " << s << " p " << f << endl;
+
+    if(f == 0){
+        for(int i = 0; i < com[c].size(); i++){
+            for(int j = i; j < com[c].size(); j++){
+                if(j-i+1 <= s)
+                    ret = (ret + go1(c, i, j, s - (j-i+1))) % mod;
+            }
+        }
+        for(int i = 0; i < com[c].size(); i++){
+            for(int j = com[c].size() - 1; j > i+1; j--){
+                if(i+1 + (com[c].size() - j) <= s){
+                    int v = s - (i+1 + (com[c].size() - j));
+                    for(int k = 0; k <= v; k++){
+                        ret = (ret + go1(c, 0, i, k) * go1(c, j, com[c].size()-1, v-k)) % mod;
+                    }
+                }
+            }
+        }
+    } else {
+        for(int i = 0; i < com[c].size(); i++){
+            for(int j = com[c].size(); j > i + 1; j--){
+                int v = s - (i + (com[c].size() - j));
+                if(v < 0) continue;
+                for(int k = 0; k <= v; k++){
+                    LL p = go1(c, 0, i, k);
+                    LL q = 1;
+                    if(j < com[c].size()) q = go1(c, j, com[c].size() -1, v - k);
+                    else if(k != v) q = 0;
+                    ret = (ret + p*q) % mod;
+                }
+            }
+        }
+        if(com[c].size()-1 <= s) ret = (ret + go1(c, 0, com[c].size()-1, s - com[c].size() + 1)) % mod;
+    }
+
+    return ret;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    int T; cin >> T;
+    while(T--){
+        set0(vis); set0(is_brdge); set0(in); set0(val); cnt = 0;
+        REP(i, 5001) {
+            vc[i].clear();
+            vp[i].clear();
+            com[i].clear();
+            adj[i].clear();
+            REP(j, 33) dp2[i][j].clear();
+            REP(j, 51) REP(k, 51) mm[i][j][k].clear();
+        }
+
+        int n, m, K; cin >> n >> m >> K;
+        REP(i, m){
+            int x, y; cin >> x >> y;
+            pp[i] = mp(x, y);
+            vc[x].pb(y); vc[y].pb(x);
+            vp[x].pb(i); vp[y].pb(i);
+            REP(j, K+1) dp2[x][j].pb(-1);
+            REP(j, K+1) dp2[y][j].pb(-1);
+        }
+
+        LL res = 0;
+        int cc = 0;
+
+        set0(vis1);
+        memset(dp, -1, sizeof dp);
+
+        FOR(i, 1, n+1){
+            if(vis[i] == 0){
+                int st = cc + 1;
+                dfs(i, -1);
+                while(!S.empty()){
+                    int c = S.top(); S.pop();
+                    if(vis1[c] == 0){
+                        cc++;
+                        dfs1(c, cc);
+                    }
+                }
+                for(int j = st; j <= cc; j++){
+                    REP(k, com[j].size()){
+                        int c = com[j][k];
+                        REP(l, vc[c].size()){
+                            if(vis1[ vc[c][l] ] != j) adj[j].pb(vc[c][l]);
+                        }
+                    }
+                }
+                dfs2(st, 0, com[st][0]);
+                for(int k = st; k <= cc; k++){
+                    for(int j = 1; j <= K; j++){
+                        res = (res + go(k, j, pre[k], 0)) % mod;
+//                        cout << res << " " << j << " " << k << endl;
+                    }
+                }
+            }
+        }
+
+        cout << res << endl;
+    }
+}

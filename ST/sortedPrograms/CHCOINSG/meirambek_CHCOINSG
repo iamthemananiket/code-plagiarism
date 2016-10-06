@@ -1,0 +1,83 @@
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 100500;
+int n, d[N];
+
+inline void solve() {
+	scanf("%d", &n);
+	if (n % 6) puts("Chef");
+	else puts("Misha");
+}
+
+int pr[66444], k = 0;
+
+int main() {
+	#ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+	#endif
+/*
+	for (int i = 2; i <= 10000; ++ i) {
+		bool ok = 1;
+		for (int j = 2; j * j <= i; ++ j) {
+			if (i % j == 0) {
+				ok = 0;
+				break;
+			}
+		}
+		if (ok) pr[++k] = i;
+	}
+
+	d[0] = 2;
+
+	for (int i = 1; i <= 1000; ++ i) {
+		d[i] = 2;
+		if (d[i - 1] == 2) d[i] = 1;
+
+		for (int j = 1; j <= k && pr[j] <= i; ++ j) {
+			int now = pr[j];
+			while (now <= i) {
+				if (d[i - now] == 2) {
+					d[i] = 1;
+					break;
+				}
+				now *= pr[j];
+			}
+			if (d[i] == 1) break;
+		}
+		cout << i << " -> " << d[i] << endl;
+	}
+*/
+	int t;
+	scanf("%d", &t);
+
+	while(t--) solve();
+
+    return 0;
+}

@@ -1,0 +1,136 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <map>
+#include <vector>
+#include <cstdio>
+
+#define NMAX 100010
+
+using namespace std;
+
+int bit0[NMAX];
+int bit1[NMAX];
+
+
+int lev[NMAX];
+int st[NMAX];
+int en[NMAX];
+
+int fib[NMAX+10];
+
+vector<int> child[NMAX];
+
+
+int N;
+
+const int mod = (1e9)+7;
+
+inline int add(int a, int b){
+	return (a+b)%mod;
+}
+
+void upd(int x, int val, int *tree){
+	for(;x < N; x+=(x&-x)){
+		tree[x] = add(tree[x],val);
+		if(!x) break;
+	}
+}
+
+void range_upd(int i, int j, int val, int *tree){
+	upd(i,val,tree);
+	upd(j+1,-val,tree);
+}
+
+int read(int x, int *tree){
+	int val;
+	val = 0;
+
+	for(;x >= 0; x-=(x&-x)){
+		val = add(val,tree[x]);
+		if(!x) break;
+	}
+
+	return val;
+}
+
+
+
+inline int get_fib(int k){
+	if(k >= 0) return fib[k];
+	k *=-1;
+	return fib[k]*((k&1) ? 1 : -1);
+}
+
+void update(int v, int k){
+	int f1 = get_fib(k-lev[v]);
+	int f0 = get_fib(k-lev[v]-1);
+
+	range_upd(st[v],en[v],f0,bit0);
+	range_upd(st[v],en[v],f1,bit1);
+}
+
+int query(int x){
+	int v1,v0;
+	v0 = (1LL*read(st[x],bit0)*get_fib(lev[x]))%mod;
+	v1 = (1LL*read(st[x],bit1)*get_fib(lev[x]+1))%mod;
+	return (add(v0,v1)+mod)%mod;
+}
+
+int tim;
+
+void dfs(int v, int l){
+	lev[v] = l;
+	st[v] = tim++;
+
+
+	int i,u;
+
+	for(i = 0; i <child[v].size(); ++i){
+		u = child[v][i];
+		dfs(u,l+1);
+	}
+
+	en[v] = tim-1;
+}
+
+int M;
+
+void init(){
+	int i;
+	fib[0]= 0;
+	fib[1] = 1;
+
+	for(i = 2; i <= 1e5 + 10; ++i){
+		fib[i] = add(fib[i-1],fib[i-2]);
+	}
+	dfs(0,0);
+}
+
+int main(){
+	int i,v,k;
+	char c;
+	scanf("%d%d",&N,&M);
+
+	for(i = 1; i < N; ++i){
+		scanf("%d",&v);
+		--v;
+		child[v].push_back(i);
+	}
+
+	init();
+
+	while(M--){
+		scanf(" %c%d",&c,&v);
+		--v;
+		if(c == 'U'){
+			scanf("%d",&k);
+			update(v,k);
+			continue;
+		}
+
+		printf("%d\n",query(v));
+	}
+
+	return 0;
+}

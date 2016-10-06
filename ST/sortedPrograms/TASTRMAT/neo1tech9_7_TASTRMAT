@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#include <assert.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+ 
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define reps(i,a,n) for(int i = a; i < n; i++)
+#define s(n) cin >> n
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define rsz(x,n) x.clear(); x.resize(n)
+#define rrsz(x,a,n) x.clear(); x.resize(n,a)
+#define wt while(true)
+#define all(x) x.begin(),x.end()
+#define pb push_back
+#define ls(x) ((2*(x)) + 1)
+#define rs(x) ((ls(x)) + 1)
+#define md(a,b) (((a) + (b))/2)
+#define INF (1e9 + 7)
+ 
+ll t, u, v, n, k, m, c, d, f, e, l, r, x, y;
+string ss, s1, s2;
+vll b;
+vector < pii > cc;
+const long long mod = 1e9 + 7;
+const long long H = 100001;
+long long Power (long long base, long long exp) {
+	if(exp == 0)
+		return 1;
+	if(exp == 1)
+		return base % mod;
+	else if(exp & 1) {
+		return (base*Power(base, exp - 1)) % mod;
+	}
+	else return Power(((base*base)%mod), exp / 2) % mod;
+}
+ll mac [50005];
+int a[50005];
+int main(){
+	csl;
+	cin >> ss;
+	cin >> t;
+	mac[0] = 1;
+	reps (i, 1, 50002) {
+		mac[i] = mac[i - 1] * H;
+		mac[i] %= mod;
+	}
+	while (t--) {
+		cin >> s1;
+		rep (i, ss.size() - s1.size() + 1) {
+			ll qk = 0;
+			rep (j, s1.size()) {
+				if (s1[j] != ss[i + j]) {
+					++qk;
+				}
+			}
+			a[i] = qk;
+		}
+		ll ans = 0;
+		rep (i, ss.size() - s1.size() + 1) {
+			ans += a[i] * mac[ss.size() - s1.size() + 1 - i - 1];
+			ans %= mod;
+		}
+		cout << ans << '\n';
+	}
+    return 0;
+}

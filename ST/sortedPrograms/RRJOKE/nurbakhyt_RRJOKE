@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int t;
+int n;
+int x, y;
+int ans;
+
+int main() {
+	cin >> t;
+	while(t--) {
+		cin >> n;
+		ans = 0;
+		for (int i = 1; i <= n; i++) {
+			cin >> x >> y;
+			ans ^= i;
+		}
+		cout << ans << endl;
+	}
+	return 0;
+}

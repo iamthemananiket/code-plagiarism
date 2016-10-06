@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+#define ll long long
+using namespace std;
+ 
+const int MAX = 105;
+ 
+const int MOD = (int)(1e9 + 297);
+ 
+int T , K , M , fs , idc;
+ 
+int main() {
+    
+    
+    cin.tie(0);
+    ios::sync_with_stdio(0);
+    cin >> M;
+    cin >> fs;
+    for(int i = 1 ; i <= fs ; i++) cin >> idc;
+    cin >> fs;
+    for(int i = 1 ; i <= fs ; i++) cin >> idc;
+    cin >> T;
+    int fs2;
+    while(T--){
+        cin >> K >> idc;
+        for(int i = 1 ; i <= K ; i++) cin >> fs >> idc >> fs2;
+        cout << "-1" << endl;
+        for(int i = 1 ; i <= K ; i++) cout << (rand() % (M - rand() % ( M - rand() % ( M - rand() % M ) ) ) ) << endl;
+    }
+ 
+    return 0;
+} 

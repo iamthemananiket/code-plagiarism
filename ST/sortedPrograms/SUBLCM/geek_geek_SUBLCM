@@ -1,0 +1,99 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%lld",&x)
+#define pi(x) printf("%lld",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output_large.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli long long int
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+using namespace std;
+vector<vector<lli> > primes;
+int prog()
+{
+    lli *hs = new lli[1000001];
+    lli *dp = new lli[100001];
+    lli i,j,k,x,y,z,n,m;
+    fl(i,0,1000001)
+        hs[i]=0;
+    gi(n);
+    gi(x);
+    dp[1]=1;
+     fl(j,0,primes[x].size())
+            {
+                hs[primes[x][j]]=1;
+            }
+    fl(i,2,n+1)
+    {
+        gi(x);
+        if(x==1)
+        {
+            y=0;
+        }
+        else
+        {
+            y = 0;
+            fl(j,0,primes[x].size())
+            {
+                y = max(y,hs[primes[x][j]]);
+                hs[primes[x][j]]=i;
+            }
+        }
+        dp[i]=min(dp[i-1]+1,i-y);
+    }
+    x = *max_element(dp+1,dp+(n+1));
+    if(x==1)
+        x=-1;
+    printf("%lld\n",x);
+    r0;
+}
+int main()
+{
+    //f_in;
+    primes.resize(1000001);
+    lli t,i,j;
+    fl(i,2,1000001)
+    {
+        if(primes[i].size()==0)
+        {
+            j = i;
+            while(j<1000001)
+            {
+                primes[j].pb(i);
+                j+=i;
+            }
+        }
+    }
+    t=1;
+    gi(t);
+    while(t--)
+        prog();
+    return 0;
+}

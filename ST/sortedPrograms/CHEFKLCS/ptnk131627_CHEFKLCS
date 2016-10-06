@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("clis.inp","r",stdin)
+#define OUTPUT freopen("clis.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=1e3+10,alp=26,BASE=1e4;
+
+int t[N][N][alp],f[N][N],way[N][N],n,m,k;
+string s1,s2;
+void prepare(){
+    cin>>n>>k>>s1>>s2;
+    REP(i,0,alp)
+        FOR(j,1,n+1) t[n+1][j][i]=t[j][n+1][i]=BASE*(n+1)+n+1;
+}
+void solve(){
+    FORD(i,n,1){
+        FORD(j,n,1){
+            REP(i1,0,alp) t[i][j][i1]=min(t[i+1][j][i1],t[i][j+1][i1]);
+            if (s1[i-1]==s2[j-1]){
+                f[i][j]=way[i][j]=1;
+                REP(i1,0,alp){
+                    int x=t[i+1][j+1][i1]/BASE,y=t[i+1][j+1][i1]-BASE*x;
+                    if (f[x][y]+1>=f[i][j]){
+                        if (f[x][y]>=f[i][j]) way[i][j]=0;
+                        f[i][j]=f[x][y]+1;
+                        way[i][j]=min(way[i][j]+way[x][y],k+1);
+                    }
+                }
+                t[i][j][s1[i-1]-'a']=BASE*i+j;
+            }
+//            cout<<i<<" "<<j<<" "<<f[i][j]<<" "<<way[i][j]<<'\n';
+        }
+    }
+//    REP(i,0,alp) cout<<i<<" "<<t[1][1][i]/BASE<<" "<<t[1][1][i]%BASE<<'\n';
+//    string ans;
+    int len=0,cx=1,cy=1;
+    REP(i,0,alp){
+        int x=t[1][1][i]/BASE,y=t[1][1][i]%BASE;
+        len=max(len,f[x][y]);
+    }
+//    cout<<len<<'\n';
+    FORD(i,len,1){
+        int cur=0;
+//        cout<<i<<" "<<cx<<" "<<cy<<'\n';
+        while (cur<alp){
+            int nx=t[cx][cy][cur]/BASE,ny=t[cx][cy][cur]%BASE;
+//            cout<<i<<" "<<cur<<" "<<nx<<" "<<ny<<" "<<way[nx][ny]<<" "<<f[nx][ny]<<" "<<k<<'\n';
+            if (f[nx][ny]==i){
+                if (k>way[nx][ny]) k-=way[nx][ny];
+                else {
+                    cx=nx+1,cy=ny+1;
+                    break;
+                }
+            }
+            cur++;
+        }
+        if (cur>=alp){
+            printf("-1");
+            return;
+        }
+        printf("%c",cur+'a');
+    }
+}
+int main(){
+    prepare();
+    solve();
+}

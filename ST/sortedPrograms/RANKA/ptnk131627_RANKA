@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("ranka.inp","r",stdin)
+#define OUTPUT freopen("ranka.out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+#define check if (n==0) return
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=0;
+
+
+int n;
+void solve(){
+    printf("%d %d\n",9,9);
+    n--;check;
+    FORD(st,79,1){
+        REP(i,0,st){
+            int x=i/9,y=i%9;
+            printf("%d %d\n",x+1,y+1);
+            n--;check;
+            if (i+1<st) printf("0 0\n");
+            else printf("%d %d\n",st/9+1,st%9+1);
+            n--;check;
+        }
+    }
+    //printf("tick\n");
+    FORD(st,80,1){
+        REP(i,0,st){
+            int x=i/9,y=i%9;
+            if (x==8) printf("%d %d\n",9-y,x+1);
+            else printf("%d %d\n",y+1,x+1);
+            n--;check;
+            if (i+1<st) printf("0 0\n");
+            else {
+                if ((st/9)==8) printf("%d %d\n",9-(st%9),st/9+1);
+                else printf("%d %d\n",st%9+1,st/9+1);
+            }
+            n--;check;
+        }
+    }
+}
+int main(){
+    cin>>n;
+    //OUTPUT;
+    solve();
+}

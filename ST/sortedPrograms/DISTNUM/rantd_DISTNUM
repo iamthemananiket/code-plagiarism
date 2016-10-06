@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int SZ = 500, N = 100005;
+ll a[N];
+
+struct node {
+	ll sum, sqr, cub;
+};
+
+struct SegmentTree {
+    vector<node> seg;
+    
+    SegmentTree(int _n) {
+        int n = 1;
+        while (n <= _n) n = n << 1;
+        seg.resize(n << 1);
+    }
+    
+    void build_tree(int ind, int s, int e) {
+        if (e - s == 1) {
+			ll tmp = a[s] * a[s] % MOD;
+            seg[ind] = (node) {a[s], tmp, tmp * a[s] % MOD};
+            return;
+        }
+        int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+        build_tree(c1, s, m);
+        build_tree(c2, m, e);
+        seg[ind].sum = (seg[c1].sum + seg[c2].sum) % MOD;
+		seg[ind].sqr = (seg[c1].sqr + seg[c2].sqr) % MOD;
+		seg[ind].cub = (seg[c1].cub + seg[c2].cub) % MOD;
+    }
+    
+    /* interval [s, e) */
+    node query(int ind, int s, int e, int ss, int ee) {
+        if (s >= ee || e <= ss) return (node) {0, 0, 0};
+        if (s >= ss && e <= ee) return seg[ind];
+        int c1 = ind << 1, c2 = c1 | 1, m = (s + e) >> 1;
+        node lb = query(c1, s, m, ss, ee);
+		node rb = query(c2, m, e, ss, ee);
+		node ret = (node) {(lb.sum + rb.sum) % MOD, (lb.sqr + rb.sqr) % MOD, (lb.cub + rb.cub) % MOD};
+        return ret;
+    }
+};
+
+ll mod_pow(ll x, ll y = MOD - 2) {
+	ll ret = 1;
+	while (y) {
+		if (y & 1) ret = ret * x % MOD;
+		x = x * x % MOD;
+		y >>= 1;
+	}
+	return ret;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int n, q, id, l, r, x;
+	ll y, tmp;
+	
+	const ll coef6 = mod_pow(6);
+	
+	cin >> n >> q;
+	
+	repu(i, 0, n) cin >> a[i];
+	SegmentTree st(n);
+	st.build_tree(1, 0, n);
+	
+	repu(it, 0, q) {
+		cin >> id;
+		if (id == 1) {
+			cin >> l >> r;
+			node tt = st.query(1, 0, n, l - 1, r);
+			ll ret = (tt.sum * tt.sum % MOD * tt.sum - 3 * tt.sum * tt.sqr + 2 * tt.cub) % MOD * coef6 % MOD;
+			if (ret < 0) ret += MOD;
+			printf("%lld\n", ret);
+		}
+		else if (id == 2) {
+			cin >> x >> y;
+		}
+		else if (id == 3) {
+			cin >> x;
+		}
+		else if (id == 4) {
+			cin >> x >> y;
+		}
+		else {
+			cin >> l >> r;
+		}
+	}
+	
+	return 0;
+}

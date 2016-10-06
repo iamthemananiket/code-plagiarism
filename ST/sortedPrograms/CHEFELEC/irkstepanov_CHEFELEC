@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+ 
+using namespace std;
+
+typedef long long ll;
+
+const int nmax = 100500;
+
+const int inf = 1e9 + 10;
+
+int main()
+{
+ 
+    int tt;
+    scanf("%d", &tt);
+    
+    while (tt--) {
+        int n;
+        scanf("%d", &n);
+        char s[nmax];
+        scanf("%s", s);
+        vector<int> x(n);
+        for (int i = 0; i < n; ++i) {
+            scanf("%d", &x[i]);
+        }
+        vector<int> dp(n, inf);
+        int last = -1;
+        if (s[0] == '1') {
+            dp[0] = 0;
+            last = 0;
+        }
+        for (int i = 1; i < n; ++i) {
+            if (s[i] == '0') {
+                if (last != -1) {
+                    dp[i] = min(dp[i], x[i] - x[last] + dp[last]);
+                }
+            } else {
+                if (last == -1) {
+                    dp[i] = x[i] - x[0];
+                    last = i;
+                    continue;
+                }
+                dp[i] = dp[i - 1];
+                for (int j = i - 1; j > last; --j) {
+                    dp[i] = min(dp[i], x[i] - x[j] + dp[j - 1]);
+                }
+                last = i;
+            }
+        }
+        printf("%d\n", dp[n - 1]);
+    }
+
+}

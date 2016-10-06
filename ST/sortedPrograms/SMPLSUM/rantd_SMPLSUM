@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 10000001;
+int ft[N];
+ll ans[N];
+
+inline void init() {
+    for (int i = 2; i < N; ++i) {
+        if (ft[i] == 0) {
+			ft[i] = i;
+            for (int j = i + i; j < N; j += i) {
+				ft[j] = i;
+			}
+        }
+    }
+	ans[1] = 1;
+	for (int i = 2; i < N; ++i) {
+		int x = i, p = ft[i], cnt = 1;
+		while (x % p == 0) x /= p, cnt *= p;
+		if (x == 1) {
+			ans[i] = (i * 1LL * i - 1) / (p + 1) * p + 1;
+		}
+		else {
+			ans[i] = ans[x] * ans[cnt];
+		}
+	}
+}
+
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, n;
+	
+	init();
+	
+	cin >> ntest;
+	for (; ntest; --ntest) {
+		cin >> n;
+		printf("%lld\n", ans[n]);
+	}
+	
+	//cerr << clock() * 1.0 / CLOCKS_PER_SEC << endl;
+	
+	return 0;
+}

@@ -1,0 +1,111 @@
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <deque>
+#include <vector>
+#include <queue>
+#include <stack>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("input.inp","r",stdin)
+#define OUTPUT freopen("output.out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=26;
+
+double a[N][N],base[N][N];
+string s;
+vector <string> des;
+int n,k,m,test;
+void copyarr(double a[N][N],double b[N][N]){
+    REP(i,0,26)
+        REP(j,0,26) a[i][j]=b[i][j];
+}
+void matrixpow(int x){
+    stack <int> st;
+    while (x) st.push(x),x>>=1;
+    copyarr(a,base);
+    double tmp[N][N],tmp1[N][N];
+    while (1){
+        st.pop();
+        if (st.empty()) break;
+        copyarr(tmp,a);
+        REP(i,0,26)
+            REP(j,0,26) a[i][j]=0;
+        if (st.top()%2){
+            REP(i,0,26)
+                REP(j,0,26){
+                    tmp1[i][j]=0;
+                    REP(k,0,26) tmp1[i][j]+=tmp[i][k]*tmp[k][j];
+                }
+            REP(i,0,26)
+                REP(j,0,26)
+                    REP(k,0,26) a[i][j]+=tmp1[i][k]*base[k][j];
+        }else REP(i,0,26)
+                REP(j,0,26)
+                    REP(k,0,26) a[i][j]+=tmp[i][k]*tmp[k][j];
+    }
+}
+/*
+void matrixpow(double a[N][N],int x){
+    if (x==1) {
+        copyarr(a,base);
+        return;
+    }
+    double tmp[N][N],tmp1[N][N];
+    matrixpow(tmp,x/2);
+    REP(i,0,26)
+        REP(j,0,26) a[i][j]=.0;
+    if (x%2){
+        REP(i,0,26)
+            REP(j,0,26){
+                tmp1[i][j]=.0;
+                REP(k,0,26) tmp1[i][j]+=tmp[i][k]*tmp[k][j];
+            }
+        REP(i,0,26)
+            REP(j,0,26)
+                REP(k,0,26) a[i][j]+=tmp1[i][k]*base[k][j];
+    }else REP(i,0,26)
+              REP(j,0,26)
+                    REP(k,0,26) a[i][j]+=tmp[i][k]*tmp[k][j];
+}*/
+int main(){
+    //INPUT;OUTPUT;
+    cin>>test;
+    while (test--){
+        cin>>n>>k>>s;
+        m=s.length();
+        FOR(i,0,25)
+            FOR(j,0,25) cin>>base[i][j];
+        matrixpow(k);
+        double ans=.0;
+        des.resize(n);
+        REP(i,0,n) cin>>des[i];
+        sort(des.begin(),des.end());
+        //REP(i,0,n) cout<<des[i]<<'\n';
+        REP(i,0,n){
+            double v=1.0;
+            if (i>0&&des[i]==des[i-1]) continue;
+            if (des[i].length()!=m) v=.0;else
+            REP(j,0,m) v*=a[s[j]-'a'][des[i][j]-'a'];
+            ans+=v;
+            //printf("%.7f\n",v);
+        }
+        printf("%.7f\n",ans);
+    }
+}

@@ -1,0 +1,158 @@
+#include <algorithm>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+const int N = 100000;
+
+struct T {
+	int v, i;
+};
+
+T newT(int v, int i) {
+	T res;
+	res.v = v;
+	res.i = i;
+	return res;
+}
+
+struct Node {
+	int v, cnt;
+};
+
+Node newNode(int v, int cnt) {
+	Node res;
+	res.v = v;
+	res.cnt = cnt;
+	return res;
+}
+
+Node f(Node a, Node b) {
+	if (a.v == b.v) {
+		return newNode(a.v, a.cnt + b.cnt);
+	} else {
+		if (a.v > b.v) {
+			return a;
+		} else {
+			return b;
+		}
+	}
+}
+
+vector<T> p[N+1];
+vector<Node> a[N+1];
+int minD[N+1], start[N+1];
+
+int binsearchL(int i, int v) {
+	int l = 0;
+	int r = p[i].size()-1;
+	int res = -1;
+	while (l <= r) {
+		int m = (l+r) / 2;
+		if (p[i][m].i >= v) {
+			res = m+1;
+			r = m-1;
+		} else {
+			l = m+1;
+		}
+	}
+	return res;
+}
+
+int binsearchR(int i, int v) {
+	int l = 0;
+	int r = p[i].size()-1;
+	int res = -1;
+	while (l <= r) {
+		int m = (l+r) / 2;
+		if (p[i][m].i <= v) {
+			res = m+1;
+			l = m+1;
+		} else {
+			r = m-1;
+		}
+	}
+	return res;
+}
+
+Node getF(int i, int l, int r) {
+	Node res = newNode(-1, -1);
+	l += start[i]-1;
+	r += start[i]-1;
+	while (l <= r) {
+		if (l % 2 != 0) {
+			res = f(a[i][l++], res);
+		}
+		if (r % 2 == 0) {
+			res = f(a[i][r--], res);
+		}
+		l /= 2;
+		r /= 2;
+	}
+	return res;
+}
+
+int main() {
+	for (int i = 2; i*i <= N; i++) {
+		if (minD[i] == 0) {
+			for (int j = i*i; j <= N; j += i) {
+				minD[j] = i;
+			}
+		}
+	}
+	for (int i = 2; i <= N; i++) {
+		if (minD[i] == 0) {
+			minD[i] = i;
+		}
+	}
+	int n, m;
+	scanf("%d %d", &n, &m);
+	for (int i = 1; i <= n; i++) {
+		int number;
+		scanf("%d", &number);
+		int v = number;
+		while (v != 1) {
+			if (p[minD[v]].empty() || p[minD[v]][p[minD[v]].size()-1].i != i) {
+				p[minD[v]].push_back(newT(number,i));
+			}
+			v /= minD[v];
+		}
+	}
+	for (int i = 1; i <= N; i++) {
+		if (!p[i].empty()) {
+			start[i] = 1;
+			while (start[i] < p[i].size()) {
+				start[i] *= 2;
+			}
+			a[i].resize(start[i]*2);
+			for (int j = 0; j < p[i].size(); j++) {
+				a[i][start[i]+j] = newNode(p[i][j].v, 1);
+			}
+			for (int j = start[i]+p[i].size(); j < start[i]*2; j++) {
+				a[i][j] =  newNode(0, 0);
+			}
+			for (int j = start[i]-1; j >= 1; j--) {
+				a[i][j] = f(a[i][2*j], a[i][2*j+1]);
+			}
+		}
+	}
+	while (m--) {
+		int g, x, y;
+		scanf("%d %d %d", &g, &x, &y);
+		Node res = newNode(-1, -1);
+		while (g != 1) {
+			int l = binsearchL(minD[g], x);
+			int r = binsearchR(minD[g], y);
+			//printf("%d %d\n", l, r);
+			if (l != -1) {
+				Node tmp = getF(minD[g], l, r);
+				if (tmp.v > res.v) {
+					res = tmp;
+				}
+			}
+			g /= minD[g];
+		}
+		printf("%d %d\n", res.v, res.cnt);
+	}
+	return 0;
+}

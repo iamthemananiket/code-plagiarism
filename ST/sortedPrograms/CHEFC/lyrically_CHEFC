@@ -1,0 +1,179 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+uint xrand() {
+	static uint x = 314159265, y = 358979323, z = 846264338, w = 327950288;
+	const uint t = x ^ x << 11; x = y; y = z; z = w; return w = w ^ w >> 19 ^ t ^ t >> 8;
+}
+
+struct T {
+	int l, r;
+	int c;
+	T() {}
+	T(int l, int r, int c) : l(l), r(r), c(c) {}
+};
+T I(-1, -1, -1);
+T operator*(const T &a, const T &b) {
+	if (a.c < 0) return b;
+	if (b.c < 0) return a;
+	return T(a.l, b.r, a.c + ((a.r != b.l) ? 1 : 0) + b.c);
+}
+T &operator*=(T &a, const T &b) {
+	return a = a * b;
+}
+
+struct Tree {
+	Tree *l, *r, *p;
+	int size;
+	int v;
+	T prod; 
+	Tree() {}
+	Tree(int v) : l(0), r(0), p(0), v(v) {
+		update();
+	}
+	Tree *change(Tree *_l, Tree *_r) {
+		l = _l;
+		r = _r;
+		if (l) l->p = this;
+		if (r) r->p = this;
+		update();
+		return this;
+	}
+	void update() {
+		size = (l ? l->size : 0) + 1 + (r ? r->size : 0);
+		prod = (l ? l->prod : I) * T(v, v, 0) * (r ? r->prod : I);
+	}
+	pair<Tree *,int> getPosition() {
+		Tree *a = this;
+		int count = l ? l->size : 0;
+		for (; a->p; a = a->p) {
+			if (a->p->r == a) {
+				count += (a->p->l ? a->p->l->size : 0) + 1;
+			}
+		}
+		return mp(a, count);
+	}
+	T rangeProd(int x, int y) {
+		chmax(x, 0);
+		chmin(y, size - 1);
+		if (x == 0 && y == size - 1) {
+			return prod;
+		}
+		T ret = I;
+		if (x <= y) {
+			const int sizeL = l ? l->size : 0;
+			if (l) ret *= l->rangeProd(x, y);
+			if (x <= sizeL && sizeL <= y) ret *= T(v, v, 0);
+			if (r) ret *= r->rangeProd(x - sizeL - 1, y - sizeL - 1); 
+		}
+		return ret;
+	}
+	void print(int depth = 0) const {
+		if (l) l->print(depth + 1);
+		printf("%*s%p (%p, %p; %p; %d) (%d; %d, %d; %d)\n", 
+			depth * 2, "", this, l, r, p, size, v, prod.l, prod.r, prod.c);
+		if (r) r->print(depth + 1);
+	}
+};
+Tree *merge(Tree *a, Tree *b) {
+	if (!a) return b;
+	if (!b) return a;
+	if ((int)(xrand() % (a->size + b->size)) < a->size) {
+		a->change(a->l, merge(a->r, b));
+		return a;
+	} else {
+		b->change(merge(a, b->l), b->r);
+		return b;
+	}
+}
+pair<Tree *,Tree *> split(Tree *a, int count) {
+	if (!a) return mp(a, a);
+	const int sizeL = a->l ? a->l->size : 0;
+	a->p = 0;
+	if (count <= sizeL) {
+		const auto res = split(a->l, count);
+		return mp(res.first, a->change(res.second, a->r));
+	} else {
+		const auto res = split(a->r, count - sizeL - 1);
+		return mp(a->change(a->l, res.first), res.second);
+	}
+}
+
+int N;
+int A[100010];
+Tree nodes[100010];
+
+Tree *build(int S, int T) {
+	if (T - S == 1) {
+		nodes[S] = Tree(A[S]);
+		return &nodes[S];
+	} else {
+		const int U = (S + T) / 2;
+		return merge(build(S, U), build(U, T));
+	}
+}
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		Tree *rt = build(0, N);
+		for (int qry = in(); qry--; ) {
+// rt->print();
+			switch (in()) {
+				case 1: {
+					const int l = in() - 1;
+					const int r = in() - 1;
+					const T res = rt->rangeProd(l, r);
+					printf("%d\n", res.c + 1);
+				} break;
+				case 2: {
+					const int l = in() - 1;
+					const int r = in() - 1;
+					const auto spl0 = split(rt, l);
+					const auto spl1 = split(spl0.second, r - l + 1);
+					rt = merge(merge(spl1.first, spl0.first), spl1.second);
+				} break;
+				default: assert(false);
+			}
+		}
+	}
+	
+	return 0;
+}
+

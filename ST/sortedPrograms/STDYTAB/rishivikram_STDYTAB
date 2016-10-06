@@ -1,0 +1,128 @@
+#include<bits/stdc++.h>
+#define MOD 1000000000
+using namespace std;
+long long int dp[2003][2003];
+long long int val[2003];
+vector<long long int> isPrime(4000,1);
+vector<long long int> primes;
+long long int modpow(long long int base,long long int exp){
+    long long int x=1,y=base; // long long is taken to avoid overflow of intermediate results
+    while(exp > 0){
+        if(exp&1){
+            x=(x*y)%MOD;
+        }
+        y = (y*y)%MOD; // squaring the base
+        exp /= 2;
+    }
+    return x%MOD;
+}
+long long int power(long long int a, long long int b)
+{
+	long long int ans=0;
+	while(a)
+	{
+		ans+=a/b;
+		a/=b;
+	}
+	return ans;
+}
+void find_all_primes()
+{
+	long long int i,j;
+	primes.push_back(2);
+	for(i=3;i<=3999;i+=2)
+	{
+		if(isPrime[i]==1)
+		{
+			primes.push_back(i);
+			for (j=2*i; j<=3999; j+=i)
+    	   	    isPrime[j]=0;
+   		}
+	}
+	/*for(i=0;i<primes.size();i++)
+		cout<<primes[i]<<" ";
+	cout<<endl;*/
+}
+void init(long long int m)
+{
+	long long int i,res,j,powerofprime;
+	val[0]=1;
+	for (i=1;i<=m;i++)
+    {
+		res=1;
+		for(j=0;j<primes.size();j++)
+		{
+			if(primes[j]<=m-1+i)
+			{
+				powerofprime=power(m-1+i,primes[j])-power(i,primes[j])-power(m-1,primes[j]);
+				res=(res*modpow(primes[j],powerofprime))%MOD;
+			}
+			else
+				break;
+		}
+		val[i]=res;
+	//	cout<<" i is "<<i<<" and val[i] is "<<val[i]<<endl;
+	}
+}
+long long int solve(long long int r,long long int c)
+{
+	long long int i,j;
+	long long int sum=0;
+	for(i=c;i>=0;i--)
+	{
+		sum+=val[i];
+		if(sum>=MOD)
+			sum%=MOD;
+		dp[1][i]=(val[i]*sum)%MOD;
+	}
+	for(j=1;j<r;j++)
+	{
+		sum=0;
+		for(i=c;i>=0;i--)
+		{
+			sum+=dp[j][i];
+			if(sum>=MOD)
+				sum%=MOD;
+			dp[j+1][i]=(sum*val[i])%MOD;
+		}
+	}
+	return dp[r][0];
+}
+/*long long int fact(long long int a, long long int b,long long int moddu)
+{
+	long long int maxim,minim,res=1,i;
+	if(b>=a-b)
+	{
+		maxim=b;
+		minim=a-b;
+	}
+	else
+	{
+		maxim=a-b;
+		minim=b;
+	}
+	for(i=maxim+1;i<=a;i++)
+	{
+		res=mod((res*i),moddu);
+	}
+	for(i=2;i<=minim;i++)
+	{
+		res=mod((res*mod_inverse(i,moddu)),moddu);
+	}
+	return res;
+}
+	*/
+int main()
+{
+	find_all_primes();
+	long long int t,n,m,ans;
+	scanf("%lld",&t);
+	while(t--)
+	{
+		scanf("%lld%lld",&n,&m);
+		init(m);
+		ans=solve(n,m)%MOD;
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

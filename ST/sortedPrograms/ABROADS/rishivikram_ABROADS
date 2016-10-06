@@ -1,0 +1,91 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+#define ff first
+#define ss second
+const int MAXN = 5e5+3;
+int dsu[MAXN];
+int cc[MAXN];
+int ans[MAXN];
+int a[MAXN];
+int b[MAXN];
+pair<int, pair<int,int> > evts[MAXN];
+map< int,int > M;
+map< pair<int,int> ,int > removed;
+
+int findRoot(int s) {
+	if(s==dsu[s])
+		return s;
+	return dsu[s]=findRoot(dsu[s]);
+}
+void unite(int a, int b) {
+	int rA=findRoot(a);
+	int rB=findRoot(b);
+	if(rA==rB)
+		return;
+	cc[rA]+=cc[rB];
+	dsu[rB]=rA;
+}
+void unite2(int a, int b) {
+	int rA=findRoot(a);
+	int rB=findRoot(b);
+	if(rA==rB)
+		return;
+	M.erase(M.find(rB));
+	cc[rA]+=cc[rB];
+	dsu[rB]=rA;
+}
+int main() {
+	// freopen("TASK.in","r",stdin);	
+	// freopen("TASK.out","w",stdout);
+	int n,m,q;
+	cin>>n>>m>>q;
+	for(int i = 1;i<=n;i++) {
+		scanf("%d",&cc[i]);
+		dsu[i]=i;
+	}
+	for(int i=1;i<=m;i++)
+		scanf("%d%d",&a[i],&b[i]);
+	for(int i=0;i<q;i++) {
+		char ch;
+		int A,B;
+		cin>>ch>>A;
+		if(ch=='P') {
+			cin>>B;
+			evts[i]=make_pair(A,make_pair(cc[A],B));
+			cc[A]=B;
+		}
+		else {
+			removed[make_pair(a[A],b[A])]++;
+			evts[i]=make_pair(a[A],make_pair(b[A],-1));
+		}
+	}
+	for(int i=0;i<m;i++) {
+		if(removed.find(make_pair(a[i],b[i]))==removed.end())
+			unite(a[i],b[i]);
+	}
+	for(int i=1;i<=n;i++) {
+		int R=findRoot(i);
+		M[R]++;
+	}
+	for(int i=q-1;i>=0;i--) {
+		if(evts[i].ss.ss==-1) {
+			int maxi=-1;
+			for(map<int,int>::iterator it=M.begin();it!=M.end();it++)
+				maxi=max(maxi,cc[it->ff]);
+			ans[i]=maxi;
+			unite2(evts[i].ff,evts[i].ss.ff);
+		}
+		else {
+			int maxi=-1;
+			for(map<int,int>::iterator it=M.begin();it!=M.end();it++)
+				maxi=max(maxi,cc[it->ff]);
+			ans[i]=maxi;
+			int R=findRoot(evts[i].ff);
+			cc[R]+=evts[i].ss.ff-evts[i].ss.ss;
+		}
+	}
+	for(int i=0;i<q;i++)
+		printf("%d\n",ans[i]);
+	return 0;
+}

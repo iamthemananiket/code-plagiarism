@@ -1,0 +1,103 @@
+// HAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA
+#include<bits/stdc++.h>
+using namespace std;
+char s[50];
+char ss[35][50];
+int ll[35],n;
+int dp[100][100];
+int that (int st,int en)
+{
+	if (st>en)
+		return 0;
+	int i;
+	if (dp[st][en]!=-1)
+		return dp[st][en];
+	int ans=0;
+	set<int>se;
+	for (i=st;i<=en;i++) // the subtring is traversed bruh ! 
+	{
+		int j;
+		for (j=0;j<n;j++) // j th substr selected bruh!
+		{
+			/*if (i==4&&j==1)
+			printf("entered i=4 and j=1");
+			*/
+			if(i+ll[j]-1>en)
+				continue;
+			
+			
+			int f=1;
+			int k;
+			for (k=i;k<ll[j]+i;k++)
+			{
+				if (s[k]!=ss[j][k-i])
+				{
+					f=0;
+					break;
+				}
+			}
+			if (f)
+			{
+			
+				/*
+				//printf("match found!!! from position i:%d substring nuber :%d\n",i,j);
+				int gas=i;
+				for (gas=i;gas<i+ll[j];gas++)
+					printf("%c",s[gas]);
+				printf(" %s\n",ss[j]);
+				*/
+				
+				int al=that(st,i-1);
+				int be=that(ll[j]+i,en);
+		
+				se.insert(al^be);
+		
+			}
+		}
+	}
+	typeof(se.begin())it=se.begin();
+	for (i=0;it!=se.end();it++,i++)
+	{
+		if ((*it)>i)
+			break;
+	}
+	
+
+
+	return dp[st][en]=i;
+	
+}
+void reset();
+
+int main()
+{
+	int t;
+	scanf("%d",&t);
+
+	while (t--)
+	{
+		reset();
+		scanf("%s",s);
+		int i,j;
+		scanf("%d",&n);
+		for (i=0;i<n;i++)
+		{
+			scanf("%s",ss[i]);
+			ll[i]=strlen(ss[i]);
+		}
+		int ans=that(0,strlen(s)-1);
+		if (ans==0)
+			printf("Tracy\n");
+		else
+			printf("Teddy\n");
+		
+	}
+	return 0;
+}
+void reset()
+{
+	int i,j;
+	for (i=0;i<100;i++)
+		for (j=0;j<100;j++)
+			dp[i][j]=-1;
+}

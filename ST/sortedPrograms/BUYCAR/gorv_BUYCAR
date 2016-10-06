@@ -1,0 +1,60 @@
+#include<iostream>
+#include<stdio.h>
+#include<string>
+#include<stdlib.h>
+struct p
+{
+int index;
+float realprice;
+float baseprice;
+};
+
+
+inline int comp(const void *b,const void *a)
+{
+if(((struct p *)a)->realprice-((struct p *)b)->realprice)
+return ((struct p *)a)->realprice-((struct p *)b)->realprice;
+else
+return ((struct p *)a)->baseprice-((struct p *)b)->baseprice;
+}
+
+
+
+using namespace std;
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		int n;
+		cin>>n;
+		string cars[n];
+		//float realprice[n];
+		//int baseprice[n];
+		struct p s[n];
+		for(int i=0;i<n;i++){
+		string carname,price,tax;
+		
+		//Lamborghini $300000 10%
+		cin>>carname;
+		cars[i]=carname;
+		cin>>price;
+		//cin>>ch2;
+		cin>>tax;
+			//cin>>ch2;
+		//cout<<carname<<"\n";
+		string pricee = price.substr(1, price.size());
+		int pricevalue = atoi(pricee.c_str());
+		s[i].baseprice=(float)pricevalue;
+		//cout<<pricevalue<<"\n";
+		//cout<<(int)price<<"\n";
+		string taxx = tax.substr(0, tax.size()-1);
+		int taxvalue = atoi(taxx.c_str());
+		//cout<<taxvalue<<"\n";
+		s[i].realprice=(float)pricevalue+(((float)(taxvalue*pricevalue))/100.0);
+		s[i].index=i;
+	}
+	qsort(s,n,sizeof(struct p),comp);
+	cout<<cars[s[0].index]<<"\n";
+	
+
+}}

@@ -1,0 +1,78 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+
+int dp[18][1 << 18];
+int use[18][1 << 18];
+int n;
+int m;
+int t;
+int u_s = 0;
+vector<int> v[18];
+inline bool dfs(int a, int b){
+	if (use[a][b]==u_s){
+		return dp[a][b];
+	}
+	dp[a][b] = false;
+	use[a][b] = u_s;
+	int nex = b | (1 << a);
+	for (int i = 0; i < v[a].size(); i++){
+		if ((b >> v[a][i]) & 1){
+			continue;
+		}
+		dp[a][b] |= !dfs(v[a][i], nex);
+		if (dp[a][b]){
+			break;
+		}
+	}
+	return dp[a][b];
+}
+int main(){
+	scanf("%d", &t);
+	while (t--){
+		u_s++;
+		scanf("%d%d", &n, &m);
+		int countt = 0;
+		for (int i = 0; i < n; i++){
+			v[i].clear();
+		}
+		for (int i = 0; i < m; i++){
+			int a, b;
+			scanf("%d%d", &a, &b);
+			a--;
+			b--;
+			v[a].push_back(b);
+			v[b].push_back(a);
+		}
+		for (int i = 0; i < n; i++){
+			if (!dfs(i, 0)){
+				countt++;
+			}
+		}
+		printf("%d\n", countt);
+	}
+	return 0;
+}

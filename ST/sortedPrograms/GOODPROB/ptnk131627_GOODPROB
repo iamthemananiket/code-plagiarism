@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first 
+#define Y second 
+#define FOR(i,L,R) for(auto i=(L);i<=(R);i++)
+#define REP(i,L,R) for(auto i=(L);i<(R);i++)
+
+typedef pair<int,int> ii;
+typedef long long ll;
+
+const int MOD=1e9+7;
+const int N=1e5+10,M=350;
+const int inf=1e9,maxval=1<<14;
+
+int f[M][maxval];
+int tmpf[maxval];
+
+int n,a[N];
+int e[N][2];
+int elmin[N][20];
+
+ll process(int val,int L,int R){
+	int Lb=L/M,Rb=R/M;
+	if (Lb>=Rb-1){
+		int ans=0;
+		for(int i=L;i<=R;i++){
+			int nval=val&a[i];
+			if (nval==val||nval==a[i]) ans++;
+		}
+		return ans;
+	}
+	int ans=0;
+	for(int i=L;i<(Lb+1)*M;i++){
+		int nval=val&a[i];
+		if (nval==val||nval==a[i]) ans++;
+	}
+	for(int i=Rb*M;i<=R;i++){
+		int nval=val&a[i];
+		if (nval==val||nval==a[i]) ans++;
+	}
+	for(int i=Lb+1;i<Rb;i++)
+		ans+=f[i][val];
+	return ans;
+}
+int comp(int x,int y){
+	return a[x]<a[y];
+}
+int getmax(int L,int R){
+	int len=int(log2(R-L+1));
+	return max(elmin[L][len],elmin[R-(1<<len)+1][len],comp);
+}
+void prepare(){
+	scanf("%d",&n);
+	for(int i=0;i<n;i++) scanf("%d",a+i);
+	///build edges
+	for(int i=0;i<n;i++) elmin[i][0]=i;
+	for(int lay=1;lay<20;lay++)
+		for(int i=0;i<=n-(1<<lay);i++) elmin[i][lay]=max(elmin[i][lay-1],elmin[i+(1<<(lay-1))][lay-1],comp);
+	///
+	for(int blo=0;blo*M<n;blo++){
+		int st=blo*M,en=min((blo+1)*M,n);
+		memset(tmpf,0,sizeof(tmpf));
+		for(int i=st;i<en;i++) tmpf[a[i]]++;
+		for(int i=0;i<14;i++)
+			for(int j=0;j<maxval;j++) if (j&(1<<i))
+				tmpf[j]+=tmpf[j^(1<<i)];
+		for(int i=0;i<maxval;i++) f[blo][i]+=tmpf[i];
+		memset(tmpf,0,sizeof(tmpf));
+		for(int i=st;i<en;i++) tmpf[a[i]]++;
+		for(int i=0;i<14;i++)
+			for(int j=0;j<maxval;j++) if (j&(1<<i))
+				tmpf[j^(1<<i)]+=tmpf[j];
+		for(int i=0;i<maxval;i++) f[blo][i]+=tmpf[i]; 
+		for(int i=st;i<en;i++) f[blo][a[i]]--;
+	}
+	// cout<<"FIN\n";
+}
+ll DP(int L,int R){
+	int root=getmax(L,R);
+	int numL=root-L,numR=R-root;
+	ll ans=0;
+	if (numL<numR)
+		for(int i=L;i<=root;i++) ans+=process(a[i],root,R);
+	else for(int i=root;i<=R;i++) ans+=process(a[i],L,root);
+	ans*=a[root];
+	// cout<<L<<" "<<R<<" "<<ans<<'\n';
+	if (root>L) ans+=DP(L,root-1);
+	if (root<R) ans+=DP(root+1,R);
+	return ans;
+}
+ll solve(){
+	ll ans=DP(0,n-1);
+	for(int i=0;i<n;i++) ans-=a[i];
+	return ans;
+}
+int main(){
+	prepare();
+	cout<<solve();
+}

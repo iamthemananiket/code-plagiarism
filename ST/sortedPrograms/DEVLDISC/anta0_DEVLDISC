@@ -1,0 +1,103 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+int main() {
+	/*
+	rer(n, 1, 7) {
+		int g[8][8], a[8];
+		rep(m, 1 << (n * (n - 1) / 2)) {
+			mset(g, INF);
+			rep(x, n) g[x][x] = 0;
+			int e = 0;
+			rep(x, n) rep(y, x) if(m >> (e ++) & 1)
+				g[x][y] = g[y][x] = 1;
+			rep(k, n) rep(i, n) rep(j, n)
+				amin(g[i][j], g[i][k] + g[k][j]);
+			int ma = 0;
+			rep(i, n) {
+				a[i] = 0;
+				rep(j, n)
+					amax(a[i], g[i][j]);
+				amax(ma, a[i]);
+			}
+			if(ma == INF) continue;
+			rep(i, n) {
+				int b = 0;
+				rep(j, n) if(g[i][j] == a[i])
+					amax(b, a[j]);
+				if(b != ma) {
+					vpii edges;
+					e = 0;
+					rep(x, n) rep(y, x) if(m >> (e ++) & 1)
+						edges.push_back(mp(x, y));
+					cerr << "n = " << n << endl;
+					cerr << "ma = " << ma << endl;
+					cout << edges.size() << endl;
+					for(int i = 0; i < (int)edges.size(); ++ i)
+						printf("%d %d\n", edges[i].first + 1, edges[i].second + 1);
+					cout << i + 1 << endl;
+					cout << endl;
+				}
+			}
+		}
+	}*/
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int n;
+		scanf("%d", &n);
+		if(n <= 6) {
+			puts("-1");
+		} else {
+			vpii edges;
+			edges.push_back(mp(0, 2));
+			edges.push_back(mp(0, 4));
+			edges.push_back(mp(0, 6));
+			edges.push_back(mp(1, 2));
+			edges.push_back(mp(1, 4));
+			edges.push_back(mp(1, 5));
+			edges.push_back(mp(2, 3));
+			rep(i, n - 7)
+				edges.push_back(mp(0, 7 + i));
+			printf("%d\n", (int)edges.size());
+			for(int i = 0; i < (int)edges.size(); ++ i)
+				printf("%d %d\n", edges[i].first + 1, edges[i].second + 1);
+			printf("%d\n", 4 + 1);
+		}
+	}
+	return 0;
+}

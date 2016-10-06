@@ -1,0 +1,69 @@
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX = 55555;
+map<int, int> dsu;
+
+int findset(int x) {
+  return !dsu.count(x) ? x : dsu[x] = findset(dsu[x]);
+}
+
+void unite(int a, int b) {
+  a = findset(a);
+  b = findset(b);
+  if (a != b) {
+    dsu[a] = b;
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N, M;
+    cin >> N >> M;
+    vector<int> type(N);
+    map<int, vector<pair<int, int>>> edges;
+    for (int i = 0; i < N; ++i) {
+      cin >> type[i];
+    }
+    for (int i = 0, t, a, b; i < M; ++i) {
+      cin >> t >> a >> b;
+      edges[-t].push_back( { a, b });
+    }
+    vector<int> best(MAX);
+    for (int i = 1; i < MAX; ++i) {
+      best[i] = i;
+    }
+    map<int, int> now;
+    for (const auto& lst : edges) {
+      dsu.clear();
+      for (const auto& e : lst.second) {
+        unite(e.first, e.second);
+      }
+      now.clear();
+      for (const auto& e : lst.second) {
+        now[findset(e.first)] = max(now[findset(e.first)], max(best[e.first], best[e.second]));
+      }
+      for (const auto& e : lst.second) {
+        best[e.first] = best[e.second] = now[findset(e.first)];
+      }
+    }
+    ll res = 0;
+    for (const auto& t : type) {
+      res += best[t];
+    }
+    cout << res << endl;
+  }
+  return 0;
+}

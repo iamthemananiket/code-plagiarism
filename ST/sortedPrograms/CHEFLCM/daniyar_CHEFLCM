@@ -1,0 +1,88 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 20;
+
+int p[maxn], deg[maxn];
+
+int cur[maxn];
+
+long long ans;
+
+int n;
+
+void rec(int pos, int x = 1)
+{
+	if (pos == n + 1)
+	{
+		ans += x;
+		return ;
+	}
+	if (cur[pos] < deg[pos])
+	{
+		cur[pos]++;
+		rec(pos, x * p[pos]);
+		cur[pos]--;
+	}
+	rec(pos + 1, x);
+}
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	int T;
+	cin >> T;
+	while (T--)
+	{
+		int x;
+		scanf("%d", &x);
+		n = 0;
+		for (int j = 2; j * j <= x; j++)
+		{
+			if (x % j == 0)
+			{
+				p[++n] = j;
+				deg[n] = 0;
+				while (x % j == 0)
+				{
+					deg[n]++;
+					x /= j;
+				}
+			}
+		}
+		if (x > 1)
+		{
+			p[++n] = x;
+			deg[n] = 1;
+		}
+		ans = 0;
+		memset(cur, 0, sizeof(cur));
+		rec(1);
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

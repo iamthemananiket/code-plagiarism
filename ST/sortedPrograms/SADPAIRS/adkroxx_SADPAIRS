@@ -1,0 +1,366 @@
+#include<bits/stdc++.h>
+#include <sys/resource.h>
+
+#define MOD 1000000007
+#define MAX 200005
+#define LIM 1000005
+#define ll long long
+#define slld(t) scanf("%lld",&t)
+#define sd(t) scanf("%d",&t)
+#define pd(t) printf("%d\n",t)
+#define plld(t) printf("%lld\n",t)
+#define pcc pair<char,char>
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define tr(container,it) for(typeof(container.begin()) it=container.begin();it!=container.end();it++)
+#define mp(a,b) make_pair(a,b)
+#define FF first
+#define SS second
+#define pb(x) push_back(x)
+#define vi vector<int>
+#define vpii vector<pii >
+#define vll vector<ll>
+#define clr(x) memset(x,0,sizeof(x))
+
+using namespace std;
+
+// SOURCE: http://codeforces.com/contest/487/submission/15921824 - By a user name 'ikbal'
+// Take care it is 0 indexed -_-
+struct BiconnectedComponents {
+	struct Edge {
+		int from, to;
+	};
+	struct To {
+		int to; int edge;
+	};
+	vector<Edge> edges;
+	vector<vector<To> > g;
+	vector<int> low, ord, depth;
+	vector<bool> isArtic;
+	vector<int> edgeColor;
+	vector<int> edgeStack;
+	int colors;
+	int dfsCounter;
+
+	void init(int n) {
+		edges.clear();
+		g.assign(n, vector<To>());
+	}
+
+	void addEdge(int u, int v) {
+		if(u > v) swap(u, v);
+		Edge e = { u, v };
+		int ei = edges.size();
+		edges.push_back(e);
+		To tu = { v, ei }, tv = { u, ei };
+		g[u].push_back(tu);
+		g[v].push_back(tv);
+	}
+
+	void run() {
+		int n = g.size(), m = edges.size();
+		low.assign(n, -2);
+		ord.assign(n, -1);
+		depth.assign(n, -2);
+		isArtic.assign(n, false);
+		edgeColor.assign(m, -1);
+		edgeStack.clear();
+		colors = 0;
+
+		for(int i = 0; i < n; ++ i) if(ord[i] == -1) {
+			dfsCounter = 0;
+			dfs(i);
+		}
+	}
+
+private:
+	void dfs(int i) {
+		low[i] = ord[i] = dfsCounter ++;
+		for(int j = 0; j < (int)g[i].size(); ++ j) {
+			int to = g[i][j].to, ei = g[i][j].edge;
+			if(ord[to] == -1) {
+				depth[to] = depth[i] + 1;
+				edgeStack.push_back(ei);
+				dfs(to);
+				low[i] = min(low[i], low[to]);
+				if(low[to] >= ord[i]) {
+					if(ord[i] != 0 || j >= 1)
+						isArtic[i] = true;
+					while(!edgeStack.empty()) {
+						int fi = edgeStack.back(); edgeStack.pop_back();
+						edgeColor[fi] = colors;
+						if(fi == ei) break;
+					}
+					++ colors;
+				}
+			}else if(depth[to] < depth[i] - 1) {
+				low[i] = min(low[i], ord[to]);
+				edgeStack.push_back(ei);
+			}
+		}
+	}
+} mkc;
+
+int N,E,G[MAX],GLOBAL[LIM],ToBe[MAX],temp[LIM],artToBe[MAX],glob;
+vi adj[MAX],vertex,color,E1[MAX],E2[MAX],artic,adj2[MAX];
+ll ANS[MAX],ComponentAnswer,globalComponentAnswer=0,SUB1[LIM],SUB2[LIM];
+bool visited1[MAX];
+map<ll,ll>* M[LIM];
+
+void dfs1(int ind){
+	vertex.pb(ind);
+	for(int j=0;j<adj[ind].size();j++){
+		if(visited1[adj[ind][j]]) continue;
+		visited1[adj[ind][j]]=true;
+		dfs1(adj[ind][j]);
+	}
+}
+
+// I am assuming map has by default 0 for all unassigned one
+// take care if RE/WA comes this can be cause
+void dfs2(int curr,int pr){
+	int mx=E2[curr][0];		// data about curr will be stored at mx itself
+	
+	if(mx>N){
+		if(adj2[curr].size()==1 && pr>0){
+			M[mx]=new map<ll,ll >;
+			return;
+		}
+		int in=0,sz=0;
+		for(int i=0;i<adj2[curr].size();i++){
+			int ch=adj2[curr][i];
+			if(ch==pr) continue;
+			dfs2(ch,curr);
+			if((*M[E2[ch][0]]).size()>sz){
+				in=E2[ch][0];
+				sz=(*M[E2[ch][0]]).size();
+				SUB1[mx]=SUB1[E2[ch][0]];
+				SUB2[mx]=SUB2[E2[ch][0]];
+			}
+		}
+		
+		M[mx]=M[in];
+		map<ll,ll>::iterator itr;
+		for(int i=0;i<adj2[curr].size();i++){
+			int ch=adj2[curr][i];
+			if(ch==pr) continue;
+			ch=E2[ch][0];
+			if(ch==in) continue;
+			for(itr = (*M[ch]).begin();itr!=(*M[ch]).end();itr++){
+				if((*M[mx]).find(itr->first)==(*M[mx]).end())
+                	(*M[mx])[itr->first] = 0;
+	            ll prev=(*M[mx])[itr->first];
+	            (*M[mx])[itr->first] += itr->second;
+	            ll now=prev+(itr->second);
+	            SUB1[mx]+=now*now-prev*prev;
+	            SUB2[mx]+=2*temp[itr->first]*(now-prev);
+	        }
+		}
+		return;
+	}
+	
+	if(adj2[curr].size()==1 && pr>0){
+		M[mx]=new map<ll,ll >;
+		if(mkc.isArtic[ToBe[mx]]){
+			ANS[mx]=ComponentAnswer-1;
+		}
+		for(int i=0;i<E2[curr].size();i++){
+			if((*M[mx]).find(G[E2[curr][i]])==(*M[mx]).end())
+                	(*M[mx])[G[E2[curr][i]]] = 0;
+			int prev=(*M[mx])[G[E2[curr][i]]];
+			(*M[mx])[G[E2[curr][i]]]++;
+			SUB1[mx]+=2*prev+1;
+			SUB2[mx]+=2*temp[G[E2[curr][i]]];
+		}
+		if(mkc.isArtic[ToBe[mx]]){
+			ANS[mx]-=ComponentAnswer+SUB1[mx]-SUB2[mx];
+		}
+		return;
+	}
+	
+	int in=0,sz=0;
+	
+	if(mkc.isArtic[ToBe[mx]]){
+		ANS[mx]=ComponentAnswer-1;
+	}
+	
+	for(int i=0;i<adj2[curr].size();i++){
+		int ch=adj2[curr][i];
+		if(ch==pr) continue;
+		dfs2(ch,curr);
+		if(mkc.isArtic[ToBe[mx]]) ANS[mx]-=SUB1[E2[ch][0]];
+		if((*M[E2[ch][0]]).size()>sz){
+			in=E2[ch][0];
+			sz=(*M[E2[ch][0]]).size();
+			SUB1[mx]=SUB1[E2[ch][0]];
+			SUB2[mx]=SUB2[E2[ch][0]];
+		}
+	}
+	
+	M[mx]=M[in];
+	map<ll,ll>::iterator itr;
+	for(int i=0;i<adj2[curr].size();i++){
+		int ch=adj2[curr][i];
+		if(ch==pr) continue;
+		ch=E2[ch][0];
+		if(ch==in) continue;
+		for(itr = (*M[ch]).begin();itr!=(*M[ch]).end();itr++){
+			if((*M[mx]).find(itr->first)==(*M[mx]).end())
+                	(*M[mx])[itr->first] = 0;
+            ll prev=(*M[mx])[itr->first];
+            (*M[mx])[itr->first] += itr->second;
+            ll now=prev+(itr->second);
+            SUB1[mx]+=now*now-prev*prev;
+            SUB2[mx]+=2*temp[itr->first]*(now-prev);
+        }
+	}
+	
+	for(int i=0;i<E2[curr].size();i++){
+		if((*M[mx]).find(G[E2[curr][i]])==(*M[mx]).end())
+                (*M[mx])[G[E2[curr][i]]] = 0;
+		ll prev=(*M[mx])[G[E2[curr][i]]];
+		(*M[mx])[G[E2[curr][i]]]++;
+		ll now=prev+1;
+		SUB1[mx]+=now*now-prev*prev;
+        SUB2[mx]+=2*temp[G[E2[curr][i]]]*(now-prev);
+	}
+	
+	if(mkc.isArtic[ToBe[mx]]){
+		ANS[mx]-=ComponentAnswer+SUB1[mx]-SUB2[mx];
+	}
+}
+
+void go(int ind){
+	
+	// start solving for this phucking connected component
+	// make sure not to do more operation than the size*log2(size) of this component
+	
+	//	DFS1 for vertices
+	//		vi vertex = {store the list of all vertex in this component}
+	//		sort vertex for mapping them in range [0,sz-1]
+	//		Real[i] -> store in it original vertex to which it will point ( i<sz and no need to reset )
+	//		From definition Real[i] == vertex[i]
+	//		ToBe[i] -> store in it new mapped one ( i can be any of the elements from vertex )
+	vertex.clear(); visited1[ind]=true; dfs1(ind);
+	sort(vertex.begin(),vertex.end());
+	for(int j=0;j<vertex.size();j++) ToBe[vertex[j]]=j;
+	
+	//	Compress the graph using BCC
+	//		mkc.init(vertex.size());
+	//		do a dfs to add edges ( u-v will change to ToBe[u] to ToBe[v] ) to mkc
+	//		mkc.run();
+	mkc.init(vertex.size());
+	for(int j=0;j<vertex.size();j++)
+		for(int k=0;k<adj[vertex[j]].size();k++)
+			if(adj[vertex[j]][k]>vertex[j])
+				mkc.addEdge(ToBe[vertex[j]],ToBe[adj[vertex[j]][k]]);
+	mkc.run();
+	
+	//	map occurences of each color from vertex - Also add them corresponding to global color
+	//	calculate sum of occ^2 for each of color from maps - store it in ComponentAnswer - Add to globalComponentAnswer
+	//  Since you are not using map dont forget to reset the temp array in this case
+	for(int i=0;i<vertex.size();i++) temp[G[vertex[i]]]++,GLOBAL[G[vertex[i]]]++;
+	ComponentAnswer=0;
+	color.clear();	for(int j=0;j<vertex.size();j++) color.pb(G[vertex[j]]);
+	sort(color.begin(),color.end());
+	int last=color[0];
+	for(int i=1;i<color.size();i++)
+		if(color[i]!=last){
+			ComponentAnswer+=temp[last]*1LL*temp[last];
+			last=color[i];
+		}
+	ComponentAnswer+=temp[last]*1LL*temp[last];
+	globalComponentAnswer+=ComponentAnswer;
+	
+	//	for vertices that are not articulation point answering for them is quite trivial
+	//		for vertices that are not articulation point
+	//			let his color be x = G[ Real[vertex from mkc] ]
+	//			ANS[ Real[vertex from mkc] ] = 2*(occ[x]-1)
+	artic.clear();
+	for(int i=0;i<vertex.size();i++){
+		if(!mkc.isArtic[i]){
+			int x=G[vertex[i]];
+			ANS[vertex[i]]=2*(temp[x]-1);
+		}
+		else artic.pb(vertex[i]);
+	}
+	
+	// Return if there is no articulation point in this component + reset temp array
+	if(artic.empty()==true){
+		for(int i=0;i<color.size();i++) temp[color[i]]=0;
+		return;
+	}
+	
+	// You will have to build the BC-tree now :'(
+	for(int i=0;i<mkc.colors+artic.size();i++) E1[i].clear(),E2[i].clear(),adj2[i].clear();
+	for(int i=0;i<mkc.edgeColor.size();i++) E1[mkc.edgeColor[i]].pb(vertex[mkc.edges[i].from]),E1[mkc.edgeColor[i]].pb(vertex[mkc.edges[i].to]);
+	
+	int TOTAL=mkc.colors;
+	for(int i=0;i<artic.size();i++){
+		artToBe[artic[i]]=TOTAL+i;
+		E2[TOTAL+i].pb(artic[i]);
+	}
+	
+	for(int i=0;i<mkc.colors;i++){
+		sort(E1[i].begin(),E1[i].end());
+		int prev=E1[i][0];
+		for(int j=1;j<E1[i].size();j++){
+			if(E1[i][j]!=prev){
+				if(mkc.isArtic[ToBe[prev]]){
+					// edge in BC-Tree between prev and ith BCC
+					int u=i,v=artToBe[prev];
+					adj2[u].pb(v);adj2[v].pb(u);
+				} else E2[i].pb(prev);
+				prev=E1[i][j];
+			}
+		}
+		if(mkc.isArtic[ToBe[prev]]){
+			// edge in BC-Tree between prev and ith BCC
+			int u=i,v=artToBe[prev];
+			adj2[u].pb(v);adj2[v].pb(u);
+		}else E2[i].pb(prev);
+		
+		if(E2[i].empty()==true) E2[i].pb(glob),glob++;
+	}
+	
+	// BC-Tree has total mkc.colors+artic.size() vertices and articulation points are in range [mkc.colors,artic.size())
+	// You even created some dummy nodes in process -> You will have to handle them and also reset more E2
+	// Root the BC-Tree at vertex mkc.colors
+	// for subtree part count separately using that map technique
+	// for part excluding subtree count using that phucking map technique itself >_<
+	
+	dfs2(mkc.colors,-1);
+	
+	for(int i=0;i<color.size();i++) temp[color[i]]=0;
+	return;
+}
+
+int main(int argc, char **argv){
+//	rlimit R;
+//	getrlimit(RLIMIT_STACK, &R);
+//	R.rlim_cur = R.rlim_max;
+//	setrlimit(RLIMIT_STACK, &R);
+    
+    const rlim_t kStackSize = 64 * 1024 * 1024;
+    struct rlimit rl;
+    rl.rlim_cur = kStackSize;
+    setrlimit(RLIMIT_STACK, &rl);
+    
+	sd(N);sd(E);
+	glob=N+1;
+	
+	for(int i=1;i<=N;i++) sd(G[i]);
+	for(int i=1;i<=E;i++){
+		int a,b;sd(a);sd(b);
+		adj[a].pb(b);adj[b].pb(a);
+	}
+	
+	clr(GLOBAL);clr(temp);clr(ANS);clr(SUB1);clr(SUB2);clr(visited1);
+	for(int i=1;i<=N;i++) if(visited1[i]==false) go(i);
+	
+	ll T=0;
+	for(int i=1;i<LIM;i++) T+=GLOBAL[i]*1LL*GLOBAL[i];
+	T-=globalComponentAnswer;
+	
+	for(int i=1;i<=N;i++) ANS[i]=(ANS[i]+T)/2,plld(ANS[i]);
+}

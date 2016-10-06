@@ -1,0 +1,173 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int LIM_N = 100000;
+const int LIM_Q = 500000;
+
+const int E = 18;
+
+int N, Q1, Q2;
+int X[LIM_N + 10], Y[LIM_N + 10];
+int A[LIM_Q + 10], B[LIM_Q + 10], C[LIM_Q + 10], D[LIM_Q + 10];
+int QE[LIM_Q + 10], QF[LIM_Q + 10];
+
+int m, ptr[LIM_N + 10], nxt[LIM_N * 2 + 10], zu[LIM_N * 2 + 10];
+int par[E][LIM_N + 10];
+int dep[LIM_N + 10];
+
+void dfs0(int u, int p, int d) {
+	par[0][u] = p;
+	dep[u] = d;
+	for (int i = ptr[u]; ~i; i = nxt[i]) {
+		const int v = zu[i];
+		if (v != p) {
+			dfs0(v, u, d + 1);
+		}
+	}
+}
+
+Int sum[LIM_N + 10];
+Int ss[E][LIM_N + 10];
+
+int LCA(int u, int v) {
+	if (dep[u] > dep[v]) swap(u, v);
+	for (int e = E; e--; ) if (dep[u] <= dep[v] - (1 << e)) v = par[e][v];
+	for (int e = E; e--; ) if (par[e][u] != par[e][v]) u = par[e][u], v = par[e][v];
+	if (u != v) u = par[0][u], v = par[0][v];
+	return u;
+}
+Int getSum(int u, int v) {
+	Int ret = 0;
+	if (dep[u] > dep[v]) swap(u, v);
+	for (int e = E; e--; ) if (dep[u] <= dep[v] - (1 << e)) ret += ss[e][v], v = par[e][v];
+	for (int e = E; e--; ) if (par[e][u] != par[e][v]) ret += ss[e][u] + ss[e][v], u = par[e][u], v = par[e][v];
+	if (u != v) ret += ss[0][u] + ss[0][v], u = par[0][u], v = par[0][v];
+	return ret;
+}
+
+void doIt(int a, int b) {
+// cout<<"add "<<a<<" - "<<b<<endl;
+	--sum[a];
+	++sum[b];
+}
+
+void doIt(int a, int b, int c, int d) {
+	const int e = LCA(b, d);
+	if (dep[a] <= dep[e] && dep[c] <= dep[e]) {
+		const int f = (dep[a] <= dep[c]) ? c : a;
+// cout<<"sub "<<f<<" - "<<e<<endl;
+		++sum[f];
+		--sum[e];
+	}
+}
+
+void dfs1(int u, int p) {
+	for (int i = ptr[u]; ~i; i = nxt[i]) {
+		const int v = zu[i];
+		if (v != p) {
+			dfs1(v, u);
+			sum[u] += sum[v];
+		}
+	}
+}
+
+int main() {
+	
+	
+	for (; ~scanf("%d%d%d", &N, &Q1, &Q2); ) {
+if(!(1<=N&&N<=LIM_N))for(;;);	
+if(!(1<=Q1&&Q1<=LIM_Q))for(;;);	
+if(!(1<=Q2&&Q2<=LIM_Q))for(;;);	
+		for (int i = 0; i < N - 1; ++i) {
+			X[i] = in() - 1;
+			Y[i] = in() - 1;
+		}
+		for (int q = 0; q < Q1; ++q) {
+			A[q] = in() - 1;
+			B[q] = in() - 1;
+			C[q] = in() - 1;
+			D[q] = in() - 1;
+		}
+		for (int q = 0; q < Q2; ++q) {
+			QE[q] = in() - 1;
+			QF[q] = in() - 1;
+		}
+		
+		m = 0;
+		fill(ptr, ptr + N, -1);
+		for (int i = 0; i < N - 1; ++i) {
+			const int u = X[i];
+			const int v = Y[i];
+			nxt[m] = ptr[u]; ptr[u] = m; zu[m] = v; ++m;
+			nxt[m] = ptr[v]; ptr[v] = m; zu[m] = u; ++m;
+		}
+		dfs0(0, -1, 0);
+		par[0][0] = 0;
+		for (int e = 1; e < E; ++e) {
+			for (int u = 0; u < N; ++u) {
+				par[e][u] = par[e - 1][ par[e - 1][u] ];
+			}
+		}
+		
+		fill(sum, sum + N, 0);
+		for (int q = 0; q < Q1; ++q) {
+			const int lAB = LCA(A[q], B[q]);
+			const int lCD = LCA(C[q], D[q]);
+			doIt(lAB, A[q]);
+			doIt(lAB, A[q], lCD, C[q]);
+			doIt(lAB, A[q], lCD, D[q]);
+			doIt(lAB, B[q]);
+			doIt(lAB, B[q], lCD, C[q]);
+			doIt(lAB, B[q], lCD, D[q]);
+		}
+// cout<<"sum : ";pv(sum,sum+N);
+		dfs1(0, -1);
+// cout<<"sum : ";pv(sum,sum+N);
+		// assert(sum[0] == 0);
+		copy(sum, sum + N, ss[0]);
+		for (int e = 1; e < E; ++e) {
+			for (int u = 0; u < N; ++u) {
+				ss[e][u] = ss[e - 1][ par[e - 1][u] ] + ss[e - 1][u];
+			}
+		}
+		
+		for (int q = 0; q < Q2; ++q) {
+			Int res = getSum(QE[q], QF[q]);
+			printf("%lld\n", res);
+		}
+break;
+	}
+	
+	return 0;
+}

@@ -1,0 +1,59 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <set>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define pb push_back
+#define all(x) (x).begin(),(x).end()
+
+using namespace std;
+typedef long long ll;
+inline int read()
+{
+	int x=0; bool f=false; char ch=getchar();
+	while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+	while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+	return f?-x:x;
+}
+
+#define maxn 1009
+
+int n, m, k[maxn], pos[maxn]; bool b[maxn];
+struct node{int x,t;} g[maxn]; 
+bool cmp(node a, node b){return a.x<b.x || (a.x==b.x && a.t<b.t);}
+set<int>s;
+
+inline int p(int x){return x*(x+1)/2;}
+
+int main()
+{
+	int t=read(); while (t--)
+	{
+		n=read();
+		rep(i, 1, n) g[i]=(node){k[i]=read(),i}; 
+		sort(g+1, g+1+n, cmp);
+		rep(i, 1, n) pos[g[i].t]=i;
+		ll A=0; rep(st, 1, n)
+		{
+			int now=p(n-st+1); s.clear(); s.insert(st-1); s.insert(n+1);
+			clr(b,0); rep(ed, st, n) if (now)
+			{
+				if (!b[pos[ed]])
+				{
+					for(int i=pos[ed],x,l,r; i<=n && g[i].x==k[ed]; b[i]=1,i++)
+					{
+						x=g[i].t, l=*--s.lower_bound(x), r=*s.upper_bound(x);
+						now-=p(r-l-1), now+=p(x-l-1)+p(r-x-1); s.insert(x);
+					}
+				}
+				A+=now;
+			} else break;
+		}
+		printf("%lld\n", A);
+	}
+	return 0;
+}

@@ -1,0 +1,53 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define MAX 1111
+
+int n;
+int m;
+
+int r[MAX][MAX];
+int dx[] = { 0, 0, 1, -1 };
+int dy[] = { 1, -1, 0, 0 };
+queue<pair<int, int> > q;
+int main(){
+	cin >> n >> m;
+	int k;
+	cin >> k;
+	int cnt = 0;
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < m; j++){
+			scanf("%d", &r[i][j]);
+			cnt += r[i][j];
+		}
+	}
+	while (k--){
+		int a, b;
+		scanf("%d%d", &a, &b);
+		a--;
+		b--;
+		if (r[a][b]){
+			cnt -= r[a][b];
+			r[a][b] = 0;
+			q.push(make_pair(a, b));
+			while (!q.empty()){
+				a = q.front().first;
+				b = q.front().second;
+				q.pop();
+				for (int i = 0; i < 4; i++){
+					int aa = a + dx[i];
+					int bb = b + dy[i];
+					if (aa >= 0 && bb >= 0 && aa < n&&bb < m){
+						if (r[aa][bb]){
+							q.push(make_pair(aa, bb));
+							cnt -= r[aa][bb];
+							r[aa][bb] = 0;
+						}
+					}
+				}
+			}
+		}
+		printf("%d\n", cnt);
+	}
+	return 0;
+}

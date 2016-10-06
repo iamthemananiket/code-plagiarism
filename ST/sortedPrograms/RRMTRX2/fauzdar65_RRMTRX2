@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+#define mod 10000007
+#define ll long long
+using namespace std;
+
+ll n,m;
+
+ll A[100][100];
+
+ll solve(int pos)
+{
+if(pos==m)
+{
+	ll ret=0;
+	
+	for(int i=1;i<=n;i++)ret=(ret+ A[i][m])%mod;
+	
+	return ret;
+}
+
+ll an=solve(pos+1); ll re=0;
+
+for(int i=1;i<=n;i++)
+{
+	re=(re+ (an*A[i][pos])%mod)%mod;
+}
+return re;
+}	
+
+
+int main() {
+	
+	
+	cin>>n>>m;
+	
+	for(int i=1;i<=n;i++)
+	{
+		for(int j=1;j<=m;j++){ cin>>A[i][j]; if(A[i][j]<0)A[i][j]+=mod; }
+	}
+	
+	cout<<solve(1);
+	return 0;
+}

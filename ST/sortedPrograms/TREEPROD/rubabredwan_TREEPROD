@@ -1,0 +1,104 @@
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(x,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			100020
+#define INF			1e9
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+ll n, m, ret = 0;
+vector<ll>edge[MAX], cost[MAX];
+bool vis[MAX];
+ll dis[MAX];
+
+void bfs(ll source){
+    queue<ll>q;
+    q.push(source);
+    SET(vis, 0);
+    SET(dis, 0);
+    vis[source] = 1;
+    dis[source] = 1;
+    while(!q.empty()){
+        ll u = q.front();
+        q.pop();
+        REP(i, edge[u].size()){
+            ll v = edge[u][i], c = cost[u][i];
+            if(!vis[v]){
+                vis[v] = 1;
+                dis[v] = (dis[u] * c) % m;
+                q.push(v);
+            }
+        }
+    }
+    for(ll i = source + 1;i <= n;i++){
+        if(!dis[i]){
+            //cout << "# " << source << " " << i << endl;
+            ret++;
+        }
+    }
+}
+
+int current, b[MAX], t;
+
+void dfs(int at, bool flag){
+    b[at] = t;
+    if(flag && at > current) ret++;
+    REP(i, edge[at].size()){
+        int u = edge[at][i], c = cost[at][i];
+        if(b[u]!=t){
+            if(c == m) dfs(u, 1);
+            else dfs(u, flag);
+        }
+    }
+}
+
+int main()
+{
+    //READ("in.txt");
+    //WRITE("out.txt");
+    ll x, y, c;
+    scanf("%lld %lld", &n, &m);
+    REP(i, n-1){
+        scanf("%lld %lld %lld", &x, &y, &c);
+        edge[x].pb(y);
+        edge[y].pb(x);
+        cost[x].pb(c);
+        cost[y].pb(c);
+    }
+
+    if(n <= 1000){
+        REPN(i, n) bfs(i);
+        printf("%lld\n", ret);
+    }
+
+    else{
+        t=1;
+        REPN(i, n){
+            current = i;
+            dfs(i, 0);
+            t++;
+        }
+        printf("%d\n", ret);
+    }
+	return 0;
+}

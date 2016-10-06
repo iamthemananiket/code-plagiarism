@@ -1,0 +1,47 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+struct Point
+{
+    int x;
+    int y;
+
+} A, B, C;
+
+int T, ans;
+
+int dist( Point a, Point b )
+{
+    return ( a.x - b.x ) * ( a.x - b.x ) +
+           ( a.y - b.y ) * ( a.y - b.y );
+}
+
+int valid()
+{
+    int a = dist( A, B );
+    int b = dist( B, C );
+    int c = dist( A, C );
+
+    if ( 2 * max ( a, max ( b, c ) ) == a + b + c )
+            return 1;
+    else
+            return 0;
+}
+
+int main()
+{
+    for ( cin >> T; T; T-- )
+    {
+        cin >> A.x >> A.y;
+        cin >> B.x >> B.y;
+        cin >> C.x >> C.y;
+
+        ans += valid();
+    }
+
+    cout << ans << "\n";
+
+    return 0;
+}

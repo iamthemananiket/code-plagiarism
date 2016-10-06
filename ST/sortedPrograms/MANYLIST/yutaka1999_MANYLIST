@@ -1,0 +1,94 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <set>
+#define SIZE 300005
+#define BT 512*1024*2
+#define SQR 605
+
+using namespace std;
+typedef pair <int,int> P;
+
+struct segtree
+{
+	int seg[BT];
+	int mum;
+	
+	void init(int n)
+	{
+		mum=1;
+		while(mum<n) mum<<=1;
+		for(int i=0;i<mum*2;i++) seg[i]=0;
+	}
+	void update(int a,int b,int k,int l,int r,int v)
+	{
+		if(b<=l||r<=a) return;
+		if(a<=l&&r<=b) seg[k]+=v;
+		else
+		{
+			update(a,b,k*2+1,l,(l+r)/2,v);
+			update(a,b,k*2+2,(l+r)/2,r,v);
+		}
+	}
+	void update(int a,int b,int v)
+	{
+		update(a,b,0,0,mum,v);
+	}
+	int get(int k)
+	{
+		k+=mum-1;
+		int ret=seg[k];
+		while(k>0)
+		{
+			k=(k-1)/2;
+			ret+=seg[k];
+		}
+		return ret;
+	}
+};
+segtree seg;
+int cnt[SIZE];
+set <P> st[SIZE];
+set <P>::iterator it;
+
+int main()
+{
+	int n,q;
+	scanf("%d %d",&n,&q);
+	for(int i=0;i<n;i++) st[i].insert(P(0,n-1));
+	seg.init(n+2);
+	for(int i=0;i<q;i++)
+	{
+		int tp;
+		scanf("%d",&tp);
+		if(tp==0)
+		{
+			int l,r,x;
+			scanf("%d %d %d",&l,&r,&x);l--;r--;x--;
+			while(1)
+			{
+				it=st[x].lower_bound(P(l,-1));
+				if(it!=st[x].begin()) it--;
+				if(it==st[x].end()) break;
+				if((*it).second<l) it++;
+				if(it==st[x].end()) break;
+				if((*it).first>r) break;
+				P p=*it;
+				st[x].erase(it);
+				int ml=max(l,p.first),mr=min(r,p.second);
+				seg.update(ml,mr+1,1);
+				if(p.first<ml) st[x].insert(P(p.first,ml-1));
+				if(mr<p.second) st[x].insert(P(mr+1,p.second));
+			}
+		}
+		else
+		{
+			int x;
+			scanf("%d",&x);x--;
+			printf("%d\n",seg.get(x));
+		}
+	}
+	return 0;
+}

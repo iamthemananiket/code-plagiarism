@@ -1,0 +1,60 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 99991
+map<long long int ,long long int> fib;
+/*long long getAns(long long n)
+{
+	if (vis[n]) return fib[n];
+	vis[n]=true;
+	long long int k=n/2;
+	if (n%2==0)
+		return fib[n] = ((getAns(k)*getAns(k))%MOD + (getAns(k-1)*getAns(k-1))%MOD) % MOD;
+	 else
+		return fib[n] = ((getAns(k)*getAns(k+1))%MOD + (getAns(k-1)*getAns(k))%MOD) % MOD;
+}*/
+long long int getAns(long long int n) {
+	if (fib.count(n))
+		 return fib[n];
+	long long int k=n/2;
+	if (n%2==0) { 
+		return fib[n] = ((getAns(k)*getAns(k))%MOD + (getAns(k-1)*getAns(k-1))%MOD) % MOD;
+	} else {
+		return fib[n] = ((getAns(k)*getAns(k+1))%MOD + (getAns(k-1)*getAns(k))%MOD) % MOD;
+	}
+}
+int main()
+{
+	long long int x,i,k,n,count,sum=0,num,j,ans=0;
+	fib[0]=1;
+	fib[1]=1;
+	scanf("%lld",&n);
+	scanf("%lld",&k);
+	long long int a[n];
+	
+	for(i=0;i<n;i++)
+	{
+		scanf("%lld",&a[i]);
+	}
+	string str(n-k,'0');
+	string str1(k,'1');
+	str.append(str1);
+	do
+	{
+		sum=0;
+		count=0;
+		//cout<<str<<endl;
+		for(i=0;i<n&&count<=k;i++)
+		{
+			if(str[i]=='1')
+			{
+				sum+=a[i];
+				count++;
+			}
+		}
+		ans+=getAns(sum-1);
+		ans%=MOD;
+	}
+	while(next_permutation(str.begin(),str.end()));
+	printf("%lld\n",ans);
+	return 0;
+}

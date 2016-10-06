@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector<int> ppl;
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        int N;
+        scanf("%d", &N);
+        int ans=0;
+        for(int i=0; i<N; i++)
+        {
+            int a;
+            scanf("%d", &a);
+            for(int j=0; j<(int)ppl.size(); j++) if(ppl[j]==a)
+            {
+                a=j+1;
+                break;
+            }
+            ans+=min(a, i-a);
+            ppl.insert(ppl.begin()+a, i+1);
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAGIC_ROW=1, MAGIC_COL=1, MAGIC_GUESS=4;
+int N, M, C;
+vector<vector<int>> A;
+
+int ask1(int x0, int y0, int x1, int y1, int l, int r)
+{
+    printf("1 %d %d %d %d %d %d\n", x0+1, x1+1, y0+1, y1+1, l, r);
+    fflush(stdout);
+    int ret;
+    scanf("%d", &ret);
+    return ret;
+}
+
+int ask2(int x, int y)
+{
+    printf("2 %d %d %d %d\n", x+1, x+1, y+1, y+1);
+    fflush(stdout);
+    int ret;
+    scanf("%d", &ret);
+    return ret;
+}
+
+void solve_row(int l, int r, int x, int y)
+{
+    if(r-l<=MAGIC_ROW)
+    {
+        int total=(r-l+1)*(y-x+1);
+        int lo=1, mid, hi=50;
+        for(int i=0; i<MAGIC_GUESS && lo<hi; i++)
+        {
+            mid=(lo+hi)/2;
+            int k=ask1(l, x, r, y, lo, mid);
+            if(k*2<total)
+                lo=mid+1;
+            else
+                hi=mid;
+        }
+        int v=(lo+hi)/2;
+        for(int i=l; i<=r; i++)
+            for(int j=x; j<=y; j++)
+                A[i][j]=v;
+    }
+    else
+    {
+        int m=(l+r)/2;
+        solve_row(l, m, x, y);
+        solve_row(m+1, r, x, y);
+    }
+}
+
+void solve_col(int l, int r)
+{
+    if(r-l<=MAGIC_COL)
+        solve_row(0, N-1, l, r);
+    else
+    {
+        int m=(l+r)/2;
+        solve_col(l, m);
+        solve_col(m+1, r);
+    }
+}
+
+int main()
+{
+    scanf("%d%d%d", &N, &M, &C);
+    A.resize(N);
+    for(int i=0; i<N; i++)
+        A[i].resize(M);
+    int solved=C/N;
+    for(int i=0; i<N; i++)
+        for(int j=0; j<solved; j++)
+            A[i][j]=ask2(i, j);
+    C-=N*solved;
+    solve_col(solved, M-1);
+    for(int i=0; i<C; i++)
+        A[i][solved]=ask2(i, solved);
+    printf("3\n");
+    for(int i=0; i<N; i++)
+        for(int j=0; j<M; j++)
+            printf("%d%c", A[i][j], " \n"[j==M-1]);
+    fflush(stdout);
+    return 0;
+}

@@ -1,0 +1,64 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+// mylittlepony
+using namespace std;
+
+struct fin {
+	vector<long long> T;
+	fin(int N) {T.resize(N+1,0);}
+
+	int lastone(int x) {return x&(x^(x-1));}
+
+	void put(int pos, int val) {
+		for(int i =pos+1; i < T.size(); i +=lastone(i)) T[i] +=val;
+		}
+
+	long long get(int pos) {
+		long long ret =0;
+		for(int i =pos+1; i > 0; i -=lastone(i)) ret +=T[i];
+		return ret;}
+	};
+
+int main() {
+	cin.sync_with_stdio(0);
+	int N,Q,a,b;
+	string s;
+	cin >> N >> Q;
+
+	fin F(N);
+	for(int i =0; i < N; i++) {
+		cin >> a;
+		F.put(i,a);}
+
+	for(int i =0; i < Q; i++) {
+		cin >> s >> a >> b;
+		if(s == "S") {
+			cout << F.get(b)-F.get(a-1) << "\n";
+			continue;}
+		if(s == "T") b *=-1;
+		F.put(a,b);}
+	return 0;}
+
+// look at my code
+// my code is amazing

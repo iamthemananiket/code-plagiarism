@@ -1,0 +1,29 @@
+#include<bits/stdc++.h>
+using namespace std;
+long long int gcd(long long int a, long long int b)
+{
+	if(b==0)
+		return a;
+	else
+		return gcd(b,a%b);
+}
+int main()
+{
+	long long int i,t,n,hcf,x;
+	scanf("%lld",&t);
+	while(t--)
+	{
+		scanf("%lld",&n);
+		scanf("%lld",&hcf);
+		for(i=1;i<n;i++)
+		{
+			scanf("%lld",&x);
+			hcf=gcd(hcf,x);
+		}
+		if(hcf==1)
+			cout<<n<<endl;
+		else
+			cout<<"-1"<<endl;
+	}
+	return 0;
+}

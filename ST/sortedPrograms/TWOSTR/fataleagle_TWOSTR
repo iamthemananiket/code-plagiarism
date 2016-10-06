@@ -1,0 +1,21 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+char S[20];
+char T[20];
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+    {
+        scanf("%s%s", S, T);
+        bool ans=true;
+        for(int i=0; i<strlen(S); i++) if(S[i]!='?' && T[i]!='?')
+            ans&=S[i]==T[i];
+        puts(ans?"Yes":"No");
+    }
+    return 0;
+}

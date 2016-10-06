@@ -1,0 +1,63 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int DIG = 19;
+const int MSK = (1 << 9);
+const int LCM = 504;
+
+long long dp[DIG][2][MSK][LCM];
+int digits, q, k;
+string s;
+
+inline long long compute(int pos, int prev, int is_smaller, int mask, int num){
+	if(pos == digits){
+		int val = 0;
+		for(int i = 1; i <= 9; i++){
+			if(i == 5) continue;
+			if(mask & (1 << (i - 1)))
+				val += (num % i == 0);
+		}
+		if((prev == 5) || (prev == 0 and (mask & 16))) val++;
+		return (val >= k);
+	}
+	long long &res = dp[pos][is_smaller][mask][num];
+	if(res != -1) return res;
+	res = 0;
+	for(int i = 0; i <= 9; i++){
+		int lol = (i) ? (1 << (i - 1)) : (0);
+		if(is_smaller){
+			res += compute(pos + 1, i, is_smaller, mask | lol, (num * 10 + i) % LCM);
+		}
+		else if(i <= (s[pos] - '0')){
+			res += compute(pos + 1, i, i != (s[pos] - '0'), mask | lol, (num * 10 + i) % LCM);
+		}
+	}
+	return res;
+}
+
+inline long long solve(long long x){
+	if(!x) return 0;
+	s = to_string(x);
+	digits = s.size();
+	int first_digit = s[0] - '0';
+	long long ans = 0;
+    memset(dp, -1, sizeof dp);
+	for(int i = 1; i <= first_digit; i++){
+		ans += compute(1, i, i != first_digit, (1 << (i - 1)), i % LCM);
+	}
+	for(int i = 2; i <= digits; i++){
+		for(int d = 1; d <= 9; d++){
+			ans += compute(i, d, 1, (1 << (d - 1)), d % LCM);
+		}
+	}
+	return ans;
+}
+
+int main(){
+	scanf("%d", &q);
+	while(q--){
+		long long l, r;
+		scanf("%lld %lld %d", &l, &r, &k);
+		printf("%lld\n", solve(r) - solve(l - 1));
+	}
+}

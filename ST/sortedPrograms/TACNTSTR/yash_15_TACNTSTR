@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define mod 1000000007
+char str[100005];
+int main(){
+	cin >> str;
+	ll i,ans=0,rhs=0;
+	int n=strlen(str);
+	for(i=n-2;i>=0;i--){
+		rhs=(rhs*26+('Z'-str[i+1]))%mod;
+		ans+=((('Z'-str[i])*rhs)%mod);
+		ans+=('Z'-str[i]);
+	}
+	ans+=('Z'-str[n-1]);
+	ans%=mod;
+	cout<<ans;
+}

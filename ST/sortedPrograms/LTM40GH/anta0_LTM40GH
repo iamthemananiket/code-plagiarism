@@ -1,0 +1,116 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+vector<int> t_parent;
+vi t_ord;
+
+void tree_getorder(const vector<vi> &g, int root) {
+	int n = g.size();
+	t_parent.assign(n, -1);
+	t_ord.clear();
+
+	vector<int> stk; stk.push_back(root);
+	while(!stk.empty()) {
+		int i = stk.back(); stk.pop_back();
+		t_ord.push_back(i);
+		for(int j = (int)g[i].size() - 1; j >= 0; j --) {
+			int c = g[i][j];
+			if(t_parent[c] == -1 && c != root)
+				stk.push_back(c);
+			else
+				t_parent[i] = c;
+		}
+	}
+}
+
+struct Node {
+	Node *next[2];
+	Node() : next{} {}
+};
+
+int main() {
+	Node *nodes = (Node*)new char[(2000000 * 31 + 1) * sizeof(Node)];
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int N;
+		scanf("%d", &N);
+		vector<int> A(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &A[i]);
+		vector<vector<int> > g(N);
+		for(int i = 0; i < N - 1; ++ i) {
+			int u, v;
+			scanf("%d%d", &u, &v), -- u, -- v;
+			g[u].push_back(v);
+			g[v].push_back(u);
+		}
+		tree_getorder(g, 0);
+		vector<int> xorsum(N);
+		for(int ix = 0; ix < (int)t_ord.size(); ++ ix) {
+			int i = t_ord[ix], p = t_parent[i];
+			xorsum[i] = (p == -1 ? 0 : xorsum[p]) ^ A[i];
+		}
+
+		int nNodes = 0;
+
+		auto insert = [&nNodes, &nodes](Node *t, int val) {
+			for(int b = 29; b >= 0; -- b) {
+				auto &n = t->next[val >> b & 1];
+				if(!n) n = new(&nodes[nNodes ++]) Node();
+				t = n;
+			}
+		};
+
+		vector<vi> values(N);
+		vector<Node*> tries(N);
+		rep(i, N) {
+			values[i].push_back(xorsum[i]);
+			tries[i] = new(&nodes[nNodes ++]) Node();
+			insert(tries[i], xorsum[i]);
+		}
+		vector<int> ans(N, 0);
+		for(int ix = (int)t_ord.size() - 1; ix > 0; -- ix) {
+			int i = t_ord[ix], p = t_parent[i];
+			int topval = A[p];
+			int y = i, x = p;
+			if(values[x].size() < values[y].size())
+				swap(x, y);
+			for(int valy : values[y]) {
+				Node *t = tries[x];
+				int val = valy ^ topval;
+				int xorval = 0;
+				for(int bi = 29; bi >= 0; -- bi) {
+					int a = val >> bi & 1;
+					int b = t->next[a ^ 1] ? a ^ 1 : a;
+					xorval |= (a ^ b) << bi;
+					t = t->next[b];
+				}
+				amax(ans[p], xorval);
+			}
+			for(int valy : values[y])
+				insert(tries[x], valy);
+			values[x].insert(values[x].end(), values[y].begin(), values[y].end());
+			values[x].swap(values[p]);
+			swap(tries[x], tries[p]);
+			values[i].clear();
+			tries[i] = nullptr;
+		}
+		rep(i, N)
+			amax(ans[i], A[i]);
+		for(int ix = (int)t_ord.size() - 1; ix > 0; -- ix) {
+			int i = t_ord[ix], p = t_parent[i];
+			amax(ans[p], ans[i]);
+		}
+		for(int i = 0; i < N; ++ i)
+			printf("%d\n", ans[i]);
+	}
+	return 0;
+}

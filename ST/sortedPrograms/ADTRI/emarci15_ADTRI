@@ -1,0 +1,78 @@
+#include <cstdio>
+#include <cmath>
+
+using namespace std;
+
+const int A[3][3] = {
+    {1,-2,2},
+    {2,-1,2},
+    {2,-2,3},
+};
+
+const int B[3][3] = {
+    {1,2,2},
+    {2,1,2},
+    {2,2,3},
+};
+
+const int C[3][3] = {
+    {-1,2,2},
+    {-2,1,2},
+    {-2,2,3},
+};
+
+int n;
+bool s[5000001];
+
+void dfs(long long tr[3]) {
+    if(tr[2] > n) return;
+    s[tr[2]] = 1;
+
+    long long ntr[3];
+    for(int i=0; i<3; i++) {
+        ntr[i] = 0;
+        for(int j=0; j<3; j++) {
+            ntr[i] += tr[j]*A[i][j];
+        }
+    }
+    dfs(ntr);
+
+    for(int i=0; i<3; i++) {
+        ntr[i] = 0;
+        for(int j=0; j<3; j++) {
+            ntr[i] += tr[j]*B[i][j];
+        }
+    }
+    dfs(ntr);
+
+    for(int i=0; i<3; i++) {
+        ntr[i] = 0;
+        for(int j=0; j<3; j++) {
+            ntr[i] += tr[j]*C[i][j];
+        }
+    }
+    dfs(ntr);
+}
+
+int T,x;
+
+int main()
+{
+    n = 5000000;
+    long long t[3] = {3ll,4ll,5ll};
+    dfs(t);
+
+    for(int i=5; i<=n; i++) {
+        if(!s[i]) continue;
+        for(int j=i*2; j<=n; j+=i) s[j] = 1;
+    }
+
+    for(scanf("%d",&T); T--;) {
+        scanf("%d",&x);
+        if(s[x]) {
+            printf("YES\n");
+        } else printf("NO\n");
+    }
+
+    return 0;
+}

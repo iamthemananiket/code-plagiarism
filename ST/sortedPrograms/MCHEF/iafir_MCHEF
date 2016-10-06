@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+const int N = 1e5 + 10;
+
+typedef pair<int, int> ii;
+typedef pair< ii, int > iii;
+
+int a[N], cost[N];
+iii suap[N];
+long long dp[505];
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--) {
+		int n, m, k;
+		scanf("%d%d%d", &n, &k, &m);
+		for(int i = 0; i<n; i++) {
+			scanf("%d", a+i);
+			cost[i] = 1000;
+		}
+		for(int i = 0; i<m; i++) {
+			scanf("%d%d%d", &suap[i].X.X, &suap[i].X.Y, &suap[i].Y);
+			suap[i].X.X--;
+		}
+		sort(suap, suap+m);
+		priority_queue< ii > st;
+		int now = 0;
+		for(int i = 0; i<n; i++) {
+			while(now < m && suap[now].X.X == i) {
+				st.push(ii(-suap[now].Y, suap[now].X.Y));
+				now++;
+			}
+			while(!st.empty()) {
+				ii to = st.top();
+				if(to.Y<=i)
+					st.pop();
+				else
+					break;
+			}
+			if(!st.empty()) {
+				cost[i] = -st.top().X;
+			}
+		}
+		for(int i = 0; i<=k; i++)
+			dp[i] = 0;
+		for(int i = 0; i<n; i++) {
+			if(a[i]<0)
+			for(int j = cost[i]; j<=k; j++)
+				dp[j-cost[i]] = min(dp[j-cost[i]], dp[j]+a[i]);
+		}
+		long long sum = 0, ans;
+		for(int i = 0; i<n; i++)
+			sum += a[i];
+		ans = 0;
+		for(int i = 0; i<=k; i++) {
+			ans = min(ans, dp[i]);
+		}
+		printf("%lld\n", sum - ans);
+	}
+	return 0;
+}

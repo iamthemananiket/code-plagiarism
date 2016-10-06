@@ -1,0 +1,169 @@
+/***************************************
+    codeforces = topcoder = sahedsohel
+    IIT,Jahangirnagar University(42)
+****************************************/
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define ull unsigned long long int
+#define inf (INT_MAX/10)
+#define linf (LLONG_MAX/10LL)
+#define sc(a) scanf("%d",&a)
+#define sc2(a,b) scanf("%d%d",&a,&b)
+#define sc3(a,b,c) scanf("%d%d%d",&a,&b,&c)
+#define sc4(a,b,c,d) scanf("%d%d%d%d",&a,&b,&c,&d)
+#define fl(c,i,n) for(i=c;i<n;i++)
+#define f(i,n) for(i=0;i<n;i++)
+#define mem(a) memset(a,0,sizeof(a))
+#define memn(a) memset(a,-1,sizeof(a))
+#define pb push_back
+#define aov(a) a.begin(),a.end()
+#define mpr make_pair
+//#define PI (2.0*acos(0.0)) //#define PI acos(-1.0)
+#define PI (3.14159265359)
+#define xx first
+#define yy second
+#define mxv(a) *max_element(aov(a))
+#define mnv(a) *min_element(aov(a))
+#define LB(a,x) (lower_bound(aov(a),x)-a.begin())
+#define UB(a,x) (upper_bound(aov(a),x)-a.begin())
+#define to_c_string(a) a.c_str()
+#define strtoint(c) atoi(&c[0])
+#define pll pair< ll , ll >
+#define pii pair< int , int >
+#define pid pair< int , double >
+#define pcs(a) printf("Case %d: ", a)
+#define nl puts("")
+#define endl '\n'
+#define dbg(x) cout<<#x<<" : "<<x<<endl
+
+template <class T> inline T bigmod(T p,T e,T M){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p) % M;p = (p * p) % M;}return (T)ret;}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}   // M is prime}
+template <class T> inline T bpow(T p,T e){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p);p = (p * p);}return (T)ret;}
+
+int toInt(string s){int sm;stringstream ss(s);ss>>sm;return sm;}
+int toLlint(string s){long long int sm;stringstream ss(s);ss>>sm;return sm;}
+
+
+///int mnth[]={-1,31,28,31,30,31,30,31,31,30,31,30,31};  //Not Leap Year
+///int dx[]={2,1,-1,-2,-2,-1,1,2};int dy[]={1,2,2,1,-1,-2,-2,-1};//Knight Direction
+///int dx[]={-1,+1,0,1,0,-1}; // Hexagonal Direction   **
+///int dy[]={-1,+1,1,0,-1,0}; //                       *#*
+///                                                     **
+///const double eps=1e-9;
+///int dx[]={0,1,0,-1};int dy[]={1,0,-1,0}; //4 Direction
+
+/*****************************************************************/
+/// ////////////////////   GET SET GO    ////////////////////// ///
+/*****************************************************************/
+
+
+#define intx(i,j,k,l) ((a[i]*b[j]-b[i]*a[j])*(a[k]-a[l])-(a[i]-a[j])*(a[k]*b[l]-b[k]*a[l]))/((a[i]-a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]-a[l]))
+#define inty(i,j,k,l) ((a[i]*b[j]-b[i]*a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]*b[l]-b[k]*a[l]))/((a[i]-a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]-a[l]))
+#define dst(u,v,x,y) sqrt((x*1.0-u*1.0)*(x*1.0-u*1.0)+(y*1.0-v*1.0)*(y*1.0-v*1.0))
+#define area(p1,p2,p3) (p1.xx*p2.yy+p2.xx*p3.yy+p3.xx*p1.yy-p1.yy*p2.xx-p2.yy*p3.xx-p3.yy*p1.xx)
+
+int ts,kk=1;
+
+#define M 200005
+#define MD 1000000007LL
+#define MX 1000000001
+
+int n;
+int a[M];
+ll r1,r2,q,q1,q2;
+ll ls[M],mn;
+
+int main()
+{
+    int t,i,j,k;
+    int l,r;
+    sc(ts);
+    while(ts--)
+    {
+        sc(n);
+        for(i=1;i<=n;i++)sc(a[i]);
+        sc2(l,r);
+        if(l>r)swap(l,r);
+        r1=0;
+
+        for(i=l;i<r;i++)r1+=a[i];
+        q1=r1;
+//        cout<<r1<<endl;
+
+        ls[l]=0;
+        j=l-1;if(j==0)j=n;
+        k=r;
+
+        q=0;
+        mn=0;
+        for(;j!=k;)
+        {
+            q+=a[j]*2LL;
+            mn=min(mn,q);
+            ls[j]=mn;
+            j--;
+            if(j==0)j=n;
+        }
+        ls[j]=mn;
+        r1=min(r1,r1+mn);
+
+        j=l;
+        k=r;
+
+        q=0;
+        for(;j!=k;)
+        {
+            r1=min(r1, q1+q+ls[k] );
+            q+=a[k]*2LL;
+            k++;
+            if(k>n)k=1;
+        }
+        r1=min(r1, q1+q+ls[k] );
+
+//        cout<<"r1  --> "<<r1<<endl;
+        r2=0;
+        for(i=r;i!=l;i=((i==n)?1:(i+1)))r2+=a[i];
+        q2=r2;
+//        cout<<r2<<endl;
+
+        j=l;
+        k=r;
+
+        q=0;
+        mn=0;
+        for(;j!=k;)
+        {
+            ls[j]=mn;
+            q+=a[j]*2LL;
+            mn=min(mn,q);
+//            cout<<j<<" "<<mn<<endl;
+            j++;
+            if(j>n)j=1;
+        }
+        ls[j]=mn;
+//        cout<<r2<<" "<<mn<<" "<<r2+mn<<endl;
+        r2=min(r2,r2+mn);
+//        cout<<mn<<" "<<r2<<endl;
+
+        j=l;
+        k=r-1;if(k==0)k=n;
+
+        q=0;
+        for(;j!=k;)
+        {
+            r2=min(r2, q2+q+ls[k] );
+            q+=a[k]*2LL;
+            k--;
+            if(k==0)k=1;
+        }
+        r2=min(r2, q2+q+ls[k] );
+
+//        cout<<"-------->"<<r2<<endl;
+        printf("%d\n",min(r1,r2));
+    }
+    return 0;
+}
+

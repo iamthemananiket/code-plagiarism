@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int M = 2e7 + 5;
+
+long long ans[M];
+
+long long solve(int n) {
+	if(n<M && ans[n] + 1)
+		return ans[n];
+	long long ret = 0;
+	int q = sqrt(n), r = n/q;
+	for(int i = 2; i<=r; i++)
+		ret += solve(n/i);
+	for(int i = 1; i<q; i++)
+		ret += 1LL*(n/i - n/(i+1))*solve(i);
+	ret = 1LL*n*(n+1LL)/2 - ret;
+	if(n < M)
+		ans[n] = ret;
+	return ret;
+}
+
+int main() {
+	int t; scanf("%d", &t);
+	memset(ans, -1, sizeof ans);
+	ans[1] = 1;
+	while(t--) {
+		int n, d; scanf("%d%d", &n, &d);
+		printf("%lld\n",(n>=d) ? solve(n/d) : 0);
+	}
+	return 0;
+}

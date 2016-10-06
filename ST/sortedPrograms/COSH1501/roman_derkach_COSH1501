@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+#define f first
+#define s second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+ using namespace std;
+
+ const int N = 2e6 + 121, M = 101500;
+
+ ll dp[N+121];
+ char b[N+1];
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+     //freopen("input.txt","r",stdin);freopen("output.txt","w",stdout);
+
+     int s=1,i=1;
+     while(s<=M)
+     {
+         b[s] = 1;
+         i+=2;
+         s+=i;
+     }
+
+    int t;
+    cin>>t;
+     while(t--)
+     {
+         int n;
+         cin>>n;
+         fill(dp,dp+N,0);
+         dp[1] = 1;
+         int mx = 1;
+          while(n--)
+          {
+              int x;
+              cin>>x;
+              int mx1 = mx;
+              for(int i=mx;i>0;--i)
+                if(dp[i]) dp[i*x]+=dp[i],mx1=max(mx1,i*x);
+                mx=mx1;
+          }
+          ll ans = 0;
+          for(int i=2;i<=mx;++i)
+            if(b[i]) ans+=dp[i];
+          cout<<ans<<endl;
+     }
+
+    return 0;
+  }

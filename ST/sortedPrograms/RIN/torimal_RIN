@@ -1,0 +1,137 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const ll INF = 1LL << 60;
+
+struct MaxFlow {
+
+  typedef long long ll;
+
+  struct Edge{
+    int to;
+    ll cap;
+    int rev;
+    Edge() : to(), cap(), rev() {}
+    Edge(int to, ll cap, int rev) : to(to), cap(cap), rev(rev) {}
+  };
+
+  int V;  
+  vector<vector<Edge>> g;
+  vector<int> level, iter;
+
+  MaxFlow(int V) : V(V), g(V), level(V), iter(V) {}
+
+  void add_edge(int from, int to, ll cap){
+    g[from].push_back(Edge(to, cap, (int)g[to].size()));
+    g[to].push_back(Edge(from, 0, (int)g[from].size() - 1));
+  }
+
+  void bfs(int s){
+    fill(level.begin(), level.end(), -1);
+    queue<int> q;
+    q.push(s);
+    level[s] = 0;
+    while (!q.empty()) {
+      int v = q.front(); q.pop();
+      for (const Edge &e : g[v]) {
+        if (e.cap > 0 && level[e.to] < 0) {
+          level[e.to] = level[v] + 1;
+          q.push(e.to);
+        }
+      }
+    }
+  }
+
+  ll dfs(int v, int t, ll f){
+    if (v == t) return f;
+    for (int &i = iter[v]; i < (int)g[v].size(); i++) {
+      Edge &e = g[v][i];
+      if (e.cap > 0 && level[e.to] > level[v]) {
+        ll d = dfs(e.to, t, min(f, e.cap));
+        if (d > 0) {
+          e.cap -= d;
+          g[e.to][e.rev].cap += d;
+          return d;
+        }
+      }
+    }
+    return 0;
+  }
+
+  ll calc(int s, int t){
+    ll f = 0;
+    for (;;) {
+      bfs(s);
+      if (level[t] < 0) return f;
+      fill(iter.begin(), iter.end(), 0);
+      ll d;
+      while ((d = dfs(s, t, INF)) > 0) {
+        f += d;
+      }
+    }
+  }
+};
+
+const int MAX_V = 100;
+
+int n, m, k;
+
+inline int ix(int i, int j) {
+  return i * (m + 1) + j;
+}
+
+int main() {
+  cin >> n >> m >> k;
+  int V = n * (m + 1) + 2;
+  MaxFlow mf(V);
+  int s = V - 1, t = V - 2;
+  for (int i = 0; i < n; i++) {
+    mf.add_edge(s, ix(i, 0), INF);
+    mf.add_edge(ix(i, m), t, INF);
+  }
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      int v;
+      cin >> v;
+      ll cost = (v == -1) ? INF : (MAX_V - v);
+      mf.add_edge(ix(i, j), ix(i, j + 1), cost);
+    }
+  }
+  for (int i = 0; i < k; i++) {
+    int u, v;
+    cin >> u >> v;
+    u--, v--;
+    for (int j = 0; j < m; j++) {
+      mf.add_edge(ix(u, j), ix(v, j + 1), INF);
+    }
+  }
+  printf("%.2f\n", (double)(MAX_V * n - mf.calc(s, t)) / n);
+}

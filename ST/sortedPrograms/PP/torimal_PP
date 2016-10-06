@@ -1,0 +1,113 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+typedef unsigned long long FP;
+const ll B = 10007;
+struct RabinKarp {
+  int n;
+  string s;
+  vector<FP> hs;
+  vector<FP> ws;
+  
+  RabinKarp(const string &s) : n(s.size()), s(s) {
+    hs.push_back(0);
+    ws.push_back(1);
+    for (int i = 0; i < n; i++) {
+      hs.push_back(B * hs.back() + s[i]);
+      ws.push_back(B * ws.back());
+    }    
+  }
+ 
+  FP get(int l, int r) const {
+    return hs[r] - hs[l] * ws[r - l];
+  }
+};
+
+const int MAX_N = 1100000;
+int n;
+string a[MAX_N];
+string ra[MAX_N];
+
+ll solve(const string *a, const string *ra,
+         const vector<RabinKarp> &b,
+         const vector<RabinKarp> &rb,
+         bool same) {
+  unordered_map<FP, ll> table;
+  for (int i = 0; i < n; i++) {
+    table[rb[i].get(0, ra[i].size())]++;
+  }
+  ll ans = 0;
+  for (int i = 0; i < n; i++) {
+    int m = a[i].size();
+    for (int j = 1; j <= m - same; j++) {
+      int l = m + j;
+      int c = l / 2;
+      if (l % 2 == 0) {
+        int d = m - c;
+        FP x1 = rb[i].get(0, d);
+        FP x2 = b[i].get(c - d, c);
+        FP x3 = b[i].get(0, c - d);
+        if (x1 == x2 && table.count(x3)) {
+          ans += table[x3] - (x3 == rb[i].get(0, ra[i].size()));
+        }
+      } else {
+        int d = m - c - 1;
+        FP x1 = rb[i].get(0, d);
+        FP x2 = b[i].get(c - d, c);
+        FP x3 = b[i].get(0, c - d);
+        if (x1 == x2 && table.count(x3)) {
+          ans += table[x3] - (x3 == rb[i].get(0, ra[i].size()));
+        }
+      }
+    }
+  }
+  return ans;
+}
+
+int main() {
+  int T;
+  scanf("%d", &T);
+  while (T--) {
+    scanf("%d", &n);
+    vector<RabinKarp> b, rb;
+    for (int i = 0; i < n; i++) {
+      cin >> a[i];
+      ra[i] = a[i];
+      reverse(ra[i].begin(), ra[i].end());
+      b.emplace_back(a[i]);
+      rb.emplace_back(ra[i]);
+    }
+    printf("%lld\n", solve(a, ra, b, rb, true) + solve(ra, a, rb, b, false));
+  }
+}

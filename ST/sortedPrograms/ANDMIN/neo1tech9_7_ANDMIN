@@ -1,0 +1,106 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, x;
+const int N = 1e5 + 500;
+const int LN = 19;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+pii tree[4 * N];
+int A[N];
+inline void init(int l, int r, int i) {
+    if (l == r) {
+        tree[i].fst = A[l];
+        tree[i].snd = A[l];
+        return;
+    }
+    int mid = (l + r) / 2;
+    init(l, mid, i + 1 + i);
+    init(mid + 1, r, i + 2 + i);
+    tree[i].fst = min(tree[i + 1 + i].fst, tree[i + 2 + i].fst);
+    tree[i].snd = tree[i + 1 + i].snd | tree[i + 2 + i].snd;
+}
+inline void modify(int l, int r, int i, int rl, int rr, int x) {
+    if (l > rr || rl > r) return;
+    if (tree[i].snd & x);
+    else return;
+    if (l == r) {
+        tree[i].fst &= (~x);
+        tree[i].snd = tree[i].fst;
+        return;
+    }
+    int mid = (l + r) / 2;
+    modify(l, mid, i + 1 + i, rl, rr, x);
+    modify(mid + 1, r, i + 2 + i, rl, rr, x);
+    tree[i].fst = min(tree[i + 1 + i].fst, tree[i + 2 + i].fst);
+    tree[i].snd = tree[i + 1 + i].snd | tree[i + 2 + i].snd;
+}
+inline int query(int l, int r, int i, int rl, int rr) {
+    if (l > rr || rl > r) return INT_MAX;
+    if (rl <= l && r <= rr) return tree[i].fst;
+    int mid = (l + r) / 2;
+    return min(query(l, mid, i + 1 + i, rl, rr), query(mid + 1, r, i + 2 + i, rl, rr));
+}
+int main() {
+    csl;
+    cin >> n >> q;
+    for (int i = 1; i <= n; ++i) {
+        cin >> A[i];
+    }
+    init(1, n, 0);
+    while (q--) {
+        int type;
+        cin >> type;
+        if (type == 0) {
+            cin >> l >> r;
+            cout << query(1, n, 0, l, r) << '\n';
+        } else {
+            cin >> l >> r >> x;
+            modify(1, n, 0, l, r, ~x);
+        }
+    }
+    return 0;
+}

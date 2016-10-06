@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, M;
+char A[100002];
+
+struct node
+{
+    long long ans, sum, l[3], r[3];
+} seg[262144], dummy;
+
+node combine(node a, node b)
+{
+    node c;
+    c.ans=a.ans+b.ans+a.r[0]*b.l[0]+a.r[1]*b.l[2]+a.r[2]*b.l[1];
+    c.sum=(a.sum+b.sum)%3;
+    c.l[0]=a.l[0]+b.l[(3-a.sum)%3];
+    c.l[1]=a.l[1]+b.l[(4-a.sum)%3];
+    c.l[2]=a.l[2]+b.l[(5-a.sum)%3];
+    c.r[0]=a.r[(3-b.sum)%3]+b.r[0];
+    c.r[1]=a.r[(4-b.sum)%3]+b.r[1];
+    c.r[2]=a.r[(5-b.sum)%3]+b.r[2];
+    return c;
+}
+
+node make_node(int v)
+{
+    node ret;
+    ret.sum=v%3;
+    ret.ans=ret.sum==0;
+    for(int i=0; i<3; i++)
+    {
+        ret.l[i]=ret.sum==i;
+        ret.r[i]=ret.sum==i;
+    }
+    return ret;
+}
+
+void init(int idx, int begin, int end)
+{
+    if(begin==end)
+        seg[idx]=make_node(A[begin]-'0');
+    else
+    {
+        int mid=(begin+end)/2;
+        init(idx*2, begin, mid);
+        init(idx*2+1, mid+1, end);
+        seg[idx]=combine(seg[idx*2], seg[idx*2+1]);
+    }
+}
+
+void update(int idx, int begin, int end, int x, int v)
+{
+    if(x<begin || end<x)
+        return;
+    if(begin==end)
+        seg[idx]=make_node(v);
+    else
+    {
+        int mid=(begin+end)/2;
+        update(idx*2, begin, mid, x, v);
+        update(idx*2+1, mid+1, end, x, v);
+        seg[idx]=combine(seg[idx*2], seg[idx*2+1]);
+    }
+}
+
+node query(int idx, int begin, int end, int i, int j)
+{
+    if(j<begin || end<i)
+        return dummy;
+    if(i<=begin && end<=j)
+        return seg[idx];
+    int mid=(begin+end)/2;
+    node l=query(idx*2, begin, mid, i, j);
+    node r=query(idx*2+1, mid+1, end, i, j);
+    if(l.ans==-1)
+        return r;
+    if(r.ans==-1)
+        return l;
+    return combine(l, r);
+}
+
+int main()
+{
+    dummy.ans=-1;
+    scanf("%d%d", &N, &M);
+    scanf("%s", A+1);
+    init(1, 1, N);
+    int a, b, c;
+    for(int i=0; i<M; i++)
+    {
+        scanf("%d%d%d", &a, &b, &c);
+        if(a==1)
+            update(1, 1, N, b, c);
+        else
+            printf("%lld\n", query(1, 1, N, b, c).ans);
+    }
+    return 0;
+}

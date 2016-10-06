@@ -1,0 +1,223 @@
+#include<bits/stdc++.h>
+#define N 200010
+#define M 400010
+using namespace std;
+int vis[N],head[N],ne[N],v[N],dad[N],s,t,q[N],r,j;
+int sz[N],wz[N],tot,top[N],n,i,x,y,z,l,len[N],get[N];
+int lf[M],rf[M],mf[M],lm[M],rm[M],mm[M],sum[M],cov[M];
+int ll,rr,t1,t2,t3,t4,cs[N],dfn[N],L,R,m,xx,yy,ans;
+char s1[5];
+void add(int x,int y)
+{
+	v[++l]=y;ne[l]=head[x];head[x]=l;
+}
+void dfs(int x)
+{
+	vis[x]=1;
+    for(int i=head[x];i;i=ne[i])
+	if(v[i]!=dad[x])
+	{
+		if(!vis[v[i]])dad[v[i]]=x,dfs(v[i]);
+		else if(!s)s=x,t=v[i];
+	}
+}
+void dfs(int x,int y)
+{
+	vis[x]=y;sz[x]=1;
+	for(int i=head[x];i;i=ne[i])
+		if(!vis[v[i]]&&!wz[v[i]])
+			dad[v[i]]=x,dfs(v[i],y),sz[x]+=sz[v[i]];
+}
+void slpf(int x)
+{
+	int mx=0;wz[x]=++tot;cs[x]=cs[dad[x]]+1;
+	for(int i=head[x];i;i=ne[i])
+		if(dad[v[i]]==x&&sz[v[i]]>sz[mx])mx=v[i];
+	if(mx)top[mx]=top[x],slpf(mx);
+	for(int i=head[x];i;i=ne[i])
+	if(dad[v[i]]==x)
+	{
+		get[v[i]]=i>>1;
+		if(mx!=v[i])top[v[i]]=v[i],slpf(v[i]);
+	}
+}
+void pushup(int cur)
+{
+	lf[cur]=max(lf[cur<<1],sum[cur<<1]+lf[cur<<1|1]);
+	rf[cur]=max(rf[cur<<1|1],sum[cur<<1|1]+rf[cur<<1]);
+	mf[cur]=max(rf[cur<<1]+lf[cur<<1|1],max(mf[cur<<1],mf[cur<<1|1]));
+	lm[cur]=min(lm[cur<<1],sum[cur<<1]+lm[cur<<1|1]);
+	rm[cur]=min(rm[cur<<1|1],sum[cur<<1|1]+rm[cur<<1]);
+	mm[cur]=min(rm[cur<<1]+lm[cur<<1|1],min(mm[cur<<1],mm[cur<<1|1]));
+	sum[cur]=sum[cur<<1]+sum[cur<<1|1];
+}
+void build(int l,int r,int cur)
+{
+	if(l==r)
+	{
+		lf[cur]=rf[cur]=mf[cur]=sum[cur]=lm[cur]=
+		rm[cur]=mm[cur]=len[get[dfn[l]]];return;
+	}
+	int mid=(l+r)>>1;
+	build(l,mid,cur<<1);
+	build(mid+1,r,cur<<1|1);
+	pushup(cur);
+}
+void done(int cur)
+{
+	swap(lf[cur],lm[cur]);swap(rf[cur],rm[cur]);
+	swap(mf[cur],mm[cur]);sum[cur]=-sum[cur];cov[cur]^=1;
+	lf[cur]=-lf[cur];rf[cur]=-rf[cur];mf[cur]=-mf[cur];
+	lm[cur]=-lm[cur];rm[cur]=-rm[cur];mm[cur]=-mm[cur];
+}
+void change(int l,int r,int cur)
+{
+	if(L<=l&&R>=r){done(cur);return;}
+	if(cov[cur])cov[cur]=0,done(cur<<1),done(cur<<1|1);
+	int mid=(l+r)>>1;
+	if(L<=mid)change(l,mid,cur<<1);
+	if(R>mid)change(mid+1,r,cur<<1|1);
+	pushup(cur);
+}
+int query(int l,int r,int cur,int &l1,int &r1,int &m1)
+{
+	//printf("query %d %d %d %d\n",l,r,lf[cur],rf[cur]);
+	if(L<=l&&R>=r)
+	{
+		l1=lf[cur],r1=rf[cur],m1=mf[cur];
+		return sum[cur];
+	}
+	if(cov[cur])cov[cur]=0,done(cur<<1),done(cur<<1|1);
+	int mid=(l+r)>>1;
+	if(R<=mid)return query(l,mid,cur<<1,l1,r1,m1);
+	if(L>mid)return query(mid+1,r,cur<<1|1,l1,r1,m1);
+	int l2,r2,m2,s1,s2;
+	s1=query(l,mid,cur<<1,l1,r2,m2);
+	s2=query(mid+1,r,cur<<1|1,l2,r1,m1);
+	l1=max(l1,s1+l2);
+	r1=max(r1,s2+r2);
+	m1=max(max(m1,m2),l2+r2);
+	return s1+s2;
+}
+int main()
+{
+	//freopen("a.in","r",stdin);
+	scanf("%d",&n);l=1;
+	for(i=1;i<=n;i++)
+	{
+		scanf("%d%d%d",&x,&y,&len[i]);
+		add(x,y);add(y,x);
+	}
+	dfs(1);
+	memset(vis,0,sizeof(vis));
+	for(i=s;;i=dad[i])
+	{
+		q[++r]=i;
+		wz[i]=++tot;top[i]=s;
+		if(i==t)break;
+	}
+	memset(dad,0,sizeof(dad));
+	for(i=1;i<=r;i++)
+	{
+		dfs(q[i],i);
+		for(j=head[q[i]];j;j=ne[j])
+			if(!wz[v[j]])top[v[j]]=v[j],slpf(v[j]),get[v[j]]=j>>1;
+			else if(v[j]==q[i%r+1])get[q[i]]=j>>1;
+	}
+	for(i=1;i<=n;i++)dfn[wz[i]]=i;
+	build(1,n,1);
+	scanf("%d",&m);
+	while(m--)
+	{
+		scanf("%s%d%d",s1,&x,&y);
+		if(s1[0]=='?')
+		{
+			ll=rr=0;
+			for(ans=0;top[x]!=top[y];x=dad[top[x]])
+			{
+				if(cs[top[x]]<cs[top[y]])swap(x,y),swap(ll,rr);
+				L=wz[top[x]];R=wz[x];
+				//printf("%d %d %d %d %d %d\n",x,y,L,R,ll,rr);
+				t1=query(1,n,1,t2,t3,t4);
+				//printf("%d %d %d %d\n",t1,t2,t3,t4);
+				ans=max(ans,max(t4,ll+t3));
+				ll=max(ll+t1,t2);
+			}
+			//printf("%d %d %d %d\n",x,y,vis[x],vis[y]);
+			//printf("%d %d\n",ll,rr);
+			if(!cs[x])
+			{
+				if(vis[x]>vis[y])swap(x,y),swap(ll,rr);
+				xx=vis[x];yy=vis[y];
+				if(yy-xx<=(r>>1))
+				{
+					L=xx,R=yy-1;
+					if(L<=R)
+					{
+						t1=query(1,n,1,t2,t3,t4);
+						ans=max(ans,max(t4,ll+t2));
+						ll=max(ll+t1,t3);
+					}
+				}else
+				{
+					L=1,R=xx-1;
+					if(L<=R)
+					{
+						t1=query(1,n,1,t2,t3,t4);
+						ans=max(ans,max(t4,ll+t3));
+						ll=max(ll+t1,t2);
+						//printf("%d %d %d %d %d %d\n",L,R,t1,t2,t3,t4);
+					}
+					L=yy,R=r;
+					if(L<=R)
+					{
+						t1=query(1,n,1,t2,t3,t4);
+						ans=max(ans,max(t4,rr+t2));
+						rr=max(rr+t1,t3);
+						//printf("%d %d %d %d %d %d\n",L,R,t1,t2,t3,t4);
+					}
+				}
+			}else
+			{
+				if(cs[x]>cs[y])swap(x,y),swap(ll,rr);
+				L=wz[x]+1;R=wz[y];
+				if(L<=R)
+				{
+					t1=query(1,n,1,t2,t3,t4);
+					ans=max(ans,max(t4,ll+t2));
+					ll=max(ll+t1,t3);
+				}
+			}
+			ans=max(ans,ll+rr);
+			printf("%d\n",ans);
+		}else
+		{
+			for(;top[x]!=top[y];x=dad[top[x]])
+			{
+				if(cs[top[x]]<cs[top[y]])swap(x,y);
+				L=wz[top[x]];R=wz[x];change(1,n,1);
+			}
+			if(!cs[x])
+			{
+				xx=vis[x];yy=vis[y];
+				if(xx>yy)swap(xx,yy);
+				if(yy-xx<=(r>>1))
+				{
+					L=xx,R=yy-1;
+					if(L<=R)change(1,n,1);
+				}else
+				{
+					L=yy,R=r;
+					if(L<=R)change(1,n,1);
+					L=1,R=xx-1;
+					if(L<=R)change(1,n,1);
+				}
+			}else
+			{
+				if(cs[x]>cs[y])swap(x,y);
+				L=wz[x]+1;R=wz[y];
+				if(L<=R)change(1,n,1);
+			}
+		}
+	}
+}

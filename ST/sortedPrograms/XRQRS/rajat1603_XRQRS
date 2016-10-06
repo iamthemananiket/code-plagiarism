@@ -1,0 +1,145 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+const int N = 500005;
+const int LN = 19;
+struct trie{
+    int size;
+    trie *left;
+    trie *right;
+    trie(){
+        size = 0;
+        left = NULL;
+        right = NULL;
+    }
+    trie(int v, trie *l , trie *r){
+        size = v;
+        left = l;
+        right = r;
+    }
+    trie *insert(int val,int level);
+};
+trie *null = new trie(0,NULL,NULL);
+trie* trie::insert(int val,int level){
+    if(level<0){
+        return new trie(size+1,null,null);
+    }
+    if((val>>level)&1){
+        return new trie(size+1,left,right->insert(val,level-1));
+    }
+    else{
+        return new trie(size+1,left->insert(val,level-1),right);
+    }
+}
+trie *root[N];
+int kquery(int ll,int rr ,int k){
+    int ret = 0;
+    trie *l = root[ll];
+    trie *r = root[rr];
+    for(int level = LN ; level >=0 ; --level ){
+        bool kbit = (k>>level)&1;
+        if(kbit){
+            ret+=r->left->size - l->left->size;
+            l = l->right;
+            r = r->right;
+        }
+        else{
+            l = l->left;
+            r = r->left;
+        }
+    }
+    return ret;
+}
+int xquery(int ll,int rr,int value){
+    trie *l = root[ll];
+    trie *r = root[rr];
+    int ret = 0;
+    for(int level = LN ; level >= 0 ; --level){
+        if((value>>level)&1){
+            int count = r->left->size - l->left->size;
+            if(count==0){
+                l = l->right;
+                r = r->right;
+                ret += 1<<level;
+            }
+            else{
+                l = l->left;
+                r = r->left;
+            }
+        }
+        else{
+            int count = r->right->size - l->right->size;
+            if(count==0){
+                l = l->left;
+                r = r->left;
+            }
+            else{
+                ret += 1<<level;
+                l = l->right;
+                r = r->right;
+            }
+        }
+    }
+    return ret;
+}
+int kminquery(int lll,int rrr,int k){
+    trie *l = root[lll];
+    trie *r = root[rrr];
+    int ret = 0;
+    for(int level = LN ; level >= 0 ; -- level ){
+        int count = r->left->size - l->left->size;
+        if(k<=count){
+            l = l->left;
+            r = r->left;
+        }
+        else{
+            k-=count;
+            l = l->right;
+            r = r->right;
+            ret |= 1<<level;
+        }
+    }
+    return ret;
+}
+int q;
+int cur = 0;
+int main(){
+    null->left = null->right = null;
+    root[0] = null;
+    q = scan();
+    while(q--){
+        int type = scan();
+        if(!type){
+            cur++;
+            root[cur] = root[cur-1]->insert(scan(),LN);
+        }
+        else if(type==1){
+            int l = scan() , r = scan() , val = scan();
+            printf("%d\n",xquery(l-1,r,val));
+        }
+        else if(type==2){
+            cur -= scan();
+        }
+        else if(type==3){
+            int l = scan() , r = scan() , k = scan();
+            printf("%d\n",kquery(l-1,r,k+1));
+        }
+        else{
+            int l = scan() , r = scan() , k = scan();
+            printf("%d\n",kminquery(l-1,r,k));
+        }
+    }
+}

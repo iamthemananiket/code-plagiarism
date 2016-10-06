@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+
+#ifdef getchar
+#undef getchar
+#endif
+#define getchar() (*_pinp?*_pinp++:(_inp[fread(_pinp=_inp, 1, 4096, stdin)]='\0', *_pinp++))
+char _inp[4097], *_pinp=_inp;
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+
+using namespace std;
+
+int N, M;
+int A[1000000];
+int L[1000000];
+int R[1000000];
+vector<pair<int, pair<long long, pair<long long, long long>>>> B;
+
+char nextchar()
+{
+    char c=getchar();
+    while(c<=' ')
+        c=getchar();
+    return c;
+}
+
+int main()
+{
+    scan(N);
+    scan(M);
+    for(int i=0; i<N; i++)
+        scan(A[i]);
+    vector<int> S;
+    for(int i=0; i<N; i++)
+    {
+        while(!S.empty() && A[S.back()]<=A[i])
+            S.pop_back();
+        if(!S.empty())
+            L[i]=S.back()+1;
+        else
+            L[i]=0;
+        S.push_back(i);
+    }
+    S.clear();
+    for(int i=N-1; i>=0; i--)
+    {
+        while(!S.empty() && A[S.back()]<A[i])
+            S.pop_back();
+        if(!S.empty())
+            R[i]=S.back()-1;
+        else
+            R[i]=N-1;
+        S.push_back(i);
+    }
+    for(int i=0; i<N; i++)
+        B.push_back(make_pair(A[i], make_pair(1LL*(i-L[i]+1)*(R[i]-i+1), make_pair(0, 0))));
+    sort(B.begin(), B.end());
+    int ptr=0;
+    for(int i=1; i<N; i++)
+    {
+        if(B[i].first==B[ptr].first)
+            B[ptr].second.first+=B[i].second.first;
+        else
+            B[++ptr]=B[i];
+    }
+    B.resize(ptr+1);
+    for(size_t i=0; i<B.size(); i++)
+    {
+        if(i>0)
+            B[i].second.second.first=B[i-1].second.second.first;
+        B[i].second.second.first+=B[i].second.first;
+    }
+    for(int i=B.size()-1; i>=0; i--)
+    {
+        if(i+1<(int)B.size())
+            B[i].second.second.second=B[i+1].second.second.second;
+        B[i].second.second.second+=B[i].second.first;
+    }
+    while(M--)
+    {
+        char tp=nextchar();
+        int n;
+        scan(n);
+        char s=nextchar();
+        long long cnt=0;
+        if(tp=='<')
+        {
+            auto it=lower_bound(B.begin(), B.end(), make_pair(n, make_pair(-1LL, make_pair(-1LL, -1LL))));
+            if(it!=B.begin())
+                cnt=(--it)->second.second.first;
+        }
+        else if(tp=='>')
+        {
+            auto it=lower_bound(B.begin(), B.end(), make_pair(n+1, make_pair(-1LL, make_pair(-1LL, -1LL))));
+            if(it!=B.end())
+                cnt=it->second.second.second;
+        }
+        else
+        {
+            auto it=lower_bound(B.begin(), B.end(), make_pair(n, make_pair(-1LL, make_pair(-1LL, -1LL))));
+            if(it!=B.end() && it->first==n)
+                cnt=it->second.first;
+        }
+        if((cnt%2)^(s-'C'))
+            putchar('C');
+        else
+            putchar('D');
+    }
+    putchar('\n');
+    return 0;
+}

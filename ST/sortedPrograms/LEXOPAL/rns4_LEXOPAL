@@ -1,0 +1,26 @@
+#include <cstdio>
+#include <cstring>
+
+char s[1000001];
+
+main() {
+	int T;
+	scanf("%d", &T);
+	while(T --) {
+		int ok = 1;
+		scanf("%s", s);
+		int n = strlen(s);
+		for(int i = 0; i * 2 < n; i ++) {
+			///printf("%d\n", i);
+			if(s[i] != '.' && s[n-1-i] != '.') {
+				if(s[i] != s[n-1-i]) {ok = 0; continue;}
+			}
+			else if(s[i] == '.' && s[n-1-i] == '.') s[i] = s[n-1-i] = 'a';
+			else if(s[i] == '.') s[i] = s[n-1-i];
+			else if(s[n-1-i] == '.') s[n-1-i] = s[i];
+			///else s[i] = s[n-1-i] = 'a';
+		}
+		if(!ok) puts("-1");
+		else puts(s);
+	}
+}

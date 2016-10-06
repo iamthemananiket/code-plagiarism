@@ -1,0 +1,127 @@
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 100500;
+int pr[1000100], lp[1000010], k = 0;
+vector <int> all[N];
+int n, m, a[N];
+
+struct tree {
+	int mx, least;
+	tree () {
+		mx = -inf;
+		least = -inf;
+	}
+}t[4 * N];
+int nn = 1;
+
+void upd(int l, int r, int v = 1, int tl = 1, int tr = nn) {
+	if (l > r || l > tr || tl > r || t[v].mx == 0) return;
+	if (tl == tr) {
+		all[tl].pop_back();
+		t[v].mx = (int)all[tl].size();
+		if ((int)all[tl].size()) t[v].least = all[tl][(int)all[tl].size() - 1];
+		else t[v].least = 1;
+		return;
+	}
+	int mid = (tl + tr) >> 1;
+	upd(l, r, v + v, tl, mid);
+	upd(l, r, v + v + 1, mid + 1, tr);
+	t[v].least = max(t[v + v].least, t[v + v + 1].least);
+	t[v].mx = max(t[v + v].mx, t[v + v + 1].mx);
+}
+
+int get(int l, int r, int v = 1, int tl = 1, int tr = nn) {
+	if (l > r || l > tr || tl > r) return 1;
+	if (l <= tl && tr <= r) return t[v].least;
+	int mid = (tl + tr) >> 1;
+	return max(get(l, r, v + v, tl, mid), get(l, r, v + v + 1, mid + 1, tr));
+}
+
+void solve() {
+	scanf("%d%d", &n, &m);
+	nn = 1;
+	while (nn < n) nn <<= 1;
+
+	for (int i = 1; i <= n; ++ i) {
+		scanf("%d", &a[i]);
+		int x = a[i];
+		all[i].clear();
+		while (x > 1) {
+			all[i].pb(lp[x]);
+			x /= lp[x];
+		}
+		reverse(all[i].begin(), all[i].end());
+		t[i + nn - 1].mx = (int)all[i].size();
+		if ((int)all[i].size()) t[i + nn - 1].least = all[i][(int)all[i].size() - 1];
+		else t[i + nn - 1].least = 1;
+	}
+
+	for (int i = nn - 1; i > 0; -- i) {
+		t[i].least = max(t[i + i].least, t[i + i + 1].least);
+		t[i].mx = max(t[i + i].mx, t[i + i + 1].mx);
+	}
+
+	for (int i = 1; i <= m; ++ i) {
+		int type, l, r;
+		scanf("%d%d%d", &type, &l, &r);
+		if (!type) upd(l, r);
+		else {
+			int ans = get(l, r);
+			if (ans == inf) ans = 1;
+			printf("%d ", ans);
+		}
+	}
+	puts("");
+}
+
+int main() {
+	#ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+	#endif
+
+	lp[0] = lp[1] = 1;
+	for (int i = 2; i <= 1000000; ++ i) {
+		if (!lp[i]) {
+			lp[i] = i;
+			pr[++k] = i;
+		}
+		for (int j = 1; j <= k && pr[j] <= lp[i]; ++ j) {
+			if (pr[j] * 1ll * i > 1000000) break;
+			lp[pr[j] * i] = pr[j];
+		}
+	}
+
+	int t;
+	scanf("%d", &t);
+
+	while(t--) solve();
+
+    return 0;
+}

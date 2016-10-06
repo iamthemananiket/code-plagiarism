@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+
+#define MOD 1000000007
+#define MAX 1005
+#define ll long long
+#define slld(t) scanf("%lld",&t)
+#define sd(t) scanf("%d",&t)
+#define ss(x) scanf("%s",x)
+#define pd(t) printf("%d\n",t)
+#define plld(t) printf("%lld\n",t)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define tr(container,it) for(typeof(container.begin()) it=container.begin();it!=container.end();it++)
+#define mp(a,b) make_pair(a,b)
+#define FF first
+#define SS second
+#define pb(x) push_back(x)
+#define vi vector<int>
+#define vpii vector<pii >
+#define vll vector<ll>
+#define clr(x) memset(x,0,sizeof(x))
+
+#define FILEIO(name) \
+    freopen(name".in", "r", stdin); \
+    freopen(name".out", "w", stdout);
+
+using namespace std;
+
+char S[MAX],T[MAX];
+int dp[MAX][MAX];
+
+int main(){
+	int t;sd(t);
+	for(int tt=1;tt<=t;tt++){
+		int l1,l2;
+		sd(l1);sd(l2);
+		ss(S);ss(T);
+		int mx=max(l1,l2);
+		clr(dp);
+		for(int i=1;i<=l1;i++){
+			for(int j=1;j<=l2;j++){
+				dp[i][j] = max ( dp[i-1][j], dp[i][j-1]);
+				if(S[i-1]==T[j-1]){
+					dp[i][j]=max(dp[i][j],1+dp[i-1][j-1]);
+				}
+			}
+		}
+		int ans=mx+min(l1,l2)-dp[l1][l2];
+		printf("Case %d: %d\n",tt,ans);
+	}
+}

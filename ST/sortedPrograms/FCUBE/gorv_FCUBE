@@ -1,0 +1,114 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MAX 10000005
+int isprime[MAX/32+2];
+#define MOD 1000000007
+#define isSet(n) isprime[n>>5]&(1<<(n&31))
+#define unset(n) isprime[n>>5] &= ~(1<<(n&31));
+long long mulmod(long long a,long long b,long long c)
+{    
+	long long x = 0,y=a%c;    
+	while(b > 0)
+	{
+	    if(b%2 == 1)
+		{
+			x = (x+y)%c;
+		}        
+		y = (y*2)%c;
+		b /= 2;
+	}
+	return x%c;
+}
+long long p(long long n,long long m)
+{
+    if(m==0) return 1;
+    
+    long long x=p(n,m/2);
+    if(m%2==0) 
+               return (x*x)%MOD;
+    else
+               return (((x*x)%MOD)*n)%MOD;
+}
+
+int main(){
+	ios::sync_with_stdio(false);
+	//freopen("in.txt","r",stdin);
+	//freopen("out.txt","w",stdout);
+	//sieve();
+	int  t;
+	cin>>t;
+	while(t--){
+		map<long long,int> allFactors;
+		int  NN;
+		cin>>NN;
+		long long int n;
+		cin>>n;
+		/*
+		for(int  i=0;i<NN;i++){
+			long long x;
+			cin>>x;
+			a.push_back(x);
+		}*/
+		
+		for(int j=0;j<NN;j++){
+		
+			//cout<<"FACTORISING "<<a[j]<<"\n";
+			//map<long long,int> factors;
+			while (n%2==0)
+    		{
+        		allFactors[2]++;
+        		n=n/2;
+    		}
+			int limit=sqrt(n);
+    		for (int i=3;i<=limit;i=i+2)
+    		{
+        		while (n%i==0)
+        		{
+        			allFactors[i]++;
+            		n=n/i;
+        		}
+    		}
+		
+    		if (n>2)
+    			allFactors[n]++;
+			/*
+			for(map<long long ,int>::iterator i=factors.begin();i!=factors.end();i++)
+			{
+			//	cout<<i->first<<" "<<i->second<<"\n";
+				//cout<<i->first<<" "<<i->second<<"\n";
+				//assert((i->first)>=0);
+				//assert((i->first)<=1000000000);
+				allFactors[i->first]+=i->second;
+				//cout<<"AM DONE ADDING "<<"\n";
+			}
+			*/
+		
+			//cout<<"FACTOR COMPLETE FOR "<<a[j]<<"\n";
+			
+		}
+		/*
+		for(map<long long ,long long >::iterator i=allFactors.begin();i!=allFactors.end();i++)
+			{
+				cout<<i->first<<" "<<i->second<<"\n";
+			}
+			*/
+			long long ans=1;
+			for(map<long long ,int>::iterator i=allFactors.begin();i!=allFactors.end();i++)
+			{
+				
+				int  exp;
+				int val=i->second;
+				if(val%3==0){
+					exp=val;
+				}
+				else if(val%3==1){
+					exp=val+2;
+				}
+				else if(val%3==2){
+					exp=val+1;
+				}
+				ans=(ans*p(i->first,exp))%MOD;
+			}
+			cout<<ans<<"\n";	
+	}
+}

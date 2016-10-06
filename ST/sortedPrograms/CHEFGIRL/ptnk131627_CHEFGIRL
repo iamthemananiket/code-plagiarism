@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("lcha12.inp","r",stdin)
+#define OUTPUT freopen("lcha12.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=1e5+10,M=32;
+
+int n,g[M+10][M+10],f[M+10][M+10],af[M+10];
+ii r[N];
+vector <int> v[N];
+int cost(int L,int R,int cL,int cR){
+    return max(0,cL-L)+max(0,R-cR);
+}
+void prepare(){
+    int m,x,y,L,R;
+    scanf("%d%d",&n,&m);
+    while (m--){
+        scanf("%d%d%d%d",&x,&y,&L,&R);
+        r[y]=ii(L,R);
+        v[x].push_back(y);
+    }
+    FOR(i,2,N) assert(v[i].size()<=1);
+}
+int solve(){
+    FOR(i,1,M)
+        FOR(j,i,M) g[i][j]=inf;
+    if (v[1].empty()) return 0;
+    for(auto x:v[1]){
+        memset(f,0,sizeof(f));
+        while (1){
+            FOR(i,1,M)
+                FOR(j,i,M) f[i][j]+=cost(i,j,r[x].X,r[x].Y);
+            if (v[x].empty()) break;
+            x=v[x][0];
+        }
+        FOR(i,1,M)
+            FOR(j,i,M) g[i][j]=min(g[i][j],f[i][j]);
+    }
+    fill(af+1,af+M+1,inf);
+    FOR(R,1,M)
+        FOR(L,1,R) af[R]=min(af[R],af[L-1]+g[L][R]);
+    return af[M];
+}
+int main(){
+    prepare();
+    cout<<solve();
+}

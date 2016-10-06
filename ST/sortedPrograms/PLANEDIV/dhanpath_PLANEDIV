@@ -1,0 +1,42 @@
+#include <iostream>
+#include <map>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+typedef  pair<int,int>  pii ;
+#define  f(x,y,z)  { x/z, y/z }
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  t, n, a, b, c, ab, bc, ca, ans ;
+
+        for(  cin >> t ;  t-- ;  )
+        {
+                map<pii,set<pii>>   slopes ;
+                set<pii>  hor, ver ;
+
+                for( cin >> n ;  n-- ;  )
+                {
+                        cin >> a >> b >> c ;
+                        ab = __gcd(a,b);
+                        bc = __gcd(b,c);
+                        ca = __gcd(c,a);
+                        if( a==0 )  ver.insert( f(b,c,bc) );
+                        else if( b==0 )  hor.insert( f(c,a,ca) );
+                        else  slopes[ f(a,b,ab) ].insert( f(b,c,bc) );
+                }
+
+                ans = max( hor.size(), ver.size() ) ;
+                for( auto &z: slopes )
+                        if( ans < z.second.size() )
+                                ans = z.second.size() ;
+
+                cout << ans << endl ;
+        }
+
+        return 0;
+} 

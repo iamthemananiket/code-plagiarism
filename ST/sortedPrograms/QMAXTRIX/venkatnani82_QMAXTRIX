@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+using namespace std;
+int l[100010], r[100010];
+int col[100010], row[100010];
+int start[100010], end[100010];
+int main(){
+	int n;
+	cin>>n;
+	for (int i = 1; i <= n; i++) {
+		scanf("%d %d", l + i, r + i);
+		if((r[i] - l[i]) % 2 == 1) row[i] = 0;
+		else row[i] = 1;
+		start[l[i]]++;
+		end[r[i]]++;
+	}
+	int open = 0;
+	for (int i = 1; i <= n; i++) {
+		open += start[i];
+		col[i] = open % 2;
+		open -= end[i];
+	}
+	int q, x, y;
+	cin>>q;
+	int sum = 0;
+	for (int i = 1; i <= n; i++) sum ^= row[i];
+	for (int i = 0; i < q; i++) {
+		scanf("%d %d", &x, &y);
+		int tmp = sum ^ row[x] ^ col[y];
+		if(l[x] <= y && y <= r[x]) tmp++;
+		if(tmp % 2 == 0) printf("E\n");
+		else printf("O\n");
+	}
+}

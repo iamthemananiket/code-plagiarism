@@ -1,0 +1,53 @@
+# include <cstdio>
+# include <cstring>
+# include <algorithm>
+
+using namespace std;
+
+const int MAX_N = 100010;
+
+int main ()
+{
+	int n, q, i, tq, tl, tr, tw, qc, cw, op;
+	int a[MAX_N];
+	bool w[MAX_N];
+	int sums[MAX_N], p;
+	scanf ("%d%d", &n, &q);
+	for (i = 1; i <= n; i ++)
+		scanf ("%d", &a[i]);
+	for (qc = 1; qc <= q; qc ++)
+	{
+		scanf ("%d%d%d", &tq, &tl, &tr);
+		if (tq == 1)
+		{
+			a[tl] = tr;
+			continue;
+		}
+		if (tq == 2)
+		{
+			for (i = tl; i <= (tl + tr) >> 1; i ++)
+				swap (a[i], a[tr - (i - tl)]);
+			continue;	
+		}
+		scanf ("%d", &tw);
+		memset (w, 0, sizeof (w));
+		w[0] = 1;
+		sums[0] = 0;
+		p = 1;
+		for (i = tl; i <= tr; i ++)
+		{
+			op = p;
+			for (cw = 0; cw < op; cw ++)
+				if (sums[cw] + a[i] <= tw && !w[sums[cw] + a[i]])
+					sums[p ++] = sums[cw] + a[i], w[sums[cw] + a[i]] = true;
+			if (w[tw])
+				break;
+		}
+		
+		if (w[tw])
+			printf ("Yes\n");
+		else
+			printf ("No\n");		
+	}
+	return 0;
+}

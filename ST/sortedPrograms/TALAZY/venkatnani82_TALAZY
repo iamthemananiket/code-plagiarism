@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long n, b, m;
+long long get(long long n, long long tim) {
+	if(n == 0) return 0;
+	return ((n + 1) / 2) * tim + b + get(n / 2, 2 * tim);
+}
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		cin >> n >> b >> m;
+		cout << get(n, m) - b << endl;
+	}
+}

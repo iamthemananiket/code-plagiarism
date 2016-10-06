@@ -1,0 +1,37 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+int n;
+
+bool jo[2][200001];
+int nch[2][200001];
+
+char c[200001];
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> c;
+        for(n=0; c[n]!='\0'; n++) jo[0][n+1] = (c[n]=='.');
+        cin >> c;
+        for(n=0; c[n]!='\0'; n++) jo[1][n+1] = (c[n]=='.');
+
+        for(int i=1; i<=n; i++) {
+            nch[0][i] = nch[1][i] = 999999;
+            for(int j=0; j<2; j++) {
+                if(!jo[j][i]) continue;
+                nch[j][i] = min(nch[j][i-1],1+nch[!j][i-1]);
+            }
+        }
+
+        int sol = min(nch[0][n],nch[1][n]);
+
+        if(sol >= 999999) {
+            cout << "No" << endl;
+        } else cout << "Yes" << endl << sol << endl;
+    }
+
+    return 0;
+}

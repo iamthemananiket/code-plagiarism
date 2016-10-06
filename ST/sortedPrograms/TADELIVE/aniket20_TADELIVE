@@ -1,0 +1,102 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll A[100001],B[100001];
+struct point
+{
+	ll a;
+	ll b;
+};
+point v[100001];
+bool comp(point p1,point p2)
+{
+	return (p1.a<=p2.a);
+}
+int main()
+{
+	ll n,x,y,ans=0,i,j;
+	cin>>n>>x>>y;
+	for(i=0;i<n;i++)
+	{
+		cin>>A[i];
+	}
+	for(j=0;j<n;j++)
+	{
+		cin>>B[j];
+	}
+	for(i=0;i<n;i++)
+	{
+		v[i].a=A[i]-B[i];
+		v[i].b=i;
+	}
+	sort(v,v+n,comp);
+	ll cnt1=0;
+	ll cnt2=0;
+	 i=0;
+	ll p1=0;
+	ll p2=n-1;
+	while(1)
+	{
+		if(i==n)
+		{
+			break;
+		}
+		if(cnt2==y)
+		{
+			while(i!=n)
+			{
+				ans=(ans+A[v[p2].b]);
+				p2--;
+				cnt1++;
+				i++;
+			}
+		}
+		else if(cnt1==x)
+		{
+			while(i!=n)
+			{
+				ans=(ans+B[v[p1].b]);
+				p1++;
+				cnt2++;
+				i++;
+			}
+		}
+		else
+		{
+			if(abs(v[p1].a)>abs(v[p2].a))
+			{
+				ans=(ans+B[v[p1].b]);
+				p1++;
+				cnt2++;
+				i++;
+			}
+			else if(abs(v[p1].a)<abs(v[p2].a))
+			{
+				ans=(ans+A[v[p2].b]);
+				p2--;
+				cnt1++;
+				i++;
+			}
+			else
+			{
+				if(B[v[p1].b]<=A[v[p1].b])
+				{
+					ans=(ans+A[v[p1].b]);
+					p1++;
+					cnt1++;
+					i++;
+				}
+				else
+				{
+					ans=(ans+B[v[p1].b]);
+					p1++;
+					cnt2++;
+					i++;
+				}
+			}
+		}
+	//	cout<<ans<<" ";
+	}
+	cout<<ans<<endl;
+	return 0;
+}

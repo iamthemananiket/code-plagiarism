@@ -1,0 +1,208 @@
+#include<stdio.h>
+#include<algorithm>
+#include<vector>
+#define N_ 201000
+#define INF 99999999
+#define SZ 262144
+#define pii pair<int,int>
+
+using namespace std;
+vector<int>E[N_];
+int TC, n, Q;
+
+int Chain[N_], Dep[N_], par[N_], ed[N_];
+
+int Sub_C[N_], Qu[N_];
+void BFS(int a){
+	int i, h = 0, t = 0, x;
+	for (i = 1; i <= n; i++)Sub_C[i] = 0;
+	Qu[++t] = a;
+	while (h < t){
+		x = Qu[++h];
+		for (i = 0; i < E[x].size(); i++){
+			Qu[++t] = E[x][i];
+			par[E[x][i]] = x;
+		}
+	}
+	for (i = t; i >= 1; i--){
+		Sub_C[Qu[i]]++;
+		Sub_C[par[Qu[i]]] += Sub_C[Qu[i]];
+	}
+}
+
+int N_cnt, Num[N_], re_Num[N_];
+bool OnOff[N_];
+
+struct Stack{
+	int a, pp, dep;
+}st[N_];
+
+int top, pv[N_], HL_ck[N_];
+void Push(int a, int pp, int dep){
+	top++;
+	st[top].a = a, st[top].pp = pp, st[top].dep = dep;
+	Num[a] = ++N_cnt;
+	re_Num[Num[a]] = a;
+	Chain[Num[a]] = Num[pp];
+	Dep[Num[a]] = dep;
+}
+
+void Numbering(int a, int pp, int dep){
+	top = 0;
+	Push(a, pp, dep);
+	int i;
+	for (i = 1; i <= n; i++)HL_ck[i] = pv[i] = 0;
+	while (top){
+		a = st[top].a, pp = st[top].pp, dep = st[top].dep;
+		if (pv[a] == E[a].size()){
+			ed[Num[a]] = N_cnt;
+			top--;
+			continue;
+		}
+		if (E[a][pv[a]] == HL_ck[a]){
+			pv[a]++;
+			continue;
+		}
+		if (!HL_ck[a]){
+			int x = 0, M = 0;
+			for (i = 0; i < E[a].size(); i++){
+				if (M < Sub_C[E[a][i]]){
+					M = Sub_C[E[a][i]];
+					x = E[a][i];
+				}
+			}
+			HL_ck[a] = x;
+			Push(x, pp, dep + 1);
+		}
+		else{
+			Push(E[a][pv[a]], E[a][pv[a]], dep + 1);
+			pv[a]++;
+		}
+	}
+	/*
+	if (!E[a].size()){
+		ed[Num[a]] = N_cnt;
+		return;
+	}
+
+	int i, x = 0, M = 0;
+
+	for (i = 0; i < E[a].size(); i++){
+		if (M < Sub_C[E[a][i]]){
+			M = Sub_C[E[a][i]];
+			x = i;
+		}
+	}
+	Numbering(E[a][x], pp, dep + 1);
+	for (i = 0; i < E[a].size(); i++){
+		if (i != x)Numbering(E[a][i], E[a][i], dep + 1);
+	}
+	ed[Num[a]] = N_cnt;*/
+}
+
+pii IT[SZ + SZ][2];
+
+void Ins(int a, pii tp, int ck){
+	a += SZ;
+	IT[a][ck] = tp;
+	while (a != 1){
+		a >>= 1;
+		IT[a][ck] = max(IT[a * 2][ck], IT[a * 2 + 1][ck]);
+	}
+}
+
+pii Max(int b, int e, int ck){
+	pii r = pii(-INF, -INF);
+	b += SZ, e += SZ;
+	while (b <= e){
+		r = max(r, IT[b][ck]);
+		r = max(r, IT[e][ck]);
+		b = (b + 1) >> 1, e = (e - 1) >> 1;
+	}
+	return r;
+}
+
+void Calc(int a){
+	int b, e;
+	if (Chain[a + 1] == Chain[a])b = ed[a + 1] + 1;
+	else b = a + 1;
+	e = ed[a];
+	pii tp = max(Max(b, e, 0), Max(a, a, 0));
+	tp.first -= Dep[a] * 2;
+	Ins(a, tp, 1);
+}
+
+void UDT(int a){
+	while (1){
+		Calc(a);
+		a = par[Chain[a]];
+		if (!a)break;
+	}
+}
+
+void On(int a){
+	OnOff[a] = true;
+	Ins(a, pii(Dep[a], re_Num[a]), 0);
+	UDT(a);
+}
+
+void Off(int a){
+	OnOff[a] = false;
+	Ins(a, pii(-INF, re_Num[a]), 0);
+	UDT(a);
+}
+
+int Solve(int a){
+	int ch = 0;
+	pii tp, res = pii(-INF, -INF);
+	while (a){
+		if (!ch){
+			tp = Max(a, ed[a], 0);
+			tp.first -= Dep[a] * 2;
+		}
+		else{
+			tp = max(Max(a, ch - 1, 0), Max(ed[ch] + 1, ed[a], 0));
+			tp.first -= Dep[a] * 2;
+		}
+		res = max(res, tp);
+		ch = Chain[a];
+		if (ch != a){
+			res = max(res, Max(ch, a - 1, 1));
+		}
+		a = par[ch];
+	}
+	return res.second;
+}
+
+int main(){
+	int i, a, ck, j;
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%d%d", &n, &Q);
+		for (i = 2; i <= n; i++){
+			scanf("%d", &a);
+			E[a].push_back(i);
+		}
+		BFS(1);
+		Numbering(1, 1, 0);
+		
+		par[1] = 0;
+		for (i = 1; i <= n; i++)for (j = 0; j < E[i].size(); j++)par[Num[E[i][j]]] = Num[i];
+		for (i = 1; i <= n; i++)On(i);
+
+		while (Q--){
+			scanf("%d", &a);
+			a = Num[a];
+			ck = 0;
+			if (!OnOff[a]){
+				On(a);
+				ck = 1;
+			}
+			printf("%d\n", Solve(a));
+			if (!ck)Off(a);
+		}
+
+		N_cnt = 0;
+		for (i = 1; i <= n; i++)E[i].clear();
+	}
+}

@@ -1,0 +1,67 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 2e5 + 10;
+const int debug = 0;
+
+int T, N, K;
+int A[MAX_N];
+ll g(int n) { return 1LL * n * (n + 1) / 2;}
+
+ll search(){
+  sort(A, A + K + 1);
+  ll s = 0;
+  int j = 1, m;
+  for(int i = 1; i <= K; i++){
+    s += g(A[i] - 1) - g(A[i - 1]);
+    while(1){
+      j = max(j, i);
+      m = max(m, A[i] + 1);
+      while(j <= K && A[j] < m) j ++;
+      if(j > K || A[j] != m) break;
+      m ++;
+    }
+    // printf("A[i]=%d s = %lld m = %d\n", A[i], s, m);
+    if(s + 1 < m){
+      return s + 1; 
+    }
+  }
+  s += g(N) - g(A[K]);
+  return s + 1;
+}
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d%d", &N, &K);
+    A[0] = 0;
+    for(int i = 1; i <= K; i++)
+      scanf("%d", A + i);
+    ll s = search();
+    if(debug) printf("s = %lld\n", s);
+    if(s % 2 == 0){
+      puts("Mom");
+    } else {
+      puts("Chef");
+    }
+  }
+  return 0;
+}

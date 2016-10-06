@@ -1,0 +1,173 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memsetval(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) ll((a).size())
+#define mod 1000000007
+#define N 100010
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(ll i=a;i<b;++i)
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	ll neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	ll i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+typedef struct node {ll min; ll size[30];} node;
+
+node Tree[3*N];
+ll a[N];
+
+inline void maketree(ll vertex, ll l, ll r)
+{
+	if (l==r)
+	{
+		Tree[vertex].min=a[l];
+		REP(i,30)
+			if (a[l] & (1<<i) ) Tree[vertex].size[i]=1;
+			else Tree[vertex].size[i]=0;
+		return;
+	}
+	ll m=(l+r)/2,left=2*vertex,right=left+1;
+	maketree(left,l,m);
+	maketree(right,m+1,r);
+	Tree[vertex].min=min(Tree[left].min,Tree[right].min);
+	REP(i,30) Tree[vertex].size[i]=Tree[left].size[i]+Tree[right].size[i];
+	return;
+}
+
+inline void update(ll vertex, ll l, ll r, ll u, ll v, ll col)
+{
+	if (l==r)
+	{
+		Tree[vertex].min=Tree[vertex].min & col;
+		REP(i,30)
+			if ( Tree[vertex].min & (1<<i) ) Tree[vertex].size[i]=1;
+			else Tree[vertex].size[i]=0;
+		return;
+	}
+	ll m=(l+r)/2,left=2*vertex,right=left+1,x;
+	if (u>m)
+	{
+		x=0;
+		REP(i,30) if ((!( (1<<i) & col))&&Tree[vertex].size[i]!=0) x++;
+		if (x) update(right,m+1,r,u,v,col);
+	}
+	else if (v<=m)
+	{
+		x=0;
+		REP(i,30) if ((!( (1<<i) & col))&&Tree[vertex].size[i]!=0) x++;
+		if (x) update(left,l,m,u,v,col);
+	}
+	else
+	{
+		x=0;
+		REP(i,30) if ((!( (1<<i) & col))&&Tree[vertex].size[i]!=0) x++;
+		if (x)
+		{
+			update(right,m+1,r,m+1,v,col);
+			update(left,l,m,u,m,col);
+		}
+	}
+	Tree[vertex].min=min(Tree[left].min,Tree[right].min);
+	REP(i,30) Tree[vertex].size[i]=Tree[left].size[i]+Tree[right].size[i];
+	return;
+}
+
+inline ll query(ll vertex, ll l, ll r, ll u, ll v)
+{
+	if (l==u&&r==v) return Tree[vertex].min;
+	ll m=(l+r)/2,left=2*vertex,right=left+1;
+	if (v<=m) return query(left,l,m,u,v);
+	if (u>m) return query(right,m+1,r,u,v);
+	ll a,b;
+	a=query(left,l,m,u,m);
+	b=query(right,m+1,r,m+1,v);
+	return min(a,b);
+}
+
+// void printtree(int vertex, int l, int r)
+// {
+// 	if (l!=r)
+// 	{
+// 		ll m=(l+r)/2,left=2*vertex,right=left+1;
+// 		printtree(left,l,m);
+// 		printtree(right,m+1,r);
+// 	}
+// 	printf("Vertex of %d to %d, having rlen as %lld, llen as %lld and num as %lld\n",l+1,r+1,Tree[vertex].rlen,Tree[vertex].llen,Tree[vertex].num);
+// }
+
+int main()
+{
+ll n,m,i,u,v,code;
+n=input();
+m=input();
+for(i=0;i<n;i++) a[i]=input();
+maketree(1,0,n-1);
+while(m--)
+{
+	code=input();
+	if (code==0)
+	{
+	u=input();
+	v=input();
+	u--;
+	v--;
+	output(query(1,0,n-1,u,v));
+	}
+	else
+	{
+		u=input();
+		u--;
+		v=input();
+		v--;
+		code=input();
+		update(1,0,n-1,u,v,code);
+		//printtree(1,0,n-1);
+	}
+}
+return 0;
+}

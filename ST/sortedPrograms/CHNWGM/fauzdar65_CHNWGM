@@ -1,0 +1,768 @@
+#include <bits/stdc++.h>
+#include<ext/pb_ds/assoc_container.hpp>
+#include<ext/pb_ds/tree_policy.hpp>
+// #include <boost/multiprecision/cpp_int.hpp> 
+ 
+#define gc getchar//_unlocked
+#define pc putchar//_unlocked
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vpp vector<pp>
+#define vll vector<ll>
+ 
+using namespace std;
+using namespace __gnu_pbds;
+ 
+char putnb[20];
+void putn(ll n) {if(!n)pc('0');if(n<0)pc('-'),n=0-n;int pi=0;while(n)putnb[pi++]=(n%10)+'0',n/=10;while(pi)pc(putnb[--pi]);}
+void sci(int *x) {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+void scll(ll *x)  {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x =  (ll)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+ll fp(ll a,ll b,ll c) {if(b==0)return 1%c; if(b==1)return a%c; ll ret=fp(a,b/2,c); ret=(ret*ret)%c; if(b&1)ret=(ret*a)%c; return ret;}
+ 
+const ll mod=1e9 +7;
+const ll mod2=1999999973;
+const ll inf=1e18;
+const int infs=1e9 + 1000;
+const int N=100000;
+const long double PI = acos(-1);
+ 
+template <typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+ 
+int area[20] = { 1,2,2,3,3,4,4,5,5,4,9,5,5,5,5,3,3,3,3};
+int piece[20][5][5] = {
+ 
+  { {1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,0,0,0,0},
+    {1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,1,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,1,1,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0}
+  },
+ 
+  { {1,1,1,1,1},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,0,0,0},
+    {1,1,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,1,0,0},
+    {1,1,1,0,0},
+    {1,1,1,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,1,0,0},
+    {0,0,1,0,0},
+    {0,0,1,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {0,0,1,0,0},
+    {0,0,1,0,0},
+    {1,1,1,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,0,0,0,0},
+    {1,0,0,0,0},
+    {1,1,1,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,1,0,0},
+    {1,0,0,0,0},
+    {1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,0,0,0},
+    {1,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,1,0,0,0},
+    {0,1,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {0,1,0,0,0},
+    {1,1,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  },
+ 
+  { {1,0,0,0,0},
+    {1,1,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0},
+    {0,0,0,0,0}
+  }
+};
+ 
+ 
+int grid[25][25]; 
+int tgrid[25][25];
+int grid2[1005][25][25];
+ 
+int p[7][4] = {{1,2,3},{1,3,2},{2,1,3},{2,3,1},{3,1,2},{3,2,1}};
+int numt[10005];
+int numz[10005];
+int numemp[10005];
+int numh[10005];
+int numpss[10005];
+vi  numsc[10005];
+int numhot[10005];
+int id2[1005][4];
+int r2[1005][4];
+int c2[1005][4];
+ int dir[5][2] = { {1,0} , {-1,0} , {0,-1} , {0,1}};
+ 
+int compo[25][25];
+int sz[125];
+bool vish[25][25];
+ 
+bool canplace(int pos,int r,int c)
+{
+  bool ret = true;
+  afor(i,0,4)afor(j,0,4)
+  {
+    if(piece[pos][i][j]==0)continue;
+  
+    if(grid[r+i][c+j]>=1)
+    {
+      ret = false;
+      break;
+    }
+  }
+  return ret;
+}
+ 
+int cleargrid()
+{
+  bool *rch=new bool[25]();
+  bool *cch=new bool[25]();
+  
+  int r1 = 0;
+  int r2 = 0;
+  afor(i,5,14)
+  {
+    bool ch=true;
+    afor(j,5,14)
+    {
+      if(!grid[i][j])
+      {
+        ch=false;
+        break;
+      }
+    }
+    rch[i]=ch;
+  }
+  
+  afor(j,5,14)
+  {
+    bool ch=true;
+    afor(i,5,14)
+    {
+      if(!grid[i][j])
+      {
+        ch=false;
+        break;
+      }
+    }
+    cch[j]=ch;
+  }
+  
+  afor(i,5,14)
+  {
+    if(rch[i])
+    {
+      r1++;
+      afor(j,5,14)grid[i][j]=0;
+    }
+  }
+  
+  afor(j,5,14)
+  {
+    if(cch[j])
+    {
+      r2++;
+      afor(i,5,14)grid[i][j]=0;
+    }
+  }
+ 
+  return r1*r1 + r2*r2 + 5*r1*r2;
+}
+ 
+pp place(int pos,int r,int c)
+{
+  pp ret;
+ 
+  ret.second = c - 4;
+  int rmax = 0;
+ 
+  afor(i,0,4)afor(j,0,4)
+  {
+    if(!piece[pos][i][j])continue;
+    assert(grid[r + i][c + j]==0);
+    grid[r + i][c + j]=pos+1 ;
+    rmax = max( rmax , i);
+  }
+ 
+  ret.first = r - 4 + rmax;
+  return ret;
+}
+ 
+void unplace(int pos,int r,int c)
+{
+  afor(i,0,4)afor(j,0,4)
+  {
+    if(piece[pos][i][j])grid[r + i][c + j]=0;
+  }
+}
+ 
+vi full_count()
+{
+  vi ret;
+  
+  afor(i,5,14)
+  {
+    int curr = 0;
+    afor(j,5,14)
+    {
+      if(grid[i][j])
+      {
+        curr++;
+      }
+    }
+    ret.pb(curr);
+  }
+  
+  afor(j,5,14)
+  {
+    int curr = 0;
+    afor(i,5,14)
+    {
+      if(grid[i][j])
+      {
+        curr++;
+      }
+    }
+    ret.pb(curr);
+  }
+  
+  sort(ret.begin(),ret.end(),greater<int>());
+  return ret;
+}
+ 
+ 
+int emp_count()
+{
+  int ret=0;
+ 
+  
+  afor(i,5,14)afor(j,5,14)
+  {
+    if(grid[i][j])continue;
+ 
+    int num =0;
+ 
+    afor(k,0,3)
+    {
+      int nx = i + dir[k][0];
+      int ny = j + dir[k][1];
+ 
+      if(!grid[nx][ny])num++;
+    }
+    if(num == 4)ret+=10;
+    else if(num == 3)ret+=7;
+    else if(num == 2)ret+=5;
+    else if(num == 1)ret+=3;
+    else ret+=1;
+  }
+  return ret;
+}
+ 
+int pss_count()
+{
+  int ret=0;
+ 
+  afor(i,5,14)afor(j,5,14)
+  {
+    afor(k,0,18)
+    {
+      if(canplace(k,i,j))ret++;
+    }
+  }
+  return ret;
+}
+void viewgrid()
+{
+  afor(i,5,14){ afor(j,5,14)
+  {
+    if(!grid[i][j])cout<<".";
+    else cout<<(char)(grid[i][j]-1 + 'a');
+  }cout<<"\n";}
+  cout<<"\n";
+}
+ 
+bool comp0(const vi &a,const vi &b,int c,int d)
+{
+  afor(i,0,19)
+  {
+    if(a[i]>b[i])return true;
+    else if(a[i]<b[i])return false;
+  }
+  return c>=d;
+}
+bool comp(const int &a,const int &b)
+{
+  afor(i,0,19)
+  {
+    if(numsc[a][i]>numsc[b][i])return true;
+    else if(numsc[a][i]<numsc[b][i])return false;
+  }
+  return numemp[a]>=numemp[b];
+}
+ 
+int num_zero()
+{
+  int ret = 0;
+  afor(i,5,14)afor(j,5,14)
+  {
+    if(!grid[i][j])ret++;
+  }
+  return ret;
+}
+  
+void dfsh(int i,int j,int com)
+{
+  if(grid[i][j] || vish[i][j] || i<5 || i>14 || j<5 || j>14)return;
+  sz[com]++;
+  vish[i][j]=true;
+  compo[i][j]=com;
+ 
+  afor(z,0,3)
+  {
+    int nx = i + dir[z][0];
+    int ny = j + dir[z][1];
+    dfsh(nx,ny,com);
+  }
+}
+ 
+ 
+int holes_count()
+{
+  int ret=0;
+  afor(i,5,14)afor(j,5,14)vish[i][j]=false,compo[i][j]=0;
+  afor(i,0,100)sz[i]=0;
+ 
+  int cc = 0;
+  afor(i,5,14)afor(j,5,14)
+  {
+    if(grid[i][j])continue;
+    else {
+      if(!vish[i][j])dfsh(i,j,++cc);
+    }
+  }
+ 
+  //afor(i,5,14)afor(j,5,14)ret+=sz[compo[i][j]]; 
+  return cc;
+} 
+pp optimalpos(int pos)
+{
+  pp ret = {-1,-1};
+  vi maxs;
+  int maxe = -100000;
+  afor(i,1,20)maxs.pb(-1);
+  
+ 
+  afor(i,5,14)afor(j,5,14)
+  {
+    if(canplace(pos,i,j))
+    {
+      place(pos,i,j);
+      vi curr = full_count();
+      int curre = emp_count();
+      int curh = holes_count();
+      int currz = num_zero();
+ 
+      int cval = 15*curre + 8*currz - 6*curh;
+ 
+      /*if(cval > maxe)
+      {
+        maxe = cval;
+        ret = {i , j};
+      }
+      */
+      if(comp0(curr,maxs,curre,maxe))
+      {
+        maxs = curr;
+        maxe = curre;
+        ret = {i , j};
+      }
+      
+      unplace(pos,i,j);
+    }
+  }
+  return ret;
+}
+ 
+ 
+ 
+ 
+ 
+bool comp2(const int &a,const int &b)
+{
+  if(numt[a]==numt[b])
+  {
+    
+    //return true;
+    int le = 5*numz[a] + 40*numemp[a] + 6*numhot[a] - 3*numh[a];
+    int ri=  5*numz[b] + 40*numemp[b] + 6*numhot[b] - 3*numh[b];
+ 
+    return le >= ri;
+    
+    if(numz[a] == numz[b])
+    {
+ 
+    //  if(numemp[a]==numemp[b])return numh[a]<=numh[b];
+        //{  return numhot[a]>=numhot[b]; }
+      
+      //return numhot[a]>=numhot[b];
+      return numemp[a]>=numemp[b];
+    }
+    else return numz[a] > numz[b];
+  }
+  else return numt[a]>numt[b];
+}
+ 
+int main()
+{
+ //srand (time(NULL));
+ 
+  afor(i,0,4)afor(j,0,24)grid[i][j]=tgrid[i][j]=1;
+  afor(i,5,14)afor(j,0,4)grid[i][j]=tgrid[i][j]=1;
+  afor(i,5,14)afor(j,15,24)grid[i][j]=tgrid[i][j]=1;
+  afor(i,15,24)afor(j,0,24)grid[i][j]=tgrid[i][j]=1;
+ 
+  afor(i,0,4)afor(j,0,24)afor(k,0,21)grid2[k][i][j]=1;
+  afor(i,5,14)afor(j,0,4)afor(k,0,21)grid2[k][i][j]=1;
+  afor(i,5,14)afor(j,15,24)afor(k,0,21)grid2[k][i][j]=1;
+  afor(i,15,24)afor(j,0,24)afor(k,0,21)grid2[k][i][j]=1;
+ 
+ 
+ int f[4];
+  
+ int ct=0;
+ 
+ int hope = 0;
+ int score = 0;
+ 
+  while(1)
+  {
+  hope++;
+    int nans=0;
+    ct++;
+    cin>>f[1]>>f[2]>>f[3];
+    --f[1]; --f[2]; --f[3];
+   
+ 
+    if(f[1] == -2)break;
+ 
+    vector<pp> pt[4];
+ 
+    afor(z,1,3)
+    {
+        afor(i,5,14)afor(j,5,14)
+        {
+          if(canplace(f[z],i,j))pt[z].pb({i,j});
+        }
+    }
+  
+  afor(zz,0,300)
+  { 
+ 
+    afor(i,5,14)afor(j,5,14)tgrid[i][j]=grid[i][j]; //backup
+ 
+    int r[4],c[4],id[4];
+    numt[zz]=numz[zz]=0;
+    numsc[zz].clear();
+    numhot[zz]= 0;
+ 
+    if(zz <= 5)
+    {
+      afor(z,1,3)
+      {
+      r[z]=c[z]=id[z]=-1;
+ 
+      int perm = p[zz][z-1];
+      
+        pp pt = optimalpos(f[perm]);
+        
+        if(pt.first != -1)
+        {
+          numt[zz]++;
+          pp res = place(f[perm],pt.first,pt.second);
+          numhot[zz]+=cleargrid();
+          r[z] = res.first;
+          c[z] = res.second;
+          id[z] = perm;
+        }
+      }
+    }
+    else
+    {
+        
+        int ord = rand()%6;
+ 
+        bool found = false;
+ 
+        afor(i,0,12)
+        {
+          afor(x,5,14)afor(y,5,14)grid[x][y]=tgrid[x][y]; //restore initial grid
+          afor(z,1,3)r[z]=c[z]=id[z]=-1;
+          numhot[zz]=0;
+ 
+          int q=p[ord][0];
+          id[1]=q;
+ 
+          if(!pt[q].size())break;
+          int sz=rand()%pt[q].size();
+          r[1]=pt[q][sz].first;
+          c[1]=pt[q][sz].second;
+ 
+          assert(canplace(f[q],r[1],c[1]));
+          pp res=place(f[q],r[1],c[1]);
+          r[1]=res.first;
+          c[1]=res.second;
+          numhot[zz]+=cleargrid();
+          
+          int tgrid2[25][25]; 
+          afor(x,5,14)afor(y,5,14)tgrid2[x][y]=grid[x][y]; //snapshot after placing first piece 
+          
+          int tmp = numhot[zz];
+          afor(j,0,12)
+          {
+            afor(x,5,14)afor(y,5,14)grid[x][y]=tgrid2[x][y]; //restore till first piece
+            numhot[zz] = tmp;
+            int q=p[ord][1];
+            id[2]=q;
+ 
+            if(!pt[q].size())break;
+            int sz=rand()%pt[q].size();
+            r[2]=pt[q][sz].first;
+            c[2]=pt[q][sz].second;
+ 
+            if(!canplace(f[q],r[2],c[2]))continue;
+            
+            pp res=place(f[q],r[2],c[2]);
+            r[2]=res.first;
+            c[2]=res.second;
+            numhot[zz]+=cleargrid();
+ 
+            int tgrid3[25][25];
+            afor(x,5,14)afor(y,5,14)tgrid3[x][y]=grid[x][y]; //snapshot after placing second piece
+            int tmp2= numhot[zz];
+            afor(k,0,12)
+            {
+              afor(x,5,14)afor(y,5,14)grid[x][y]=tgrid3[x][y]; //restore till second piece
+              numhot[zz]=tmp2;
+              int q=p[ord][2];
+              id[3]=q;
+ 
+              if(!pt[q].size())break;
+              int sz=rand() % pt[q].size();
+              r[3]=pt[q][sz].first;
+              c[3]=pt[q][sz].second;
+              if(!canplace(f[q],r[3],c[3]))continue;
+              
+              found=true;
+              pp res=place(f[q],r[3],c[3]);
+              r[3]=res.first;
+              c[3]=res.second;
+              numhot[zz]+=cleargrid();
+              break;
+            }
+            if(found)break;
+          }
+          if(found)break;
+        }
+        
+        if(!found)
+        {
+          afor(z,1,3)r[z]=c[z]=id[z]=-1;
+          numhot[zz]=0;
+        }
+        else
+        {
+          numt[zz]=3;
+        }
+    }
+ 
+  if(id[1]==-1)
+  {
+    if(id[2]==-1)
+    {
+    swap(id[1],id[3]);
+    swap(r[1],r[3]);
+    swap(c[1],c[3]);
+    }
+    else
+    {
+    swap(id[1],id[2]);
+    swap(r[1],r[2]);
+    swap(c[1],c[2]);
+    
+    swap(id[2],id[3]);
+    swap(r[2],r[3]);
+    swap(c[2],c[3]);
+    }
+  }
+  else if(id[2]==-1)
+  {
+    swap(id[2],id[3]);
+    swap(r[2],r[3]);
+    swap(c[2],c[3]);
+  }
+ 
+    afor(i,1,3)
+    {
+      assert(r[i]==-1 || (r[i]>=1 && r[i]<=10));
+      assert(c[i]==-1 || (c[i]>=1 && c[i]<=10));
+    }
+ 
+    numz[zz]=num_zero();
+    numsc[zz]=full_count();
+    numemp[zz]=emp_count();
+    numh[zz]=holes_count();
+   // numpss[zz]=pss_count();
+    
+    afor(i,5,14)afor(j,5,14)grid2[zz][i][j]=grid[i][j]; //snapshot
+ 
+    afor(i,5,14)afor(j,5,14)grid[i][j]=tgrid[i][j]; //restore
+    afor(i,1,3)
+    {
+      id2[zz][i]=id[i];
+      r2[zz][i]=r[i];
+      c2[zz][i]=c[i];
+    }
+ 
+    if(!comp2(nans,zz))nans=zz;
+}
+    
+    //vi ans ;
+    //afor(i,0,5)ans.pb(i);
+    //sort(ans.begin(),ans.end(),comp2);
+    //nans = ans[0];
+    //assert(hope <= 10000);
+    //assert(nans>=0 && nans<=20);
+    
+    if(hope == 1100)
+    {
+    cout<<"-1 -1 -1 -1 -1 -1 -1 -1 -1\n";
+    fflush(stdout);
+    continue;
+    }
+    
+    afor(i,1,3)cout<<id2[nans][i]<<" "<<r2[nans][i]<<" "<<c2[nans][i]<<" ";
+    cout<<"\n";
+    fflush(stdout);
+    
+    
+    afor(i,5,14)afor(j,5,14)grid[i][j]=grid2[nans][i][j]; //restore snapshot
+    
+    bool ff = true;
+    //cout<<nans<<endl;
+    score+= numhot[nans];
+    afor(i,1,3)
+    {
+      if(id2[nans][i]==-1)ff=false;
+      else score+= area[f[id2[nans][i]]];
+    }
+ 
+    //if(!ff || hope==10000)break;
+    
+  //viewgrid();
+  }
+ 
+  //cout<<hope<<" "<<score<<endl;
+  //viewgrid();
+  
+return 0;
+}    

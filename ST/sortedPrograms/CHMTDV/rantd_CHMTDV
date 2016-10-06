@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 501;
+int n, p, a[N][N];
+ll sumR[N][N];
+
+unsigned long xor_shift() {
+	static unsigned long x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+	unsigned long t;
+	t = (x ^ (x << 11));
+	x = y, y = z, z = w;
+	return (w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+}
+
+inline ll score(const vector<int> &tr, const vector<int> &tc) {
+	ll ans = 0;
+	REPU(i, 0, p) REPU(j, 0, p) {
+		ll tmp = 0;
+		REPU(k, tr[i], tr[i + 1]) tmp += sumR[k][tc[j + 1] - 1] - (tc[j] > 0 ? sumR[k][tc[j] - 1] : 0);
+		if (ans < tmp) {
+			ans = tmp;
+		}
+	}
+	return ans;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+
+	cin >> n >> p;
+	REPU(i, 0, n) REPU(j, 0, n) cin >> a[i][j];
+	REPU(i, 0, n) {
+		sumR[i][0] = a[i][0];
+		REPU(j, 1, n) sumR[i][j] = sumR[i][j - 1] + a[i][j];
+	}
+	vector<int> r(p + 1, 0), c(p + 1, 0);
+	REPU(i, 1, p) {
+		r[i] = c[i] = n / p * i;
+	}
+	r[p] = c[p] = n;
+
+	vector<int> tmpR(p + 1), tmpC(p + 1);
+	tmpR[0] = tmpC[0] = 0;
+	tmpR[p] = tmpC[p] = n;
+	ll best_score = score(r, c);
+	const int iters = static_cast<int>(1e9 / n / p / p);
+	REPU(_, 0, iters) {
+		REPU(i, 1, p) {
+			tmpR[i] = tmpR[i - 1] + 1 + (xor_shift() % (n + i - p - tmpR[i - 1]));
+			tmpC[i] = tmpC[i - 1] + 1 + (xor_shift() % (n + i - p - tmpC[i - 1]));
+		}
+		ll ans = score(tmpR, tmpC);
+		if (ans < best_score) {
+			best_score = ans;
+			r = tmpR, c = tmpC;
+		}
+	}
+
+	REPU(i, 1, p) printf("%d%c", r[i], " \n"[i == p - 1]);
+	REPU(i, 1, p) printf("%d%c", c[i], " \n"[i == p - 1]);
+
+	return 0;
+}

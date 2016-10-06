@@ -1,0 +1,139 @@
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include <string.h>
+using namespace std;
+const double pi=acos(-1.0);
+const double eps=1e-11;
+#define ll long long int
+#define si(x) scanf("%d",&x)
+#define mp(A,B) make_pair(A,B)
+#define pb(X) push_back(X)
+#define INF 1000000000
+#define MOD 1000000007
+#define SET(x,y) memset(x,y,sizeof(x));
+#define getchar_unlocked getchar //uncomment when compiling on DEV c++
+inline void sc(int* x)
+{
+	register char c = getchar_unlocked();
+	*x = 0;
+	int neg = 0;
+	for(; ((c<48 || c>57) && c != '-');c = getchar_unlocked());
+	if(c=='-') {
+        neg = 1;
+        c = getchar_unlocked();
+    }
+	for(; (c>47)&&(c<58);c = getchar_unlocked())
+		*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+    if(neg)
+        *x = -*x;
+}
+inline void scl(long long int* x)
+{
+	register char c = getchar_unlocked();
+	*x = 0;
+	int neg = 0;
+	for(; ((c<48 || c>57) && c != '-');c = getchar_unlocked());
+	if(c=='-') {
+        neg = 1;
+        c = getchar_unlocked();
+    }
+	for(; (c>47)&&(c<58);c = getchar_unlocked())
+		*x = (long long int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+    if(neg)
+        *x = -*x;
+}/*
+ll solve(ll n, ll k, ll answer, ll a[], int flag)
+{
+	ll i,j;
+	if(flag==0)
+	{
+		for(i=1;i<=k;i++)
+		{
+			for(j=1;j<=n;j++)
+				answer=answer&a[j-1];
+		}
+		return answer;
+	}
+	else if(flag==1)
+	{
+		for(i=1;i<=k;i++)
+		{
+			for(j=1;j<=n;j++)
+				answer=answer^a[j-1];
+		}
+		return answer;
+	}
+	else
+	{
+		for(i=1;i<=k;i++)
+		{
+			for(j=1;j<=n;j++)
+				answer=answer|a[j-1];
+		}
+		return answer;
+	}
+}*/
+int main()
+{
+	int t;
+	ll n,k,answer,i,ans,answer1,answer2,answer3;
+	sc(&t);
+	string op;
+	while(t--)
+	{
+		scl(&n);scl(&k);scl(&answer);
+		answer1=answer2=answer3=answer;
+		ll a[n];
+		for(i=0;i<n;i++)
+		{
+			scl(&a[i]);
+			answer1=answer1&a[i];
+			answer2=answer2|a[i];
+			answer3=answer3^a[i];
+		}
+		cin>>op;
+		if(op=="AND")
+		{
+			if(k==0)
+				ans=answer;
+			else
+				ans=answer1;
+		}
+		else if(op=="OR")
+		{
+			if(k==0)
+				ans=answer;
+			else
+				ans=answer2;
+		}
+		else
+		{
+			if(k==0||k%2==0)
+				ans=answer;
+			else
+				ans=answer3;
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

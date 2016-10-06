@@ -1,0 +1,50 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 2;
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		vector<i_i> p(N);
+		for (int i = 0; i < N; i++)
+			scanf("%d%d", &p[i].second, &p[i].first);
+		sort(p.begin(), p.end());
+		vector<int> a(N), b(N);
+		for (int i = 0; i < N; i++)
+			a[i] = p[i].second, b[i] = p[i].first;
+		int x = -1, cnt = 0;
+		for (int i = 0; i < N; i++)
+			if (x < a[i]) cnt++, x = b[i];
+		cout << cnt << endl;
+	}
+}

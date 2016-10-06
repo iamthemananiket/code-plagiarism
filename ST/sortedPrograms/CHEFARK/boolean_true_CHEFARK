@@ -1,0 +1,69 @@
+#include<bits/stdc++.h>
+#define N 100009
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+ll fact[N];
+ll invfact[N];
+ll mod_expo(ll a,ll b,ll p)
+{
+    ll ans=1;
+    a%=p;
+    while(b)
+    {
+        if(b&1)
+            ans=(ans*a)%p;
+        b>>=1;
+        a=(a*a)%p;
+    }
+    return ans;
+}
+void pre_calculate()
+{
+    fact[1]=1;
+    invfact[1]=1;
+    for(int i=2;i<N;i++)
+    {
+        fact[i]=(fact[i-1]*i)%MOD;
+        invfact[i]=mod_expo(fact[i],MOD-2,MOD);
+    }
+}
+ll nCr(ll n,ll r)
+{
+   if(r==0||r==n)
+      return 1;
+   if(n<r)
+      return 0;
+   ll ans=(fact[n]*((invfact[r]*invfact[n-r])%MOD))%MOD;
+   return ans;
+}
+int main()
+{
+    pre_calculate();
+    int test;
+    cin>>test;
+    while(test--)
+    {
+        ll n,k,m=0;
+        cin>>n>>k;
+        for(int i=0;i<n;i++)
+        {
+            ll p;
+            cin>>p;
+            if(p!=0)
+                m++;
+        }
+        ll cur=k%2;
+        if(m!=n)
+            cur=0;
+        ll ans=0;
+        while(cur<=min(m,k))
+        {
+            ans+=nCr(m,cur);
+            ans%=MOD;
+            cur+=1+(m==n);
+        }
+        cout<<ans<<endl;
+    }
+}
+

@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+int t, n, m1, m2, u, v, c;
+vector < pair < int , pair < int, int > > > Edges;
+vector < int > Parent;
+int find(int x){
+	if(x == Parent[x])
+		return x;
+	else return Parent[x] = find(Parent[x]);
+}
+void uni(int u, int v){
+    u = find(u), v = find(v);
+	Parent[u] = v;
+}
+int main(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cin >> t;
+	while(t--){
+		cin >> n >> m1 >> m2;
+		long long profit = 0, cost = 0, sztree = 0;;
+		Edges.clear();
+		for(int i = 0; i < m1; ++i){
+			cin >> u >> v >> c;
+			Edges.push_back(make_pair(c, make_pair(u, v)));
+		}
+		for(int i = 0; i < m2; ++i){
+			cin >> u >> v >> c;
+			Edges.push_back(make_pair(-c, make_pair(u, v)));
+		}
+		Parent.clear();
+		for(int i = 0; i < n; ++i)
+			Parent.push_back(i);
+		sort(Edges.begin(), Edges.end());
+		for(int i = 0; i < Edges.size(); ++i){
+			if(find(Edges[i].second.first) != find(Edges[i].second.second)){
+				uni(Edges[i].second.first, Edges[i].second.second);
+				if(Edges[i].first < 0) profit += abs(Edges[i].first);
+				cost += abs(Edges[i].first);
+				++sztree;
+			}
+		}
+		if(sztree != n - 1)
+			cout << "Impossible\n";
+		else cout << profit <<  " " << cost << '\n';
+	}
+	return 0;
+}

@@ -1,0 +1,144 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int N, Q;
+int A[200010];
+int I[200010], J[200010];
+
+int as[200010];
+
+Int bubbleCountSolve(int S, int T) {
+	if (T - S == 1) {
+		return 0;
+	}
+	const int U = (S + T) / 2;
+	Int ret = 0;
+	ret += bubbleCountSolve(S, U);
+	ret += bubbleCountSolve(U, T);
+	for (int i = S, j = U; i < U; ++i) {
+		for (; j < T && as[i] > as[j]; ++j);
+		ret += j - U;
+	}
+	inplace_merge(as + S, as + U, as + T);
+	return ret;
+}
+Int bubbleCount() {
+	copy(A, A + N, as);
+	return bubbleCountSolve(0, N);
+}
+
+struct Event {
+	int key;
+	int pos;
+	int val;
+	int id;
+	Event() {}
+	Event(int key, int pos, int val, int id) : key(key), pos(pos), val(val), id(id) {}
+	bool operator<(const Event &a) const {
+		return ((key != a.key) ? (key < a.key) : (id < a.id));
+	}
+};
+
+int esLen;
+Event es[1000010];
+Int ans[200010];
+
+int bit[200010];
+void bitAdd(int pos, int val) {
+	for (int x = pos; x < N; x |= x + 1) bit[x] += val;
+}
+int bitSum(int pos) {
+	int ret = 0;
+	for (int x = pos - 1; x >= 0; x = (x & (x + 1)) - 1) ret += bit[x];
+	return ret;
+}
+
+int main() {
+	
+	
+	for (; ~scanf("%d%d", &N, &Q); ) {
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		for (int q = 0; q < Q; ++q) {
+			I[q] = in() - 1;
+			J[q] = in() - 1;
+			if (I[q] > J[q]) {
+				swap(I[q], J[q]);
+			}
+		}
+		
+		const Int now = bubbleCount();
+// cout<<"bubbleCount() = "<<now<<endl;
+		fill(ans, ans + Q, now);
+		
+		esLen = 0;
+		for (int i = 0; i < N; ++i) {
+			es[esLen++] = Event(A[i], i, +1, -2);
+		}
+		for (int q = 0; q < Q; ++q) {
+			const int i = I[q];
+			const int j = J[q];
+			if (A[i] < A[j]) {
+				++ans[q];
+				es[esLen++] = Event(A[i] - 1, -2, -1, q);
+				es[esLen++] = Event(A[i]    , -2, -1, q);
+				es[esLen++] = Event(A[j] - 1, -2, +1, q);
+				es[esLen++] = Event(A[j]    , -2, +1, q);
+			} else if (A[i] > A[j]) {
+				--ans[q];
+				es[esLen++] = Event(A[j] - 1, -2, +1, q);
+				es[esLen++] = Event(A[j]    , -2, +1, q);
+				es[esLen++] = Event(A[i] - 1, -2, -1, q);
+				es[esLen++] = Event(A[i]    , -2, -1, q);
+			}
+		}
+		sort(es, es + esLen);
+		fill(bit, bit + N, 0);
+		for (int h = 0; h < esLen; ++h) {
+			if (es[h].id == -2) {
+				bitAdd(es[h].pos, es[h].val);
+			} else {
+				const int q = es[h].id;
+				ans[q] += es[h].val * (bitSum(J[q]) - bitSum(I[q] + 1));
+			}
+		}
+		
+		for (int q = 0; q < Q; ++q) {
+			printf("%lld\n", ans[q]);
+		}
+	}
+	
+	return 0;
+}

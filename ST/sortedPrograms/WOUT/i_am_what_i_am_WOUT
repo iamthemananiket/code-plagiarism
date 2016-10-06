@@ -1,0 +1,38 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t;
+	//freopen("in.txt","r",stdin);
+	cin>>t;
+	while(t--)
+	 {
+	 	int n,h;
+	 	cin>>n>>h;
+	 	vector<long long> cf(n+2);
+	 	for(int i=0;i<n;i++)
+	 	 {
+	 	 	int lw,up;
+	 	    cin>>lw>>up;
+			cf[lw]++;
+			cf[up+1]--;	
+		 }
+		for(int i=1;i<=n+1;i++)
+		  cf[i]+=cf[i-1];
+		for(int i=0;i<=n+1;i++)
+		  cf[i]=n-cf[i];
+		long long sum=0;
+		for(int i=0;i<h-1;i++)
+		  sum+=cf[i];
+		long long minSum=LLONG_MAX;
+		for(int i=h-1;i<n;i++)
+		 {
+		 	sum+=cf[i];
+		 	if(sum<minSum)
+		 	  minSum=sum;
+		 	sum-=cf[i-h+1];
+		 }
+		cout<<minSum<<endl;
+	 }
+}

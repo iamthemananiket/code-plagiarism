@@ -1,0 +1,81 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<set>
+#include<queue>
+#include<iostream>
+#include<map>
+#include<vector>
+using namespace std;
+#define long long long
+
+int rint() { int ret; scanf("%d", &ret); return ret; }
+int rlong() { long ret; scanf("%lld", &ret); return ret; }
+
+const int MAXN = 100000;
+int a[MAXN], b[MAXN], f[MAXN];
+long dp[501];
+
+int main()
+{
+#ifdef _DEBUG
+	freopen("..\\input.txt", "r", stdin);
+#endif
+
+	for (int tt = rint(); tt > 0; tt--)
+	{
+		int n = rint();
+		int k = rint();
+		int m = rint();
+
+		for (int i = 0; i < n; i++)
+			a[i] = rint();
+
+		vector<vector<pair<int, int>>> e(n + 1, vector<pair<int, int>>());
+
+		for (int i = 0; i < m; i++)
+		{
+			int l = rint() - 1;
+			int r = rint();
+			int c = rint();
+			e[l].push_back(make_pair(-c, i));
+			e[r].push_back(make_pair(0, i));
+		}
+
+		for (int i = 0; i < n; i++)
+			b[i] = f[i] = 0;
+		priority_queue<pair<int, int>> q;
+		for (int i = 0; i < n; i++)
+		{
+			for (auto ee : e[i])
+				if (ee.first < 0)
+					q.push(ee);
+				else
+					f[ee.second] = 1;
+			while (q.size() > 0 && f[q.top().second])
+				q.pop();
+
+			if (q.size() > 0)
+				b[i] = -q.top().first;
+		}
+
+		for (int i = 0; i <= k; i++)
+			dp[i] = 0;
+		for (int i = 0; i < n; i++)
+			if (a[i] < 0 && b[i] > 0)
+			{
+				for (int j = k - b[i]; j >= 0; j--)
+					dp[j + b[i]] = min(dp[j + b[i]], dp[j] + a[i]);
+			}
+
+		long ans = 0;
+		for (int i = 0; i < n; i++)
+			ans += a[i];
+		long mn = 0;
+		for (int i = 0; i <= k; i++)
+			mn = min(mn, dp[i]);
+		printf("%lld\n", ans - mn);
+	}
+
+	return 0;
+}

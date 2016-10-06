@@ -1,0 +1,23 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	long long int t,i,l,d,s,c,ans;
+	cin>>t;
+	while(t--)
+	{
+		cin>>l>>d>>s>>c;
+		ans=s;
+		for(i=1;i<=d-1;i++)
+		{
+			ans*=1+c;
+			if(ans>=l)
+				break;
+		}
+		if(ans>=l)
+			cout<<"ALIVE AND KICKING"<<endl;
+		else
+			cout<<"DEAD AND ROTTING"<<endl;
+	}
+	return 0;
+}

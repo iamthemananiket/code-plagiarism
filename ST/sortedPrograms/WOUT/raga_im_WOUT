@@ -1,0 +1,147 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+unsigned long long  lazy[4000001],s[4000001];
+int n;
+#define gc getchar_unlocked
+#define pc(x) putchar_unlocked(x);
+    inline void writeInt (long long int n)
+    {
+       long long  int N = n, rev, count = 0;
+        rev = N;
+        if (N == 0) { pc('0'); pc('\n'); return ;}
+        while ((rev % 10) == 0) { count++; rev /= 10;} //obtain the count of the number of 0s
+        rev = 0;
+        while (N != 0) { rev = (rev<<3) + (rev<<1) + N % 10; N /= 10;}  //store reverse of N in rev
+        while (rev != 0) { pc(rev % 10 + '0'); rev /= 10;}
+        while (count--) pc('0');
+    }
+inline void fastRead_int(int *a)
+{
+    register char c=0;
+    while (c<33) c=getchar_unlocked();
+    *a=0;
+    while (c>33)
+    {
+        *a=*a*10+c-'0';
+        c=getchar_unlocked();
+    }
+}
+void scanint(int &x)
+{
+    register int c = gc();
+    x = 0;
+    for(;(c<48 || c>57);c = gc());
+    for(;c>47 && c<58;c = gc()) {x = (x<<1) + (x<<3) + c - 48;}
+}
+void build(int id = 1,int l = 0,int r = n){
+	if(r - l < 2){	//	l + 1 == r
+		s[id] =n;
+		lazy[id]=0;
+		return ;
+	}
+	int mid = (l+r)/2;
+	build(id * 2, l, mid);
+	build(id * 2 + 1, mid, r);
+	s[id] = s[id * 2] + s[id * 2 + 1];
+	lazy[id]=0;
+}
+void upd(int id,int l,int r,int x){//	increase all members in this interval by x
+	lazy[id] += x;
+	s[id] += (r - l) * x;
+}
+//A function to pass the update information to its children :
+
+void shift(int id,int l,int r){//pass update information to the children
+	int mid = (l+r)/2;
+	upd(id * 2, l, mid, lazy[id]);
+	upd(id * 2 + 1, mid, r, lazy[id]);
+	lazy[id] = 0;// passing is done
+}
+//A function to perform increase queries :
+
+void increase(int x,int y,int id = 1,int l = 0,int r = n){
+	if(x >= r or l >= y)	return ;
+	if(x <= l && r <= y){
+		upd(id, l, r, -1);
+		return ;
+	}
+	shift(id, l, r);
+	int mid = (l+r)/2;
+	increase(x, y, id * 2, l, mid);
+	increase(x, y, id*2+1, mid, r);
+	s[id] = s[id * 2] + s[id * 2 + 1];
+}
+//(We should call increase(l r x))
+
+//A function to answer to queries asking about the sum :
+unsigned long long sum(int x,int y,int id = 1,int l = 0,int r = n){
+	if(x >= r or l >= y)	return 0;
+	if(x <= l && r <= y)	return s[id];
+	shift(id, l, r);
+	int mid = (l+r)/2;
+	return sum(x, y, id * 2, l, mid) +
+	       sum(x, y, id * 2 + 1, mid, r);
+}
+ unsigned int summ(int x,int y,int id = 1,int l = 0,int r = n){
+	if(x >= r or l >= y)	return 0;
+	if(x <= l && r <= y)	return s[id];
+	shift(id, l, r);
+	int mid = (l+r)/2;
+	return summ(x, y, id * 2, l, mid) +
+	       summ(x, y, id * 2 + 1, mid, r);
+}
+
+
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */
+    int t,l,r,h,i;
+    long long int min,temp;
+   fastRead_int(&t);
+    while(t--){
+         // scanint(n);
+          // scanint(h);
+        //cin>>n>>h;
+        fastRead_int(&n);
+        fastRead_int(&h);
+        build();
+         for( i=0;i<n;i++){
+            // scanint(l);
+             fastRead_int(&l);
+             fastRead_int(&r);
+             //scanint(r);
+             increase(l,r+1);
+         }
+
+        if(n>90000){
+        min=sum(0,h);
+         for( i=1;i<n-h+1;i++)
+            {
+            //cout<<b[i]<<" ";
+            temp=sum(i,i+h);
+             if(temp<min)
+             min=temp;
+         }
+    }
+        else{
+             min=summ(0,h);
+
+
+          for(i=1;i<n-h+1;i++)
+            {
+
+            temp=summ(i,i+h);
+             if(temp<min)
+             min=temp;
+        }
+        }
+       // printf("%lld\n",min);
+              writeInt(min);
+             putchar('\n');
+
+    }
+    return 0;
+}

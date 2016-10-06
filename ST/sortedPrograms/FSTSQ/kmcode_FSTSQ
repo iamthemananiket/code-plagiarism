@@ -1,0 +1,122 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+int t;
+int n;
+int d;
+#define MOD 1000000007LL
+long long int p[2000001];
+int v[3000000];
+int v_siz = 0;
+int vv[3000000];
+int vv_siz = 0;
+#define MODD 100000000007LL
+int main() {
+	p[0] = 1LL;
+	for (int i = 1;i < 2000001;i++) {
+		p[i] = p[i - 1];
+		p[i] *= 23LL;
+		if (p[i] >= MOD) {
+			p[i] %= MOD;
+		}
+	}
+	scanf("%d", &t);
+	while (t--) {
+		v_siz = 0;
+		vv_siz = 0;
+		scanf("%d%d", &n, &d);
+		long long int mod = 0;
+		long long int D = (long long int)(d)*(long long int)(d);
+		for (int i = 0;i < n;i++) {
+			mod += D;
+			v[v_siz] = mod % 10LL;
+			v_siz++;
+			mod /= 10LL;
+		}
+		while (mod) {
+			v[v_siz] = mod % 10;
+			v_siz++;
+			mod /= 10LL;
+		}
+		mod = 0;
+		int countt = 0;
+		long long int sum = 0;
+		int len = v_siz * 2;
+		len--;
+		mod = 0;
+		int l = 0;
+		int r = 0;
+		while (1) {
+			if (countt < n) {
+				r = countt;
+				sum += v[countt];
+				countt++;
+			}
+			else {
+				if (len - countt <= n) {
+					if (l>r) {
+						break;
+					}
+					sum -= v[l];
+					l++;
+					countt++;
+				}
+				else {
+					r = countt;
+					sum += v[countt];
+					sum -= v[l];
+					l++;
+					countt++;
+				}
+			}
+			mod += sum;
+			vv[vv_siz]=(mod % 10LL);
+			vv_siz++;
+			mod /= 10LL;
+		}
+		while (mod > 0) {
+			vv[vv_siz]=(mod % 10LL);
+			vv_siz++;
+			mod /= 10LL;
+		}
+		while (vv_siz&&vv[vv_siz-1] == 0) {
+			vv_siz--;
+		}
+		long long int ans = 0;
+		for (int i = vv_siz-1;i>=0;i--) {
+			ans += (long long int)(vv[i])*(long long int)(p[vv_siz-i-1]);
+			if (ans >= MODD) {
+				ans %= MOD;
+			}
+		}
+		ans %= MOD;
+		int outt = ans;
+		printf("%d\n", outt);
+	}
+	return 0;
+}

@@ -1,0 +1,105 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+const LL INF = 1LL<<60;
+const LL MOD = 1e9+7;
+
+int T, N, S[9], L[9][9];
+int M[9][10];
+LL mi[9], ma[9];
+LL mi_cnt[9], ma_cnt[9];
+LL z_cnt[9];
+
+LL ans_max;
+LL ans_cnt;
+void rec(int I, LL sum, LL cnt) {
+    if (I == N) {
+	if (ans_max < sum) {
+	    ans_max = sum;
+	    ans_cnt = 0;
+	}
+	if (ans_max == sum) {
+	    ans_cnt += cnt;
+	    ans_cnt %= MOD;
+	}
+    } else {
+	rec(I+1, sum * mi[I], cnt * mi_cnt[I] % MOD);
+	if (ma[I] != mi[I]) rec(I+1, sum * ma[I], cnt * ma_cnt[I] % MOD);
+    }
+}
+void rec2(int I, int mask, LL cnt) {
+    if (I == N) {
+	if (mask) {
+	    ans_cnt += cnt;
+	    ans_cnt %= MOD;
+	}
+    } else {
+	rec2(I+1, mask, cnt * (S[I] * (S[I]+1) / 2 - z_cnt[I]) % MOD);
+	rec2(I+1, 1, cnt * z_cnt[I] % MOD);
+    }
+}
+
+int main() {
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d", &N);
+	REP (i, N) {
+	    scanf("%d", S+i);
+	    REP (j, S[i]) scanf("%d", L[i]+j);
+	}
+
+	REP (i, N) {
+	    REP (j, S[i])
+		M[i][j+1] = M[i][j] + L[i][j];
+
+	    ma[i] = -INF;
+	    mi[i] = INF;
+	    z_cnt[i] = 0;
+	    for (int r=1; r<=S[i]; r++) {
+		for (int l=0; l<r; l++) {
+		    int g = M[i][r] - M[i][l];
+		    if (ma[i] < g) {
+			ma[i] = g;
+			ma_cnt[i] = 0;
+		    }
+		    if (ma[i] == g) ma_cnt[i]++;
+
+		    if (mi[i] > g) {
+			mi[i] = g;
+			mi_cnt[i] = 0;
+		    }
+		    if (mi[i] == g) mi_cnt[i]++;
+
+		    if (g == 0) z_cnt[i]++;
+		}
+	    }
+	}
+
+	ans_max = -INF;
+	rec(0, 1, 1);
+
+	if (ans_max == 0) {
+	    ans_cnt = 0;
+	    rec2(0, 0, 1);
+	}
+
+	ans_cnt = (ans_cnt % MOD + MOD) % MOD;
+	printf("%lld %lld\n", ans_max, ans_cnt);
+    }
+    return 0;
+}

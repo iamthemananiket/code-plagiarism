@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+#define int long long
+#define pb push_back
+#define mp make_pair
+#define f first
+#define s second
+#define sqr(x) (x) * (x)
+ using namespace std;
+int r,a,b,c,N=333,i;
+double s,p;
+vector<pair<int,pair<int,int> > > vec;
+  //int
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>r;
+    r*=r;
+    r*=4;
+
+     for(a=1;a<=N;++a)
+        for(b=a;b<=N;++b)
+         for(c=b;a+b>c;++c)
+     {
+         if(r * (a+b+c) == (b + c - a) * (a + c - b) * (a+b-c)) vec.pb(mp(a,mp(b,c)));
+     }
+
+     cout<<(int)vec.size()<<endl;
+     for(i=0;i<(int)vec.size();++i) cout<<vec[i].f<<' '<<vec[i].s.f<<' '<<vec[i].s.s<<endl;
+
+  }

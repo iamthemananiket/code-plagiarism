@@ -1,0 +1,111 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+struct Node {
+  int cnt[3];
+  int sum;
+
+  Node() {
+    cnt[0] = cnt[1] = cnt[2] = 0;
+    sum = 0;
+  }
+};
+const int MOD = 1000000007;
+const int PW = 1 << 17;
+Node tree[2 * PW];
+
+Node combine(const Node& lch, const Node& rch) {
+  Node res;
+  res.sum = (lch.sum + rch.sum) % 3;
+  for (int i = 0; i < 3; i++)
+    res.cnt[i] = lch.cnt[i] + rch.cnt[(i - lch.sum + 3) % 3];
+  return res;
+}
+
+ll query(int l, int r) {
+  Node res_l, res_r;
+  for (l += PW, r += PW + 1; l < r; l >>= 1, r >>= 1) {
+    if (l & 1)
+      res_l = combine(res_l, tree[l++]);
+    if (r & 1)
+      res_r = combine(tree[--r], res_r);
+  }
+  Node res = combine(res_l, res_r);
+  res.cnt[0]++;
+  ll ans = 0;
+  for (int i = 0; i < 3; i++)
+    ans += (res.cnt[i]) * (res.cnt[i] - 1LL) / 2;
+  return ans;
+}
+
+void update(int pos, int val) {
+  pos += PW;
+  val %= 3;
+  tree[pos] = Node();
+  tree[pos].cnt[val] = 1;
+  tree[pos].sum = val;
+  for (int i = pos >> 1; i > 0; i >>= 1)
+    tree[i] = combine(tree[i + i], tree[i + i + 1]);
+}
+
+void solve(int test_num) {
+  int N, Q;
+  string str;
+  cin >> N >> Q >> str;
+  for (int i = 0; i < N; i++) {
+    const int val = (str[i] - '0') % 3;
+    tree[i + PW].cnt[val] = 1;
+    tree[i + PW].sum = val;
+  }
+  for (int i = PW - 1; i > 0; i--)
+    tree[i] = combine(tree[i + i], tree[i + i + 1]);
+  for (int qq = 0; qq < Q; qq++) {
+    int type;
+    cin >> type;
+    if (type == 1) {
+      int pos, val;
+      cin >> pos >> val;
+      update(--pos, val);
+    } else {
+      int lef, rig;
+      cin >> lef >> rig;
+      lef--, rig--;
+      const ll res = query(lef, rig);
+      cout << res << endl;
+    }
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int solve(int a[], int l, int r)
+{
+	int sum=0,pro=1,i;
+	for(i=l;i<=r;i++)
+		sum+=a[i],pro*=a[i];
+	return (sum==pro)?1:0;
+}
+
+int main() {
+	int t,n,i,j,ans,a[100];
+	cin>>t;
+	while(t--) {
+		cin>>n;
+		for(i=0;i<n;i++)
+			cin>>a[i];
+		ans=0;
+		for(i=0;i<n;i++)
+			for(j=i;j<n;j++)
+				ans+=solve(a,i,j);
+		cout<<ans<<"\n";
+	}
+}

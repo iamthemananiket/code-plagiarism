@@ -1,0 +1,21 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+int main()
+{
+	ll t,n1,n2,m,val,ans;
+	cin>>t;
+	while(t--)
+	{
+		scanf("%lld%lld%lld",&n1,&n2,&m);
+		if(n1>n2)
+			swap(n1,n2);
+		val=(m*(m+1))/2;
+		if(val<n1)
+			ans=n1-val+n2-val;
+		else
+			ans=n2-n1;
+		printf("%lld\n",ans);
+	}
+}

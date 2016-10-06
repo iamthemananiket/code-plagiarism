@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+       int t ;
+       long long ans;
+       long N;
+       long limit;
+       long op;
+       scanf("%d",&t);
+       while(t--)
+           {
+           scanf("%lld",&N);
+           if(N==1)
+               printf("1\n");
+           else
+               {
+               ans=1;
+               int lim;
+               lim = (long long)sqrt(N);
+               for(long long i=2;i<=lim;i++)
+                   {
+                   if(N%i==0)
+                       {
+                       op=N/i;
+                       ans+=i;
+                       if(i!=N/i)
+                           ans+=(N/i);
+                       }
+                   }
+               ans+=N;
+               printf("%lld\n",ans);
+               
+              }
+          }
+       return 0;
+}

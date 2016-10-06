@@ -1,0 +1,228 @@
+#include <stdio.h>
+#include <math.h>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define N 361111
+#define max(a, b) (a > b ? a : b)
+#define min(a, b) (a < b ? a : b)
+
+const int mod = 100003;
+const int P1 = (151 << 20 | 1);
+const int P2 = (141 << 20 | 1);
+const int R1 = 3, R1dash = (P1+1)/3;
+const int R2 = 5, R2dash = (2*P2+1)/5;
+
+int po[3][22][2];
+
+typedef vector <int> VI;
+VI b[7], bb;
+
+int f[N], rf[N];
+int c[N];
+int id[7];
+int a[N/6];
+int ans[7];
+int T;
+
+
+
+inline int pow(int a, int b,  int mod){
+    if(!b) return 1;
+    int r = pow(a, b/2, mod);
+    r = 1ll*r*r % mod;
+    if(b & 1) return 1ll*r*a % mod;
+    return r;
+}
+
+inline int invmod(int a, int p) { return pow(a, p - 2, p); }
+
+void init(){
+    po[1][0][0] = 1, po[1][0][1] = 1;
+    int r = P1-1;
+    for(int i=1; i<21; i++) r/=2, po[1][i][0] = pow(R1, r, P1), po[1][i][1] = pow(R1dash, r, P1);
+    po[2][0][0] = 1, po[2][0][1] = 1;
+    r = P2-1;
+    for(int i=1; i<21; i++) r/=2, po[2][i][0] = pow(R2, r, P2), po[2][i][1] = pow(R2dash, r, P2);
+}
+
+void get_f(){
+    f[0] = 1; rf[0] = 1;
+    for(int i=1; i<N; i++){
+        if(i%mod!=0) f[i] = 1ll*f[i-1]*i % mod;
+        else f[i] = 1ll*f[i-1]*i/mod % mod;
+        rf[i] = pow(f[i], mod-2, mod);
+    }
+}
+
+int com(int k, int i){
+    if(i<0) return 0;
+    int r = 1ll*f[k]*rf[i] % mod;
+    if(k/mod>i/mod+(k-i)/mod) return 0;
+    return 1ll*r*rf[k-i] % mod;
+}
+
+void get_c(){
+    c[0] = 1;
+    for(int i=1; i<N; i++){
+        c[i] = c[i-1]*2 % mod;
+        int j = (i-1)/6;
+        c[i] = (c[i]-com(i-1, j)+mod) % mod;
+        if(i%6 == 0) c[i] = (c[i]+com(i, i/6)) % mod;
+    }
+}
+
+void get_a(){
+    a[1] = 9;
+    for(int i=2; i<N/6; i++){
+        int r = pow(2, 6*i-12, mod);
+        a[i] = 256*r % mod;
+        a[i] = (a[i]-com(6*i-12, i-1)-13*c[6*i-12]) % mod;
+        if(i>=3) a[i] = (a[i] - 54*(c[6*i-12]-com(6*i-12, i-2))) % mod;
+        if(i>=4) a[i] = (a[i]-108*(c[6*i-12]-com(6*i-12, i-3)-com(6*i-12, i-2))) % mod;
+        if(i>=5) a[i] = (a[i]-81*(c[6*i-12]-com(6*i-12, i-4)-com(6*i-12, i-3)-com(6*i-12, i-2))) % mod;
+        a[i] = (a[i]+mod) % mod;
+    }
+}
+
+void NTT(VI &in, int inv, int p, int tp) {
+	int n = in.size();
+
+	for (int i = 1, j = 0; i < n; i ++) {
+		int bit = n >> 1;
+		for (; j >= bit; bit >>= 1) j ^= bit;
+		j ^= bit;
+		if (i < j) swap(in[i], in[j]);
+	}
+	for (int len = 2, half = 1, k = 1; len <= n; len <<= 1, half <<= 1, k++) {
+		int wlen = po[tp][k][inv];
+		for (int i = 0; i < n; i += len) {
+			int w = 1;
+			for (int j = 0; j < half; j ++) {
+				int u = in[i + j], v = (1LL * w * in[i + j + half]) % p;
+				in[i + j] = u + v < p ? u + v : u + v - p;
+				in[i + j + half] = u - v >= 0 ? u - v : u - v + p;
+				w = (1LL * w * wlen) % p;
+			}
+		}
+	}
+
+	if (inv) {
+		int inv_n = invmod(n, p);
+		for (int i = 0; i < n; i ++) in[i] = (1LL * inv_n * in[i]) % p;
+	}
+}
+
+void mul(VI &a, VI &b, VI &c){
+	int n = a.size();
+	int m = b.size();
+	c.resize(n+m);
+	for(int i=0; i<n+m; i++)c[i] = 0;
+	for(int i=0; i<n; i++)for(int j=0; j<m; j++){
+		c[i+j] += (1ll*a[i]*b[j]%mod);
+		if(c[i+j] >=mod)c[i+j]-=mod;
+	}
+	return ;
+}
+
+int K = 50;
+
+void multiply(VI &a1, VI &b1, VI &c) {
+
+	int n = a1.size();
+	int m = b1.size();
+	if(n < K || m < K){
+		mul(a1, b1,c);
+		return ;
+	}
+	if(n<m)n = m;
+	n*=2;
+	a1.resize(n);
+	b1.resize(n);
+	c.resize(n);
+	VI a2 = a1, b2 = b1;
+
+	NTT(a1, 0, P1, 1);
+	NTT(b1, 0, P1, 1);
+	NTT(a2, 0, P2, 2);
+	NTT(b2, 0, P2, 2);
+
+	for (int i = 0; i < n; i ++) {
+		a1[i] = (1LL * a1[i] * b1[i]) % P1;
+		a2[i] = (1LL * a2[i] * b2[i]) % P2;
+	}
+
+	NTT(a1, 1, P1, 1);
+	NTT(a2, 1, P2, 2);
+
+	int inv_P1 = invmod(P1, P2);
+	for (int i = 0; i < n; i ++) {
+		int aux = (1LL * (a2[i] - a1[i]) * inv_P1) % P2;
+		if (aux < 0) aux += P2;
+		c[i] = (a1[i] + 1LL * aux * P1) % mod;
+	}
+}
+#define M 60000
+vector<int> v[17][M+100];
+void prepare(){
+	for(int i=1; i<=M; i++){
+		v[0][i].resize(2);
+		v[0][i][0] = 1;
+		v[0][i][1] = a[i];
+	}
+	for(int i=1; i<=15; i++){
+		int j = 1<<(i-1);
+		for(int st=1; st<=M; st+=j*2){
+			if(st+j<=M){
+				VI A = v[i-1][st];
+				VI B = v[i-1][st+j];
+				multiply(A, B, v[i][st]);
+			}else {
+				v[i][st] = v[i-1][st];
+			}
+		}
+	}
+}
+
+void doit(int n, int st, VI &A){
+	if(n == 0){
+		A.resize(1);
+		A[0] = 1;
+		return ;
+	}
+	for(int i=15; i>=0; i--){
+		if((n>>i)&1){
+			VI c = v[i][st];
+			int j = 1<<i;
+			st+=j;
+			n-=j;
+			VI B;
+			doit(n, st, B);
+			multiply(B, c, A);
+			return ;
+		}
+	}
+}
+
+int main(){
+    get_f();
+    get_c();
+    get_a();
+    init();
+    prepare();
+    //return 0;
+    scanf("%d", &T);
+    int n, m;
+    for(int i=0; i<T; i++){
+		scanf("%d%d", &n, &m);
+		VI A;
+		doit(n, 1, A);
+		int ans = 0;
+		for(int j=m; j<=n; j++){
+			ans+=A[j];
+			ans%=mod;
+		}
+		printf("%d\n", ans);
+    }
+    return 0;
+}

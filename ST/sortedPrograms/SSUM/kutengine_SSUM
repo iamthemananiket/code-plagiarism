@@ -1,0 +1,63 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define fi first
+#define se second
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define sz(x) (int((x).size()))
+#define bit(x) (1 << (x))
+#define cnt1(x) (__builtin_popcount(x))
+
+template<class T>
+inline void chkmax(T& x, T y) {
+	if (x < y) x = y;
+}
+
+template<class T>
+inline void chkmin(T& x, T y) {
+	if (y < x) x = y;
+}
+
+typedef long long LL;
+typedef double DB;
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+int r[10005], rn;
+
+int main() {
+//	freopen("in.txt", "r", stdin);
+//	freopen("out.txt", "w", stdout);
+	
+	int tc, n, s, i;
+	
+	for (scanf("%d", &tc); tc--; ) {
+		scanf("%d%d", &n, &s);
+		rn = 0;
+		if (s < n * 2) {
+			for (i = 1; i <= n; i++) {
+				if (n / i * i > s - n) r[rn++] = i;
+			}
+		}
+		if (s > n) r[rn++] = s;
+		printf("%d\n", rn);
+		for (i = 0; i < rn; i++) printf("%d%s", r[i], (i < rn - 1) ? " " : "\n");
+	}
+	return 0;
+}

@@ -1,0 +1,77 @@
+#include <cstdio>
+#include <algorithm>
+
+#define mod 1000000007
+
+using namespace std;
+
+int T;
+
+int n,m,l,r;
+
+long long f[10000];
+int h[10001];
+int fe;
+
+long long pow(int b, int p) {
+    long long ret = 1;
+    long long ppow = b;
+    for(int i=0; (1<<i)<=p; i++) {
+        if(p&(1<<i)) {
+            ret = (ret * ppow) % mod;
+        }
+
+        ppow = (ppow*ppow) % mod;
+    }
+    return ret;
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d%d%d",&n,&m,&l,&r);
+
+        h[10000] = m+1;
+        fe = 9999;
+        for(int i=1; i*i<m; i++) {
+            h[fe] = (m/(i+1)) + 1;
+            f[fe] = pow(i,n);
+            int k = 2;
+            for(int j=i-1; j>0; j--) {
+                if((k*h[fe]) < h[10001-j]) {
+                    f[fe] = (f[fe] + mod - (((((h[10001-j]-1)/h[fe])+1-k)*f[10000-j])%mod))%mod;
+                    k = ((h[10001-j]-1)/h[fe])+1;
+                }
+            }
+            fe--;
+        }
+        for(int i=h[fe+1]-1; i>0; i--) {
+            h[fe] = i;
+            f[fe] = pow((m/i),n);
+            int k = 2;
+            for(int j=fe+1; j<10000; j++) {
+                if((k*h[fe]) < h[j+1]) {
+                    f[fe] = (f[fe] + mod - (((((h[j+1]-1)/h[fe])+1-k)*f[j])%mod))%mod;
+                    k = ((h[1+j]-1)/h[fe])+1;
+                }
+            }
+            fe--;
+        }
+
+        int e = (upper_bound(&h[fe],&h[10001],l) - &h[0]);
+        int v = (upper_bound(&h[fe],&h[10001],r) - &h[0])-1;
+
+        if(v<e) {
+            printf("%lld\n",(f[v]*(r+1-l))%mod);
+            continue;
+        }
+
+        long long sol = (((f[e-1]*(h[e]-l))%mod) + ((f[v]*(r+1-h[v]))%mod))%mod;
+        for(int i=e; i<v; i++) {
+            sol = (sol + ((f[i]*(h[i+1]-h[i]))%mod))%mod;
+        }
+        printf("%lld\n",sol);
+}
+
+    return 0;
+}

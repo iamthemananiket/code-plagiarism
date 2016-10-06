@@ -1,0 +1,22 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    
+    cin.sync_with_stdio( false );
+    cin.tie( 0 );
+    
+    int test;
+    cin >> test;
+    while ( test-- ) {
+        string str;
+        cin >> str;
+        const int zero = count( str.begin(), str.end(), '0' );
+        const int one = count( str.begin(), str.end(), '1' );
+        cout << ( zero == 1 or one == 1 ? "Yes" : "No" ) << "\n";
+    }
+    
+	return 0;
+}

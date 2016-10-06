@@ -1,0 +1,93 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+int main() {
+	int N; int M; long long K;
+	while(~scanf("%d%d%lld", &N, &M, &K)) {
+		-- K;
+		assert(0 <= K);
+		vector<vector<int> > P(M, vector<int>(N));
+		for(int i = 0; i < M; ++ i) for(int j = 0; j < N; ++ j) {
+			scanf("%d", &P[i][j]);
+			P[i][j] = (int)1e9 - P[i][j];
+		}
+		int m1 = (M + 1) / 2, m2 = M - m1;
+		vector<int> pows(m1 + 1);
+		pows[0] = 1;
+		rep(i, m1) pows[i + 1] = pows[i] * N;
+		vector<pair<ll, int>> left(pows[m1]), right(pows[m2]);
+		rep(s, pows[m1]) {
+			int x = s;
+			ll cost = 0;
+			rep(i, m1) {
+				cost += P[M - 1 - i][x % N];
+				x /= N;
+			}
+			left[s] = { cost, s };
+		}
+		rep(s, pows[m2]) {
+			int x = s;
+			ll cost = 0;
+			rep(i, m2) {
+				cost += P[M - 1 - (m1 + i)][x % N];
+				x /= N;
+			}
+			right[s] = { cost, s };
+		}
+		sort(left.begin(), left.end());
+		sort(right.begin(), right.end());
+
+		auto getcnt = [&](ll cost, int sR, int sL) {
+			int j = (int)left.size();
+			ll cnt = 0;
+			rep(i, right.size()) {
+				ll val = cost - right[i].first;
+				for(; j > 0 && left[j - 1].first > val; -- j);
+				if(j > 0 && left[j - 1].first == val) {
+					if(right[i].second < sR) {
+					} else if(right[i].second > sR) {
+						for(; j > 0 && left[j - 1].first == val; -- j);
+					} else {
+						for(; j > 0 && left[j - 1].first == val && left[j - 1].second >= sL; -- j);
+					}
+				}
+				cnt += j;
+			}
+			return cnt;
+		};
+
+		ll lo = 0, up = (ll)1e10;
+		while(up - lo > 0) {
+			ll mid = (lo + up + 1) / 2;
+			if(getcnt(mid, 0, 0) <= K)
+				lo = mid;
+			else
+				up = mid - 1;
+		}
+		ll cost = lo;
+		//cerr << "cost = " << cost << endl;
+		lo = 0, up = (ll)pows[m1] * pows[m2] - 1;
+		while(up - lo > 0) {
+			ll mid = (lo + up + 1) / 2;
+			if(getcnt(cost, (int)(mid / pows[m1]), mid % pows[m1]) <= K)
+				lo = mid;
+			else
+				up = mid - 1;
+		}
+		ll x = lo;
+		string ans(M, '?');
+		rep(i, M) {
+			ans[M - 1 - i] = char('a' + x % N);
+			x /= N;
+		}
+		puts(ans.c_str());
+	}
+	return 0;
+}

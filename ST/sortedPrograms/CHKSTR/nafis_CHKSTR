@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+
+#define gl(x) getline(cin,x); 
+
+using namespace std;
+
+long long fib[1000000], mod = 1e9 + 7;
+
+int main(){
+
+int t;cin>>t;
+
+while(t--){
+
+int a,b;cin>>a>>b;
+
+fib[0]=a;fib[1]=b;
+
+for(int i=2;i!=1000000;i++) fib[i] = (fib[i-1]+fib[i-2])%mod;
+
+string s;
+gl(s);
+gl(s);
+
+istringstream ss(s);
+
+int x;
+
+int sum=0;
+
+while(ss>>x)sum = (sum + fib[x-1]) % mod;
+
+printf("%d\n",sum);}}

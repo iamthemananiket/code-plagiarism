@@ -1,0 +1,134 @@
+# include <cstdio>
+# include <cstring>
+# include <algorithm>
+# include <iostream>
+ 
+using namespace std;
+ 
+const int MAX_R = 52;
+const int MAX_N = 300010;
+ 
+int n, L, R;
+int a[MAX_N], b[MAX_N], cc[MAX_N];
+ 
+int c[MAX_N], pos;
+ 
+inline bool check (int med)
+{
+	int clen, i, t, from, to, len, now = 1;
+	char dp[MAX_N][2];
+	int dp_to[MAX_N][2];
+	char dp2[MAX_N][2];
+	///printf ("%d\n", med);
+	for (i = 1; i <= n; i ++)
+	{
+		dp[i][0] = dp2[i][0] = dp_to[i][0] = 0;
+		dp[i][1] = dp2[i][1] = dp_to[i][1] = -1;
+	}
+	for (clen = 1; clen <= R; clen ++)
+	{
+		for (i = 1; i < n; i ++)
+		{
+			t = 0;
+			
+			if (cc[i] <= med)
+				t = 1;
+			
+			int curr = -1;
+			
+			from = a[i];	to = b[i];	len = clen;
+			
+			if (dp_to[to][now ^ 1] == from)
+				curr = dp2[to][now ^ 1];
+			else
+				curr = dp[to][now ^ 1];
+			
+			if (curr != -1)
+			{
+				if (curr + t >= dp[from][now])
+				{
+					dp2[from][now] = dp[from][now];
+					dp[from][now] = curr + t;
+					dp_to[from][now] = to;
+				}
+				else
+				{
+					if (curr + t > dp2[from][now])
+						dp2[from][now] = curr + t;
+				}
+				if (len >= L && len - dp[from][now] < dp[from][now])
+					return true;
+			}
+			
+			curr = -1;
+			
+			from = b[i];	to = a[i];	len = clen;
+			
+			if (dp_to[to][now ^ 1] == from)
+				curr = dp2[to][now ^ 1];
+			else
+				curr = dp[to][now ^ 1];
+			if (curr != -1)
+			{
+				if (curr + t >= dp[from][now])
+				{
+					dp2[from][now] = dp[from][now];
+					dp[from][now] = curr + t;
+					dp_to[from][now] = to;
+				}
+				else
+				{
+					if (curr + t > dp2[from][now])
+						dp2[from][now] = curr + t;
+				}
+				if (len >= L && len - dp[from][now] < dp[from][now])
+					return true;
+			}
+				
+		}
+		now ^= 1;
+		for (i = 1; i <= n; i ++)
+			dp[i][now] = dp2[i][now] = dp_to[i][now] = -1;
+	}
+	return false;
+}
+ 
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		int i;
+		scanf ("%d%d%d", &n, &L, &R);
+		for (i = 1; i < n; i ++)
+		{
+			scanf ("%d%d%d", &a[i], &b[i], &cc[i]);
+			c[i] = cc[i];
+		}
+		sort (c + 1, c + n);
+		pos = 1;
+		for (i = 2; i < n; i ++)
+		{
+			if (c[i] != c[i - 1])
+				c[pos ++] = c[i - 1];
+		}
+		c[pos] = c[n - 1];
+		
+		int l, r, mid;
+		c[pos + 1] = -1;
+		l = 0;
+		r = pos + 1;
+		while (r - l > 1)
+		{
+			mid = (l + r) >> 1;
+			if (check (c[mid]))
+				r = mid;
+			else
+				l = mid;
+		}
+		printf ("%d\n", c[r]);
+	}
+	return 0;
+}
+ 

@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int am[10000007];
+
+int p2;
+
+int rmq(int l, int r) {
+	int ret = min(am[l], am[r-p2+1]);
+	if((p2 << 1) <= r-l) {
+		ret = min(ret, min(am[l+p2],am[r-(p2<<1)+1]));
+	}
+	return ret;
+}
+
+int main() {
+	long long a,b,c,d,e,f;
+	int r,s,t,m,lm, dm;
+	int  n, k, q;
+	long long l1, la, lc,  d1, da, dc;
+	
+	scanf("%d%d%d",&n, &k, &q);
+	scanf("%lld%lld%lld%lld%lld%lld%d%d%d%d%d", &a, &b, &c, &d, &e, &f, &r, &s, &t, &m, am);
+	scanf("%lld%lld%lld%d%lld%lld%lld%d", &l1, &la, &lc, &lm, &d1, &da, &dc, &dm);
+	// clock_t tStart = clock();
+	
+	long long tt = t;
+	for(int i = 1; i<n; i++) {
+		tt *= t;
+		tt %= s;
+		if(tt <= r)
+			am[i] = (((a*am[i-1] % m)*am[i-1] % m) + (b*am[i-1] % m) + c) % m;
+		else
+			am[i] = (((d*am[i-1] % m)*am[i-1] % m) + (e*am[i-1] % m) + f) % m;
+	}
+    // printf("Time taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+	int p = log2(k);
+	p2 = (1 << p);
+	for(int i = 1; i <= p; i++) {
+		int bb = n - (1<<i);
+		int jj = 1<<(i-1);
+		for(int j = 0; j <= bb; j++) {
+			am[j] = min(am[j], am[j+jj]);
+		}
+	}
+    // printf("Time taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+	long long sum, mul;
+	sum = 0;
+	mul = 1;
+	for(int i = 0; i < q; i++) {
+		l1 = (la*l1 + lc) % lm;
+		d1 = (da*d1 + dc) % dm;
+		int mm = rmq(l1, min((int)(l1 + k + d1 - 1), n-1));
+		sum += mm;
+		mul *= mm;
+		mul %= 1000000007;
+	}
+	printf("%lld %lld\n", sum, mul);
+    // printf("Time taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+	return 0;
+}

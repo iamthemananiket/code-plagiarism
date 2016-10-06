@@ -1,0 +1,46 @@
+#include<bits/stdc++.h>
+#define f first
+#define s second
+#define pb push_back
+#define mp make_pair
+ using namespace std;
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+     //freopen("input.txt","r",stdin);freopen("output.txt","w",stdout);
+
+    int t;
+    cin>>t;
+     while(t--)
+     {
+         int n;
+         cin>>n;
+         vector<pair<int,int> > F,S;
+         for(int i=1;i<=n;++i)
+            for(int j=1;j<=n;++j)
+            {
+                int x;
+                cin>>x;
+                if(x==1) F.pb(mp(i,j)); else
+                    if(x==3) S.pb(mp(i,j));
+            }
+            int ANS = 0;
+            for(int i=0;i<F.size();++i)
+            {
+                int x1 = F[i].f,y1 = F[i].s,ans = 2e9;
+                for(int j=0;j<S.size();++j)
+                {
+                    int x2 = S[j].f, y2 = S[j].s;
+                    ans=min(ans,abs(x1-x2) + abs(y1-y2));
+                }
+                ANS = max(ANS,ans);
+            }
+            cout<<ANS<<endl;
+     }
+
+    return 0;
+  }

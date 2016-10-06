@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long mod = 1e9 + 9;
+long long prime = 999983;
+long long prev[5010], f[5010];
+vector<string> v; 
+long long power(long long x, long long p) {
+	if(p == 0) return 1;
+	long long tmp = power(x, p / 2);
+	tmp *= tmp;
+	tmp %= mod;
+	if(p % 2 == 0) return tmp;
+	else return (tmp * x) % mod; 
+}
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		string s;
+		cin>>s;
+		int len = s.length();
+		if(len < 20) {
+			map<string, int> m; 
+			m.clear();
+			for (int i = 0; i < (1 << len); i++) {
+				string tmp = "";
+				for (int j = 0; j < len; j++) {
+					if((i >> j) & 1) {
+						tmp.push_back(s[j]);
+					}    		
+				}    	
+				m[tmp]++;
+			}    
+			bool ok = false;
+			map<string, int> :: iterator it = m.begin();
+			while (it != m.end()){
+				if(it -> second == 2) {
+					ok = true;
+					cout<<(it -> first)<<endl;
+					break;
+				}     
+				it++;
+			} 
+			if(!ok) cout<<-1<<endl;
+		}
+		else {
+			for (int i = 0; i <= len; i++) prev[i] = f[i] = 0; 
+			map<long long, vector<int> > m;
+			m.clear(); 
+			prev[len - 1] = ((s[len - 1] - 'A' + 1) * prime); 
+			for (int i = len - 2; i >= 0; i--) {
+				prev[i] = prev[i + 1] * prime + ((s[i] - 'A' + 1) * prime);
+				prev[i] %= mod;
+			}
+			long long mul = prime;
+			f[0] = ((s[0] - 'A' + 1) * prime) % mod; 
+			for (int i = 1; i < len; i++) {
+				mul *= prime;
+				f[i] = f[i - 1] + ((s[i] - 'A' + 1) * mul);
+				f[i] %= mod;
+				mul %= mod;
+			}
+			m[prev[1]].push_back(0);
+			for (int i = 1; i < len; i++) {
+				long long tmp = f[i - 1] + prev[i + 1] * power(prime, i - 1);
+				m[tmp % mod].push_back(i);
+			}    
+			bool ok = true;
+			map<long long, vector<int> > :: iterator it = m.begin();
+			while (it != m.end()){
+				if(int((it -> second).size()) == 2) {
+					ok = false;
+					string tmp = "";
+					for (int i = 0; i < len; i++) {
+						if(i == (it -> second[0])) continue;
+						tmp.push_back(s[i]);
+					}
+					cout<<tmp<<endl;
+					break;
+				}    
+				it++;
+			} 
+			if(ok) cout<<-1<<endl;
+		}
+	}
+} 

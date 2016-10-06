@@ -1,0 +1,63 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+int n,r[200000];
+long long ps[200001];
+
+long long sz(int s, int e) {
+    long long r(0);
+    r += ps[e];
+    r -= ps[s];
+    if(s>e) r += ps[n];
+
+    return r;
+}
+
+int s,e;
+
+long long dpl[200000],dpr[200000];
+long long dpbl[200000],dpbr[200000];
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(NULL);
+    for(cin >> T; T--;) {
+        cin >> n;
+        for(int i=0; i<n; i++) {
+            cin >> r[i];
+            ps[i+1] = (ps[i]+r[i]);
+        }
+        cin >> s >> e; s--; e--;
+
+        dpr[s] = 0ll;
+        for(int i=s+1; i<=e; i++) dpr[i] = dpr[i-1]+(2ll*r[i-1]);
+        for(int i=s+1; i<=e; i++) dpr[i] = min(dpr[i],dpr[i-1]);
+        dpl[s] = 0ll;
+        for(int i=(s+n-1)%n; i!=(e+n-1)%n; i=(i+n-1)%n) dpl[i] = dpl[(i+1)%n] + (2ll*r[i]);
+        for(int i=(s+n-1)%n; i!=(e+n-1)%n; i=(i+n-1)%n) dpl[i] = min(dpl[i],dpl[(i+1)%n]);
+
+        dpbr[e] = 0ll;
+        for(int i=(e+1)%n; i!=(s+1)%n; i=(i+1)%n) dpbr[i] = dpbr[(i+n-1)%n]+(2ll*r[(i+n-1)%n]);
+        for(int i=(e+1)%n; i!=(s+1)%n; i=(i+1)%n) dpbr[i] = min(dpbr[i],dpbr[(i+n-1)%n]);
+        dpbl[e] = 0ll;
+        for(int i=e-1; i>=s; i--) dpbl[i] = dpbl[i+1]+(2ll*r[i]);
+        for(int i=e-1; i>=s; i--) dpbl[i] = min(dpbl[i],dpbl[i+1]);
+
+        long long sol(20000000000000ll);
+        for(int i=s; i<=e; i++) {
+            sol = min(sol,dpr[i]+dpbl[i]+sz(e,s));
+        }
+        for(int i=s; i!=e; i=(i+n-1)%n) {
+            sol = min(sol,dpl[i]+dpbr[i]+sz(s,e));
+        }
+        sol = min(sol,dpl[e]+dpbr[e]+sz(s,e));
+
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

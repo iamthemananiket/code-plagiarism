@@ -1,0 +1,63 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAX_N = ;
+
+int T;
+int N;
+ll K;
+int dp[1 << 21];
+ll x[21];
+
+bool rec(int bmask, ll leftK){
+  if(dp[bmask] != -1)
+    return dp[bmask];
+  if(leftK == 0)
+    leftK = K;
+  for(int i = 0; i < N && x[i] <= leftK; i++)
+    if(((bmask >> i) & 1) && rec(bmask & ~(1 << i), leftK - x[i]))
+      return dp[bmask] = 1;
+  return dp[bmask] = 0;
+}
+
+bool solve(){
+  ll s = 0;
+  scanf("%d%lld", &N, &K);
+  for(int i = 0; i < N; i++){
+    scanf("%lld", &x[i]);
+    s += x[i];
+  }
+  if(s % K != 0)
+    return false;
+  sort(x, x + N);
+  K = s / K; // we divide by sum now
+  memset(dp, -1, sizeof dp);
+  dp[0] = 1;
+  return rec((1 << N) - 1, K);
+}
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    puts(solve() ? "yes" : "no");
+  }
+  return 0;
+}

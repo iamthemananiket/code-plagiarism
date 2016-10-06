@@ -1,0 +1,159 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(a) scanf("%d",&a)
+#define ss(a) scanf("%s",&a)
+#define sl(a) scanf("%lld",&a)
+#define clr(a) memset(a,0,sizeof(a))
+#define debug(a) printf("check%d",a)
+#define rep(i)
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 50010
+vector<int> v[N];
+//------CENTROID-DECOMPOSITION------
+int sz[N],c_par[N],l[N];
+int cnt;//no. of nodes in current part
+bool mark[N]={0};//wether node has already been marked as centroid
+void dfs2(int cur,int par)
+{
+	cnt++;
+	sz[cur]=1;
+	for(int i=0;i<v[cur].size();++i)
+	{
+		if(mark[v[cur][i]]||v[cur][i]==par)
+			continue;
+		dfs2(v[cur][i],cur);
+		sz[cur]+=sz[v[cur][i]];
+	}
+}
+
+int find_centroid(int cur,int par)
+{
+	for(int i=0;i<v[cur].size();++i)
+	{
+		if(mark[v[cur][i]]||v[cur][i]==par)
+			continue;
+		if(sz[v[cur][i]]>cnt/2)
+			return find_centroid(v[cur][i],cur);
+	}
+	return cur;
+}
+void decompose(int start,int par)
+{
+	cnt=0;
+	dfs2(start,0);
+	int cur=find_centroid(start,0);
+	mark[cur]=1;
+	c_par[cur]=0;
+	l[cur]=0;
+	if(par)
+	{
+		c_par[cur]=par;
+		l[cur]=1+l[par];
+	}
+	for(int i=0;i<v[cur].size();++i)
+		if(!mark[v[cur][i]])
+			decompose(v[cur][i],cur);
+}
+//------END------
+bool isprime[N];
+int p[N],pcnt=0,c,croot;
+vector<vector<int> > List[N];
+int s[N];
+void seive()
+{
+	int i,j;
+	for(i=2;i<N;++i)
+		isprime[i]=1;
+	for(i=2;i<N;++i)
+		if(isprime[i])
+		{
+			p[pcnt++]=i;
+			for(j=2*i;j<N;j+=i)
+				isprime[j]=0;
+		}
+}
+void dfs(int cur,int par,int d)
+{
+	List[croot][c].PB(d);
+	for(int i=0;i<v[cur].size();++i)
+		if((v[cur][i]!=par)&&l[v[cur][i]]>l[croot])
+			dfs(v[cur][i],cur,d+1);
+}
+int main()
+{
+	seive();
+	int n,i,j,k,m;
+	int ans=0;
+	sd(n);
+	for(i=0;i<n-1;++i)
+	{
+		int x,y;
+		sd(x);sd(y);
+		v[x].PB(y);
+		v[y].PB(x);
+	}
+	decompose(1,0);
+	for(i=1;i<=n;++i)
+	{
+		c=0;
+		for(j=0;j<v[i].size();++j)
+			if(l[v[i][j]]>l[i])
+				++c;
+		List[i].resize(c);
+		c=0;
+		clr(s);
+		int maxx=0;
+		for(j=0;j<v[i].size();++j)
+			if(l[v[i][j]]>l[i])
+			{
+				croot=i;
+				dfs(v[i][j],i,1);
+				sort(List[i][c].begin(),List[i][c].end());
+				
+				for(k=0;k<List[i][c].size();++k)
+				{
+					maxx=max(maxx,List[i][c][k]);
+					++s[List[i][c][k]];
+				}
+				c++;
+			}
+		for(j=0;j<c;++j)
+		{
+			vector<pair<int,int> > v;
+			int p1,p2;
+			for(p1=0;p1<List[i][j].size();)
+			{
+				for(p2=p1;p2<List[i][j].size();++p2)
+					if(List[i][j][p2]!=List[i][j][p1])
+						break;
+				v.PB(MP(List[i][j][p1],p2-p1));
+				p1=p2;
+			}
+			for(k=0;k<v.size();++k)
+				s[v[k].F]-=v[k].S;
+			int max1=v[v.size()-1].F;
+			for(k=0;k<pcnt&&p[k]<=n&&p[k]<=maxx+max1;++k)
+			{
+				for(m=0;m<v.size();++m)
+				{
+					if(v[m].F>p[k])
+						break;
+					ans=ans+v[m].S*s[p[k]-v[m].F];
+				}
+			}
+			for(m=0;m<v.size();++m)
+				if(isprime[v[m].F])
+				{
+					ans=ans+v[m].S;
+					//Out[v[m].F]=Out[v[m].F]+v[m].S;
+				}
+		}
+	}
+	double p=((double)ans)/((double)n*(n-1)/2);
+	printf("%.9lf\n",p);
+}

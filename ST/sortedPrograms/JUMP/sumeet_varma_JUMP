@@ -1,0 +1,203 @@
+// DaFruitSalad
+
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef pair<int,int>   II;
+typedef vector< II >      VII;
+typedef vector<int>     VI;
+typedef vector< VI >    VVI;
+typedef long long ll;
+
+#define PB push_back
+#define MP make_pair
+#define F first
+#define S second
+#define SZ(a) (int)(a.size())
+#define ALL(a) a.begin(),a.end()
+#define SET(a,b) memset(a,b,sizeof(a))
+
+#define si(n) scanf("%d",&n)
+#define dout(n) printf("%d\n",n)
+#define sll(n) scanf("%lld",&n)
+#define lldout(n) printf("%lld\n",n)
+#define fast_io ios_base::sync_with_stdio(false);cin.tie(NULL)
+
+#define TRACE
+
+#ifdef TRACE
+#define trace(...) __f(#__VA_ARGS__, __VA_ARGS__)
+template <typename Arg1>
+void __f(const char* name, Arg1&& arg1){
+    cerr << name << " : " << arg1 << std::endl;
+}
+template <typename Arg1, typename... Args>
+void __f(const char* names, Arg1&& arg1, Args&&... args){
+    const char* comma = strchr(names + 1, ',');cerr.write(names, comma - names) << " : " << arg1<<" | ";__f(comma+1, args...);
+}
+#else
+#define trace(...)
+#endif
+
+
+
+const ll oo = (long long)(1e18);
+const int maxm = 300001;
+
+class CHT // Convex hull trick
+{
+    typedef long long fft;
+    typedef long long retlls;
+    typedef long long retll;
+
+    public:
+      CHT(){
+    }
+
+    struct line_segment
+    {
+        fft a, b;
+        double xLeft;
+
+        enum Type {line, maxQuery, minQuery} type;
+        retlls val;
+
+        explicit line_segment(fft aa=0, fft bb=0) : a(aa), b(bb), xLeft(-INFINITY), type(Type::line), val(0) {}
+        retll valueAt(retlls x) const { return a*x+b; }
+        friend bool dont_meet(const line_segment& l1, const line_segment& l2) { return l1.a==l2.a; }
+        friend double meet(const line_segment& l1, const line_segment& l2) { return dont_meet(l1,l2)?INFINITY:1.0*(l2.b-l1.b)/(l1.a-l2.a); }
+        bool operator<(const line_segment& l2) const
+        {
+            if (l2.type == line)
+                return this->a     < l2.a;
+            if (l2.type == maxQuery)
+                return this->xLeft < l2.val;
+            if (l2.type == minQuery)
+                return this->xLeft > l2.val;
+        }
+    };
+
+    bool  isMax = false;
+    std::set<line_segment>  slopes;
+
+    bool hasPrev(std::set<line_segment>::iterator it) { return it!=slopes.begin(); }
+    bool hasNext(std::set<line_segment>::iterator it) { return it!=slopes.end() && std::next(it)!=slopes.end(); }
+
+    bool bad(const line_segment& l1, const line_segment& l2, const line_segment& l3) { return meet(l1,l3) <= meet(l1,l2); }
+    bool bad(std::set<line_segment>::iterator it)
+    {
+        return hasPrev(it) && hasNext(it)
+               && (    isMax && bad(*std::prev(it), *it, *std::next(it))
+                       || !isMax && bad(*std::next(it), *it, *std::prev(it)) );
+    }
+
+    std::set<line_segment>::iterator fix(std::set<line_segment>::iterator it)
+    {
+        if (isMax && !hasPrev(it) || !isMax && !hasNext(it))
+            return it;
+
+        double val = meet(*it, isMax?*std::prev(it):*std::next(it));
+        line_segment buf(*it);
+        it = slopes.erase(it);
+        buf.xLeft = val;
+        it = slopes.insert(it, buf);
+        return it;
+    }
+
+    void insert_Line(fft a, fft b)
+    {
+        line_segment l3 = line_segment(a, b);
+        auto it = slopes.lower_bound(l3);
+
+        if (it!=slopes.end() && dont_meet(*it, l3))
+        {
+            if (isMax && it->b < b || !isMax && it->b > b)
+                it = slopes.erase(it);
+            else
+                return;
+        }
+
+        it = slopes.insert(it, l3);
+        if (bad(it)) { slopes.erase(it); return; }
+
+        while (hasPrev(it) && bad(std::prev(it))) slopes.erase(std::prev(it));
+        while (hasNext(it) && bad(std::next(it))) slopes.erase(std::next(it));
+
+        it = fix(it);
+        if (hasPrev(it))
+            fix(prev(it));
+        if (hasNext(it))
+            fix(next(it));
+    }
+
+    retll evaluate(retlls x) const
+    {
+        if(slopes.empty())
+            return (long long)1e18;
+        line_segment q;
+        q.val = x;
+        q.type = isMax ? line_segment::Type::maxQuery : line_segment::Type::minQuery;
+
+        auto bestLine = slopes.lower_bound(q);
+        if (isMax) --bestLine;
+        return bestLine->valueAt(x);
+    }
+};
+
+
+CHT tree[maxm * 4];
+int p[maxm] ;
+ll a[maxm] ;
+ll dp[maxm] ;
+ll h[maxm];
+int n;
+
+void update(int s , int e , int c , int x , ll slo , ll cons )
+{
+    tree[c].insert_Line(slo,cons);
+    if(s == e)  return;
+    int m = (s + e) >> 1;
+    if(m >= x)
+        update(s,m,2*c+1,x,slo,cons);
+    else
+        update(m+1,e,2*c+2,x,slo,cons);
+}
+
+ll query(int s,int e,int c,int l,int r,long long x)
+{
+    if(s == l && e == r)
+        return tree[c].evaluate(x);
+    int m = (s + e) >> 1;
+    if(r <= m)
+        return query(s,m,2*c+1,l,r,x);
+    if(l > m)
+        return query(m+1,e,2*c+2,l,r,x);
+    return min(query(s,m,2*c+1,l,m,x), query(m+1,e,2*c+2,m+1,r,x));
+}
+
+int main()
+{
+    si(n);
+    for( int i = 1 ; i <= n ; i++ )
+    {
+        int val;
+        si(val);
+        p[val] = i;
+    }
+    for( int i = 1 ; i <= n ; i++ )
+        sll(a[i]);
+    for( int i = 1 ; i <= n ; i++ )
+        sll(h[i]);
+
+    dp[n] = a[n];
+    update(1,n,0,n,h[n],dp[n] + h[n]*h[n]);
+
+    for( int i = n-1 ; i >= 1 ; i-- )
+    {
+        dp[p[i]] = a[p[i]] + h[p[i]] * h[p[i]] ;
+        dp[p[i]] += query( 1 , n , 0 , p[i] + 1 , n , -2 * h[p[i]]);
+        update( 1 , n , 0 , p[i] , h[p[i]] , dp[p[i]] + h[p[i]] * h[p[i]] );
+    }
+
+    lldout(dp[1]);
+}

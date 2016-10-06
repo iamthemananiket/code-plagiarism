@@ -1,0 +1,40 @@
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <cmath>
+#include <cstdlib>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+
+int main(void) {
+   std::ios::sync_with_stdio(false);
+ int n,m;
+    cin>>n>>m;
+     set<int> s;
+    vector<set<int>> v;
+    while(n--){
+       v.push_back(s);
+    }
+    long long p,q,l,r;
+    while(m--){
+        cin>>p;
+        if(p){
+            cin>>q;
+            cout<<v[q-1].size()<<endl;
+            
+        }
+        else{
+            cin>>l>>r>>q;
+            for(int i=l-1;i<r;i++)
+                v[i].insert(q);
+            
+        }
+    }
+   
+   return 0;
+}

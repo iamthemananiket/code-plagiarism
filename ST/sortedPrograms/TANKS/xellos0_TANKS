@@ -1,0 +1,154 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define ALL_THE_REV(CAKE,LIE) for(auto LIE =CAKE.rbegin(); LIE != CAKE.rend(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+int M;
+vector<int> seq[4], seq_cnt[4];
+set<int> seqS[4];
+
+bool is_prime(int x) {
+	for(int i =2; i*i <= x; i++) if(x%i == 0) return false;
+	return true;}
+
+vector< vector<int> > ids;
+vector<int> rep;
+
+int solve_prodline(int id, double pb) {
+	// parameters
+	int cap =0;
+	bool pos_seq[4] ={true,false,false,false};
+	while((int)ids[id-1].size() < rep[id-1]) {
+		cout << id << endl;
+		int t, id2;
+		cin >> t >> id2;
+		if(id2 == -1) return 0;
+		cap++;
+		ids[id-1].push_back(id2);}
+	cap =ids[id-1].size();
+	sort(begin(ids[id-1]),begin(ids[id-1])+cap);
+	vector<int> L(4,M+1);
+	L[0] =(ids[id-1][cap-1]-ids[id-1][0]+1)*1.007;
+	for(int k =1; k < 4; k++) for(int l =0; l < 2; l++) {
+		ALL_THE(seqS[k],it) {
+			if(*it > 30000) break;
+			int akt =*it;
+			bool ok =true;
+			for(int i =1; i < cap; i++) {
+				if(seqS[k].find(akt+abs(ids[id-1][i]-ids[id-1][i-1])) != seqS[k].end()) akt +=abs(ids[id-1][i]-ids[id-1][i-1]);
+				else {ok =false; break;}
+				}
+			if(!ok) continue;
+			pos_seq[k] =true;
+			L[k] =min(L[k],seq_cnt[k][akt]);
+			break;}
+		reverse(begin(ids[id-1]),begin(ids[id-1])+cap);}
+	vector<int> q;
+	for(int i =0; i < 4; i++) if(pos_seq[i]) q.push_back(i);
+	if(q.size() > 1 && q[0] == 0) q.erase(q.begin());
+	int chosen_type =q[rand()%q.size()];
+	return max(0,min(M,(int)(L[chosen_type]*(1+pb/300))-cap));}
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	cin >> M;
+	srand(M);
+	seq[0].resize(M+9,0);
+	for(int i =0; i <= M; i++) seq[0][i] =1;
+	seq[1].resize(M+9,0);
+	vector<bool> isP(2*M+1,true);
+	for(int i =2; i < 2*M; i++) if(isP[i])
+		for(int j =i; j <= (2*M)/i; j++) isP[i*j] =false;
+	for(int i =2; i < 2*M; i++) if(isP[i]) seq[1][(i+1)/2] =1;
+	int Ulam1, Ulam2;
+	cin >> Ulam1;
+	seq[2].resize(M+9,0);
+	for(int i =0; i < Ulam1; i++) {
+		int a;
+		cin >> a;
+		seq[2][a] =1;}
+	cin >> Ulam2;
+	seq[3].resize(M+9,0);
+	for(int i =0; i < Ulam2; i++) {
+		int a;
+		cin >> a;
+		seq[3][a] =1;}
+	for(int k =0; k < 4; k++) {
+		seq_cnt[k].resize(M+10,0);
+		for(int i =1; i < M+10; i++) {
+			seq_cnt[k][i] =seq_cnt[k][i-1]+seq[k][i-1];
+			if(seq[k][i-1]) seqS[k].insert(i-1);}
+		}
+
+	int T;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		int K,C;
+		cin >> K >> C;
+		srand(rand()%C+K+1);
+		rep.clear();
+		rep.resize(K,(M == 1000000)?120:(M >= 100000)?100:((M == 10000)?55:17));
+		ids.clear();
+		ids.resize(K);
+		bool clr =false;
+		vector<int> Ci(K),Bi(K),Pi(K);
+		for(int i =0; i < K; i++) cin >> Ci[i];
+		for(int i =0; i < K; i++) cin >> Bi[i];
+		for(int i =0; i < K; i++) cin >> Pi[i];
+		int stop =0;
+		while(true) {
+			cout << "0" << endl;
+			int t,id2;
+			cin >> t >> id2;
+			if(id2 == -1) {clr =true; break;}
+			ids[t-1].push_back(id2);
+			if(stop == 1) break;
+			if(stop > 1) stop--;
+			if((int)ids[t-1].size() == rep[t-1]) stop =K*15+20;}
+		vector<int> D(K,0);
+		for(int i =0; i < K; i++) if(!clr) {
+			if(Ci[i] > 2*C) rep[i] -=1;
+			D[i] =solve_prodline(i+1,1.0*Pi[i]/Bi[i]);}
+		cout << "-1" << endl;
+		for(int i =0; i < K; i++) cout << D[i] << " ";
+		cout << endl;}
+	return 0;}
+
+// look at my code
+// my code is amazing

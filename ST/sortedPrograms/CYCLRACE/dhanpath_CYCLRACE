@@ -1,0 +1,70 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+typedef  long double  LD ;
+const  LD  MXT = 1e20 ;    // maxTime
+struct  line  {  LD  m, c ;  };
+struct  peak  {  LD  x, y;  int id ;  };
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int  n, q, type, cyclist ;
+        LD  time, speed ;
+        vector<line>  lines ;
+        vector<peak>  peaks = { {0,0,0}, {MXT,0,0} };
+
+        cin >> n ;      lines.resize( n+1, {0,0} );
+
+        for(  cin >> q ;  q-- ;  )
+        {
+                cin >> type ;
+                if( type == 1 )
+                {
+                        cin >> time >> cyclist >> speed ;
+
+                        lines[cyclist].c  =  lines[cyclist].m * time + lines[cyclist].c - speed*time ;
+                        lines[cyclist].m  =  speed ;
+
+                        peak  last ;
+
+                        while( peaks.back().x * lines[cyclist].m + lines[cyclist].c  >  peaks.back().y  )
+                        {
+                                last = peaks.back();
+                                peaks.pop_back();
+                        }
+
+                        if( peaks.back().x == MXT )
+                                continue ;
+
+                        if( peaks.back().x * lines[cyclist].m + lines[cyclist].c  <  peaks.back().y  )
+                        {
+                                LD  intersec  =  ( lines[cyclist].c - lines[last.id].c )  /  ( lines[last.id].m - lines[cyclist].m )  ;
+                                peaks.push_back(   {  intersec,  intersec*lines[last.id].m + lines[last.id].c,  last.id  }   );
+                        }
+
+                        peaks.push_back(   {  MXT,  MXT*lines[cyclist].m + lines[cyclist].c,  cyclist  }   );
+                }
+                else
+                {
+                        cin >> time ;
+
+                        int  lo = 0,  hi = -1+peaks.size(),  mid ;
+
+                        while( lo <= hi )
+                        {
+                                mid = lo + (hi-lo)/2 ;
+                                peaks[mid].x  <=  time   ?   lo = mid + 1   :   hi = mid - 1   ;
+                        }
+
+                        int  i = peaks[lo].id ;
+                        cout  <<  (long long)( lines[i].m * time + lines[i].c )  <<  endl ;
+                }
+        }
+
+        return 0;
+} 

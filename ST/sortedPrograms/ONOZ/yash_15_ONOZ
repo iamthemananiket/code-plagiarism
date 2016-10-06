@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define pi pair<int,int>
+#define F first
+#define S second
+#define MAXN 100005
+
+int a,b,h,m;
+int main()
+{
+    ll sum,ans;
+    int tt,n,i;
+    cin >>tt;
+    while(tt--) {
+        cin >> h>>m;
+        sum=1;
+        for(i=1;i<10;i++){
+            if(h<=i)
+                a=0;
+            else if(h<=11*i)
+                a=1;
+            else
+                a=2;
+            if(m<=i)
+                b=0;
+            else if(m<=11*i)
+                b=1;
+            else
+                b=2;
+            sum+=a*b;
+        }
+        printf("%lld\n",sum);
+    }
+    return 0;
+}

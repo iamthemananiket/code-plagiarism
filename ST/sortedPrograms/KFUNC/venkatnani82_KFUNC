@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long calc(long long x){
+	if(x == 0) return 9;
+	else return x;
+}
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		long long a1, d, l, r;
+		a1 %= 9, d %= 9;
+		scanf("%lld %lld %lld %lld", &a1, &d, &l, &r);
+		long long ans = 0;
+		long long x = (l - 1) % 9;
+		x *= d;
+		a1 += x % 9;
+		a1 %= 9;
+		for (long long i = l; i < l + 9 && i <= r; i++) {
+			ans += ((r - i) / 9LL + 1) * calc(a1);
+			a1 += d;
+			a1 %= 9;
+		}
+		printf("%lld\n", ans);
+	}
+}

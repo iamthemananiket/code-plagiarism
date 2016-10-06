@@ -1,0 +1,136 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<set>
+#include<queue>
+#include<iostream>
+#include<map>
+#include<vector>
+using namespace std;
+#define long long long
+
+int rint()
+{
+	int result = 0;
+	char ch;
+	ch = getchar();
+	while (true) 
+	{
+		if (ch >= '0' && ch <= '9')
+			break;
+		ch = getchar();
+	}
+	result = ch - '0';
+	while (true) 
+	{
+		ch = getchar();
+		if (ch < '0' || ch > '9') 
+			break;
+		result = result * 10 + ch - '0';
+	}
+	return result;
+}
+int rlong() { long ret; scanf("%lld", &ret); return ret; }
+
+struct Trie
+{
+	const int SIZE = 30;
+
+	struct Node
+	{
+		struct Node *zero, *one;
+	};
+
+	Node *root = new Node();
+
+	void Insert(int x)
+	{
+		Node *c = root;
+		for (int i = SIZE - 1; i >= 0; i--)
+		{
+			if ((x >> i & 1) == 1)
+			{
+				if (c->one == NULL)
+					c->one = new Node();
+				c = c->one;
+			}
+			else
+			{
+				if (c->zero == NULL)
+					c->zero = new Node();
+				c = c->zero;
+			}
+		}
+	}
+
+	int Query(int x)
+	{
+		Node *c = root;
+		int ret = 0;
+		for (int i = SIZE - 1; i >= 0; i--)
+		{
+			if ((x >> i & 1) == 1)
+			{
+				if (c->zero == NULL)
+					c = c->one;
+				else
+				{
+					c = c->zero;
+					ret |= 1 << i;
+				}
+			}
+			else
+			{
+				if (c->one == NULL)
+					c = c->zero;
+				else
+				{
+					c = c->one;
+					ret |= 1 << i;
+				}
+			}
+		}
+		return ret;
+	}
+};
+
+vector<int> Fun(vector<int> a)
+{
+	int n = a.size();
+	vector<int> ret(n);
+	Trie *trie = new Trie();
+	int x = 0;
+	trie->Insert(0);
+	for (int i = 0; i < n; i++)
+	{
+		x ^= a[i];
+		ret[i] = trie->Query(x);
+		if (i > 0)
+			ret[i] = max(ret[i], ret[i - 1]);
+		trie->Insert(x);
+	}
+	return ret;
+}
+
+int main()
+{
+#ifdef _DEBUG
+	freopen("..\\input.txt", "r", stdin);
+#endif
+
+	int n = rint();
+	vector<int> a(n);
+	for (int i = 0; i < n; i++)
+		a[i] = rint();
+	auto left = Fun(a);
+	reverse(a.begin(), a.end());
+	auto right = Fun(a);
+
+	int ans = 0;
+	for (int i = 0; i < n - 1; i++)
+		ans = max(ans, left[i] + right[n - i - 2]);
+
+	printf("%d\n", ans);
+
+	return 0;
+}

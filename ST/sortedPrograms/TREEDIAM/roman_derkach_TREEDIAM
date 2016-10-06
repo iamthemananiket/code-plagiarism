@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+#define int long long
+#define pb push_back
+ using namespace std;
+
+ const int N = 2e5 + 10,md = 1e9 + 7;
+ int a[N],b[N],last[N],num[N],kol,mx_g,pos,w[N],p[N],G[N],ans[N],i,c[N],n,v[N],u[N],pos_edge[N],ANS,answer[N],x,y,pos1,usd[N],j;
+
+ int sqr(int x)
+ {
+     return x * x % md;
+ }
+
+ int bin_pow(int a,int b)
+ {
+     if(b==0) return 1 % md;
+     if(b==1) return a % md;
+     if(b & 1) return a * bin_pow(a,b-1) % md; else
+            return sqr(bin_pow(a,b>>1));
+ }
+
+ inline void add(int v,int u)
+ {
+     a[++kol] = u;
+     b[kol] = last[v];
+     last[v] = kol;
+     c[kol] = i;
+ }
+
+ void dfs(int v,int g,int pr = -1)
+ {
+     if(g>mx_g) mx_g = g,pos = v;
+     int x = last[v];
+      while(x)
+      {
+          if(a[x]!=pr && usd[c[x]]) dfs(a[x],g + w[a[x]],v);
+          x = b[x];
+      }
+ }
+
+ int find_set(int x)
+ {
+     if(x==p[x]) return p[x];
+     p[x] = find_set(p[x]);
+     return p[x];
+ }
+
+ //int
+  main()
+ {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>n;
+    for(i=1;i<=n;++i) cin>>w[i];
+    for(i=1;i<n;++i)
+    {
+        cin>>v[i]>>u[i];
+        add(v[i],u[i]);
+        add(u[i],v[i]);
+    }
+
+     for(i=1;i<n;++i) cin>>pos_edge[i];
+
+     for(i=1;i<=n;++i) p[i] = i,ans[i] = w[i],G[i] = 1;
+
+      ANS=1;
+     for(i=1;i<=n;++i)
+        ANS = ANS * w[i] % md;
+
+     answer[n] = ANS;
+
+     for(i=n-1;i>0;--i)
+     {
+         x = find_set(v[pos_edge[i]]);
+         y = find_set(u[pos_edge[i]]);
+         if(G[x] < G[y]) swap(x,y);
+         usd[pos_edge[i]] = 1;
+        ANS = ANS * bin_pow(ans[x],md - 2) % md;
+        ANS = ANS * bin_pow(ans[y],md - 2) % md;
+        p[y] = x;
+        G[x]+=G[y];
+        G[y] = 0;
+        mx_g=0;
+        dfs(x,w[x]);
+        pos1 = pos;
+        mx_g = 0;
+        dfs(pos1,w[pos1]);
+        ans[x] = mx_g;
+        ANS = ANS * ans[x] % md;
+         answer[i] = ANS;
+     }
+
+     for(i=1;i<=n;++i) cout<<answer[i]<<'\n';
+
+ }

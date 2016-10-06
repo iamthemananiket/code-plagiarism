@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int Q;
+int ans;
+pair<int, int> points[500001];
+multiset<int> A, B, C, D;
+
+int main()
+{
+    scanf("%d", &Q);
+    int a, b;
+    char c;
+    int M=1;
+    while(Q--)
+    {
+        scanf(" %c", &c);
+        if(c=='+')
+        {
+            scanf("%d%d", &a, &b);
+            a^=ans;
+            b^=ans;
+            points[M++]=make_pair(a, b);
+            A.insert(a+b);
+            B.insert(-a+b);
+            C.insert(a-b);
+            D.insert(-a-b);
+        }
+        else if(c=='-')
+        {
+            scanf("%d", &a);
+            a^=ans;
+            b=points[a].second;
+            a=points[a].first;
+            A.erase(A.find(a+b));
+            B.erase(B.find(-a+b));
+            C.erase(C.find(a-b));
+            D.erase(D.find(-a-b));
+        }
+        else
+        {
+            scanf("%d%d", &a, &b);
+            a^=ans;
+            b^=ans;
+            int _ans=0;
+            _ans=max(_ans, (*A.rbegin())+(-a-b));
+            _ans=max(_ans, (*B.rbegin())+(a-b));
+            _ans=max(_ans, (*C.rbegin())+(-a+b));
+            _ans=max(_ans, (*D.rbegin())+(a+b));
+            printf("%d\n", _ans);
+            ans=_ans;
+        }
+    }
+    return 0;
+}

@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define linf -100000000.000000
+using namespace std;
+
+long double dp[150][150],a[150][150];
+int N,t;
+
+long double solve(int m,int n)
+{
+    if(m==1 && n==1)return 0.000000;
+    if(m<1 || n<1 || m>N || n>N)return linf;
+   
+    if(dp[m][n]>linf)return dp[m][n];
+    
+    return dp[m][n]=(max(solve(m-1,n),solve(m,n-1))+a[m][n]);
+}
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cin>>t;
+    while(t--)
+    {
+        cin>>N;
+        for(int i=1;i<=N;i++)
+        {
+            for(int j=1;j<=N;j++){ cin>>a[i][j]; dp[i][j]=linf; }
+        }
+        
+       
+        long double ans=solve(N,N)/((long double)(N+N-3));
+        
+        if(ans>=0)cout<<fixed<<setprecision(6)<<ans<<"\n";
+        else cout<<"No funds\n";
+    }
+
+	return 0; 
+}

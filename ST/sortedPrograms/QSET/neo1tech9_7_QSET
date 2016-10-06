@@ -1,0 +1,153 @@
+#include <bits/stdc++.h>
+#include <assert.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+ 
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define reps(i,a,n) for(int i = a; i < n; i++)
+#define s(n) cin >> n
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define rsz(x,n) x.clear(); x.resize(n)
+#define rrsz(x,a,n) x.clear(); x.resize(n,a)
+#define wt while(true)
+#define all(x) x.begin(),x.end()
+#define pb push_back
+#define ls(x) (((x) << 1) + 1)
+#define rs(x) ((ls(x)) + 1)
+#define md(a,b) (((a) + (b)) >> 1)
+#define INF (1LL << 60LL)
+ 
+int t, u, v, n, k, m, c, d, f, e, l, r, q;
+const int N = 100005;
+ll B[N];
+ll X[N];
+ll T[N] = {0};
+void upd_b (int pos, int val) {
+	while (pos <= n) {
+		T[pos] += val;
+		pos += pos & (-pos);
+	}
+}
+int sum (int pos) {
+	int sn = 0;
+	while (pos > 0) {
+		sn += T[pos];
+		pos -= pos & (-pos);
+	}
+	return sn;
+}
+struct node { 
+	ll res;
+	ll cnt[3];
+	node () {
+		this -> res = 0;
+		this -> cnt[0] = this -> cnt[1] = this -> cnt[2] = 0;
+	}
+	node operator+ (const node & a) {
+		node b;
+		b.res = 0;
+		rep (i, 3) {
+			b.cnt[i] = this -> cnt[(((i - this -> res) % 3) + 3) % 3] + a.cnt[(((i - a.res) % 3) + 3) % 3];
+		}
+		return b;
+	}
+	void operator<< (ostream & o) {
+		o << this -> res << '\n';
+		rep (i, 3)
+			o << this -> cnt[i] << " ";
+		o << '\n';
+	}
+} st[4 * N];
+string ss;
+node nul;
+void init (int s = 0, int e = n - 1, int id = 0) {
+	if (s == e) {
+		rep (i, 3) {
+			if (B[s] % 3 == i)
+				st[id].cnt[i] = 1;
+			else st[id].cnt[i] = 0;
+		}
+		st[id].res = 0;
+	}
+	else {
+		init(s, md(s, e), ls(id));
+		init(md(s, e) + 1, e, rs(id));
+		st[id] = st[ls(id)] + st[rs(id)];
+	}
+}
+void update (int s, int e, int id, int l, int r, int val) {
+	if (l <= s && r >= e) {
+		st[id].res += val;
+		st[id].res %= 3;
+		return;
+	}
+	if (s > r || e < l) return;
+	else {
+		st[ls(id)].res += st[id].res;
+		st[rs(id)].res += st[id].res;
+		st[ls(id)].res %= 3;
+		st[rs(id)].res %= 3;
+		update(s, md(s, e), ls(id), l, r, val);
+		update(md(s, e) + 1, e, rs(id), l, r, val);
+		st[id] = st[ls(id)] + st[rs(id)];
+	}
+}
+node query(int s, int e, int id, int l, int r) {
+	if (l <= s && r >= e) return st[id];
+	if (e < l || s > r) return nul;
+	else {
+		if (st[id].res != 0) {
+			st[ls(id)].res += st[id].res;
+			st[rs(id)].res += st[id].res;
+			st[ls(id)].res %= 3;
+			st[rs(id)].res %= 3;
+			st[id] = st[ls(id)] + st[rs(id)];
+		}
+		return query(s, md(s, e), ls(id), l, r) + query(md(s, e) + 1, e, rs(id), l, r);
+	}
+}
+int main() {
+    csl;
+	nul.res = 0;
+	rep (i, 3) nul.cnt[i] = 0;
+	cin >> n >> m;
+	cin >> ss;
+	B[0] = X[0] = (ss[0] - '0') % 3;
+	upd_b(1, X[0]);
+	reps (i, 1, n) {
+		X[i] = (ss[i] - '0') % 3;
+		B[i] = (X[i] + B[i - 1]) % 3;
+		upd_b(i + 1, X[i]);
+	}
+	init();
+	rep (i, m) {
+		cin >> u >> v >> c;
+		if (u == 1) {
+			update(0, n - 1, 0, v - 1, n - 1, ((((c - X[v - 1]) % 3) + 3) % 3));
+			upd_b(v, c - X[v - 1]);
+			X[v - 1] = c;
+			X[v - 1] %= 3;
+		}
+		else {
+			node d = query(0, n - 1, 0, v - 1, c - 1);
+			ll ans = 0;
+			//d << cout;
+			d.res += (3 - ((sum(v - 1) + 3) % 3) % 3);
+			d.res %= 3;
+			rep (j, 3) {
+				ans += (d.cnt[j] * (d.cnt[j] - 1)) / 2LL;
+				if ((((j + d.res) % 3) + 3) % 3 == 0) {
+					ans += d.cnt[j];
+				}
+			}
+			cout << ans << '\n';
+		}
+	}
+    return 0;
+}

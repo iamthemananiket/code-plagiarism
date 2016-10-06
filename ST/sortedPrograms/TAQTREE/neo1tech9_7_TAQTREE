@@ -1,0 +1,189 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <functional>
+#include <string>
+#include <math.h>
+#include <iomanip>
+#include <map>
+#include <utility>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <list>
+#include <climits>
+#include <fstream>
+#include <sstream>
+ 
+using namespace std;
+#define ls(x) ((2*(x)) + 1)
+#define rs(x) ((2*(x)) + 2)
+#define md(x) ((x)/2)
+int t;
+vector < int > adj [100006], Cost [100006], indexx [100006];
+int base [100006], ptr;
+int ChainNo, ChainInd [100006], ChainHead [100006], posinbase [100006];
+int depth [100006], L [100006][22], OtherEnd[100006], subsize[100006];
+int s_tree[401240];
+int n;
+void init(int index, int start, int end){
+	if(start == end)
+		s_tree[index] = base[start];
+	else {
+		init(ls(index), start, md(start + end));
+		init(rs(index), md(start + end) + 1, end);
+		s_tree[index] = s_tree[ls(index)] + s_tree[rs(index)];
+	}
+}
+int query(int idx, int s, int e, int ras, int rae){
+	if(ras > rae)
+		return 0;
+	if(ras <= s && rae >= e)
+		return s_tree[idx];
+	else if(ras > e || rae < s)
+		return 0;
+	else {
+		return query(ls(idx), s, md(s + e), ras, rae) + query(rs(idx), md(s + e) + 1, e, ras, rae);
+	}
+}
+void update(int idx, int s, int e, int cv, int val){
+	if(s == e){
+		s_tree[idx] = val;
+	}
+	else {
+		if(md(s + e) >= cv)
+			update(ls(idx), s, md(s + e), cv, val);
+		else update(rs(idx), md(s + e) + 1, e, cv, val);
+		s_tree[idx] = s_tree[ls(idx)] + s_tree[rs(idx)];
+	}
+}
+void pre_lca(){
+	for(int j = 1; j < 21; ++j)
+		for(int i = 1; i <= n; ++i)
+			L[i][j] = L[i][j - 1] != -1 ? L[L[i][j - 1]][j - 1] : -1;
+}	
+void dfs(int parent, int index, int dep){
+	L[index][0] = parent;
+	depth[index] = dep;
+	subsize[index] = 1;
+	for(int i = 0; i < adj[index].size(); ++i){
+		if(adj[index][i] == parent)
+			continue;
+		dfs(index, adj[index][i], dep + 1);
+		OtherEnd[indexx[index][i]] = adj[index][i];
+		subsize[index] += subsize[adj[index][i]];
+	}
+}
+int LCA(int u, int v){
+	if(depth[u] < depth[v])
+		swap(u, v);
+	int dep = depth[u] - depth[v];
+	for(int i = 20; i >= 0; --i){
+		if((1 << i) & dep)
+			u = L[u][i];
+	}
+	if(u == v)
+		return u;
+	for(int i = 20; i >= 0; --i){
+		if(L[u][i] != L[v][i])
+			u = L[u][i], v = L[v][i];
+	}
+	return L[u][0];
+}
+void change(int i, int val){
+	int u = OtherEnd[i];
+	update(0, 0, ptr - 1, posinbase[u], val);
+}
+void HLD(int cur, int parent, int cost){
+	if(ChainHead[ChainNo] == -1){
+		ChainHead[ChainNo] = cur;
+	}
+	ChainInd[cur] = ChainNo;
+	posinbase[cur] = ptr;
+	base[ptr++] = cost;
+	int cind = -1, ncost;
+	for(int i = 0; i < adj[cur].size(); ++i){
+		if(adj[cur][i] == parent)
+			continue;
+		if(cind == -1 || subsize[cind] < subsize[adj[cur][i]]){
+			cind = adj[cur][i];
+			ncost = Cost[cur][i];
+		}
+	}
+	if(cind != -1)
+			HLD(cind, cur, ncost);
+
+	for(int i = 0; i < adj[cur].size(); ++i){
+		if(adj[cur][i] == parent || adj[cur][i] == cind)
+			continue;
+		else{
+			ChainNo++;
+			HLD(adj[cur][i], cur, Cost[cur][i]);
+		}
+	}
+}
+int query_up(int u, int v){
+	if(u == v)
+		return 0;
+	int qt = 0;
+	int chainofu, chainofv = ChainInd[v], ans = -1;
+	while(true){
+		chainofu = ChainInd[u];
+		if(chainofu == chainofv){
+			if(u == v)break;
+			qt += query(0, 0, ptr - 1, posinbase[v] + 1, posinbase[u]);
+			break;
+		}
+		qt += query(0, 0, ptr - 1, posinbase[ChainHead[ChainInd[u]]], posinbase[u]);
+		u = L[ChainHead[ChainInd[u]]][0];
+	}
+	return qt;
+}
+void qu(int u, int v){
+	int lca = LCA(u, v);
+	int ans1 = query_up(u, lca);
+	int ans2 = query_up(v, lca);
+	cout << ans1 + ans2 << '\n';
+}
+int q;
+int main(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+		ptr = 0;
+		cin >> n;
+		for(int i = 0; i <= n; ++i){
+			adj[i].clear();
+			Cost[i].clear();
+			indexx[i].clear();
+			ChainHead[i] = -1;
+			for(int j = 0; j < 20; ++j)
+				L[i][j] = -1;
+		}
+		for(int i = 0; i < n - 1; ++i){
+			int u, v, c;
+			cin >> u >> v >> c;
+			adj[u].push_back(v);
+			adj[v].push_back(u);
+			Cost[u].push_back(c);
+			Cost[v].push_back(c);
+			indexx[u].push_back(i + 1);
+			indexx[v].push_back(i + 1);
+		}
+		cin >> q;
+		ChainNo = 0;
+		dfs(-1, 1, 0);
+		pre_lca();
+		HLD(1, -1, -1);
+		init(0, 0, ptr - 1);
+		int ss;
+		int u, v;
+		while(q--){
+			cin >> ss;
+			cin >> u >> v;
+			if(ss == 1){
+				change(u, v);
+			}
+			else qu(u, v);
+		}
+    return 0;
+}

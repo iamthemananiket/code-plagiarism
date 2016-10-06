@@ -1,0 +1,73 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-7
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 100031;
+
+int tests;
+long long n, b, m, ans;
+long long can_do;
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/input.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+
+	cin >> tests;
+	for (; tests; --tests)
+	{
+		cin >> n >> b >> m;
+		ans = 0;
+		while (true)
+		{
+			can_do = n / 2 + n % 2;
+			ans += can_do*m;
+			n -= can_do;
+			if (n == 0)
+				break;
+			ans += b;
+			m *= 2;
+		}
+		cout << ans << endl;
+	}
+	cin.get(); cin.get();
+	return 0;
+}

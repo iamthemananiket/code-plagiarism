@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+#define mp make_pair
+#define pb push_back
+#define sz(a) static_cast<int>((a).size())
+#define all(a) (a).begin(), (a).end()
+#define forn(i, n) for (int i = 0; i < n; ++i)
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+typedef vector<int> vi;
+typedef pair<int, int> edge;
+
+int main()
+{
+
+    ios::sync_with_stdio(false);
+
+    //ifstream cin("input.txt");
+    //ofstream cout("mine.txt");
+
+    int tt;
+    cin >> tt;
+    while (tt--) {
+        int n;
+        cin >> n;
+        if (n < 7) {
+            cout << "-1\n";
+            continue;
+        }
+        if (n <= 8) {
+            cout << n << "\n";
+            for (int i = 1; i < 6; ++i) {
+                cout << i << " " << i + 1 << "\n";
+            }
+            cout << "6 1\n";
+            cout << "2 7\n";
+            if (n == 8) {
+                cout << "6 8\n";
+            }
+            cout << "1\n";
+            continue;
+        }
+        cout << n << "\n";
+        for (int i = 1; i < n - 1; ++i) {
+            cout << i << " " << i + 1 << "\n";
+        }
+        cout << n - 1 << " 1\n";
+        if (n & 1) {
+            cout << "2 " << n << "\n";
+        } else {
+            cout << "3 " << n << "\n";
+        }
+        cout << "1\n";
+    }
+
+}

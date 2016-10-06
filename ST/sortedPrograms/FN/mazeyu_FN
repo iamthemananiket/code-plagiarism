@@ -1,0 +1,101 @@
+#include<bits/stdc++.h>
+#define N 200010
+#define M 1000010
+#define mod 1000000007
+#define ll long long
+using namespace std;
+unordered_map<int,int>mp;
+int a[N],T,c,p,g,i,t,sq5,y,z,r,r1,r2,rr1,rr2,ans,rr,ss;
+int powmod(int x,int y,int p)
+{
+	int ans=1;
+	for(;y;y>>=1,x=1ll*x*x%p)
+		if(y&1)ans=1ll*ans*x%p;
+	return ans;
+}
+int getg(int p)
+{
+	int i,j,l=0;
+	for(i=2;i*i<p;i++)
+		if((p-1)%i==0)a[++l]=i,a[++l]=(p-1)/i;
+	for(i=2;i<p;i++)
+	{
+		for(j=1;j<=l;j++)
+			if(powmod(i,a[j],p)==1)break;
+		if(j>l)return i;
+	}
+}
+void Init(int g,int p)
+{
+	int tot=1,pp=powmod(g,ss,p),i;
+	for(i=0;i<p;i+=ss)
+	{
+		if(!mp[tot])mp[tot]=i+1;
+		tot=1ll*tot*pp%p;
+	}
+}
+int find(int g,int x,int k)
+{
+	if(!x)return p+1;
+	int pp=powmod(g,p-2,p),t,ans=p;
+	for(i=0;i<ss;i++)
+	{
+		t=mp[x];
+		if(t&&t+i<=p)
+		{
+			if(!k)ans=min(ans,t+i-1);
+			if((k&1)==(i&1))ans=min(ans,t+i-1);
+		}
+		x=1ll*x*pp%p;
+	}
+	return ans;
+}
+int main()
+{
+	//freopen("a.in","r",stdin);
+	//freopen("a.out","w",stdout);
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%d%d",&c,&p);
+		ss=(int)sqrt(p);
+		if(ss&1)ss++;
+		if(!c){puts("0");continue;}
+		g=getg(p);mp.clear();
+		Init(g,p);ans=p;
+		sq5=powmod(g,find(g,5,0)>>1,p);
+		y=1ll*(1+sq5)*powmod(2,p-2,p)%p;
+		z=1ll*sq5*c%p;
+		r=find(g,(1ll*z*z+4)%p,0);
+		rr=find(g,(1ll*z*z+p-4)%p,0);
+		if(!(r&1))
+		{
+			r=r<p?powmod(g,r>>1,p):0;
+			r1=1ll*(z+r)*powmod(2,p-2,p)%p;
+			r2=1ll*(z-r)*powmod(2,p-2,p)%p;
+			if(r2<0)r2+=p;
+			mp.clear();
+			Init(y,p);
+			rr1=find(y,r1,2);
+			rr2=find(y,r2,2);
+			if(rr1<p)ans=min(ans,rr1);
+			if(rr2<p)ans=min(ans,rr2);
+		}
+		r=rr;
+		if(!(r&1))
+		{
+			r=r<p?powmod(g,r>>1,p):0;
+			r1=1ll*(z+r)*powmod(2,p-2,p)%p;
+			r2=1ll*(z-r)*powmod(2,p-2,p)%p;
+			if(r2<0)r2+=p;
+			mp.clear();
+			Init(y,p);
+			rr1=find(y,r1,1);
+			rr2=find(y,r2,1);
+			if(rr1<p)ans=min(ans,rr1);
+			if(rr2<p)ans=min(ans,rr2);
+		}
+		if(ans!=p){printf("%d\n",ans);continue;}
+		puts("-1");
+	}
+}

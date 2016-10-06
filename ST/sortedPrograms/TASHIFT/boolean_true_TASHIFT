@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+vector<int> find_lps(const string &needle)
+{
+    int m=needle.size();
+    vector<int>lps(m+1);
+    int i=1,j=0;
+    lps[0]=0;
+    while(i<m)
+    {
+        if(needle[i]==needle[j])
+        {
+            j++;
+            lps[i]=j;
+            i++;
+            continue;
+        }
+        else
+        {
+            if(j!=0)
+                j=lps[j-1];
+            else
+            {
+                lps[i]=0;
+                i++;
+            }
+        }
+    }
+    return lps;
+}
+int main()
+{
+    int n;
+    scanf("%d",&n);
+    string A,B;
+    cin>>A;
+    cin>>B;
+    A=A+'$'+B;
+    vector<int>ans=find_lps(A);
+    int how_much=INT_MIN;
+    int ind;
+    for(int i=n+1;i<ans.size();i++)
+    {
+        if(ans[i]>how_much)
+        {
+            how_much=ans[i];
+            ind=i;
+        }
+    }
+    if(how_much==0)
+    {
+        printf("0\n");
+        return 0;
+    }
+    ind-=(n+1);
+    printf("%d\n",ind-how_much+1);
+}

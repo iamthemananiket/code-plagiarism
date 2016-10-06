@@ -1,0 +1,34 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+long long l,r;
+
+long long v[60][60];
+
+int main()
+{
+    v[0][1] = 2ll;
+    for(int i=1; i<=37; i++) v[i][1] = v[i-1][1]*3ll;
+    for(int i=0; i<=37; i++) {
+        for(int j=2; j<60; j++) {
+            v[i][j] = v[i][j-1]*2ll;
+            if(v[i][j] > 1000000000000000000ll) v[i][j] = 1000000000000000001ll;
+        }
+    }
+
+    for(cin >> T; T--;) {
+        cin >> l >> r;
+        int sol(l==1);
+        for(int i=0; i<=37; i++) {
+            for(int j=1; j<60; j++) {
+                if((l<=v[i][j]) && (v[i][j]<=r)) sol++;
+            }
+        }
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

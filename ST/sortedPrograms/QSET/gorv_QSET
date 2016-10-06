@@ -1,0 +1,176 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MAXN 100010
+int arr[MAXN];
+class segemntTree{
+	public :
+		struct node{
+			long long values[4][3];
+		};
+		int arrSize;
+		vector<node> tree;
+		long long size;
+		segemntTree(int n){
+  			size=2*(long long)pow(2,(long long)(ceil(log2(n))))-1;
+  			tree.resize(size);
+  			arrSize=n;
+  			for(int i=0;i<size;i++){
+  				for(int j=0;j<=3;j++){
+  					for(int k=0;k<=2;k++){
+  						tree[i].values[j][k]=0;
+  					}
+  				}
+  			}
+  			constructTree(0,n-1,0);
+		}
+		node emptynode(){
+			node empty;
+			for(int i=0;i<=3;i++){
+				for(int j=0;j<=2;j++){
+					empty.values[i][j]=0;
+				}
+			}
+			return empty;
+		}
+		node merge(node a,node b){
+			node ans=emptynode();
+			for(int j=0;j<=2;j++){
+				ans.values[3][j]=a.values[3][j]+b.values[3][j];
+			}
+			ans.values[0][0]=a.values[0][0]+b.values[0][0]+(a.values[2][1]*b.values[1][2])+(a.values[2][0]*b.values[1][0])+(a.values[2][2]*b.values[1][1]);
+			ans.values[0][1]=a.values[0][1]+b.values[0][1]+(a.values[2][1]*b.values[1][0])+(a.values[2][0]*b.values[1][1])+(a.values[2][2]*b.values[1][2]);
+			ans.values[0][2]=a.values[0][2]+b.values[0][2]+(a.values[2][1]*b.values[1][1])+(a.values[2][0]*b.values[1][2])+(a.values[2][2]*b.values[1][0]);
+			int s=(a.values[3][1]+a.values[3][2]+a.values[3][2])%3;
+			if(s==0){
+				for(int i=0;i<=2;i++){
+					ans.values[1][i]=a.values[1][i]+b.values[1][i];
+				}
+			}
+			else if(s==1){
+				ans.values[1][0]=a.values[1][0]+b.values[1][2];
+				ans.values[1][1]=a.values[1][1]+b.values[1][0];
+				ans.values[1][2]=a.values[1][2]+b.values[1][1];
+			}
+			else if(s==2){
+				ans.values[1][0]=a.values[1][0]+b.values[1][1];
+				ans.values[1][1]=a.values[1][1]+b.values[1][2];
+				ans.values[1][2]=a.values[1][2]+b.values[1][0];
+			}	
+			int s1=(b.values[3][1]+b.values[3][2]+b.values[3][2])%3;
+			if(s1==0){
+				for(int i=0;i<=2;i++){
+					ans.values[2][i]=a.values[2][i]+b.values[2][i];
+				}
+			}
+			else if(s1==1){
+				ans.values[2][0]=b.values[2][0]+a.values[2][2];
+				ans.values[2][1]=b.values[2][1]+a.values[2][0];
+				ans.values[2][2]=b.values[2][2]+a.values[2][1];
+			}
+			else if(s1==2){
+				ans.values[2][0]=b.values[2][0]+a.values[2][1];
+				ans.values[2][1]=b.values[2][1]+a.values[2][2];
+				ans.values[2][2]=b.values[2][2]+a.values[2][0];
+			}	
+			return ans;
+		}
+		int leftchild(int pos){
+			return 2*pos + 1;
+		}
+		int rightchild(int pos){
+			return 2*pos + 2;
+		}
+		node constructTree(int left,int right,int position){
+			if(left==right){
+				for(int i=0;i<=2;i++){
+					if(arr[left]==i){
+						for(int j=0;j<=3;j++)
+							tree[position].values[j][i]=1;
+					}
+				}
+				return tree[position];
+			}
+			int mid=left+(right-left)/2;
+			node x=merge(constructTree(left,mid,leftchild(position)),(constructTree(mid+1,right,rightchild(position))));
+			for(int i=0;i<=3;i++){
+     			for(int j=0;j<=2;j++){
+     				tree[position].values[i][j]=x.values[i][j];
+     			}
+     		}
+			return tree[position];
+		}
+		void printTree(){
+			for(int i=0;i<size;i++){
+				for(int j=0;j<=3;j++){
+					for(int k=0;k<=2;k++){
+						cout<<tree[i].values[j][k]<<" ";
+					}
+					cout<<"\n";
+				}
+				cout<<"\n";
+			}
+		}
+		void update(int left,int right,int position,int value,int currentNode){
+			if(position<left || position>right)
+    			return;
+			if(position==left && position==right){
+			for(int i=0;i<=3;i++){
+					for(int j=0;j<=2;j++){
+						tree[currentNode].values[i][j]=0;
+					}
+				}
+				for(int i=0;i<=2;i++){
+					if(arr[left]==i){
+						for(int j=0;j<=3;j++)
+							tree[currentNode].values[j][i]=1;
+					}
+				}
+				return;
+			}
+			int mid=left+(right-left)/2;
+     		update(left,mid,position,value,2*currentNode+1);
+     		update(mid+1,right,position,value,2*currentNode+2);
+     		tree[currentNode]=merge(tree[2*currentNode+1],tree[2*currentNode+2]);
+		}
+		
+		node query(int queryStart,int queryEnd,int nodeStart,int nodeEnd,int position){		
+   			if (queryStart<=nodeStart && queryEnd>=nodeEnd)
+        		return tree[position];
+    		if (queryEnd<nodeStart || queryStart>nodeEnd)
+        		return emptynode();
+    		int mid=nodeStart+(nodeEnd-nodeStart)/2;
+    		return merge(query(queryStart,queryEnd,nodeStart,mid,leftchild(position)),query(queryStart,queryEnd,mid+1,nodeEnd,rightchild(position)));
+		}		
+};
+int main(){
+	ios::sync_with_stdio(false);
+	//freopen("in.txt","r",stdin);
+	int n,m;
+	cin>>n>>m;
+	string s;
+	cin>>s;
+	for(int i=0;i<n;i++){
+		int x=s[i]-'0';
+		x=x%3;
+		arr[i]=x;
+	}
+	segemntTree st(n);
+	//st.printTree();
+	while(m--){
+		int type;
+		cin>>type;
+		if(type==1){
+			int x,y;
+			cin>>x>>y;
+			y=y%3;
+			x--;
+			arr[x]=y;
+			st.update(0,n-1,x,y,0);
+		}
+		else if(type==2){
+			int c,d;
+			cin>>c>>d;
+			cout<<st.query(c-1,d-1,0,n-1,0).values[0][0]<<"\n";
+		}
+	}
+}

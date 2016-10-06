@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MAX 10000005
+#define MOD 1000000007
+bool isprime[MAX];
+int least[MAX];
+void sieve()
+{	
+	int i,j;
+	for(i=0;i<MAX;i++){
+		least[i]=INT_MAX;
+	}
+	isprime[1]=isprime[0]=false;
+	isprime[2]=true;
+	for(i=3;i<MAX;i+=2)
+		isprime[i]=true;
+	for(j=4;j<MAX;j+=2)
+	{
+		least[j]=min(least[j],2);
+		isprime[j]=false;
+	}
+	for(i=3;i*i<MAX;i+=2)
+	{
+		if(isprime[i]==false)
+		continue;
+		for(j=i*i;j<MAX;j+=i)
+		{
+			isprime[j]=false;
+			least[j]=min(least[j],i);
+		}
+	}
+}
+long long int power(long long int n,int m)
+{
+	if(m==0) 
+		return 1;
+	long long int x=power(n,m/2);
+	if(m%2==0)
+		return (x*x)%MOD;
+	else
+	return (((x*x)%MOD)*n)%MOD;
+}
+long long store[MAX];
+int arr[MAX];
+int main(){
+	ios::sync_with_stdio(false);
+	sieve();
+	int t;
+	cin>>t;
+	store[1]=1;
+	while(t--){
+		int n,m,l,r;
+		cin>>n>>m>>l>>r;
+		for(int i=2;i<=m;i++){
+			if(isprime[i]){
+				store[i]=power(i,n);	
+			}
+			else{
+				store[i]=store[least[i]]*store[i/least[i]];		
+				if(store[i]>MOD)
+					store[i]%=MOD;
+			}
+		}
+		long long int result=0;
+		long long int remaining=0;
+		for(int i=m;i>1;i--){
+			int current=0;	
+			for(int k=2*i;k<=m;k=k+i)
+				current=(current+arr[k]);
+			arr[i]=(store[m/i]-current+MOD)%MOD;
+			remaining+=arr[i];
+			if(i>=l && i<=r)
+				result=result+arr[i];
+		}
+		if(l==1){
+			long long calculate=store[m]-remaining;
+			if(calculate<0){
+				calculate=(calculate+MOD)%MOD;
+			}
+			result+=calculate;
+		}
+ 	   	cout<<result%MOD<<"\n";
+	}
+}

@@ -1,0 +1,83 @@
+#include<stdio.h>
+#include<iostream>
+#include<vector>
+#include<cmath>
+#include<algorithm>
+#include<memory.h>
+#include<map>
+#include<set>
+#include<queue>
+#include<deque>
+#include<list>
+#include<sstream>
+#include<cstring>
+#include<unordered_map>
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) (x.begin(),x.end())
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+#define sqr(x) ((x)*(x))
+#define SET(a,b) memset((a),(b),sizeof((a)))
+#define pw(x) (1ll<<(x))
+#define buli(x) __builtin_popcountll(x)
+#define endl "\n"
+
+const int MOD = 1e9+7;
+const int N = 1e5+3;
+
+using namespace std;
+
+typedef long long ll;
+typedef vector<int> vi;
+typedef map<int,int> mii;
+typedef map<string,int> msi;
+typedef pair<int,int> pii;
+typedef vector<pii> vpii;
+
+inline bool EQ(double a,double b) { return fabs(a - b) < 1e-9; }
+inline void set_bit(int & n, int b) { n |= pw(b); }
+inline void unset_bit(int & n, int b) { n &= ~pw(b); }
+
+int main() {
+	// freopen("TASK.in","r",stdin);	
+	// freopen("TASK.out","w",stdout);
+	int t;
+	cin>>t;
+	while(t--) {
+		int n,m;
+		cin>>n>>m;
+		if(n==1) {
+			cout<<"-1 -1"<<endl;
+		}
+		if(n==2) {
+			if(m==1)
+				cout<<"1 2"<<endl;
+			else
+				cout<<"-1 -1"<<endl;
+		}
+		if(n==3) {
+			if(m<=2)
+				cout<<"-1 -1"<<endl;
+			else if(m==3)
+				cout<<"1 2"<<endl<<"2 3"<<endl<<"1 3"<<endl;
+			else
+				cout<<"-1 -1"<<endl;
+		}
+		if(n==4) {
+			if(m<=3)
+				cout<<"-1 -1"<<endl;
+			else if(m==4)
+				cout<<"1 2"<<endl<<"2 3"<<endl<<"3 4"<<endl<<"1 4"<<endl;
+			// else  if(m==5)
+				// cout<<"1 2"<<endl<<"2 3"<<endl<<"3 4"<<endl<<"1 3"<<endl<<"2 4"<<endl;
+			else
+				cout<<"-1 -1"<<endl;
+		}
+
+	}
+	return 0;
+}

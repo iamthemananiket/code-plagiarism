@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int sz[3] = {6, 5, 4};
+const int sc[3] = {4, 2, 1};
+
+int score(map<int, int> &mp) {
+	int ans = 0;
+	for (int i = 0; i < 3; ++i) {
+		if (mp.size() < sz[i]) continue;
+		int mx = 101;
+		for (auto it = mp.begin(); it != mp.end(); ++it) {
+			amin(mx, it->second);
+		}
+		ans += sc[i] * mx;
+		map<int, int> tmp(mp);
+		for (auto it = mp.begin(); it != mp.end(); ++it) {
+			mp[it->first] -= mx;
+			tmp[it->first] -= mx;
+			if (mp[it->first] == 0) tmp.erase(it->first);
+		}
+		mp = tmp;
+	}
+	return ans;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+
+	int T, n, c, t;
+
+	cin >> T;
+	while (T--) {
+		cin >> n;
+		vector<int> s(n);
+		REPU(i, 0, n) {
+			cin >> c;
+			map<int, int> mp;
+			REPU(j, 0, c) {
+				cin >> t; mp[t]++;
+			}
+			s[i] = c + score(mp);
+		}
+		int ind = max_element(ALL(s)) - s.begin();
+		bool found(false);
+		REPU(i, 0, n) if (i != ind && s[i] == s[ind]) {
+			found = true;
+		}
+		if (found) puts("tie");
+		else {
+			if (ind == 0) puts("chef");
+			else printf("%d\n", ind + 1);
+		}
+	}
+
+	return 0;
+}

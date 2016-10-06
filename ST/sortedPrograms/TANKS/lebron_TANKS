@@ -1,0 +1,76 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+ 
+const int N = 101131;
+ 
+using namespace std;
+ 
+int M,U12,u12[N],U23,u23[N],tests,K,C,c[N],b[N],p[N];
+ 
+int main(){
+	//freopen("beavers.in","r",stdin);
+	//freopen("beavers.out","w",stdout);
+//	freopen("F:/in.txt","r",stdin);
+//	freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>M;
+	cin>>U12;
+	for (int i=1;i<=U12;i++)
+		cin>>u12[i];
+	cin>>U23;
+	for (int i=1;i<=U23;i++)
+		cin>>u23[i];
+	cin>>tests;
+	for (;tests;--tests)
+	{
+		cin>>K>>C;
+		for (int i=1;i<=K;i++)
+			cin>>c[i];
+		for (int i=1;i<=K;i++)
+			cin>>b[i];
+		for (int i=1;i<=K;i++)
+			cin>>p[i];
+		cout<<-1<<endl;
+		for (int i=1;i<=K;i++)
+		{
+			if (i>1)
+				cout<<" ";
+			cout<<int(M/2.8);
+		}
+		cout<<endl;
+	}
+	return 0;
+} 

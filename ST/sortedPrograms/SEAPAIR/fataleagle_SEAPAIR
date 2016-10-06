@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MOD=1000000007;
+const int GOOGOL=226732710;
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        int N, K;
+        scanf("%d%d", &N, &K);
+        K=N-K;
+        int a, b;
+        vector<pair<long long, int>> ev;
+        for(int i=0; i<N; i++)
+        {
+            scanf("%d%d", &a, &b);
+            long long l=1LL*a*b;
+            long long r=1LL*a*(b+1);
+            ev.push_back({l, 1});
+            ev.push_back({r, -1});
+        }
+        sort(ev.begin(), ev.end());
+        if(K==0)
+        {
+            printf("%d\n", GOOGOL+1);
+            continue;
+        }
+        for(int i=0; i<(int)ev.size(); i++)
+            if(ev[i].first==0x3f3f3f3f3f3f3f3fLL)
+                ev[i].first=GOOGOL;
+        int cnt=0;
+        long long last=ev[0].first;
+        int ans=0;
+        for(int i=0, j; i<(int)ev.size(); i=j)
+        {
+            if(cnt>=K)
+                ans=(ans+(ev[i].first-last)%MOD+MOD)%MOD;
+            for(j=i; j<(int)ev.size() && ev[i].first==ev[j].first; j++)
+                cnt+=ev[j].second;
+            last=ev[i].first;
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}

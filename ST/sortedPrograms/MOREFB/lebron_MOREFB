@@ -1,0 +1,287 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 99991
+#define bsize 256
+ 
+using namespace std;
+ 
+ int ops;
+ 
+vector<int> Z;
+vector<int> ONE;
+
+vector< int  > mult(vector<int > &v1,
+vector<int > &v2)
+{
+    vector<int > res=Z;
+    
+    res[0]=(1ll*v1[0]*v2[0]+1ll*v1[1]*v2[1])%bs;
+    res[1]=(1ll*v1[0]*v2[1]+1ll*v1[1]*(v2[0]-v2[1]+bs))%bs;   
+    
+    return res;
+}
+ 
+vector<int > one(int sz)
+{
+    vector<int > res;
+    res.resize(sz);
+         for (int j=0;j<res.size();j++)
+        res[j]=(1-j);
+    
+    return res;
+}
+ 
+vector<int> pw(vector<int > a,
+int b)
+{
+    if (b==0)return one(a.size());
+    if (b%2){vector<int> v=pw(a,b-1);return mult(a,v);}
+    return pw(mult(a,a),b/2);   
+}
+ 
+void add(vector<int > &v1,vector<int > &v2)
+ {
+ 		//ops+=v2.size();
+        for (int j=0;j<v2.size();j++){
+         v1[j]=(v1[j]+v2[j]);
+         if (v1[j]>=bs)v1[j]-=bs;}
+ }
+ 
+long long tres[200][2];
+vector<vector<int>  > mult(vector<vector<int>  > &v1,vector<vector<int > > &v2)
+{
+    vector<vector<int > > res;
+    res.resize(v1.size()+v2.size()-1);
+    for (int i=0;i<res.size();i++)
+    {
+        res[i]=Z;
+        tres[i][0]=tres[i][1]=0;
+    }
+    
+    for (int i=0;i<v1.size();i++)
+    for (int j=0;j<v2.size();j++)
+    {
+        tres[i+j][0]=(tres[i+j][0]+1ll*v1[i][0]*v2[j][0]+1ll*v1[i][1]*v2[j][1]);
+    	tres[i+j][1]=(tres[i+j][1]+1ll*v1[i][0]*v2[j][1]+1ll*v1[i][1]*(v2[j][0]-v2[j][1]+bs));   
+    }
+    
+    for (int i=0;i<res.size();i++)
+    	res[i][0]=tres[i][0]%bs,
+    	res[i][1]=tres[i][1]%bs;
+    	
+    return res;
+}
+ 
+void show(vector<int > v)
+{
+    for (int i=0;i<v.size();i++)
+    {
+         cout<<v[i]<<" ";
+        cout<<endl;
+    }
+}
+ 
+vector<int> fb;
+int n,k,val;
+int V[1<<20];
+ 
+void neg(vector<vector<int > >& v)
+{
+    for (int ii=0;ii<v.size();ii++)
+        for (int j=0;j<v[ii].size();j++)
+         if (v[ii][j]>0)
+            v[ii][j]=bs-v[ii][j];
+}
+ 
+vector<int > ZERO()
+{
+    vector<int > z;
+    z.resize(2);
+    for (int i=0;i<2;i++)
+         z[i]=0;
+    return z;
+}
+ 
+vector<vector<int > > add(vector<vector<int > > v1,vector<vector<int > > v2)
+{
+//  if (v1.size()>v2.size())swap(v1,v2);
+    
+    if (v1.size()<=v2.size())
+    {   
+    for (int i=0;i<v1.size();i++)
+        if (i<v2.size())add(v1[i],v2[i]);
+    for (int i=v1.size();i<v2.size();i++)
+        v1.push_back(v2[i]);
+    return v1;
+    }
+    else
+    {   
+    for (int i=0;i<v2.size();i++)
+        if (i<v1.size())add(v2[i],v1[i]);
+    for (int i=v2.size();i<v1.size();i++)
+        v2.push_back(v1[i]);
+    return v2;
+    }
+}
+ 
+inline vector<vector<int > > Mult(vector<vector<int > > &v1,vector<vector<int > > &v2)
+{
+    if (v1.size()<75||v2.size()<75)
+        return mult(v1,v2); 
+    vector<vector<int > > a,b,c,d;
+    int N=min(v1.size(),v2.size());
+    int n=N/2;
+    a.reserve(n);
+    b.reserve(v1.size()-n);
+    c.reserve(n);
+    d.reserve(v2.size()-n);
+    for (int i=0;i<n;i++)
+        a.push_back(v1[i]);
+    for (int i=0;i<n;i++)
+        c.push_back(v2[i]);
+    for (int i=n;i<v1.size();i++)
+        b.push_back(v1[i]);
+    for (int i=n;i<v2.size();i++)
+        d.push_back(v2[i]);
+    vector<vector<int > >ac=Mult(a,c);
+    vector<vector<int > >bd=Mult(b,d);
+    vector<vector<int> > aa=add(a,b);
+    vector<vector<int> > bb=add(c,d);
+    vector<vector<int > >abcd=Mult(aa,bb);
+    neg(ac);
+    neg(bd);
+    vector<vector<int > >v=add(abcd,add(ac,bd));
+    neg(ac);
+    neg(bd);
+    
+    while (ac.size()<bd.size()+2*n)
+        ac.push_back(Z);
+    while (ac.size()<v.size()+n)
+        ac.push_back(Z);
+    
+    for (int i=0;i<bd.size();i++)
+        add(ac[i+2*n],bd[i]);
+    for (int i=0;i<v.size();i++)
+        add(ac[i+n],v[i]);
+    while (ac.size()>k+1)ac.erase(ac.begin()+ac.size()-1);
+    return ac;
+}
+ 
+vector<vector<int > > solve(int l,int r)
+{
+    vector<vector< int > > res;
+    
+    if (l==r)
+    {
+        res.push_back(ONE);
+        res.push_back(pw(fb,V[l]));
+        return res;
+    }
+    int mid=l+r;
+    mid/=2;
+    vector<vector<int> > v1,v2;
+    v1=solve(l,mid);
+    v2=solve(mid+1,r);
+    res=Mult(v1,v2);
+    return res;
+}
+ 
+vector<vector<int> > Solve(int l,int r)
+{
+	if (r<10)return solve(l,r);
+	vector<vector<int> > v1,v2;
+	int mid=l+r;
+	mid/=2;
+	v1=solve(l,mid);
+//	v2=v1;
+	v2=solve(mid+1,r);
+//	return v1;
+	vector<vector<int> > res;
+	res.resize(k+1);
+	res[k].resize(2);
+	res[k][0]=res[k][1]=0;
+	
+//	return res;
+	for (int i=0;i<v1.size()&&i<=k;i++)
+	{
+		int need=k-i;
+		if (need<v2.size())
+		{
+		 vector<int> v=mult(v1[i],v2[need]);
+		 add(res[k],v);
+		}
+	}
+	return res;
+}
+
+int main(){
+//freopen("newlines.in","r",stdin);
+//freopen("newlines.out","w",stdout);
+//freopen("F:/in.txt","r",stdin);
+//freopen("F:/output.txt","w",stdout);
+ios_base::sync_with_stdio(0);
+//cin.tie(0);
+ 
+Z.push_back(0);
+Z.push_back(0);
+ONE.push_back(1);
+ONE.push_back(0);
+fb=one(2);
+fb[0]=fb[1]=1;
+ 
+cin>>n>>k;
+ 
+ ///cout<<pow(3.0,log(25.0)/log(2.0))<<endl;
+ 
+vector<vector<int > > res,temp;
+res.push_back(one(2));
+ 
+temp.resize(2);
+temp[0]=one(2);
+ 
+for (int i=1;i<=n;i++)
+{ cin>>V[i];
+ //V[i]=rand();
+}
+ 
+res=Solve(1,n);
+ 
+ //cout<<ops<<endl;
+/* 
+for (int i=0;i<res.size();i++)
+{
+	show(res[i]);
+	cout<<endl;
+}*/
+cout<<res[k][1]<<endl;
+ 
+//cin.get();cin.get();
+return 0;}       

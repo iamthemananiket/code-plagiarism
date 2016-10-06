@@ -1,0 +1,15 @@
+#include<stdio.h>
+char p[1010], q[1010];
+int v[1010];
+int main(){
+    int TC;
+    scanf("%d",&TC);
+    while(TC--){
+        int i;
+        for(i='a';i<='z';i++)v[i]=0;
+        scanf("%s%s",p,q);
+        for(i=0;p[i];i++)v[p[i]]=1;
+        for(i=0;q[i];i++)if(v[q[i]])break;
+        printf(q[i]?"Yes\n":"No\n");
+    }
+}

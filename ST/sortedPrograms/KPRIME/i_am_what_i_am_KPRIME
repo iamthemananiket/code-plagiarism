@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MAXSZ 100005
+
+vector<bool> isPrime(MAXSZ, true);
+int prefactor[MAXSZ]={0};
+
+vector<vector<int> > cf(MAXSZ,vector<int>(6,0));
+
+void sieve()
+{
+	for(int i=2;i<MAXSZ;i+=2)
+	  {
+	   prefactor[i]=2;
+	   isPrime[i]=false;
+	  }
+	isPrime[2]=true;
+	prefactor[1]=1;
+	int i;
+	for(i=3;i*i<MAXSZ;i+=2)
+	 {
+	 	if(isPrime[i]==false)
+	 	  continue;
+	 	prefactor[i]=i;
+	 	for(int j=i*i;j<MAXSZ;j+=2*i)
+	 	 {
+	 	 	prefactor[j]=i;
+	 	 	isPrime[j]=false;
+		  }
+	 }
+	for(i;i<MAXSZ;i++)
+	 {
+	 	if(isPrime[i])
+	 	  prefactor[i]=i;
+	 }
+}
+
+int countPrefactors(int n)
+{
+	int ctr=1;
+	set<int> v;
+	while(prefactor[n]!=n)
+	{
+		v.insert(prefactor[n]);
+		n=n/prefactor[n];
+		ctr++;
+	}
+	v.insert(n);
+	
+	return v.size();
+}
+
+void preprocess()
+{
+	for(int i=2;i<MAXSZ;i++)
+	 {
+	 	int count=countPrefactors(i);
+	 	for(int j=1;j<=5;j++)
+	 	 {
+	 	 	cf[i][j]=cf[i-1][j];	
+		 }
+		if(count<=5)
+		  cf[i][count]++;
+	 }
+}
+
+int main()
+{
+	sieve();
+	preprocess();
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		int left,right,c;
+		cin>>left>>right>>c;
+		cout<<cf[right][c]-cf[left-1][c]<<endl;
+	}
+}

@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+//	freopen("in.txt","r",stdin);
+	int t,ch,n,m;
+	cin>>n>>m;
+	int x,l,r;
+	vector<set<int> > v(1005);
+	while(m--)
+	 {
+	 	cin>>ch;
+	 	if(ch)
+	 	 {
+	 	 	cin>>x;
+	 	 	x--;
+	 	 	cout<<v[x].size()<<endl;	
+		 }
+		else
+		 {
+		 	cin>>l>>r>>x;
+		 	l--;
+		 	r--;
+		 	for(int i=l;i<=r;i++)
+		 	  v[i].insert(x);
+		 }
+	 	
+	 }
+}

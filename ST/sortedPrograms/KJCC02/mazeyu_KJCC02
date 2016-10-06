@@ -1,0 +1,27 @@
+#include<cstdio>
+using namespace std;
+int T,n,tot,x,y;
+int main()
+{
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%d",&n);tot=0;
+		while(n--)
+		{
+			scanf("%d",&x);
+			for(y=0;x>=10;x=y)
+				for(y=0;x;x/=10)y+=x%10;
+			if(x>tot)tot=x;
+		}if(tot==0)puts("red");
+		if(tot==1)puts("blue");
+		if(tot==2)puts("pink");
+		if(tot==3)puts("white");
+		if(tot==4)puts("black");
+		if(tot==5)puts("violet");
+		if(tot==6)puts("cyan");
+		if(tot==7)puts("yellow");
+		if(tot==8)puts("green");
+		if(tot==9)puts("brown");
+	}
+}

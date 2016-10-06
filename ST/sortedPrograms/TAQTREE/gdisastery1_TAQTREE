@@ -1,0 +1,128 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+const int ROOT = 1;
+const int LOG_N = 17;
+int N, Q;
+vector<pii> E[MAX_N];
+int ls[MAX_N], rs[MAX_N], nn;
+int p[MAX_N][LOG_N];
+int h[MAX_N];
+int p_dist[MAX_N];
+pii edges[MAX_N];
+
+int calc_lca(int u, int v){
+  if(h[u] < h[v])
+    swap(u, v);
+  for(int i = LOG_N - 1; i >= 0; i--)
+    if(h[p[u][i]] >= h[v])
+      u = p[u][i];
+  if(u == v)
+    return u;
+  for(int i = LOG_N - 1; i >= 0; i--)
+    if(p[u][i] != p[v][i])
+      u = p[u][i], v = p[v][i];
+  return p[u][0];
+}
+
+void dfs_1(int u){
+  ls[u] = ++nn;
+  for(int i = 1; i < LOG_N; i++)
+    p[u][i] = p[p[u][i - 1]][i - 1];
+  h[u] = h[p[u][0]] + 1;
+  for(pii e: E[u]){
+    if(p[u][0] != e.fi){
+      p[e.fi][0] = u;
+      p_dist[e.fi] = e.se;
+      dfs_1(e.fi);
+    }
+  }
+  rs[u] = nn;
+}
+
+int lazy[MAX_N * 4];
+
+void st_update(int n, int L, int R, int i, int j, int s){
+  if(j < L || R < i)
+    return;
+  if(i <= L && R <= j){
+    lazy[n] += s;
+  } else {
+    st_update(n * 2, L, (L + R) / 2, i, j, s);
+    st_update(n * 2 + 1, (L + R) / 2 + 1, R, i, j, s);
+  }
+}
+
+int st_query(int n, int L, int R, int i){
+  if(L == R) return lazy[n];
+  if(i <= (L + R) / 2) return lazy[n] + st_query(n * 2, L, (L + R) / 2, i);
+  else return lazy[n] + st_query(n * 2 + 1, (L + R) / 2 + 1, R, i);
+}
+int st_query(int i){ return st_query(1, 1, N, i); } 
+
+// ith edge ... 
+void update(int i, int w) {
+  int u = edges[i].fi, v = edges[i].se;
+  if(p[u][0] != v)
+    swap(u, v);
+  // now u is bottom
+  st_update(1, 1, N, ls[u], rs[u], w - p_dist[u]);
+  p_dist[u] = w;
+}
+
+int calc_dist(int u, int v){
+  int lca = calc_lca(u, v);
+  // printf("lca=%d\n", lca);
+  return st_query(ls[u]) + st_query(ls[v]) - 2 * st_query(ls[lca]);
+}
+
+int main(){
+  int u, v, w;
+  scanf("%d", &N);
+  for(int i = 0; i < N - 1; i++){
+    scanf("%d%d%d", &u, &v, &w);
+    E[u].pb(mp(v, w));
+    E[v].pb(mp(u, w));
+    edges[i] = mp(u, v);
+  }
+  dfs_1(ROOT);
+  /* 
+  for(int i = 1; i <= N; i++){
+    printf("i=%d h=%d ls=%d rs=%d\n", i, h[i], ls[i], rs[i]);
+    } */
+  
+  for(int i = 2; i <= N; i++){
+    st_update(1, 1, N, ls[i], rs[i], p_dist[i]);
+  }
+  
+  scanf("%d", &Q);
+  while(Q--){
+    scanf("%d%d%d", &w, &u, &v);
+    if(w == 1){
+      // update
+      update(u - 1, v);
+    } else {
+      printf("%d\n", calc_dist(u, v));
+    }
+  }
+  return 0;
+}

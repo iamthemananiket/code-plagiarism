@@ -1,0 +1,74 @@
+#include<bits/stdc++.h>
+#define eps 1e-9
+#define INF 1000000000
+using namespace std;
+int n,m,E[15][15],X[50],Y[50],Z[50],i,j,k,id[15][15],N,M,t;
+double a[1000][1000],ans;
+void deal(int x,int y)
+{
+	int i,j;
+	a[x][y]=1/a[x][y];
+	for(i=0;i<=N;i++)
+		if(i!=y)a[x][i]*=a[x][y];
+	for(i=0;i<=M;i++)
+	if(i!=x&&abs(a[i][y])>eps)
+	{
+		for(j=0;j<=N;j++)
+			if(j!=y)a[i][j]-=a[i][y]*a[x][j];
+		a[i][y]=-a[i][y]*a[x][y];
+	}
+}
+double solve()
+{
+	int i,j,k;double m1;
+	while(1)
+	{
+		for(i=1;i<=N&&a[0][i]<eps;i++);
+		if(i>N)return -a[0][0];m1=1e30;
+		for(j=1;j<=M;j++)
+			if(a[j][i]>eps&&a[j][0]/a[j][i]<m1)
+				m1=a[j][0]/a[j][i],k=j;
+		if(m1>1e29)return m1;
+		deal(k,i);
+	}
+}
+int main()
+{
+	scanf("%d%d",&n,&m);
+	memset(E,63,sizeof(E));
+	for(i=1;i<=m;i++)
+	{
+		scanf("%d%d%d",&X[i],&Y[i],&Z[i]);
+		X[i]++;Y[i]++;E[X[i]][Y[i]]=E[Y[i]][X[i]]=1;
+	}
+	for(i=1;i<=n;i++)
+		for(j=1;j<=n;j++)
+			for(k=1;k<=n;k++)
+				if(E[j][k]>E[j][i]+E[i][k])
+					E[j][k]=E[j][i]+E[i][k];
+	N=m<<1;
+	for(i=1;i<=n;i++)
+		for(j=i+1;j<=n;j++)
+			if(E[i][j]<INF)id[i][j]=id[j][i]=++N;
+	for(i=1;i<=n;i++)
+		for(j=i+1;j<=n;j++)if(id[i][j])
+			for(k=1;k<=n;k++)if(i!=k&&j!=k&&id[i][k]&&id[k][j])
+			{
+				M++;a[M][0]=20*(E[i][k]+E[k][j]-E[i][j]);
+				a[M][id[i][k]]=a[M][id[k][j]]=1;a[M][id[i][j]]=-1;
+			}
+	for(i=1;i<=m;i++)
+	{
+		a[0][i]=a[0][i+m]=1;ans+=18+Z[i];
+		a[++M][id[X[i]][Y[i]]]=1;a[M][i]=-1;a[M][i+m]=1;
+		a[++M][id[X[i]][Y[i]]]=-1;a[M][i]=1;a[M][i+m]=-1;
+		a[++M][0]=19;a[M][i]=1;a[++M][0]=Z[i]-1;a[M][i+m]=1;
+	}
+	ans-=solve();
+	for(i=1;;i++)
+	{
+		t=(int)(ans*i+0.5);
+		if(abs(t-ans*i)<eps)break;
+	}
+	printf("%d/%d\n",t,i);
+}

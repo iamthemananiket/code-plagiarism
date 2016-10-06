@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int N = 1e6 + 5;
+
+int n, m;
+int a[N], nl[N];
+long long psum[N];
+map< int, long long > mp;
+char c1[3], c2[3], inv[256];
+
+int main() {
+  inv['C'] = 'D';
+  inv['D'] = 'C';
+  scanf("%d%d", &n, &m);
+  for(int i = 0; i<n; i++)
+    scanf("%d", a+i);
+  stack< int > st;
+  st.push(0);
+  for(int i = 0; i<n; i++) {
+    while(!st.empty()) {
+      if(a[st.top()] <=  a[i])
+        st.pop();
+      else
+        break;
+    }
+    if(st.empty())
+      nl[i] = i+1;
+    else
+      nl[i] = i-st.top();
+    st.push(i);
+  }
+  while(!st.empty())
+    st.pop();
+  for(int i = n-1; i>=0; i--) {
+    while(!st.empty()) {
+      if(a[st.top()] <  a[i])
+        st.pop();
+      else
+        break;
+    }
+    mp[a[i]] += 1LL*(nl[i])*((st.empty() ? n : st.top())-i);
+    st.push(i);
+  }
+  auto itend = mp.end();
+  long long sum = 0;
+  n = 1;
+  a[0] = 0;
+  psum[0] = 0;
+  for(auto it = mp.begin(); it != mp.end(); it++) {
+    a[n] = it->first;
+    sum += it->second;
+    psum[n] = sum;
+    n++;
+  }
+  while(m--) {
+    int x;
+    scanf("%s%d%s", c1, &x, c2);
+    if(c1[0] == '=') {
+      int y = lower_bound(a, a+n, x)-a;
+      if(a[y] != x || (((psum[y]-psum[y-1]) & 1) == 0))
+        printf("%c", inv[c2[0]]);
+      else
+        printf("%c", c2[0]);
+    }
+    else if(c1[0] == '<'){
+      int y = lower_bound(a, a+n, x)-a-1;
+      printf("%c", (psum[y] & 1) ? c2[0] : inv[c2[0]]);
+    } 
+    else {
+      int y = upper_bound(a, a+n, x)-a-1;
+      printf("%c", ((sum-psum[y])&1) ? c2[0] : inv[c2[0]]);
+    }
+  }
+  puts("");
+  return 0;
+}

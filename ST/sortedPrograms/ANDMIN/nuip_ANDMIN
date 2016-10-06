@@ -1,0 +1,111 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<unordered_map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#include<cassert>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define reps(X,S,Y) for (int (X) = S;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y)-1;(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+#define eb emplace_back
+#define UNIQUE(X) (X).erase(unique(all(X)),(X).end())
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> using vv=vector<vector<T>>;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+template<class T> inline bool MX(T &l,const T &r){return l<r?l=r,1:0;}
+template<class T> inline bool MN(T &l,const T &r){return l>r?l=r,1:0;}
+const ll MOD=1e9+7;
+const int INF=1e9+3;
+const int MAX_N=(1<<17);
+int nn=MAX_N;
+
+struct Seg{
+  int mn;
+  Seg(int d=INF):mn(d){
+  }
+  static Seg e;
+};
+vector<Seg> dat(2*MAX_N);
+Seg Seg::e=Seg();
+
+Seg operator+(const Seg &l,const Seg &r){
+  return Seg(min(l.mn,r.mn));
+}
+//ostream& operator<<(ostream &os, const Seg &t) { return os<<"["<<t.mn<<")";}
+template<class T=Seg> void upd(int k,int a,vector<T> &dat=dat){
+  k+=dat.size()/2-1;
+  dat[k]=Seg(a);
+  while(k>0){
+    k=(k-1)/2;
+    dat[k]=dat[k*2+1]+dat[k*2+2];
+  }
+}
+
+//(l,r,0,0,nn)
+template<class T=Seg> T query(int a,int b,const vector<T> &dat=dat,int k=0,int l=0,int r=-1){
+  if(r<0) r=dat.size()/2;
+  if(r<=a || b<=l)return T::e;
+  if(a<=l && r<=b) return dat[k];
+  T lv=query(a,b,dat,k*2+1,l,(l+r)/2) ,rv= query(a,b,dat,k*2+2,(l+r)/2,r);
+  return lv+rv;
+}
+
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  int n,q;
+  scanf("%d%d",&n,&q);
+  vector<int> a(n);
+  rep(i,n) scanf("%d",&a[i]);
+  rep(i,n) dat[nn-1+i].mn=a[i];
+  rrep(i,nn-1) dat[i]=dat[i*2+1]+dat[i*2+2];
+  set<int> nums[30];
+  rep(i,30) rep(j,n) if(a[j]>>i&1) nums[i].insert(j);
+  int t,x,l,r;
+  while(q--){
+    scanf("%d%d%d",&t,&l,&r); --l;
+    if(t){
+      scanf("%d",&x);
+      rep(i,30)if(!(x>>i&1)){
+	for(auto it=nums[i].lower_bound(l);it!=nums[i].end();nums[i].erase(it++)){
+	  if(*it >= r) break;
+	  a[*it]-=1<<i;
+	  upd(*it,a[*it]);
+	}
+      }
+    }else{
+      printf("%d\n",query(l,r));
+    }
+  }
+  return 0;
+}

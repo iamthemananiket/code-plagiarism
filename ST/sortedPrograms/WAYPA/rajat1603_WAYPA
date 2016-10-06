@@ -1,0 +1,105 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 105;
+const int inf = 1e9 + 7;
+const int ninf = -1e5;
+int t;
+int n;
+int baap[N];
+int parent[N];
+vector < pair < int , int > > v[N];
+int go[N][N];
+int tin[N];
+int tout[N];
+int cur;
+int a , b , c;
+int ans;
+int dp[N][N];
+void dfs(int node , int par){
+    parent[node] = par;
+    tin[node] = ++cur;
+    for(auto it : v[node]){
+        if(it.first != par){
+            baap[it.first] = it.second;
+            dfs(it.first , node);
+        }
+    }
+    tout[node] = cur;
+}
+void dfs1(int start , int node , int par , int child){
+    go[start][node] = child;
+    for(auto it : v[node]){
+        if(it.first != par){
+            dfs1(start , it.first , node , child);
+        }
+    }
+}
+bool anc(int top , int bottom){
+    return (tin[top] <= tin[bottom] && tout[bottom] <= tout[top]);
+}
+int solve(int start , int end){
+    if(start == end){
+        return 1;
+    }
+    if(parent[start] == end || parent[end] == start){
+        return 2;
+    }
+    if(dp[start][end] != -inf){
+        return dp[start][end];
+    }
+    if(anc(start , end)){
+        if(baap[go[start][end]] == baap[end]){
+            return dp[start][end] = 2 + solve(go[start][end] , parent[end]);
+        }
+        else{
+            return dp[start][end] = ninf;
+        }
+    }
+    if(anc(end , start)){
+        if(baap[go[end][start]] == baap[start]){
+            return dp[start][end] = 2 + solve(go[end][start] , parent[start]);
+        }
+        else{
+            return dp[start][end] = ninf;
+        }
+    }
+    if(baap[start] == baap[end]){
+        return dp[start][end] = 2 + solve(parent[start] , parent[end]);
+    }
+    else{
+        return dp[start][end] = ninf;
+    }
+}
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d" , &n);
+        cur = 0;
+        ans = 1;
+        for(int i = 1 ; i <= n ; ++i){
+            v[i].clear();
+            for(int j = 1 ; j <= n ; ++j){
+                go[i][j] = -1;
+                dp[i][j] = -inf;
+            }
+        }
+        for(int i = 1 ; i < n ; ++i){
+            scanf("%d %d %d" , &a , &b , &c);
+            v[a].emplace_back(make_pair(b , c));
+            v[b].emplace_back(make_pair(a , c));
+        }
+        baap[1] = -1;
+        dfs(1 , -1);
+        for(int i = 1 ; i <= n ; ++i){
+            for(auto it : v[i]){
+                dfs1(i , it.first , parent[it.first] , it.first);
+            }
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            for(int j = 1 ; j <= n ; ++j){
+                ans = max(ans , solve(i , j));
+            }
+        }
+        printf("%d\n" , ans);
+    }
+}

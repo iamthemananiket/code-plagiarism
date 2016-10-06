@@ -1,0 +1,161 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int SZ=291;
+int N, Q;
+int A[35001];
+vector<int> adj[35001];
+int depth[35001];
+int parent[35001];
+int in[35001], now;
+int ine[35001];
+multiset<int> e, d;
+int ans[35000];
+
+struct query
+{
+    int u, v, l, r, t, i;
+    bool operator< (const query& other) const
+    {
+        if(l!=other.l)
+            return l<other.l;
+        return r<other.r;
+    }
+} q[35000];
+
+void dfs(int u, int p)
+{
+    in[u]=++now;
+    for(auto& v: adj[u]) if(v!=p)
+    {
+        depth[v]=depth[u]+1;
+        parent[v]=u;
+        dfs(v, u);
+    }
+    now++;
+}
+
+void change(int u)
+{
+    if(ine[u])
+    {
+        auto it=e.find(A[u]);
+        auto nit=next(it);
+        if(nit!=e.end())
+            d.erase(d.find(*nit-*it));
+        if(it!=e.begin())
+        {
+            auto pit=prev(it);
+            d.erase(d.find(*it-*pit));
+            if(nit!=e.end())
+                d.insert(*nit-*pit);
+        }
+        e.erase(it);
+        ine[u]=0;
+    }
+    else
+    {
+        auto it=e.insert(A[u]);
+        auto nit=next(it);
+        if(nit!=e.end())
+            d.insert(*nit-*it);
+        if(it!=e.begin())
+        {
+            auto pit=prev(it);
+            d.insert(*it-*pit);
+            if(nit!=e.end())
+                d.erase(d.find(*nit-*pit));
+        }
+        ine[u]=1;
+    }
+}
+
+vector<int> get_path(int u, int v)
+{
+    vector<int> pu, pv;
+    pv.push_back(v);
+    while(u!=v)
+    {
+        if(depth[u]>depth[v])
+        {
+            pu.push_back(u);
+            u=parent[u];
+        }
+        else
+        {
+            v=parent[v];
+            pv.push_back(v);
+        }
+    }
+    pu.insert(pu.end(), pv.rbegin(), pv.rend());
+    return pu;
+}
+
+int main()
+{
+    scanf("%d", &N);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    for(int i=0; i<N-1; i++)
+    {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+    }
+    dfs(1, 1);
+    scanf("%d", &Q);
+    for(int i=0; i<Q; i++)
+    {
+        char c;
+        int a, b;
+        scanf(" %c%d%d", &c, &a, &b);
+        if(in[a]>in[b])
+            swap(a, b);
+        q[i]=(query){a, b, in[a]/SZ, in[b], c=='F', i};
+    }
+    sort(q, q+Q);
+    int u=-1, v=-1;
+    for(int i=0; i<Q; i++)
+    {
+        int nu=q[i].u, nv=q[i].v;
+        if(i==0 || q[i].l!=q[i-1].l)
+        {
+            d.clear();
+            e.clear();
+            for(int j=1; j<=N; j++)
+                ine[j]=0;
+            auto p=get_path(nu, nv);
+            for(int j=0; j<(int)p.size(); j++)
+                change(p[j]);
+        }
+        else
+        {
+            auto p=get_path(u, nu);
+            for(int j=1; j<(int)p.size(); j++)
+            {
+                if(ine[p[j]])
+                    change(p[j-1]);
+                else
+                    change(p[j]);
+            }
+            p=get_path(v, nv);
+            for(int j=1; j<(int)p.size(); j++)
+            {
+                if(ine[p[j]])
+                    change(p[j-1]);
+                else
+                    change(p[j]);
+            }
+        }
+        if(q[i].t==0)
+            ans[q[i].i]=*d.begin();
+        else
+            ans[q[i].i]=*e.rbegin()-*e.begin();
+        u=nu, v=nv;
+    }
+    for(int i=0; i<Q; i++)
+        printf("%d\n", ans[i]);
+    return 0;
+}

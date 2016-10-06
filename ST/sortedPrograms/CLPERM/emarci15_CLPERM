@@ -1,0 +1,74 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int T;
+
+int k;
+int n;
+
+long long m[100000];
+
+bool answered;
+
+char ans[2][5] = {"Chef","Mom"};
+
+void answer(long long lok) {
+    answered = 1;
+    printf("%s\n",ans[lok%2]);
+}
+
+long long szum(long long b, long long e) {
+    return (((e*(e+1))/2)-((b*(b+1))/2));
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&k);
+
+        if(!k) {
+            answer(szum(0,n));
+            continue;
+        }
+
+        for(int i=0; i<k; i++) {
+            scanf("%d",&m[i]);
+        }
+
+        sort(m,m+k);
+        m[k] = 1<<30;
+
+        answered = 0;
+
+        if(m[0] == 1) {
+            answer(0);
+            continue;
+        }
+
+        long long byNow = szum(0,m[0]-1);
+        for(int i=0; i<k; i++) {
+            int j = i;
+            while(m[j+1]==m[j]+1) j++;
+            if(m[j] == n) {
+                answer(byNow);
+                break;
+            }
+            if(m[j]>byNow) {
+                answer(byNow);
+                break;
+            }
+
+            if(j==k-1) {
+                byNow += szum(m[j],n);
+                break;
+            }
+            byNow += szum(m[j],m[j+1]-1);
+            i=j;
+        }
+        if(!answered) answer(byNow);
+    }
+
+    return 0;
+}

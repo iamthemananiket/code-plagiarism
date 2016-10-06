@@ -1,0 +1,105 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+
+const int MAX_BIT = 29;
+const int N = (int)4e5 + 9;
+
+int a[N], prefMaxXor[N], suffMaxXor[N];
+
+struct Node {
+	int next[2];
+} t[N * 30];
+
+int sz;
+
+void insert(int v) {
+	int pos = 0;
+	for (int i = MAX_BIT; i >= 0; --i) {
+		int x = (v & (1 << i)) != 0;
+		if (t[pos].next[x] == -1) {
+			t[sz].next[0] = t[sz].next[1] = -1;
+			t[pos].next[x] = sz;
+			++sz;
+		}
+		pos = t[pos].next[x];
+	}
+}
+
+int query(int v) {
+	int res = 0;
+	int pos = 0;
+	for (int i = MAX_BIT; i >= 0; --i) {
+		int x = (v & (1 << i)) != 0;
+		if (t[pos].next[x] != -1) {
+			res = (res << 1) + x;
+			pos = t[pos].next[x];
+		} else {
+			res = (res << 1) + 1 - x;
+			pos = t[pos].next[1 - x];
+		}
+	}
+	return res;
+}
+
+int main() {
+	//freopen("input.in", "rt", stdin);
+	//freopen("output.out", "wt", stdout);
+	int n;
+	scanf("%d", &n);
+	for (int i = 1; i <= n; ++i) {
+		scanf("%d", &a[i]);
+	}
+	t[0].next[0] = t[0].next[1] = -1;
+	sz = 1;
+	int currentXor = 0;
+	insert(0);
+	for (int i = 1; i <= n; ++i) {
+		currentXor ^= a[i];
+		prefMaxXor[i] = max(currentXor ^ query(~currentXor),
+			prefMaxXor[i - 1]);
+		insert(currentXor);
+	}
+	t[0].next[0] = t[0].next[1] = -1;
+	sz = 1;
+	currentXor = 0;
+	insert(0);
+	for (int i = n; i >= 1; --i) {
+		currentXor ^= a[i];
+		suffMaxXor[i] = max(currentXor ^ query(~currentXor),
+			suffMaxXor[i + 1]);
+		insert(currentXor);
+	}
+	int res = 0;
+	for (int i = 1; i < n; ++i) {
+		res = max(prefMaxXor[i] + suffMaxXor[i + 1], res);
+	}
+	printf("%d\n", res);
+	return 0;
+}

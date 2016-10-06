@@ -1,0 +1,132 @@
+/*
+ * main.cpp
+ *
+ *  Created on: Sep 3, 2016
+ *      Author: ACMonster
+ */
+
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<algorithm>
+
+using namespace std;
+
+int getInt() {
+	char c;
+	while (c = getchar(), c < '0' || c > '9')
+		;
+	int x = c - '0';
+	while (c = getchar(), c >= '0' && c <= '9')
+		x = x * 10 + c - '0';
+	return x;
+}
+
+const int MAX = 1;
+const long long INF = 1000000000000000LL;
+
+int a[500][500];
+long long w[500][500];
+
+long long solve(int n, int m, int *ans) {
+	long long left = 0, right = 0;
+	long long sum[500];
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < n; j++) {
+			left = max(left, w[i][j]);
+			right += w[i][j];
+		}
+	while (left < right) {
+		long long mid = (left + right) / 2;
+		int count = 1;
+		memset(sum, 0, sizeof(sum));
+		for (int i = 0; count <= m && i < n; i++) {
+			bool overflow = false;
+			for (int j = 0; !overflow && j < m; j++)
+				overflow = (sum[j] + w[j][i] > mid);
+			if (overflow) {
+				count++;
+				memset(sum, 0, sizeof(sum));
+			}
+			for (int j = 0; j < m; j++)
+				sum[j] += w[j][i];
+		}
+		if (count <= m)
+			right = mid;
+		else
+			left = mid + 1;
+	}
+	memset(sum, 0, sizeof(sum));
+	int count = 0;
+	for (int i = 0; i < n; i++) {
+		bool overflow = false;
+		for (int j = 0; !overflow && j < m; j++)
+			overflow = (sum[j] + w[j][i] > left);
+		if (overflow) {
+			ans[count++] = i;
+			memset(sum, 0, sizeof(sum));
+		}
+		for (int j = 0; j < m; j++)
+			sum[j] += w[j][i];
+	}
+	while (count < m)
+		ans[count++] = n - 1;
+	ans[m - 1] = n;
+	for (int i = m - 2; i >= 0; i--)
+		ans[i] = min(ans[i], ans[i + 1] - 1);
+	return left;
+}
+
+int main() {
+	int n = getInt();
+	int m = getInt();
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+			a[i][j] = getInt();
+	int ansx[500], ansy[500];
+	long long bestValue = INF;
+	for (int repeat = 0; repeat < MAX; repeat++) {
+		int x[500], y[500];
+		for (int i = 0; i < m - 1; i++)
+			x[i] = rand() % n + 1;
+		sort(x, x + m - 1);
+		x[m - 1] = n;
+		long long value = -1;
+		while (true) {
+			int group[500];
+			for (int i = 0; i < m; i++)
+				for (int j = (i == 0) ? 0 : x[i - 1]; j < x[i]; j++)
+					group[j] = i;
+			memset(w, 0, sizeof(w));
+			for (int i = 0; i < n; i++)
+				for (int j = 0; j < n; j++)
+					w[group[i]][j] += a[i][j];
+			solve(n, m, y);
+
+			for (int i = 0; i < m; i++)
+				for (int j = (i == 0) ? 0 : y[i - 1]; j < y[i]; j++)
+					group[j] = i;
+			memset(w, 0, sizeof(w));
+			for (int i = 0; i < n; i++)
+				for (int j = 0; j < n; j++)
+					w[group[j]][i] += a[i][j];
+			long long newValue = solve(n, m, x);
+			if (newValue == value)
+				break;
+			value = newValue;
+		}
+		if (value < bestValue) {
+			bestValue = value;
+			for (int i = 0; i < m; i++)
+				ansx[i] = x[i];
+			for (int i = 0; i < m; i++)
+				ansy[i] = y[i];
+		}
+	}
+	for (int i = 0; i < m - 1; i++)
+		printf("%d%c", ansx[i], (i < m - 2) ? ' ' : '\n');
+	for (int i = 0; i < m - 1; i++)
+		printf("%d%c", ansy[i], (i < m - 2) ? ' ' : '\n');
+	return 0;
+}

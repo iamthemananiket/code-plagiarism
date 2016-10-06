@@ -1,0 +1,191 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+uint xrand() {
+	static uint x = 314159265, y = 358979323, z = 846264338, w = 327950288;
+	const uint t = x ^ x << 11; x = y; y = z; z = w; return w = w ^ w >> 19 ^ t ^ t >> 8;
+}
+
+const int INF = 1001001001;
+const int L = 30;
+
+int M, N, K;
+int X[10010], Y[10010];
+bool is[110][110];
+int sumRow[110][110];
+int sumCol[110][110];
+
+int dp[L + 1][L + 1][110][110];
+int cut[L + 1][L + 1][110][110];
+
+int ansOptLen;
+pair<pint,int> ansOpt[10010];
+
+int ansLen;
+pair<pint,int> ans[10010];
+
+void solve(int a, int b, int x, int y) {
+// cout<<a<<" "<<b<<" "<<x<<" "<<y<<endl;
+	//	x, x + a, y, y + b : wall
+	if (a == 1 || b == 1) {
+		return;
+	}
+	int side;
+	int z;
+	if (a <= L && b <= L) {
+		side = cut[a][b][x][y] & 1;
+		z = cut[a][b][x][y] >> 1;
+	} else {
+		const int rnd = xrand() % ((a - 1) + (b - 1));
+		if (rnd < a - 1) {
+			side = 0;
+			z = x + 1 + rnd;
+		} else {
+			side = 1;
+			z = y + 1 + (rnd - (a - 1));
+		}
+	}
+	switch (side) {
+		case 0: {
+			//	(z, y + 1) ... (z, y + b - 1)
+			if (!is[z][y + 1]) {
+				ans[ansLen++] = mp(mp(z, y + 1), 0);
+			}
+			for (int w = y + 1; w < y + b - 1; ++w) {
+				if (is[z][w] && !is[z][w + 1]) {
+					ans[ansLen++] = mp(mp(z, w + 1), 0);
+				}
+			}
+			solve(z - x, b, x, y);
+			solve((x + a) - z, b, z, y);
+		} break;
+		case 1: {
+			//	(x + 1, z) ... (x + a - 1, z)
+			if (!is[x + 1][z]) {
+				ans[ansLen++] = mp(mp(x + 1, z), 1);
+			}
+			for (int w = x + 1; w < x + a - 1; ++w) {
+				if (is[w][z] && !is[w + 1][z]) {
+					ans[ansLen++] = mp(mp(w + 1, z), 1);
+				}
+			}
+			solve(a, z - y, x, y);
+			solve(a, (y + b) - z, x, z);
+		} break;
+		default: assert(false);
+	}
+}
+
+int main() {
+	
+	
+	M = in();
+	N = in();
+	K = in();
+	for (int k = 0; k < K; ++k) {
+		X[k] = in();
+		Y[k] = in();
+	}
+	
+	for (int x = 0; x <= M + 1; ++x) for (int y = 0; y <= N + 1; ++y) {
+		if (x == 0 || x == M + 1 || y == 0 || y == N + 1) {
+			is[x][y] = true;
+		}
+	}
+	for (int k = 0; k < K; ++k) {
+		is[X[k]][Y[k]] = true;
+	}
+	for (int x = 1; x <= M; ++x) {
+		for (int y = 0; y <= N; ++y) {
+			sumRow[x][y + 1] = sumRow[x][y] + ((is[x][y] && !is[x][y + 1]) ? 1 : 0);
+		}
+	}
+	for (int y = 1; y <= N; ++y) {
+		for (int x = 0; x <= M; ++x) {
+			sumCol[y][x + 1] = sumCol[y][x] + ((is[x][y] && !is[x + 1][y]) ? 1 : 0);
+		}
+	}
+	
+	for (int a = 1; a <= L; ++a) for (int b = 1; b <= L; ++b) {
+		for (int x = 0; x + a <= M + 1; ++x) for (int y = 0; y + b <= N + 1; ++y) {
+			//	x, x + a, y, y + b : wall
+			int &opt = dp[a][b][x][y];
+			if (a == 1 || b == 1) {
+				opt = 0;
+			} else {
+				opt = INF;
+				for (int z = x + 1; z < x + a; ++z) {
+					//	(z, y + 1) ... (z, y + b - 1)
+					const int tmp = ((!is[z][y + 1]) ? 1 : 0) + (sumRow[z][y + b - 1] - sumRow[z][y + 1])
+						+ dp[z - x][b][x][y] + dp[(x + a) - z][b][z][y];
+					if (opt > tmp) {
+						opt = tmp;
+						cut[a][b][x][y] = z << 1 | 0;
+					}
+				}
+				for (int z = y + 1; z < y + b; ++z) {
+					//	(x + 1, z) ... (x + a - 1, z)
+					const int tmp = ((!is[x + 1][z]) ? 1 : 0) + (sumCol[z][x + a - 1] - sumCol[z][x + 1])
+						+ dp[a][z - y][x][y] + dp[a][(y + b) - z][x][z];
+					if (opt > tmp) {
+						opt = tmp;
+						cut[a][b][x][y] = z << 1 | 1;
+					}
+				}
+			}
+		}
+	}
+// cout<<dp[M+1][N+1][0][0]<<endl;
+// cout<<cut[M+1][N+1][0][0]<<endl;
+	
+	ansOptLen = INF;
+	for (int iter = 0; iter < 10000; ++iter) {
+		ansLen = 0;
+		solve(M + 1, N + 1, 0, 0);
+// cout<<endl;
+		if (ansOptLen > ansLen) {
+// cerr<<"iter = "<<iter<<", ansLen = "<<ansLen<<endl;
+			ansOptLen = ansLen;
+			copy(ans, ans + ansLen, ansOpt);
+		}
+	}
+	
+	assert(ansOptLen < INF);
+	printf("%d\n", ansOptLen);
+	for (int i = 0; i < ansOptLen; ++i) {
+		printf("%d %d %d\n", ansOpt[i].first.first, ansOpt[i].first.second, ansOpt[i].second);
+	}
+	
+	return 0;
+}

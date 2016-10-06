@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("recrecov.inp","r",stdin)
+#define OUTPUT freopen("recrecov.out","w",stdout)
+#define FOR(i,l,r) for(auto i=l;i<=r;i++)
+#define REP(i,l,r) for(auto i=l;i<r;i++)
+#define FORD(i,l,r) for(auto i=l;i>=r;i--)
+#define REPD(i,l,r) for(auto i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=2e2+10;
+
+int n,match[N],h[N],s[N];
+vector <int> v[N];
+void prepare(){
+    int m,x,y;
+    scanf("%d%d",&n,&m);
+    ///reset
+    FOR(i,1,n<<1) v[i].clear();
+    while (m--){
+        scanf("%d%d",&x,&y);
+        v[x].push_back(n+y);
+    }
+}
+bool DFS(int x){
+    for(auto y:v[x]) if (!h[y]){
+        h[y]=1;
+        bool ok=!match[y];
+        if (match[y]) ok|=DFS(match[y]);
+        if (ok){
+            match[y]=x;
+            return 1;
+        }
+    }
+    return 0;
+}
+int solve(){
+    memset(match,0,sizeof(match));
+    FOR(i,1,n) s[i]=i;
+    int top=n;
+    while (1){
+        int last=top;
+        memset(h,0,sizeof(h));
+        FORD(i,top,1) if (DFS(s[i])) swap(s[i],s[top--]);
+        if (last==top) break;
+    }
+    return top;
+}
+int main(){
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        cout<<solve()<<'\n';
+    }
+}

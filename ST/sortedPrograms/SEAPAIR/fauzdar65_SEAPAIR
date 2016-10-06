@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define ppl pair<ll,ll>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+#define vpp vector<ppl>
+using namespace std;
+const int N=100000;
+
+ll tmod;
+ll t,n,k;
+
+bool cmp(const ppl &a,const ppl &b)
+{
+	if(a.first==b.first)return a.second<b.second;
+	return a.first<b.first;
+}
+
+int main()
+{
+  finp;
+  tmod=1LL;
+  afor(i,1,100)tmod=(tmod*10)%mod;
+  tmod=(tmod+1)%mod;
+
+  cin>>t;
+  while(t--)
+  {
+  	cin>>n>>k;
+  	vpp inp(n+1);
+  	vpp an;
+
+  	afor(i,1,n)
+  	{
+  	 ll v1,v2;
+  	 cin>>v1>>v2;
+  	 inp[i].first=v1*v2;
+  	 inp[i].second=v1*v2+ v1 - 1;
+  	}
+  	assert(k<=n);
+  	if(k==n)
+  	{
+  		cout<<tmod<<"\n";
+  		continue;
+  	}
+  	sort(inp.begin() + 1,inp.end(),cmp);
+  	ll ans=0;
+  	ll sz=n-k-1;
+  	multiset<ll> s;
+  	s.clear();
+
+  	afor(i,1,sz)s.insert(inp[i].second);
+
+  	afor(i,sz+1,n)
+  	{
+  		if(!sz)an.pb(inp[i]);
+  		else
+  		{
+  			ll vv=*(s.begin());
+  			ll v2=min(vv,inp[i].second);
+  			if(vv>=inp[i].first)an.pb(mp(inp[i].first,v2));
+
+  			if(inp[i].second>vv)
+  			{
+  			s.erase(s.begin());
+  			s.insert(inp[i].second);
+  			}
+  		}
+  	}
+  
+  	sort(an.begin(),an.end(),cmp);
+
+  	ll cmax=-1;
+  	for(auto i:an)
+  	{
+  		if(i.second<=cmax)continue;
+
+  		if(i.first>cmax)ans+=i.second-i.first+1;
+  		else ans+=i.second-cmax;
+
+  		cmax=i.second;
+  	}
+  	ans%=mod;
+  	cout<<ans<<"\n";
+  }
+
+return 0;
+}

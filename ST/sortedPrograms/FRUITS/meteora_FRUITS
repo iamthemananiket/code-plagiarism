@@ -1,0 +1,23 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <map>
+#include <cstdio>
+
+using namespace std;
+
+
+int main(){
+
+	int t,n,m,k;
+	scanf("%d",&t);
+
+	while(t--){
+		scanf("%d%d%d",&n,&m,&k);
+		if(n < m) swap(m,n);
+		m = min(n,m+k);
+		printf("%d\n",n-m);
+	}
+
+	return 0;
+}

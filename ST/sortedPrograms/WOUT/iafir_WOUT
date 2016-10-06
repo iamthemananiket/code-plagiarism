@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int N = 1e6 + 5;
+const int inf = 1e7;
+
+int t;
+int d[N];
+long long sum[N];
+int n, h;
+
+int main() {
+  scanf("%d", &t);
+  while(t--) {
+    scanf("%d%d", &n, &h);
+    for(int i = 0; i<n; i++)
+      d[i] = 0;
+    for(int i = 0; i<n; i++) {
+      int a, b;
+      scanf("%d%d", &a, &b);
+      d[a]++;
+      d[b+1]--;
+    }
+    long long now = 0;
+    sum[0] = 0;
+    for(int i = 0; i <n; i++) {
+      now += d[i];
+      sum[i+1] = sum[i] + now;
+    }
+    long long ans = 0;
+    for(int i = h; i<=n; i++)
+      ans = max(ans, sum[i]-sum[i-h]);
+    printf("%lld\n", 1LL*n*h - ans);
+  }
+  return 0;
+}

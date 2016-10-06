@@ -1,0 +1,304 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return val < a ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+
+const int maxn = 500 + 10;
+int n, p;
+long long a[maxn][maxn];
+pair<long long, pair<vi, vi> > best = mp(LINF, mp(vi(), vi()));
+
+long long calc(int x, int y, int z, int t) {
+	long long res = a[z][t];
+	if (x) res -= a[x - 1][t];
+	if (y) res -= a[z][y - 1];
+	if (x && y) res += a[x - 1][y - 1];
+	return res;
+}
+
+void fill(vector<int>& hor) {
+	static int f[maxn];
+	fill_n(f, maxn, 0);
+	FOR(i, 0, sz(hor)) {
+		f[hor[i]] = 1;
+	}
+	while (sz(hor) < p - 1) {
+		FOR(i, 1, n + 1) if (!f[i]) {
+			hor.pb(i);
+		}
+	}
+	sort(all(hor));
+}
+
+vector<int> check1(long long m) {
+	vector<int> res;
+	int ptr = 1;
+	FOR(i, 1, n + 1) {
+		if (calc(ptr, 1, i, n) > m) {
+			if (i == ptr) {
+				return vector<int>();
+			}
+			res.push_back(i - 1);
+			ptr = i;
+		}
+	}
+	if (calc(ptr, 1, n, n) > m) {
+		return vector<int>();
+	}
+	if (res.size() > p - 1) {
+		return vector<int>();
+	}
+	fill(res);
+	return res;
+}
+
+vector<int> check2(vector<int> hor, long long m) {
+	hor.push_back(0), hor.push_back(n);
+	sort(hor.begin(), hor.end());
+	vector<int> res;
+	int ptr = 1;
+	FOR(i, 1, n + 1) {
+		int found = 0;
+		FOR(j, 0, hor.size() - 1) {
+			if (calc(hor[j] + 1, ptr, hor[j + 1], i) > m) {
+				found = 1;
+				break;
+			}
+		}
+		if (found) {
+			if (i == ptr) {
+				return vector<int>();
+			}
+			res.push_back(i - 1);
+			ptr = i;
+		}
+	}
+	int found = 0;
+	FOR(j, 0, hor.size() - 1) {
+		if (calc(hor[j] + 1, ptr, hor[j + 1], n) > m) {
+			found = 1;
+			break;
+		}
+	}
+	if (found) {
+		return vector<int>();
+	}
+	if (res.size() > p - 1) {
+		return vector<int>();
+	}
+	fill(res);
+	return res;
+}
+
+void work1() {
+	long long l = 0, r = LINF;
+	while (l < r) {
+		long long m = l + r >> 1;
+		if (!check1(m).size()) {
+			l = m + 1;
+		}
+		else {
+			r = m;
+		}
+	}
+	vector<int> hor = check1(l);
+	l = 0, r = LINF;
+	while (l < r) {
+		long long m = l + r >> 1;
+		if (!check2(hor, m).size()) {
+			l = m + 1;
+		}
+		else {
+			r = m;
+		}
+	}
+	vector<int> ver = check2(hor, l);
+	chkmin(best, mp(l, mp(hor, ver)));
+}
+
+vector<int> check12(long long m) {
+	vector<int> res;
+	int ptr = 1;
+	FOR(i, 1, n + 1) {
+		if (calc(1, ptr, n, i) > m) {
+			if (i == ptr) {
+				return vector<int>();
+			}
+			res.push_back(i - 1);
+			ptr = i;
+		}
+	}
+	if (calc(1, ptr, n, n) > m) {
+		return vector<int>();
+	}
+	if (res.size() > p - 1) {
+		return vector<int>();
+	}
+	fill(res);
+	return res;
+}
+
+vector<int> check22(vector<int> hor, long long m) {
+	hor.push_back(0), hor.push_back(n);
+	sort(hor.begin(), hor.end());
+	vector<int> res;
+	int ptr = 1;
+	FOR(i, 1, n + 1) {
+		int found = 0;
+		FOR(j, 0, hor.size() - 1) {
+			if (calc(ptr, hor[j] + 1, i, hor[j + 1]) > m) {
+				found = 1;
+				break;
+			}
+		}
+		if (found) {
+			if (i == ptr) {
+				return vector<int>();
+			}
+			res.push_back(i - 1);
+			ptr = i;
+		}
+	}
+	int found = 0;
+	FOR(j, 0, hor.size() - 1) {
+		if (calc(ptr, hor[j] + 1, n, hor[j + 1]) > m) {
+			found = 1;
+			break;
+		}
+	}
+	if (found) {
+		return vector<int>();
+	}
+	if (res.size() > p - 1) {
+		return vector<int>();
+	}
+	fill(res);
+	return res;
+}
+
+void work2() {
+	long long l = 0, r = LINF;
+	while (l < r) {
+		long long m = l + r >> 1;
+		if (!check12(m).size()) {
+			l = m + 1;
+		}
+		else {
+			r = m;
+		}
+	}
+	vector<int> hor = check12(l);
+	l = 0, r = LINF;
+	while (l < r) {
+		long long m = l + r >> 1;
+		if (!check22(hor, m).size()) {
+			l = m + 1;
+		}
+		else {
+			r = m;
+		}
+	}
+	vector<int> ver = check22(hor, l);
+	chkmin(best, mp(l, mp(ver, hor)));
+}
+
+void calc(vi& hor, vi& ver) {
+	vi h(hor.begin(), hor.begin() + p - 1); h.pb(0), h.pb(n);
+	vi v(ver.begin(), ver.begin() + p - 1); v.pb(0), v.pb(n);
+	sort(all(h)), sort(all(v));
+	long long mx = 0;
+	FOR(i, 1, p + 1) FOR(j, 1, p + 1) {
+		int r = h[i];
+		int c = v[j];
+		int rr = h[i - 1] + 1;
+		int cc = v[j - 1] + 1;
+		chkmax(mx, calc(rr, cc, r, c));
+	}
+	chkmin(best, mp(mx, mp(hor, ver)));
+}
+
+void solve() {
+	cin >> n >> p;
+	FOR(i, 1, n + 1) FOR(j, 1, n + 1) {
+		cin >> a[i][j];
+		a[i][j] += a[i - 1][j] + a[i][j - 1] - a[i - 1][j - 1];
+	}
+	work1(), work2();
+	while (1.0 * clock() / CLOCKS_PER_SEC < 1.8) {
+		vi hor = best.se.fi;
+		vi ver = best.se.se;
+		int ix = rand() % (p - 1);
+		if (ix && hor[ix] > hor[ix - 1] + 1) {
+			hor[ix]--;
+			calc(hor, ver);
+			hor[ix]++;
+		}
+		if (ix < p - 2 && hor[ix] + 1 < hor[ix + 1]) {
+			hor[ix]++;
+			calc(hor, ver);
+			hor[ix]--;
+		}
+		ix = rand() % (p - 1);
+		if (ix && ver[ix] > ver[ix - 1] + 1) {
+			ver[ix]--;
+			calc(hor, ver);
+			ver[ix]++;
+		}
+		if (ix < p - 2 && ver[ix] + 1 < ver[ix + 1]) {
+			ver[ix]++;
+			calc(hor, ver);
+			ver[ix]--;
+		}
+	}
+	FOR(i, 0, p - 1) cout << best.se.fi[i] << " \n"[i == p - 2];
+	FOR(i, 0, p - 1) cout << best.se.se[i] << " \n"[i == p - 2];
+}
+
+int main() {
+	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

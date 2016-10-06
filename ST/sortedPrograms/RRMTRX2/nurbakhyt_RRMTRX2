@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+
+const int mod = (int)1e7 + 7;
+
+using namespace std;
+
+int n, m;
+int a[100][100];
+int d[100];
+
+int main() {
+	cin >> n >> m;
+	for (int i = 1; i <= n; i++)
+		for (int j = 1; j <= m; j++)
+			cin >> a[i][j];
+	d[0] = 1;
+	for (int j = 1; j <= m; j++) {
+		for (int i = 1; i <= n; i++) {
+			d[j] = (d[j] + 1ll * a[i][j] * d[j - 1] % mod) % mod;
+			if (d[j] < 0)
+				d[j] += mod;
+		}
+	}
+	cout << d[m] << endl;
+	return 0;
+}

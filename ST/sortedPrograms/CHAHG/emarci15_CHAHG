@@ -1,0 +1,98 @@
+#include <iostream>
+#include <cstdio>
+
+#define iinf 1000000001ll
+
+using namespace std;
+
+void kis(long long h0, long long m0, long long h1, long long m1, long long &e, long long &v) {
+    e = iinf; v = -1ll;
+    /*for(long long j=0; j<=iinf; j++) {
+        if((h0+j*m0)<(h1+j*m1)) {
+            e = min(e,j);
+            v = max(v,j);
+        }
+    }*/
+    if(m0<m1) {
+        v = iinf;
+        if(h0<h1) {
+            e = 0ll;
+        } else e = ((h0-h1)/(m1-m0))+1ll;
+    } else if(m0>m1) {
+        e = 0ll;
+        if(h1<=h0) {
+            v = -1ll;
+        } else v = (((m0-1ll-m1) + h1-h0)/(m0-m1))-1ll;
+    } else {
+        if(h0<h1) {
+            e = 0;
+            v = iinf;
+        }
+    }
+}
+
+int T,n;
+long long h[10],m[10];
+
+long long e0,v0;
+long long ee,vv;
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d",&n);
+        for(int i=0; i<n; i++) scanf("%lld%lld",&h[i],&m[i]);
+
+        long long e(0ll),v(iinf);
+        for(int i=0; i<n-1; i++) {
+            long long h0 = h[i], m0 = m[i];
+            long long h1 = h[i+1], m1 = m[i+1];
+            if((i&1)) {
+                swap(h0,h1);
+                swap(m0,m1);
+            }
+            kis(h0,m0,h1,m1,ee,vv);
+            e = max(e,ee);
+            v = min(v,vv);
+        }
+
+        e0 = e; v0 = v;
+        e = 0ll,v = iinf;
+        for(int i=0; i<n-1; i++) {
+            long long h0 = h[i], m0 = m[i];
+            long long h1 = h[i+1], m1 = m[i+1];
+            if(!(i&1)) {
+                swap(h0,h1);
+                swap(m0,m1);
+            }
+            kis(h0,m0,h1,m1,ee,vv);
+            e = max(e,ee);
+            v = min(v,vv);
+        }
+
+        if(e<e0) {
+            swap(e,e0);
+            swap(v,v0);
+        }
+        if((e0<=v+1) && (e<=v0+1) && (e<=v) && (e0<=v0)) {
+            e = min(e,e0);
+            v = max(v,v0);
+            e0 = v0+1;
+        }
+        printf("%d\n",((e0<=v0)+(e<=v)));
+        if(e0<=v0) {
+            printf("%lld ",e0);
+            if(v0>=iinf) {
+                printf("Inf\n");
+            } else printf("%lld\n",v0);
+        }
+        if(e<=v) {
+            printf("%lld ",e);
+            if(v>=iinf) {
+                printf("Inf\n");
+            } else printf("%lld\n",v);
+        }
+    }
+
+    return 0;
+}

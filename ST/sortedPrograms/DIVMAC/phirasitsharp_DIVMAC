@@ -1,0 +1,102 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+const int T = 1e6 + 10;
+const int N = 1e5 + 10;
+
+class SegNode {
+    public:
+        int a, b, max;
+        SegNode *left, *right;
+        SegNode( int _a, int _b ) :
+            a( _a ), b( _b ), max( 1 ),
+            left( nullptr ), right( nullptr ) 
+            {}
+};
+
+int mark[ T ];
+std::vector< int > list[ T ];
+
+std::vector< int > data[ N ];
+int n, m;
+
+SegNode* init( int a, int b );
+void update( SegNode *root, int a, int b );
+int query( SegNode *root, int a, int b );
+
+int main( void ) {
+    
+    std::cin.sync_with_stdio( false );
+    std::cin.tie( 0 );
+    
+    for ( int i = 2 ; i < T ; ++i ) {
+        if ( mark[i] ) continue;
+        for ( int j = i ; j < T ; j += i ) {
+            for ( int val = j ; val % i == 0 ; val /= i ) {
+                list[j].emplace_back( i );
+                mark[j] = true;
+            }
+        }
+    }
+    
+    int test;
+    std::cin >> test;
+    while ( test-- ) {
+
+        std::cin >> n >> m;
+
+        for ( int i = 1 ; i <= n ; ++i ) {
+            int val;
+            std::cin >> val;
+            data[i] = list[val];
+            std::reverse( data[i].begin(), data[i].end() );
+        }
+        
+        auto head = init( 1, n );
+    
+        while ( m-- ) {
+            int type, L, R;
+            std::cin >> type >> L >> R;
+            if ( type == 0 ) {
+                update( head, L, R );
+            } else {
+                std::cout << query( head, L, R ) << " ";
+            }
+        } 
+        std::cout << "\n";
+    }
+	return 0;
+}
+SegNode* init( int a, int b ) {
+    SegNode *root = new SegNode( a, b );
+    if ( a < b ) {
+        const int mid = ( a + b ) / 2;
+        root->left = init( a, mid );
+        root->right = init( mid+1, b );
+        root->max = std::max( root->left->max, root->right->max );
+    } else {
+        root->max = ( data[a].empty() ? 1 : data[a].back() );
+    }
+    return root;
+}
+void update( SegNode *root, int a, int b ) {
+    if ( b < root->a or root->b < a ) return;
+    if ( root->max == 1 ) return;
+    if ( root->a >= root->b ) {
+        a = root->a;
+        if ( not data[a].empty() ) {
+            data[a].pop_back();
+            root->max = ( data[a].empty() ? 1 : data[a].back() );
+        }
+        return;
+    }
+    update( root->left, a, b );
+    update( root->right, a, b );
+    root->max = std::max( root->left->max, root->right->max );
+}
+int query( SegNode *root, int a, int b ) {
+    if ( b < root->a or root->b < a ) return 1;
+    if ( a <= root-> a and root->b <= b ) return root->max;
+    return std::max( query( root->left, a, b ), query( root->right, a, b ) );
+}

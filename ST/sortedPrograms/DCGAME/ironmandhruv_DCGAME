@@ -1,0 +1,203 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ll long long int
+#define NN 1000006
+#define MOD 1000000007
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i=0;i<N;i++)
+#define inf 0x7fffffff
+#define frep(i,a,b) for(int i=a;i<=b;i++)
+
+unsigned short int L[NN],R[NN];
+int A[NN],K[NN],V[NN],B[NN];
+unsigned short int ans[NN],prefix[NN];
+char C1[NN],C2[NN];
+char store[2][5];
+int n,m;
+
+
+
+void solve1() {
+	rep(i,n) {
+		cin>>A[i];
+		B[i]=A[i];
+	}
+	unordered_map<int,int> M;
+	sort(A,A+n);
+	//V[i]=x implies x has been mapped to i
+	V[1]=A[0];
+	M[A[0]]=1;
+	int sz=1;
+	frep(i,1,n-1)
+		if(A[i]!=A[i-1]) {
+			V[++sz]=A[i];
+			M[A[i]]=sz;
+		}
+
+	rep(i,n)
+		A[i]=M[B[i]];
+
+	stack<int> S;
+	S.push(0);
+	frep(i,1,n-1) {
+		while(!S.empty() && A[S.top()]<=A[i])
+			S.pop();
+		if(!S.empty())
+			L[i]=(S.top()+1)&1;
+		S.push(i);
+	}
+	while(!S.empty())
+		S.pop();
+
+	R[n-1]=(n-1)&1;
+	S.push(n-1);
+
+	for(int i=n-2;i>=0;i--) {
+		while(!S.empty() && A[S.top()]<A[i])
+			S.pop();
+		R[i]=(n-1)&1;
+		if(!S.empty())
+			R[i]=(S.top()-1)&1;
+		S.push(i);
+	}
+
+	//count of all subarrays with maximum A[i](after mapping)
+	for(ll i=0;i<n;i++) {
+		ans[A[i]]+=((i-L[i]+1)+(R[i]-i)+(i-L[i])*(R[i]-i))&1;
+	}
+
+	frep(i,1,sz)
+		prefix[i]=(prefix[i-1]+ans[i])&1;
+
+	
+	char c1,c2,e;
+	int k,ind; 
+	int cnt;
+	store[0]['D'-'A']='C';
+	store[0]['C'-'A']='D';
+	store[1]['D'-'A']='D';
+	store[1]['C'-'A']='C';
+
+	V[sz+1]=inf;
+	M[inf]=sz+1;
+	rep(i,m) {
+		cin>>c1>>k>>c2;
+		//cout<<c1<<" "<<k<<" "<<c2<<"\n";
+		cnt=0;
+		if(c1=='<') {
+			ind=lower_bound(V+1,V+sz+1,k)-V;
+			ind--;
+			cnt=prefix[ind];
+		}
+		else if(c1=='=') {
+			cnt=ans[M[k]];
+		}
+		else {
+			ind=upper_bound(V+1,V+sz+1,k)-V;
+			cnt=prefix[sz]-prefix[ind-1];
+		}
+		cout<<(store[cnt&1][c2-'A']);
+	}
+}
+
+
+void solve2() {
+
+	set<int> SET;
+	SET.clear();
+	set<int >::iterator it;
+
+	rep(i,n) {
+		cin>>A[i];
+		//SET.insert(A[i]);
+	}
+	rep(i,n) {
+		//fastRead_int(A[i]);
+		SET.insert(A[i]);
+	}
+
+
+	unordered_map<int,int> M;
+	int c=0;
+	for(it=SET.begin();it!=SET.end();it++)
+		M[(*it)]=++c;
+
+	stack<int> S;
+	S.push(0);
+	A[0]=M[A[0]];
+	frep(i,1,n-1) {
+		A[i]=M[A[i]];
+		while(!S.empty() && A[S.top()]<=A[i])
+			S.pop();
+		if(!S.empty())
+			L[i]=(S.top()+1)&1;
+		S.push(i);
+	}
+	while(!S.empty())
+		S.pop();
+
+	R[n-1]=n-1;
+	S.push(n-1);
+
+	for(int i=n-2;i>=0;i--) {
+		while(!S.empty() && A[S.top()]<A[i])
+			S.pop();
+		if(!S.empty())
+			R[i]=(S.top()-1)&1;
+		else
+			R[i]=n-1;
+		S.push(i);
+	}
+
+	for(ll i=0;i<n;i++) {
+		ans[A[i]]+=((i-L[i]+1)+(R[i]-i)+(i-L[i])*(R[i]-i))&1;
+	}
+
+	frep(i,1,c)
+		prefix[i]=(prefix[i-1]+ans[i])&1;
+
+	
+	char c1,c2,e;
+	int k; 
+	int cnt;
+	SET.insert(0);
+	SET.insert(inf);
+	M[inf]=n+1;
+	store[0]['D'-'A']='C';
+	store[0]['C'-'A']='D';
+	store[1]['D'-'A']='D';
+	store[1]['C'-'A']='C';
+	rep(i,m) {
+		cin>>c1>>k>>c2;
+		cnt=0;
+		if(c1=='<') {
+			it=SET.lower_bound(k);
+			it--;
+			cnt=prefix[M[*(it)]];
+		}
+		else if(c1=='=') {
+			cnt=ans[M[k]];
+		}
+		else {
+			it=SET.upper_bound(k);
+			cnt=prefix[c]-prefix[M[(*it)]-1];
+		}
+		cout<<(store[cnt&1][c2-'A']);
+	}
+}
+
+int main(int argc, char const *argv[])
+{
+	fast;
+	cin>>n>>m;
+
+	if(n>=500000 && m>=500000)
+		solve1();
+	else
+		solve2();
+
+	return 0;
+}
+

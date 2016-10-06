@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 100001;
+char str[N];
+int arr[N];
+int freq[N]={0};
+long long sum[N]={0};
+long long sqm[N]={0};
+int n,q;
+int main(){
+    int t;
+    scanf("%d",&t);
+    while(t--){
+        scanf("%s",str);
+        for(n = 0 ; str[n] != '\0' ; ++n){
+            arr[n+1] = 1<<(str[n]-'a');
+        }
+        assert(n<=10000);
+        map < int , int > lol;
+        lol[0];
+        arr[0] = 0;
+        for(int i = 1 ; i <= n ; ++i ){
+            arr[i] ^= arr[i-1];
+            lol[arr[i]];
+        }
+        int cur = 0;
+        for(map< int , int >::iterator it = lol.begin() ; it != lol.end() ; ++it){
+            lol[it->first] = ++cur;
+        }
+        for(int i = 0 ; i <= n ; ++i ){
+            arr[i] = lol[arr[i]];
+        }
+        scanf("%d",&q);
+        int a = 0;
+        int b = 0;
+        while(q--){
+            int x , y , type;
+            scanf("%d %d %d",&x,&y,&type);
+            int l = x + a;
+            int r = y + b;
+            if(l >= n){
+                l -= n;
+            }
+            if(r >= n){
+                r -= n;
+            }
+            r++;
+            if(l > r){
+                l^=r^=l^=r;
+            }
+            assert(l>=0&&l<r&&r<=n);
+            long long ans = 0;
+            if(!type){
+                for(int i = l ; i <= r ; ++i){
+                    ans+=freq[arr[i]];
+                    freq[arr[i]]++;
+                }
+                for(int i = l ; i <= r ; ++i){
+                    freq[arr[i]] = 0;
+                }
+            }
+            else if(type&1){
+                for(int i = l ; i <= r ; ++i){
+                    ans += freq[arr[i]] * i - sum[arr[i]];
+                    ++freq[arr[i]];
+                    sum[arr[i]] += i;
+                }
+                for(int i = l ; i <= r ; ++i){
+                    freq[arr[i]] = 0;
+                    sum[arr[i]] = 0;
+                }
+            }
+            else{
+                for(int i = l ; i <= r ; ++i){
+                    ans += (1LL * i * i * freq[arr[i]]) - (2LL * i * sum[arr[i]]) + sqm[arr[i]];
+                    freq[arr[i]]++;
+                    sum[arr[i]] += i;
+                    sqm[arr[i]] += i*i;
+                }
+                for(int i = l ; i <= r ; ++i){
+                    freq[arr[i]] = 0;
+                    sum[arr[i]] = 0;
+                    sqm[arr[i]] = 0;
+                }
+            }
+            printf("%lld\n",ans);
+            a = b;
+            if(ans>=n)
+                ans%=n;
+            b = ans;
+        }
+    }
+}

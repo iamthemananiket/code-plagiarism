@@ -1,0 +1,304 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define N 1000000
+#define M 1000100
+#define MM 101000
+typedef long long ll;
+ll Ans[MM];
+vector<int> v[MM], Ce[MM];
+int mn[M], mi[M], sz[MM], mx[MM], x[MM], y[MM], w[MM], vis[M], vis1[M], A[M];
+
+int Read() {
+    int ans = 0;
+    char s = getchar();
+    while(1) {
+        if(s >= '0' && s <= '9') {
+            ans = s - '0';
+            break;
+        }
+        s = getchar();
+    }
+    while(1) {
+        s = getchar();
+        if(s >= '0' && s <= '9') {
+            ans = ans * 10 + s - '0';
+        }else break;
+
+    }
+    return ans;
+}
+
+void init() {
+	int cnt = 0;
+	for(int i = 2; i <= N; i ++) {
+		if(!mn[i]) {
+			mn[i] = i;
+			A[cnt ++] = i;
+		}
+		for(int j = 0; j < cnt && i * A[j] <= N; j ++) {
+			mn[i * A[j]] = A[j];
+			if(i % A[j] == 0) break;
+		}
+	}
+	mi[1] = 1;
+	for(int i = 2; i <= N; i ++) {
+		int x = mn[i];
+		int j = i / x;
+		if(j % x == 0) mi[i] = 0;
+		else mi[i] = -mi[j];
+	}
+}
+
+void DFS(int st, int p) {
+	sz[st] = 1;
+	mx[st] = 0;
+	for(int i = 0; i < (int)v[st].size(); i ++) {
+		int id = v[st][i];
+		int en = x[id] + y[id] - st;
+		if(vis[en] || en == p) continue;
+		DFS(en, st);
+		sz[st] += sz[en];
+		if(mx[st] < sz[en]) mx[st] = sz[en];
+	}
+}
+
+int Cen(int st, int p, int sum) {
+	mx[st] = max(mx[st], sum - sz[st]);
+	int ans = st;
+	for(int i = 0; i < (int)v[st].size(); i ++) {
+		int id = v[st][i];
+		int en = x[id] + y[id] - st;
+		if(vis[en] || en == p) continue;
+		int k = Cen(en, st, sum);
+		if(mx[ans] > mx[k]) ans = k;
+	}
+	return ans;
+}
+
+
+int num;
+int root[MM];
+
+int gcd(int a, int b) {
+	return b? gcd(b, a % b) : a;
+}
+
+int T;
+int gas[M];
+
+int cc;
+
+int Val[M];
+int Num;
+
+void Op(int va, int ty = 1) {
+	if(va == 1) cc ++;
+	int tt = 0;
+	int xx = va;
+	A[tt ++] = 1;
+	while(xx > 1) {
+		int yy = mn[xx];
+		int po = 0;
+		while(xx % yy == 0) {
+			po ++;
+			xx /= yy;
+		}
+		int ga = tt;
+		for(int i = 0; i < tt; i ++) {
+			int pt = yy;
+			for(int j = 0; j < po; j ++) {
+				A[ga ++] = A[i] * pt;
+				pt = yy * pt;
+			}
+		}
+		tt = ga;
+	}
+	for(int i = 0; i < tt; i ++) {
+		int j = A[i];
+		if(vis1[j] == T) gas[j] += ty;
+		else {
+			vis1[j] = T;
+			gas[j] = 1;
+			Val[Num ++] = j;
+		}
+	}
+}
+
+int val[MM];
+int CC;
+
+void DFS2(int st, int p, int cnt, int X, int ty) {
+	for(int i = 0; i < (int)v[st].size(); i ++) {
+		CC ++;
+		int id = v[st][i];
+		int en = x[id] + y[id] - st;
+		if(en == p || vis[en]) continue;
+		val[en] = gcd(w[id], val[st]);
+		Op(val[en]);
+		DFS2(en, st, cnt, X, ty);
+	}
+}
+
+ll Doit() {
+	ll ans = 0;
+	for(int i = 0; i < Num; i ++) {
+		int j = Val[i];
+		ans += 1ll * mi[j] * gas[j] * gas[j];
+	}
+	return ans;
+}
+
+void Calc(int X, int ty) {
+	int st = root[X];
+	Ans[X] = 0;
+	Num = 0;
+	T ++;
+	cc = 0;
+	for(int i = 0; i < (int)v[st].size(); i ++) {
+		int id = v[st][i];
+		int en = x[id] + y[id] - st;
+		if(vis[en]) continue;
+		val[en] = w[id];
+		Op(val[en]);
+		DFS2(en, st, st, X, ty);
+	}
+	Ans[X] = Doit();
+	int aa = cc;
+	for(int i = 0; i < (int)v[st].size(); i ++) {
+		int id = v[st][i];
+		int en = x[id] + y[id] - st;
+		if(vis[en]) continue;
+		val[en] = w[id];
+		T ++;
+		Num = 0;
+		Op(val[en]);
+		DFS2(en, st, en, X, ty);
+		Ans[X] -= Doit();
+	}
+	Ans[X] /= 2;
+	Ans[X] += aa;
+}
+
+
+void Work(int st) {
+	DFS(st, 0);
+	int K = Cen(st, 0, sz[st]);
+	num ++;
+	root[num] = K;
+	Calc(num, 0);
+	vis[K] = 1;
+	for(int i = 0; i < (int)v[K].size(); i ++) {
+		int id = v[K][i];
+		int en = x[id] + y[id] - K;
+		if(vis[en]) {
+			continue;
+		}
+		Work(en);
+	}
+	return ;
+}
+
+void Ch(int &x) {
+    if(!x) return ;
+    int y = 1;
+    while(x > 1) {
+        int k = mn[x];
+        while(x % k == 0) x /= k;
+        y = y * k;
+    }
+    x = y;
+}
+
+int pa[MM], val1[MM], val2[MM];
+
+void dfs(int st, int en, int p) {
+    for(int i = 0; i < v[st].size(); i ++) {
+        int id = v[st][i];
+        int j = x[id] + y[id] - st;
+        if(j == en) continue;
+        val[j] = gcd(val[st], w[id]);
+        pa[j] = p;
+        dfs(j, st, p);
+    }
+}
+
+int n;
+int BB[MM];
+ll Calc1(int st, int en, int xx, int yy) {
+    Num = 0;
+    int cnt = 0;
+    for(int i = 1; i <= n; i ++) {
+        val1[i] = val[i], val2[i] = val[i];
+        if(pa[i] == en) val1[i] = gcd(val[i], xx), val2[i] = gcd(val[i], yy), BB[cnt ++] = i;
+    }
+    T ++;
+    for(int i = 1; i <= n; i ++) Op(val1[i]);
+    ll ans = 0;
+    ans += Doit();
+    for(int j = 0; j < cnt; j ++) {
+        int i = BB[j];
+        if(val1[i] != val2[i]) {
+            Op(val1[i], -1);
+            Op(val2[i]);
+            if(val1[i] == 1) ans += 2;
+            else if(val2[i] == 1) ans -= 2;
+        }
+    }
+    ans -= Doit();
+    T ++;
+    Num = 0;
+    for(int j = 0; j < cnt; j ++) {
+        int i = BB[j];
+        Op(val1[i]);
+    }
+    ans -= Doit();
+    T ++;
+    Num = 0;
+    for(int j = 0; j < cnt; j ++) {
+        int i = BB[j];
+        Op(val2[i]);
+    }
+    ans += Doit();
+    ans /= 2;
+    return ans;
+}
+
+
+int main() {
+	int Q, id;
+	init();
+	n = Read();
+	for(int i = 1; i < n; i ++) {
+        x[i] = Read();
+        y[i] = Read();
+        w[i] = Read();
+		v[x[i]].push_back(i);
+		v[y[i]].push_back(i);
+		Ch(w[i]);
+	}
+	num = 0;
+	Work(1);
+	ll ans = 0;
+	for(int i = 1; i <= num; i ++) ans += Ans[i];
+	printf("%lld\n", ans);
+	for(scanf("%d", &Q); Q --;) {
+		int Y;
+		scanf("%d%d", &id, &Y);
+		Ch(Y);
+		int xx = w[id];
+		w[id] = 0;
+		int st = x[id];
+		val[st] = 0;
+		for(int i = 0; i < v[st].size(); i ++) {
+            int id = v[st][i];
+            int en = x[id] + y[id] - st;
+            val[en] = w[id];
+            pa[en] = en;
+            dfs(en, st, en);
+		}
+		w[id] = Y;
+		ans -= Calc1(st, y[id], xx, Y);
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

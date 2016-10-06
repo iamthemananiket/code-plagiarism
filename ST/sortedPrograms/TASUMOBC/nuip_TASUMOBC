@@ -1,0 +1,100 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < int(Y);++(X))
+#define rrep(X,Y) for (int (X) = int(Y-1);(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < int(Y);++(X))
+#define peat(X,Y) for (;(X) < int(Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+
+using namespace std;
+typedef uint64_t ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+
+pll hoge[]={pll(1,0),pll(2,0),pll(2,1)};
+
+pll solve(ll n,ll ub){
+  //   cout<<n<<",\n"<<ub<<endl;
+  if(n<3)
+    return hoge[n];
+  if(n==ub)
+    return pll(2,0);
+  ub=ub/3;
+  if(n==ub*2)
+    return pll(2,1);
+  if(n<=ub)
+    return solve(n,ub);
+  pll re=solve(n%ub,ub);
+  if(n<ub*2){
+    re.X*=2,re.Y*=2;
+  }else{
+    pll tmp=re;
+    re.X=tmp.X*2+tmp.Y;
+    re.Y=tmp.Y*2+tmp.X;
+  }
+  // cout<<re<<endl;
+  return re;
+}
+
+
+int comb[10123][10123];
+ll solve2(ll n){
+  if(n>10000)return 0;
+  if(!comb[0][0]){comb[0][0]=1;
+  rep(i,10120)
+    rep(j,10120){
+    (comb[i+1][j]+=comb[i][j])%=3;
+    (comb[i+1][j+1]+=comb[i][j])%=3;
+  }}
+  ll re=0;
+  rep(i,n+1)
+    re+=comb[n][i];
+  return re;
+}
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  int i,j,k;
+  vector<ll> pw;
+  pw.pb(3);
+  while(pw.back()<1e18){
+    pw.pb(pw.back()*3ll);
+  }
+  //   cout<<pw;
+  int t;
+  cin>>t;
+  while(t--){
+    ll n,mod=1e9+7;
+    cin>>n;
+    pll re=solve(n,*lower_bound(all(pw),n));
+    cout<<(re.X+re.Y*2)%mod<<endl;
+    //    cout<<solve2(n)<<endl;
+  }
+  return 0;
+}

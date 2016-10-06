@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct BIT
+{
+    long long bit[1006][1006];
+    void add(int x, int y, int v)
+    {
+        y=1005-y;
+        for(x++; x<=1005; x+=x&-x)
+            for(int yy=y+1; yy<=1005; yy+=yy&-yy)
+                bit[x][yy]+=v;
+    }
+    long long sum(int x, int y)
+    {
+        y=1005-y;
+        long long ret=0;
+        for(x++; x>0; x-=x&-x)
+            for(int yy=y+1; yy>0; yy-=yy&-yy)
+                ret+=bit[x][yy];
+        return ret;
+    }
+} tree1, tree2;
+
+int N;
+int A[1001];
+long long B[1001][1001];
+long long C[1001][1001];
+
+long long getsum(int x0, int y0, int x1, int y1)
+{
+    if(x0>x1)
+        return 0;
+    if(y0>y1)
+        return 0;
+    x0--, y0--;
+    return B[x1][y1]-B[x0][y1]-B[x1][y0]+B[x0][y0];
+}
+
+long long getsum2(int x0, int y0, int x1, int y1)
+{
+    if(x0>x1)
+        return 0;
+    if(y0>y1)
+        return 0;
+    x0--, y0--;
+    return C[x1][y1]-C[x0][y1]-C[x1][y0]+C[x0][y0];
+}
+
+void _main()
+{
+    scanf("%d", &N);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    sort(A+1, A+1+N);
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=N; j++)
+            B[i][j]=C[i][j]=0;
+    vector<pair<int, pair<int, int>>> v;
+    for(int i=1; i<=N; i++)
+        for(int j=i+1; j<=N; j++)
+        {
+            B[i][j]=A[i]+A[j];
+            C[i][j]=1;
+            v.push_back(make_pair(A[i]+A[j], make_pair(i, j)));
+        }
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=N; j++)
+        {
+            B[i][j]+=B[i-1][j]+B[i][j-1]-B[i-1][j-1];
+            C[i][j]+=C[i-1][j]+C[i][j-1]-C[i-1][j-1];
+        }
+    sort(v.begin(), v.end());
+    long long ans=0;
+    for(auto& it: v)
+    {
+        int s=it.first;
+        int x=it.second.first;
+        int y=it.second.second;
+        tree1.add(x, y, it.first);
+        tree2.add(x, y, 1);
+        long long s1=tree1.sum(x-1, y+1), s2=tree2.sum(x-1, y+1);
+        ans+=s*s2-s1+(getsum(1, y+1, x-1, N)-s1-s*(getsum2(1, y+1, x-1, N)-s2));
+    }
+    for(int i=1; i<=N; i++)
+        for(int j=i+1; j<=N; j++)
+            ans+=getsum(i+1, j+1, N, N)-getsum(j, j, j, N)-(getsum2(i+1, j+1, N, N)-getsum2(j, j, j, N))*(A[i]+A[j]);
+    for(auto& it: v)
+    {
+        int x=it.second.first;
+        int y=it.second.second;
+        tree1.add(x, y, -it.first);
+        tree2.add(x, y, -1);
+    }
+    printf("%lld\n", ans*2);
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+        _main();
+    return 0;
+}

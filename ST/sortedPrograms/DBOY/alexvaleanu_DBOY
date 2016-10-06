@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_H = 2 * 500;
+const int MAX_N = 500;
+const int INF = numeric_limits<int>::max() / 2;
+
+int dp[MAX_H + 1];
+int H[MAX_N + 1];
+
+int main()
+{
+    ///ifstream cin("data.in");
+
+    int T, N;
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N;
+
+        for (int j = 0; j <= MAX_H; ++j)
+            dp[j] = INF;
+
+        dp[0] = 0;
+
+        for (int i = 1; i <= N; ++i)
+            cin >> H[i];
+
+        for (int i = 1; i <= N; ++i)
+        {
+            int val;
+            cin >> val;
+
+            for (int j = 0; j <= MAX_H - val; ++j)
+                if (dp[j] != INF)
+                    dp[j + val] = min(dp[j + val], dp[j] + 1);
+        }
+
+        int sol = 0;
+
+        for (int i = 1; i <= N; ++i)
+            sol += dp[2 * H[i]];
+
+        cout << sol << "\n";
+    }
+
+    return 0;
+}

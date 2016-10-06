@@ -1,0 +1,69 @@
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <deque>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen(".inp","r",stdin)
+#define OUTPUT freopen(".out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=0;
+
+int n,x,y,col,s[2][100];
+string key;
+void solve(){
+    int b=0,r=0,t[2]={0},p[2]={1,0};
+    if (x>y) swap(x,y);
+    while (x){
+        s[0][++t[0]]=x;
+        x>>=1;
+    }
+    while (y){
+        s[1][++t[1]]=y;
+        y>>=1;
+    }
+    //FOR(i,1,t[0]) printf("%d ",s[0][i]);ENDL;
+    //FOR(i,1,t[1]) printf("%d ",s[1][i]);ENDL;
+    for(p[1]=1;;p[1]++){
+        while (s[1][p[1]]<s[0][p[0]]) p[0]++;
+        if (s[1][p[1]]==s[0][p[0]]) break;
+    }
+    p[1]--;
+    FOR(k,0,1){
+        if (t[k]%2==0) r+=(p[k]+1)/2,b+=p[k]/2;
+        else b+=(p[k]+1)/2,r+=p[k]/2;
+    }
+    if (col) swap(r,b);
+    printf("%d\n",(key[1]=='r')?r:b);
+}
+int main()
+{
+    cin>>n;
+    col=0;
+    while (n--){
+        cin>>key;
+        if (key[1]=='i') col=1-col;
+        else{
+            cin>>x>>y;
+            solve();
+        }
+    }
+}

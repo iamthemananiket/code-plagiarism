@@ -1,0 +1,411 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+inline void fasterLLDivMod(unsigned long long x, unsigned y, unsigned &out_d, unsigned &out_m) {
+	unsigned xh = (unsigned)(x >> 32), xl = (unsigned)x, d, m;
+#ifdef __GNUC__
+	asm (
+		"divl %4; \n\t"
+		: "=a" (d), "=d" (m)
+		: "d" (xh), "a" (xl), "r" (y)
+		);
+#else
+	__asm {
+		mov edx, dword ptr [xh];
+		mov eax, dword ptr [xl];
+		div dword ptr [y];
+		mov dword ptr [d], eax;
+		mov dword ptr [m], edx;
+	};
+#endif
+	out_d = d; out_m = m;
+}
+
+template<int MOD>
+struct ModInt {
+	static const int Mod = MOD;
+	unsigned x;
+	ModInt() : x(0) {}
+	ModInt(signed sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	ModInt(signed long long sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	int get() const { return (int)x; }
+
+	ModInt &operator+=(ModInt that) { if((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator-=(ModInt that) { if((x += MOD - that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) {
+		unsigned dummy;
+		fasterLLDivMod((unsigned long long)x * that.x, MOD, dummy, x);
+		return *this;
+	}
+
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+	ModInt operator*(ModInt that) const {
+		ModInt res;
+		unsigned dummy;
+		fasterLLDivMod((unsigned long long)x * that.x, MOD, dummy, res.x);
+		return res;
+	}
+};
+typedef ModInt<1000000007> mint;
+
+vector<int> primes;
+vector<int> smallestPrimeFactor;
+void linearSieve(int n) {
+	if(n < 1) n = 1;
+	if((int)smallestPrimeFactor.size() >= n+1) return;
+	int primePiBound = n < 20 ? n - 1 : (int)(n / (log(n * 1.) - 2) + 2);
+	primes.assign(primePiBound + 1, numeric_limits<int>::max());
+	int P = 0;
+	smallestPrimeFactor.assign(n + 1, 0);
+	smallestPrimeFactor[1] = 1;
+	int n2 = n / 2, n3 = n / 3, n5 = n / 5;
+	if(n >= 2)
+		primes[P ++] = 2;
+	if(n >= 3)
+		primes[P ++] = 3;
+	for(int q = 2; q <= n; q += 2)
+		smallestPrimeFactor[q] = 2;
+	for(int q = 3; q <= n; q += 6)
+		smallestPrimeFactor[q] = 3;
+	for(int q = 5; q <= n5; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+		int bound = smallestPrimeFactor[q];
+		for(int i = 2; ; ++ i) {
+			int p = primes[i];
+			if(p > bound) break;
+			int pq = p * q;
+			if(pq > n) break;
+			smallestPrimeFactor[pq] = p;
+		}
+	}
+	for(int q = (n5 + 1) | 1; q <= n; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+	}
+	primes.resize(P);
+}
+
+struct Sum {
+	mint prod;
+	Sum() { prod.x = 1; }
+	explicit Sum(mint x): prod(x) { }
+	Sum &operator+=(const Sum &that) {
+		prod *= that.prod;
+		return *this;
+	}
+	Sum operator+(const Sum &that) const {
+		return Sum(*this) += that;
+	}
+};
+
+struct RangeFenwickTree2D {
+	typedef int Pos;
+	vector<vector<int> > perms;
+	vector<vector<Pos> > poses;
+	vector<vector<Sum> > nodes;
+	vector<vector<int> > rcnts;
+	int n, log2n;
+	void init(const vector<Pos> &ys, const Sum &v = Sum()) {
+		init(ys, vector<Sum>(ys.size(), v));
+	}
+private:
+	struct IndirectPosCmp {
+		const vector<int> &ys;
+		IndirectPosCmp(const vector<int> &ys_): ys(ys_) { }
+		bool operator()(int i, int j) const {
+			bool a = i >= (int)ys.size(), b = j >= (int)ys.size();
+			if(a || b) return !a < !b;
+			else return ys[i] < ys[j];
+		}
+	};
+public:
+	void init(const vector<Pos> &ys, const vector<Sum> &vals) {
+		n = 1, log2n = 0; while(n < (int)ys.size()) n *= 2, log2n ++;
+		nodes.resize(n * 2);
+
+		perms.assign(log2n + 1, vector<int>(n));
+		poses.assign(log2n + 1, vector<Pos>(n));
+		nodes.assign(log2n + 1, vector<Sum>(n));
+		rcnts.assign(log2n, vector<int>(n + 1));
+
+		vector<int> prev(n), cnt(n);
+		for(int i = 0; i < n; i ++) {
+			perms[log2n][i] = i;
+			poses[log2n][i] = i < (int)ys.size() ? ys[i] : -1;
+			nodes[log2n][i] = i < (int)ys.size() ? vals[i] : Sum();
+			cnt[i] = i;
+		}
+		vector<bool> origin(n);
+		for(int k = log2n - 1; k >= 0; -- k) {
+			prev.swap(cnt);
+			int h = 1 << (log2n - k), h_2 = h / 2;
+			vector<int> &cperms = perms[k];
+			vector<int> &cposes = poses[k];
+			vector<Sum> &cnodes = nodes[k];
+			vector<int> &crcnts = rcnts[k];
+
+			for(int j = 0; j < n; j += h) {
+				for(int k = 0; k < h; ++ k)
+					origin[prev[j + k]] = k >= h_2;
+				merge(prev.begin() + j, prev.begin() + j + h_2
+					, prev.begin() + j + h_2, prev.begin() + j + h
+					, cnt.begin() + j, IndirectPosCmp(ys));
+				for(int i = 0; i < h; i ++) {
+					int p = cnt[j + i];
+					cperms[p] = j + i;
+					cposes[j + i] = p < (int)ys.size() ? ys[p] : -1;
+					cnodes[j + i] = p < (int)ys.size() ? vals[p] : Sum();
+					crcnts[j + i + 1] = crcnts[j + i] + (origin[p] ? 1 : 0);
+				}
+				for(int i = 0; i < h; i ++) {
+					int c = i | (i+1);
+					if(c < h) cnodes[j + c] += cnodes[j + i];
+				}
+			}
+		}
+	}
+	Sum get(int i) const { return nodes[log2n][i]; }
+
+	Sum getRange(int i1, int j1, Pos j2) const {
+		if(i1 >= j1)
+			return Sum();
+		int p = lower_bound(poses[0].begin(), poses[0].end(), j2) - poses[0].begin();
+		return getRangeRec(0, 1, 0, i1, j1, j2, p);
+	}
+
+	void add(int p, const Sum &x) {
+		for(int i = p + n, k = log2n; i > 0; i >>= 1, -- k) {
+			int h = 1 << (log2n - k), base = (i - (1 << k)) * h;
+			add1(&nodes[k][base], h, perms[k][p] - base, x);
+		}
+	}
+private:
+	inline void add1(Sum *cnodes, int h, int i, const Sum &x) const {
+		for(; i < h; i |= i+1) cnodes[i] += x;
+	}
+	Sum getRangeRec(int k, int i, int l, int i1, int j1, Pos j2, int p) const {
+		int h = 1 << (log2n - k);
+		int base = (i - (1 << k)) * h;
+		if(j1 - i1 == h) {
+			if(i >= n) {
+				Pos y = poses[k][base];
+				return y < j2 ? Sum(nodes[k][base]) : Sum();
+			}else {
+				return getRange1(&nodes[k][base], h, p);
+			}
+		}else {
+			int m = l + h / 2;
+			int q = rcnts[k][base + p] - rcnts[k][base];
+			Sum res;
+			if(i1 < m)
+				res += getRangeRec(k+1, i * 2,     l, i1, min(j1, m), j2, p - q);
+			if(m < j1)
+				res += getRangeRec(k+1, i * 2 + 1, m, max(i1, m), j1, j2, q);
+			return res;
+		}
+	}
+	inline Sum getRange1(const Sum *cnodes, int h, int j) const {
+		Sum res = Sum();
+		for(-- j; j >= 0; j = (j & (j+1)) - 1) res += cnodes[j];
+		return res;
+	}
+};
+
+int MM;
+const int MaxN = 100000;
+const int Log2N = 16;
+const int Log3N = 10;
+const int SqrtNPrimes = 65;
+
+RangeFenwickTree2D rt;
+vector<pair<int, int> > primePoses;
+
+//= lcm [n-k+1..n]
+mint solve(int n, int k) {
+	int L = n - k + 1;
+	mint prods[Log3N + 1];
+	rer(i, 1, Log3N)
+		prods[i].x = 1;
+	prods[L > n / 3 * 3 ? 0 : L > n / 9 * 9 ? 1 : L > n / 27 * 27 ? 2 : L > n / 81 * 81 ? 3 : L > n / 243 * 243 ? 4 : L > n / 729 * 729 ? 5 : L > n / 2187 * 2187 ? 6 : L > n / 6561 * 6561 ? 7 : L > n / 19683 * 19683 ? 8 : L > n / 59049 * 59049 ? 9 : 10] *= 3;
+	prods[L > n / 5 * 5 ? 0 : L > n / 25 * 25 ? 1 : L > n / 125 * 125 ? 2 : L > n / 625 * 625 ? 3 : L > n / 3125 * 3125 ? 4 : L > n / 15625 * 15625 ? 5 : L > n / 78125 * 78125 ? 6 : 7] *= 5;
+	prods[L > n / 7 * 7 ? 0 : L > n / 49 * 49 ? 1 : L > n / 343 * 343 ? 2 : L > n / 2401 * 2401 ? 3 : L > n / 16807 * 16807 ? 4 : 5] *= 7;
+	if(MM <= 10) goto skip;
+	prods[L > n / 11 * 11 ? 0 : L > n / 121 * 121 ? 1 : L > n / 1331 * 1331 ? 2 : L > n / 14641 * 14641 ? 3 : 4] *= 11;
+	prods[L > n / 13 * 13 ? 0 : L > n / 169 * 169 ? 1 : L > n / 2197 * 2197 ? 2 : L > n / 28561 * 28561 ? 3 : 4] *= 13;
+	prods[L > n / 17 * 17 ? 0 : L > n / 289 * 289 ? 1 : L > n / 4913 * 4913 ? 2 : L > n / 83521 * 83521 ? 3 : 4] *= 17;
+	prods[L > n / 19 * 19 ? 0 : L > n / 361 * 361 ? 1 : L > n / 6859 * 6859 ? 2 : 3] *= 19;
+	prods[L > n / 23 * 23 ? 0 : L > n / 529 * 529 ? 1 : L > n / 12167 * 12167 ? 2 : 3] *= 23;
+	prods[L > n / 29 * 29 ? 0 : L > n / 841 * 841 ? 1 : L > n / 24389 * 24389 ? 2 : 3] *= 29;
+	prods[L > n / 31 * 31 ? 0 : L > n / 961 * 961 ? 1 : L > n / 29791 * 29791 ? 2 : 3] *= 31;
+	prods[L > n / 37 * 37 ? 0 : L > n / 1369 * 1369 ? 1 : L > n / 50653 * 50653 ? 2 : 3] *= 37;
+	prods[L > n / 41 * 41 ? 0 : L > n / 1681 * 1681 ? 1 : L > n / 68921 * 68921 ? 2 : 3] *= 41;
+	prods[L > n / 43 * 43 ? 0 : L > n / 1849 * 1849 ? 1 : L > n / 79507 * 79507 ? 2 : 3] *= 43;
+	prods[L > n / 47 * 47 ? 0 : L > n / 2209 * 2209 ? 1 : 2] *= 47;
+	prods[L > n / 53 * 53 ? 0 : L > n / 2809 * 2809 ? 1 : 2] *= 53;
+	prods[L > n / 59 * 59 ? 0 : L > n / 3481 * 3481 ? 1 : 2] *= 59;
+	prods[L > n / 61 * 61 ? 0 : L > n / 3721 * 3721 ? 1 : 2] *= 61;
+	prods[L > n / 67 * 67 ? 0 : L > n / 4489 * 4489 ? 1 : 2] *= 67;
+	prods[L > n / 71 * 71 ? 0 : L > n / 5041 * 5041 ? 1 : 2] *= 71;
+	prods[L > n / 73 * 73 ? 0 : L > n / 5329 * 5329 ? 1 : 2] *= 73;
+	prods[L > n / 79 * 79 ? 0 : L > n / 6241 * 6241 ? 1 : 2] *= 79;
+	prods[L > n / 83 * 83 ? 0 : L > n / 6889 * 6889 ? 1 : 2] *= 83;
+	prods[L > n / 89 * 89 ? 0 : L > n / 7921 * 7921 ? 1 : 2] *= 89;
+	prods[L > n / 97 * 97 ? 0 : L > n / 9409 * 9409 ? 1 : 2] *= 97;
+	prods[L > n / 101 * 101 ? 0 : L > n / 10201 * 10201 ? 1 : 2] *= 101;
+	prods[L > n / 103 * 103 ? 0 : L > n / 10609 * 10609 ? 1 : 2] *= 103;
+	prods[L > n / 107 * 107 ? 0 : L > n / 11449 * 11449 ? 1 : 2] *= 107;
+	prods[L > n / 109 * 109 ? 0 : L > n / 11881 * 11881 ? 1 : 2] *= 109;
+	prods[L > n / 113 * 113 ? 0 : L > n / 12769 * 12769 ? 1 : 2] *= 113;
+	prods[L > n / 127 * 127 ? 0 : L > n / 16129 * 16129 ? 1 : 2] *= 127;
+	prods[L > n / 131 * 131 ? 0 : L > n / 17161 * 17161 ? 1 : 2] *= 131;
+	prods[L > n / 137 * 137 ? 0 : L > n / 18769 * 18769 ? 1 : 2] *= 137;
+	prods[L > n / 139 * 139 ? 0 : L > n / 19321 * 19321 ? 1 : 2] *= 139;
+	prods[L > n / 149 * 149 ? 0 : L > n / 22201 * 22201 ? 1 : 2] *= 149;
+	prods[L > n / 151 * 151 ? 0 : L > n / 22801 * 22801 ? 1 : 2] *= 151;
+	prods[L > n / 157 * 157 ? 0 : L > n / 24649 * 24649 ? 1 : 2] *= 157;
+	prods[L > n / 163 * 163 ? 0 : L > n / 26569 * 26569 ? 1 : 2] *= 163;
+	prods[L > n / 167 * 167 ? 0 : L > n / 27889 * 27889 ? 1 : 2] *= 167;
+	prods[L > n / 173 * 173 ? 0 : L > n / 29929 * 29929 ? 1 : 2] *= 173;
+	prods[L > n / 179 * 179 ? 0 : L > n / 32041 * 32041 ? 1 : 2] *= 179;
+	prods[L > n / 181 * 181 ? 0 : L > n / 32761 * 32761 ? 1 : 2] *= 181;
+	prods[L > n / 191 * 191 ? 0 : L > n / 36481 * 36481 ? 1 : 2] *= 191;
+	prods[L > n / 193 * 193 ? 0 : L > n / 37249 * 37249 ? 1 : 2] *= 193;
+	prods[L > n / 197 * 197 ? 0 : L > n / 38809 * 38809 ? 1 : 2] *= 197;
+	prods[L > n / 199 * 199 ? 0 : L > n / 39601 * 39601 ? 1 : 2] *= 199;
+	prods[L > n / 211 * 211 ? 0 : L > n / 44521 * 44521 ? 1 : 2] *= 211;
+	prods[L > n / 223 * 223 ? 0 : L > n / 49729 * 49729 ? 1 : 2] *= 223;
+	prods[L > n / 227 * 227 ? 0 : L > n / 51529 * 51529 ? 1 : 2] *= 227;
+	prods[L > n / 229 * 229 ? 0 : L > n / 52441 * 52441 ? 1 : 2] *= 229;
+	prods[L > n / 233 * 233 ? 0 : L > n / 54289 * 54289 ? 1 : 2] *= 233;
+	prods[L > n / 239 * 239 ? 0 : L > n / 57121 * 57121 ? 1 : 2] *= 239;
+	prods[L > n / 241 * 241 ? 0 : L > n / 58081 * 58081 ? 1 : 2] *= 241;
+	prods[L > n / 251 * 251 ? 0 : L > n / 63001 * 63001 ? 1 : 2] *= 251;
+	prods[L > n / 257 * 257 ? 0 : L > n / 66049 * 66049 ? 1 : 2] *= 257;
+	prods[L > n / 263 * 263 ? 0 : L > n / 69169 * 69169 ? 1 : 2] *= 263;
+	prods[L > n / 269 * 269 ? 0 : L > n / 72361 * 72361 ? 1 : 2] *= 269;
+	prods[L > n / 271 * 271 ? 0 : L > n / 73441 * 73441 ? 1 : 2] *= 271;
+	prods[L > n / 277 * 277 ? 0 : L > n / 76729 * 76729 ? 1 : 2] *= 277;
+	prods[L > n / 281 * 281 ? 0 : L > n / 78961 * 78961 ? 1 : 2] *= 281;
+	prods[L > n / 283 * 283 ? 0 : L > n / 80089 * 80089 ? 1 : 2] *= 283;
+	prods[L > n / 293 * 293 ? 0 : L > n / 85849 * 85849 ? 1 : 2] *= 293;
+	prods[L > n / 307 * 307 ? 0 : L > n / 94249 * 94249 ? 1 : 2] *= 307;
+	prods[L > n / 311 * 311 ? 0 : L > n / 96721 * 96721 ? 1 : 2] *= 311;
+	prods[L > n / 313 * 313 ? 0 : L > n / 97969 * 97969 ? 1 : 2] *= 313;
+skip:;
+	int k2 = 0;
+	while(L <= (n >> k2 << k2)) ++ k2;
+	mint res; res.x = 1 << (k2-1);
+	mint prod; prod.x = 1;
+	for(int i = Log3N; i >= 1; -- i) {
+		prod *= prods[i];
+		res *= prod;
+	}
+	if(MM > 10) {
+		int li = lower_bound(all(primePoses), mp(L, 0)) - primePoses.begin();
+		int ri = lower_bound(all(primePoses), mp(n + 1, 0)) - primePoses.begin();
+		Sum sum = rt.getRange(li, ri, li);
+		res *= sum.prod;
+	}
+	return res;
+}
+
+void init() {
+	linearSieve(MaxN);
+	primePoses.clear();
+	each(pi, primes) {
+		int p = *pi;
+		if((ll)p * p <= MaxN)
+			continue;
+		if(p > MaxN)
+			break;
+		for(int n = p; n <= MaxN; n += p)
+			primePoses.push_back(mp(n, p));
+	}
+	sort(all(primePoses));
+	int P = primePoses.size();
+	vector<int> prevPos(MaxN+1, -1);
+	vi ys(P);
+	vector<Sum> vals(P);
+	rep(i, P) {
+		int p = primePoses[i].second;
+		ys[i] = prevPos[p];
+		vals[i] = Sum(p);
+		prevPos[p] = i;
+	}
+	rt.init(ys, vals);
+}
+
+int main() {
+	init();
+
+	/*
+	for(int pi = 1; pi < SqrtNPrimes; ++ pi) {
+		int p = primes[pi];
+		int t = p, k = 0;
+		cout << "prods[";
+		while(t <= MaxN) {
+			cout << "L > n / " << t << " * " << t << " ? " << k << " : ";
+			t *= p, ++ k;
+		}
+		cout << k << "] *= " << p << ";" << endl;
+	}*/
+
+	int T;
+	while(~scanf("%d", &T)) {
+		int N, K;
+		scanf("%d%d", &N, &K);
+		int A, B, M;
+		scanf("%d%d%d", &A, &B, &M);
+		MM = M;
+		vector<int> C(T);
+		for(int i = 0; i < T-1; ++ i)
+			scanf("%d", &C[i]);
+		vector<int> D(T);
+		for(int i = 0; i < T-1; ++ i)
+			scanf("%d", &D[i]);
+		rep(i, T) {
+			mint ans = solve(N, K);
+			printf("%d\n", ans.get());
+			int Answer = ans.get();
+			N = 1 + ((ll)A * Answer + C[i]) % M;
+			K = 1 + ((ll)B * Answer + D[i]) % N;
+		}
+	}
+	return 0;
+}

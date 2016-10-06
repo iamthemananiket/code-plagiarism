@@ -1,0 +1,103 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int mod = 1e9 + 7;
+const int N = 1e3 + 1;
+int power(int base , int expo){
+    long long a = base , res = 1;
+    while(expo){
+        if(expo & 1){
+            res *= a;
+            if(res >= mod){
+                res %= mod;
+            }
+        }
+        a *= a;
+        if(a >= mod){
+            a %= mod;
+        }
+        expo >>= 1;
+    }
+    return int(res);
+}
+int t , n;
+int arr[N];
+int precalc[N][N];
+vector < int > v[N];
+bool visited[N];
+bool color[N];
+void prepare(){
+    for(int i = 1 ; i <= n ; ++i){
+        for(int j = i + 1 ; j <= n ; ++j){
+            precalc[i][j] = min( power(arr[i] , arr[j]) , power(arr[j] , arr[i]) );
+        }
+    }
+}
+void cleargraph(){
+    for(int i = 1 ; i <= n ; ++i){
+        v[i].clear();
+        visited[i] = 0;
+        color[i] = 0;
+    }
+}
+void makegraph(int maxval){
+    for(int i = 1 ; i <= n ; ++i){
+        for(int j = i + 1 ; j <= n ; ++j){
+            if(precalc[i][j] > maxval){
+                v[i].push_back(j);
+                v[j].push_back(i);
+            }
+        }
+    }
+}
+bool bfs(int start){
+    visited[start] = 1;
+    color[start] = 0;
+    queue < int > q;
+    q.push(start);
+    bool ok = 1;
+    while(!q.empty()){
+        int node = q.front();
+        q.pop();
+        for(int i = 0 ; i < v[node].size() ; ++i){
+            int next = v[node][i];
+            if(!visited[next]){
+                color[next] = color[node] ^ 1;
+                visited[next] = 1;
+                q.push(next);
+            }
+            ok &= color[node] ^ color[next];
+        }
+    }
+    return ok;
+}
+bool checkgraph(){
+    bool ok = 1;
+    for(int i = 1 ; i <= n ; ++i){
+        if(!visited[i]){
+            ok &= bfs(i);
+        }
+    }
+    return ok;
+}
+int solve(){
+    int l = 1;
+    int r = mod - 1;
+    while(l < r){
+        int mid = (l + r) >> 1;
+        cleargraph();
+        makegraph(mid);
+        checkgraph() ? r = mid : l = mid + 1 ;
+    }
+    return l;
+}
+int main(){
+    cin >> t;
+    while(t--){
+        cin >> n;
+        for(int i = 1 ; i <= n ; ++i){
+            cin >> arr[i];
+        }
+        prepare();
+        cout << solve() << "\n";
+    }
+}

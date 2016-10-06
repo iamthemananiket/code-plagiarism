@@ -1,0 +1,94 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<unordered_map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y)-1;(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+#define eb emplace_back
+#define UNIQUE(X) (X).erase(unique(all(X)),(X).end())
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> using vv=vector<vector<T>>;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+const ll MOD=1e9+7;
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  vector<int> head={0,0,0,0,1,2,3,5,7,8},
+    reps={0,1,4,9,7,7,9,4,1,9},
+      last={0,11,44,99,76,75,96,39,04,91};
+  int T;
+  scanf("%d",&T);
+  while(T--){
+    int n,d;
+    scanf("%d%d",&n,&d);
+    vector<int> re;
+    ll ans=0;
+    if(n==1){
+      d*=d;
+      while(d){
+	re.pb(d%10); d/=10;
+      }
+      rep(i,re.size()){
+	(ans*=23)%=MOD;
+	(ans+=re[i])%=MOD;
+      }
+    }else{
+      vector<int> seq={last[d]%10,last[d]/10},sum={0};
+      rep(hoge,n-2) seq.pb(reps[d]);
+      if(head[d])seq.pb(head[d]);
+      for(int x:seq) sum.pb(sum.back()+x);
+      vector<int> poyo(seq.size()*2);
+      rep(i,seq.size()*2)
+	poyo[i]=sum[min<int>(sum.size()-1,i+1)]-sum[min<int>(sum.size()-1,max(0,i+1-n))];
+      //cout<<seq<<poyo;
+      while(poyo.size() && poyo.back()==0) poyo.pop_back();
+      ll kuri=0;
+      for(const int &x:poyo){
+        kuri+=x;
+	if(ans>1e16) ans%=MOD;
+	(ans*=23);
+	(ans+=kuri%10);
+	kuri/=10;
+      }
+      while(kuri){
+	if(ans>1e16) ans%=MOD;
+	(ans*=23)%=MOD;
+	(ans+=kuri%10)%=MOD;
+	kuri/=10;
+      }
+    }
+    printf("%lld\n",ans%MOD);
+  }
+  return 0;
+}

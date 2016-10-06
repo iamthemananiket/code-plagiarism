@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+
+using namespace std;
+
+const int N = (int) 1e6 + 7;
+const int MOD = (int) 1e9 + 7;
+
+inline int add(int &x, int y) {
+  x += y;
+  if (x >= MOD) x -= MOD;
+  if (x < 0) x += MOD;
+}
+
+int amazingness(int x) {
+  vector<int> d;
+  while (x) {
+    d.pb(x % 10);
+    x /= 10;
+  }
+  int res = 0;
+  int mask = 1;
+  int prefix = 0;
+  for (auto it : d) {
+    prefix ^= it;
+    mask |= (1 << prefix);
+  }
+  bool used[26] = {0};
+  for (int i = 0; i < 16; i++) {
+    for (int j = i + 1; j < 16; j++) {
+      if ((mask >> i) & 1) {
+        if ((mask >> j) & 1) {
+          if (!used[i ^ j])
+            res += (i ^ j);
+          used[i ^ j] = 1;
+        }
+      }
+    }
+  }
+  return res;
+}
+
+int cost(int mask) {
+  int res = 0;
+  bool used[26] = {0};
+  for (int i = 0; i < 16; i++) {
+    for (int j = i + 1; j < 16; j++) {
+      if ((mask >> i) & 1) {
+        if ((mask >> j) & 1) {
+          if (!used[i ^ j])
+            res += (i ^ j);
+          used[i ^ j] = 1;
+        }
+      }
+    }
+  }
+  return res;
+}
+
+int calculate_slow(int till) {
+  int sum = 0;
+  for (int i = 1; i <= till; i++)
+    sum += amazingness(i);
+  return sum;
+}
+
+int dp[11][1 << 15][16][2];
+int f[N];
+int s[N];
+
+inline int calculate(int till) {
+  if (till == 0)
+    return 0;
+  if (till == (int) 1e9)
+    return calculate(till - 1) + 1;
+  vector<int> d;
+  while (till) {
+    d.pb(till % 10);
+    till /= 10;
+  }
+  reverse(d.begin(), d.end());
+  memset(dp, 0, sizeof dp);
+  dp[0][0][0][0] = 1;
+  dp[0][0][0][0] = 1;
+  for (int i = 0; i < d.size(); i++) {
+    for (int mask = 0; mask < (1 << 15); mask++) {
+      for (int last = 0; last < 16; last++) {
+        if (!(dp[i][mask][last][0] | dp[i][mask][last][1]))
+          continue;
+        for (int put = 0; put < 10; put++) {
+          int nxt = (last ^ put);
+          int new_mask = (mask | (nxt ? (1 << (nxt - 1)) : 0));
+          add(dp[i + 1][new_mask][nxt][1], dp[i][mask][last][1]);
+          if (put == d[i])
+            add(dp[i + 1][new_mask][nxt][0], dp[i][mask][last][0]);
+          if (put < d[i])
+            add(dp[i + 1][new_mask][nxt][1], dp[i][mask][last][0]);
+        }
+      }
+    }
+  }
+  int res = 0;
+  for (int mask = 0; mask < (1 << 15); mask++) {
+    for (int last = 0; last < 16; last++) {
+      int ways = dp[d.size()][mask][last][0] + dp[d.size()][mask][last][1];
+      res = (res + (long long) ways * f[(mask << 1) | 1]) % MOD;
+    }
+  }
+  return res;
+}
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  //freopen("out", "w", stdout);
+  #endif // LOCAL
+
+  for (int i = 1; i < (1 << 16); i++) {
+    f[i] = cost(i);
+  }
+  //for (int i = 1; i < N; i++) {
+  //  s[i] = s[i - 1] + amazingness(i);
+  //}
+
+  int cases, l, r;
+  scanf("%d", &cases);
+  while (cases--) {
+    scanf("%d%d", &l, &r);
+    int ans = calculate(r);
+    add(ans, -calculate(l - 1));
+    printf("%d\n", ans);
+  }
+
+  return 0;
+}

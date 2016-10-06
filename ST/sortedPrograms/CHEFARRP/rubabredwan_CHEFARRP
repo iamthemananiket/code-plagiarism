@@ -1,0 +1,61 @@
+/*
+__________           .___
+\______   \ ____   __| _/_  _  _______    ____
+ |       _// __ \ / __ |\ \/ \/ /\__  \  /    \
+ |    |   \  ___// /_/ | \     /  / __ \|   |  \
+ |____|_  /\___  >____ |  \/\_/  (____  /___|  /
+        \/     \/     \/              \/     \/
+
+handle	: rubabredwan (Codeforces/CodeChef/HackerRank)
+task 	: ...............
+
+*/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(x,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			150020
+#define INF			1e9
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+int main(){
+    ll tc, n, arr[55];
+    scanf("%lld", &tc);
+    while(tc--){
+        scanf("%lld", &n);
+        REPN(i, n){
+            scanf("%lld", &arr[i]);
+        }
+        int ret = 0;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=n;j++){
+                ll sum = 0, mul = 1;
+                for(int k=i;k<=j;k++) sum+=arr[k], mul *= arr[k];
+                if(sum==mul) ret++;
+            }
+        }
+        printf("%d\n", ret);
+    }
+	return 0;
+}

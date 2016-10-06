@@ -1,0 +1,220 @@
+/*
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+	ABHINANDAN AGARWAL
+	MNNIT ALLAHABAD
+	CSE
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+*/
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+#define sc(x) scanf("%d",&x);
+#define fl(i,n) for (i=0;i<n;i++)
+#define fle(i,n) for (i=1;i<=n;i++)
+#define fla(i,a,n) for (i=a;i<n;i++)
+#define mem(a,i) memset(a,i,sizeof(a))
+#define fi first
+#define se second
+#define pii pair<int,int> 
+#define piii pair<int,pair<int,int> >
+#define wl(n) while (n--)
+
+int fs()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (c<'0'||c>'9')
+		c=getchar_unlocked();
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return x; 
+}
+void pps(const char *s)
+{
+	int i;
+	for (i=0;s[i]!='\0';i++)
+	{
+		putchar_unlocked(s[i]);
+	}
+}
+void _ppd(int a)
+{
+	if (a==0)
+		return ;
+	_ppd(a/10);
+	putchar_unlocked(a%10+'0');
+}
+void ppd(int a) // Printing integer using utchar unlocked!
+{
+	if (a==0)
+	{
+		pc('0');
+		return;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_ppd(a);
+}
+void _pplld(ll a)
+{
+	if (a==0)
+		return ;
+	_pplld(a/10);
+	pc(a%10+'0');
+}
+void pplld(ll a)
+{
+	if (a==0)
+	{
+		pc('0');
+		return ;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_pplld(a);
+}
+int ggs(char *s) // String inputting
+{
+	int x=0;
+	char c=gc();
+	while (!('a'<=c&&c<='z')&&c!=-1) // change conditions to whatever strings can input !
+		c=gc();
+	while ('a'<=c&&c<='z')
+	{
+		s[x++]=c;
+		c=gc();
+	}
+	s[x]='\0';
+	return x;
+}
+
+int fsn()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (!('0'<=c&&c<='9'||c=='-'))
+		c=getchar_unlocked();
+	int neg=0;
+	if (c=='-'){
+		neg=1;
+		c=getchar_unlocked();
+	}
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return (neg==0?x:-x); 
+}
+//------------------------------------------------------------------------------------
+
+#define MOD (1000000007)
+int A[100010];
+int n;
+vector<int>khoya[100010];
+ll powd(ll a, ll b, ll c)
+{
+	if (b==0)
+		return 1;
+	ll ret=powd(a,b/2,c);
+	if (b&1)
+		return (((a*ret)%c)*ret)%c;
+	else
+		return (ret*ret)%c;
+}// a^b mod c is calculated by this.. 
+ll fac[100010];
+ll inv[100010];
+ll ncr(int n,int r)
+{
+	ll ret;
+	ret=fac[n];
+	ret=(ret*inv[n-r])%MOD;
+	ret=(ret*inv[r])%MOD;
+	return ret;
+}
+vector<int>::iterator it;
+int f=1;
+ll calc(int l,int r)
+{
+	/*if (r<l)return 0;*/
+	//printf("%d %d |-|\n",l,r);
+	if (!f)return 0;
+	if (l>r)
+		return 1;
+	it=lower_bound(khoya[r+1].begin(),khoya[r+1].end(),l);
+	if (it==khoya[r+1].end())
+	{
+		f=0;
+		return 0;
+	}
+	if (l>=r)return 1;
+	//if (l>r)return 0;
+	int ind=*it;
+	///printf("%d->>\n",ind);
+	ll ret,x=r-l+1;
+	return ret=(((ncr(x-1,ind-l)*calc(l,ind-1))%MOD)*calc(ind+1,r))%MOD;
+
+}
+int main()
+{
+	int i,j,t;
+	fac[0]=1;
+	for (i=1;i<=100000;i++)
+	{
+		fac[i]=(fac[i-1]*i)%MOD;
+		inv[i]=powd(fac[i],MOD-2,MOD);
+		//printf("%lld\n",inv[i]);
+	}
+	inv[0]=1;
+	t=fs();
+	wl(t)
+	{
+		n=fs();
+		f=1;
+		for(i=0;i<n;i++)
+		{	A[i]=fs();
+			if (i+A[i]+1>n)
+				f=0;
+		}
+		if (!f)
+		{
+			pps("0\n");
+			continue;
+		}
+		for (i=0;i<=n;i++)
+			khoya[i].clear();
+		for(i=0;i<n;i++)
+		{
+			khoya[i+A[i]+1].pb(i);
+			//printf("%d pushed at :%d\n",i,i+A[i]+1);
+		}
+		ll ans=calc(0,n-1);
+		if (!f)
+			pps("0\n");
+		else
+		{	pplld(ans);
+			pc('\n');
+		}
+
+	}	
+		
+
+	return 0;
+
+}

@@ -1,0 +1,101 @@
+/*
+ * 2013 Codechef Ode2Code
+ * Chef And Dishes
+ * File:   LEDISHES.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 16, 2013, 1:04:50 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace LEDISHES {
+typedef long long ll;
+
+struct Qfe {
+  //a+b sqrt(2)
+  ll a, b;
+
+  Qfe operator*(Qfe q) {
+    return Qfe { a * q.a + 2 * b * q.b, b * q.a + a * q.b };
+  }
+
+  Qfe operator+(Qfe q) {
+    return Qfe { a + q.a, b + q.b };
+  }
+
+};
+
+const int MAX = 1000000000;
+vector<pair<int, int>> ans;
+
+void solve(int test_num) {
+  //looking for p, k such that C(p,2)/C(p+k,2)=0.5
+  //Solve x^2-8K^2 = 1 in integers
+  //Then p = (2K+1+x)/2
+  Qfe b1 { 3, 2 }, b2 { 3, -2 }, t1 { 1, 0 }, t2 { 1, 0 };
+  for (int t = 0; t < 12; t++) {
+    t1 = t1 * b1;
+    t2 = t2 * b2;
+    ll x = (t1 + t2).a / 2;
+    ll k = sqrt((x * x - 1) / 8);
+    ll p = (k + k + 1 + x) >> 1;
+    //pln(x, p, k);
+    ans.push_back(make_pair(p, k));
+  }
+  int T;
+  cin >> T;
+  for (int t = 1; t <= T; t++) {
+    int N;
+    cin >> N;
+    cout << "Case:" << t << endl;
+    for (int i = 0; i < 12; i++)
+      if (ans[i].first <= N)
+        cout << (ans[i].first) << " " << (ans[i].second) << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  solve(1);
+}
+}
+
+int main() {
+  LEDISHES::solve();
+  return 0;
+}
+

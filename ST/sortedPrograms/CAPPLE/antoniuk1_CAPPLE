@@ -1,0 +1,33 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <math.h>
+#include <cassert>
+#include <algorithm>
+#include <deque>
+#include <set>
+#include <map>
+
+using namespace std;
+
+int mas[100010];
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    int t;
+    cin >> t;
+    while(t --> 0) {
+        int n; cin >> n;
+        for(int i = 0; i < n; ++i)
+            cin >> mas[i];
+        sort(mas, mas+n);
+        
+        int ans = 1;
+        for(int i = 1; i < n; ++i)
+            ans += mas[i] != mas[i-1];
+        
+        cout << ans << "\n";
+    }
+    return 0;
+}

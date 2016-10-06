@@ -1,0 +1,59 @@
+#include<iostream>
+#include<algorithm>
+#include<stdio.h>
+#include<stdlib.h>
+#include<malloc.h>
+#include<climits>
+#define ll long long
+using namespace std;
+struct student{
+	string name;
+	ll int value;
+};
+inline  int comp(const void *a,const void *b)
+{
+return ((struct student *)a)->value-((struct student *)b)->value;
+}
+
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		ll int n;
+		cin>>n;
+		struct student s[n];
+		for(ll int i=0;i<n;i++){
+			cin>>s[i].name>>s[i].value;
+		}
+		qsort(s,n,sizeof(struct student),comp);
+		//for(int i=0;i<n;i++)
+		//cout<<s[i].name<<" "<<s[i].value<<"\n";
+		s[n].value=INT_MAX;
+		ll int pos=0;
+		ll int flag=0;
+		ll int i;
+		if(s[0].value!=s[1].value)
+		{
+			flag=1;
+			pos=0;
+		}
+		else {
+		for(i=1;i<n;i++){
+			if(s[i].value!=s[i-1].value && s[i].value!=s[i+1].value)
+			{
+				flag=1;
+				pos=i;
+				break;
+			}
+			else
+			continue;
+		}
+		}
+		//cout<<"\n";
+		//cout<<i<<" ";
+		if(flag==1)
+		cout<<s[pos].name<<"\n";
+		if(i==n && flag==0)
+		cout<<"Nobody wins."<<"\n";
+	}
+}

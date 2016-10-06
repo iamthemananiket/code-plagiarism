@@ -1,0 +1,207 @@
+#include <bits/stdc++.h>
+#include <sys/resource.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,ll> pii;
+
+const int maxn = 1e5 + 7;
+const int lmaxn = 21;
+const int inf = 2e9;
+
+ll dist[maxn];
+vector<pii> G[maxn];
+int n;
+int dp[maxn][2];
+ll diam[maxn];
+ll rad[maxn];
+int L[maxn][lmaxn];
+ll W[maxn][lmaxn];
+int depth[maxn];
+int a,b,p,q;
+
+inline ll leng(int x,int y,int lc) {
+	return dist[x] + dist[y] - dist[lc] - dist[lc];
+}
+
+inline int lca(int x,int y) {
+	if (depth[x] < depth[y]) return lca(y,x);
+	drep(k,lmaxn-1,0) {
+		if (L[x][k] > 0 && depth[L[x][k]] >= depth[y]) {
+			x = L[x][k];
+		}
+	}
+	if (x == y) return x;
+
+	drep(k,lmaxn-1,0) {
+		if (L[x][k] > 0 && L[x][k] != L[y][k]) {
+			x = L[x][k];
+			y = L[y][k];
+		}
+	}
+	return L[x][0];
+}
+
+inline ll ldist(int x,int y) {
+	int q = lca(x,y);
+	return dist[x] + dist[y] - dist[q] - dist[q];
+}
+
+inline int findf(int x,int y,int z) {
+	int p = lca(x,y);
+
+	//cout<<"lca("<<x<<","<<y<<") = "<<p<<endl;
+
+	/*if (p == x) {
+		x = y;
+	}*/
+
+
+	//cout<<"LCA: "<<x<<","<<y<<" -> "<<p<<endl;	
+
+	if (ldist(x,p) < z) {
+
+		//cout<<x<<" , "<<y<<" Case #1"<<endl;
+
+		ll cur = ldist(x,y);
+		int v = y;
+
+		drep(k,lmaxn-1,0) {
+			if (cur - W[v][k] > z) {
+				cur -= W[v][k]; v = L[v][k];
+			}
+		}
+
+		return L[v][0];
+
+
+	} else {
+
+		//cout<<x<<" , "<<y<<" Case #2"<<endl;
+
+		ll cur = 0;
+		int v = x;
+
+		drep(k, lmaxn-1, 0) {
+			if (cur + W[v][k] <= z) {
+				cur += W[v][k]; v = L[v][k];
+			} 
+		}
+
+		return v;
+	}
+}
+
+inline void dfs(int x,int pi, ll d) {
+
+	depth[x] = 1;
+
+	if (pi >= 0) { depth[x] = depth[pi] + 1; }
+
+	dist[x] = d;
+
+	dp[x][0] = dp[x][1] = x; diam[x] = 0; rad[x] = 0;
+
+	L[x][0] = pi; W[x][0] = dist[x] - dist[pi];
+
+	repe(i,1,lmaxn) {
+		if (L[x][i-1] < 0) {
+			L[x][i] = L[x][i-1];
+			W[x][i] = inf;
+		} else {
+			L[x][i] = L[L[x][i-1]][i-1];
+			W[x][i] = W[x][i-1] + W[L[x][i-1]][i-1];
+		}
+	}
+
+	for (pii p : G[x]) {
+		int y; ll z; tie(y,z) = p;
+		if (y == pi) continue;
+		dfs(y,x,d+z);
+
+		if (leng(x,dp[x][0],x) < leng(x,dp[y][0],x)) {
+			dp[x][1] = dp[x][0];
+			dp[x][0] = dp[y][0];
+		} else if (leng(x,dp[x][1],x) < leng(x,dp[y][0],x)) {
+			dp[x][1] = dp[y][0];
+		}
+
+		if (diam[y] > diam[x]) { diam[x] = diam[y]; rad[x] = rad[y]; }
+	}
+
+	ll z = leng(dp[x][0],dp[x][1],x);
+
+	if (z > diam[x]) {
+		
+		diam[x] = z;
+		
+		a = dp[x][0], b = dp[x][1]; // a..b = z
+		p = findf(a,b,z/2);
+		q = findf(b,a,z/2);
+	
+		rad[x] =  min( max(ldist(a,p),ldist(b,p)), max(ldist(a,q), ldist(b,q)) );
+		
+		//cout<<"Check.."<<" : "<<p<<" : "<<q<<" : "<<(z/2)<<endl;
+	}
+
+	//cout<<x<<" pi: "<<pi<<" dp: "<<dp[x][0]<<" , "<<dp[x][1]<<" D: "<<diam[x]<<" R: "<<rad[x]<<endl;
+
+}
+
+void solve() {
+	s(n);
+
+	rep(i,1,n) {
+		depth[i] = 0;
+		G[i].clear();
+	}
+
+	rep(i,2,n) {
+		int x,y; ll z;
+		s(x); s(y); sl(z);
+
+		//x = i;
+		//y = i-1;
+		//z = rand()%500;
+		//y = (rand()%(x-1)) + 1;
+		//z = rand()%1000;
+
+		G[x].pb(mp(y,z));
+		G[y].pb(mp(x,z));
+	}
+
+	dfs(1,-1,0);
+
+	rep(i,1,n) {
+		prl(rad[i]); endc;
+	}
+
+}
+
+int main() {
+
+	rlimit R;
+	getrlimit(RLIMIT_STACK, &R);
+	R.rlim_cur = R.rlim_max;
+	setrlimit(RLIMIT_STACK, &R);
+
+	repe(j,0,maxn) { G[j].clear(); }
+
+	int t; s(t); while (t--) solve();
+}

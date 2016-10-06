@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+const int MAX = 111000;
+const ll MOD = ll(1e9) + 7;
+vector<int> child[MAX];
+ll dp[MAX], fact[MAX], ifact[MAX];
+int size[MAX];
+
+ll mod_inv(ll x) {
+  ll res=1;
+  for(ll e=MOD-2;e>0;e>>=1){
+    if(e&1)res=res*x%MOD;
+    x=x*x%MOD;
+  }
+  return res;
+}
+
+ll comb(ll n, ll k) {
+  return (fact[n]*ifact[k]%MOD)*ifact[n-k]%MOD;
+}
+
+void go(int at) {
+  dp[at] = 1;
+  size[at]=1;
+  for(int ch : child[at]) {
+    go(ch);
+    size[at] += size[ch];
+    
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  /*
+  fact[0] = ifact[0] = 1;
+  for(int i=1;i<MAX;++i) {
+    fact[i] = fact[i-1]*i%MOD:
+    ifact[i] = mod_inv(fact[i]);
+  }
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N;
+    cin >> N;
+    for(int i=1;i<=N+1;++i)
+      child[i].clear();
+    for(int v=1,c;v<=N;++v) {
+      cin >> c;
+      adj[v+c+1].push_back(v);
+    }
+    go(N+1);
+    cout << dp[N+1] << endl;
+  }*/
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    string fst;
+    int N;
+    cin >> N >> fst;
+    vector<int> arr(N);
+    for(int& a : arr)
+      cin >> a;
+    if (fst == "Dee" && N==1 && arr[0]%2==0) {
+      cout << "Dee\n";
+    } else {
+      cout << "Dum\n";
+    }
+  }
+  return 0;
+}

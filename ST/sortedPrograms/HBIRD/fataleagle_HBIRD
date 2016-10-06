@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX=50*335*335;
+int N, M, Q;
+vector<vector<int>> A, B;
+priority_queue<int> pq;
+int cnt[MAX+1];
+
+inline void add(int x)
+{
+    cnt[x]++;
+}
+
+void populate()
+{
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=M; j++)
+            B[i][j]=B[i][j-1]+A[i][j];
+    for(int i=1; i<=N; i++) for(int j=1; j<=M; j++)
+    {
+        int sum=A[i][j];
+        for(int k=1; i+k<=N && j+k<=M; k++)
+        {
+            sum+=B[i+k][j+k]-B[i+k][j-1];
+            if(sum)
+                add(sum);
+        }
+    }
+}
+
+void populate2()
+{
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=M; j++)
+            B[i][j]=B[i][j-1]+A[i][j];
+    for(int i=1; i<=N; i++) for(int j=1; j<=M; j++)
+    {
+        int sum=A[i][j];
+        for(int k=1; i+k<=N && j+k<=M && j-k>=1; k++)
+        {
+            sum+=B[i+k][j+k]-B[i+k][j-k-1];
+            if(sum)
+                add(sum);
+        }
+    }
+}
+
+void populate3()
+{
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=M; j++)
+            B[i][j]=B[i-1][j]+A[i][j];
+    for(int i=1; i<=N; i++) for(int j=1; j<=M; j++)
+    {
+        int sum=A[i][j];
+        for(int k=1; i+k<=N && j+k<=M && i-k>=1; k++)
+        {
+            sum+=B[i+k][j+k]-B[i-k-1][j+k];
+            if(sum)
+                add(sum);
+        }
+    }
+}
+
+int main()
+{
+    scanf("%d%d%d", &N, &M, &Q);
+    A.resize(N+1);
+    B.resize(N+1);
+    for(int i=0; i<=N; i++)
+    {
+        A[i].resize(M+1);
+        B[i].resize(M+1);
+    }
+    for(int i=1; i<=N; i++)
+        for(int j=1; j<=M; j++)
+            scanf("%d", &A[i][j]);
+    for(int a=0; a<2; a++)
+    {
+        populate2();
+        for(int b=0; b<2; b++)
+        {
+            populate();
+            if(a)
+                populate3();
+            for(int i=1; i<=N; i++)
+                reverse(A[i].begin()+1, A[i].end());
+        }
+        for(int j=1; j<=M; j++)
+            for(int i=1; i<N-i+1; i++)
+                swap(A[i][j], A[N-i+1][j]);
+    }
+    vector<int> all;
+    int sum=0;
+    for(int i=1; i<=MAX; i++)
+        for(int j=0; j<cnt[i] && sum+i<=1000000000; j++)
+            all.push_back(i), sum+=i;
+    for(int i=1; i<(int)all.size(); i++)
+        all[i]+=all[i-1];
+    while(Q--)
+    {
+        int x;
+        scanf("%d", &x);
+        printf("%d\n", upper_bound(all.begin(), all.end(), x)-all.begin());
+    }
+    return 0;
+}

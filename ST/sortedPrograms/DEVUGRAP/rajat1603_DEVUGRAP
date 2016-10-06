@@ -1,0 +1,34 @@
+#include "bits/stdc++.h"
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+const int N = 200001;
+int t , n , k;
+int main(){
+    t = scan();
+    while(t--){
+        n = scan() , k = scan();
+        long long ans = 0;
+        while(n--){
+            long long num = scan();
+            if(num < k){
+                ans += k - num;
+                continue;
+            }
+            long long x = num - ( num % k );
+            long long y = x + k;
+            ans += min(num - x , y - num);
+        }
+        printf("%lld\n",ans);
+    }
+}

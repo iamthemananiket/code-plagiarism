@@ -1,0 +1,113 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <set>
+#include <cstring>
+#include <map>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+#define f first
+#define s second
+#define ll long long
+#define ull unsigned long long
+#define mp make_pair
+#define pb push_back
+#define vi vector <int>
+#define pii pair<int, int>
+using namespace std;          
+const int N = int(1e3), mod = int(1e9) + 7; 
+ll f[14];
+int a,b,c[N * N],d[N * N],T,n,k,m;
+ll ans;
+int p[N],pn;
+bool u[N+5];
+int r[N+5];
+ll fans[15][15];
+
+ll modpow(ll a,ll b){
+	ll res = 1;
+	while(b > 0){
+		if(b & 1) res = res * a % mod;
+		a = a * a % mod;
+		b /= 2;
+	}
+	return res;
+}
+
+int cnt(int n,int p){
+	int res = 0;
+	while(n >= p){
+		n /= p;
+		res += n;
+	}
+	return res;
+}
+
+ll C(int n,int k){
+	ll res = 1;
+	for(int i=1;i<=pn;i++) r[i] = mod;
+	for(int j=1;j<=pn;j++) if(p[j] <= n){
+		for(int i=1;i<=k;i++){
+			r[j] = min(r[j],cnt(i - 1,p[j]) + cnt(n - i,p[j]));
+		}	
+	}
+	for(int i=1;i<=pn;i++) if(p[i] <= n){
+		r[i] = cnt(n,p[i]) - r[i];
+		res = res * modpow(p[i],r[i]) % mod;
+	}
+	return res;
+}
+
+ll lcm(ll a,ll b){
+	ll d = __gcd(a,b);
+	return a / d * b;
+}
+
+
+int main () {
+	for(int i=2;i<=N;i++){
+		if(!u[i]){
+			p[++pn] = i;
+			for(int j=2*i;j<=N;j+=i) u[j] = 1;
+		}
+	}
+	f[0] = 1;;
+	for(int i=1;i<=10;i++) f[i] = f[i-1] * i;
+	for(int i=1;i<=10;i++){
+		fans[i][1] = i;
+		for(int j=2;j<=i;j++){
+		    fans[i][j] = lcm(fans[i][j-1],f[i] / f[j - 1] / f[i - j]);
+		}
+	}
+	scanf("%d",&T);
+	scanf("%d%d",&n,&k);
+	scanf("%d%d%d",&a,&b,&m);
+	ans = C(n,k);
+	printf("%lld\n",ans);
+	for(int i=2;i<=T;i++){
+		scanf("%d",&c[i]);
+	}
+	for(int i=2;i<=T;i++){
+		scanf("%d",&d[i]);
+	}
+	for(int i=2;i<=T;i++){
+		n = (1ll*a * ans + c[i]) % m + 1;
+		k = (1ll*b * ans + d[i]) % n + 1;
+		if(n > N) assert(0);
+		if(n <= 10){
+			ans = fans[n][k]; 
+		}
+		else ans = C(n,k);
+		printf("%lld\n",ans);
+	}
+		
+
+
+return 0;
+}

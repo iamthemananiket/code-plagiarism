@@ -1,0 +1,121 @@
+#include<queue>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+
+const int dy[] = {0, 1, 0, -1};
+const int dx[] = {1, 0, -1, 0};
+const string DIR = "LURD";
+int N, M;
+char F[25][25];
+int Ci, Cj;
+string ans;
+int cnt;
+
+int pr[21][21][21][21][5];
+bool ok(int i, int j) {
+    return 0 <= i && i < N && 0 <= j && j < M && F[i][j] != '*';
+}
+void nxt(int i, int j, int d, int &ii, int &jj) {
+    ii = i + dy[d];
+    jj = j + dx[d];
+    if (!ok(ii, jj)) {
+	ii = i;
+	jj = j;
+    }
+}
+
+void bfs() {
+    memset(pr, -1, sizeof pr);
+    pr[Ci][Cj][Ci][Cj][0] = -2;
+    queue<int> qi, qj, qI, qJ;
+    qi.push(Ci);
+    qj.push(Cj);
+    qI.push(Ci);
+    qJ.push(Cj);
+    while (!qi.empty()) {
+	int i = qi.front(); qi.pop();
+	int j = qj.front(); qj.pop();
+	int I = qI.front(); qI.pop();
+	int J = qJ.front(); qJ.pop();
+	int ii, jj, II, JJ;
+//	eprintf("%d %d %d %d %d ---\n", i, j, I, J, cnt++);
+	REP (d, 4) {
+	    REP (s, 3) {
+		int i3, j3;
+		if (~s & 1) nxt(i, j, d, ii, jj);
+		else { ii = i; jj = j; }
+		nxt(ii, jj, (d+2)%4, i3, j3);
+		if (i3 != i || j3 != j) continue;
+
+		if (~s & 2) nxt(I, J, d, II, JJ);
+		else { II = I; JJ = J; }
+		nxt(II, JJ, (d+2)%4, i3, j3);
+		if (i3 != I || j3 != J) continue;
+
+
+		if (pr[ii][jj][II][JJ][0] == -1) {
+		    pr[ii][jj][II][JJ][0] = i;
+		    pr[ii][jj][II][JJ][1] = j;
+		    pr[ii][jj][II][JJ][2] = I;
+		    pr[ii][jj][II][JJ][3] = J;
+		    pr[ii][jj][II][JJ][4] = d;
+		    qi.push(ii);
+		    qj.push(jj);
+		    qI.push(II);
+		    qJ.push(JJ);
+		}
+	    }
+	}
+    }
+}
+
+void calc(int I, int J) {
+    int i = Ci, j = Cj;
+    string r = "";
+    while (pr[i][j][I][J][0] != -2) {
+	r.push_back(DIR[pr[i][j][I][J][4]]);
+	int i2 = pr[i][j][I][J][0];
+	int j2 = pr[i][j][I][J][1];
+	int I2 = pr[i][j][I][J][2];
+	int J2 = pr[i][j][I][J][3];
+	i = i2; j = j2; I = I2; J = J2;
+    }
+//    cerr << r << endl;
+    ans += r;
+}
+
+int main() {
+
+    scanf("%d%d", &N, &M);
+    REP (i, N) scanf("%s", F[i]);
+
+    REP (i, N) REP (j, M) if (F[i][j] == 'C') {
+	Ci = i;
+	Cj = j;
+    }
+
+    bfs();
+
+    REP (i, N) REP (j, M) if (F[i][j] == '.') calc(i, j);
+
+    cout << ans << endl;
+    return 0;
+
+}
+

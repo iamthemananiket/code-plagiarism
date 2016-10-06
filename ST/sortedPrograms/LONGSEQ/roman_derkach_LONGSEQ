@@ -1,0 +1,26 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ int t,z,o,i,n;
+ string s;
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    cin>>t;
+     while(t--)
+     {
+         z = o = 0;
+         cin>>s;
+         n = (int)s.size();
+          for(i=0;i<n;++i)
+            z+=(s[i]=='0'),o+=(s[i]=='1');
+          if(o==1 || z==1) cout<<"Yes\n"; else cout<<"No\n";
+     }
+
+    return 0;
+  }

@@ -1,0 +1,59 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 1e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+// mylittlepony
+using namespace std;
+
+int main() {
+	cin.sync_with_stdio(0);
+	int T,N,P;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		cin >> N >> P;
+		string A,B;
+		cin >> A >> B;
+		vector< vector< vector<int> > > S(N+1, vector< vector<int> >(N+1, vector<int>(N+1,0)));
+		for(int i =0; i < N; i++) for(int j =0; j < N; j++) for(int k =0; k < N; k++) {
+			S[i+1][j+1][k+1] =S[i][j+1][k+1]+S[i+1][j][k+1]+S[i+1][j+1][k]
+						-S[i+1][j][k]-S[i][j+1][k]-S[i][j][k+1]+S[i][j][k];
+			if(A[i*N*N+j*N+k] == B[i*N*N+j*N+k]) S[i+1][j+1][k+1]++;}
+		if(S[N][N][N] == 0 && P > 0) {cout << "-1\n"; continue;}
+
+		int ans =-1, poc =0;
+		for(int d =N; d > 0; d--) if(ans == -1)
+			for(int i =0; i <= N-d; i++) for(int j =0; j <= N-d; j++) for(int k =0; k <= N-d; k++) {
+				if(ans != -1) break;
+				int s =S[i+d][j+d][k+d]-S[i][j+d][k+d]-S[i+d][j][k+d]-S[i+d][j+d][k]
+					+S[i+d][j][k]+S[i][j+d][k]+S[i][j][k+d]-S[i][j][k];
+				if(P*d*d*d <= s*100) ans =d;}
+		if(ans == -1) {cout << ans << "\n"; continue;}
+		for(int i =0; i <= N-ans; i++) for(int j =0; j <= N-ans; j++) for(int k =0; k <= N-ans; k++) {
+			int d =ans;
+			int s =S[i+d][j+d][k+d]-S[i][j+d][k+d]-S[i+d][j][k+d]-S[i+d][j+d][k]
+				+S[i+d][j][k]+S[i][j+d][k]+S[i][j][k+d]-S[i][j][k];
+			if(P*d*d*d <= s*100) poc++;}
+		cout << ans << " " << poc << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing

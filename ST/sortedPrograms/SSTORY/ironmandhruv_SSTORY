@@ -1,0 +1,211 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ll long long int
+#define pb push_back
+#define mp make_pair
+#define INF (ll)(1e18)
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define sz(x) ((int) (x).size())
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i = 0;i < N;i++)
+#define frep(i,a,b) for(int i = a;i <= b;i++)
+#define pii pair<int , int>
+#define pll pair<ll , ll>
+#define vii vector<int>
+#define vpii vector< pii >
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcountll(x)
+#define print(A,j,k) for(int ii=j;ii<k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+#define SQRT 350
+#define CASES int t;cin>>t;while(t--)
+#define FILE freopen("inp.txt" , "r" , stdin);
+#define ld long double
+
+const int MOD = 1e9 + 7;
+const int N = 1e6 + 5;
+
+int gap;
+int sa[N] , lcp[N];
+int Rank[N] , temp[N];
+int n;
+string s;
+
+//sufCmp returns 1 if s[i .. n] < s[j .. n]
+bool sufCmp(int i , int j) {
+
+	if (Rank[i] != Rank[j]) {		//previously assigned different Ranks
+		return Rank[i] < Rank[j];	
+	}
+
+	//Rank[i] = Rank[j] ie all letters when compared from start..start + gap are same
+	i += gap;
+	j += gap;
+
+	if (i < n && j < n) {
+		//sorting by 2 * gap letters
+		//already sorted by gap 2 letters previously
+		//move both suffixes by gap spaces resulting in already Ranked suffixes
+		return Rank[i] < Rank[j];
+	}
+	else {
+		//one of the strings has less than gap letters
+		//yet both have same Ranks assigned
+		//all letters match between the two strings
+		//suffix with lesser length comes first then
+		return i > j;		
+	}
+}
+
+void buildLCP() {
+	for (int i = 0, k = 0; i < n; ++i) if (Rank[i] != n - 1) {
+		for (int j = sa[Rank[i] + 1]; s[i + k] == s[j + k];)
+		++k;
+		lcp[Rank[i]] = k;
+		if (k)--k;
+	}
+}
+
+int tree[3 * N];
+
+void build(int node , int l , int r) {
+	if (l > r)
+		return;
+
+	if (l == r) {
+		tree[node] = lcp[l];
+		return;
+	}
+
+	int mid = (l + r) / 2;
+	build(2 * node , l , mid);
+	build(2 * node + 1 , mid + 1 , r);
+	tree[node] = min(tree[2 * node] , tree[2 * node + 1]);
+}
+
+
+int query(int node , int l , int r , int ql , int qr) {
+
+	if (l > r || ql > qr || l > qr || r < ql)
+		return inf;
+
+	if (l >= ql && r <= qr)
+		return tree[node];
+
+	int mid = (l + r) / 2;
+	int x = query(2 * node , l , mid , ql , qr);
+	int y = query(2 * node + 1 , mid + 1 , r , ql , qr);
+	return min(x , y);
+}
+
+
+int main(int argc, char const *argv[])
+{
+	fast;
+	
+	string a , b;
+	cin >> a >> b;
+	s = a + "$" + b;
+
+	n = s.size();
+	for(int i = 0;i < n;i++) {
+		sa[i] = i;		//index of the ith suffix in the sorted suffix table
+		Rank[i] = s[i];		
+	}
+
+	//initial Rank is assigned accoriding to the value of the first character
+
+	//start sorting entire strings in powers of 2
+	for(gap = 1;;gap *= 2) {
+		sort(sa , sa + n , sufCmp);
+		for(int i = 0;i < n - 1;i++)
+			temp[i + 1] = temp[i] + sufCmp(sa[i] , sa[i + 1]);
+		for(int i = 0;i < n;i++) {
+			Rank[sa[i]] = temp[i];
+		}
+		//tmp[i] denotes number of adjacent pairs that are sorted in correct order
+		if (temp[n - 1] == n - 1) {
+			break;
+			//suffix array is now complete
+		}
+	}
+
+	// cout << "sorted suffixes\n";
+	// for(int i = 0;i < n;i++) {
+	// 	cout << i << ' ';
+	// 	for(int j = sa[i];j < n;j++)
+	// 		cout << s[j];
+	// 	cout << '\n';
+	// }
+
+	buildLCP();
+	lcp[n - 1] = inf;
+
+	//L[i] denotes nearest suffix to the left in the suffix array that belongs to the first string
+	vector<int> L(n , -1) , R(n , -1);
+	int l = -1;
+	for(int i = 0;i < n;i++) {
+		if (sa[i] < a.size())
+			l = i;
+		else {
+			L[i] = l;
+		}
+	}
+
+	//R[i] denotes nearest suffix to the right in the suffix array that belongs to the second string
+	int r = -1;
+	for(int i = n - 1;i >= 0;i--) {
+		if (sa[i] < a.size())
+			r = i;
+		else
+			R[i] = r;
+	}
+
+	build(1 , 0 , n - 1);		//build segtree on the lcp array
+
+	int fans = 0 , start = inf;
+	for(int i = 0;i < n;i++) {
+		if (L[i] != -1) {
+			int f = L[i] , s = i;
+			// cout << f << ' ' << s << ' ';
+			int ans = query(1 , 0 , n - 1 , f , s - 1);
+			// cout << ans << '\n';
+			if (ans > fans) {
+				fans = ans;
+				start = max(sa[f] , sa[s]);
+			}
+			else if (ans == fans) {
+				start = min(start , max(sa[f] , sa[s]) );
+			}
+		}
+
+		if (R[i] != -1) {
+			int f = i , s = R[i];
+			// cout << f << ' ' << s << ' ';
+			int ans = query(1 , 0 , n - 1 , f , s - 1);
+			// cout << ans << '\n';
+			if (ans > fans) {
+				fans = ans;
+				start = max(sa[f] , sa[s]);
+			}
+			else if (ans == fans) {
+				start = min(start , max(sa[f] , sa[s]) );
+			}	
+		}
+	}
+
+	
+	if (fans) {
+		for(int j = start;j < start + fans;j++)
+			cout << s[j];
+		cout << '\n';
+	}
+	cout << fans << '\n';
+	return 0;
+}

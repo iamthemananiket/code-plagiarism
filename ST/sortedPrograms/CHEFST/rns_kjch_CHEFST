@@ -1,0 +1,24 @@
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+#include <assert.h>
+using namespace std;
+typedef long long LL;
+
+void mem(int x) {
+	int sz = 1LL * x * 1024 * 1024;
+	char *s = new char[sz];
+}
+int a[100];
+
+int main() {
+	int T; LL x, y, m;
+	for (scanf("%d", &T); T--; ) {
+		scanf("%lld %lld %lld", &x, &y, &m);
+		if (x > y) x ^= y ^= x ^= y;
+		LL t = m * (m + 1) / 2;
+		if (x <= t) printf("%lld\n", y - x);
+		else printf("%lld\n", (y - t) + (x - t));
+	}
+	mem(a[200]); //printf("%d\n", 1/0);
+}

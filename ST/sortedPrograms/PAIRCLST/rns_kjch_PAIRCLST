@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define M 200001
+
+int a[M];
+vector<int> v[M], w[M];
+int dis[M], par[M];
+
+priority_queue<pair<int, int> > Q;
+
+int main() {
+    ///freopen("1.in", "r", stdin);
+    int n, m, k;
+    scanf("%d %d %d", &n, &m, &k);
+    for(int i = 1; i <= k; i ++) scanf("%d", &a[i]);
+    for(int i = 0; i < m; i ++) {
+        int x, y, z;
+        scanf("%d %d %d", &x, &y, &z);
+        v[x].push_back(y);
+        v[y].push_back(x);
+        w[x].push_back(z);
+        w[y].push_back(z);
+    }
+    for(int i = 1; i <= n; i ++) dis[i] = 1e9;
+    for(int i = 1; i <= k; i ++) par[a[i]] = i, dis[a[i]] = 0, Q.push(make_pair(0, a[i]));
+    int ans = 1e9;
+    while(!Q.empty()) {
+        int x = -Q.top().first, y = Q.top().second; Q.pop();
+        if(dis[y] != x) continue;
+        for(int i = 0; i < v[y].size(); i ++) {
+            int z = v[y][i];
+            if(par[z] && par[z] != par[y]) ans = min(ans, dis[z] + dis[y] + w[y][i]);
+            if(dis[z] <= dis[y] + w[y][i]) continue;
+            dis[z] = dis[y] + w[y][i];
+            par[z] = par[y];
+            Q.push(make_pair(-dis[z], z));
+        }
+    }
+    printf("%d\n", ans);
+}

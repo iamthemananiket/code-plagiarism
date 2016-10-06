@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+long long mod =1000000007;
+vector<long long> fac(100000+tisic,1),inv(100000+tisic,1);
+
+long long pw(long long a, long long e) {
+	if(e <= 0) return 1;
+	long long x =pw(a,e/2);
+	x =(x*x)%mod;
+	if(e%2 != 0) x =(x*a)%mod;
+	return x;}
+
+long long getC(int N, int K) {
+	if(K < 0 || K > N || N < 0) return 0;
+	long long ret =(fac[N]*inv[K])%mod;
+	return (ret*inv[N-K])%mod;}
+
+void solve(int z, int k, vector< vector<int> > &last, long long &ans) {
+	if(z >= k) return;
+	if(last[k].empty()) {ans =0; return;}
+	int c =last[k].back();
+	last[k].pop_back();
+//	[z..k): [z..c) + [c+1..k)
+//	cout << z << " " << k << " " << c << "\n";
+	if(c < z || c >= k) {ans =0; return;}
+	ans =(ans*getC(k-z-1,c-z))%mod;
+	solve(z,c,last,ans);
+	solve(c+1,k,last,ans);}
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	for(int i =1; i <= 100000; i++) {
+		fac[i] =(fac[i-1]*i)%mod;
+		inv[i] =pw(fac[i],mod-2);}
+	int T;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		int N;
+		cin >> N;
+		vector<int> P(N);
+		vector< vector<int> > last(N+1);
+		bool ok =true; 
+		for(int i =0; i < N; i++) {
+			cin >> P[i];
+			if(i+P[i]+1 > N) ok =false;
+			if(ok) last[i+P[i]+1].push_back(i);}
+		for(int i =0; i <= N; i++) reverse(begin(last[i]),end(last[i]));
+		if(!ok) {cout << "0\n"; continue;}
+		long long ans =1;
+		solve(0,N,last,ans);
+		if(ans < 0) ans +=mod;
+		cout << ans << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing

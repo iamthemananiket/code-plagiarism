@@ -1,0 +1,51 @@
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <deque>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen(".inp","r",stdin)
+#define OUTPUT freopen(".out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=0;
+
+double rpow(int x){
+    if (x==0) return 1.0;
+    if (x==1) return 0.5;
+    double tmp=rpow(x/2);
+    return tmp*tmp*rpow(x%2);
+}
+int test,x;
+ll k;
+int main(){
+    scanf("%d",&test);
+    while (test--){
+        scanf("%d%lld",&x,&k);
+        int y=0;
+        while (1LL<<(y+1)<=k) y++;
+        double part=rpow(y)*x;
+        //cout<<y<<" "<<part<<'\n';
+        k-=1LL<<y;
+        double ans=part*k+part/2;
+        //cout<<ans<<'\n';
+        printf("%.7f\n",ans);
+    }
+}

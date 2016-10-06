@@ -1,0 +1,61 @@
+#include  <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <map>
+using namespace std;
+#define vi vector < int >
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define llu unsigned long long
+#define MOD 1000000007
+#define INF 1000000000
+#define dbg(x) { cout<< #x << ": " << (x) << endl; }
+#define all(x) x.begin(),x.end()
+int a[1003];
+int main()
+{
+    int t,n,k,i,j;
+    scanf("%d",&t);
+    assert(1<=t && t<=10);
+    while(t--)
+    {
+              scanf("%d%d",&n,&k);
+              assert(1<=n && n<=1000);
+              assert(1<=k && k<=1000);
+              for(i=0;i<n;i++)
+              {
+                  scanf("%d",&a[i]);
+                  assert(1<= a[i] && a[i] <= 1000000);
+              }
+              j = 0;
+              while(k>0 || j<n)
+              {
+                   int mn = INF,id;
+                   for(i=j;i<n;i++)
+                   {
+                      if(i-j <= k && mn > a[i])
+                      mn = a[i] , id = i;
+                   }
+                   for(int x=id;x-1>=j;x--)
+                   {
+                      swap(a[x],a[x-1]);
+                   }
+                   k -= (id-j);
+                   j++;
+              }
+              for(i=0;i<n;i++)
+              {
+                printf("%d ",a[i]);
+              }
+              printf("\n");
+    }
+    //system("pause");
+    return 0;
+}

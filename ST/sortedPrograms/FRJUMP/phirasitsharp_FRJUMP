@@ -1,0 +1,104 @@
+#include <cmath>
+#include <cstdio>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const long long mod = ( long long ) 1e9 + 7ll;
+const int N = 100010;
+
+long double sum_log[N];
+long long mul[N];
+
+vector < int > fac[N];
+
+double Flog[N];
+long long Finv[N];
+
+long long F[N];
+int n, q;
+
+long long pw ( long long a, long long b ) {
+	if ( b == 0ll ) return 1ll;
+	long long r = pw ( a, b / 2ll );
+	r = ( r * r ) % mod;
+	if ( b % 2ll ) r = ( a * r ) % mod;
+	return r;
+}
+
+long long inv ( int x ) {
+	return pw ( x, mod - 2ll );
+}
+
+int main ( void ) {
+
+	ios :: sync_with_stdio ( false );
+
+	cin >> n;
+
+	for ( int R = 1 ; R <= n ; R++ ) { 
+		for ( int idx = 1 + R ; idx <= n ; idx += R ) {
+			fac[ idx ].emplace_back ( R );
+		}
+		sum_log[ R ] = 0.0;
+		mul[ R ] = 1ll;
+	}
+
+	for ( int idx = 1 ; idx <= n ; idx++ ) {
+
+		cin >> F[idx];
+
+		Flog[idx] = log10 ( ( long double ) F[idx] );
+		Finv[idx] = inv ( F[idx] );
+
+		for ( int R : fac[idx] ) {
+			sum_log[R] += Flog[idx];
+			mul[R] = ( mul[R] * F[idx] ) % mod;
+		}
+	}
+
+	cin >> q;
+
+	for ( int i = 0 ; i < q ; i++ ) {
+		
+		int type;
+		cin >> type;
+
+		if ( type == 1 ) {
+			
+			int idx;
+			
+			cin >> idx;
+			cin >> F[idx];
+
+			double lg = log10 ( ( long double ) F[idx] );
+			
+			for ( int R : fac[idx] ) {
+				sum_log[R] += lg - Flog[idx];
+				mul[R] = ( mul[R] * Finv[idx] ) % mod;
+				mul[R] = ( mul[R] * F[idx] ) % mod;
+			}
+
+			Finv[idx] = inv ( F[idx] );
+			Flog[idx] = lg;
+
+		} else {
+			
+			int R;
+			cin >> R;
+
+			long double lg = sum_log[R] + Flog[1];
+			long double first_digit = pow ( 10.0, lg - floor ( lg ) );
+
+			first_digit = floor ( first_digit + 1e-8 );
+
+			char buf[9];
+			sprintf ( buf, "%.5Lf", first_digit );
+
+			printf( "%c %lld\n", buf[0], ( mul[R] * F[1] ) % mod );
+		}
+	}
+
+	return 0;
+}

@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int BLK=64*1024;
+vector<int> T[BLK];
+
+int main()
+{
+    int Q;
+    unsigned int S, A, B;
+    cin>>Q>>S>>A>>B;
+    long long ans=0;
+    for(int i=0; i<Q; i++)
+    {
+        int N=S/2;
+        if(S&1)
+            T[N%BLK].push_back(N);
+        else
+            T[N%BLK].push_back(-N);
+        S=S*A+B;
+    }
+    set<int> s;
+    for(int i=0; i<BLK; i++)
+    {
+        for(auto& it: T[i])
+        {
+            if(it>0)
+                s.insert(it);
+            else
+                s.erase(-it);
+        }
+        for(auto& it: s)
+            ans+=it;
+        s.clear();
+    }
+    printf("%lld\n", ans);
+    return 0;
+}

@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ 
+#define pb push_back
+ 
+using namespace std;
+ 
+typedef long long ll;
+ 
+const int N = 21;
+ 
+int n, k;
+int a[N];
+int q[(1 << N)]; 
+int sz;
+ll sum, now;
+bool ans;
+ 
+void rec(int mask, int h = 0) {
+	if (ans)
+		return;
+	if (mask == (1 << n) - 1) {
+		if (h == k)
+			ans = 1;
+		return;
+	}
+	for (int i = sz; i > 0; i--)
+		if ((mask & q[i]) == 0) {
+			rec(mask | q[i], h + 1);
+			if (ans)
+				return;
+		}
+	return;
+}
+ 
+void solve() {
+	cin >> n >> k;
+	ans = sz = sum = 0;
+	for (int i = 0; i < n; i++)
+		cin >> a[i],
+		sum += a[i];
+	if (sum % k != 0) {
+		printf("no\n");
+		return;
+	}
+	sum /= k;
+	if (sum == 0) {
+		if (n >= k)
+			printf("yes\n");
+		else
+			printf("no\n");			
+		return;
+	}
+	for (int i = 1; i < (1 << n); i++) {
+		now = 0;
+		for (int j = 0; j < n; j++)
+			if ((i & (1 << j)) > 0) {
+				now += a[j];
+				if (now > sum)
+					break;
+			}
+		if (now == sum)
+			q[++sz] = i;
+	}
+	rec(0);
+	if (ans)
+		printf("yes\n");
+	else
+		printf("no\n");
+	return;
+}
+ 
+int test;
+ 
+int main() {
+	cin >> test;
+	while(test--)
+		solve();
+	return 0;
+}
+ 

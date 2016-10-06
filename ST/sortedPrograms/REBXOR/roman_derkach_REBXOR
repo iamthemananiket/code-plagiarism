@@ -1,0 +1,86 @@
+#include<bits/stdc++.h>
+//#define int long long
+ using namespace std;
+
+ struct my
+ {
+     int one,zero,leaf;
+ };
+
+ const int N = 4e5 + 1, M = 31 * N;
+
+ my b[M];
+ int a[N],leaft[N],r,pr[N],x[N],i,n,kol=1,ans;
+
+ inline bool bit(int x,int p)
+ {
+     return(x & (1<<p));
+ }
+
+ inline void add(int x)
+ {
+     int pos = 1;
+      for(int i=30;i>=0;--i)
+      {
+          if(bit(x,i))
+          {
+            if(!b[pos].one) b[pos].one=++kol;
+            pos=b[pos].one;
+          } else
+          {
+            if(!b[pos].zero) b[pos].zero=++kol;
+            pos=b[pos].zero;
+          }
+      }
+      b[pos].leaf=x;
+ }
+
+ inline int get(int x)
+ {
+     int pos = 1;
+      for(int i=30;i>=0;--i)
+          if(!b[pos].one || bit(x,i) && b[pos].zero) pos=b[pos].zero; else pos=b[pos].one;
+          return b[pos].leaf;
+ }
+
+  main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+  //   freopen("input.txt","r",stdin);
+  //   freopen("output.txt","w",stdout);
+
+    // cout<<bit(1,0)<<endl;
+
+      cin>>n;
+      add(0);
+       for(i=1;i<=n;++i)
+       {
+           cin>>a[i];
+           x[i]=x[i-1]^a[i];
+           add(x[i]);
+           leaft[i]=x[i] ^ get(x[i]);
+           pr[i]=max(pr[i-1],leaft[i]);
+       }
+
+       memset(b,0,sizeof(b));
+        kol=1;
+        add(0);
+
+         for(i=n;i>1;--i)
+         {
+            x[i]=a[i]^x[i+1];
+            add(x[i]);
+            r=max(r,x[i] ^ get(x[i]));
+            ans=max(ans,pr[i-1] + r);
+         }
+
+         cout<<ans<<endl;
+
+       //for(i=1;i<=n;++i) cout<<leaft[i]<<' '; cout<<endl;
+
+    return 0;
+  }

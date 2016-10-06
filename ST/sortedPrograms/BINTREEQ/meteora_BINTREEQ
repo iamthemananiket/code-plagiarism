@@ -1,0 +1,45 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+
+using namespace std;
+typedef long long lli;
+
+int Q;
+
+int main(){
+
+	int u,v,l1,l2,n,d1,d2;
+
+	cin >> Q;
+
+	while(Q--){
+		cin >> n >> u >> v;
+
+		l1 = l2 = n;
+
+		if(u < v) swap(u,v);
+
+		d1 = __builtin_clz(u);
+		d2 = __builtin_clz(v);
+
+
+		while(d1 < d2){
+			++d1;
+			l1 -= u&1;
+			u >>= 1, l1 >>= 1;
+		}
+
+		while(u != v){
+			l1 -= u&1;
+			l2 -= v&1;
+			u >>= 1, v >>= 1, l1 >>= 1, l2 >>= 1;
+		}
+
+		cout << min(l1,l2) << "\n";
+	}
+
+
+	return 0;
+}

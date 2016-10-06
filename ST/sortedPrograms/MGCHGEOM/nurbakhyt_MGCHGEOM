@@ -1,0 +1,118 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)2e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+struct Point {
+	double x, y;
+	Point() {}
+	Point(double x, double y) : x(x), y(y) {}
+};
+
+bool cmp(Point a, Point b) {
+	if (a.x != b.x)
+		return a.x < b.x;
+	return a.y < b.y;
+}
+
+bool bad(Point a, Point b, Point c, bool tp) {
+	if (!tp)
+		return b.x * (c.y - a.y) + a.x * (b.y - c.y) + c.x * (a.y - b.y) < 0;
+	return b.x * (c.y - a.y) + a.x * (b.y - c.y) + c.x * (a.y - b.y) > 0;	
+}
+
+void find_answer(vector < Point > &a) {
+	if (sz(a) == 1)
+		return;
+	sort(a.begin(), a.end(), &cmp);
+	vector < Point > f, s;
+	f.pb(a[0]), s.pb(a[0]);
+	for (int i = 1; i < sz(a); i++) {
+		if (i == sz(a) - 1 || bad(a[0], a[i], a.back(), 0)) {
+			while(sz(f) > 1 && !bad(f[sz(f) - 2], f.back(), a[i], 0))
+				f.pp();
+			f.pb(a[i]);
+		}
+		if (i == sz(a) - 1 || bad(a[0], a[i], a.back(), 1)) {
+			while(sz(s) > 1 && !bad(s[sz(s) - 2], s.back(), a[i], 1))
+				s.pp();
+			s.pb(a[i]);
+		}
+	}
+	a.clear();
+	for (auto i : f)
+		a.pb(i);
+	s.pp();
+	reverse(s.begin(), s.end());
+	for (auto i : s)
+		a.pb(i);
+}
+
+double crossProduct(Point a, Point b) {
+	return a.x * b.y - a.y * b.x;
+}
+
+double find_area(vector < Point > &now) {
+	double res = 0;
+	for (int i = 0; i + 1 < sz(now); i++)
+		res += crossProduct(now[i], now[i + 1]);
+	res = fabs(res) / 2.0;
+	return res;
+}
+
+multiset < pi > q;
+int n;
+
+vector < Point > ans;
+
+void solve() {
+	q.clear();
+	cin >> n;
+	for (int i = 1; i <= n; i++) {
+		char tp;
+		Point now;
+		cin >> tp >> now.x >> now.y;
+		if (tp == '+')
+			q.insert(mp(now.x, now.y));
+		else
+			q.erase(q.find(mp(now.x, now.y)));
+		ans.clear();
+		for (auto j : q)
+			ans.pb(Point(j.f, j.s));
+		find_answer(ans);
+		cout << fixed << setprecision(1) << find_area(ans) << endl;
+	}
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+	ios_base :: sync_with_stdio(NULL), cin.tie(NULL);
+	int t;
+	cin >> t;
+	while(t--)
+		solve();	
+	return 0;
+}

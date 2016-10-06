@@ -1,0 +1,57 @@
+//  https://code.google.com/codejam/contest/204113/dashboard#s=a&a=2
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std ;
+
+int  t, n, m, x, y, ans ;
+vector<int>  pre ;
+vector<bool>  visited ;
+vector<vector<bool>>  cbn ;
+
+bool FindNextDfs( int a )
+{
+        if( a < 0 ) return true;
+        if( visited[a] ) return false;
+        visited[a] = true ;
+        for( int i=0;  i<n;  i++ )
+        if( cbn[a][i] && FindNextDfs(pre[i]) )   {
+                pre[i] = a ;
+                return true;
+        }
+        return false;
+}
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> n >> m ;
+                cbn.resize( n, vector<bool>(n,0) );
+                pre.resize( n, -1 );
+                while(m--)
+                {
+                        cin >> x >> y ;
+                        cbn[x-1][y-1] = 1 ;
+                }
+
+                ans = 0 ;
+                for( int i=0; i<n; i++ )
+                {
+                        visited.resize( n, 0 );
+                        if( ! FindNextDfs(i) )
+                                ans++;
+                        visited.clear();
+                }
+                cout << ans << endl ;
+
+                cbn.clear();
+                pre.clear();
+        }
+
+        return 0;
+} 

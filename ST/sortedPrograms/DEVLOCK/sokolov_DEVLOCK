@@ -1,0 +1,208 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <vector>
+#include <utility>
+#include <algorithm>
+using namespace std;
+ 
+#define MAXN 1000
+#define MOD 998244353
+ 
+int N, P, M, MM;
+ 
+class matrix
+{
+public:
+    int n, m;
+    int ** mat;
+ 
+    void alloc()
+    {
+        mat = new int*[n];
+        for (int i = 0; i < n; i++) {
+            mat[i] = new int[m];
+        }
+    }
+ 
+    void free()
+    {
+        for (int i = 0; i < n; i++) {
+            delete[] mat[i];
+        }
+        delete[] mat;
+    }
+ 
+    matrix()
+    {
+        n = m = 1;
+        alloc();
+        mat[0][0] = 0;
+    }
+ 
+    matrix(int n, int m) : n(n), m(m)
+    {
+        alloc();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                mat[i][j] = 0;
+            }
+        }
+    }
+ 
+    ~matrix()
+    {
+        free();
+    }
+ 
+    matrix(const matrix & M)
+    {
+        n = M.n;
+        m = M.m;
+        alloc();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                mat[i][j] = M.mat[i][j];
+            }
+        }
+    }
+ 
+    matrix & operator=(const matrix & M)
+    {
+        if (this == &M) {
+            return *this;
+        } else {
+            free();
+            n = M.n;
+            m = M.m;
+            alloc();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
+                    mat[i][j] = M.mat[i][j];
+                }
+            }
+        }
+    }
+ 
+    matrix operator*(const matrix& M) const
+    {
+        matrix ret(n, M.m);
+ 
+        for (int i = 0; i < ret.n; i++) {
+            for (int j = 0; j < ret.m; j++) {
+                ret.mat[i][j] = 0;
+                for (int k = 0; k < m; k++) {
+                    ret.mat[i][j] += mat[i][k] * M.mat[k][j];
+                    ret.mat[i][j] %= MOD;
+                }
+            }
+        }
+ 
+        return ret;
+    }
+ 
+    int & operator()(int i, int j)
+    {
+        return mat[i][j];
+    }
+};
+ 
+matrix fastpow(const matrix& m, int n)
+{
+    if (n == 1) {
+        return m;
+    }
+ 
+    if (n % 2 == 0) {
+        return fastpow(m * m, n / 2);
+    } else {
+        return m * fastpow(m, n - 1);
+    }
+}
+ 
+int rec(int pos, int left, int rem)
+{
+    if (pos >= N) {
+        if (rem == 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+ 
+    int ret = 0;
+    for (int k = 0; k <= 9; k++) {
+        if (left - k >= 0) {
+            ret += rec(pos + 1, left - k, (rem * 10 + k) % P);
+        }
+    }
+    return ret;
+}
+ 
+void into(int num, int & a, int & b)
+{
+    a = num / P;
+    b = num % P;
+}
+ 
+int onto(int a, int b)
+{
+    return a * P + b;
+}
+ 
+int * f;
+int * fp;
+void alloc(int n, int m)
+{
+    f = new int[n * m];
+    fp = new int[n * m];
+    //for (int i = 0; i < n; i++) {
+    //    f[i] = new int[m];
+    //    fp[i] = new int[m];
+    //}
+}
+ 
+bool valid(int a, int b)
+{
+    return false;
+}
+ 
+int main(int argc, char * argv[])
+{
+#ifdef Home
+    freopen("inp.txt", "rb", stdin);
+#endif
+ 
+    scanf("%d %d %d", &N, &P, &MM);
+    alloc(MM + 3, P + 3);
+    for (int pos = N; pos >= 0; pos--) {
+        for (int left = 0; left < MM + 1; left++) {
+            for (int rem = 0; rem < P; rem++) {
+                if (pos >= N) {
+                    if (rem == 0) {
+                        f[onto(left, rem)] = 1;
+                    } else {
+                        f[onto(left, rem)] = 0;
+                    }
+                } else {
+                    f[onto(left, rem)] = 0;
+                    for (int k = 0; k <= 9; k++) {
+                        if (left - k >= 0) {
+                            f[onto(left, rem)] += fp[onto(left - k, (rem * 10 + k) % P)];
+                            f[onto(left, rem)] %= MOD;
+                            //fp[left - k][(rem * 10 + k) % P];
+                        }
+                    }
+                }
+            }
+        }
+        swap(f, fp);
+    }
+ 
+    for (M = 0; M < MM + 1; M++) {
+        printf("%d", fp[onto(M, 0)]);
+        printf("%s", M == MM ? "\n" : " ");
+    }
+ 
+    return 0;
+}

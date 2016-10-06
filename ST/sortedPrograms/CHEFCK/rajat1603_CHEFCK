@@ -1,0 +1,129 @@
+#include<bits/stdc++.h>
+#define author rajat1603
+#define pb push_back
+#define mp make_pair
+using namespace std;
+static inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+static const int mod = 1e9 + 7;
+static const int N = 1e7 + 5;
+static const int LN = 24;
+static int arr[N];
+static int n,k,q;
+static int a,b,c,d,e,f,r,s,t,m,ans;
+static int L1,La,Lc,Lm,D1,Da,Dc,Dm;
+static long long T , temp , temp2 ,prod = 1 , sum = 0;
+static int block[N];
+static int prefix[N];
+static int suffix[N];
+static int start[N];
+static int finish[N];
+int main(){
+	n=scan(),k=scan(),q=scan();
+	a=scan(),b=scan(),c=scan(),d=scan(),e=scan(),f=scan(),r=scan(),s=scan(),t=scan(),m=scan(),arr[1]=scan();
+	T = t;
+	for(int x = 2 ; x <= n ; ++x ){
+		T*=t;
+		if(T>=s)
+			T%=s;
+		if(T<=r){
+		    temp =  arr[x-1];
+			temp*=a;
+			if(temp>=m)
+				temp%=m;
+			temp*=arr[x-1];
+			if(temp>=m)
+				temp%=m;
+			temp2 = arr[x-1];
+			temp2*=b;
+			if(temp2>=m)
+				temp2%=m;
+			temp += temp2;
+			temp +=c;
+			if(temp>=m)
+				temp%=m;
+			arr[x] = temp;
+		}
+		else{
+			temp =  arr[x-1];
+			temp*=d;
+			if(temp>=m)
+				temp%=m;
+			temp*=arr[x-1];
+			if(temp>=m)
+				temp%=m;
+			temp2 = arr[x-1];
+			temp2*=e;
+			if(temp2>=m)
+				temp2%=m;
+			temp += temp2;
+			temp +=f;
+			if(temp>=m)
+				temp%=m;
+			arr[x] = temp;
+		}
+	}
+	int cur = 0;
+	int i = 1;
+	while(i<=n){
+		int j = i;
+		++cur;
+		int mi = INT_MAX;
+		start[cur] = i;
+		while(j<=i+k&&j<=n){
+			block[j] = cur;
+			mi = min(mi,arr[j]);
+			prefix[j] = mi;
+			++j;
+		}
+		i = j;
+		--j;
+		finish[cur] = j;
+		mi = INT_MAX;
+		for(j = finish[cur] ; j>=start[cur];--j){
+			mi = min(mi,arr[j]);
+			suffix[j] = mi;
+		}
+	}
+	L1 = scan() , La = scan(), Lc = scan() , Lm = scan(), D1 = scan(), Da = scan() , Dc = scan(), Dm = scan();
+	while(q--){
+		temp = La;
+		temp*=L1;
+		temp+=Lc;
+		if(temp>=Lm){
+			temp%=Lm;
+		}
+		L1 = temp;
+		temp = Da;
+		temp*=D1;
+		temp+=Dc;
+		if(temp>=Dm){
+			temp%=Dm;
+		}
+		D1 = temp;
+		int l = L1 + 1;
+		int r = min(l + k - 1 + D1 , n );
+		ans = suffix[l];
+		ans = min(ans,prefix[r]);
+		int xxx = start[block[l]+1];
+		int yyy = finish[block[l]+1];
+		if(xxx>=l&&yyy<=r){
+			ans = min(ans , prefix[yyy]);
+		}
+        sum+=ans;	
+        prod *= ans;
+        if(prod>=mod)
+        	prod %=mod;
+	}
+	printf("%lld\n%lld\n",sum,prod);
+}

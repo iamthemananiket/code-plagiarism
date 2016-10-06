@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector<int> vi;
+typedef pair<int,int> pi;
+typedef priority_queue<int, vi, greater<int> > pq_t;
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define rep(i,a,b) for(i=a;i<b;i++)
+#define repb(i,a,b) for(i=a-1;i>=b;i--)
+#define zero(x) memset((x),0,sizeof (x))
+inline void read(int &x)	{	scanf("%d",&x);		}
+inline void read(ll &x)		{	scanf("%lld",&x);	}
+
+int a[151][151];
+ll b[151][151];
+ll c[151];
+
+ll aux[200][10];
+int mergeSort(ll a[], int beg, int end, int s, int lvl=0)
+{
+    int n=end-beg;
+    if(n<2)
+    {
+        aux[beg][lvl]=a[beg];
+        return 0;
+    }
+    int x,y,i,j,k,ans;
+    x=n/2;y=n-x;
+    ans=mergeSort(a,beg,beg+x,s,lvl+1)+mergeSort(a,beg+x,end,s,lvl+1);
+
+    for(i=0,j=0;i<x;i++)
+    {
+    	while(j<y && aux[beg+x+j][lvl+1]-aux[beg+i][lvl+1]<=s)
+    		j++;
+    	ans+=j;
+    }
+    for(i=0,j=0,k=0;i<x && j<y;)
+    {
+        while(aux[beg+i][lvl+1]<=aux[beg+x+j][lvl+1] && i<x)
+        {
+            aux[beg+k][lvl]=aux[beg+i][lvl+1];
+            k++;i++;
+        }
+        while(aux[beg+i][lvl+1]>aux[beg+x+j][lvl+1] && j<y)
+        {
+            aux[beg+k][lvl]=aux[beg+x+j][lvl+1];
+            k++;j++;
+        }
+    }
+    while(i<x)
+    {
+        aux[beg+k][lvl]=aux[beg+i][lvl+1];
+        k++;i++;
+    }
+    while(j<y)
+    {
+        aux[beg+k][lvl]=aux[beg+x+j][lvl+1];
+        k++;j++;
+    }
+    return ans;
+}
+
+int main()
+{
+	int tt,n,m,s,i,j,x,y,ans;
+	read(tt);
+	while(tt--)
+	{
+		ans=0;
+		read(n);
+		read(m);
+		read(s);
+		rep(i,1,n+1)
+			rep(j,1,m+1)
+			{
+				read(a[i][j]);
+				b[i][j]=b[i][j-1]+b[i-1][j]-b[i-1][j-1]+a[i][j];
+			}
+		rep(i,1,m+1)
+			rep(j,i,m+1)
+			{
+				c[0]=0;
+				rep(x,1,n+1)
+					c[x]=c[x-1]+b[x][j]-b[x][i-1]+b[x-1][i-1]-b[x-1][j];
+				ans+=mergeSort(c,0,n+1,s);
+			}
+		printf("%d\n",ans);
+	}
+}

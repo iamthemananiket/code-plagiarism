@@ -1,0 +1,70 @@
+#define _CRT_SECURE_NO_WARNINGS
+//#include <algorithm>
+#include <stdio.h>
+#include <string.h>
+//using namespace std;
+
+int min(int a, int b) {
+	if (a <= b) {
+		return a;
+	}
+	return b;
+}
+
+int max(int a, int b) {
+	if (a >= b) {
+		return a;
+	}
+	return b;
+}
+
+int len[(int)1e5 + 5];
+int ansLeft[17][(int)1e5 + 5];
+int ansRight[17][(int)1e5 + 5];
+int powersOfTwo[17];
+
+int main() {
+	//freopen("input.in", "rt", stdin);
+	//freopen("output.out", "wt", stdout);
+	powersOfTwo[0] = 1;
+	for (int i = 1; i <= 16; ++i) {
+		powersOfTwo[i] = powersOfTwo[i - 1] << 1;
+	}
+	int n;
+	scanf("%d", &n);
+	int cur = 0;
+	for (int i = 0; i < n; ++i) {
+		int v;
+		scanf("%d", &v);
+		ansRight[0][i] = ansLeft[0][i] = v;
+		if (powersOfTwo[cur + 1] == i + 1) {
+			++cur;
+		}
+		len[i + 1] = cur;
+	}
+	int m, x, y;
+	scanf("%d %d %d", &m, &x, &y);
+	long long res = 0;
+	for (int j = 1; j <= cur; ++j) {
+		int r = powersOfTwo[j] - 1;
+		for (int l = 0; r < n; ++l) {
+			ansRight[j][l] = ansLeft[j][r] = max(ansRight[j - 1][l], ansLeft[j - 1][r]);
+			++r;
+		}
+	}
+	for (int mm = 0; mm < m; ++mm) {
+		int l = min(x, y);
+		int r = max(x, y);
+		res += max(ansRight[len[r - l + 1]][l], ansLeft[len[r - l + 1]][r]);
+		x += 7;
+		while (x >= n - 1) {
+			x -= n - 1;
+		}
+		y += 11;
+		while (y >= n) {
+			y -= n;
+		}
+	}
+	printf("%lld\n", res);
+	return 0;
+}

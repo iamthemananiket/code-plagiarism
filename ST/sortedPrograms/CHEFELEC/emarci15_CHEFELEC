@@ -1,0 +1,39 @@
+#include <iostream>
+#include <cstdio>
+
+using namespace std;
+
+int T,n;
+bool e[100000];
+int x[100001];
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+        char c=getchar();
+        while(c<'0') c=getchar();
+        for(int i=0; i<n; i++) {
+            e[i] = c-'0';
+            c=getchar();
+        }
+        for(int i=0; i<n; i++) cin >> x[i];
+        x[n] = x[n-1];
+        int sol(0);
+        int g(0);
+        bool ve(0);
+        for(int i=0; i<n; i++) {
+            if(e[i]) {
+                if(ve) sol -= g;
+                ve = 1;
+                g = 0;
+            }
+            sol += x[i+1]-x[i];
+            g = max(g,x[i+1]-x[i]);
+        }
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+#include <string.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef double ld;
+typedef pair<ll, int> pll;
+
+const int inf = 100500;
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //freopen("input.txt", "r", stdin);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<vector<char> > a(n, vector<char>(m));
+    int xc, yc;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            cin >> a[i][j];
+            if (a[i][j] == 'C') {
+                xc = i, yc = j;
+            }
+        }
+    }
+
+    vector<vector<char> > pr(n, vector<char>(m, '?'));
+    vector<vector<int> > dist(n, vector<int>(m, inf));
+    queue<int> q;
+    dist[xc][yc] = 0;
+    q.push(xc);
+    q.push(yc);
+
+    int dx[4] = {-1, 1, 0, 0}, dy[4] = {0, 0, 1, -1};
+    char dc[4] = {'D', 'U', 'L', 'R'};
+
+    while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+        int y = q.front();
+        q.pop();
+        for (int k = 0; k < 4; ++k) {
+            int xx = x + dx[k], yy = y + dy[k];
+            if (a[xx][yy] == '.' && dist[xx][yy] == inf) {
+                pr[xx][yy] = dc[k];
+                dist[xx][yy] = dist[x][y] + 1;
+                q.push(xx);
+                q.push(yy);
+            }
+        }
+    }
+
+    vector<vector<string> > s(n, vector<string>(m, ""));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            if (a[i][j] == '.') {
+                int x = i, y = j;
+                s[i][j] = "";
+                while (x != xc || y != yc) {
+                    s[i][j] += pr[x][y];
+                    if (pr[x][y] == 'U') {
+                        --x;
+                    } else if (pr[x][y] == 'D') {
+                        ++x;
+                    } else if (pr[x][y] == 'L') {
+                        --y;
+                    } else {
+                        ++y;
+                    }
+                }
+            }
+        }
+    }
+
+    string ans = "";
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            if (a[i][j] != '.') {
+                continue;
+            }
+            int x = i, y = j;
+            for (int k = 0; k < sz(ans); ++k) {
+                if (ans[k] == 'U' && a[x - 1][y] != '*') {
+                    --x;
+                }
+                if (ans[k] == 'D' && a[x + 1][y] != '*') {
+                    ++x;
+                }
+                if (ans[k] == 'L' && a[x][y - 1] != '*') {
+                    --y;
+                }
+                if (ans[k] == 'R' && a[x][y + 1] != '*') {
+                    ++y;
+                }
+            }
+            ans += s[x][y];
+        }
+    }
+
+    cout << ans << "\n";
+
+}

@@ -1,0 +1,39 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+const int N = 25 * 1e4 + 10;
+int x[N],y[N];
+int main()
+  {
+
+       //  freopen("input.txt","r",stdin);
+       //  freopen("output.txt","w",stdout);
+
+            int t;
+          scanf("%d",&t);
+           while(t--)
+           {
+               int n;
+               scanf("%d",&n);
+                for(int i=1;i<=n;++i)
+                 for(int j=1;j<=n;++j)
+                {
+                    int val;
+                    scanf("%d",&val);
+                     x[val]=i;
+                     y[val]=j;
+                }
+                int X=x[1];
+                int Y=y[1];
+                long long ans=0;
+              for(int i=2;i<=n*n;++i)
+              {
+                  ans+=abs(X-x[i]) + abs(Y - y[i]);
+                  X=x[i];
+                  Y=y[i];
+              }
+              printf("%d\n",ans);
+           }
+
+      return 0;
+  }

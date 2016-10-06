@@ -1,0 +1,200 @@
+/***************************************
+    codeforces = topcoder = sahedsohel
+    IIT,Jahangirnagar University(42)
+****************************************/
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <list>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+using namespace std;
+
+#define ll long long int
+#define ull unsigned long long int
+#define inf (INT_MAX/10)
+#define linf (LLONG_MAX/10LL)
+#define sc(a) scanf("%d",&a)
+#define sc2(a,b) scanf("%d%d",&a,&b)
+#define sc3(a,b,c) scanf("%d%d%d",&a,&b,&c)
+#define sc4(a,b,c,d) scanf("%d%d%d%d",&a,&b,&c,&d)
+#define fl(c,i,n) for(i=c;i<n;i++)
+#define f(i,n) for(i=0;i<n;i++)
+#define mem(a) memset(a,0,sizeof(a))
+#define memn(a) memset(a,-1,sizeof(a))
+#define pb push_back
+#define pp pop_back()
+#define aov(a) a.begin(),a.end()
+#define mpr make_pair
+#define PI (2.0*acos(0.0)) //#define PI acos(-1.0)
+#define xx first
+#define yy second
+#define mxv(a) *max_element(aov(a))
+#define mnv(a) *min_element(aov(a))
+#define LB(a,x) (lower_bound(aov(a),x)-a.begin())
+#define UB(a,x) (upper_bound(aov(a),x)-a.begin())
+#define to_c_string(a) a.c_str()
+#define strtoint(c) atoi(&c[0])
+#define pii pair< int , int >
+#define pll pair< ll , ll >
+#define pcs(a) printf("Case %d: ", a)
+#define nl puts("")
+#define dbg(x) cout<<#x<<" : "<<x<<endl
+
+template <class T> inline T bigmod(T p,T e,T M){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p) % M;p = (p * p) % M;}return (T)ret;}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}   // M is prime}
+template <class T> inline T bpow(T p,T e){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p);p = (p * p);}return (T)ret;}
+
+int toInt(string s){int sm;stringstream ss(s);ss>>sm;return sm;}
+int toLlint(string s){long long int sm;stringstream ss(s);ss>>sm;return sm;}
+
+
+///int mnth[]={-1,31,28,31,30,31,30,31,31,30,31,30,31};  //Not Leap Year
+///int dx[]={1,1,0,-1,-1,-1,0,1};int dy[]={0,1,1,1,0,-1,-1,-1};//8 direction
+///int dx[]={2,1,-1,-2,-2,-1,1,2};int dy[]={1,2,2,1,-1,-2,-2,-1};//Knight Direction
+///int dx[]={-1,-1,+0,+1,+1,+0};int dy[]={-1,+1,+2,+1,-1,-2}; //Hexagonal Direction
+///const double eps=1e-6;
+///int dx[]={0,1,0,-1};
+///int dy[]={1,0,-1,0}; //4 Direction
+
+/*****************************************************************/
+///////////////////////   GET SET GO    ///////////////////////////
+/*****************************************************************/
+
+#define M 10000002
+#define MX 100005
+#define MD 1000000007LL
+
+struct D{
+    int l,r;
+    bool operator< (const D& x)const
+    {
+        return r<x.r;
+    }
+};
+
+ll a, b, c, d, e, f, r, s, t, m, A[M],zx;
+ll L1, La, Lc, Lm, D1, Da, Dc, Dm;
+int n,k,q;
+D qx[M];
+int tr[M],nx[M][2];
+
+void add(int i,int v)
+{
+    for(;i<=n;i=nx[i][0])
+//        if(tr[i]==-1)
+//            tr[i]=v;
+//        else
+            tr[i]=min(tr[i],v);
+}
+
+int qry(int i)
+{
+    int qrs=2000483648;
+    for(;i>0;i=nx[i][1])
+        qrs=min(tr[i],qrs);
+    return qrs;
+}
+
+
+int main()
+{
+    int i,j,x;
+
+    scanf("%d %d %d %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld",&n,&k,&q,&a,&b,&c, &d, &e, &f, &r, &s, &t, &m, &A[1],&L1, &La, &Lc, &Lm, &D1, &Da, &Dc, &Dm);
+    if(La>=Lm)
+        La%=Lm;
+    if(Lc>=Lm)
+        Lc%=Lm;
+    if(Da>=Dm)
+        Da%=Dm;
+    if(Dc>=Dm)
+        Dc%=Dm;
+    for(i= 0;i<q;i++)// to Q:
+    {
+        tr[i]=2000483648;
+        nx[i][0]=i+(i&-i);
+        nx[i][1]=i-(i&-i);
+        L1 = (La * L1 + Lc);
+        if(L1>=Lm)
+            L1%=Lm;
+        D1 = (Da * D1 + Dc);
+        if(D1>=Dm)
+            D1%=Dm;
+        qx[i].l = L1 + 1;
+        qx[i].r = min(L1+ k + D1, (ll)n);
+    }
+    for(;i<=n;i++){
+        tr[i]=2000483648;
+        nx[i][0]=i+(i&-i);
+        nx[i][1]=i-(i&-i);
+    }
+    sort(qx,qx+q);
+
+    ll ra,rb,qrs;
+
+    ra=0LL;
+    rb=1LL;
+
+    add(n,A[1]);
+    x=2;
+    ll qt=(t*t)%s;
+    if(t>=s)
+        t%=s;
+    if(a>=m)
+        a%=m;
+    if(b>=m)
+        b%=m;
+    if(c>=m)
+        c%=m;
+    if(d>=m)
+        d%=m;
+    if(e>=m)
+        e%=m;
+    if(f>=m)
+        f%=m;
+    f(i,q)
+    {
+        for(;x<=qx[i].r;x++)
+        {
+            zx=(A[x-1]*A[x-1]);
+            if(zx>=m)
+                zx%=m;
+            if(qt <= r)
+                A[x] = (a*zx + b*A[x-1] + c);
+            else
+                A[x] = (d*zx + e*A[x-1] + f);
+            if(A[x]>=m)
+                A[x]%=m;
+            qt=(qt*t);
+            if(qt>=s)
+                qt%=s;
+            add(n-x+1,A[x]);
+        }
+        qrs=qry(n-qx[i].l+1);
+        ra=(ra+qrs);
+        rb=(rb*qrs);
+        if(rb>=MD)
+            rb%=MD;
+    }
+
+    printf("%lld %lld\n",ra,rb);
+
+
+    return 0;
+}

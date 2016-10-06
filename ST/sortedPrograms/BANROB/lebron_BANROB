@@ -1,0 +1,181 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define ends adsfasfsdf
+ 
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+ 
+using namespace std;
+ 
+int tests;
+int n;
+double p;
+double s1[100],s2[100];
+
+vector<vector<double> >mult(vector<vector<double> >v1,vector<vector<double> > v2)
+{
+	vector<vector<double> > res;
+	res=v1;
+	for (int i=0;i<v1.size();i++)
+		for (int j=0;j<v1.size();j++)
+		{
+			res[i][j]=0;
+		}
+	for (int i=0;i<v1.size();i++)
+		for (int j=0;j<v1.size();j++)
+			for (int q=0;q<v1.size();q++)
+				res[i][j]+=v1[i][q]*v2[q][j];
+	return res;
+}
+
+vector<vector<double> > pw(vector<vector<double> > a,int b)
+{
+	if (b==1)
+		return a;
+	if (b%2)
+		return mult(a,pw(a,b-1));
+	return pw(mult(a,a),b/2);
+}
+
+void show(vector<vector<double> > v)
+{
+	for (int i=0;i<v.size();i++)
+	{
+		for (int j=0;j<v.size();j++)
+			cout<<v[i][j]<<" ";
+		cout<<endl;
+	}
+}
+
+int main(){
+//freopen("center.in","r",stdin);
+//freopen("center.out","w",stdout);
+//freopen("F:/in.txt","r",stdin);
+//freopen("F:/output.txt","w",stdout);
+//ios_base::sync_with_stdio(0);
+//cin.tie(0);
+ 
+cout.precision(12);
+ 
+cin>>tests;
+for (;tests;--tests)
+{
+	//cin>>n>>p;
+	scanf("%d",&n);
+	scanf("%lf",&p);
+	
+	//show(v);
+	
+	if (p>=1.0-1e-9)
+	{
+		if (n%2==1)
+			cout<<1e9<<" "<<0<<endl;
+		else
+			cout<<0<<" "<<1e9<<endl;
+		continue;
+	}
+	
+	if (p<eps)
+	{ 
+		cout<<1e9<<" "<<0<<endl;
+		continue;
+	}
+	
+	if (n>10000&&p>0.1&&p<0.9)
+	{
+		
+		double rat=1.0/(p+1);
+		printf("%.3lf",1e9*rat);	
+		printf(" %.3lf \n",1e9-1e9*rat);
+//	cout<<fixed<<1e9*rat<<" "<<1e9*(1.0-rat)<<endl;
+		continue;
+	}
+	
+	if (n>100000)
+	{
+		
+		double rat=1.0/(p+1);
+		printf("%.3lf",1e9*rat);	
+		printf(" %.3lf \n",1e9-1e9*rat);
+//	cout<<fixed<<1e9*rat<<" "<<1e9*(1.0-rat)<<endl;
+		continue;
+	}
+	
+	vector<vector<double> > v;
+	v.resize(2);
+	for (int i=0;i<2;i++)
+	{
+		v[i].resize(2);
+		for (int j=0;j<2;j++)
+			v[i][j]=0;
+	}
+	
+	v[1][0]=1;
+//	v[1][0]=p;
+	v[0][0]=-p;
+	v[1][1]=1;
+	
+	v=pw(v,n);
+	
+	printf("%.3lf",1e9*v[1][0]);
+	printf(" %.3lf \n",1e9-1e9*v[1][0]);
+//	cout<<fixed<<1e9*v[1][0]<<" "<<1e9-1e9*v[1][0]<<endl;
+	
+//	cout<<fixed<<v[2][0]+v[2][1]<<endl;
+	
+	/*
+	if (n<=100)
+	{
+		s1[n+1]=s2[n+1]=0;
+	//long double lsum=pow(p,n-1);
+	for (int lev=n;lev;--lev)
+	{
+		int i=lev;
+		if (lev%2==1)
+			s2[i]=s2[i+1]*p,
+			s1[i]=1-s2[i];
+		else
+			s1[i]=s1[i+1]*p,
+			s2[i]=1-s1[i];
+		//lsum/=p;
+	}
+	
+	for (int i=1;i<=n;i++)
+		cout<<s1[i]<<" "<<s2[i]<<endl;
+		
+		cout<<fixed<<1e9*s1[1]<<" "<<1e9*(1.0-s1[1])<<endl;
+		continue;
+	}
+	
+	
+	double rat=1.0/(p+1);
+	cout<<fixed<<1e9*rat<<" "<<1e9*(1.0-rat)<<endl;*/
+}
+return 0;} 

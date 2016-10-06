@@ -1,0 +1,153 @@
+
+#include<bits/stdc++.h>
+using namespace std;
+
+int t;
+
+#define MAX 502
+vector<pair<int,int> > v[MAX];
+vector<pair<int, int> > rv[MAX];
+
+int d[MAX][1002];
+bool vis[MAX];
+
+queue<pair<int,int > > q;
+
+bool flag[MAX][1002];
+
+double W[MAX];
+double L[MAX];
+bool c[MAX];
+double S;
+
+/*inline void dfs(int node, double w,double l){
+	if (flag[node]&&c[node]&&vis[node]){
+		double w_ =w-W[node];
+		double l_ = l - L[node];
+		if (l_ == 0||w_==0){
+			return;
+		}
+		double k = fabs(w_ / l_);
+		S = min(S, k);
+		return;
+	}
+	if (flag[node])return;
+	flag[node] = true;
+	W[node] = w;
+	L[node] = l;
+	for (int i = 0; i < v[node].size(); i++){
+		dfs(v[node][i].first, w + v[node][i].second, l + 1);
+	}
+	for (int i = 0; i < rv[node].size(); i++){
+		dfs(rv[node][i].first, w - rv[node][i].second, l - 1);
+	}
+}*/
+int star;
+inline void dfs(int node, double w, double l){
+		if (node==star&&l){
+			double w_ = w - W[node];
+			double l_ = l - L[node];
+			double k = w_ / l_;
+			S = min(S, k);
+			return;
+		}
+	W[node] = w;
+	L[node] = l;
+	for (int i = 0; i < v[node].size(); i++){
+		if (flag[node][i] == false){
+			flag[node][i] = true;
+			dfs(v[node][i].first, w + v[node][i].second, l + 1);
+			flag[node][i] = false;
+		}
+	}
+}
+vector<int> r[MAX];
+
+
+int main(){
+	cin >> t;
+	while (t--){
+		memset(vis, false, sizeof(vis));
+		int n, m;
+		scanf("%d%d", &n, &m);
+		for (int i = 0; i < n; i++){
+			v[i].clear();
+			r[i].clear();
+			rv[i].clear();
+		}
+		for (int i = 0; i < m; i++){
+			int x, y, z;
+			scanf("%d%d%d", &x, &y, &z);
+			x--;
+			y--;
+			v[x].push_back(make_pair(y, z));
+			r[y].push_back(x);
+			rv[y].push_back(make_pair(x, z));
+		}
+		for (int i = 0; i < n; i++){
+			for (int j = 0; j <= m; j++){
+				d[i][j] = INT_MAX;
+			}
+		}
+		memset(c, false, sizeof(c));
+		int A, B;
+		scanf("%d%d", &A, &B);
+		A--;
+		B--;
+		q.push(make_pair(A, 0));
+		d[A][0] = 0;
+		memset(vis, false, sizeof(vis));
+		memset(flag, false, sizeof(flag));
+		vis[A] = true;
+		while (!q.empty()){
+			int b = q.front().first;
+			int c = q.front().second;
+			vis[b] = true;
+			q.pop();
+			if (c == m)continue;
+			for (int i = 0; i < v[b].size(); i++){
+				int go = v[b][i].first;
+				int nex = d[b][c] + v[b][i].second;
+				if (d[go][c + 1] > nex){
+					d[go][c + 1] = nex;
+					q.push(make_pair(go, c + 1));
+				}
+			}
+		}
+		double ans = INT_MAX;
+		for (int j = 0; j <= m; j++){
+			if (d[B][j] != INT_MAX){
+				ans = min(ans, (double)(d[B][j]) / (double)(j));
+			}
+		}
+		if (ans == INT_MAX){
+			puts("-1");
+			continue;
+		}
+		S = INT_MAX;
+		queue<int> qq;
+		c[B] = true;
+		qq.push(B);
+		while (!qq.empty()){
+			int b = qq.front();
+			qq.pop();
+			for (int i = 0; i < r[b].size(); i++){
+				if (c[r[b][i]] == false){
+					c[r[b][i]] = true;
+					qq.push(r[b][i]);
+				}
+			}
+		}
+		for (int i = 0; i < n; i++){
+			if (vis[i]&&c[i]){
+				star = i;
+				dfs(i, 0, 0);
+			}
+		}
+		ans = min(ans, S);
+		//if (ans == INT_MAX)return 1;
+		if (ans < 1.0)return 1;
+		printf("%.9f\n", ans);
+	}
+	return 0;
+}

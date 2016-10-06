@@ -1,0 +1,253 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#define each(it,o) for(auto it= (o).begin(); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define inrep int t;cin>>t; while(t--)
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> pii;
+typedef vector<pii > vpii;
+typedef long long ll;
+typedef vector<ll> vll;
+typedef pair<ll,ll> pll;
+typedef vector<pll > vpll;
+typedef vector<string> vs;
+typedef double ftype;
+
+template<typename T> ostream& operator<< ( ostream &o,vector<T> v ) {
+    if ( v.size() >0 )
+        o<<v[0];
+    for ( unsigned   i=1; i<v.size(); i++ )
+        o<<" "<<v[i];
+    return o<<endl;
+}
+
+template<typename U,typename V> ostream& operator<< ( ostream &o,pair<U,V> p ) {
+    return o<<"("<<p.first<<", "<<p.second<<") ";
+}
+template<typename T> istream& operator>> ( istream &in,vector<T> &v ) {
+
+    for ( unsigned   i=0; i<v.size(); i++ )
+        in>>v[i];
+    return in;
+}
+vector<vector<vector<ftype>>> areas ( 51,vector<vector<ftype>> ( 100,vector<ftype> ( 100 ) ) );
+vector<vector<vector<ftype>>> cumareas ( 51,vector<vector<ftype>> ( 101,vector<ftype> ( 101 ) ) );
+bool inCirc ( ftype x, ftype y, int rsq ) {
+    return x*x+y*y<rsq;
+}
+
+
+
+
+ftype F ( ftype x,ftype r ) {
+    return 0.5*x*sqrt ( r*r-x*x )-0.5*r*r*acos ( x/r );
+}
+ftype integr ( ftype xmi, ftype xma, int r ) {
+    return F ( xma,r )-F ( xmi,r );
+}
+void compAreas() {
+    reu ( r,1,51 ) {
+        int rsq=r*r;
+        auto &ar=areas[r];
+        rep ( i,50 ) rep ( j,50 ) {
+            ftype val=1;
+            int x=abs ( i-50 )-1, y=abs ( j-50 )-1;
+            if ( !inCirc ( x,y,rsq ) ) {
+                val=0;
+            } else if ( inCirc ( x+1,y+1,rsq ) ) {
+                val=1;
+
+            } else {
+                ftype xmin=x;
+                ftype xmax=x+1;
+                if ( inCirc ( x,y+1 ,rsq ) ) {
+                    xmin=sqrt ( rsq- ( y+1 ) * ( y+1 ) );
+                }
+                if ( !inCirc ( x+1,y,rsq ) ) {
+                    xmax=sqrt ( rsq-y*y );
+                }
+                assert ( xmin>=x &&xmax<=x+1 &&xmin<=xmax );
+                val =integr ( xmin,xmax,r )- ( xmax-xmin ) *y+ ( xmin-x );
+            }
+            ar[i][j]=val;
+
+
+        }
+        reu ( i,50,100 ) {
+            rep ( j,50 ) {
+                ar[i][j]=ar[100-i-1][j];
+            }
+
+        }
+        rep ( i,100 ) {
+            reu ( j,50,100 ) ar[i][j]=ar[i][100-j-1];
+
+        }
+        reu ( i,1,101 ) reu ( j,0,100 ) {
+            cumareas[r][i][j]=cumareas[r][i-1][j]+areas[r][i-1][j];
+        }
+
+    }
+}
+inline ftype getArea ( int i, int j, int l,int r ) {
+    return cumareas[r][i][j+l]-cumareas[r][i][j]; //-cumareas[r][i+li][j]+cumareas[r][i][j];
+}
+
+vpii mima ( 50001,mp ( 50001,0 ) );
+struct Pip {
+    const int BSH=7;
+    const int BSIZE=1<<BSH;
+    vector<ftype> bvals=vector<ftype> ( 500 );
+    vector<ftype> vals=vector<ftype> ( 50001 );
+    deque<pair<pii,pii>> circs;
+    int lupdate=-INF;
+    ftype query ( int b, int e, int y ) {
+        if ( lupdate<y ) {
+            lupdate=y;
+            for (pair<pii,pii> &p:circs ) {
+                int i0,j0;
+                tie ( i0,j0 ) =p.first;
+                int r,jl;
+                tie ( r,jl ) =p.second;
+                if ( jl==INF ) continue;
+                int st1=50-r;
+                int e1=50+r;
+  if ( i0+st1>=mima[y].second ||i0+e1<=mima[y].first ) continue;
+                int st2=jl-j0;
+                int e2=y-j0;
+                if ( e2>50+r ) {
+                    e2=50+r;
+                    p.second.second=INF;
+                } else {
+                  
+                    p.second.second=y;
+                }
+
+                int l=e2-st2;
+                if ( l>0 ) {
+                    st1=max ( st1,-i0 );
+                    e1=min ( 50001-i0,e1 );
+                    reu ( i,st1,e1 ) {
+                        int x=i0+i;
+                        ftype a=cumareas[r][e2][i]-cumareas[r][st2][i];
+                        vals[x]+=a;
+                        bvals[x>>BSH]+=a;
+                    }
+
+                }
+            }
+        }
+        while ( !circs.empty() &&circs.front().second.second==INF ) {
+            circs.pop_front();
+        }
+        ftype su=0;
+        int bb=b>>BSH;
+        int be=e>>BSH;
+        if ( bb==be ) {
+            reu ( i,b,e ) {
+                su+=vals[i];
+            }
+        } else {
+            int e2= ( bb+1 ) *BSIZE;
+            reu ( i,b,e2 ) su+=vals[i];
+            reu ( i,be*BSIZE,e ) su+=vals[i];
+            reu ( i,bb+1,be ) su+=bvals[i];
+        }
+        return su;
+    }
+    void insertC ( int i0, int j0, int r ) {
+        circs.push_back ( mp ( mp ( i0,j0 ),mp ( r,j0+50-r ) ) );
+    }
+
+};
+bool compCirc ( const pair<pii,int>& c1, const  pair<pii,int>&c2 ) {
+    if ( c1.first.second==c2.first.second ) return c1<c2;
+    return c1.first.second<c2.first.second;
+}
+// ftype inter1 ( int x1,int y1, int x2, int y2, int cx, int cy, int r ) {
+//     int bx=max ( 0,x1-cx );
+//     int ex=min ( 100,x2-cx );
+//     int by=max ( 0,y1-cy );
+//     int ey=min ( 100,y2-cy );
+// //     cout<<mp(bx,ex)<<mp(by,ey)<<endl;
+//     ftype su=0;
+//     reu ( i,bx,ex )
+// //     reu ( j,by,ey )
+//     su+=getArea ( i,by,ey-by,r ); //areas[r][i][j];
+//     return su;
+//
+// }
+int main() {
+    compAreas();
+    ios_base::sync_with_stdio ( false );
+    cout.precision ( 8 );
+    cout.setf ( ios::fixed );
+    int n,q;
+    cin>>n>>q;
+//     assert ( n<50000 );
+    vector<pair<pii,int>> circs ( n );
+    rep ( i,n ) {
+        cin>>circs[i].first.first>>circs[i].first.second>>circs[i].second;
+        circs[i].first.first-=50;
+        circs[i].first.second-=50;
+    }
+    sort ( all ( circs ),compCirc );
+    vector<pair<pii,pii>> queries;
+    vector<pii> qOrder;
+    rep ( i,q ) {
+        int x1,x2,y1,y2;
+        cin>>x1>>y1>>x2>>y2;
+        queries.push_back ( mp ( mp ( x1,y1 ),mp ( x2,y2 ) ) );
+        mima[y1].first=min ( mima[y1].first,x1 );
+        mima[y1].second=max ( mima[y1].second,x2 );
+        mima[y2].first=min ( mima[y2].first,x1 );
+        mima[y2].second=max ( mima[y2].second,x2 );
+
+        qOrder.push_back ( mp ( y1,i ) );
+        qOrder.push_back ( mp ( y2,i ) );
+    }
+    sort ( all ( qOrder ) );
+    vector<ftype> res ( q );
+
+//     rep ( i,q ) {
+//         ftype su=0;
+//         for ( const pair<pii,int>& c:circs ) {
+//             su+=inter1 ( queries[i].first.first,queries[i].first.second,queries[i].second.first, queries[i].second.second,c.first.first,c.first.second,c.second );
+//
+//         }
+//         cout<<su<<'\n';
+//
+//     }
+// return 0;
+
+    int i=0,j=0;
+    Pip pip;
+    while ( i<2*q ) {
+        if ( j<n &&circs[j].first.second<qOrder[i].first ) {
+            pip.insertC ( circs[j].first.first,circs[j].first.second,circs[j].second );
+            j++;
+        } else {
+            int k=qOrder[i].second;
+            int x1,x2,y1,y2;
+            tie ( x1,y1 ) =queries[k].first;
+            tie ( x2,y2 ) =queries[k].second;
+            ftype r=pip.query ( x1,x2,qOrder[i].first );
+
+            if ( qOrder[i].first==y2 ) res[k]+=r;
+            else res[k]-=r;
+            i++;
+        }
+    }
+
+    for ( ftype d: res ) cout<<d<<'\n';
+
+
+
+}

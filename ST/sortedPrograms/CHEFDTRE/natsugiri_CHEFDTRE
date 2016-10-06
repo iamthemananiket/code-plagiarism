@@ -1,0 +1,184 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+namespace RBST_SET_SPACE {
+;;;;;;;;;;;;;;;;;;;;
+typedef int Val; // Ord Val
+struct Node {
+    Val val;
+    Node *ch[2];
+    int subsize;
+    Node() {}
+    Node(const Val&val): val(val), subsize(1) {
+	ch[0] = ch[1] = NULL;
+    }
+    Node *update() {
+	subsize = 1 + size(ch[0]) + size(ch[1]);
+	return this;
+    }
+    static int size(Node *p) { return p ? p->subsize : 0; }
+};
+
+const int MAX = 1000000;
+Node node[MAX];
+int node_i = 0;
+
+struct RBST_SET {
+    Node *root;
+    bool valid;
+    RBST_SET(): root(NULL), valid(true) {}
+    int size() { return root ? root->subsize : 0; }
+    static int size(Node *p) { return p ? p->subsize : 0; }
+
+    static Node *new_(const Node &t) {
+	node[node_i++] = t;
+	return &node[node_i-1];
+    }
+    static Node *merge(Node *l, Node *r) {
+	if (!l || !r) return !l ? r : l;
+	if (rand() % (size(r) + size(l)) < size(l)) {
+	    l->ch[1] = merge(l->ch[1], r);
+	    return l->update();
+	} else {
+	    r->ch[0] = merge(l, r->ch[0]);
+	    return r->update();
+	}
+    }
+    static pair<Node*, Node*> split(Node *p, int k) { // [0, k), [k, n)
+	if (!p) return make_pair((Node*)NULL, (Node*)NULL);
+	if (k <= size(p->ch[0])) {
+	    pair<Node*, Node*> s = split(p->ch[0], k);
+	    p->ch[0] = s.second;
+	    return make_pair(s.first, p->update());
+	} else {
+	    pair<Node*, Node*> s = split(p->ch[1], k-size(p->ch[0])-1);
+	    p->ch[1] = s.first;
+	    return make_pair(p->update(), s.second);
+	}
+    }
+    static pair<Node*, Node*> split_val(Node *p, const Val &val) { // [0, val), [val, n)
+	if (!p) return make_pair((Node*)NULL, (Node*)NULL);
+	if (val <= p->val) {
+	    pair<Node*, Node*> s = split_val(p->ch[0], val);
+	    p->ch[0] = s.second;
+	    return make_pair(s.first, p->update());
+	} else {
+	    pair<Node*, Node*> s = split_val(p->ch[1], val);
+	    p->ch[1] = s.first;
+	    return make_pair(p->update(), s.second);
+	}
+    }
+    bool insert(const Val &val) {
+	if (find(val)) return false;
+	pair<Node*, Node*> s = split_val(root, val);
+	root = merge(s.first, merge(new_(Node(val)), s.second));
+	return true;
+    }
+    bool erase(const Val &val) {
+	if (find(val)) {
+	    pair<Node*, Node*> s1 = split_val(root, val);
+	    pair<Node*, Node*> s2 = split(s1.second, 1);
+	    root = merge(s1.first, s2.second);
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+    void erase_nth(int n) {
+	pair<Node*, Node*> s1 = split(root, n);
+	pair<Node*, Node*> s2 = split(s1.second, 1);
+	root = merge(s1.first, s2.second);
+    }
+    Node *find(const Val &val) {
+	Node *p = root;
+	while (p) {
+	    if (val < p->val) p = p->ch[0];
+	    else if (p->val < val) p = p->ch[1];
+	    else return p;
+	}
+	return (Node*)NULL;
+    }
+    int count(const Val &val) {
+	return !!find(val);
+    }
+    int pos(const Val &val) { // inserting index
+	pair<Node*, Node*> s = split_val(root, val);
+	return size(s.first);
+    }
+    const Val &operator[](int n) const {
+	Node *p = root;
+	while (p) {
+	    if (n < size(p->ch[0])) {
+		p = p->ch[0];
+	    } else if (size(p->ch[0]) < n) {
+		n = n - size(p->ch[0]) - 1;
+		p = p->ch[1];
+	    } else {
+		return p->val;
+	    }
+	}
+	return p->val;
+    }
+    const Val &back() { return this->operator[](size()-1); }
+    const Val &front() { return this->operator[](0); }
+};
+
+RBST_SET single(const Val &val) {
+    RBST_SET r;
+    r.insert(val);
+    return r;
+}
+pair<RBST_SET, RBST_SET> split(RBST_SET &x, int k) { // [0, k), [k, n)
+    pair<Node*, Node*> s = RBST_SET::split(x.root, k);
+    RBST_SET p, q;
+    p.root = s.first; q.root = s.second;
+    x.valid = false;
+    return make_pair(p, q);
+}
+pair<RBST_SET, RBST_SET> split_val(RBST_SET &x, Val &val) { // [0, val), [val, n)
+    pair<Node*, Node*> s = RBST_SET::split_val(x.root, val);
+    RBST_SET p, q;
+    p.root = s.first; q.root = s.second;
+    x.valid = false;
+    return make_pair(p, q);
+}
+;;;;;;;;;;;;;;;;;;;;
+};
+
+using namespace RBST_SET_SPACE;
+RBST_SET S[300011];
+int N, Q;
+char buf[99];
+int A, B;
+int main() {
+    scanf("%d%d", &N, &Q);
+    REP (i, N) S[i+1].insert(i+1);
+    REP ($, Q) {
+	scanf("%s%d%d", buf, &A, &B);
+	if (buf[0] == 'U') {
+	    if (S[A].size() > S[B].size()) swap(A, B);
+	    S[N+1] = S[B];
+	    REP (i, S[A].size()) S[N+1].insert(S[A][i]);
+	    N++;
+	} else {
+	    printf("%d\n", S[A][B-1]);
+	}
+    }
+    
+    return 0;
+}

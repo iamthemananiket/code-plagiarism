@@ -1,0 +1,78 @@
+#include<bits/stdc++.h>
+using namespace std;
+int invcount(int a[],int n)
+{
+    int z,t,i,l1,l2,u1,u2,siz,k,j;
+    int counter=0;
+    int aux[n];
+    counter=0;
+    siz=1;
+    while(siz<n)
+    {
+        l1=0;
+        k=0;
+        while(l1+siz<n)
+        {
+            l2=l1+siz;
+            u1=l2-1;
+            u2=(l2+siz-1<n-1)?l2+siz-1:n-1;
+            for(i=l1,j=l2;i<=u1&&j<=u2;k++)
+            {
+                if(a[i]<=a[j])
+                    aux[k]=a[i++];
+                else
+                {
+                    aux[k]=a[j++];
+                    counter+=siz-i+l1;
+                }
+            }
+            for(;i<=u1;i++)
+                aux[k++]=a[i];
+            for(;j<=u2;j++)
+                aux[k++]=a[j];
+            l1=u2+1;
+        }
+        for(i=k;i<n;i++)
+            aux[i]=a[i];
+        for(i=0;i<n;i++)
+            a[i]=aux[i];
+        siz*=2;
+    }
+    return counter;
+}
+int main()
+{
+    int test=1;
+    while(test--)
+    {
+        int n,m,cnt1=0,cnt2=0,q;
+        scanf("%d%d",&n,&q);
+        int A[5000];
+        int B[5000];
+        int C[5000];
+        for(int i=0;i<n;i++)
+            scanf("%d",&A[i]);
+        cnt1=n;
+        while(q--)
+        {
+            int l,r,k;
+            scanf("%d%d%d",&l,&r,&k);
+            l--;
+            r--;
+            k--;
+            int len=r-l+1;
+            for(int i=cnt2+len-1;i>=k+len;i--)
+                B[i]=B[i-len];
+            for(int i=k;i<k+len;i++)
+                B[i]=A[l+i-k];
+            cnt2+=len;
+            for(int i=l;i+len<cnt1;i++)
+                A[i]=A[i+len];
+            cnt1-=len;
+            for(int i=0;i<cnt2;i++)
+                C[i]=B[i];
+            printf("%d\n",invcount(C,cnt2));
+        }
+    }
+    return 0;
+}

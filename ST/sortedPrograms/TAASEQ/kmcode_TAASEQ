@@ -1,0 +1,148 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int t;
+
+vector<int> v;
+set<int> s;
+#define MAX 100002
+int linkk[MAX];
+int linkk2[MAX];
+
+int solve(int val){
+	int id;
+	for (int i = 0; i < v.size(); i++){
+		if (v[i] == val){
+			id = i;
+			break;
+		}
+	}
+	set<int> ss;
+	for (int i = 1; i < v.size(); i++){
+		ss.insert(v[i] - v[i - 1]);
+	}
+	int r = INT_MAX;
+	for (auto it = ss.begin(); it != ss.end(); it++){
+		bool ok = false;
+		bool ng_flag = false;
+		int ng_val = -1;
+		int ich = id - 1;
+		long long int nex = val - (*it);
+		bool no = false;
+		int cnt = 0;
+		while (ich >= 0){
+			if (v[ich] == ng_val){
+				ich = linkk[ich];
+				cnt++;
+				continue;
+			}
+			if (v[ich] == nex){
+				nex -= (*it);
+			}
+			else{
+				if (ng_flag&&ng_val != v[ich]){
+					no = true;
+					break;
+				}
+				else{
+					ng_flag = true;
+					ng_val = v[ich];
+				}
+				cnt++;
+			}
+			ich--;
+		}
+		if (no)continue;
+		ich = id + 1;
+		nex = val + (*it);
+		int siz = v.size();
+		while (ich <siz){
+			if (v[ich] == ng_val){
+				ich = linkk2[ich];
+				cnt++;
+				continue;
+			}
+			if (v[ich] == nex){
+				nex += (*it);
+			}
+			else{
+				if (v[ich] == nex){
+					nex -= (*it);
+				}
+				else{
+					if (ng_flag&&ng_val != v[ich]){
+						no = true;
+						break;
+					}
+					else{
+						ng_flag = true;
+						ng_val = v[ich];
+					}
+					cnt++;
+				}
+			}
+			ich++;
+		}
+		if (no == false && ng_flag == true && cnt == 1){
+			r = min(r, ng_val);
+		}
+		if (ng_flag == false && cnt == 0){
+			r=min(r,min(v.back(), v[0]));
+		}
+	}
+	return r;
+}
+int main(){
+	cin >> t;
+	while (t--){
+		int n;
+		scanf("%d", &n);
+		v.clear();
+		s.clear();
+		for (int i = 0; i < n; i++){
+			int a;
+			scanf("%d", &a);
+			v.push_back(a);
+			s.insert(a);
+		}
+		memset(linkk, -1, sizeof(linkk));
+		linkk[0] = -1;
+		for (int i = 1; i < n; i++){
+			if (v[i] == v[i - 1]){
+				linkk[i] = linkk[i - 1];
+			}
+			else{
+				linkk[i] = i - 1;
+			}
+		}
+		memset(linkk2, -1, sizeof(linkk2));
+		linkk2[n - 1] = n;
+		for (int i = n - 2; i >= 0; i--){
+			if (v[i + 1] == v[i]){
+				linkk2[i] = linkk2[i + 1];
+			}
+			else{
+				linkk2[i] = i + 1;
+			}
+		}
+		if (n == 2){
+			printf("%d\n", min(v[0], v[1]));
+			continue;
+		}
+		if (n == 3){
+			sort(v.begin(), v.end());
+			cout << v[0] << endl;
+			continue;
+		}
+		if (s.size() == 1){
+			cout << (*s.begin()) << endl;
+			continue;
+		}
+		int ans = min(solve(*s.begin()), solve(*s.rbegin()));
+		if (ans == INT_MAX){
+			ans = -1;
+		}
+		cout << ans << endl;
+	}
+	return 0;
+}

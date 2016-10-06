@@ -1,0 +1,148 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <map>
+#include <vector>
+#include <cstdio>
+
+using namespace std;
+
+typedef long long lli;
+
+const int mod = (1e9)+7;
+
+lli pro[10000];
+int ct[10000];
+
+int S;
+
+int arr[10][10];
+int n[10];
+int N;
+
+int nz[10];
+
+inline int add(int a ,int b){
+	int c = a+b;
+	return c >= mod ? c-mod : c;
+}
+
+int all = 1;
+
+void upd(int k){
+	int i,mx,n1,mn,n2,curmx,curmn,b1,b2;
+
+	mx = -(1e9);
+	mn = (1e9);
+	curmx= curmn = 0;
+	n1 = n2 = 0;
+
+	b1 = b2 = 0;
+
+	nz[k] = 0;
+	for(i = 0; i < n[k] ; ++i){
+		int cur = 0;
+		for(int j =i; j < n[k]; ++j){
+			cur += arr[k][j];
+			if(!cur) nz[k]++;
+		}
+	}
+
+
+	for(i = 0; i < n[k]; ++i){
+		if(curmx <= 0){
+			b1 = curmx ? 1 : b1+1;
+			curmx = arr[k][i];
+		}else{
+			curmx = arr[k][i]+curmx;
+		}
+
+		if(curmn >= 0){
+			b2 = curmn ? 1 : b2+1;
+			curmn = arr[k][i];
+		}else{
+			curmn = arr[k][i]+curmn;
+		}
+
+		if(curmx > mx) mx = curmx,n1 = 0;
+		if(curmn < mn) mn = curmn, n2 = 0;
+
+		if(curmx == mx) n1 = add(n1,b1);
+		if(curmn == mn) n2 = add(n2,b2);
+	}
+
+	if(mx == mn) n2 = 0;
+
+	for(i = S-1; i >= 0;--i){
+		pro[i*2+1] = pro[i]*mx;
+		ct[i*2+1] = (1LL*ct[i]*n1)%mod;
+		pro[i*2] = pro[i]*mn;
+		ct[i*2] = (1LL*ct[i]*n2)%mod;
+	}
+
+	S *=2;
+}
+
+int compute0(){
+	int sel,way,cur,all;
+	way = 0;
+
+	int i;
+	for(sel =1; sel < (1<<N); ++sel){
+		cur = 1;
+		for(i = 0; i < N; ++i){
+			if(sel&(1<<i)){
+				cur = (1LL*cur*nz[i])%mod;
+			}else{
+				all = (n[i]*(n[i]+1))/2 - nz[i];
+				cur = (1LL*cur*all)%mod;
+			}
+		}
+		way = add(way,cur);
+	}
+
+	assert(way >= 0);
+	return way;
+}
+
+int main(){
+
+	int t,k,i;
+	scanf("%d",&t);
+
+	lli mx;
+	int nn;
+
+	while(t--){
+		scanf("%d",&N);
+		S=0;
+		all =1;
+		pro[S] = ct[S] = 1;
+		++S;
+		for(k = 0; k < N; ++k){
+			scanf("%d",&n[k]);
+			for(i =0; i < n[k]; ++i){
+				scanf("%d",&arr[k][i]);
+			}
+			upd(k);
+		}
+
+		mx = -(1LL<<61);
+		nn = 0;
+
+		for(i = 0; i < S; ++i){
+			if(pro[i] > mx){
+				mx = pro[i], nn =0 ;
+			}
+			if(pro[i] == mx) nn =add(nn,ct[i]);
+		}
+
+		if(mx == 0) nn = compute0();
+		assert(nn > 0);
+
+		printf("%lld %d\n",mx,nn);
+	}
+
+
+	return 0;
+}

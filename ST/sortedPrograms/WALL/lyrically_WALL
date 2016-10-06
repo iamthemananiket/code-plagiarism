@@ -1,0 +1,85 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+Int H;
+int N, M;
+Int A, B, IND;
+Int D[600010];
+
+Int X[600010];
+int app[600010];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		H = in();
+		N = in();
+		M = in();
+		A = in();
+		B = in();
+		IND = in();
+		for (int i = 0; i < M; ++i) {
+			D[i] = in();
+		}
+// {int ind=IND;for(int j=0;j<N-1;++j){cout<<D[ind]<<" ";ind=(A*ind+B)%M;}cout<<endl;}
+		
+		Int W = 0;
+		fill(app, app + M, -1);
+		int ind = IND;
+		for (int j = 0; ; ++j) {
+			X[j + 1] = X[j] + D[ind];
+			if (~app[ind]) {
+				const int j0 = app[ind];
+				if (N - 1 < j0) {
+					W = X[N - 1];
+				} else {
+					const Int q = (N - 1 - j0) / (j - j0);
+					const Int r = (N - 1 - j0) % (j - j0);
+					W = X[j0] + q * (X[j] - X[j0]) + (X[j0 + r] - X[j0]);
+				}
+				break;
+			}
+			app[ind] = j;
+			ind = (A * ind + B) % M;
+		}
+// cout<<"W = "<<W<<endl;
+		
+		const Int ans = H * W;
+		printf("%lld.%lld\n", ans / 2, ans % 2 * 5);
+	}
+	
+	return 0;
+}
+

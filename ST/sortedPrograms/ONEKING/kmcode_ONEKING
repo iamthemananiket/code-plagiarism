@@ -1,0 +1,77 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+int t;
+vector<vector<int> > v;
+vector<vector<int> > er;
+vector<pair<int, int> > vv;
+int main(){
+	scanf("%d", &t);
+	while (t--){
+		v.clear();
+		int n;
+		scanf("%d", &n);
+		v.clear();
+		er.clear();
+		v.resize(2001);
+		er.resize(2001);
+		vv.clear();
+		for (int i = 0; i < n; i++){
+			int kari, kari1;
+			scanf("%d%d", &kari, &kari1);
+			vv.push_back(make_pair(kari, kari1));
+			v[kari].push_back(i);
+			er[kari1].push_back(i);
+		}
+		int countt = 0;
+		for (int i = 0; i <= 2000; i++){
+			if (v[i].size() == 0){
+				continue;
+			}
+			{
+				countt++;
+				int j = i;
+				while (j <= 2000){
+					if (er[j].size()){
+						break;
+					}
+					j++;
+				}
+				vector<int>::iterator ite;
+				for (int k = i; k <= j; k++){
+					for (int kk = 0; kk < v[k].size(); kk++){
+						int ich = v[k][kk];
+						ite = lower_bound(er[vv[ich].second].begin(), er[vv[ich].second].end(), ich);
+						er[vv[ich].second].erase(ite, ite + 1);
+					}
+				}
+				i = j;
+			}
+		}
+		printf("%d\n", countt);
+	}
+	return 0;
+}

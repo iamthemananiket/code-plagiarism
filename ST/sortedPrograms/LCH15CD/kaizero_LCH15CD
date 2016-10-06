@@ -1,0 +1,38 @@
+#include<stdio.h>
+int n, K, T, po[20];
+long long D[65536];
+long long Gap(int a){
+	int i, w[20], S1 = 0, S2 = 0;
+	for (i = 0; i < n; i++){
+		w[i] = a%K;
+		S1 ^= w[i];
+		S2 += w[i];
+		a /= K;
+	}
+	return (long long)S1*S2;
+}
+int main()
+{
+	int i, j, t, w[20];
+	scanf("%d", &T);
+	while (T--){
+		scanf("%d%d", &n, &K);
+		po[0] = 1;
+		for (i = 1; i <= n; i++)po[i] = po[i - 1] * K;
+		D[0] = Gap(0);
+		for (i = 1; i < po[n]; i++)D[i] = 999999999999999999LL;
+		for (i = 0; i < po[n]; i++){
+			t = i;
+			for (j = 0; j < n; j++){
+				w[j] = t%K;
+				t /= K;
+			}
+			for (j = 0; j < n; j++){
+				if (w[j] != K - 1){
+					if (D[i + po[j]] > D[i] + Gap(i + po[j]))D[i + po[j]] = D[i] + Gap(i + po[j]);
+				}
+			}
+		}
+		printf("%lld\n", D[po[n] - 1]);
+	}
+}

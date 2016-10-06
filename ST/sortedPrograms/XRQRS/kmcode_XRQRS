@@ -1,0 +1,378 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+
+class trie{
+	struct st{
+		st *c[2];
+		int countt;
+		st(){
+			countt = 0;
+			c[0] = NULL;
+			c[1] = NULL;
+		}
+	};
+	st *root;
+	void ad(st *node, int val, int shif){
+		while (1){
+			node->countt++;
+			if (shif < 0){
+				return;
+			}
+			bool go = (val >> shif) & 1;
+			if (!node->c[go]){
+				node->c[go] = new st();
+			}
+			node = node->c[go];
+			shif--;
+			//	ad(node->c[go], val, shif - 1);
+		}
+	}
+	void del(st *node, int val, int shif){
+		while (1){
+			node->countt--;
+			if (shif < 0){
+				return;
+			}
+			bool go = (val >> shif) & 1;
+			if (node->c[go]->countt == 1){
+				node->c[go] = NULL;
+				return;
+			}
+			node = node->c[go];
+			shif--;
+		}
+	}
+	int q(st *node, int val, int shif, int b = 0){
+		while (1){
+			bool want = (val >> shif) & 1;
+			want ^= 1;
+			if (!node->c[want]){
+				want ^= 1;
+			}
+			b <<= 1;
+			b |= want;
+			if (shif == 0){
+				return b;
+			}
+			node = node->c[want];
+			shif--;
+		}
+	}
+public:
+	trie(){
+		root = new st();
+	}
+	void add(int val){
+		ad(root, val, 20);
+	}
+	void erase(int val){
+		del(root, val, 20);
+	}
+	int serch(int val){
+		return q(root, val, 20);
+	}
+};
+#define MAX 720
+int unit;
+int m;
+trie room[MAX];
+//vector<int> v;
+int v[500001];
+int v_siz;
+int id(int b){
+	return b / unit;
+}
+/*query*/
+int ty;
+int l;
+int r;
+int ll;  //belong l
+int rr;  //belong r
+int maxt;
+int outt;
+#define MAX_VAL 500001
+int bit[720][MAX_VAL];
+int bit2[10][MAX_VAL];
+void add_bit(int i, int j, int x){
+	while (j < MAX_VAL){
+		bit[i][j] += x;
+		j += j&-j;
+	}
+}
+int sum_bit(int i, int j){
+	int r = 0;
+	while (j > 0){
+		r += bit[i][j];
+		j -= j&-j;
+	}
+	return r;
+}
+int copy_3(int x){
+	maxt = 0;
+	if (l%unit == 0 && (r + 1) % unit == 0){
+		for (int i = ll; i <= rr; i++){
+			maxt += sum_bit(i, x);
+		}
+		return maxt;
+	}
+	if (ll != rr){
+		if (l%unit == 0){
+			for (int i = ll; i < rr; i++){
+				maxt += sum_bit(i, x);
+			}
+			for (int j = unit*rr; j <= r; j++){
+				if (v[j] <= x){
+					maxt++;
+				}
+			}
+			return maxt;
+		}
+		if ((r + 1) % unit == 0){
+			for (int i = ll + 1; i <= rr; i++){
+				maxt += sum_bit(i, x);
+			}
+			for (int i = l; id(i) == ll&&i < v_siz; i++){
+				if (v[i] <= x){
+					maxt++;
+				}
+			}
+			return maxt;
+		}
+	}
+	for (int i = ll + 1; i < rr; i++){
+		maxt += sum_bit(i, x);
+	}
+	for (int i = l; i < v_siz && id(i) == ll&&i <= r; i++){
+		if (v[i] <= x){
+			maxt++;
+		}
+	}
+	if (ll != rr){
+		for (int j = unit*rr; j <= r; j++){
+			if (v[j] <= x){
+				maxt++;
+			}
+		}
+	}
+	return maxt;
+}
+int wher;
+struct in{
+	int ty2;
+	int x2;
+	int y2;
+	int l2;
+	int r2;
+};
+in aa[5000001];
+int summ;
+int sizz;
+int main(){
+	int x;
+	scanf("%d", &m);
+	summ = -1;
+	int max_label = 0;
+	for (int i = 0; i < m; i++){
+		scanf("%d", &aa[i].ty2);
+		if (aa[i].ty2 == 0){
+			scanf("%d", &aa[i].x2);
+			sizz++;
+		}
+		if (aa[i].ty2 == 1){
+			scanf("%d%d%d", &aa[i].l2, &aa[i].r2, &aa[i].x2);
+			summ = max(summ, sizz);
+			max_label = i;
+		}
+		if (aa[i].ty2 == 3){
+			scanf("%d%d%d",&aa[i].l2, &aa[i].r2, &aa[i].x2);
+			summ = max(summ, sizz);
+			max_label = i;
+		}
+		if (aa[i].ty2 == 4){
+			scanf("%d%d%d", &aa[i].l2, &aa[i].r2, &aa[i].x2);
+			summ = max(summ, sizz);
+			max_label = i;
+		}
+		if (aa[i].ty2 == 2){
+			scanf("%d", &aa[i].l2);
+			sizz -= aa[i].l2;
+		}
+	}
+	if (summ == -1){
+		return 0;
+	}
+	unit = sqrt(summ);
+	if (unit == 0){
+		unit++;
+	}
+	int label = -1;
+	while (m--){
+		label++;
+		if (label > max_label){
+			exit(0);
+		}
+		ty = aa[label].ty2;
+		l = aa[label].l2;
+		r = aa[label].r2;
+		x = aa[label].x2;
+		if (ty == 0){
+			v[v_siz] = x;
+			v_siz++;
+			if (summ < v_siz){
+				continue;
+			}
+			wher = id(v_siz - 1);
+			room[wher].add(x);
+			add_bit(wher, x, 1);
+			continue;
+		}
+		if (ty == 1){
+			l--;
+			r--;
+			ll = id(l);
+			rr = id(r);
+			maxt = -1;
+			outt = -1;
+			int ss;
+			for (int i = ll + 1; i < rr; i++){
+				ss = room[i].serch(x);
+				if ((ss^x) > maxt){
+					maxt = ss^x;
+					outt = ss;
+				}
+			}
+			for (int i = l; id(i) == ll&&i <= r; i++){
+				if (maxt<(v[i] ^ x)){
+					maxt = v[i] ^ x;
+					outt = v[i];
+				}
+			}
+			if (ll != rr){
+				for (int j = unit*rr; j <= r; j++){
+					if (maxt<(v[j] ^ x)){
+						maxt = v[j] ^ x;
+						outt = v[j];
+					}
+				}
+			}
+			printf("%d\n", outt);
+			continue;
+		}
+		if (ty == 2){
+			while (l--){
+				if (summ < v_siz){
+					v_siz--;
+					continue;
+				}
+				wher = id(v_siz - 1);
+				room[wher].erase(v[v_siz - 1]);
+				r = wher;
+				x = v[v_siz - 1];
+				add_bit(id(v_siz - 1), x, -1);
+				v_siz--;
+			}
+			continue;
+		}
+		if (ty == 3){
+			l--;
+			r--;
+			ll = id(l);
+			rr = id(r);
+			maxt = 0;
+			if (l%unit==0&&(r+1)%unit==0){
+				for (int i = ll; i <= rr; i++){
+					maxt += sum_bit(i, x);
+				}
+				printf("%d\n", maxt);
+				continue;
+			}
+			if (ll != rr){
+				if (l%unit == 0){
+					for (int i = ll; i < rr; i++){
+						maxt += sum_bit(i, x);
+					}
+					for (int j = unit*rr; j <= r; j++){
+						if (v[j] <= x){
+							maxt++;
+						}
+					}
+					printf("%d\n", maxt);
+					continue;
+				}
+				if ((r + 1) % unit == 0){
+					for (int i = ll + 1; i <= rr; i++){
+						maxt += sum_bit(i, x);
+					}
+					for (int i = l; id(i) == ll&&i<v_siz; i++){
+						if (v[i] <= x){
+							maxt++;
+						}
+					}
+					printf("%d\n", maxt);
+					continue;
+				}
+			}
+			for (int i = ll + 1; i < rr; i++){
+				maxt += sum_bit(i, x);
+			}
+			for (int i = l; i < v_siz && id(i) == ll&&i <= r; i++){
+				if (v[i] <= x){
+					maxt++;
+				}
+			}
+			if (ll != rr){
+				for (int j = unit*rr; j <= r; j++){
+					if (v[j] <= x){
+						maxt++;
+					}
+				}
+			}
+			printf("%d\n", maxt);
+			continue;
+		}
+		l--;
+		r--;
+		int mint = 0;
+		int maxt1 = 500000;
+		ll = id(l);
+		rr = id(r);
+		int mid;
+		int answe;
+		while (maxt1 - mint>1){
+			mid = (mint + maxt1) / 2;
+			answe = copy_3(mid);
+			if (answe >= x){
+				maxt1 = mid;
+			}
+			else{
+				mint = mid;
+			}
+		}
+		printf("%d\n", maxt1);
+	}
+	return 0;
+}

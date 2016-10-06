@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+
+#include <random>
+std::default_random_engine random_engine(0xdeadbeef);
+template<class T>
+inline T randint(T L, T R) { return std::uniform_int_distribution<T>(L, R)(random_engine); }
+
+using namespace std;
+using namespace __gnu_pbds;
+
+typedef
+tree<
+  int,
+  int,
+  less<int>,
+  rb_tree_tag,
+  tree_order_statistics_node_update>
+map_t;
+
+int N, Q;
+map<int, map_t> freq;
+int A[100001];
+
+int main()
+{
+    scanf("%d%d", &N, &Q);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i), freq[A[i]].insert(make_pair(i, i));
+    while(Q--)
+    {
+        int t, a, b;
+        scanf("%d%d%d", &t, &a, &b);
+        if(t==1)
+        {
+            freq[A[a]].erase(a);
+            A[a]=b;
+            freq[A[a]].insert(make_pair(a, a));
+        }
+        else
+        {
+            bool ok=false;
+            for(int t=0; t<30; t++)
+            {
+                int x=randint(a, b);
+                auto m=freq.find(A[x]);
+                if(m!=freq.end())
+                {
+                    int n=m->second.order_of_key(b+1)-m->second.order_of_key(a);
+                    if(n*2>b-a+1)
+                    {
+                        printf("Yes\n");
+                        ok=true;
+                        break;
+                    }
+                }
+            }
+            if(!ok)
+                printf("No\n");
+        }
+    }
+    return 0;
+}

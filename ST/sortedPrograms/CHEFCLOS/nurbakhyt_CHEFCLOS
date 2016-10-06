@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)8e4 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+const int mod = (int)1e9 + 7;
+
+using namespace std;
+
+int n, k, l;
+int a[30];
+int c[30][30];
+
+int gcd(int a, int b) {
+	while(a) {
+		swap(a, b);
+		a %= b;
+	}
+	return b;
+}
+
+bool check(int mask) {
+	for (int i = 0; i <= l; i++)
+		for (int j = 0; j <= l; j++)
+			if ((mask & (1 << i)) > 0 && (mask & (1 << j)) > 0 && (mask & (1 << gcd(i, j))) == 0)
+				return 0;
+	return 1;
+}
+
+void solve() {
+	cin >> n >> k >> l;
+	for (int i = 0; i < 30; i++) {
+		c[i][0] = c[i][i] = 1;
+		for (int j = 1; j < i; j++)
+			c[i][j] = (c[i - 1][j] + c[i - 1][j - 1]) % mod;
+	}
+	int mask = 0;
+	for (int i = 0; i < n; i++) {
+		cin >> a[i];
+		mask |= (1 << a[i]);
+	}
+	int ans = 0;
+	for (int nw = 1; nw < (1 << (l + 1)); nw++) {
+		if ((1 << 0) & nw)
+			continue;
+		if (check(nw | mask) && __builtin_popcount(nw) <= k)
+			ans = (ans + c[k - 1][__builtin_popcount(nw) - 1]);
+	}
+	cout << ans << endl;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in", "r", stdin);
+	freopen(fname"out", "w", stdout);
+	#endif
+	int test;
+	cin >> test;
+	while(test--)
+		solve();
+	return 0;
+}

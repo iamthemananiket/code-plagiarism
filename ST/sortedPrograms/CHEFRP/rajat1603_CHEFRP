@@ -1,0 +1,38 @@
+#include<bits/stdc++.h>
+#define author rajat1603
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+const int mod = 1e9 + 7;
+int main(){
+    int t=scan();
+    while(t--){
+    	int n=scan();
+    	int mi = INT_MAX;
+    	int sum = 0;
+    	while(n--){
+    		int temp=scan();
+    		mi = min(mi,temp);
+    		sum+=temp;
+    	}
+    	if(mi<2){
+    		printf("-1\n");
+    		continue;
+    	}
+    	mi -= 2;
+    	sum -= mi;
+    	printf("%d\n",sum);
+    }
+}

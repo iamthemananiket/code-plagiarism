@@ -1,0 +1,164 @@
+#include <bits/stdc++.h>
+#include <assert.h>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef vector < long long > vll;
+typedef pair < long long,  long long > pll;
+typedef pair < int,  int > pii;
+typedef vector < int > vii;
+
+#define csl ios_base :: sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t,  n,  u,  v,  m,  q,  r,  ql,  qr,  k,  l,  s,  x,  y,  w,  h,  c,  a,  b,  z;
+const int N = 3e5 + 500;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 57LL;
+const bool JUDGE = false;
+
+ll A[N], dp[N], H[N], P[N];
+struct cht {
+    struct Line {
+        ll a,  b;
+        long double xLeft;
+        enum Type {line,  Mx,  Mn} type;
+        ll val;
+        explicit Line(ll aa = 0, ll bb = 0) : a(aa), b(bb), xLeft(-INF), type(Type :: line), val(0) {}
+        ll func(ll x) const { return a * x + b; }
+        friend bool areParallel(const Line& l1,  const Line& l2) { return l1.a == l2.a; }
+        friend long double intersectX(const Line& l1,  const Line& l2) { return areParallel(l1, l2) ? INF : 1.0 * (l2.b - l1.b) / (l1.a - l2.a); }
+        bool operator<(const Line& l2) const {
+            if (l2.type == line)
+                return this -> a < l2.a;
+            if (l2.type == Mx)
+                return this -> xLeft < l2.val;
+            if (l2.type == Mn)
+                return this -> xLeft > l2.val;
+        }
+    };
+    bool ok;
+    set < Line > stck;
+    bool Prev(set < Line > :: iterator it) { return it != stck.begin(); }
+    bool Next(set < Line > :: iterator it) { return it != stck.end() && next(it) != stck.end(); }
+    bool Clear(const Line& l1,  const Line& l2,  const Line& l3) { return intersectX(l1, l3) <= intersectX(l1, l2); }
+    bool Clear(set < Line > :: iterator it) {
+        return Prev(it) && Next(it) && (ok && Clear(*prev(it), *it, *next(it)) || !ok && Clear(*next(it), *it, *prev(it)));
+    }
+    set < Line > :: iterator modify (set < Line > :: iterator it) {
+        if (ok && !Prev(it) || !ok && !Next(it))
+            return it;
+        long double val = intersectX(*it,  ok? *prev(it): *next(it));
+        Line buf (*it);
+        it = stck.erase(it);
+        buf.xLeft = val;
+        it = stck.insert(it, buf);
+        return it;
+    }
+    void insert(ll a,  ll b) {
+        Line l3 = Line(a,  b);
+        auto it = stck.lower_bound(l3);
+        if (it != stck.end() && areParallel(*it,  l3)) {
+            if (ok && it -> b < b || !ok && it -> b > b)
+                it = stck.erase(it);
+            else return;
+        }
+        it = stck.insert(it,  l3);
+        if (Clear(it)) { 
+			stck.erase(it); 
+			return; 
+		}
+        while (Prev(it) && Clear(prev(it))) stck.erase(prev(it));
+        while (Next(it) && Clear(next(it))) stck.erase(next(it));
+        it = modify(it);
+        if (Prev(it))
+            modify(prev(it));
+        if (Next(it))
+            modify(next(it));
+    }
+    ll calc(ll x) {
+        if (stck.empty())
+            return INF;
+        Line q;
+        q.val = x;
+        q.type = ok ? Line :: Type :: Mx : Line :: Type :: Mn;
+        auto best = stck.lower_bound(q);
+        if (ok) --best;
+        return best -> func(x);
+    }
+}tree[4 * N];
+void modify(int i, int l, int r, ll x, ll m, ll b) {
+    if (l == r) {
+		tree[i].insert(m, b);
+		return;
+	}
+    int mid = (l + r) >> 1;
+    if (x <= mid)
+        modify(i + i + 1, l, mid, x, m, b);
+    else
+        modify(i + i + 2, mid + 1, r, x, m, b);
+	tree[i].insert(m, b);
+}
+ll query(int i, int l, int r, int rl, int rr, ll x) {
+    if (rl <= l && r <= rr) {
+		return tree[i].calc(x);
+	}
+	if (l > rr || rl > r) return INF;
+    int mid = (l + r) / 2;
+    return min(query(i + i + 1, l, mid, rl, rr, x), query(i + i + 2, mid + 1, r, rl, rr, x));
+}
+int main() {
+    csl;
+	if (JUDGE) {
+		freopen("cricket.in", "r", stdin);
+		freopen("cricket.out", "w", stdout);
+	}
+    cin >> n;
+    for (int i = 0; i < n; ++i) {
+        cin >> x;
+        P[x - 1] = i;
+    }
+    for (int i = 0; i < n; ++i) {
+        cin >> A[i];
+	}
+    for (int i = 0; i < n; ++i) {
+        cin >> H[i];
+	}
+    dp[n - 1] = A[n - 1];
+    modify(0, 0, n - 1, n - 1, H[n - 1] * (-2), A[n - 1] + (H[n - 1] * H[n - 1]));
+    for (int i = n - 2; i >= 0; --i) {
+		ll a = query(0, 0, n - 1, P[i], n - 1, H[P[i]]);
+		//assert(a < INF);
+        dp[P[i]] = (H[P[i]] * H[P[i]]) + A[P[i]] + a;
+		//cout << a << '\n';
+		modify(0, 0, n - 1, P[i], H[P[i]] * (-2), dp[P[i]] + (H[P[i]] * H[P[i]]));
+		//cout << dp[P[i]] << '\n';
+    }
+	//assert(dp[0] < INF);
+    cout << dp[0] << '\n';
+	return 0;
+}
+/*#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long,  long long > pll;
+typedef pair < int,  int > pii;
+typedef vector < int > vii;
+
+#define mp make_pair
+#define fst first
+#define snd second
+
+ll t, n, u, v, m, q, r, ql, qr, k, d, l, w, c, x;
+const int N = 1e5 + 500;
+const ll mod = 1e9 + 7;
+const ll INF = 1LL << 57LL;
+struct {
+{
+}
+};*/

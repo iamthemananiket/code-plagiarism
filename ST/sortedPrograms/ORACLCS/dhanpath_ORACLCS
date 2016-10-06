@@ -1,0 +1,26 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+        
+        int  t, n, res ;
+        string  str ;
+        
+        for( cin >> t ;  t-- ;  )
+        {
+                res = 1000 ;
+                for( cin >> n ;  n-- ;  )
+                {
+                        cin >> str ;
+                        int  ca = count( str.begin(), str.end(), 'a' );
+                        res = min( res, min( ca, (int)str.size()-ca ) );
+                }
+                cout << res << endl ;
+        }
+        
+        return 0;
+}

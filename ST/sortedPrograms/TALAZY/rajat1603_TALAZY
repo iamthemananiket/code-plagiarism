@@ -1,0 +1,18 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t;
+long long n , b , m;
+long long solve(long long n , long long b , long long m){
+    if(n == 1){
+        return m;
+    }
+    long long x = n + 1 >> 1;
+    return m * x + b + solve(n - x , b , m + m);
+}
+int main(){
+    cin >> t;
+    while(t--){
+        cin >> n >> b >> m;
+        cout << solve(n , b , m) << endl;
+    }
+}

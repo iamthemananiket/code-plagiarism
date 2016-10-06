@@ -1,0 +1,50 @@
+#include <cstdio>
+
+#define lim 100
+
+using namespace std;
+
+int n,q;
+long long a[300001];
+long long dp[300001][lim];
+
+long long x,y;
+
+int main()
+{
+    scanf("%d",&n);
+
+    for(int i=1; i<=n; i++) scanf("%lld",&a[i]);
+    for(int y=1; y<lim; y++) {
+        for(int j=n; j>0; j--) {
+            dp[j][y] = a[j];
+            if((j+y) <= n) dp[j][y] += dp[j+y][y];
+        }
+    }
+
+    long long sol;
+    for(scanf("%d",&q); q--;) {
+        scanf("%lld%lld",&x,&y);
+        if(y==0) {
+            printf("%lld\n",a[x]);
+            continue;
+        }
+        if(x > n) {
+            printf("0\n");
+            continue;
+        }
+        if(x < 1) {
+            x -= (x/y);
+            while(x<1) x += y;
+        }
+        if(y < lim) {
+            printf("%lld\n",dp[x][y]);
+        } else {
+            sol = 0ll;
+            for(int i=x; i<=n; i+=y) sol += a[i];
+            printf("%lld\n",sol);
+        }
+    }
+
+    return 0;
+}

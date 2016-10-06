@@ -1,0 +1,162 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return val < a ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+
+#define RL double
+#define EPS 1e-9
+struct PT {
+	RL x, y;
+	PT() : x(0), y(0) {}
+	PT(RL x, RL y) : x(x), y(y) {}
+	PT(const PT& p) : x(p.x), y(p.y) {}
+	int operator < (const PT& rhs) const {return make_pair(x, y) < make_pair(rhs.x, rhs.y);}
+	int operator == (const PT& rhs) const {return make_pair(x, y) == make_pair(rhs.x, rhs.y);}
+	PT operator + (const PT& p) const {return PT(x + p.x, y + p.y);}
+	PT operator - (const PT& p) const {return PT(x - p.x, y - p.y);}
+	PT operator * (RL c) const {return PT(x * c, y * c);}
+	PT operator / (RL c) const {return PT(x / c, y / c);}
+};
+RL cross(PT p, PT q) {return p.x * q.y - p.y * q.x;}
+RL area(PT a, PT b, PT c) {return fabs(cross(a, b) + cross(b, c) + cross(c, a)) / 2;}
+RL area2(PT a, PT b, PT c) {return cross(a, b) + cross(b, c) + cross(c, a);}
+RL dot(PT p, PT q) {return p.x * q.x + p.y * q.y;}
+RL dist(PT p, PT q) {return sqrt(dot(p - q, p - q));}
+RL dist2(PT p, PT q) {return dot(p - q, p - q);}
+PT RotateCCW90(PT p) {return PT(-p.y, p.x);}
+PT RotateCW90(PT p) {return PT(p.y, -p.x);}
+PT RotateCCW(PT p, RL t) {return PT(p.x * cos(t) - p.y * sin(t), p.x * sin(t) + p.y * cos(t));}
+int sign(RL x) {return x < -EPS ? -1 : x > +EPS;}
+int sign(RL x, RL y) {return sign(x - y);}
+PT ComputeLineIntersection(PT a, PT b, PT c, PT d) {
+	b = b - a; d = c - d; c = c - a;
+	return a + b * cross(c, d) / cross(b, d);
+}
+
+const int maxn = 20000 + 10;
+const int mod = (int) 1e9 + 9;
+int cnt[maxn];
+int f[maxn];
+
+void solve() {
+	int test; cin >> test;
+	while (test--) {
+		fill_n(cnt, maxn, 0);
+		int n, a, b, c, d;
+		cin >> n >> a >> b >> c >> d;
+		FOR(i, 0, 4) cin >> f[i];
+		FOR(i, 4, maxn) {
+			f[i] = mult(f[i - 1], a, mod);
+			addmod(f[i], mult(f[i - 2], b, mod), mod);
+			addmod(f[i], mult(f[i - 3], c, mod), mod);
+			addmod(f[i], mult(f[i - 4], d, mod), mod);
+		}
+		vector<PT> p(n);
+		int mn = +INF, mx = -INF;
+		FOR(i, 0, n) {
+			int x, y; cin >> x >> y;
+			p[i] = PT(x, y);
+			chkmin(mn, y), chkmax(mx, y);
+		}
+		int ans = 0;
+		FOR(i, mn, mx + 1) {
+			int y = i;
+			PT a = PT(0, y), b = PT(1, y);
+			vector<pair<PT, int> > vp;
+			vii sg;
+			FOR(j, 0, n) {
+				PT u = p[j], v = p[(j + 1) % n], w = p[(j + n - 1) % n];
+				if (sign(cross(u - a, b - a)) * sign(cross(v - a, b - a)) < 0) {
+					PT q = ComputeLineIntersection(a, b, u, v);
+					if (sign(cross(u - a, b - a)) > 0) vp.pb(mp(q, +2)); else vp.pb(mp(q, -2));
+				}
+				if (sign(cross(u - a, b - a)) == 0) {
+					vp.pb(mp(u, sign(cross(w - a, b - a)) - sign(cross(v - a, b - a))));
+					sg.pb(mp(u.x, u.x));
+				}
+			}
+			sort(all(vp));
+			int tot = 0;
+			FOR(j, 0, sz(vp) - 1) {
+				tot += vp[j].se;
+				if (tot) {
+					int u = (int) ceil(vp[j].fi.x - EPS);
+					int v = (int) floor(vp[j + 1].fi.x + EPS);
+					if (u <= v) {
+						sg.pb(mp(u, v));
+					}
+				}
+			}
+			sort(all(sg));
+			vii tmp;
+			FOR(i, 0, sz(sg)) {
+				if (sz(tmp) && tmp.back().se >= sg[i].fi) {
+					chkmax(tmp.back().se, sg[i].se);
+				}
+				else {
+					tmp.pb(sg[i]);
+				}
+			}
+			sg = tmp;
+			FOR(j, 0, sz(sg)) {
+				int l = sg[j].fi;
+				int r = sg[j].se;
+				cnt[y + l]++, cnt[y + r + 1]--;
+			}
+		}
+		FOR(i, 1, maxn) cnt[i] += cnt[i - 1];
+		FOR(i, 0, maxn) if (cnt[i]) {
+			addmod(ans, mult(cnt[i], f[i], mod), mod);
+		}
+		cout << ans << "\n";
+	}
+}
+
+int main() {
+	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, Q;
+int A[10000];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d", &N);
+        int lsum=0, hsum=0;
+        for(int i=0; i<N; i++)
+        {
+            scanf("%d", A+i);
+            if(A[i]==0)
+                continue;
+            lsum+=A[i]-1;
+            hsum+=A[i];
+        }
+        if(lsum<100 && 100<=hsum)
+            printf("YES\n");
+        else
+            printf("NO\n");
+    }
+    return 0;
+}

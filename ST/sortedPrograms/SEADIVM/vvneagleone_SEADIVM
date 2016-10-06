@@ -1,0 +1,383 @@
+// Program and program template by vvneagleone
+
+#include<cstdio>
+#include<iostream>
+#include<iomanip>
+#include<algorithm>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<climits>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<set>
+#include<map>
+using namespace std;
+typedef long long LL;
+typedef long double LD;
+#define MOD 1000000007LL
+
+#ifdef __GNUC__
+    #if ( __GNUC__ >= 4 && __GNUC_MINOR__ >= 7 && __cplusplus > 201100L )
+        #include<unordered_set>
+        #include<unordered_map>
+    #endif
+#endif // __GNUC__
+
+#ifdef __WIN32
+    #define gx getchar
+    #define px putchar
+    #define ps putchar(' ')
+    #define pn putchar('\n')
+#else
+    #define gx getchar_unlocked
+    #define px putchar_unlocked
+    #define ps putchar_unlocked(' ')
+    #define pn putchar_unlocked('\n')
+#endif // __WIN32
+
+void scan(int &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*sign;}
+void lscan(LL &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*(LL)(sign);}
+int sscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n')a[i++]=c,c=gx();a[i]=0;return i;}
+int wscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n'&&c!=' ')a[i++]=c,c=gx();a[i]=0;return i;}
+void print(int n){if(n<0){n=-n;px('-');}int i=10;char o[10];do{o[--i]=(n%10)+'0';n/=10;}while(n);do{px(o[i]);}while(++i<10);}
+void lprint(LL n){if(n<0LL){n=-n;px('-');}int i=21;char o[21];do{o[--i]=(n%10LL)+'0';n/=10LL;}while(n);do{px(o[i]);}while(++i<21);}
+void sprint(const char*a){const char*p=a;while(*p)px(*p++);}
+LL power(LL b,LL e,LL m=MOD){LL r=1;while(e){if(e&1)r=(r*b)%m;b=(b*b)%m;e>>=1;}return r;}
+LL minv(LL a,LL m=MOD){LL c,t,q,x,y;c=m;x=0;y=1;while(a>1){q=a/c;t=c;c=a%c;a=t;t=x;x=y-q*x;y=t;}if(y<0)y+=m;return y;}
+LL mmul(LL a,LL b,LL m=MOD){LL x=0,y=a%m;while(b){if(b&1)x=(x+y)%m;y=(y<<1)%m;b>>=1;}return x%m;}
+LL absll(LL x){if(x<0)return -x;return x;}
+
+int t, n, m, i, j, k;
+int ctt[1002], ctt1[1002];
+int a[102][102];
+int dp[102][102];
+int *xa, *xa1, *xa2;
+
+int tx1[10002], ty1[10002], tx2[10002], ty2[10002];
+int tct;
+int ta[102][102];
+void toprunner() {
+    tct = 0;
+    // remove horizontally
+    for( i = 1; i <= n; ++i ) {
+        k = 0;
+        xa = ta[i];
+        for( j = 1; j <= m; ++j ) {
+            if( xa[j] == 1 ) ++k;
+            else if( k > 0 ) {
+                // j-k to j-1
+                tx1[tct] = i;
+                ty1[tct] = j - k;
+                tx2[tct] = i;
+                ty2[tct] = j - 1;
+                k = 0;
+                ++tct;
+            }
+        }
+        if( k > 0 ) {
+            tx1[tct] = i;
+            ty1[tct] = j - k;
+            tx2[tct] = i;
+            ty2[tct] = j - 1;
+            k = 0;
+            ++tct;
+        }
+    }
+}
+
+int bx1[10002], by1[10002], bx2[10002], by2[10002];
+int bct;
+int ba[102][102];
+void bottomrunner() {
+    bct = 0;
+    // remove horizontally
+    for( i = 1; i <= n; ++i ) {
+        k = 0;
+        xa = ba[i];
+        for( j = 1; j <= m; ++j ) {
+            if( xa[j] == 1 ) ++k;
+            else if( k > 0 ) {
+                // j-k to j-1
+                bx1[bct] = i;
+                by1[bct] = j - k;
+                bx2[bct] = i;
+                by2[bct] = j - 1;
+                k = 0;
+                ++bct;
+            }
+        }
+        if( k > 0 ) {
+            bx1[bct] = i;
+            by1[bct] = j - k;
+            bx2[bct] = i;
+            by2[bct] = j - 1;
+            k = 0;
+            ++bct;
+        }
+    }
+}
+
+int lx1[10002], ly1[10002], lx2[10002], ly2[10002];
+int lct;
+int la[102][102];
+void leftrunner() {
+    lct = 0;
+    // remove vertically
+    for( j = 1; j <= m; ++j ) {
+        for( i = 1; i <= n; ++i ) {
+            if( la[i][j] == 1 ) ++k;
+            else if( k > 0 ) {
+                lx1[lct] = i - k;
+                ly1[lct] = j;
+                lx2[lct] = i - 1;
+                ly2[lct] = j;
+                k = 0;
+                ++lct;
+            }
+        }
+        if( k > 0 ) {
+            lx1[lct] = i - k;
+            ly1[lct] = j;
+            lx2[lct] = i - 1;
+            ly2[lct] = j;
+            k = 0;
+            ++lct;
+        }
+    }
+}
+
+int rx1[10002], ry1[10002], rx2[10002], ry2[10002];
+int rct;
+int ra[102][102];
+void rightrunner() {
+    rct = 0;
+    // remove vertically
+    for( j = 1; j <= m; ++j ) {
+        for( i = 1; i <= n; ++i ) {
+            if( ra[i][j] == 1 ) ++k;
+            else if( k > 0 ) {
+                rx1[rct] = i - k;
+                ry1[rct] = j;
+                rx2[rct] = i - 1;
+                ry2[rct] = j;
+                k = 0;
+                ++rct;
+            }
+        }
+        if( k > 0 ) {
+            rx1[rct] = i - k;
+            ry1[rct] = j;
+            rx2[rct] = i - 1;
+            ry2[rct] = j;
+            k = 0;
+            ++rct;
+        }
+    }
+}
+
+
+vector<int> ftx1, fty1, ftx2, fty2;
+vector<int> fax1, fay1, fax2, fay2;
+int minn;
+int fta[102][102];
+int fba[102][102];
+int fla[102][102];
+int fra[102][102];
+
+void runner( int arr[102][102] ) {
+    int Ax, Ay, Bx, By;
+    ftx1.clear(); fty1.clear(); ftx2.clear(); fty2.clear();
+    while(1) {
+        int mxx = 0;
+        for( i = 1; i <= n; ++i ) {
+            k = 0;
+            for( j = 1; j <= m; ++j ) {
+                if( arr[i][j] == 1 ) ++k;
+                else if( k > 0 ) {
+                    if( k > mxx ) {
+                        mxx = k;
+                    }
+                    Ax = i;
+                    Ay = j - k;
+                    Bx = i;
+                    By = j - 1;
+                    k = 0;
+                }
+            }
+            if( k > 0 ) {
+                if( k > mxx ) {
+                    mxx = k;
+                }
+                Ax = i;
+                Ay = j - k;
+                Bx = i;
+                By = j - 1;
+                k = 0;
+            }
+        }
+
+        for( j = 1; j <= m; ++j ) {
+            k = 0;
+            for( i = 1; i <= n; ++i ) {
+                if( arr[i][j] == 1 ) ++k;
+                else if( k > 0 ) {
+                    if( k > mxx ) {
+                        mxx = k;
+                    }
+                    Ax = i - k;
+                    Ay = j;
+                    Bx = i - 1;
+                    By = j;
+                    k = 0;
+                }
+            }
+            if( k > 0 ) {
+                if( k > mxx ) {
+                    mxx = k;
+                }
+                Ax = i - k;
+                Ay = j;
+                Bx = i - 1;
+                By = j;
+                k = 0;
+            }
+        }
+        if( mxx == 0 ) break;
+        for( i = Ax; i <= Bx; ++i ) {
+            for( j = Ay; j <= By; ++j ) arr[i][j] = 0;
+        }
+        ftx1.push_back(Ax);
+        fty1.push_back(Ay);
+        ftx2.push_back(Bx);
+        fty2.push_back(By);
+    }
+
+    if( ftx1.size() < minn ) {
+        minn = ftx1.size();
+        fax1 = ftx1;
+        fay1 = fty1;
+        fax2 = ftx2;
+        fay2 = fty2;
+
+        /*cout << endl << endl;
+        print(fax1.size()); pn;
+        for( i = 0; i < fax1.size(); ++i ) {
+            print(fax1[i]); ps; print(fay1[i]); ps; print(fax2[i]); ps; print(fay2[i]); pn;
+        }
+        cout << endl << endl;*/
+
+    }
+
+}
+
+int main() {
+    scan(t);
+    while(t--) {
+        for( i = 1; i < 1001; ++i ) ctt[i] = 0;
+        scan(n); scan(m);
+        for( i = 1; i <= n; ++i ) {
+            xa = a[i];
+            for( j = 1; j <= m; ++j ) {
+                scan(xa[j]);
+                ++ctt[xa[j]];
+            }
+        }
+        for( i = 1; i < 1001; ++i ) ctt[i] >>= 1;
+
+        // Fill TA and BA
+        for( i = 1; i < 1001; ++i ) ctt1[i] = ctt[i];
+        for( i = 1; i <= n; ++i ) {
+            xa = a[i];
+            xa1 = ta[i];
+            xa2 = ba[i];
+            for( j = 1; j <= m; ++j ) {
+                k = xa[j];
+                if( ctt1[k] ) {
+                    xa1[j] = 1;
+                    xa2[j] = 0;
+                    --ctt1[k];
+                }
+                else {
+                    xa1[j] = 0;
+                    xa2[j] = 1;
+                }
+            }
+        }
+
+        // Fill LA and RA
+        for( j = 1; j <= m; ++j ) {
+            for( i = 1; i <= n; ++i ) {
+                k = a[i][j];
+                if( ctt[k] ) {
+                    la[i][j] = 1;
+                    ra[i][j] = 0;
+                    --ctt[k];
+                }
+                else {
+                    la[i][j] = 0;
+                    ra[i][j] = 1;
+                }
+            }
+        }
+
+        /*for( int i = 1; i <= n; ++i ) {
+            for( int j = 1; j <= m; ++j ) cout << ta[i][j] << " ";
+            cout << endl;
+        }*/
+
+        minn = INT_MAX;
+        for( i = 1; i <= n; ++i ) {
+            for( j = 1; j <= m; ++j ) {
+                fta[i][j] = ta[i][j];
+                fba[i][j] = ba[i][j];
+                fla[i][j] = la[i][j];
+                fra[i][j] = ra[i][j];
+            }
+        }
+        runner(fta);
+        runner(fba);
+        runner(fla);
+        runner(fra);
+        toprunner();
+        bottomrunner();
+        leftrunner();
+        rightrunner();
+
+        int fctxxx = fax1.size();
+        if( tct <= bct && tct <= lct && tct <= rct && tct <= fctxxx ) {
+            print(tct); pn;
+            for( i = 0; i < tct; ++i ) {
+                print(tx1[i]); ps; print(ty1[i]); ps; print(tx2[i]); ps; print(ty2[i]); pn;
+            }
+            continue;
+        }
+        if( bct <= tct && bct <= lct && bct <= rct && bct <= fctxxx ) {
+            print(bct); pn;
+            for( i = 0; i < bct; ++i ) {
+                print(bx1[i]); ps; print(by1[i]); ps; print(bx2[i]); ps; print(by2[i]); pn;
+            }
+            continue;
+        }
+        if( lct <= tct && lct <= bct && lct <= rct && lct <= fctxxx ) {
+            print(lct); pn;
+            for( i = 0; i < lct; ++i ) {
+                print(lx1[i]); ps; print(ly1[i]); ps; print(lx2[i]); ps; print(ly2[i]); pn;
+            }
+            continue;
+        }
+        if( rct <= tct && rct <= bct && rct <= lct && rct <= fctxxx ) {
+            print(rct); pn;
+            for( i = 0; i < rct; ++i ) {
+                print(rx1[i]); ps; print(ry1[i]); ps; print(rx2[i]); ps; print(ry2[i]); pn;
+            }
+            continue;
+        }
+        print(fax1.size()); pn;
+        for( i = 0; i < fax1.size(); ++i ) {
+            print(fax1[i]); ps; print(fay1[i]); ps; print(fax2[i]); ps; print(fay2[i]); pn;
+        }
+    }
+    return 0;
+}

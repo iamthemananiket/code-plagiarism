@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < ll, ll >
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const ll inf = (ll)1e18 + 123;
+const double eps = 1e-9;
+
+using namespace std;
+
+struct trie {
+    int nx[2];
+    trie() {
+        memset(nx, -1, sizeof nx);
+    }
+};
+
+bool bit(int x, int i) {
+    return ((x & (1 << i)) > 0);
+}
+
+struct Magic {
+    vector < int > q;
+    int lazy;
+    vector < trie > t;
+    Magic() {
+        q.clear(), lazy = 0;
+        t.clear();
+        t.pb(trie());
+    }
+    void clear() {
+        q.clear(), lazy = 0;
+        t.clear();
+        t.pb(trie());
+    }
+    void add(int x) {
+        x ^= lazy;
+        q.pb(x);
+        int v = 0;
+        for (int i = 29; i >= 0; i--) {
+            bool j = bit(x, i);
+            if (t[v].nx[j] == -1) {
+                t[v].nx[j] = sz(t);
+                t.pb(trie());
+            }
+            v = t[v].nx[j];
+        }
+    }
+    int maxi(int x) {
+        x ^= lazy;
+        int v = 0, res = 0;
+        for (int i = 29; i >= 0; i--) {
+            bool j = bit(x, i);
+            if (t[v].nx[j ^ 1] != -1) {
+                res |= (1 << i);
+                v = t[v].nx[j ^ 1];
+            }
+            else {
+                assert(t[v].nx[j] != -1);
+                v = t[v].nx[j];
+            }
+        }
+        return res;
+    }
+} f[MAX_N];
+
+int n;
+vector < int > g[MAX_N];
+int a[MAX_N], val[MAX_N];
+
+void dfs(int v, int pr = -1) {
+    val[v] = a[v];
+    f[v].add(a[v]);
+    for (auto to : g[v])
+        if (to != pr) {
+            dfs(to, v);
+            val[v] = max(val[v], val[to]);
+            if (sz(f[v].q) <= sz(f[to].q)) {
+                for (auto j : f[v].q)
+                    val[v] = max(val[v], f[to].maxi(j ^ f[v].lazy));
+                f[to].lazy ^= a[v];
+                for (auto j : f[v].q)
+                    f[to].add(j ^ f[v].lazy);
+                swap(f[v], f[to]);
+            }
+            else {
+                for (auto j : f[to].q)
+                    val[v] = max(val[v], f[v].maxi(j ^ f[to].lazy));
+                f[to].lazy ^= a[v];
+                for (auto j : f[to].q)
+                    f[v].add(j ^ f[to].lazy);
+            }
+        }
+}
+
+inline void solve() {
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+        scanf("%d", &a[i]);
+    for (int i = 1; i <= n; i++)
+        g[i].clear(), f[i].clear();
+    for (int i = 1, u, v; i < n; i++) {
+        scanf("%d%d", &u, &v);
+        g[u].pb(v), g[v].pb(u);
+    }
+    dfs(1);
+    for (int i = 1; i <= n; i++)
+        printf("%d\n", val[i]);
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+    int t;
+    scanf("%d", &t);
+    while(t--)
+        solve();
+	return 0;
+}

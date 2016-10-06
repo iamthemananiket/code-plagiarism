@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 15, M = 1 << 15;
+int n, a[N], dp[M][N], mask[M], bits[M];
+vector<int> G[M];
+
+struct S {
+	int msk, cnt;
+};
+
+bool comp(const int &x, const int &y) {
+	if (bits[x] != bits[y]) return bits[x] < bits[y];
+	return x < y;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, m, c, x, ret, maxi;
+	
+	bits[1] = 1;
+	repu(i, 2, M) {
+		if (i & 1) bits[i] = 1 + bits[i - 1];
+		else bits[i] = bits[i >> 1];
+	}
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n;
+		ret = 0;
+		repu(i, 0, n) {
+			cin >> a[i]; ret += a[i];
+		}
+		sort(a, a + n); reverse(a, a + n);
+		repu(i, 0, (1 << n)) {
+			int tot = (1 << n) - 1 - i, sub = tot;
+			do {
+				G[i].push_back(sub);
+				sub = (sub - 1) & tot;
+			} while (sub != tot);
+		}
+		cin >> m;
+		repu(i, 0, m) {
+			cin >> c;
+			int tot = 0;
+			repu(j, 0, c) {
+				cin >> x; tot |= 1 << (x - 1);
+			}
+			mask[i] = tot;
+		}
+		if (m > 0) sort(mask, mask + m, comp);
+		mem(dp, -1);
+		dp[0][0] = 0;
+		repu(i, 0, m) {
+			for (auto &s : G[mask[i]]) repu(j, 0, n) if (dp[s][j] != -1) {
+				amax(dp[s | mask[i]][j + bits[mask[i]]], dp[s][j] + a[j + bits[mask[i]] - 1]);
+			}
+		}
+		maxi = 0;
+		repu(i, 0, (1 << n)) repu(k, 0, n + 1) {
+			amax(maxi, dp[i][k]);
+		}
+		ret -= maxi;
+		printf("%d\n", ret);
+		repu(i, 0, (1 << n)) G[i].clear();
+	}
+	
+	return 0;
+}

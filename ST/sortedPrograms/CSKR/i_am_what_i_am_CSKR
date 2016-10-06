@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+using namespace std;
+long long MOD=1e9+7;
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--) 
+	{
+		int n,x,zero=0;
+		cin>>n;
+		vector<int> pos,neg;
+		for(int i=0;i<n;i++) 
+		 {
+		 	cin>>x;
+		 	if(x>0)
+		 	  pos.push_back(x);
+		 	else if(x<0)
+		 	  neg.push_back(x);
+		 	else
+		 	  zero=1;
+		 	
+		 }
+		if(pos.size()==0 && neg.size()==0)
+		  cout<<0<<endl;
+		else if(pos.size()==0 && neg.size()==1)
+		 {
+		 	if(zero)
+		 	  cout<<0<<endl;
+		 	else 
+			  cout<<(neg[0]+MOD)%MOD<<endl;
+		 }
+		else
+		{
+			long long ans=1;
+			for(int i=0;i<pos.size();i++)
+			  ans = (ans*pos[i])%MOD;
+			sort(neg.begin(),neg.end());
+			for(int i=0;i<(int)neg.size()-1;i++) 
+			  {
+			  	neg[i]=-neg[i];
+			  	 ans = (ans*neg[i])%MOD;
+			  }
+			if(neg.size()%2==0 && neg.size())
+			   {
+			   	neg[(int)neg.size()-1]=-neg[(int)neg.size()-1];
+			   	ans = (ans*neg[(int)neg.size()-1])%MOD;
+			   }
+			cout<<ans<<endl;
+		}
+	}
+}

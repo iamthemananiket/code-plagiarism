@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 3000010;
+
+int prime[N], phi[N], ans[N];
+
+void init(void) {
+  for(int i = 1;i < N;i++) {
+    prime[i] = 1;
+    phi[i] = i;
+    ans[i] = 0;
+  }
+  prime[1] = 0;
+  for(int i = 2;i < N;i++) {
+    if(prime[i]) {
+      for(int j = i+i;j < N;j+=i) {
+        prime[j] = 0;
+      }
+    }
+  }
+  for(int i = 1;i < N;i++) {
+    if(!prime[i]) continue;
+    for(int j = i;j < N;j += i) {
+      phi[j] -= phi[j] / i;
+    }
+  }
+  for(int i = 1;i < N;i++) {
+    for(int j = i, cnt = 1;j < N;j+=i, cnt++) {
+      ans[j] += cnt * phi[cnt];
+    }
+  }
+}
+void evaluate(int n) {
+  printf("%d\n", ans[n]);
+}
+int main() {
+  init();
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    int n;
+    scanf("%d", &n);
+    evaluate(n);
+  }
+  return 0;
+}

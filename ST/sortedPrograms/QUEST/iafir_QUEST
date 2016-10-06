@@ -1,0 +1,26 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <utility>
+
+using namespace std;
+
+char ss[111111];
+int ab[256]={0};
+
+int main()
+{
+	cin.getline(ss,101101);
+	for(int i=0; i<strlen(ss); i++)
+		ab[ss[i]]++;
+	int ganjil = 0;
+	for(int i='a'; i<='z' && ganjil<2; i++)
+		if(ab[i] % 2)
+			ganjil++;
+	if(ganjil<2)
+		cout << "YES\n";
+	else
+		cout << "NO\n";
+	return 0;
+}

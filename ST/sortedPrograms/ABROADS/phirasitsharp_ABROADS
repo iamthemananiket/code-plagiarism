@@ -1,0 +1,102 @@
+#include <cstdio>
+#include <vector>
+#include <set>
+#include <functional>
+
+using namespace std;
+
+const int N = 500010;
+
+struct Query {
+  char ch[5];
+  int t, id, x, k;
+  long long ans;
+  void read(void) {
+    scanf("%s", ch);
+    if(ch[0] == 'D') {  
+      t = 1; 
+      scanf("%d", &k);
+    }else {
+      t = 2;
+      scanf("%d%d", &id, &x);
+    }
+  }
+} query[N];
+
+struct Edge {
+  int u, v, out;
+  void read(void) {
+    scanf("%d%d", &u, &v);
+    out = 0;
+  }
+} edge[N];
+
+typedef pair<long long, int> pii;
+
+set<pii> S;
+vector<int> val[N];
+
+int group[N];
+long long sz[N];
+int n, m, q;
+
+int find(int u) {
+  if(group[u] == u) return u;
+  return group[u] = find(group[u]);
+}
+void merge(int u, int v) {
+  if(find(u) == find(v)) return;
+  S.erase(S.find(pii(sz[find(u)], find(u))));
+  S.erase(S.find(pii(sz[find(v)], find(v))));
+  sz[find(u)] += sz[find(v)];
+  group[find(v)] = find(u);
+  S.insert(pii(sz[find(u)], find(u)));
+}
+int main() {
+  scanf("%d%d%d", &n, &m, &q);
+  for(int i = 1;i <= n;i++) {
+    int x;
+    scanf("%d", &x);
+    val[i].push_back(x);
+  }
+  for(int i = 1;i <= m;i++) {
+    edge[i].read();
+  }
+  for(int i = 0;i < q;i++) {
+    query[i].read();
+    if(query[i].t == 1) {
+      edge[query[i].k].out = 1;
+    }else {
+      val[query[i].id].push_back(query[i].x);
+    }
+  }
+  for(int i = 1;i <= n;i++) {
+    group[i] = i;
+    sz[i] = val[i].back();
+    S.insert(pii(sz[i], i));
+  }
+  for(int i = 1;i <= m;i++) {
+    if(!edge[i].out) {
+      merge(edge[i].u, edge[i].v);
+    }
+  }
+  for(int i = q-1;i >= 0;i--) {
+    query[i].ans = S.rbegin()->first;
+    if(query[i].t == 1) {
+      edge[query[i].k].out = 0;
+      merge(edge[query[i].k].u, edge[query[i].k].v);
+    }else {
+      int u = query[i].id;
+      int dif = -val[u].back();
+      val[u].pop_back();
+      dif += val[u].back();
+      S.erase(S.find(pii(sz[find(u)], find(u))));
+      sz[find(u)] += dif;
+      S.insert(pii(sz[find(u)], find(u)));
+    }
+  }
+  for(int i = 0;i < q;i++) {
+    printf("%lld\n", query[i].ans);
+  }
+  return 0;
+}

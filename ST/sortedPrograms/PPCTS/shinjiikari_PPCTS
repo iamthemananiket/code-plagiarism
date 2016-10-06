@@ -1,0 +1,157 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define mp make_pair
+#define pb push_back
+#define X first
+#define Y second
+#define sz(a) int((a).size())
+#define N 1000010
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+	while(t>=48 && t<=57)
+	{
+		x=(x<<3)+(x<<1)+t-48;
+		t=getchar();
+	}
+	if (neg) x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+vector <ll> x,y;
+ll prex[N],prey[N],sufx[N],sufy[N];
+
+int main()
+{
+	ll n,m,a=0,b=0,val;
+	string s;
+	n=input();
+	m=input();
+	REP(i,n)
+	{
+		x.pb(input());
+		y.pb(input());
+	}
+	sort(all(x));
+	sort(all(y));
+	REP(i,n)
+	{
+		if (i==0)
+		{
+			prex[0]=x[0];
+			prey[0]=y[0];
+		}
+		else
+		{
+			prex[i]=x[i]+prex[i-1];
+			prey[i]=y[i]+prey[i-1];			
+		}
+	}
+	for(int i=n-1;i>=0;i--)
+	{
+		if (i==n-1)
+		{
+			sufx[i]=x[i];
+			sufy[i]=y[i];			
+		}
+		else
+		{
+			sufx[i]=x[i]+sufx[i+1];
+			sufy[i]=y[i]+sufy[i+1];		
+		}
+	}
+	ll i;
+	cin>>s;
+	REP(j,s.length())
+	{
+		if (s[j]=='R') a++;
+		else if (s[j]=='L') a--;
+		else if (s[j]=='U') b++;
+		else b--;
+		i=lower_bound(all(x),a)-x.begin();
+		//output(i);
+		val=0;
+		if (i==n)
+		{
+			i--;
+			val-=prex[i];
+			val+=n*a;			
+		}
+		else if (i==0)
+		{
+			val+=sufx[i];
+			val-=n*a;
+		}
+		else
+		{
+			val+=sufx[i];
+			val-=prex[i-1];
+			val+=i*a;
+			val-=(n-i)*a;
+		}
+		i=lower_bound(all(y),b)-y.begin();
+		//output(i);
+		//getchar();
+		//getchar();
+		if (i==n)
+		{
+			i--;
+			val-=prey[i];
+			val+=n*b;
+		}
+		else if (i==0)
+		{
+			val+=sufy[i];
+			val-=n*b;
+		}
+		else
+		{
+			val+=sufy[i];
+			val-=prey[i-1];
+			val+=i*b;
+			val-=(n-i)*b;
+		}
+		output(val);
+	}
+return 0;
+}

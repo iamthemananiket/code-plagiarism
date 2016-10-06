@@ -1,0 +1,50 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
+
+
+using namespace std;
+
+
+long long pref[100010];
+
+
+const int mxn = 100000;
+
+
+int is_palin(int num){
+	int i,rev,nn;
+
+	rev = 0;
+	nn = num;
+	while(num){
+		i = num%10;
+		num /= 10;
+		rev *= 10;
+		rev += i;
+	}
+
+	return rev == nn ? nn : 0;
+}
+
+int main(){
+
+	int i;
+
+
+	for(i = 1; i <= mxn; ++i){
+		pref[i] = pref[i-1]+is_palin(i);
+	}
+
+	int l,r;
+
+	scanf("%d",&i);
+
+	while(i--){
+		scanf("%d%d",&l,&r);
+		printf("%lld\n", pref[r]-pref[l-1]);
+	}
+	return 0;
+}

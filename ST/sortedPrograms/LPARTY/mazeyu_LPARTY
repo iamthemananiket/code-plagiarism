@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+int T,n,m,g[250],gs[250],ans,i,u,t,j,f[10],sf[250],ln,k,maxln;
+char s1[10];
+ll s[250],tot,maxt,gg[250];
+void dfs(int x,ll y,int z)
+{
+	if(z>=ans||(y|gg[x])!=tot)return;
+	if(y==tot){ans=z;return;}
+	if(!x)return;
+	if(((y|s[sf[x]])!=y))dfs(x-1,y|s[sf[x]],z+gs[sf[x]]);
+	dfs(x-1,y,z);
+}
+bool cmp(int x,int y){return gs[x]<gs[y];}
+int main()
+{
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%d%d",&n,&m);tot=ln=0;
+		memset(g,0,sizeof(g));
+		memset(s,0,sizeof(s));
+		for(i=1;i<=m;i++)
+		{
+			scanf("%s",s1+1);
+			u=0;t=0;
+			for(j=1;j<=n;j++)
+			{
+				u=u*3+(s1[j]>='a');
+				t=t<<1|(s1[j]>='a');
+			}
+			g[u]=1;s[u]=1ll<<t;tot|=1ll<<t;
+		}
+		ans=1e9;f[0]=1;
+		for(i=1;i<=n;i++)f[i]=f[i-1]*3;
+		for(i=0;i<f[n];i++)
+		{
+			gs[i]=n;t=n;
+			for(j=0;j<n;j++)
+				if((i/f[j])%3==2)t=j,gs[i]--;
+			if(t<n)
+			{
+				g[i]=g[i-f[t]]&g[i-f[t]*2];
+				s[i]=s[i-f[t]]|s[i-f[t]*2];
+			}
+		}
+		for(i=0;i<f[n];i++)if(g[i])
+		{
+			for(j=i+1;j<f[n];j++)if(g[j])
+			{
+				for(k=0;k<n;k++)
+					if((i/f[k])%3!=(j/f[k])%3&&(j/f[k])%3!=2)break;
+				if(k>=n){g[i]=0;break;}
+			}
+			if(g[i])sf[++ln]=i;
+		}
+		for(j=1;j<=ln;j++)gg[j]=gg[j-1]|s[sf[j]];
+		dfs(ln,0,0);
+		if(ln>maxln)maxln=ln,maxt=tot;
+		printf("%d\n",ans);
+	}
+	//printf("%d %lld\n",maxln,maxt);
+}

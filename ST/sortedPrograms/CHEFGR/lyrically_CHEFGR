@@ -1,0 +1,59 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int N;
+Int M;
+Int A[10010];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		M = in();
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		const Int mx = *max_element(A, A + N);
+		Int need = 0;
+		for (int i = 0; i < N; ++i) {
+			need += (mx - A[i]);
+		}
+		const bool ans = (M >= need && (M - need) % N == 0);
+		puts(ans ? "Yes" : "No");
+	}
+	
+	return 0;
+}
+

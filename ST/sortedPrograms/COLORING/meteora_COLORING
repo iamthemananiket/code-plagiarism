@@ -1,0 +1,179 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+#define NMAX 100010
+#define TMAX ((1LL<<18)+10)
+
+using namespace std;
+typedef long long lli;
+
+int N;
+
+class segtree{
+	lli tree[TMAX];
+	int ch[TMAX];
+	inline int left(int x){ return (x+1)*2-1; }
+	inline int right(int x){ return (x+1)*2; }
+
+
+	void upd(int node, int vl){
+		ch[node] = vl;
+		tree[node] = vl ? (1LL<<(vl-1)) : 0;
+	}
+
+	void update(int node, int s, int e, int i, int j, int k){
+		if(s > j || e < i) return;
+
+		if(s >= i && e <= j){
+			upd(node,k);
+			return;
+		}
+
+		int l,r,m;
+		l = left(node), r = right(node), m= (s+e)/2;
+
+		if(ch[node] >= 0){
+			upd(l,ch[node]);
+			upd(r,ch[node]);
+			ch[node] = -1;
+		}
+
+		update(l,s,m,i,j,k);
+		update(r,m+1,e,i,j,k);
+
+		tree[node] = tree[l]|tree[r];
+	}
+
+	lli query(int node, int s, int e, int i, int j){
+		if(s > j || e < i) return 0;
+		if(s >= i && e <= j) return tree[node];
+		int l,r,m;
+		l = left(node),r =right(node), m = (s+e)/2;
+
+		if(ch[node] >= 0){
+			return tree[node];
+		}
+
+		return query(l,s,m,i,j)|query(r,m+1,e,i,j);
+	}
+
+	int N;
+
+public:
+	void init(int n){
+		N = n;
+		memset(tree,0,sizeof(tree));
+		memset(ch,-1,sizeof(ch));
+	}
+
+	void update(int i, int j, int k){
+		update(0,0,N-1,i,j,k);
+	}
+
+	lli query(int i, int j){
+		return query(0,0,N-1,i,j);
+	}
+};
+
+
+segtree T;
+
+void update(int node, int k1, int k2){
+	if(!node) return;
+
+	update(node>>1,k1+1,k2);
+
+	int l,r;
+	l = r = node;
+
+	while(l <= N && k1 <= k2){
+		T.update(l,r,k1);
+		l <<=1;
+		r <<=1;
+		r += 1;
+		if(r > N) r = N;
+		++k1;
+	}
+}
+
+inline int popcount(lli x){
+	int ct=0;
+	while(x){
+		ct += (x&1);
+		x >>= 1;
+	}
+	return ct;
+}
+
+int pathquery(int u, int v){
+	lli x;
+	x = 0;
+
+	if(u > v) swap(u,v);
+
+	int clz1,clz2;
+	clz1 = __builtin_clz(u);
+	clz2 = __builtin_clz(v);
+
+	for(;clz2 < clz1;++clz2){
+		x |= T.query(v,v);
+		v>>=1;
+	}
+
+	while(u != v){
+		x |= T.query(u,u);
+		x |= T.query(v,v);
+		u >>=1, v >>=1;
+	}
+
+	x |= T.query(u,u);
+	return popcount(x);
+}
+
+int subquery(int v){
+	int l,r;
+
+	l = r = v;
+	lli x=0;
+	while(l <= N){
+		x |= T.query(l,r);
+		l <<=1;
+		r  <<=1;
+		r += 1;
+		if(r > N) r = N;
+	}
+
+	return popcount(x);
+}
+
+
+int Q;
+int main(){
+	int i,k,t;
+
+	scanf("%d%d",&N,&Q);
+
+	T.init(N+1);
+
+	while(Q--){
+		scanf("%d",&t);
+		if(t==1){
+			scanf("%d%d",&i,&k);
+			update(i,0,k);
+			continue;
+		}
+		if(t == 2){
+			scanf("%d%d",&i,&k);
+			printf("%d\n",pathquery(i,k));
+			continue;
+		}
+
+		scanf("%d",&i);
+		printf("%d\n",subquery(i));
+	}
+
+	return 0;
+}

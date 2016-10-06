@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first 
+#define Y second 
+#define FOR(i,L,R) for(auto i=(L);i<=(R);i++)
+#define REP(i,L,R) for(auto i=(L);i<(R);i++)
+
+typedef pair<int,int> ii;
+typedef long long ll;
+
+const ll linf=1e16;
+const int MOD=1e9+7;
+const int N=4e5+10;
+
+int n,st,en,a[N];
+ll psum[N];
+ll fL[N],fR[N];
+ll solve(int st,int en){
+	fL[st]=0;
+	for(int i=st+1;i<=en;i++)
+		fL[i]=min(fL[i-1],psum[i-1]-psum[st-1]);
+	fR[en]=0;
+	for(int i=en-1;i>=st;i--)
+		fR[i]=min(fR[i+1],psum[en-1]-psum[i-1]);
+	ll ans=linf;
+	for(int i=st;i<=en;i++) ans=min(ans,fL[i]+fR[i]);
+	return ans;
+}
+void prepare(){
+	scanf("%d",&n);
+	for(int i=1;i<=n;i++) scanf("%d",a+i);
+	for(int i=1;i<=n;i++) a[n+i]=a[i];
+	scanf("%d%d",&st,&en);
+	assert(st<en);
+	FOR(i,1,n<<1) psum[i]=psum[i-1]+a[i];
+}
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		prepare();
+		cout<<min(2*solve(st,en)+psum[n]-(psum[en-1]-psum[st-1]),2*solve(en,n+st)+psum[en-1]-psum[st-1])<<'\n';
+	}
+}

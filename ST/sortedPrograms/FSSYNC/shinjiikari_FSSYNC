@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 1000010
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline int input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(int x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int f[N],vis[N],dis[N];
+vector <int> G[N];
+
+void dfs(int v)
+{
+	int w;
+	vis[v]=1;
+	REP(i,G[v].size())
+	{
+		w=G[v][i];
+		if (!vis[w])
+		{
+			dis[w]=dis[v];
+			if (f[v]) dis[w]++;
+			dfs(w);
+		}
+	}
+}
+
+int main()
+{
+	int t,n,m,u,v;
+	double ans;
+	t=input();
+	while(t--)
+	{
+		n=input();
+		REP(i,n) G[i].clear();
+		FILL(f,0);
+		REP(i,n-1)
+		{
+			u=input();
+			v=input();
+			u--;
+			v--;
+			G[u].pb(v);
+			G[v].pb(u);
+		}
+		m=input();
+		REP(i,m)
+		{
+			u=input();
+			u--;
+			f[u]=1;
+		}
+		FILL(dis,0);
+		FILL(vis,0);
+		dfs(0);
+		ans=0.0;
+		REP(i,n) ans+=((1.0*dis[i])/((dis[i]+1)*1.0));
+		printf("%.6lf\n",ans);
+	}
+return 0;
+}

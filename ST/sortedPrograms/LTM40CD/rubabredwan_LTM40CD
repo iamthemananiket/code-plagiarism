@@ -1,0 +1,99 @@
+/* Bismillahir Rahmanir Rahim */
+
+#include <bits/stdc++.h>
+
+#define read(x)		freopen(x, "r", stdin)
+#define write(x) 	freopen(x, "w", stdout)
+
+#define rep(i, n)	for(int i=0;i<n;i++)
+#define repn(i, n)	for(int i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx		100005
+#define pb		push_back
+
+#define inf		(1 << 29)	
+#define	eps		1e-6
+#define pi 		acos(-1)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+struct data{
+	int x, y, z;
+	bool operator < (const data &p) const{
+		if(x == p.x){
+			if(y == p.y){
+				return z < p.z;
+			}
+			return y < p.y;
+		}
+		return x < p.x;
+	}
+	data () {}
+	data (int a, int b, int c){
+		x = a;
+		y = b;
+		z = c;
+	}
+};
+
+int r, sem;
+vector<data>vec;
+vector<data>ret;
+
+void solve(int f){
+	int need = r * r * f;
+	vector<int>div;
+	int sq = sqrt(need);
+	for(int i=1;i<=sq;i++){
+		if(need % i == 0){
+			if(i < need) div.pb(i);
+			if(need/i < f) div.pb(need/i);
+		}
+	}
+	if(sq * sq == need && sq < need) div.pb(sq);
+	sort(div.begin(), div.end());
+	for(int i=0;i<div.size();i++){
+		for(int j=i;j<div.size();j++){
+			int a = f - div[i];
+			int b = f - div[j];
+			// cout << a << ' ' << b << endl;
+			int rm = div[i] * div[j];
+			int nd = need / rm;
+			if(need % rm) continue;
+			int c = f - nd;
+			if(a > b) swap(a, b);
+			if(b > c) swap(b, c);
+			if(a > b) swap(a, b);
+			if(b > c) swap(c, b);
+			if(a + b <= c) continue;
+			if(a + b + c != f*2) continue;
+			// cout << a << ' ' << b << ' ' << c << endl;
+			// cout << (f - a) * (f - b) * (f - c) << endl;
+			vec.pb(data(a, b, c));
+		}
+	}
+}
+
+int main(){
+	scanf("%d", &r);
+	vec.pb(data(0, 0, 0));
+	for(int i=3;i<=10000;i++){
+		solve(i);
+	}
+	sort(vec.begin(), vec.end());
+	repn(i, vec.size()-1){
+		if(vec[i].x == vec[i-1].x && vec[i].y == vec[i-1].y && vec[i].z == vec[i-1].z) continue;
+		// printf("%d %d %d\n", vec[i].x, vec[i].y, vec[i].z);
+		ret.pb(vec[i]);
+	}
+	printf("%d\n", ret.size());
+	rep(i, ret.size()){
+		printf("%d %d %d\n", ret[i].x, ret[i].y, ret[i].z);
+	}
+	return 0;
+}
+

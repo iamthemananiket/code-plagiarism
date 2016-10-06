@@ -1,0 +1,152 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < int(Y);++(X))
+#define rrep(X,Y) for (int (X) = int(Y-1);(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < int(Y);++(X))
+#define peat(X,Y) for (;(X) < int(Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+
+ll MOD=1e7+7;
+
+typedef vector<vector<ll> > matl;
+template<class T> vector<T> operator*(T a,vector<T> v){
+  rep(i,v.size())
+    v[i]*=a;
+  return v;
+}
+template<class T> vector<T> operator+(vector<T> v,vector<T> w){
+  rep(i,v.size())
+    v[i]+=w[i];
+  return v;
+}
+
+template<class T> void print(vector<vector<T> > A){
+  int i,j;
+  rep(i,A.size()){
+    rep(j,A[i].size())cout<<A[i][j]<<" ";
+    cout<<endl;
+  }
+  return;
+}
+
+template<class T> vector<vector<T> > matE(T n){
+  vector<vector<T> > re;
+  vector<T> tmp;
+  rep(i,n){
+    tmp.clear();
+    rep(j,n)
+      tmp.pb(i==j);
+    re.pb(tmp);
+  }
+  return re;
+}
+template<class T> vector<vector<T> >
+operator*(vector<vector<T> > a,vector<vector<T> > b){
+  vector<vector<T> > re;
+  vector<T> v;
+  rep(i,a.size()){
+    v.clear();
+    rep(j,b[0].size()){
+      v.pb(0);
+      rep(k,b.size())
+        v.back()=(v.back()+a[i][k]*b[k][j]%MOD)%MOD;
+    }
+    re.pb(v);
+  }
+  return re;
+}
+
+template<class T>
+vector<vector<T> > pow(vector<vector<T> > a,ll n){
+  vector<vector<T> > re;
+  if(n==0)
+    return matE(a.size()*1ll);
+  re=pow(a,n/2);
+  return re*re*(n%2?a:matE(a.size()*1ll));
+}
+
+pll modFibPair(ll i,ll q){
+  if(!i)
+    return pll(0,1);
+  if(i%2){
+    pll f=modFibPair(i/2,q);
+    ll a=f.X,b=f.Y,c=(a+b)%q;
+    return pll((a*a%q+b*b%q)%q,(a*b%q+b*c%q)%q);
+  }else{
+    pll f=modFibPair(i-1,q);
+    return pll(f.Y, (f.X+f.Y)%q);
+  }
+}
+
+ll modFib(ll i,ll q){
+  return modFibPair(i,q).X;
+}
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  int i,j,k;
+  matl a[11],b[11];
+  rep(k,11){
+    a[k].resize(k*2,vector<ll>(k*2,0));
+    b[k].resize(k*2,vector<ll>(k*2,0));
+    rep(i,k){
+        b[k][i][i+k]=a[k][i][i+k]=1;
+    }
+    rep(i,k){
+      a[k][i+k][i]++;
+      a[k][i+k][i+k]++;
+      a[k][i+k][(i+k-1)%k]++;
+      a[k][i+k][(i+k-1)%k+k]++;
+      b[k][i+k][(i+k-1)%k]++;
+      b[k][i+k][(i+k-1)%k+k]++;
+    }
+  }
+  int T;
+  cin>>T;
+  while(T--){
+    ll n,t;
+    cin>>n>>t;
+    if(t==0){
+      if(n==1){
+        cout<<1<<endl;
+      }else{
+        cout<<modFib(n+2,MOD)<<endl;
+      }
+    }else{
+      matl pa=pow(a[t],n),pb=pow(b[t],n);
+      ll ans=0;
+      ans=(ans+pa[0][t])%MOD;
+      ans=(ans+pa[t][t])%MOD;
+      ans=(ans+MOD-pb[0][t])%MOD;
+      ans=(ans+MOD-pb[t][t])%MOD;
+      cout<<ans<<endl;
+    }
+  }
+  return 0;
+}

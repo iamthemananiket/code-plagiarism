@@ -1,0 +1,86 @@
+/*
+ * 
+ * File:   GERALD04.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on 2013-12-22, 11:01:13 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace GERALD04 {
+
+int read() {
+  int h, m;
+  scanf("%d:%d", &h, &m);
+  return 60 * h + m;
+}
+
+void solve(int test_num) {
+  int t1 = read();
+  int t2 = read();
+  int dist;
+  scanf("%d", &dist);
+  const double X = t1 - t2 + dist;
+  const int diff = t1 - t2;
+  double Y = diff;
+  int pos;
+  if (diff >= 2 * dist) {
+    pos = 0;
+  } else if (diff >= dist) {
+    pos = 2 * dist - diff;
+  } else {
+    Y += dist - diff;
+    pos = diff;
+  }
+  Y += pos / 2.0;
+  //pln(diff, dist, pos);
+  printf("%.1lf %.1lf\n", X, Y);
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  GERALD04::solve();
+  return 0;
+}

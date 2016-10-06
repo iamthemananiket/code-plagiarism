@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+int main()
+{
+	ll t,n,m,z,l,r,b,ans,avl,tot,hav;
+	cin>>t;
+	while(t--)
+	{
+		scanf("%lld%lld%lld%lld%lld%lld",&n,&m,&z,&l,&r,&b);
+		ans=0;
+		if(b<=n)
+		{
+			ans=min(m*n,z+l+r+b);
+			printf("%lld\n",ans);
+			continue;
+		}
+		
+		b-=n;
+		m--;
+		ans+=n;
+		
+		l+=r;
+		r=0;
+		
+		avl=n*(m-(m%2));
+		hav=2*min(z,b);
+		
+		z-=min(avl,hav)/2;
+		b-=min(avl,hav)/2;
+		ans+=min(avl,hav);
+		avl-=min(avl,hav);
+		
+		l+=z;
+		z=0;
+		
+		if(m%2)
+		{
+			ans+=min(n,l);
+			l-=min(n,l);
+			m--;
+		}
+		
+		if(l>=avl || !b)
+		{
+			ans+=min(avl,l);
+			printf("%lld\n",ans);
+			continue;	
+		}
+		
+		ans+=l;
+		avl-=l;
+		ans+=min(avl/2,b);
+		
+		printf("%lld\n",ans);
+	}
+}

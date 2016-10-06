@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 3001000
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+ll C[MAXN];
+ll D[MAXN];
+ll sum[2][MAXN];
+const int g = 1000004;
+
+void solve() {
+	ll n; sl(n);
+	repe(i,0,MAXN) {
+		C[i] = 0;
+		D[i] = 0;		
+	}
+	int k; s(k); int x,y;
+	rep(q,1,k) {
+		s(x); s(y);
+		C[x+y] = 1;
+		D[x-y+g] = 1;
+	}
+	
+	ll ans = 0; int even = 0, odd = 0;
+	sum[0][0] = 0; sum[1][0] = 0;
+	repe(i,1,MAXN) {
+		sum[0][i] = sum[0][i-1];
+		sum[1][i] = sum[1][i-1];
+		if (i%2 == 0) {
+			sum[0][i]+=D[i];
+		} else {
+			sum[1][i]+=D[i];
+		}
+	}
+	int l,r;
+	rep(i,2,n+n) {
+		l = MAX(2-i,i-2*n); r = MIN(2*n - i,i-2); l += g; r += g;
+		ans -= C[i]*(sum[i%2][r] - sum[i%2][l-1]); 
+	}
+	//pr(ans); endc;
+	rep(i,2,n+n) {
+		ans += (i <= n+1) ? C[i] * (i-1) : C[i] * (n+n-i+1);
+	}
+	rep(i,-(n-1),+(n-1)) {
+		ans += D[i+g] * (n - abs(i));
+	}
+	prl(n*n - ans); endc;
+}		
+
+int main() {
+	int t; s(t); while (t--) solve();
+	return 0;
+}

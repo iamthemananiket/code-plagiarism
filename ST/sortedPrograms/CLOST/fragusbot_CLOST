@@ -1,0 +1,112 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 2222;
+
+int beg[N];
+int fin[N];
+char ans[N];
+int l[N];
+int r[N];
+int n;
+int qq;
+
+int go(int i, int bal) {
+  if (bal < 0) return 0;
+  if (i == n) {
+    for (int q = 0; q < qq; ++q) {
+      int bal = 0;
+      for (int j = l[q]; j <= r[q]; ++j) {
+        bal += (ans[j] == '(');
+        bal -= (ans[j] == ')');
+        if (bal < 0) return 0;
+      }
+      if (bal != 0) return 0;
+    }
+    return 1;
+  }
+  ans[i] = '(';
+  if (go(i + 1, bal + 1)) {
+    return 1;
+  }
+  ans[i] = ')';
+  if (go(i + 1, bal - 1)) {
+    return 1;
+  }
+  return 0;
+}
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    scanf("%d %d", &n, &qq);
+    memset(beg, 0, sizeof beg);
+    memset(fin, 0, sizeof fin);
+    for (int q = 0; q < qq; ++q) {
+      scanf("%d %d", l + q, r + q);
+      ++beg[l[q]];
+      ++fin[r[q]];
+    }
+    bool bad = false;
+    int bal = 0, cnt = 0;
+    bool stop = false;
+    for (int i = 0; i < n && !stop; ++i) {
+      cnt += beg[i];
+      cnt -= fin[i];
+      //assert(bal >= 0);
+      if (beg[i] != 0) {
+        //putchar('(');
+        ans[i] = '(';
+        ++bal;
+      } else {
+        if (fin[i] != 0) {
+          //putchar(')');
+          ans[i] = ')';
+          --bal;
+          if (cnt == 0) {
+            if (bal != 0) {
+              int j = i;
+              while (!go(j, bal)) {
+                bal -= (ans[j] == '(');
+                bal += (ans[j] == ')');
+                --j;
+              }
+              stop = true;
+              bad = true;
+            }
+            //assert(bal <= 1);
+          }
+          //assert(bal == 0);
+        } else {
+          if (cnt == 0) {
+            ans[i] = '(';
+            //putchar('(');
+            bal = 0;
+          } else {
+            if (bal == 0) {
+              ans[i] = '(';
+              //putchar('(');
+              ++bal;
+            } else {
+              ans[i] = ')';
+              //putchar(')');
+              --bal;
+            }
+          }
+        }
+      }
+    }
+    if (bad) {
+      // assert(false);
+      //go(0, 0);
+    }
+    for (int i = 0; i < n; ++i) {
+      putchar(ans[i]);
+    }
+    putchar('\n');
+  }
+  return 0;
+}

@@ -1,0 +1,152 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 60000
+typedef long double ldb;
+
+const ldb ep = 1e-9;
+const ldb pi = acos(-1);
+const int D = 110;
+
+struct CIRCLE {
+  int x, y, r;
+  CIRCLE(int x = 0, int y = 0, int r = 0) : x(x), y(y), r(r) {}
+  void input() {
+    scanf("%d %d %d", &x, &y, &r); x += D, y += D;
+  }
+} circle[M];
+
+struct pnt {
+  ldb x, y;
+  pnt (ldb x = 0, ldb y = 0) : x(x), y(y) {}
+  ldb operator ^ (pnt a) {return x * a.y - y * a.x;}
+  ldb operator & (pnt a) {return x * a.x + y * a.y;}
+} ;
+
+int T;
+int chk[M];
+
+vector <pair <int, ldb> > bit[M];
+
+void upd(int x, int y, ldb val) {
+  for ( ; x < M; x += (x & -x)) bit[x].push_back(make_pair(y, val));
+}
+
+ldb get(int x, int y) {
+  ldb res = 0;
+  for ( ; x; x -= (x & -x)) {
+		if (bit[x].size()) {
+			int i = lower_bound(bit[x].begin(), bit[x].end(), make_pair(y + 1, ldb(-1))) - bit[x].begin();
+			if (i) res += bit[x][i - 1].second;
+		}
+  }
+  return res;
+}
+
+vector <pair <pair <ldb, ldb>, pair <int, ldb> > > vx[M], vy[M];
+
+ldb calc(int x, int y) {
+  x += D, y += D;
+  ++T;
+  ldb res = get(x, y);
+  if (vy[y].size()) {
+    int i = lower_bound(vy[y].begin(), vy[y].end(), make_pair(make_pair(ldb(x - 50), ldb(-1)), make_pair(0, ldb(-1)))) - vy[y].begin();
+    if (i) res += vy[y][i - 1].second.second;
+    for ( ; i < vy[y].size(); i++) {
+      int id = vy[y][i].second.first;
+      if (vy[y][i].first.second > x + ep) break;
+
+      ldb xx = vy[y][i].first.first;
+      if (xx < x + ep) {
+        res += vy[y][i].second.second; if (i) res -= vy[y][i - 1].second.second;
+        int d = x - circle[id].x, r = circle[id].r;
+        if (r > d && circle[id].y - sqrt(r * r - d * d) < y - ep) {
+          res -= (acos(1. * d / r) * r * r - d * sqrt(r * r - d * d));
+        }
+      }
+      else {
+        int ox = circle[id].x, oy = circle[id].y, r = circle[id].r;
+        ldb px = vy[y][i].first.second;
+        ldb py = oy - sqrt(r * r - (ox - x) * (ox - x));
+        pnt a = pnt(px - ox, y - oy), b = pnt(x - ox, py - oy);
+        ldb al = acos((a & b) / r / r);
+        ldb area = (a ^ b) / 2;
+        if (area > -ep) res += al * r * r / 2 - area;
+        else res += (pi - al / 2) * r * r - area;
+				res += (x - px) * (y - py) / 2;
+      }
+      chk[id] = T;
+    }
+  }
+  if (vx[x].size()) {
+    int i = lower_bound(vx[x].begin(), vx[x].end(), make_pair(make_pair(ldb(y - 50), ldb(-1)), make_pair(0, -(ldb)1.))) - vx[x].begin();
+    if (i) res += vx[x][i - 1].second.second;
+    for ( ; i < vx[x].size(); i++) {
+      int id = vx[x][i].second.first;
+      if (chk[id] == T) continue;
+      if (vx[x][i].first.second > y + ep) break;
+      ldb yy = vx[x][i].first.first;
+      if (yy < y + ep) {
+        res += vx[x][i].second.second;
+        if (i) res -= vx[x][i - 1].second.second;
+      }
+    }
+  }
+  return res;
+}
+
+int n, Q;
+
+int main() {
+  //freopen("in.txt", "r", stdin);
+
+  scanf("%d %d", &n, &Q);
+
+  for (int i = 0; i < n; i++) {
+    circle[i].input();
+    int x = circle[i].x, y = circle[i].y, r = circle[i].r;
+    upd(x + r, y + r, pi * r * r);
+    for (int yy = y - r + 1; yy <= y; yy++) {
+      ldb d = sqrt(r * r - (y - yy) * (y - yy));
+      vy[yy].push_back(make_pair(make_pair(x + d, x - d), make_pair(i, asin(d / r) * r * r - d * abs(y - yy))));
+    }
+    for (int yy = y + 1; yy <= y + r - 1; yy++) {
+      ldb d = sqrt(r * r - (y - yy) * (y - yy));
+      vy[yy].push_back(make_pair(make_pair(x + d, x - d), make_pair(i, pi * r * r - (asin(d / r) * r * r - d * abs(y - yy)))));
+    }
+    for (int xx = x - r + 1; xx <= x; xx++) {
+      ldb d = sqrt(r * r - (x - xx) * (x - xx));
+      vx[xx].push_back(make_pair(make_pair(y + d, y - d), make_pair(i, asin(d / r) * r * r - d * abs(x - xx))));
+    }
+    for (int xx = x + 1; xx <= x + r - 1; xx++) {
+      ldb d = sqrt(r * r - (x - xx) * (x - xx));
+      vx[xx].push_back(make_pair(make_pair(y + d, y - d), make_pair(i, pi * r * r - (asin(d / r) * r * r - d * abs(x - xx)))));
+    }
+  }
+  for (int i = 0; i < M; i++) {
+    if (vx[i].size()) {
+      sort(vx[i].begin(), vx[i].end());
+      for (int j = 1; j < vx[i].size(); j++) {
+        vx[i][j].second.second += vx[i][j - 1].second.second;
+      }
+    }
+    if (vy[i].size()) {
+      sort(vy[i].begin(), vy[i].end());
+      for (int j = 1; j < vy[i].size(); j++) {
+        vy[i][j].second.second += vy[i][j - 1].second.second;
+      }
+    }
+  }
+  for (int i = 0; i < M; i++) {
+    if (bit[i].size()) {
+      sort(bit[i].begin(), bit[i].end());
+      for (int j = 1; j < bit[i].size(); j++) {
+        bit[i][j].second += bit[i][j - 1].second;
+      }
+    }
+  }
+  while (Q--) {
+    int x, y, xx, yy;
+    scanf("%d %d %d %d", &x, &y, &xx, &yy);
+    printf("%.20lf\n", double(calc(xx, yy) - calc(x, yy) - calc(xx, y) + calc(x, y)));
+  }
+}

@@ -1,0 +1,89 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+const int64_t mod = 1e9 + 7ll;
+
+const int N = 100;
+
+int64_t rem[ N ][ N ];
+int pass[ N ][ N ];
+
+int64_t dp( int x, int l ) {
+	if ( x == 0ll ) return 1ll;
+	if ( x == 1ll ) return l;
+	if ( l <= 0ll ) return 0ll;
+	if ( pass[ x ][ l ] ) return rem[x][l];
+	pass[x][l] = 1;
+	return rem[x][l] = ( dp( x, l-1 ) + dp( x-1, l ) ) % mod;
+}
+
+int64_t calc( int k, int nec, int nnec ) {
+	if ( nec > k ) return 0ll;
+	return dp( k - nec, nec + nnec );
+}
+
+std::vector< int > data;
+
+const int LIM = 27;
+int use[ LIM ];
+int gcd[ N ][ N ];
+
+void dfs( int x, int hash ) {
+	if ( x >= LIM ) {
+		data.emplace_back( hash );
+		return;
+	}
+	bool err = false;
+	for ( int j = 0 ; j < x ; ++j ) {
+		if ( use[j] and !use[ gcd[ j+1 ][ x+1 ]-1 ] ) {
+			err = true;
+		}
+	}
+	if ( !err ) {
+		use[x] = 1;
+		dfs( x+1, hash | ( 1 << x ) );
+	}
+	use[x] = 0;
+	dfs( x+1, hash );
+}
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+
+	int test;
+	std::cin >> test;
+
+	for ( int i = 1 ; i < N ; ++i ) {
+		for ( int j = 1 ; j < N ; ++j ) {
+			gcd[i][j] = std::__gcd( i, j );
+		}
+	}
+	dfs( 0, 0 );
+
+	while ( test-- ) {
+
+		int n, k, l;
+		std::cin >> n >> k >> l;
+
+		int hash = 0;
+		for ( int i = 0 ; i < n ; ++i ) {
+			int val;
+			std::cin >> val;
+			hash |= ( 1 << ( val-1 ) );
+		}
+
+		int len = __builtin_popcount( hash );
+		int64_t ans = 0;
+		for ( const int config : data ) {
+			if ( ( config & hash ) != hash ) continue;
+			if ( config >= ( 1 << l ) ) continue;
+			int necessary = __builtin_popcount( config ^ hash );
+			ans = ( ans + calc( k, necessary, len ) ) % mod;
+		}
+
+		std::cout << ans << "\n";
+	}
+
+	return 0;
+}

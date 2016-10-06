@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+typedef long long  ll ;
+
+const ll  MOD = 1000000007 ;
+
+#define  MUL(x,y,z)  mul( x, mul(y,z) )
+#define  mul(x,y)  ( (x*y) % MOD )
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        ll  n, m, c, i, j, x, sum, ans ;
+        vector<ll>  U(1001,0), L(1001,0), v, a, b ;
+
+        cin >> n >> m >> c ;
+
+        for( i=0; i<n; i++ )
+        {
+                cin >> x ;
+                U[x]++ ;
+        }
+
+        for( i=0; i<m; i++ )
+        {
+                cin >> x ;
+                L[x]++ ;
+        }
+
+        for( i=1; i<=c; i++ )
+        {
+                x = ( U[i] * L[i] ) % MOD ;
+                if(x)  v.push_back(x);
+        }
+
+        a = v ;
+
+        for( i=1; i<=c; i++ )
+        {
+                ans = 0LL ;
+                sum = accumulate( a.begin(), a.end(), 0LL ) % MOD ;
+
+                for( j=1; j<(ll)a.size(); j++ )
+                {
+                        sum = ( sum - a[j-1] + MOD ) % MOD ;
+                        x = ( v[j-1] * sum ) % MOD ;
+                        b.push_back(x);
+                        ans = ( ans + x ) % MOD ;
+                }
+
+                cout << ans << ' ' ;
+
+                a.swap(b);
+                b.clear();
+        }
+
+        return 0;
+} 

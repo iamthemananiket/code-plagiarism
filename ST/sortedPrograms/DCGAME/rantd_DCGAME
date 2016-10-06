@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 1000005;
+int n, a[N], st[N], b[N];
+ll cnt[N], sum[N];
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int m, k;
+	char c, x;
+	
+	cin >> n >> m;
+	repu(i, 0, n) {
+		cin >> a[i];
+		cnt[i] = 1;
+	}
+	int top = 0;
+	repu(i, 0, n) {
+		while (top && a[st[top - 1]] < a[i]) top--;
+		if (top) cnt[i] *= (i - st[top - 1]);
+		else cnt[i] *= (i + 1);
+		st[top++] = i;
+	}
+	
+	top = 0;
+	repd(i, n - 1, -1) {
+		while (top && a[st[top - 1]] <= a[i]) top--;
+		if (top) cnt[i] *= (st[top - 1] - i);
+		else cnt[i] *= (n - i);
+		st[top++] = i;
+	}
+	
+	map<int, ll> mp;
+	repu(i, 0, n) mp[a[i]] += cnt[i];
+	int tot = 0;
+	for (map<int, ll>::iterator it = mp.begin(); it != mp.end(); ++it) {
+		b[tot] = it->first;
+		sum[tot] = tot ? sum[tot - 1] + it->second : it->second;
+		tot++;
+	}
+	
+	ll ret;
+	repu(i, 0, m) {
+		cin >> c >> k >> x;
+		if (c == '<') {
+			int ind = lower_bound(b, b + tot, k) - b;
+			ret = ind ? sum[ind - 1] : 0;
+		}
+		else if (c == '=') {
+			int lb = lower_bound(b, b + tot, k) - b;
+			int rb = upper_bound(b, b + tot, k) - b;
+			ret = rb > lb ? (sum[rb - 1] - (lb ? sum[lb - 1] : 0)) : 0;
+		}
+		else {
+			int rb = upper_bound(b, b + tot, k) - b;
+			ret = rb ? sum[tot - 1] - sum[rb - 1] : sum[tot - 1];
+		}
+		if (ret & 1) {
+			printf("%c", x);
+		}
+		else {
+			if (x == 'D') printf("C");
+			else printf("D");
+		}
+		if (i == m - 1) printf("\n");
+	}
+	
+	return 0;
+}

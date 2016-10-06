@@ -1,0 +1,106 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+typedef long long ll;
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MOD = (int)1e9 + 7;
+
+bool a[1009][1009];
+
+bool brute(const int n) {
+	for (int mask = 0; mask < (1 << n); ++mask) {
+		vector<int> table1, table2;
+		for (int i = 0; i < n; ++i) {
+			if (mask & (1 << i)) {
+				table1.push_back(i + 1);
+			} else {
+				table2.push_back(i + 1);
+			}
+		}
+		bool res = true;
+		for (int i = 0; i < table1.size() && res; ++i) {
+			for (int j = i + 1; j < table1.size(); ++j) {
+				if (!a[table1[i]][table1[j]]) {
+					res = false;
+					break;
+				}
+			}
+		}
+		for (int i = 0; i < table2.size() && res; ++i) {
+			for (int j = i + 1; j < table2.size(); ++j) {
+				if (!a[table2[i]][table2[j]]) {
+					res = false;
+					break;
+				}
+			}
+		}
+		if (res) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n, m;
+		scanf("%d %d", &n, &m);
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j <= n; ++j) {
+				a[i][j] = false;
+			}
+		}
+		while (m--) {
+			int u, v;
+			scanf("%d %d", &u, &v);
+			a[u][v] = a[v][u] = true;
+		}
+		bool res = true;
+		if (n <= 20) {
+			res = brute(n);
+		} else {
+			for (int i = 1; i <= n && res; ++i) {
+				for (int j = i + 1; j <= n && res; ++j) {
+					for (int k = j + 1; k <= n; ++k) {
+						if (!a[i][j] && !a[i][k] && !a[j][k]) {
+							res = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		printf(res ? "YES\n" : "NO\n");
+	}
+	return 0;
+}

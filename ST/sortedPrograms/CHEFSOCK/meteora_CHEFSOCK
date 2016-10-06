@@ -1,0 +1,19 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+
+using namespace std;
+
+int main(){
+
+	int j,m,s;
+	cin >> j >> s >> m;
+
+	m -= j;
+
+	if((m/s)&1) printf("Unlucky Chef");
+	else printf("Lucky Chef\n");
+
+
+	return 0;
+}

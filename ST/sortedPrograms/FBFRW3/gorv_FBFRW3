@@ -1,0 +1,53 @@
+#include<bits/stdc++.h>
+using namespace std;
+bool testAndSolve(string &S)
+{
+    int N=S.length();
+    for(int j=N-1;j>=0;--j)
+    {
+        if(S[j]=='5') {
+            S[j]='9';
+            for(int i=j+1;i<N;i++)
+            	S[i]='5';
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int main()
+{
+    int T;
+    cin>>T;
+    while(T--)
+    {
+        string S,ans; 
+		cin>>S;
+        int N=S.size();
+        int k=0;
+        for(;k<N;++k)
+        {
+            if(S[k]=='5' || S[k]=='9') 
+				ans.push_back(S[k]);
+            else break;
+        }
+        if(k==N)
+            if(!testAndSolve(ans)){ 
+				ans.clear(); 
+				for(int j=0;j<N+1;j++)
+					ans.push_back('5'); 
+			}
+        if(k<N && S[k]<'5'){ 
+			ans.push_back('5'); 
+			k++; 
+		}
+        else if(k<N && S[k]<'9'){ 
+			ans.push_back('9'); 
+			k++; 
+		}
+        if(k<N)
+        	for(int j=k;j<N;j++)
+            	ans.push_back('5');
+        cout<<ans<<endl;
+    }
+}

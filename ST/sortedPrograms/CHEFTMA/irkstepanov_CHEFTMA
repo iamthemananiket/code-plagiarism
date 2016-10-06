@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+
+#define mp make_pair
+#define pb push_back
+#define sz(a) static_cast<int>((a).size())
+#define all(a) (a).begin(), (a).end()
+#define forn(i, n) for (int i = 0; i < n; ++i)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+const int inf = static_cast<int>(1e9);
+
+int main()
+{
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        int n, k, m;
+        cin >> n >> k >> m;
+        vector<int> a(n), b(n);
+        vector<int> d(n);
+        forn(i, n) {
+            cin >> a[i];
+        }
+        ll ans = 0;
+        forn(i, n) {
+            cin >> b[i];
+            d[i] = a[i] - b[i];
+            ans += static_cast<ll>(d[i]);
+        }
+        sort(all(d));
+        vector<int> e(k + m);
+        forn(i, k + m) {
+            cin >> e[i];
+        }
+        sort(all(e));
+        int pos = n - 1;
+        for (int i = sz(e) - 1; i >= 0; --i) {
+            if (pos == -1) {
+                break;
+            }
+            if (d[pos] >= e[i]) {
+                ans -= static_cast<ll>(e[i]);
+                --pos;
+            }
+        }
+        cout << ans << "\n";
+    }
+
+}

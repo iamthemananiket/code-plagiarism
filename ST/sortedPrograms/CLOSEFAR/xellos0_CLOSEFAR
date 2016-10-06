@@ -1,0 +1,148 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+void DFS(int R, vector< vector<int> > &G, vector<int> &par, vector<int> &dep, vector< pair<int,int> > &I) {
+	I[R].ss =I[R].ff+1;
+	ALL_THE(G[R],it) if(par[*it] == -1) {
+		par[*it] =R;
+		dep[*it] =dep[R]+1;
+		I[*it].ff =I[R].ss;
+		DFS(*it,G,par,dep,I);
+		I[R].ss =I[*it].ss;}
+	}
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	int N;
+	cin >> N;
+	vector< vector<int> > G(N);
+	vector<int> V(N);
+	for(int i =0; i < N; i++) cin >> V[i];
+	for(int i =0; i < N-1; i++) {
+		int u,v;
+		cin >> u >> v;
+		G[--u].push_back(--v);
+		G[v].push_back(u);}
+
+	vector< vector<int> > par(20,vector<int>(N,-1));
+	vector<int> dep(N,0);
+	vector< pair<int,int> > I(N);
+	I[0].ff =0;
+	par[0][0] =0;
+	DFS(0,G,par[0],dep,I);
+
+	for(int i =1; i < 20; i++) for(int j =0; j < N; j++)
+		par[i][j] =par[i-1][par[i-1][j]];
+	vector< vector<int> > mx(20,vector<int>(N));
+	mx[0] =V;
+	for(int i =1; i < 20; i++) for(int j =0; j < N; j++)
+		mx[i][j] =max(mx[i-1][j],mx[i-1][par[i-1][j]]);
+	vector< vector<int> > mi(20,vector<int>(N));
+	mi[0] =V;
+	for(int i =1; i < 20; i++) for(int j =0; j < N; j++)
+		mi[i][j] =min(mi[i-1][j],mi[i-1][par[i-1][j]]);
+	
+	vector< pair<int,int> > Vs(N);
+	for(int i =0; i < N; i++) {
+		Vs[i].ff =V[i];
+		Vs[i].ss =i;}
+	sort(begin(Vs),end(Vs));
+	vector< pair<int,pair<int,int> > > Ds;
+	for(int i =0; i < N; i++) for(int j =i+1; j < N; j++) {
+		if(j-i > 105) break;
+		Ds.push_back(make_pair(Vs[j].ff-Vs[i].ff,make_pair(Vs[j].ss,Vs[i].ss)));}
+	sort(begin(Ds),end(Ds));
+
+	int Q;
+	cin >> Q;
+	for(int q =0; q < Q; q++) {
+		string s;
+		int u,v;
+		cin >> s >> u >> v;
+		u--, v--;
+		if(dep[u] > dep[v]) swap(u,v);
+		int x =u, y =v;
+		for(int k =16; k >= 0; k--) if(dep[par[k][v]] >= dep[u]) v =par[k][v];
+		for(int k =16; k >= 0; k--) if(par[k][v] != par[k][u]) {
+			v =par[k][v];
+			u =par[k][u];}
+		if(u != v) u =par[0][u]; // u: gcd
+		if(s == "C") {
+			bool ok =false;
+			for(int i =0; i < min((int)Ds.size(),100); i++) {
+				int va =Ds[i].ss.ff, vb =Ds[i].ss.ss;
+				if(I[va].ff < I[u].ff || I[va].ff >= I[u].ss) continue;
+				if(I[x].ff < I[va].ff || I[x].ff >= I[va].ss) 
+					if(I[y].ff < I[va].ff || I[y].ff >= I[va].ss) continue;
+				if(I[vb].ff < I[u].ff || I[vb].ff >= I[u].ss) continue;
+				if(I[x].ff < I[vb].ff || I[x].ff >= I[vb].ss) 
+					if(I[y].ff < I[vb].ff || I[y].ff >= I[vb].ss) continue;
+				cout << Ds[i].ff << "\n";
+				ok =true;
+				break;}
+			if(ok) continue;
+			vector<int> v;
+			while(true) {
+				v.push_back(V[x]);
+				if(x == u) break;
+				x =par[0][x];}
+			while(y != u) {
+				v.push_back(V[y]);
+				y =par[0][y];}
+			sort(begin(v),end(v));
+			int ans =1000000000;
+			for(int i =0; i < (int)v.size()-1; i++) ans =min(ans,v[i+1]-v[i]);
+			cout << ans << "\n";
+			continue;}
+		int ansmx =0, ansmi =1000000000;
+		int dl =dep[u];
+		for(int k =16; k >= 0; k--) if(dep[x]-(1<<k) >= dl-1) {
+			ansmx =max(ansmx,mx[k][x]);
+			ansmi =min(ansmi,mi[k][x]);
+			x =par[k][x];}
+		for(int k =16; k >= 0; k--) if(dep[y]-(1<<k) >= dl-1) {
+			ansmx =max(ansmx,mx[k][y]);
+			ansmi =min(ansmi,mi[k][y]);
+			y =par[k][y];}
+		cout << ansmx-ansmi << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing

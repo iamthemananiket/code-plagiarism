@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, M;
+int cnt[501];
+vector<int> rmul[501];
+vector<pair<int, int>> adj[100001];
+int sz[100001];
+int bad[100001];
+vector<int> cur;
+vector<int> all;
+
+void dfs(int u, int p)
+{
+    sz[u]=1;
+    for(auto& it: adj[u])
+    {
+        int v=it.first;
+        if(v==p || bad[v])
+            continue;
+        dfs(v, u);
+        sz[u]+=sz[v];
+    }
+}
+
+void dfs2(int u, int p, int prod)
+{
+    cur.push_back(prod);
+    for(auto& it: adj[u])
+    {
+        int v=it.first;
+        int c=it.second;
+        if(v==p || bad[v])
+            continue;
+        dfs2(v, u, c*prod%M);
+    }
+}
+
+long long work(vector<int>& v)
+{
+    long long ret=0;
+    int zero=0;
+    for(auto& it: v)
+    {
+        if(it==0)
+        {
+            zero++;
+            continue;
+        }
+        int c=M/__gcd(it, M);
+        for(auto& it2: rmul[c])
+            ret+=cnt[it2];
+        cnt[__gcd(it, M)]++;
+    }
+    for(auto& it: v) if(it!=0)
+        cnt[__gcd(it, M)]--;
+    ret+=1LL*zero*(v.size()-zero)+1LL*zero*(zero-1)/2;
+    return ret;
+}
+
+long long solve(int u)
+{
+    dfs(u, u);
+    while(1)
+    {
+        int idx=-1;
+        for(auto& it: adj[u]) if(!bad[it.first] && (idx==-1 || sz[it.first]>sz[idx]))
+            idx=it.first;
+        if(idx==-1 || sz[idx]*2<=sz[u])
+            break;
+        sz[u]-=sz[idx];
+        sz[idx]+=sz[u];
+        u=idx;
+    }
+    all.clear();
+    long long ret=0;
+    for(auto& it: adj[u]) if(!bad[it.first])
+    {
+        cur.clear();
+        dfs2(it.first, u, it.second);
+        ret-=work(cur);
+        for(auto& it2: cur)
+        {
+            all.push_back(it2);
+            if(it2==0)
+                ret++;
+        }
+    }
+    ret+=work(all);
+    bad[u]=1;
+    for(auto& it: adj[u]) if(!bad[it.first])
+        ret+=solve(it.first);
+    return ret;
+}
+
+int main()
+{
+    scanf("%d%d", &N, &M);
+    int a, b, c;
+    for(int i=0; i<N-1; i++)
+    {
+        scanf("%d%d%d", &a, &b, &c);
+        c%=M;
+        adj[a].push_back({b, c});
+        adj[b].push_back({a, c});
+    }
+    for(int i=1; i<=M; i++)
+        for(int j=i; j<=M; j+=i) if(__gcd(j, M)==j)
+            rmul[i].push_back(j);
+    if(M==1)
+        printf("%lld\n", 1LL*N*(N-1)/2);
+    else
+        printf("%lld\n", solve(1));
+    return 0;
+}

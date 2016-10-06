@@ -1,0 +1,63 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+int phi(int n) {
+    if (n==0) return 0;
+    int r=n;
+    for (int i=2; i*i<=n; i++) {
+	if (n%i==0) {
+	    r-=r/i;
+	    for (;n%i==0;) n/=i;
+	}
+    }
+    if (n>1) r-=r/n;
+    return r;
+}
+
+const int MAX = 10000000;
+LL mem[MAX];
+LL C(LL n) {
+    if (n <= 1) return n;
+    if (n < MAX && mem[n]) return mem[n];
+    LL ret = n*n;
+    LL m, k;
+    for (m=1; m*m<=n; m++)
+	ret -= C(m) * (n/m - n/(m+1));
+
+    if (m*m == n) m++;
+    for (k=2; n/k>=m; k++)
+	ret -= C(n/k);
+
+    if (n < MAX) mem[n] = ret;
+    return ret;
+}
+
+int T;
+int N, D;
+int main() {
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d%d", &N, &D);
+	N /= D;
+	LL ans = (C(N) + 1) / 2;
+	
+//	for (int i=1; i<=N; i++) ans += phi(i);
+	printf("%lld\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,47 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+
+using namespace std;
+
+int N, Q, A[55],K;
+
+int main()
+{
+	scanf("%d",&N);
+	for(int i=0; i<N; i++)
+		scanf("%d",&A[i]);
+	scanf("%d",&Q);
+	for(int i=0; i<Q; i++)
+	{
+		int nsubarray = 0;
+		scanf("%d",&K);
+		int j=0;
+		while(j<N)
+		{
+			if(A[j]==K)
+			{
+				int it,kali,hasil;
+				it=j-1; kali=0; hasil=1;
+				while(it>=0 && A[it]>K)
+				{
+					kali++;
+					it--;
+				}
+				hasil *= kali+1;
+				it=j+1; kali=0;
+				while(it<N && A[it]>=K)
+				{
+					kali++;
+					it++;
+				}
+				hasil *= kali+1;
+				nsubarray += hasil;
+			}
+			j++;
+		}
+		printf("%d\n",nsubarray);
+	}
+	return 0;
+}

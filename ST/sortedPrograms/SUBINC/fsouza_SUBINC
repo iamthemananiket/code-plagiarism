@@ -1,0 +1,34 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+int main() {
+  int nt;
+  cin >> nt;
+
+  for (int t = 0; t < nt; ++t) {
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    lint ret = 0;
+    for (int r = n, l = n-1; l >= 0; --l) {
+      if (l+1 == n || a[l] > a[l+1]) r = l;
+      ret += r-l+1;
+    }
+    cout << ret << endl;
+  }
+  
+  return 0;
+}

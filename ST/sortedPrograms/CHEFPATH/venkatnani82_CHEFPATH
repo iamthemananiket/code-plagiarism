@@ -1,0 +1,16 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		long long a, b;
+		scanf("%lld %lld", &a, &b);
+		if(a > b) swap(a, b);
+		if(a % 2 == 1 && b % 2 == 1) printf("No\n");
+		else {
+			if(a == 1 && b > 2) printf("No\n");
+			else printf("Yes\n");
+		}    
+	}
+}

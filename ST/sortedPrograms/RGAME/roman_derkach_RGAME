@@ -1,0 +1,67 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+//map<pair<int,int>, int> mp;
+//map<pair<int,int>, int>::iterator it;
+ll a[10001],b[100001],ans,md=1e9 + 7;
+int n;
+inline void tt(int pos,int mn,int mx)
+{
+    if(pos==n+1)
+    {
+        for(int i=mn;i<mx;++i)
+        // ++mp[mkp(max(a[i],a[i+1]),min(a[i],a[i+1]))];
+         ans+=b[a[i]] * b[a[i+1]];
+         ans%=md;
+         return;
+    }
+    a[mn-1] = pos;
+    tt(pos+1,mn-1,mx);
+    a[mx+1] = pos;
+    tt(pos+1,mn,mx+1);
+}
+
+ int main()
+ {
+    fast;
+
+    /* #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif */
+    int t;
+    cin>>t;
+     while(t--){
+
+            ans=0;
+
+    cin>>n;
+
+    ++n;
+
+    for(int i=1;i<=n;++i) cin>>b[i];
+
+       a[n+1] = 1;
+        tt(2,n+1,n+1);
+
+        cout<<ans<<endl;
+     }
+
+ }

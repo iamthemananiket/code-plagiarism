@@ -1,0 +1,54 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",&mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+int main()
+{
+	int t;
+	sd(t);
+	while(t--)
+	{
+		ll r,k;
+		sl(r);sl(k);
+		if(r>=100000)
+		{
+			ll lo=0,hi=1000000000,mid;
+			while(lo<hi)
+			{
+				mid=((lo+hi)>>1);
+				if(mid*mid >= 2*r-1)
+					hi=mid;
+				else
+					lo=mid+1;
+			}
+			--lo;
+			printf("%lld %lld\n",lo,r-1);
+			continue;
+		}
+		ll y=r,x;
+
+		for(x=0;x<r;++x)
+		{
+			while(x*x+y*y>=r*r && y>=0)
+				y--;
+			if(x*x+y*y<r*r)
+			{
+				if(r-sqrt(x*x+y*y) < ((double)k)/100.0)
+					break;
+			}
+		}
+		if(x==r)
+			printf("-1\n");
+		else
+			printf("%lld %lld\n",x,y);
+	}
+}

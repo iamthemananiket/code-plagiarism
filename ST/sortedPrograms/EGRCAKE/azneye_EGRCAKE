@@ -1,0 +1,29 @@
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <vector>
+
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N, M;
+    cin >> N >> M;
+    // p[i] = (i + M) % N
+    const int g = __gcd(M, N);
+    const int num = N / g;
+    if (num == N) {
+      cout << "Yes\n";
+    } else {
+      cout << "No " << num << endl;
+    }
+  }
+  return 0;
+}

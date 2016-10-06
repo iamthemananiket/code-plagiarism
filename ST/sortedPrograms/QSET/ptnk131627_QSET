@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("qset.inp","r",stdin)
+#define OUTPUT freopen("qset.out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=1e5+10;
+
+string s;
+int n,m,t,x,y;
+struct nod{
+    int rsum,d[2][3];
+    ll val;
+    void init(){
+        memset(d,0,sizeof(d));
+        rsum=0;val=0;
+    }
+}b[N<<2],ans;
+void snodeset(int node,int x){
+    b[node].init();
+    int v=(s[x-1]-'0')%3;
+    b[node].rsum=v;
+    //printf("%d %d %d %d\n",node,x,v,b[node].rsum);
+    b[node].val=(v==0);
+    b[node].d[0][v]=b[node].d[1][v]=1;
+}
+nod mergeup(nod *x,nod *y){
+    nod tmp;
+    tmp.val=x->val+y->val;
+    tmp.rsum=(x->rsum+y->rsum)%3;
+    FOR(i,0,2) tmp.val+=1LL*x->d[1][i]*y->d[0][(3-i)%3];
+    FOR(i,0,2) tmp.d[0][i]=x->d[0][i];
+    FOR(i,0,2) tmp.d[0][(i+x->rsum)%3]+=y->d[0][i];
+    FOR(i,0,2) tmp.d[1][i]=y->d[1][i];
+    FOR(i,0,2) tmp.d[1][(i+y->rsum)%3]+=x->d[1][i];
+    return tmp;
+}
+void update(int node,int L,int R,int x){
+    if (x>R||x<L) return;
+    if (L==R&&L==x){
+        snodeset(node,L);
+        return;
+    }
+    update(node*2,L,(L+R)/2,x);
+    update(node*2+1,(L+R)/2+1,R,x);
+    b[node]=mergeup(&b[node*2],&b[node*2+1]);
+}
+void build(int node,int L,int R){
+    if (L==R){
+        snodeset(node,L);
+        return;
+    }
+    build(node*2,L,(L+R)/2);
+    build(node*2+1,(L+R)/2+1,R);
+    b[node]=mergeup(&b[node*2],&b[node*2+1]);
+}
+void check(int node,int L,int R){
+    printf("%d %d %d\n%lld %d\n",node,L,R,b[node].val,b[node].rsum);
+    FOR(i,0,1){
+        printf("%d ",i);
+        FOR(j,0,2) printf("%d ",b[node].d[i][j]);ENDL;
+    }
+    if (L==R) return;
+    check(node*2,L,(L+R)/2);
+    check(node*2+1,(L+R)/2+1,R);
+}
+void query(int node,int L,int R,int l,int r){
+    if (l>R||r<L) return;
+    if (l<=L&&R<=r){
+        ans=mergeup(&ans,&b[node]);
+        return;
+    }
+    query(node*2,L,(L+R)/2,l,r);
+    query(node*2+1,(L+R)/2+1,R,l,r);
+}
+void prepare(){
+    cin>>n>>m>>s;
+    //cout<<s<<endl;
+    build(1,1,n);
+}
+int main(){
+    prepare();
+    //check(1,1,n);
+    while (m--){
+        scanf("%d%d%d",&t,&x,&y);
+        if (t==1) {
+            s[x-1]='0'+y;
+            update(1,1,n,x);
+        }else {
+            ans.init();
+            query(1,1,n,x,y);
+            printf("%lld\n",ans.val);
+        }
+    }
+}

@@ -1,0 +1,28 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+typedef long long int ll;
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int n;
+		scanf("%d",&n);
+		ll ret=0,now=0;
+		for(int i=0;i<n;i++)
+		{
+			ll a;
+			scanf("%lld",&a);
+			ret+=max(0LL,a-now);
+			now=a;
+		}
+		printf("%lld\n",ret);
+	}
+	return 0;
+}

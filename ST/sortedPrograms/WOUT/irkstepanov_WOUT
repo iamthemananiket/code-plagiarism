@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+#define mp std::make_pair
+#define pb push_back
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int) (a).size()
+
+int max(int a, int b)
+{
+    return (a > b ? a : b);
+}
+
+int min(int a, int b)
+{
+    return (a < b ? a : b);
+}
+
+typedef long long ll;
+typedef long double ld;
+typedef std::vector <int> vi;
+
+int main()
+{
+
+    int tt;
+    scanf("%d\n", &tt);
+
+    while (tt--)
+    {
+        int n, h;
+        scanf("%d%d", &n, &h);
+        std::vector <ll> d(n);
+        for (int i = 0; i < n; i++)
+        {
+            int l, r;
+            scanf("%d%d", &l, &r);
+            --d[l];
+            if (r < n - 1) ++d[r + 1];
+        }
+        std::vector <ll> row(n);
+        row[0] = d[0];
+        for (int i = 1; i < n; i++)
+            row[i] = row[i - 1] + d[i];
+        for (int i = 0; i < n; i++)
+            row[i] += n;
+        ll ans = 0;
+        for (int i = 0; i < h; i++)
+            ans += row[i];
+        ll cur = ans;
+        for (int i = h; i < n; i++)
+        {
+            cur += row[i] - row[i - h];
+            if (cur < ans) ans = cur;
+        }
+        printf("%lld\n", ans);
+    }
+
+}

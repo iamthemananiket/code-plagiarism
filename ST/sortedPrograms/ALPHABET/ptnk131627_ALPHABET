@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first 
+#define Y second 
+#define FOR(i,L,R) for(auto i=(L);i<=(R);i++)
+#define REP(i,L,R) for(auto i=(L);i<(R);i++)
+
+typedef pair<int,int> ii;
+typedef long long ll;
+
+const int MOD=1e9+7;
+const int alp=26;
+
+string s;
+int h[alp];
+
+string solve(){
+	for(auto ch:s) if (!h[ch-'a']) return "No";
+	return "Yes";
+}
+int main(){
+	cin>>s;
+	for(auto ch:s) h[ch-'a']=1;
+	int test;
+	cin>>test;
+	while (test--){
+		cin>>s;
+		cout<<solve()<<'\n';
+	}
+}

@@ -1,0 +1,133 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+const int width = 14, maxvalue = 1<<width;
+
+inline int prev_subset(int set, int sub) { return sub > 0 ? (sub-1)&set : -1; }
+
+template<typename T, class Cmp=less<T> >
+struct rmq_t {
+  Cmp cmp; vector<vector<T>> table;
+  rmq_t(const vector<T> &values, Cmp cmp = Cmp()): cmp(cmp) {
+    table.push_back(values);
+    for (int l = 1; l <= (int)__lg(values.size()); ++l) {
+      table.push_back(vector<T>(values.size() - (1<<l) + 1));
+      for (int i = 0; i+(1<<l) <= (int)values.size(); ++i)
+	table[l][i] = min(table[l-1][i], table[l-1][i+(1<<(l-1))], cmp);
+    }
+  }
+  T query(int a, int b) const {
+    int size = b-a+1, l = __lg(size);
+    return min(table[l][a], table[l][b-(1<<l)+1], cmp);
+  }
+};
+
+lint solve(int n, vector<int> ids, vector<int> queries, const rmq_t<int, greater<int>> &rmq) {
+  lint total_result = 0;
+  for (int rev = 0; rev < 2; ++rev) {
+    auto rmq_query = [&rmq, n, rev](int a, int b) {
+      if (rev == 0) return rmq.query(a, b);
+      else return rmq.query(n-1-b, n-1-a);
+    };
+
+    int i = 0, j = 0, previd = -1;
+    lint current_result = 0;
+
+    struct block_t { int value, many; };
+    stack<block_t> blocks;
+    while (i != (int)ids.size() || j != (int)queries.size()) {
+      int id = (i != (int)ids.size() && (j == (int)queries.size() || ids[i] < queries[j]) ? ids[i] : queries[j]);
+
+      if (previd+1 <= id) {
+	int range_max = rmq_query(previd+1, id);
+
+	int new_many = 0;
+	lint removed = 0;
+	while (!blocks.empty() && blocks.top().value <= range_max) {
+	  removed += (lint)blocks.top().value * blocks.top().many;
+	  new_many += blocks.top().many;
+	  blocks.pop();
+	}
+	if (new_many > 0) {
+	  blocks.push(block_t{range_max, new_many});
+	  current_result += (lint)new_many * range_max - removed;
+	}
+      }
+
+      if (j != (int)queries.size() && queries[j] == id) {
+	if (i != (int)ids.size() && ids[i] == id && rev == 1) {
+	} else {
+	  total_result += current_result;
+	}
+	++j;
+      } else {
+	int new_value = rmq_query(id, id);
+	if (!blocks.empty() && blocks.top().value == new_value) ++blocks.top().many;
+	else blocks.push(block_t{new_value, 1});
+	current_result += new_value;
+	++i;
+      }
+      previd = id;
+    }
+
+    for (int &id : ids) id = n-1-id;
+    reverse(ids.begin(), ids.end());
+    for (int &q : queries) q = n-1-q;
+    reverse(queries.begin(), queries.end());
+  }
+
+  return total_result;
+}
+
+int main() {
+  vector<vector<int>> queriesto(maxvalue), queries(maxvalue), poswith(maxvalue);
+
+  int n;
+  scanf("%d", &n);
+  vector<int> values(n);
+  for (int i = 0; i < n; ++i) {
+    scanf("%d", &values[i]);
+    poswith[values[i]].push_back(i);
+  }
+
+  for (int s = 0; s < maxvalue; ++s)
+    for (int sub = s; sub != -1; sub = prev_subset(s, sub))
+      if (poswith[s].size() < poswith[sub].size()) queriesto[s].push_back(sub);
+      else queriesto[sub].push_back(s);
+
+  for (int i = 0; i < n; ++i)
+    for (int to : queriesto[values[i]])
+      queries[to].push_back(i);
+
+  rmq_t<int, greater<int>> rmq(values);
+  lint result = 0;
+
+  for (int v = 0; v < maxvalue; ++v)
+    if (!poswith[v].empty() && !queries[v].empty())
+      result += solve(n, poswith[v], queries[v], rmq);
+
+  printf("%lld\n", result);
+
+  return 0;
+}

@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, Q;
+int A[100002];
+int L[100002];
+int R[100002];
+int P[100002];
+
+int main()
+{
+    scanf("%d", &N);
+    int a, b, s=0;
+    for(int i=0; i<N; i++)
+    {
+        scanf("%d%d", &a, &b);
+        A[a]++;
+        A[b+1]--;
+        P[i+1]=b-a+1;
+        L[i+1]=a;
+        R[i+1]=b;
+        s=(s+b-a+1)%2;
+    }
+    for(int i=1; i<=100000; i++)
+        A[i]+=A[i-1];
+    scanf("%d", &Q);
+    for(int i=0; i<Q; i++)
+    {
+        scanf("%d%d", &a, &b);
+        int k=0;
+        if(L[a]<=b && b<=R[a])
+            k=1;
+        int ans=(s-(P[a]+A[b]-k)%2+2)%2;
+        printf("%c\n", "EO"[ans]);
+    }
+    return 0;
+}

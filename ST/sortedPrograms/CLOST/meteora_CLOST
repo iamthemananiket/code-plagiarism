@@ -1,0 +1,82 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+#define NMAX 2010
+
+using namespace std;
+
+
+vector<int> en[NMAX];
+
+int N;
+char str[NMAX];
+
+int decr[NMAX];
+
+int K;
+
+int main(){
+
+	int t;
+	scanf("%d",&t);
+
+	int i,j;
+	while(t--){
+		scanf("%d%d",&N,&K);
+
+
+		while(K--){
+			scanf("%d%d",&i,&j);
+			en[i].push_back(j);
+		}
+
+		memset(str,0,sizeof(str));
+		memset(decr,0,sizeof(decr));
+
+		for(i =0 ; i < N; ++i){
+			sort(en[i].begin(),en[i].end());
+			while(en[i].size() > 1){
+				j = en[i].size()-1;
+				if(en[i][j] == en[i][j-1]){
+					en[i].pop_back();
+					continue;
+				}
+				en[en[i][j-1]+1].push_back(en[i][j]);
+				en[i].pop_back();
+			}
+
+			if(en[i].empty()) continue;
+			str[i] = '(';
+			str[en[i][0]] = ')';
+			++decr[en[i][0]];
+		}
+
+		int ct=0;
+		j = 0;
+		for(i = 0; i < N; ++i){
+			if(str[i]){
+				ct += (str[i] == '(' ? 1: -decr[i]);
+				j ^= 1;
+				continue;
+			}
+
+			if(!ct){
+				str[i] = '(';
+				continue;
+			}
+
+			str[i] = j ? ')' : '(';
+			j^=1;
+		}
+
+
+		str[N] = 0;
+
+		for(i =0 ; i < N; ++i) en[i].clear();
+		printf("%s\n",str);
+	}
+
+}

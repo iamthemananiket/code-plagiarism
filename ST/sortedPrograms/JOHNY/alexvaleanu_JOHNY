@@ -1,0 +1,47 @@
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+
+using namespace std;
+
+int v[102];
+int N, K, T;
+
+int cauta( int key )
+{
+    int st = 1, dr = N, m;
+
+    while ( st <= dr )
+    {
+        m = ( st + dr ) / 2;
+
+        if ( v[m] == key )
+                return m;
+        else
+            if ( v[m] < key )
+                    st = m + 1;
+            else
+                    dr = m - 1;
+    }
+
+    return -1;
+}
+
+int main()
+{
+    for ( cin >> T; T; T-- )
+    {
+        cin >> N;
+
+        for ( int i = 1; i <= N; ++i )
+                cin >> v[i];
+
+        cin >> K;
+
+        int key = v[K];
+
+        sort( v + 1, v + N + 1 );
+        cout << cauta( key ) << "\n";
+    }
+    return 0;
+}

@@ -1,0 +1,130 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <cmath>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+
+using namespace std;
+
+const int magic = 3333;
+
+int n;
+long long ans = 0;
+int a[555555];
+vector<int> v[555555];
+
+int tmp[555555];
+
+const int maxn = 1000000;
+int mmm;
+int t[maxn];
+
+void add(int i, int value) {
+    for (; i < mmm; i += (i + 1) & -(i + 1))
+        t[i] += value;
+}
+
+// sum[0..i]
+long long sum(int i) {
+    long long res = 0;
+    for (; i >= 0; i -= (i + 1) & -(i + 1))
+        res += t[i];
+    return res;
+}
+
+
+void solve(int val) {
+    int mx = -1e9, mn = 1e9;
+    for(int i = 0; i < n; ++i) {
+        if (a[i] == val)
+            tmp[i] = 1;
+        else
+            tmp[i] = -1;
+        if (i)
+            tmp[i] += tmp[i-1];
+        
+        mx = max(mx, tmp[i]);
+        mn = min(mn, tmp[i]);
+    }
+    
+    mmm = mx - mn + 10;
+    for(int i = 0; i < mmm; ++i)
+        t[i] = 0;
+    
+    add(0 - mn, 1);
+    for(int i = 0; i < n; ++i) {
+        ans += sum(tmp[i] - 1 - mn);
+        add(tmp[i] - mn, 1);
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin >> n;
+    map<int, int> mp;
+    for(int i = 0; i < n; ++i) {
+        cin >> a[i];
+        mp[a[i]] = 1;
+    }
+    int i = 0;
+    for(auto x : mp)
+        mp[x.first] = i++;
+    for(int i = 0; i < n; ++i)
+        a[i] = mp[a[i]];
+    
+    for(int i = 0; i < n; ++i)
+        v[a[i]].push_back(i);
+    
+    
+    for(int i = 0; i < n; ++i)
+    if (v[i].size() > magic)
+        solve(i);
+    else if (v[i].size() > 0) {
+        int cnt, cntall, can, canl, canr;
+        for(int l = 0; l < v[i].size(); ++l)
+            for(int r = l; r < v[i].size(); ++r) {
+                cnt = r-l+1;
+                cntall = v[i][r] - v[i][l] + 1;
+                
+                if (cnt + cnt <= cntall) continue;
+                
+                cntall -= cnt;
+                can = cnt - cntall - 1;
+                
+                canl = v[i][l];
+                if (l > 0)
+                    canl -= v[i][l-1]+1;
+                
+                canr = n-1 - v[i][r];
+                if (r+1 < v[i].size())
+                    canr -= n-1 - v[i][r+1] + 1;
+                
+                if (canl > canr)
+                    swap(canl, canr);
+                
+                if (can <= canl) {
+                    ans += ((can + 2) * 1ll * (can + 1)) / 2;
+                }
+                else
+                    for(int i = 0; i <= canl; ++i)
+                        ans += min(canr + 1, can - i + 1);
+            }
+    }
+    cout << ans << "\n";
+    
+    return 0;
+}

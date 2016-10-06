@@ -1,0 +1,141 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MOD = 1e9 + 7;
+
+int n, d;
+
+int demlo[2][2000010], len[2];
+int a, b;
+
+int ans[2000010], alen;
+
+long long real_ans, pp;
+
+void solve ()
+{
+	len[0] = len[1] = real_ans = alen = 0;
+	pp = 1;
+	int i, j, la = 0, curr, cc;
+	scanf ("%d%d", &n, &d);
+	for (i = 1; i <= n; i ++)
+	{
+		demlo[0][len[0] ++] = (i + la) % 10;///printf ("%d", (i + la) % 10);
+		la = (i + la) / 10;
+	}
+	for (i = n + 1; ; i ++)
+	{
+		curr = n - (i - n);
+		if (curr < 0)
+			curr = 0;
+		demlo[0][len[0] ++] = (curr + la) % 10;///printf ("%d", (curr + la) % 10);
+		la = (curr + la) / 10;
+		if (la == 0 && curr == 0)
+			break;
+	}
+	
+	for (i = 0; i < len[0]; i ++)
+		demlo[1][i] = demlo[0][i];
+	len[1] = len[0];
+	
+	a = (d * d) / 10;
+	b = (d * d) % 10;
+	
+	/**
+	for (i = len[0] - 1; i >= 0; i --)
+		printf ("%d", demlo[0][i]);
+	printf ("\n");
+	
+	for (i = len[1] - 1; i >= 0; i --)
+		printf ("%d", demlo[1][i]);
+	printf ("\n");
+	
+	printf ("%d %d\n", a, b);
+	**/
+	
+	for (i = len[0]; i >= 1; i --)
+		demlo[0][i] = demlo[0][i - 1];
+	demlo[0][0] = 0;
+	len[0] ++;
+	
+	la = 0;
+	for (i = 0; i < len[0]; i ++)
+	{
+		cc = demlo[0][i] * a + la;
+		demlo[0][i] = cc % 10;
+		la = cc / 10;
+	}
+	if (la)
+		demlo[0][len[0] ++] = la;
+		
+	la = 0;
+	for (i = 0; i < len[1]; i ++)
+	{
+		cc = demlo[1][i] * b + la;
+		demlo[1][i] = cc % 10;
+		la = cc / 10;
+	}
+	if (la)
+		demlo[1][len[1] ++] = la;
+	
+	if (len[0] < len[1])
+	{
+		for (; len[0] < len[1];)
+			demlo[0][len[0] ++] = 0;
+	}
+	
+	if (len[0] > len[1])
+	{
+		for (; len[1] < len[0];)
+			demlo[1][len[1] ++] = 0;
+	}
+	
+	/**
+	for (i = len[0] - 1; i >= 0; i --)
+		printf ("%d", demlo[0][i]);
+	printf ("\n");
+	
+	for (i = len[1] - 1; i >= 0; i --)
+		printf ("%d", demlo[1][i]);
+	printf ("\n");
+	**/
+	
+	la = 0;
+	for (i = 0; i < len[0]; i ++)
+	{
+		ans[alen ++] = (demlo[0][i] + demlo[1][i] + la) % 10;
+		la = (demlo[0][i] + demlo[1][i] + la) / 10; 
+	}
+	if (la)
+		ans[alen ++] = la;
+	
+	/**
+	for (i = alen - 1; i >= 0; i --)
+		printf ("%d", ans[i]);
+	**/
+	///printf ("%d\n", alen);
+	
+	for (i = alen - 1; i >= 0 && !ans[i]; i --);
+	
+	for (pp = 1, real_ans = 0; i >= 0; i --, pp = (pp * 23) % MOD)
+		real_ans = (real_ans + (long long) (ans[i]) * pp) % MOD;
+	printf ("%lld\n", real_ans);
+}
+
+int main ()
+{
+	int t;
+	scanf ("%d", &t);
+	while (t --)
+		solve ();
+	return 0;
+}

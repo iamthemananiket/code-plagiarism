@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+#define author rajat1603
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+const int mod = 1000000007;
+int t,n,k;
+vector<string> v;
+void gen(int m,string temp){
+	if(m<n){
+		v.pb(temp);
+	}
+	if(m==0){
+		return;
+	}
+	for(int i = 0;i<k;++i){
+		temp+='a' + i;
+		gen(m-1,temp);
+		temp.erase(temp.end()-1);
+	}
+}
+bool check(string a, string b){
+	if(a.size() > b.size()){
+		return 1;
+	}
+	for(int i = 0 ; i < a.size();++i){
+		if(a[i]!=b[i]){
+			return 1;
+		}
+	}
+	return 0;
+}
+int main(){
+    t=scan();
+    while(t--){
+    	v.clear();
+    	n = scan(),k=scan();
+    	string temp;
+    	gen(n,temp);
+    	int ans = 0;
+    	for(int i = 0;i < v.size();++i){
+    		for(int j = 0 ; j < v.size() ; ++j ){
+    			for(int k = 0 ; k < v.size() ; ++k ){
+    				if(check(v[i],v[j])&&check(v[i],v[k])&&check(v[j],v[k])&&check(v[j],v[i])&&check(v[k],v[i])&&check(v[k],v[j])){
+    					ans++;
+    				}
+    			}
+    		}
+    	}
+    	printf("%d\n",ans);
+    }
+}

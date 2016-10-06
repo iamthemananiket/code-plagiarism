@@ -1,0 +1,96 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#define SIZE 100005
+#define INF 2000000000
+#define SQR 800
+
+using namespace std;
+
+int A[SIZE];
+int all[SIZE/SQR+10];
+int mn[SIZE/SQR+10];
+int n,q;
+
+void make(int k)
+{
+	int l=SQR*k;
+	int r=min(SQR*(k+1),n);
+	mn[k]=INF;
+	for(int i=l;i<r;i++)
+	{
+		A[i]&=all[k];
+		mn[k]=min(mn[k],A[i]);
+	}
+}
+void update(int l,int r,int X)//[l,r]
+{
+	int vl=l/SQR,vr=r/SQR;
+	if(vl==vr)
+	{
+ 		while(l<=r) A[l++]&=X;
+		make(vl);
+		return;
+	}
+	while(l%SQR!=0) A[l++]&=X;
+	make(vl);
+	while((r+1)%SQR!=0) A[r--]&=X;
+	make(vr);
+	for(int i=l/SQR;i<=r/SQR;i++)
+	{
+		if(all[i]!=(all[i]&X))
+		{
+			all[i]&=X;
+			make(i);
+		}
+	}
+}
+int get(int l,int r)
+{
+	int ret=INF;
+	int vl=l/SQR,vr=r/SQR;
+	if(vl==vr)
+	{
+ 		while(l<=r) ret=min(ret,A[l++]);
+		return ret;
+	}
+	while(l%SQR!=0) ret=min(ret,A[l++]);
+	while((r+1)%SQR!=0) ret=min(ret,A[r--]);
+	for(int i=l/SQR;i<=r/SQR;i++) ret=min(ret,mn[i]);
+	return ret;
+}
+int main()
+{
+	scanf("%d %d",&n,&q);
+	int mx=0;
+	for(int i=0;i<n;i++)
+	{
+		scanf("%d",&A[i]);
+		mx|=A[i];
+	}
+	for(int i=0;i<=(n-1)/SQR;i++)
+	{
+		all[i]=mx;
+		make(i);
+	}
+	for(int i=0;i<q;i++)
+	{
+		int tp;
+		scanf("%d",&tp);
+		if(tp==0)
+		{
+			int l,r;
+			scanf("%d %d",&l,&r);l--;r--;
+			printf("%d\n",get(l,r));
+		}
+		else
+		{
+			int l,r,X;
+			scanf("%d %d %d",&l,&r,&X);l--;r--;
+			update(l,r,X);
+		}
+	}
+	return 0;
+}

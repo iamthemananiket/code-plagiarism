@@ -1,0 +1,188 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+#define count_bits(x) __builtin_popcount(x)
+#define count_bitsll(x) __builtin_popcountll(x)
+#define least_bits(x) __builtin_ffs(x)
+#define least_bitsll(x) __builtin_ffsll(x)
+#define most_bits(x) 32 - __builtin_clz(x)
+#define most_bitsll(x) 64 - __builtin_clz(x)
+
+vector<string> split(const string &s, char c) {
+	vector<string> v;
+	stringstream ss(s);
+	string x;
+	while (getline(ss, x, c)) v.push_back(x);
+	return v;
+}
+
+#define error(args...) { vector<string> _v = split(#args, ','); err(_v.begin(), args); }
+
+void err(vector<string>::iterator it) {}
+
+template<typename T, typename... Args>
+void err(vector<string>::iterator it, T a, Args... args) {
+	cerr << it -> substr((*it)[0] == ' ', it -> length()) << " = " << a << '\n';
+	err(++it, args...);
+}
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 5005;
+int n, k;
+char s[N];
+int rk[N], tmp[N], sa[N], lcp[N], cnt[N], cb[1001][1001];
+ll fact[N], ch[N];
+
+char pb[20];
+
+template<class T> inline void readNum(T &tn) {
+    tn = 0;
+    int c = getchar_unlocked();
+    while (c != '-' && (c < '0' || c > '9')) c = getchar_unlocked();
+    while (c >= '0' && c <= '9') {
+        tn = (tn << 3) + (tn << 1) + c - '0';
+        c = getchar_unlocked();
+    }
+}
+
+template<class T> inline void putNum(T tn, char d) {
+    if (!tn) putchar_unlocked('0');
+    int pi = 0;
+    while (tn) {
+        pb[pi++] = (tn % 10) + '0';
+        tn /= 10;
+    }
+    while (pi) {
+        putchar_unlocked(pb[--pi]);
+    }
+    putchar_unlocked(d);
+}
+
+inline void readChar() {
+	char c;
+	while (c < 'a' || c > 'z') c = getchar_unlocked();
+	int id = 0;
+	while (c >= 'a' && c <= 'z') {
+        s[id++] = c;
+		c = getchar_unlocked();
+    }
+}
+
+ll mod_pow(ll x, ll y = MOD - 2) {
+    ll res = 1;
+    while (y > 0) {
+        if (y & 1) res = (res * x) % MOD;
+        x = (x * x) % MOD;
+        y >>= 1;
+    }
+    return res;
+}
+ 
+ll comb(int k, int n) {
+	if (n == k) return 1;
+	if (k < 1001 && n < 1001) return cb[k][n];
+	ll ret = fact[n] * mod_pow(fact[k]) % MOD;
+	ret = (ret * mod_pow(fact[n - k])) % MOD;
+	return ret;
+}
+
+bool compare_sa(int i, int j) {
+	if (rk[i] != rk[j]) return rk[i] < rk[j];
+	else {
+		int ri = i + k <= n ? rk[i + k] : -1;
+		int rj = j + k <= n ? rk[j + k] : -1;
+		return ri < rj;
+	}
+}
+
+void construct_sa() {
+	repu(i, 0, n + 1) {
+		sa[i] = i;
+		rk[i] = i < n ? s[i] : -1;
+	}
+	for (k = 1; k <= n; k *= 2) {
+		sort(sa, sa + n + 1, compare_sa);
+		tmp[sa[0]] = 0;
+		repu(i, 1, n + 1) tmp[sa[i]] = tmp[sa[i - 1]] + (compare_sa(sa[i - 1], sa[i]) ? 1 : 0);
+		repu(i, 0, n + 1) rk[i] = tmp[i];
+	}
+}
+
+void construct_lcp() {
+	repu(i, 0, n + 1) rk[sa[i]] = i;
+	int h = 0;
+	repu(i, 0, n) {
+		int j = sa[rk[i] - 1];
+		if (h > 0) h--;
+		for (; j + h < n && i + h < n; ++h) {
+			if (s[j + h] != s[i + h]) break;
+		}
+		lcp[rk[i] - 1] = h;
+	}
+}
+
+int main(int argc, char *argv[]) {
+    ios_base::sync_with_stdio(false);
+    
+	int ntest, q, ki;
+	
+	
+	fact[0] = 1;
+	repu(i, 1, N) fact[i] = (i * fact[i - 1]) % MOD;
+	
+	repu(i, 0, 1001) cb[0][i] = 1;
+	repu(j, 1, 1001) repu(i, 1, j + 1) {
+		cb[i][j] = (cb[i][j - 1] + cb[i - 1][j - 1]) % MOD;
+	}
+	
+	readNum(ntest);
+	
+	while (ntest--) {
+		readNum(n); readNum(q); readChar();
+		
+		construct_sa();
+		construct_lcp();
+		
+		mem(cnt, 0); mem(ch, 0);
+		
+		if (n - sa[n] > lcp[n - 1]) cnt[1] += n - sa[n] - lcp[n - 1];
+		repu(len, 1, n + 1) { 
+			for (int i = 1; i < n;) {
+				while (i < n && n - sa[i] < len) i++;
+				if (i >= n) break;
+				int x = i;
+				while (i < n && lcp[i] >= len) i++;
+				cnt[i - x + 1]++;
+				i++;
+			}
+		}
+		
+		repu(i, 1, n + 1) {
+			if (cnt[i]) {
+				repu(j, 1, i + 1) ch[j] = (ch[j] + cnt[i] * comb(j, i)) % MOD;
+			}
+		}
+		
+		repu(i, 0, q) {
+			readNum(ki);
+			if (ki > n) putNum(0, '\n');
+			else putNum(ch[ki], '\n');
+		}
+	}
+	
+    return 0;
+}

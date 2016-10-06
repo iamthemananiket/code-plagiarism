@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int n,cnt=0;
+        char str[100009];
+        int pos=0;
+        scanf("%s",str);
+        int memo[26][2]={};
+        n=strlen(str);
+        char fin[n];
+        for(int i=0;i<26;i++)
+            memo[i][1]=i;
+        for(int i=0;i<n;i++)
+        {
+            int p=str[i]-'a';
+            memo[p][0]++;
+        }
+        for(int i=0;i<26;i++)
+        {
+            cnt=max(cnt,memo[i][0]);
+        }
+//        printf("%d\n",cnt);
+        if(cnt>(n+1)/2)
+        {
+            printf("-1\n");
+            continue;
+        }
+        for(int i=0;i<25;i++)
+        {
+            for(int j=i+1;j<26;j++)
+            {
+                if(memo[i][0]<memo[j][0])
+                {
+                    swap(memo[i][0],memo[j][0]);
+                    swap(memo[i][1],memo[j][1]);
+                }
+            }
+        }
+        for(int i=0;i<26;i++)
+        {
+            //printf("%d\n",pos);
+            while(memo[i][0]>0)
+            {
+                fin[pos]=memo[i][1]+'a';
+                pos+=2;
+                pos%=n;
+                if(pos==0)
+                    pos++;
+                memo[i][0]--;
+            }
+        }
+        for(int i=0;i<n;i++)
+            printf("%c",fin[i]);
+        printf("\n");
+    }
+}

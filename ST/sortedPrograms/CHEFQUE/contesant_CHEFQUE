@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+const int MAX = 1 << 26;
+
+unsigned f[MAX + 5];
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input", "r", stdin);
+  freopen("f.output", "w", stdout);
+  freopen("error", "w", stderr);
+#endif // KAZAR
+
+  int q = read();
+  unsigned s = read();
+  unsigned A = read();
+  unsigned B = read();
+
+  ll tot = 0;
+  for (int i = 1; i <= q; i++) {
+    unsigned x = s >> 1;
+    unsigned ax = x >> 5;
+    unsigned bx = 1u << (x & 31);
+    if (s & 1) {
+      if (!(f[ax] & bx)) {
+        tot += x;
+        f[ax] |= bx;
+      }
+    } else {
+      if (f[ax] & bx) {
+        tot -= x;
+        f[ax] ^= bx;
+      }
+    }
+    s = s * A + B;
+  }
+  cout << tot << endl;
+
+  return 0;
+}
+

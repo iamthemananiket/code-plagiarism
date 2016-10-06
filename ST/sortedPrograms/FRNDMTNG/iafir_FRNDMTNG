@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+double prob(double T1, double T2, double t1) {
+	t1 = min(t1, T2);
+	if(T1+t1 <= T2)
+		return t1/T2;
+	double y2 = min(t1, T2), y1 = min(T1, T2-y2), y3 = y2 - min(y2, T1-y1);
+	double p1 = (t1<=T2)? (t1/T2)*y1/T1 : 0.0, p2 = ((T1+t1) <= T2)? 0.0 : (y2*y2-y3*y3)/(T1*T2*2.0);
+ 	return p1 + p2;
+}
+ 
+int main() {
+	int t;
+	double T1, T2, t1, t2;
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%lf%lf%lf%lf", &T1, &T2, &t1, &t2);
+		printf("%.7lf\n", prob(T1, T2, t1)+prob(T2, T1, t2));
+	}
+	return 0;
+}

@@ -1,0 +1,541 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class randomGenerator
+{
+public:
+
+    std::mt19937 generator;
+
+    randomGenerator() : generator() {
+
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        generator = mt19937(seed);
+    }
+
+    int getRandomInt()
+    {
+        return generator();
+    }
+
+} generator;
+
+template <typename T> ///only integers
+class Treap
+{
+private:
+
+    class Node
+    {
+public:
+        T key;
+        int priority;
+        size_t _size;
+
+        Node *l, *r;
+
+        Node() : key(), priority(0), _size(0), l(nullptr), r(nullptr) {
+        }
+
+        explicit Node(const T k) : key(k), priority(generator.getRandomInt()), _size(1),
+            l(nullptr), r(nullptr) {
+        }
+
+        void update()
+        {
+            this->_size = 1;
+
+            if (this->l != nullptr)
+                this->_size += this->l->_size;
+
+            if (this->r != nullptr)
+                this->_size += this->r->_size;
+        }
+    };
+
+    Node* join(Node *L, Node *R)
+    {
+        if (L == nullptr)
+            return R;
+
+        if (R == nullptr)
+            return L;
+
+        if (L->priority < R->priority) ///min-heap
+        {
+            L->r = join(L->r, R);
+            L->update();
+
+            return L;
+        }
+        else
+        {
+            R->l = join(L, R->l);
+            R->update();
+
+            return R;
+        }
+    }
+
+    void split(Node *treap, Node *&L, Node *&R, const T &key)
+    {
+        L = nullptr;
+        R = nullptr;
+
+        if (treap == nullptr)
+            return;
+
+        if (treap->key < key)
+        {
+            split(treap->r, treap->r, R, key);
+            L = treap;
+        }
+        else
+        {
+            split(treap->l, L, treap->l, key);
+            R = treap;
+        }
+
+        treap->update();
+    }
+
+    bool find(Node *treap, const T &key) const
+    {
+        if (treap == nullptr)
+            return false;
+
+        if (treap->key == key)
+            return true;
+
+        if (key < treap->key)
+            return find(treap->l, key);
+        else
+            return find(treap->r, key);
+    }
+
+    T kth_element(Node *treap, const size_t position) const
+    {
+        assert(treap != nullptr);
+
+        if (realSize(treap->l) + 1 == position)
+            return treap->key;
+        else if (position <= realSize(treap->l))
+            return kth_element(treap->l, position);
+        else
+            return kth_element(treap->r, position - realSize(treap->l) - 1);
+    }
+
+    vector<T> print(Node *treap) const
+    {
+        if (treap == nullptr)
+            return vector<T>();
+
+        vector<T> a = print(treap->l);
+        a.push_back(treap->key);
+        vector<T> b = print(treap->r);
+
+        for (const auto &it : b)
+            a.push_back(it);
+
+        return a;
+    }
+
+    size_t realSize(Node *treap) const
+    {
+        if (treap == nullptr)
+            return 0;
+        else
+            return treap->_size;
+    }
+
+    void clear(Node *&treap)
+    {
+        if (treap == nullptr)
+            return;
+
+        clear(treap->l);
+        clear(treap->r);
+
+        delete treap;
+        treap = nullptr;
+    }
+
+
+    Node *root;
+
+public:
+
+    Treap() : root(nullptr) {
+    }
+
+    Treap(const Treap &treap) : root(nullptr)
+    {
+        vector<T> arr = treap.print();
+
+        for (const auto it : arr)
+            this->root(it);
+    }
+
+    Treap(const vector<T> &arr) : root(nullptr)
+    {
+        for (const auto it : arr)
+            this->insert(it);
+    }
+
+    ~Treap()
+    {
+        this->clear(root);
+    }
+
+    Treap& operator = (const Treap &treap)
+    {
+        this->clear(root);
+
+        vector<T> arr = treap.print();
+
+        for (const auto it : arr)
+            this->insert(it);
+
+        return *this;
+    }
+
+    void insert(const T &key)
+    {
+        Node *L, *R;
+
+        split(root, L, R, key);
+        root = join(join(L, new Node(key)), R);
+    }
+
+    void erase(const T &key) ///all instances
+    {
+        Node *L, *M, *R;
+
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
+
+        clear(M);
+
+        root = join(L, R);
+    }
+
+    size_t count(const T &key)
+    {
+        Node *L, *M, *R;
+
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
+
+        size_t answer = realSize(M);
+
+        L = join(L, M);
+        root = join(L, R);
+
+        return answer;
+    }
+
+    size_t countSmaller(const T &key)
+    {
+        Node *L, *R;
+
+        split(root, L, R, key - 1);
+
+        size_t answer = realSize(L);
+
+        root = join(L, R);
+
+        return answer;
+    }
+
+    size_t countSmallerOrEqual(const T &key)
+    {
+        Node *L, *R;
+
+        split(root, L, R, key);
+
+        size_t answer = realSize(L);
+
+        root = join(L, R);
+
+        return answer;
+    }
+
+    bool find(const T &key) const
+    {
+        return find(root, key);
+    }
+
+    T kth_element(const size_t position) const
+    {
+        assert(1 <= position && position <= realSize(root));
+
+        return kth_element(root, position);
+    }
+
+    T operator [] (const size_t position) const
+    {
+        return kth_element(position);
+    }
+
+    vector<T> print() const
+    {
+        return this->print(root);
+    }
+
+    bool empty() const
+    {
+        if (this->root == nullptr)
+            return true;
+        else
+            return false;
+    }
+
+    size_t size() const
+    {
+        return realSize(root);
+    }
+
+    void clear()
+    {
+        clear(root);
+    }
+};
+
+template<const size_t bufferSize>
+class Scanner
+{
+public:
+
+    Scanner(std::istream& s = std::cin, std::string sep = " ") : stream(s),
+        buffer(new char[bufferSize]), pointer(bufferSize), lengthInput(0), separators(sep) {
+
+        this->separators.push_back('\0');
+        this->separators.push_back('\n');
+
+        this->stream.seekg(0, this->stream.end);
+        this->lengthInput = this->stream.tellg();
+        this->stream.seekg(0, this->stream.beg);
+    }
+
+    Scanner(const Scanner &scan) : stream(scan.stream), pointer(scan.pointer),
+        lengthInput(scan.lengthInput), separators(scan.separators) {
+
+        for (size_t i = 0; i < bufferSize; ++i)
+            this->buffer[i] = scan.buffer[i];
+    }
+
+    Scanner& operator = (const Scanner &scan)
+    {
+        this->stream = scan.stream;
+        this->pointer = scan.pointer;
+        this->lengthInput = scan.lengthInput;
+        this->separators = scan.separators;
+
+        for (size_t i = 0; i < bufferSize; ++i)
+            this->buffer[i] = scan.buffer[i];
+
+        return *this;
+    }
+
+    ~Scanner()
+    {
+        delete[] this->buffer;
+        this->pointer = bufferSize;
+        this->lengthInput = 0;
+    }
+
+    char nextChar()
+    {
+        if (this->eof())
+            return '\0';
+
+        if (this->pointer == bufferSize)
+        {
+            this->pointer = 0;
+            stream.read(buffer, bufferSize);
+        }
+
+        this->lengthInput--;
+
+        return this->buffer[this->pointer++];
+    }
+
+    size_t nextUnsigned(void)
+    {
+        return this->nextInteger<size_t>();
+    }
+
+    int nextInt(void)
+    {
+        return this->nextInteger<int>();
+    }
+
+    long long nextLongLong(void)
+    {
+        return this->nextInteger<long long>();
+    }
+
+    double nextDouble(void)
+    {
+        double key = 0;
+        double fract = 0;
+        int sign = 1;
+        char ch;
+
+        do
+        {
+            ch = this->nextChar();
+
+        } while (separators.find(ch) != std::string::npos && ch != '+' && ch != '-' && !this->eof());
+
+        if (!ch)
+            return 0.0f;
+
+        if (!isdigit(ch))
+        {
+            sign = (ch == '-') ? -1 : 1;
+            ch = this->nextChar();
+        }
+
+        do
+        {
+            key = key * 10.0f + ch - '0';
+            ch = this->nextChar();
+
+        } while (isdigit(ch));
+
+        if (ch == '.')
+        {
+            ch = this->nextChar();
+            size_t lg = 0;
+
+            do
+            {
+                lg++;
+                fract = fract * 10.0f + ch - '0';
+                ch = this->nextChar();
+
+            } while (isdigit(ch));
+
+            while (lg--)
+                fract /= 10.0f;
+        }
+
+        return sign * (key + fract);
+    }
+
+    std::string nextString(void)
+    {
+        std::string str;
+        char ch;
+
+        do
+        {
+            ch = this->nextChar();
+
+        } while (separators.find(ch) != std::string::npos && !this->eof());
+
+        if (!ch)
+            return str;
+        do
+        {
+            str.push_back(ch);
+            ch = this->nextChar();
+
+        } while (separators.find(ch) == std::string::npos);
+
+        return str;
+    }
+
+    bool eof(void) const
+    {
+        return this->lengthInput == 0;
+    }
+
+private:
+
+    std::istream& stream;
+    char *buffer;
+    size_t pointer, lengthInput;
+    std::string separators;
+
+    template<class T>
+    T nextInteger(void)
+    {
+        T key = 0;
+        T sign = 1;
+        char ch;
+
+        do
+        {
+            ch = this->nextChar();
+
+        } while (separators.find(ch) != std::string::npos && ch != '+' && ch != '-' && !this->eof());
+
+        if (!isdigit(ch))
+        {
+            sign = (ch == '-') ? -1 : 1;
+            ch = this->nextChar();
+        }
+
+        do
+        {
+            key = key * 10 + ch - '0';
+            ch = this->nextChar();
+
+        } while (isdigit(ch));
+
+        return sign * key;
+    }
+};
+
+int main()
+{
+    ///ifstream in("data.in");
+    Scanner<(1 << 20)> scan(cin, " ");
+
+    int N = scan.nextInt();
+    int Q = scan.nextInt();
+
+    unique_ptr<Treap<int>*[]> sets(new Treap<int>*[N + Q + 1]);
+
+    for (int i = 1; i <= N; ++i)
+        sets[i] = new Treap<int>({i});
+
+    int number = N;
+
+    while (Q--)
+    {
+        string op = scan.nextString();
+
+        if (op[0] == 'U')
+        {
+            int x = scan.nextInt();
+            int y = scan.nextInt();
+
+            number++;
+
+            if (sets[x]->size() > sets[y]->size())
+                swap(x, y);
+
+            vector<int> v = sets[x]->print();
+
+            sets[number] = sets[y];
+
+            for (const int &p : v)
+                    sets[number]->insert(p);
+
+            sets[x]->clear();
+        }
+        else
+        {
+            int x = scan.nextInt();
+            int k = scan.nextInt();
+
+            cout << sets[x]->kth_element(k) << "\n";
+        }
+    }
+
+    return 0;
+}

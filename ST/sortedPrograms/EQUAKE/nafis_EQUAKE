@@ -1,0 +1,159 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         2.0*acos(0.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+int val[32*100001][13], lzy[32*100001], ar[8*100001];
+void build(int idx, int s, int e, int p, int v){
+    if(s == e){
+        int tmp[5];
+        int c = 0;
+        while(v > 0){
+            tmp[c++] = v%10;
+            v /= 10;
+        }
+        reverse(tmp, tmp+c);
+        REP(i, 12){
+            int b = tmp[0];
+            for(int j = 1; j < c; j++) tmp[j - 1] = tmp[j];
+            tmp[c - 1] = b;
+            int a = 0;
+            for(int j = 0; j < c; j++) a = (a * 10) + tmp[j];
+            val[idx][(i + 1) % 12] = a;
+        }
+        return;
+    }
+    int mid = (s + e) / 2;
+    if(p <= mid) build(idx * 2 + 1, s, mid, p, v);
+    else build(idx * 2 + 2, mid + 1, e, p, v);
+    REP(i, 12){
+        val[idx][i] = max(val[idx * 2 + 1][i], val[idx * 2 + 2][i]);
+    }
+}
+void update(int idx, int s, int e){
+    if(s == e){
+        lzy[idx] = 0;
+        return;
+    }
+    int tmp[13];
+    for(int i = lzy[idx]; i < 12; i++){
+        tmp[i - lzy[idx]] = val[idx * 2 + 1][i];
+    }
+    for(int i = 0; i < lzy[idx]; i++){
+        tmp[i+12-lzy[idx]] = val[idx * 2 + 1][i];
+    }
+    REP(i, 12) val[idx * 2 + 1][i] = tmp[i];
+
+    for(int i = lzy[idx]; i < 12; i++){
+        tmp[i - lzy[idx]] = val[idx * 2 + 2][i];
+    }
+    for(int i = 0; i < lzy[idx]; i++){
+        tmp[i+12-lzy[idx]] = val[idx * 2 + 2][i];
+    }
+    REP(i, 12) val[idx * 2 + 2][i] = tmp[i];
+    lzy[idx * 2 + 1] = (lzy[idx * 2 + 1] + lzy[idx]) % 12;
+    lzy[idx * 2 + 2] = (lzy[idx * 2 + 2] + lzy[idx]) % 12;
+    lzy[idx] = 0;
+}
+void insert(int idx, int s, int e, int st, int ed, int v){
+    if(lzy[idx] != 0) update(idx, s, e);
+    if(s == st && e == ed){
+        lzy[idx] = (lzy[idx] + v) % 12;
+        int tmp[13];
+        for(int i = lzy[idx]; i < 12; i++){
+            tmp[i - lzy[idx]] = val[idx][i];
+        }
+        for(int i = 0; i < lzy[idx]; i++){
+            tmp[i+12-lzy[idx]] = val[idx][i];
+        }
+        REP(i, 12) val[idx][i] = tmp[i];
+        return;
+    }
+    int mid = (s + e) / 2;
+    if(ed <= mid) insert(idx * 2 + 1, s, mid, st, ed, v);
+    else if(st > mid) insert(idx * 2 + 2, mid + 1, e, st, ed, v);
+    else {
+        insert(idx * 2 + 1, s, mid, st, mid, v);
+        insert(idx * 2 + 2, mid + 1, e, mid + 1, ed, v);
+    }
+    REP(i, 12) val[idx][i] = max(val[idx * 2 + 1][i], val[idx * 2 + 2][i]);
+}
+int query(int idx, int s, int e, int st, int ed){
+    if(lzy[idx] != 0) update(idx, s, e);
+    if(s == st && e == ed) {
+        return val[idx][0];
+    }
+    int mid = (s + e) / 2;
+    if(ed <= mid) return query(idx * 2 + 1, s, mid, st, ed);
+    else if(st > mid) return query(idx * 2 + 2, mid + 1, e, st, ed);
+    else return max(query(idx * 2 + 1, s, mid, st, mid), query(idx * 2 + 2, mid + 1, e, mid + 1, ed));
+}
+inline bool scan_d(int &ret) {
+        char c; int sgn;
+        if(c=getchar(),c==EOF) return 0;
+        while(c!='-'&&(c<'0'||c>'9')) c=getchar();
+        sgn=(c=='-')?-1:1;
+        ret=(c=='-')?0:(c-'0');
+        while(c=getchar(),c>='0'&&c<='9') ret=ret*10+(c-'0');
+        ret*=sgn;
+        return 1;
+}
+int main() {
+//    freopen("a.in", "r", stdin);
+//    freopen("a.out", "w", stdout);
+//    ios_base::sync_with_stdio(0); cin.tie(0);
+    int a,b,c,d = 0,e,f = 0,g,h = 0,x,y,z;
+    scan_d(a);
+    REP(i, a) scan_d(ar[i]);
+    REP(i, a) build(0, 0, a - 1, i, ar[i]);
+    scan_d(b);
+    REP(i, b){
+        scan_d(c);scan_d(d);scan_d(e);
+        if(c == 0){
+            scan_d(f);
+            insert(0, 0, a - 1, d, e, f);
+        } else printf("%d\n", query(0, 0, a - 1, d, e));
+    }
+}

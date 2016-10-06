@@ -1,0 +1,92 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+
+int n;
+int a[10];
+
+int fact[70];
+int factc[70];
+int factv;
+
+bool prime[1001];
+
+void primefact(int x) {
+    int xx = x;
+    for(int i=2; i*i<=x; i++) {
+        if((prime[i]) && (!(x%i))) {
+            long long jj = i;
+            int c = 1;
+            while(!(x%(jj*i))) {
+                c++;
+                jj*= i;
+            }
+            xx /= jj;
+            bool found = 0;
+            for(int j=0; j<factv; j++) {
+                if(fact[j] == i) {
+                    found = 1;
+                    factc[j]+= c;
+                }
+            }
+            if(!found) {
+                fact[factv] = i;
+                factc[factv++] = c;
+            }
+        }
+    }
+    if(xx != 1) {
+        int i = xx;
+        int c = 1;
+        long long jj = i;
+        bool found = 0;
+        for(int j=0; j<factv; j++) {
+            if(fact[j] == i) {
+                found = 1;
+                factc[j]+= c;
+            }
+        }
+        if(!found) {
+            fact[factv] = i;
+            factc[factv++] = c;
+        }
+    }
+    return;
+}
+
+int main()
+{
+    ios::sync_with_stdio(0);
+
+    for(int i=2; i<=1000; i++) {
+        if(!prime[i]) {
+            for(int j=i*i; j<=1000; j+=i) {
+                prime[j] = 1;
+            }
+        }
+    }
+    for(int i=2; i<=1000; i++) {
+        prime[i] = !prime[i];
+    }
+
+    for(cin >> T; T--;) {
+        cin >> n;
+        factv = 0;
+        for(int i=0; i<n; i++) {
+            cin >> a[i];
+            primefact(a[i]);
+        }
+
+        long long sol = 1;
+
+        for(int i=0; i<factv; i++) {
+            sol *= (factc[i]+1);
+        }
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

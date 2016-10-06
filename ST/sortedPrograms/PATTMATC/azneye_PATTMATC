@@ -1,0 +1,124 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MAX = 1 << 17;
+vector<int> pos[511];
+int pr[MAX], dp[MAX];
+
+void kmp(const string& text, const string& pat, vector<int>& res) {
+  static int pre[MAX];
+  const int N = text.size(), M = pat.size();
+  if (M > N) {
+    return;
+  }
+  pre[0] = -1;
+  for (int i = 0, j = -1; i < M; ++i) {
+    while (~j && pat[j] != pat[i]) {
+      j = pre[j];
+    }
+    pre[i + 1] = ++j;
+  }
+  for (int i = 0, j = 0; i < N; ++i) {
+    while (~j && pat[j] != text[i]) {
+      j = pre[j];
+    }
+    if (++j == M) {
+      res.push_back(i - M + 1);
+      j = pre[j];
+    }
+  }
+}
+
+void solve(int test_num) {
+  string pat, str;
+  cin >> pat >> str;
+  pat = string("*") + pat + "*";
+  const int N = str.size(), M = pat.size();
+  vector<int> star;
+  for (int i = 0; i < M; ++i) {
+    if (pat[i] == '*') {
+      star.push_back(i);
+    }
+  }
+  for (int i = 0; i < 511; ++i) {
+    pos[i].clear();
+  }
+  int L = 0;
+  static int len[511];
+  for (int i = 1; i < (int) star.size(); ++i) {
+    if (star[i - 1] + 1 < star[i]) {
+      len[L] = star[i] - star[i - 1] - 1;
+      kmp(str, pat.substr(star[i - 1] + 1, len[L]), pos[L]);
+      ++L;
+    }
+  }
+  if (L == 0) {
+    for (int i = 1; i <= N; ++i) {
+      cout << i << " ";
+    }
+    cout << endl;
+    return;
+  }
+  memset(pr, 0x3F, sizeof(pr));
+  for (int i = 0; i < (int) pos[L - 1].size(); ++i) {
+    pr[pos[L - 1][i]] = pos[L - 1][i] + len[L - 1] - 1;
+  }
+  for (int i = N - 2; i >= 0; --i) {
+    pr[i] = min(pr[i], pr[i + 1]);
+  }
+  for (int i = L - 2; i >= 0; --i) {
+    memset(dp, 0x3F, sizeof(dp));
+    for (int k = 0; k < (int) pos[i].size(); ++k) {
+      const int p = pos[i][k];
+      dp[p] = pr[p + len[i]];
+    }
+    for (int j = N - 2; j >= 0; --j) {
+      dp[j] = min(dp[j], dp[j + 1]);
+    }
+    memcpy(pr, dp, sizeof(dp));
+  }
+  for (int i = 0; i < N; ++i) {
+    if (pr[i] >= N) {
+      cout << "-1 ";
+    } else {
+      cout << (pr[i] + 1) << " ";
+    }
+  }
+  cout << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

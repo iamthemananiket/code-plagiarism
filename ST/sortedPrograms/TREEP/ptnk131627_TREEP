@@ -1,0 +1,182 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("treep.inp","r",stdin)
+#define OUTPUT freopen("treep2.out","w",stdout)
+#define FOR(i,l,r) for(auto i=l;i<=r;i++)
+#define REP(i,l,r) for(auto i=l;i<r;i++)
+#define FORD(i,l,r) for(auto i=l;i>=r;i--)
+#define REPD(i,l,r) for(auto i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7,BASE=31;
+const int N=1e5+10;
+
+int n,ha[N],rha[N],v[N][2],pa[20][N],cc[N],h[N],in[N],out[N],lv[N],cachel,cacher;
+ll pb[N],rpb[N];
+char ch[N];
+vector <int> e[N],di[N];
+ll power(ll x,ll y){
+    ll ans=1;
+    while (y){
+        if (y&1) ans=ans*x%MOD;
+        x=x*x%MOD;
+        y>>=1;
+    }
+    return ans;
+}
+void aprepare(){
+    pb[0]=1;
+    REP(i,1,N) pb[i]=pb[i-1]*BASE%MOD;
+    REP(i,0,N) rpb[i]=power(pb[i],MOD-2);
+    REP(i,1,N)
+        for(int j=i+i;j<N;j+=i) di[j].push_back(i);
+}
+void add(int *b,int x,int v){
+    while (x<=n){
+        b[x]=(b[x]+v)%MOD;
+        x+=x&-x;
+    }
+}
+int get(int *b,int x){
+    int ans=0;
+    x=in[x];
+    while (x){
+        ans=(ans+b[x])%MOD;
+        x-=x&-x;
+    }
+    return ans;
+}
+void modified(int i,int v){
+    int nv=(v-cc[i]+MOD)*pb[lv[i]]%MOD;
+    add(ha,in[i],nv);
+    add(ha,out[i]+1,MOD-nv);
+    int nrv=(v-cc[i]+MOD)*pb[N-lv[i]-1]%MOD;
+    add(rha,in[i],nrv);
+    add(rha,out[i]+1,MOD-nrv);
+    cc[i]=v;
+}
+void DFS(int x){
+    static int top=0;
+    if (x==1) top=0;
+    in[x]=++top;
+    for(auto i:e[x]){
+        int y=v[i][0]+v[i][1]-x;
+        if (y==pa[0][x]) continue;
+        pa[0][y]=x;
+        lv[y]=lv[x]+1;
+        DFS(y);
+        modified(y,ch[i]-'a');
+    }
+    out[x]=top;
+}
+int par(int x,int v){
+    for(int i=0;v;v>>=1,i++) if (v&1) x=pa[i][x];
+    return x;
+}
+int LCA(int x,int y){
+    if (lv[x]<lv[y]) swap(x,y);
+    x=par(x,lv[x]-lv[y]);
+    if (x==y) return x;
+    FORD(i,17,0) if (pa[i][x]!=pa[i][y])
+        x=pa[i][x],y=pa[i][y];
+    return pa[0][x];
+}
+void reset(){
+    memset(cc,0,sizeof(cc));
+    memset(ha,0,sizeof(ha));
+    memset(rha,0,sizeof(rha));
+    FOR(i,1,n) e[i].clear();
+}
+void prepare(){
+    scanf("%d",&n);
+    reset();
+    int x,y;
+    REP(i,1,n) {
+        scanf("%d%d %c",&x,&y,ch+i);
+        v[i][0]=x;v[i][1]=y;
+        e[x].push_back(i);
+        e[y].push_back(i);
+    }
+    DFS(1);
+    FOR(lv,1,18)
+        FOR(i,1,n) pa[lv][i]=pa[lv-1][pa[lv-1][i]];
+//    FOR(i,2,n) modified(i,cc[i]);
+//    FOR(i,1,n) cout<<in[i]<<" \n"[i==n];
+//    FOR(i,1,n) cout<<out[i]<<" \n"[i==n];
+//    FOR(i,1,n) cout<<lv[i]<<" \n"[i==n];
+//    FOR(i,1,n) cout<<cc[i]<<" \n"[i==n];
+}
+int pcal(int x,int z,int dir){
+    ///ensure x is z son
+    if (dir==1)/// bottom up
+        return (get(ha,x)-get(ha,z)+MOD)*rpb[lv[z]+1]%MOD;
+    ///top down
+    return (get(rha,x)-get(rha,z)+MOD)*rpb[N-lv[x]-1]%MOD;
+}
+int get(int x,int y,int z){
+    return (pcal(x,z,1)*pb[lv[y]-lv[z]]+pcal(y,z,0))%MOD;
+}
+bool check(int x,int y,int z,int len){
+    int llen=lv[x]-lv[z],rlen=lv[y]-lv[z];
+    int lin,rin;
+    if (len<=llen) rin=(pcal(par(x,len),z,1)*pb[rlen]+cacher)%MOD;
+    else rin=pcal(y,par(y,rlen-(len-llen)),0);
+    if (len<=rlen) lin=(cachel*pb[rlen-len]+pcal(par(y,len),z,0))%MOD;
+    else lin=pcal(x,par(x,llen-(len-rlen)),1);
+    return lin==rin;
+}
+int query(int x,int y){
+    static int top=0;
+    top++;
+    int z=LCA(x,y),alen=lv[x]+lv[y]-2*lv[z];
+//    memset(h,0,4*m1);
+    cachel=pcal(x,z,1),cacher=pcal(y,z,0);
+    int m1=di[alen].size();
+    int ans=alen;
+    FORD(i,m1-1,0) if (h[di[alen][i]]!=top&&di[alen][i]<ans){
+        bool ok=check(x,y,z,di[alen][i]);
+        if (ok){
+            ans=di[alen][i];
+            for(auto j:di[di[alen][i]]) if (h[j]!=top){
+                h[j]=top;
+                if (check(x,y,z,j)){
+                    ans=j;
+                    break;
+                }
+            }
+        }else for(auto j:di[di[alen][i]]) h[j]=top;
+    }
+    return ans;
+}
+void solve(){
+    int type,x,y,m;
+    scanf("%d",&m);
+    while (m--){
+        scanf("%d%d%d",&type,&x,&y);
+        if (type==2) {
+            scanf(" %c",ch);
+            if (pa[0][y]==x) swap(x,y);
+            modified(x,ch[0]-'a');
+            continue;
+        }
+        printf("%d\n",query(x,y));
+    }
+}
+int main(){
+    aprepare();
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        solve();
+    }
+}

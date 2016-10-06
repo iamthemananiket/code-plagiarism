@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, K;
+int A[100001];
+vector<int> factors[100001];
+vector<int> occ[100001];
+vector<int> all;
+int L[100001];
+
+int main()
+{
+    scanf("%d%d", &N, &K);
+    for(int i=K+1; i<=100000; i++)
+        for(int j=i; j<=100000; j+=i)
+            factors[j].push_back(i);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    for(int i=N; i>=1; i--)
+    {
+        occ[A[i]].push_back(i);
+        if(A[i]>K)
+            all.push_back(i);
+    }
+    long long ans=0;
+    for(int i=1; i<=N; i++)
+    {
+        L[i]=max(L[i], L[i-1]);
+        occ[A[i]].pop_back();
+        if(A[i]>K)
+            all.pop_back();
+        A[i]-=K;
+        if(A[i]>0)
+        {
+            for(auto& it: factors[A[i]]) if(!occ[it].empty())
+                L[occ[it].back()]=i;
+        }
+        else if(A[i]==0 && !all.empty())
+            L[all.back()]=i;
+        ans+=i-L[i];
+    }
+    printf("%lld\n", ans);
+    return 0;
+}

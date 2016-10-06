@@ -1,0 +1,215 @@
+#include <bits/stdc++.h>
+#include <string.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef double ld;
+typedef pair<ll, int> pll;
+
+const ll mod = 1e9 + 7;
+
+void add(ll& a, ll b)
+{
+    a += b;
+    if (a >= mod) {
+        a -= mod;
+    }
+}
+
+void mul(ll& a, ll b)
+{
+    a *= b;
+    if (a >= mod) {
+        a %= mod;
+    }
+}
+
+bool bit(int mask, int pos)
+{
+    return (mask >> pos) & 1;
+}
+
+int GCD(int a, int b)
+{
+    if (a < b) {
+        swap(a, b);
+    }
+    while (b) {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+
+int pop_count(int mask)
+{
+    int ans = 0;
+    while (mask) {
+        if (mask & 1) {
+            ++ans;
+        }
+        mask >>= 1;
+    }
+    return ans;
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //freopen("input.txt", "r", stdin);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    vector<bool> prime(28);
+    vector<int> prime_id(28);
+    prime[2] = prime[3] = prime[5] = prime[7] = prime[11] = prime[13] = prime[17] = prime[19] = prime[23] = true;
+    prime_id[2] = 0, prime_id[3] = 1, prime_id[5] = 2, prime_id[7] = 3, prime_id[11] = 4, prime_id[13] = 5, prime_id[17] = 6;
+    prime_id[19] = 7, prime_id[23] = 8;
+    int cnt_primes = 9;
+    int cnt_comp = 26 - 9;
+    vector<int> comp_id(28);
+    vector<int> comps;
+    vector<int> primes = {2, 3, 5, 7, 11, 13, 17, 19, 23};
+    int id = 0;
+    for (int i = 4; i < 28; ++i) {
+        if (!prime[i]) {
+            comp_id[i] = id++;
+            comps.pb(i);
+        }
+    }
+
+    int tt;
+    cin >> tt;
+
+    vector<vector<int> > gcd(28, vector<int>(28));
+    for (int i = 0; i < 28; ++i) {
+        for (int j = 0; j < 28; ++j) {
+            gcd[i][j] = GCD(i, j);
+        }
+    }
+
+    vector<int> pc(1 << cnt_comp);
+    for (int i = 0; i < (1 << cnt_comp); ++i) {
+        pc[i] = pop_count(i);
+    }
+
+    vector<vector<ll> > choose(100, vector<ll>(100));
+    choose[0][0] = 1;
+    for (int i = 1; i < 100; ++i) {
+        choose[i][0] = 1;
+        for (int j = 1; j < 100; ++j) {
+            choose[i][j] = choose[i - 1][j];
+            add(choose[i][j], choose[i - 1][j - 1]);
+        }
+    }
+
+    while (tt--) {
+        int n, k, l;
+        cin >> n >> k >> l;
+        vector<int> a(n);
+        for (int i = 0; i < n; ++i) {
+            cin >> a[i];
+        }
+        vector<int> diff = a;
+        sort(all(diff));
+        diff.resize(unique(all(diff)) - diff.begin());
+        int cnt_diff = sz(diff) - 1;
+        vector<vector<int> > cnt(1 << cnt_primes, vector<int>(cnt_comp + 1));
+        for (int mask = 0; mask < (1 << cnt_comp); ++mask) {
+            bool ok = true;
+            for (int i = 0; i < n; ++i) {
+                if (a[i] > 1 && !prime[a[i]] && !bit(mask, comp_id[a[i]])) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (!ok) {
+                continue;
+            }
+            int prime_mask = 0;
+            for (int i = 0; i < cnt_comp; ++i) {
+                if (!bit(mask, i)) {
+                    continue;
+                }
+                if (comps[i] > l) {
+                    ok = false;
+                    break;
+                }
+                for (int j = i + 1; j < cnt_comp; ++j) {
+                    if (!bit(mask, j)) {
+                        continue;
+                    }
+                    if (comps[j] > l) {
+                        ok = false;
+                        break;
+                    }
+                    int a = comps[i], b = comps[j];
+                    int c = gcd[a][b];
+                    if (prime[c]) {
+                        if (c > l) {
+                            ok = false;
+                            break;
+                        }
+                        prime_mask |= (1 << prime_id[c]);
+                    } else if (c > 1 && !bit(mask, comp_id[c])) {
+                        ok = false;
+                        break;
+                    }
+                }
+            }
+            if (!ok) {
+                continue;
+            }
+            for (int i = 0; i < n; ++i) {
+                if (prime[a[i]]) {
+                    prime_mask |= (1 << prime_id[a[i]]);
+                }
+            }
+            //cout << mask << " " << prime_mask << "\n";
+            ++cnt[prime_mask][pc[mask]];
+        }
+        ll ans = 0;
+        for (int mask = 0; mask < (1 << cnt_primes); ++mask) {
+            for (int nadmask = 0; nadmask < (1 << cnt_primes); ++nadmask) {
+                if ((nadmask | mask) != nadmask) {
+                    continue;
+                }
+                bool ok = true;
+                for (int i = 0; i < cnt_primes; ++i) {
+                    if (bit(nadmask, i) && primes[i] > l) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) {
+                    continue;
+                }
+                int p = pc[nadmask];
+                for (int i = 0; i <= cnt_comp; ++i) {
+                    int bits = p + i;
+                    if (bits - cnt_diff > k) {
+                        break;
+                    }
+                    ll relax = cnt[mask][i];
+                    mul(relax, choose[k + cnt_diff][bits]);
+                    /*if (relax) {
+                        cout << "FREEDOM " << k - bits + cnt_diff << "\n";
+                        cout << "!" << mask << " " << nadmask << " " << i << " " << relax << "\n";
+                    }*/
+                    add(ans, relax);
+                }
+            }
+        }
+        cout << ans << "\n";
+    }
+
+}

@@ -1,0 +1,169 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef unsigned long long ll;
+
+const int B = 1000;
+const int MAX_N = 101000;
+int is[MAX_N];
+
+struct SqrtDecomposition {
+  
+  struct Bucket {
+    int n;
+    int bound;
+    int is[B];
+    ll all;
+    ll a[B];
+    ll s[B + 1];
+    int lb[MAX_N];
+  };
+
+  int n, m;
+  Bucket bs[MAX_N / B];
+  const int *ps;
+  
+  void init(int n_, const ll *vs, const int *ps_) {
+    n = n_;
+    ps = ps_;
+    m = (n + B - 1) / B;
+    for (int i = 0; i < n; i++) {
+      is[i] = i;
+    }
+    sort(is, is + n, [&](int i, int j) {
+        return ps[i] < ps[j];
+      });
+    
+    for (int i = 0; i < m; i++) {
+      int ub = min((i + 1) * B, n), lb = i * B;
+      bs[i].n = ub - lb;
+      
+      for (int j = lb; j < ub; j++) {
+        bs[i].is[j - lb] = is[j];
+      }
+      bs[i].bound = ps[bs[i].is[0]];
+      
+      sort(bs[i].is, bs[i].is + bs[i].n);
+      for (int j = 0; j < bs[i].n; j++) {
+        bs[i].a[j] = vs[ps[bs[i].is[j]]];
+      }
+      
+      bs[i].s[0] = 0;
+      for (int j = 0; j < bs[i].n; j++) {
+        bs[i].s[j + 1] = bs[i].s[j] + bs[i].a[j];
+      }
+      
+      int p = 0;
+      for (int j = 0; j < n; j++) {
+        while (p < bs[i].n && bs[i].is[p] < j) p++;
+        bs[i].lb[j] = p;
+      }
+      bs[i].all = 0;
+    }
+  }
+
+  void add(int k, ll v) {
+    int ub = m, lb = -1;
+    while (ub - lb > 1) {
+      int mid = (ub + lb) / 2;
+      if (bs[mid].bound >= k) {
+        ub = mid;
+      } else {
+        lb = mid;
+      }
+    }
+    int bi = lb;
+    if (lb >= 0) {
+      for (int j = 0; j < bs[bi].n; j++) {
+        if (ps[bs[bi].is[j]] >= k) {
+          bs[bi].a[j] += v;
+        }
+      }
+      bs[bi].s[0] = 0;
+      for (int j = 0; j < bs[bi].n; j++) {
+        bs[bi].s[j + 1] = bs[bi].s[j] + bs[bi].a[j];
+      }
+    }
+    for (int i = bi + 1; i < m; i++) {
+      bs[i].all += v;
+    }
+  }
+
+  ll query(int l, int r) {
+    ll s = 0;
+    for (int i = 0; i < m; i++) {
+      int li = bs[i].lb[l], ri = bs[i].lb[r];
+      if (ri < bs[i].n && bs[i].is[ri] == r) ri++;
+      s += bs[i].s[ri] - bs[i].s[li];
+      s += bs[i].all * (ri - li);
+    }
+    return s;
+  }
+};
+
+int n;
+int a[MAX_N];
+ll s[MAX_N];
+int ls[MAX_N], rs[MAX_N];
+SqrtDecomposition lsd, rsd;
+
+int main() {
+  scanf("%d", &n);
+  for (int i = 0; i < n; i++) {
+    scanf("%d", &a[i]);
+    s[i + 1] = s[i] + a[i];
+  }
+  for (int i = 0; i < n; i++) {
+    scanf("%d%d", &ls[i], &rs[i]);
+    ls[i]--;
+  }
+  lsd.init(n, s, ls);
+  rsd.init(n, s, rs);
+  
+  int Q;
+  scanf("%d", &Q);
+  while (Q--) {
+    int t;
+    scanf("%d", &t);
+    if (t == 1) {
+      int x, y;
+      scanf("%d%d", &x, &y);
+      int d = y - a[x - 1];
+      a[x - 1] = y;
+      lsd.add(x, d);
+      rsd.add(x, d);
+    } else if (t == 2) {
+      int x, y;
+      scanf("%d%d", &x, &y);
+      x--, y--;
+      printf("%llu\n", rsd.query(x, y) - lsd.query(x, y));
+    }
+  }
+
+}

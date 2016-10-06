@@ -1,0 +1,174 @@
+#include <iostream>
+#include <vector>
+#include <math.h>
+#include <algorithm>
+#include <set>
+#include <queue>
+#include <memory.h>
+
+using namespace std;
+
+const int N = 500000;
+int mas[N+1];
+
+// ATTENTION "PERSISTENT DATA STRUCTURES!!"
+
+// ============ BOR for XOR ============
+struct node {
+    int cnt;
+    node * sons[2];
+    
+    node() {
+        cnt = 1;
+        sons[0] = sons[1] = nullptr;
+    }
+};
+node * add(node * bor, int x, int bit = 20) {
+    if (bit < 0) {
+        node * tmp = new node();
+        if (bor != nullptr)
+            tmp -> cnt = bor -> cnt + 1;
+        return tmp;
+    }
+    node * tmp = new node();
+    if (bor != nullptr) {
+        tmp -> cnt = bor -> cnt + 1;
+        tmp -> sons[0] = bor -> sons[0];
+        tmp -> sons[1] = bor -> sons[1];
+        
+        tmp -> sons[(x >> bit) % 2] = add(bor -> sons[(x >> bit) % 2], x, bit-1);
+    }
+    else
+        tmp -> sons[(x >> bit) % 2] = add(nullptr, x, bit-1);
+    
+    return tmp;
+}
+node * bors[N+1];
+int find(node * l, node * r, int x, int bit = 20) {
+    if (bit < 0) return 0;
+    
+    int current_bit = (x >> bit) % 2;
+    int good = 1 - current_bit;
+    
+    
+    if (r -> sons[good] != nullptr) {
+        if (l != nullptr && l -> sons[good] != nullptr) {
+            if (r -> sons[good] -> cnt != l -> sons[good] -> cnt)
+                return (good << bit) + find(l -> sons[good], r -> sons[good], x, bit - 1);
+        }
+        else
+            return (good << bit) + find(nullptr, r -> sons[good], x, bit - 1);
+    }
+    
+    if (l == nullptr)
+        return (current_bit << bit) + find(nullptr, r -> sons[current_bit], x, bit - 1);
+    else
+        return (current_bit << bit) + find(l -> sons[current_bit], r -> sons[current_bit], x, bit - 1);
+}
+
+// ============ SEGMENT TREE ============
+struct tnode {
+    int sum;
+    tnode *l, *r;
+    
+    tnode () {
+        sum = 0;
+        l = r = nullptr;
+    }
+};
+tnode * trees[N+1];
+tnode * build(int l, int r) {
+    tnode * tmp = new tnode();
+    if (l == r)
+        return tmp;
+    int md = (l + r) >> 1;
+    tmp -> l = build(l, md);
+    tmp -> r = build(md + 1, r);
+    return tmp;
+}
+tnode * upd(tnode * t, int l, int r, int pos) {
+    tnode * tmp = new tnode();
+    if (l == r) {
+        tmp -> sum = t -> sum + 1;
+        return tmp;
+    }
+    int md = (l + r) >> 1;
+    
+    if (pos <= md) {
+        tmp -> l = upd(t -> l, l, md, pos);
+        tmp -> r = t -> r;
+    }
+    else {
+        tmp -> l = t -> l;
+        tmp -> r = upd(t -> r, md+1, r, pos);
+    }
+    
+    if (tmp -> l != nullptr)
+        tmp -> sum += tmp -> l -> sum;
+    if (tmp -> r != nullptr)
+        tmp -> sum += tmp -> r -> sum;
+    
+    return tmp;
+}
+int get(tnode * t, int l, int r, int tl, int tr) {
+    if (l == tl && r == tr)
+        return t -> sum;
+    int md = (l + r) >> 1;
+    
+    if (tr <= md)
+        return get(t -> l, l, md, tl, tr);
+    if (tl > md)
+        return get(t -> r, md + 1, r, tl, tr);
+    return get(t -> l, l, md, tl, md) +
+            get(t -> r, md + 1, r, md + 1, tr);
+}
+int less_than_or_equal_to_x(tnode * l, tnode * r, int x) {
+    return get(r, 1, N, 1, x) - get(l, 1, N, 1, x);
+}
+int cnt_left, md;
+int get2(tnode * t1, tnode * t2, int l, int r, int k) {
+    if (l == r) return l;
+    cnt_left = t2->l->sum - t1->l->sum;
+    md = (l + r) >> 1;
+    if (cnt_left >= k)
+        return get2(t1 -> l, t2 -> l, l, md, k);
+    
+    return get2(t1 -> r, t2 -> r, md + 1, r, k - cnt_left);
+}
+
+int main() {
+    
+    bors[0] = nullptr;
+    trees[0] = build(1, N);
+    int m, type, x, k, l, r, pos = 0;
+    scanf("%d", &m);
+    
+    while(m --> 0) {
+        scanf("%d", &type);
+        if (type == 0) { // add one element
+            scanf("%d", &x);
+            pos++;
+            mas[pos] = x;
+            bors[pos] = add(bors[pos-1], x);
+            trees[pos] = upd(trees[pos-1], 1, N, x);
+        }
+        else if (type == 1) { // xor query
+            scanf("%d %d %d", &l, &r, &x);
+            printf("%d\n", find(bors[l-1], bors[r], x));
+        }
+        else if (type == 2) { // del elements
+            scanf("%d", &k);
+            pos -= k;
+        }
+        else if (type == 3) { // the number of integers less than or equal to x.
+            scanf("%d %d %d", &l, &r, &x);
+            printf("%d\n", less_than_or_equal_to_x(trees[l-1], trees[r], x));
+        }
+        else { // On the interval L..R, find the kth smallest integer (kth order statistic).
+            scanf("%d %d %d", &l, &r, &k);
+            printf("%d\n", get2(trees[l-1], trees[r], 1, N, k));
+        }
+    }
+    
+    return 0;
+}

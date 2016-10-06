@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef double dd;
+
+struct Plant {
+  int hei, gro;
+  
+  ll eval(ll t) const {
+    return hei + gro * t;
+  }
+};
+
+typedef pair<ll,ll> Interval;
+const ll INF = 1LL << 60;
+
+Interval intersect(const Interval& a, const Interval& b) {
+  return {max(a.first, b.first), min(a.second, b.second)};
+}
+
+Interval calc_less(const Plant& a, const Plant& b) {
+  if (a.gro == b.gro) {
+    if (a.hei < b.hei) return {0, INF};
+    else return {0, -1};
+  } else {
+    const dd isect = (dd)(a.hei - b.hei) / (b.gro - a.gro);
+    Interval lef = {-INF, (ll)floor(isect + 1e-9)};
+    Interval rig = {(ll)ceil(isect - 1e-9), INF};
+    if (a.eval(lef.second) == b.eval(lef.second)) {
+      --lef.second;
+    }
+    if (a.eval(rig.first) == b.eval(rig.first)) {
+      ++rig.first;
+    }
+    if (a.eval(lef.second) < b.eval(lef.second)) {
+      return lef;
+    } else {
+      return rig;
+    }
+  }
+}
+
+Interval calc(const vector<Plant>& plants, bool les) {
+  Interval res(0, INF);
+  for(int i = 0; i + 1 < (int) plants.size(); ++i) {
+    const auto& a = plants[i], b = plants[i + 1];
+    Interval now;
+    if (les) {
+      now = calc_less(a, b);
+    } else {
+      now = calc_less(b, a);
+    }
+    res = intersect(res, now);
+    les ^= true;
+  }
+  return res;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while(T-- > 0) {
+    int N;
+    cin >> N;
+    vector<Plant> plants(N);
+    for(auto& p : plants)
+      cin >> p.hei >> p.gro;
+    auto fst = calc(plants, true);
+    auto snd = calc(plants, false);
+    if (fst > snd)
+      swap(fst, snd);
+    vector<Interval> res;
+    for(const auto& interval : {fst, snd}) {
+      if (interval.first > interval.second)
+        continue;
+      if (res.empty() || interval.first > res.back().second+1) {
+        res.push_back(interval);
+      } else {
+        res.back().second = max(res.back().second, interval.second);
+      }
+    }
+    cout << res.size() << '\n';
+    for(const auto& in : res) {
+      cout << in.first << ' ';
+      if (in.second == INF) cout << "Inf";
+      else cout << in.second;
+      cout << '\n';
+    }
+  }
+  return 0;
+}

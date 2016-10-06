@@ -1,0 +1,74 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+typedef pair<int, char> i_c;
+struct edge { int v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 4;
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		string s; cin >> s;
+		int n = s.length();
+		vector<ull> a;
+		vector<bool> b;
+		int i = 0;
+		for (;;) {
+			ull x = 0;
+			for (; i < n && s[i] >= '0' && s[i] <= '9'; i++)
+				x = x * 10 + s[i] - '0';
+			a.push_back(x);
+			if (i == n) break;
+			b.push_back(s[i++] == '+');
+		}
+		int m = a.size();
+		vector<vector<ull> > maxi(m + 1, vector<ull>(m + 1, -1)), mini = maxi;
+		for (int i = 0; i + 1 <= m; i++)
+			maxi[i][i + 1] = mini[i][i + 1] = a[i];
+		for (int l = 2; l <= m; l++)
+			for (int i = 0; i + l <= m; i++) {
+				ull& ma = maxi[i][i + l];
+				for (int j = i + 1; j <= i + l - 1; j++) {
+					ull& x = maxi[i][j], y = maxi[j][i + l];
+					ull z = (b[j - 1] ? x + y : x * y);
+					if (ma == -1) ma = z;
+					else ma = max(ma, z);
+				}
+				ull& mi = mini[i][i + l];
+				for (int j = i + 1; j <= i + l - 1; j++) {
+					ull& x = mini[i][j], y = mini[j][i + l];
+					ull z = (b[j - 1] ? x + y : x * y);
+					if (mi == -1) mi = z;
+					else mi = min(mi, z);
+				}
+			}
+		cout << maxi[0][m] - mini[0][m] << endl;
+	}
+}

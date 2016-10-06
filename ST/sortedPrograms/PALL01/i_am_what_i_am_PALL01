@@ -1,0 +1,23 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		string s;
+		cin>>s;
+		int i,j;
+		for(i=0,j=(int)s.size()-1;i<j;i++,j--)
+		 {
+		 	if(s[i]!=s[j]) break;
+		 }
+		 if(i<j)
+		  puts("losses");
+		else
+		 puts("wins");
+	}
+	
+}

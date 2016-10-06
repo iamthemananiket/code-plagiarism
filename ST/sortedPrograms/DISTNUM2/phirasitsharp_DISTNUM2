@@ -1,0 +1,158 @@
+#include <iostream>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <vector>
+
+using namespace std;
+
+const int N = 100010;
+
+class SegTree2 {
+public:
+	SegTree2 *left, *right;
+	int l, r;
+	int sum;
+	SegTree2(int _l = 0, int _r = 0) : l(_l), r(_r), sum(0) {}
+	SegTree2(SegTree2 *node) { *this = *node; }
+};
+
+class SegTree {
+public:
+	SegTree *left, *right;
+	int l, r;
+	SegTree2 *head;
+	SegTree(int _l = 0, int _r = 0) : l(_l), r(_r) {}
+	SegTree(SegTree *node) { *this = *node; }
+};
+
+map<int, vector<int> > value_pos;
+vector<int> key_list;
+
+SegTree2 *initTree;
+SegTree *head[N];
+int A[N];
+int n, q;
+
+SegTree2* initSegTree2(int l, int r) {
+	SegTree2* node = new SegTree2(l, r);
+	if(l < r) {
+		int mid = (l + r) / 2;
+		node->left = initSegTree2(l, mid);
+		node->right = initSegTree2(mid+1, r);
+	}
+	return node;
+}
+SegTree* initSegTree(int l, int r) {
+	SegTree* node = new SegTree(l, r);
+	node->head = initTree;
+	if(l < r) {
+		int mid = (l + r) / 2;
+		node->left = initSegTree(l, mid);
+		node->right = initSegTree(mid+1, r);
+	}
+	return node;
+}
+SegTree2* update(SegTree2 *node, int l) {
+	if(node->r < l or l < node->l) return node;
+	SegTree2 *new_node = new SegTree2(node);
+	if(new_node->l < new_node->r) {
+		new_node->left = update(new_node->left, l);
+		new_node->right = update(new_node->right, l);
+	}
+	new_node->sum = new_node->sum + 1;
+	return new_node;
+}
+SegTree* update(SegTree *node, int l, int r) {
+	if(node->r < r or r < node->l) return node;
+	SegTree *new_node = new SegTree(node);
+	if(new_node->l < new_node->r) {
+		new_node->left = update(new_node->left, l, r);
+		new_node->right = update(new_node->right, l, r);
+	}
+	new_node->head = update(new_node->head, l);
+	return new_node;
+}
+int query(SegTree2 *node, int l) {
+	if(l < node->l) return 0;
+	if(node->r <= l) return node->sum;
+	return query(node->left, l) + query(node->right, l);
+}
+int query(SegTree *node, int l, int r) {
+	if(node->r < r) return 0;
+	if(r <= node->l) return query(node->head, l);
+	return query(node->left, l, r) + query(node->right, l, r);
+}
+
+int main() {
+
+	ios::sync_with_stdio(false);
+	
+	cin >> n >> q;
+	for(int i = 1;i <= n;i++) {
+		cin >> A[i];
+	}
+
+	for(int i = 1;i <= n;i++) {
+		value_pos[A[i]].push_back(i);
+	}
+
+	initTree = initSegTree2(1, n);
+	head[0] = initSegTree(1, n);
+	key_list.push_back(0);
+
+	for(auto value : value_pos) {
+
+		int pos = (int) key_list.size();
+		key_list.push_back(value.first);
+
+		head[pos] = head[pos-1];
+
+		auto& vec = value.second;
+		for(int i = 0;i+1 < vec.size();i++) {
+			if(vec[i]+1 < vec[i+1]) {
+				head[pos] = update(head[pos], vec[i]+1, vec[i+1]-1);
+				// cerr << "update " << value.first << " : " << vec[i]+1 << " " << vec[i+1]-1 << endl;
+			}
+		}
+		if(1 < vec[0]) {
+			head[pos] = update(head[pos], 1, vec[0]-1);
+			// cerr << "update " << value.first << " : " << 1 << " " << vec[0]-1 << endl;
+		}
+		if(vec.back() < n) {
+			head[pos] = update(head[pos], vec.back()+1, n);
+			// cerr << "update " << value.first << " : " << vec.back()+1 << " " << n << endl;
+		}
+	}
+
+	long long last_ans = 0ll;
+
+	for(int i = 0;i < q;i++) {
+		
+		int a, b, c, d, k;
+		cin >> a >> b >> c >> d >> k;
+
+		int l = (a * max(last_ans, 0ll) + b) % n + 1;
+		int r = (c * max(last_ans, 0ll) + d) % n + 1;
+		if(l > r) swap(l, r);
+
+		if((key_list.size()-1) - query(head[key_list.size()-1], l, r) < k) {
+			cout << (last_ans = -1ll) << "\n";
+		} else {
+
+			int lo = 1, hi = key_list.size() - 1;
+			while(lo < hi) {
+				int mid = (lo + hi) / 2;
+				if(mid - query(head[mid], l, r) >= k) {
+					hi = mid;
+				} else {
+					lo = mid + 1;
+				}
+			}
+
+			cout << (last_ans = key_list[lo]) << "\n";
+		}
+	}
+
+	return 0;
+}

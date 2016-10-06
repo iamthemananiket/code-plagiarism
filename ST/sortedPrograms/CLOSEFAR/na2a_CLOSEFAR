@@ -1,0 +1,269 @@
+/* GG */
+
+#include <map>
+#include <set>
+#include <list>
+#include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <string>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <climits>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <numeric>
+#include <sstream>
+#include <cassert>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+//#include <unordered_set>
+//#include <unordered_map>
+
+#define f first
+#define s second
+
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<int, int> pii;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int N = (int) 2e5 + 7;
+const int MOD = (int) 1e9 + 7;
+
+const int SIZE = 390;
+
+struct qwerty {
+  char type;
+  int l, r, id;
+  friend bool operator <(qwerty a, qwerty b) {
+    if (a.l / SIZE != b.l / SIZE)
+      return a.l / SIZE < b.l / SIZE;
+    return (a.r < b.r) ^ (a.l / SIZE % 2);
+  }
+};
+
+int n;
+int a[N];
+int b[N];
+
+vector<int> val;
+
+vector<int> g[N];
+
+char type[N];
+int from[N];
+int to[N];
+
+int euler[N];
+int sz;
+int tin[N];
+int tout[N];
+int t;
+int m;
+int ans[N];
+int up[N][20];
+int mx[N][20];
+int mn[N][20];
+int depth[N];
+
+qwerty query[N];
+
+void dfs(int v, int pr = 0) {
+  tin[v] = ++t;
+  euler[t] = v;
+  depth[v] = depth[pr] + 1;
+  up[v][0] = pr ? pr : v;
+  mx[v][0] = a[v];
+  mn[v][0] = a[v];
+  for (int i = 1; i < 20; i++) {
+    up[v][i] = up[up[v][i - 1]][i - 1];
+    mn[v][i] = min(mn[v][i - 1], mn[up[v][i - 1]][i - 1]);
+    mx[v][i] = max(mx[v][i - 1], mx[up[v][i - 1]][i - 1]);
+  }
+  for (auto to : g[v])
+    if (to != pr)
+      dfs(to, v);
+  tout[v] = ++t;
+  euler[t] = v;
+}
+
+int color[N];
+multiset<int> d;
+set<int> s;
+
+struct node {
+  int first, last, res;
+  node () {
+    first = MOD;
+    last = -MOD;
+    res = MOD;
+  }
+  node (int x, int y, int z) {
+    first = x;
+    last = y;
+    res = z;
+  }
+};
+
+node combine(node a, node b) {
+  node c;
+  c.first = min(a.first, b.first);
+  c.last = max(a.last, b.last);
+  c.res = min(c.res, b.first - a.last);
+  c.res = min(c.res, a.res);
+  c.res = min(c.res, b.res);
+  return c;
+}
+
+node tree[4 * N];
+
+inline void inc(int pos, int v = 1, int tl = 1, int tr = (int) val.size()) {
+  if (tl == tr) {
+    tree[v] = node(val[tl - 1], val[tl - 1], MOD);
+  } else {
+    int mid = (tl + tr) / 2;
+    if (pos <= mid) inc(pos, v + v, tl, mid);
+    else inc(pos, v + v + 1, mid + 1, tr);
+    tree[v] = combine(tree[v + v], tree[v + v + 1]);
+  }
+}
+
+inline void exc(int pos, int v = 1, int tl = 1, int tr = (int) val.size()) {
+  if (tl == tr) {
+    tree[v] = node(MOD, -MOD, MOD);
+  } else {
+    int mid = (tl + tr) / 2;
+    if (pos <= mid) exc(pos, v + v, tl, mid);
+    else exc(pos, v + v + 1, mid + 1, tr);
+    tree[v] = combine(tree[v + v], tree[v + v + 1]);
+  }
+}
+
+inline void add(int x) {
+  x = euler[x];
+  color[x] ^= 1;
+  if (color[x]) {
+    inc(a[x]);
+  } else {
+    exc(a[x]);
+  }
+}
+
+inline bool anc(int x, int y) {
+  return tin[x] <= tin[y] && tout[y] <= tout[x];
+}
+
+inline int getLca(int x, int y) {
+  if (anc(x, y)) return x;
+  if (anc(y, x)) return y;
+  for (int i = 19; i >= 0; i--) {
+    if (!anc(up[x][i], y)) x = up[x][i];
+  }
+  return up[x][0];
+}
+
+int gmx(int x, int y) {
+  int len = depth[x] - depth[y] + 1;
+  int res = 0;
+  for (int i = 0; i < 20; i++)
+    if ((len >> i) & 1)
+      res = max(res, mx[x][i]), x = up[x][i];
+  return res;
+}
+
+int gmn(int x, int y) {
+  int len = depth[x] - depth[y] + 1;
+  int res = MOD;
+  for (int i = 0; i < 20; i++)
+    if ((len >> i) & 1)
+      res = min(res, mn[x][i]), x = up[x][i];
+  return res;
+}
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  //freopen("out", "w", stdout);
+  #endif
+
+  scanf("%d", &n);
+  for (int i = 1; i <= n; i++) {
+    scanf("%d", &a[i]);
+    val.pb(a[i]);
+  }
+  sort(val.begin(), val.end());
+  for (int i = 1; i <= n; i++) {
+    b[i] = a[i];
+    a[i] = upper_bound(val.begin(), val.end(), a[i]) - val.begin();
+  }
+  for (int i = 1; i < n; i++) {
+    int u, v;
+    scanf("%d%d", &u, &v);
+    g[u].pb(v);
+    g[v].pb(u);
+  }
+  dfs(1);
+  //for (int i = 1; i <= t; i++)
+  //  cout << euler[i] << ' ';
+  //cout << endl;
+
+  scanf("%d", &m);
+  bool all_f = 1;
+  for (int i = 1; i <= m; i++) {
+    int x, y;
+    scanf("\n%c %d %d", &query[i].type, &x, &y);
+    if (anc(x, y)) {
+      query[i].l = tin[x];
+      query[i].r = tin[y];
+    } else if (anc(y, x)) {
+      query[i].l = tin[y];
+      query[i].r = tin[x];
+    } else {
+      if (tout[x] > tin[y]) swap(x, y);
+      query[i].l = tout[x];
+      query[i].r = tin[y];
+    }
+    all_f &= (query[i].type == 'F');
+    query[i].id = i;
+  }
+  sort(query + 1, query + m + 1);
+  int l = 1, r = 0;
+  for (int i = 1; i <= m; i++) {
+    while (r < query[i].r) add(++r);
+    while (l > query[i].l) add(--l);
+    while (r > query[i].r) add(r--);
+    while (l < query[i].l) add(l++);
+    
+    int x = euler[query[i].l];
+    int y = euler[query[i].r];
+    int z = 0;
+    if (!anc(x, y) && !anc(y, x)) {
+      z = getLca(x, y);
+    }
+    if (z) add(tin[z]);
+    if (query[i].type == 'F')
+      ans[query[i].id] = tree[1].last - tree[1].first;
+    else
+      ans[query[i].id] = tree[1].res;
+    if (z) add(tin[z]);
+  }
+  for (int i = 1; i <= m; i++)
+    printf("%d\n", ans[i]);
+
+  return 0;
+}

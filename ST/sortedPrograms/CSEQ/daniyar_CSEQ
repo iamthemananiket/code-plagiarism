@@ -1,0 +1,95 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 1010101;
+
+const int mod = 1000003;
+
+int f[maxn], inv[maxn];
+
+int bp(int a, int b)
+{
+	int res = 1;
+	while (b)
+	{
+		if (b & 1) 
+			res = (res * 1ll * a) % mod, b--;
+		a = (a * 1ll * a) % mod, b >>= 1;
+	}
+	return res;
+}
+
+int N[maxn];
+
+int K[maxn];
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	f[0] = inv[0] = 1;
+	for (int i = 1; i < mod; i++)
+	{
+		f[i] = (f[i - 1] * 1ll * i) % mod;
+		inv[i] = bp(f[i], mod - 2);
+	}
+	int len;
+	int T, n, l, r, k;
+	cin >> T;
+	while (T--)
+	{
+		scanf("%d%d%d", &n, &l, &r);
+		k = r - l + 1;
+		n += k;
+		len = 0;
+		while (n || k)
+		{
+			N[len] = n % mod;
+			K[len] = k % mod;
+			len++;
+			n /= mod;
+			k /= mod;
+		}
+		int ans = 1, cur;
+		for (int i = 0; i < len; i++)
+		{
+			if (K[i] > N[i])
+			{
+				ans = 0;
+				break;
+			}
+			cur = f[N[i]];
+			cur = (cur * 1ll * inv[K[i]]) % mod;
+			cur = (cur * 1ll * inv[N[i] - K[i]]) % mod;
+			ans = (ans * 1ll * cur) % mod;
+		}
+		ans--;
+		if (ans < 0)
+			ans += mod;
+		printf("%d\n", ans);
+	}
+	return 0;
+}

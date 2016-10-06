@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 500100
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+bool use[MAXN];
+pii E[MAXN];
+vector<ll> P[MAXN];
+pii Q[MAXN];
+ll A[MAXN];
+ll Z[MAXN];
+ll S[4*MAXN];
+vector<ll> ans;
+int n;
+const ll inf = 1e13;
+
+void update(int x,int l,int r,int p,ll v) {
+	if (l==r) { S[x] += v; return; }
+	int mid = (l+r)/2;
+	if (p <= mid) { update(x*2,l,mid,p,v); }
+	else { update(x*2 + 1,mid+1,r,p,v); }
+	S[x] = MAX(S[x*2], S[x*2 + 1]);
+}
+
+ll query(int x,int l,int r,int i,int j) {
+	if ((i<=l) and (r<=j)) return S[x];
+	if ((j < l) or (r < i)) return -inf;
+	int mid = (l+r)/2;
+	ll a = query(x*2,l,mid,i,j); ll b = query(x*2 +1,mid+1,r,i,j);
+	return MAX(a,b);
+}
+
+
+int findS(int x) {
+	if (A[x] < 0) return x;
+	return (A[x] = findS(A[x]));
+}
+
+void unionS(int x,int y) {
+	x = findS(x); y = findS(y);
+	//cout<<x<<" ^^ "<<y<<endl;
+	if (x==y) return;
+	//cout<<x<<" :? "<<y<<endl;
+	ll v = query(1,1,n,y,y);
+	//cout<<" ==> "<<v<<endl;
+	update(1,1,n,x,v);
+	update(1,1,n,y,-inf);
+	A[y] = x;
+}
+
+int main() {
+	int m,q; s(n); s(m); s(q);
+	repe(i,0,4*MAXN) S[i] = 0;
+	rep(i,1,n) {
+		P[i].clear();
+		ll x; sl(x); P[i].pb(x);
+		A[i] = -1;
+	}
+	rep(i,1,m) {
+		s(E[i].first); s(E[i].second); use[i] =  true;
+	}
+
+	rep(i,1,q) {
+		char c; scanf("%c",&c);
+		while ((c!='P') and (c!='D')) {
+			scanf("%c",&c);
+		}
+		Q[i].first = c;
+		s(Q[i].second); ll x;
+		if (c == 'P') {
+			sl(x); P[Q[i].second].pb(x);
+		} else {
+			use[Q[i].second] = false;
+		}
+	}
+	rep(i,1,n) {
+		update(1,1,n,i,P[i].back());
+	}
+	rep(i,1,m) {
+		if (use[i]) {
+			unionS(E[i].first,E[i].second);
+		}
+	}
+	ans.pb(S[1]);
+	drep(i,q,2) {
+		if (Q[i].first == 'P') {
+			int x = Q[i].second;
+			ll last = P[x].back();
+			P[x].pop_back();
+			ll now = P[x].back();
+			update(1,1,n,findS(x),now-last);
+		} else {
+			//cout<<"Hello"<<endl;
+			int x = Q[i].second;
+			//cout<<" ~~ "<<E[x].first<<" ; "<<E[x].second<<endl;
+			unionS(E[x].first,E[x].second);
+		}
+		ans.pb(S[1]);
+		/*rep(i,1,n) {
+			cout<<i<<" : "<<query(1,1,n,i,i)<<endl;
+		}*/
+	}
+	
+	drep(j,ans.size()-1,0) {
+		prl(ans[j]); endc;
+	}
+
+	return 0;
+}

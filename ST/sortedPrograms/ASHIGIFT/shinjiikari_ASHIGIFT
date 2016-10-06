@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+
+inline long long int fast_input(void)
+{
+	char t;
+	long long int x=0;
+	long long int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void fast_output(long long int x)
+{
+	char a[20];
+	long long int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+long long int t,x,y,b,c,p,q,r,i,pop,lefty;
+
+long long int leftpop(long long int curr, map <long long int, pair <long long int, pair<long long int, long long int > > > ispos)
+{
+    lefty=pop;
+    map <long long int, pair <long long int, pair<long long int, long long int > > > :: iterator ii,e=ispos.end();
+    for(ii=ispos.begin();ii!=e;ii++)
+    {
+        if ((*ii).second.first==0)
+        {
+            curr-=(*ii).second.second.first;
+            lefty-=(*ii).second.second.first;
+        }
+        else if (curr>=(*ii).second.second.first) curr=curr+(*ii).second.second.second;
+        if (curr<=0||curr>=lefty) break;
+    }
+    return curr;
+}
+
+long long int BinarySearcher(map <long long int, pair <long long int, pair<long long int, long long int > > > ispos)
+{
+    long long int l=1,r=pop,mid,a,b;
+    while(l<r)
+    {
+        mid=(l+r)/2;
+        a=leftpop(mid,ispos);
+        if (a<=0) l=mid+1;
+        else r=mid;
+    }
+    return mid;
+}
+
+int main()
+{
+t=fast_input();
+while(t--)
+{
+    pop=1;
+    map <long long int, pair <long long int, pair<long long int, long long int > > > ispos;
+    x=fast_input();
+    b=fast_input();
+    for(i=0;i<b;i++)
+    {
+        p=fast_input();
+        y=fast_input();
+        pop+=y;
+        ispos[p]=make_pair(0,make_pair(y,0));
+    }
+    c=fast_input();
+    for(i=0;i<c;i++)
+    {
+        p=fast_input();
+        q=fast_input();
+        r=fast_input();
+        ispos[p]=make_pair(1,make_pair(q,r));
+    }
+    if (c!=0) fast_output(BinarySearcher(ispos));
+    else fast_output(pop);
+}
+return 0;
+}

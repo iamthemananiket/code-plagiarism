@@ -1,0 +1,152 @@
+/*
+__________           .___                       
+\______   \ ____   __| _/_  _  _______    ____  
+ |       _// __ \ / __ |\ \/ \/ /\__  \  /    \ 
+ |    |   \  ___// /_/ | \     /  / __ \|   |  \
+ |____|_  /\___  >____ |  \/\_/  (____  /___|  /
+        \/     \/     \/              \/     \/ 
+        
+handle	: rubabredwan (Codeforces/CodeChef/HackerRank)
+task 	: ...............
+
+*/
+
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(z,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			100050
+#define INF			1e9
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+int gcd ( int a, int b ) {
+    if ( b == 0 ) return a;
+    return gcd ( b, a % b );
+}
+int ext_gcd ( int A, int B, int *X, int *Y ){
+    int x2, y2, x1, y1, x, y, r2, r1, q, r;
+    x2 = 1; y2 = 0;
+    x1 = 0; y1 = 1;
+    for (r2 = A, r1 = B; r1 != 0; r2 = r1, r1 = r, x2 = x1, y2 = y1, x1 = x, y1 = y ) {
+        q = r2 / r1;
+        r = r2 % r1;
+        x = x2 - (q * x1);
+        y = y2 - (q * y1);
+    }
+    *X = x2; *Y = y2;
+    return r2;
+}
+bool linearDiophantine ( int A, int B, int C, int *x, int *y ) {
+    int g = gcd ( A, B );
+    if ( C % g != 0 ) return false; //No Solution
+ 
+    int a = A / g, b = B / g, c = C / g;
+    ext_gcd( a, b, x, y ); //Solve ax + by = 1
+ 
+    if ( g < 0 ) { //Make Sure gcd(a,b) = 1
+        a *= -1; b *= -1; c *= -1;
+    }
+ 
+    *x *= c; *y *= c; //ax + by = c
+    return true; //Solution Exists
+}
+
+int arr[100050], en;
+int dp[15][10001], val[15], cnt[15];
+map<int, int>mp;
+
+int recur(int at, int need){
+	if(at == en){
+		if(need == 0) return 1;
+		else return 0;
+	}
+	if(dp[at][need] != -1) return dp[at][need];
+	int ret = 0;
+	for(int i=0;i<=cnt[at] && val[at] * i <= need; i++){
+		ret = max(ret,  recur(at + 1, need - (val[at] * i))  );
+	}
+	return dp[at][need] = ret;
+}
+
+int main()
+{
+	int n, q, tp, x, y, bal;
+	scanf("%d %d", &n, &q);
+	REPN(i, n) scanf("%d", &arr[i]);
+	while(q--){
+		scanf("%d", &tp);
+		if(tp == 1){
+			scanf("%d %d", &x, &y);
+			arr[x] = y;
+		}
+		else if(tp == 2){
+			scanf("%d %d", &x, &y);
+			for(int i=x, j=y;i<j;i++,j--) swap(arr[i], arr[j]);
+		}
+		else if(tp == 3){
+			scanf("%d %d %d", &x, &y, &bal);
+			int idx = 1;
+			mp.clear();
+			SET(val, 0); SET(cnt, 0);
+			for(int i=x;i<=y;i++){
+				if(!mp[arr[i]]){ 
+					mp[arr[i]] = idx;
+					val[idx] = arr[i], cnt[idx]++;
+					idx++;
+				}
+				else cnt[mp[arr[i]]]++;
+			}
+			en = idx;
+			if(idx == 3){
+			   	int abc, xyz, A = val[1], B = val[2], C = bal;
+			   	bool res = linearDiophantine ( A, B, C, &abc, &xyz );
+		//	   	cout << "# " << abc << " " << xyz << endl;
+			   	if(res == false) printf ("No\n");
+			   	else{
+				 	int g = gcd ( A, B ), flag = false;
+					int k = 1;
+				    while(1){
+				      	int ab =  abc + k * ( B / g ), cd = xyz - k * ( A / g ) ;
+			//	    	printf ( "Another Possible Solution (%d %d)\n", ab, cd);
+				    	k++;
+				    	if(cd < 0) break;
+				    	if(ab >= 0 && cd >= 0){ 
+				    		if(ab <= cnt[mp[val[1]]] && cd <= cnt[mp[val[2]]]){
+				    			flag = true;
+				    			break;
+				    		}
+				    	}				       
+				    }
+				    if(flag) printf("Yes\n");
+				    else printf("No\n");
+				}
+			 	
+			}
+			else{ 
+				SET(dp, -1);
+				if(recur(1, bal) == 1) printf("Yes\n");
+				else printf("No\n");
+			}
+		}
+	}
+	return 0;
+}

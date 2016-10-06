@@ -1,0 +1,70 @@
+//Program: seatsr
+//Author: gary
+//Date: 04/10/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+const int INF = 1e9;
+const int MAX_N = 1e5 + 1;
+const int OFFSET = 100;
+int T, N, M, a, b, k;
+char S[MAX_N];
+char W[MAX_N];
+
+int dp[MAX_N][205];
+
+void mmin(int& x, int y){
+  x = min(x, y);
+}
+
+int solve(){
+  if(a == 0) 
+    return 0;
+  N = strlen(S);
+  M = strlen(W);
+  if(abs(N - M) > k)
+    return -1;
+  for(int i = 0; i <= N; i++) fill(dp[i], dp[i] + 205, INF);
+  dp[N][M - N + OFFSET] = 0;
+  for(int i = N; i >= 0; i--){
+    for(int delta = k; delta >= -k; delta--){
+      int j = i + delta, d = delta + OFFSET;
+      if(j < 0 || j > M) continue;
+      if(i < N && j < M && S[i] == W[j]) mmin(dp[i][d], dp[i + 1][d]);
+      if(i < N && j < M) mmin(dp[i][d], dp[i + 1][d] + b);
+      if(i < N) mmin(dp[i][d], dp[i + 1][d - 1] + a);
+      if(j < M)	mmin(dp[i][d], dp[i][d + 1] + a);
+    }
+  }
+  int ans = dp[0][OFFSET];
+  if(ans <= k)
+    return ans;
+  return -1;
+}
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%s%s", S, W); 
+    scanf("%d%d%d", &a, &b, &k);
+    printf("%d\n", solve());
+  }
+  return 0;
+}

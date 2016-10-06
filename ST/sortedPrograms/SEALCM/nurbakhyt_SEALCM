@@ -1,0 +1,204 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+//
+
+inline int readChar();
+template <class T> inline T readInt();
+
+template <class T> inline void writeInt( T x );
+inline void putchar_fast( int x ); // you may use putchar() instead of it
+inline void flush();
+
+//
+
+const int MAX_N = (int)1e3 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 7;
+
+using namespace std;
+
+struct matrix {
+	int n, a[16][16];
+	matrix() {}
+	matrix(int _n) {
+	    n = _n;
+	    memset(a, 0, sizeof a);
+		for (int i = 0; i < n; i++)
+			a[i][i] = 1;
+	}
+	inline matrix operator *= (matrix &b) {
+		matrix res = matrix(n);
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++) {
+			    res.a[i][j] = 0;
+				for (int k = 0; k < n; k++) {
+					res.a[i][j] = (res.a[i][j] + 1ll * a[i][k] * b.a[k][j] % mod);
+					if (res.a[i][j] >= mod)
+						res.a[i][j] -= mod;
+				}
+			}
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++)
+				a[i][j] = res.a[i][j];
+	}
+} b, res;
+
+pair < int, int > f[5];
+int pw[5], h[16];
+int sz;
+int lp[MAX_N];
+bool pr[MAX_N];
+int num, cnt, n, m;
+
+inline int Find(int d) {
+	sz = 0;
+	while(d > 1) {
+	    if (sz && f[sz - 1].f == lp[d])
+	    	f[sz - 1].s++, pw[sz - 1] *= lp[d];
+		else
+			f[sz++] = mp(lp[d], 1), pw[sz - 1] = lp[d];
+		d /= lp[d];
+	}
+	memset(h, 0, sizeof h);
+	for (int i = 1, mask; i <= m; i++) {
+	    mask = 0;
+		for (int id = 0; id < sz; id++)
+			if (i % pw[id] == 0)
+				mask |= (1 << id);
+		h[mask]++;
+	}
+	memset(b.a, 0, sizeof b.a);
+	for (int mask = 0; mask < (1 << sz); mask++)
+		for (int last = 0; last < (1 << sz); last++)
+			b.a[last][(last | mask)] += h[mask];
+	memset(res.a, 0, sizeof res.a);
+	for (int i = 0; i < (1 << sz); i++)
+		res.a[i][i] = 1;
+	b.n = res.n = (1 << sz);
+	num = n;
+	while(num) {
+		if (num & 1)
+			res *= b;
+		b *= b;
+		num >>= 1;
+	}
+	return res.a[0][(1 << sz) - 1];
+}
+
+int l, r;
+                	
+int ans;
+
+inline void solve() {
+	n = readInt < int > ();
+	m = readInt < int > ();
+	l = readInt < int > ();
+	r = readInt < int > ();
+	ans = 0;
+	for (int i = l; i <= r; i++) {
+		ans = (ans + Find(i));
+		if (ans >= mod)
+			ans -= mod;
+	}
+	writeInt(ans);
+	putchar_fast('\n');
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	for (int i = 2; i <= (int)1e3; i++)
+		if (!pr[i]) {
+			lp[i] = i;
+			for (int j = i * i; j <= (int)1e3; j += i) {
+			    pr[j] = 1;
+				if (!lp[j] || lp[j] >= i)
+					lp[j] = i;
+			}
+		}
+	int t;
+	t = readInt < int > ();
+	while(t--)
+		solve();
+	flush();
+	return 0;
+}
+
+/** Read */
+
+static const int buf_size = 4096;
+
+inline int getchar_fast() { // you may use getchar() instead of it
+  static char buf[buf_size];
+  static int len = 0, pos = 0;
+  if (pos == len)
+    pos = 0, len = fread(buf, 1, buf_size, stdin);
+  if (pos == len)
+    return -1;
+  return buf[pos++];
+}
+
+inline int readChar() {
+  int c = getchar_fast();
+  while (c <= 32)
+    c = getchar_fast();
+  return c;
+}
+
+template <class T>
+inline T readInt() {
+  int s = 1, c = readChar();
+  T x = 0;
+  if (c == '-')
+    s = -1, c = getchar_fast();
+  while ('0' <= c && c <= '9')
+    x = x * 10 + c - '0', c = getchar_fast();
+  return s == 1 ? x : -x;
+}
+
+/** Write */
+
+static int write_pos = 0;
+static char write_buf[buf_size];
+
+inline void putchar_fast( int x ) {
+  if (write_pos == buf_size)
+    fwrite(write_buf, 1, buf_size, stdout), write_pos = 0;
+  write_buf[write_pos++] = x;
+}
+
+inline void flush() {
+  if (write_pos)
+    fwrite(write_buf, 1, write_pos, stdout), write_pos = 0;
+}
+
+template <class T> 
+inline void writeInt( T x ) {
+  if (x < 0)
+    putchar_fast('-'), x = -x;
+
+  char s[24];
+  int n = 0;
+  while (x || !n)
+    s[n++] = '0' + x % 10, x /= 10;
+  while (n--)
+    putchar_fast(s[n]);
+}

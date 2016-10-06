@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+const ull P = 3 * (1ULL << 30) + 1;
+const ll MOD = ll(1e9)+7;
+const int MAX = 1<<17;
+ll pw[MAX];
+
+vector<ull> fft(const vector<ull>& input, bool invert = false) {
+  const ull ROOT = 5, INV_ROOT = 1932735284;
+  const ull TWO_INV = 1610612737; // inverse of 2 (mod P)
+  const int N = input.size();
+  vector<ull> arr(input);
+  for (ull& x : arr)
+    x %= P;
+  for (int i = 1, j = 0; i < N; i++) {
+    int bit = N >> 1;
+    for (; j >= bit; bit >>= 1)
+      j -= bit;
+    j += bit;
+    if (i < j) swap(arr[i], arr[j]);
+  }
+  for (int half = 1; half < N; half <<= 1) {
+    ull wm = invert ? INV_ROOT : ROOT;
+    wm = (((wm * wm) % P) * wm) % P;
+    for (int ord = (P - 1) / 3; ord > 2 * half; ord >>= 1)
+      wm = (wm * wm) % P;
+    for (int st = 0; st < N; st += 2 * half) {
+      ull w = 1;
+      for (int j = st; j < st + half; ++j) {
+        const ull temp = (w * arr[j + half]) % P;
+        arr[j + half] = (arr[j] + P - temp) % P;
+        arr[j] = (arr[j] + temp) % P;
+        w = (w * wm) % P;
+      }
+    }
+  }
+  if (invert) {
+    ull size_inv = 1;
+    for (int sz = 2; sz <= N; sz <<= 1)
+      size_inv = (size_inv * TWO_INV) % P;
+    for (ull& x : arr)
+      x = (x * size_inv) % P;
+  }
+  return arr;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  string str;
+  cin>>str;
+  vector<ull> a(2*MAX), b(2*MAX);
+  const int N=str.size();
+  pw[0]=1;
+  for(int i=1;i<MAX;++i)
+    pw[i]=pw[i-1]*26%MOD;
+  for(int i=0;i<N;++i){
+    a[i] = 'Z'-str[i];
+    b[MAX-i] = a[i];
+  }
+  a=fft(a);
+  b=fft(b);
+  for(int i=0;i<2*MAX;++i) {
+    a[i] = a[i] * b[i] % P;
+  }
+  a=fft(a,true);
+  ll res=0;
+  for(int i=0;i<N;++i)
+    res += 'Z'-str[i];
+  res %= MOD;
+  for(int i=1;i<N;++i){
+    res += a[i+MAX] * pw[i-1];
+    res %= MOD;
+  }
+  cout<<res<<endl;
+  return 0;
+};

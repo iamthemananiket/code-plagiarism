@@ -1,0 +1,31 @@
+#include<bits/stdc++.h>
+#define int long long
+ using namespace std;
+
+  main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    int t;
+     cin>>t;
+      while(t--)
+      {
+          int n1,n2,m,ans;
+         cin>>n1>>n2>>m;
+
+          ans = abs(n1-n2);
+           if(n1<n2) n2 = n1; else n1 = n2;
+
+           m*=(m+1);
+           m/=2;
+           if(m<n1)
+           ans+=(abs(m-n1)<<1);
+           cout<<ans<<endl;
+
+      }
+
+    return 0;
+  }

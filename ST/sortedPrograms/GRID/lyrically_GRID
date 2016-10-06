@@ -1,0 +1,70 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int N;
+char A[1010][1010];
+bool isX[1010][1010];
+bool isY[1010][1010];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int x = 0; x < N; ++x) {
+			scanf("%s", A[x]);
+		}
+		for (int x = 0; x < N; ++x) {
+			isX[x][N] = true;
+			for (int y = N; y--; ) {
+				isX[x][y] = (A[x][y] == '.' && isX[x][y + 1]);
+			}
+		}
+		for (int y = 0; y < N; ++y) {
+			isY[N][y] = true;
+			for (int x = N; x--; ) {
+				isY[x][y] = (A[x][y] == '.' && isY[x + 1][y]);
+			}
+		}
+		int ans = 0;
+		for (int x = 0; x < N; ++x) for (int y = 0; y < N; ++y) {
+			if (isX[x][y] && isY[x][y]) {
+				++ans;
+			}
+		}
+		printf("%d\n", ans);
+	}
+	
+	return 0;
+}

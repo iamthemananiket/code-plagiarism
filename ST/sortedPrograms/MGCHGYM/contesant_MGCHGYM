@@ -1,0 +1,199 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+ 
+using namespace std;
+ 
+const int MAXN = 100000 + 5;
+ 
+int itemset[MAXN], itemset_size;
+int reachable_sum[MAXN], shifted_mask[MAXN];
+int a[MAXN], b[MAXN * 2], n, q, bn;
+int type[MAXN], param1[MAXN], param2[MAXN], param3[MAXN];
+ 
+// treap starts here
+ 
+typedef struct item * pitem;
+ 
+struct item {
+    int prior, cnt, tag;
+    bool rev;
+    int kol[11];
+    pitem l, r;
+    
+    item () {}
+    item (int prior, int tag) : prior(prior), tag(tag), l(NULL), r(NULL) {};
+    
+};
+ 
+pitem tree;
+ 
+int cnt (pitem it) {
+    return it ? it->cnt : 0;
+}
+ 
+void upd_cnt (pitem it) {
+    if (it) {
+        it->cnt = cnt(it->l) + cnt(it->r) + 1;
+        for(int i = 1; i <= bn; i++) {
+            it->kol[i] = 0;
+            if (it->l)
+                it->kol[i] += it->l->kol[i];
+            if (it->r)
+                it->kol[i] += it->r->kol[i];
+        }
+        ++it->kol[it->tag];
+    }
+}
+ 
+void push (pitem it) {
+    if (it && it->rev) {
+        it->rev = false;
+        swap (it->l, it->r);
+        if (it->l)  it->l->rev ^= true;
+        if (it->r)  it->r->rev ^= true;
+    }
+}
+ 
+void merge (pitem & t, pitem l, pitem r) {
+    push (l);
+    push (r);
+    if (!l || !r)
+        t = l ? l : r;
+    else if (l->prior > r->prior)
+        merge (l->r, l->r, r),  t = l;
+    else
+        merge (r->l, l, r->l),  t = r;
+    upd_cnt (t);
+}
+ 
+void split (pitem t, pitem & l, pitem & r, int key, int add = 0) {
+    if (!t)
+        return void( l = r = 0 );
+    push (t);
+    int cur_key = add + cnt(t->l);
+    if (key <= cur_key)
+        split (t->l, l, t->l, key, add),  r = t;
+    else
+        split (t->r, t->r, r, key, add + 1 + cnt(t->l)),  l = t;
+    upd_cnt (t);
+}
+ 
+void reverse (pitem t, int l, int r) {
+    pitem t1, t2, t3;
+    split (t, t1, t2, l);
+    split (t2, t2, t3, r-l+1);
+    t2->rev ^= true;
+    merge (t, t1, t2);
+    merge (t, t, t3);
+}
+ 
+void modify (pitem t, int j, int x) {
+    pitem t1, t2, t3;
+    split(t, t1, t2, j);
+    split(t2, t2, t3, 1);
+    t2->tag = x;
+    upd_cnt(t2);
+    merge (t, t1, t2);
+    merge (t, t, t3);
+}
+ 
+int getrand () {
+    int ret = 0;
+    for(int i = 1; i <= 10; i++)
+        ret = (ret * 10LL + rand() % 10) % 2000000000;
+    return ret;
+}
+ 
+// treap ends here
+ 
+bool can_pack (int max_a) {
+    int limit = max_a / 31;
+    for(int i = 0; i <= limit; i++)
+        reachable_sum[i] = shifted_mask[i] = 0;
+    reachable_sum[0] = 1;
+    for(int i = 0; i < itemset_size && ((reachable_sum[max_a / 31] & (1 << (max_a % 31))) == 0); i++) {
+        int complete_shifts = itemset[i] / 31;
+        int remainder_shifts = itemset[i] % 31;
+        int carry_mask = 0;
+        for(int j = 0; j <= limit - complete_shifts; j++) {
+            shifted_mask[j + complete_shifts] = (reachable_sum[j] << remainder_shifts) + carry_mask;
+            carry_mask = (reachable_sum[j] & ((2147483647 - (1 << (31 - remainder_shifts)) + 1))) >> (31 - remainder_shifts);
+        }
+        for(int j = 0; j <= limit; j++) {
+            reachable_sum[j] |= shifted_mask[j];
+        }
+    }
+    return ((reachable_sum[max_a / 31] & (1 << (max_a % 31))) != 0);
+}
+ 
+int kol[MAXN];
+ 
+void solve (int l, int r, int req) {
+    itemset_size = 0;
+    
+    pitem t1, t2, t3;
+    split (tree, t1, t2, l);
+    split (t2, t2, t3, r-l+1);
+    
+    for(int i = 1; i <= bn; i++)
+        kol[i] = t2->kol[i];
+    
+    merge (tree, t1, t2);
+    merge (tree, tree, t3);
+    
+    for(int i = 1; i <= bn; i++)
+        if (b[i] <= req && kol[i] > 0) {
+            int kk = 1, rem = kol[i];
+            while (rem >= kk) {
+                if (kk * b[i] <= req)
+                    itemset[itemset_size++] = kk * b[i];
+                rem -= kk;
+                kk *= 2;
+            }
+            if (rem > 0 && rem * b[i] <= req)
+                itemset[itemset_size++] = rem * b[i];
+        }
+    
+    if (can_pack(req))
+        cout << "Yes" << endl;
+    else
+        cout << "No" << endl;
+}
+ 
+int main(int argc, const char * argv[]) {
+    cin >> n >> q;
+    for(int i = 1; i <= n; i++)
+        cin >> a[i];
+    for(int i = 1; i <= q; i++) {
+        cin >> type[i] >> param1[i] >> param2[i];
+        if (type[i] == 3)
+            cin >> param3[i];
+    }
+    for(int i = 1; i <= n; i++)
+        b[i] = a[i];
+    bn = n;
+    for(int i = 1; i <= q; i++)
+        if (type[i] == 1)
+            b[++bn] = param2[i];
+    sort(b + 1, b + bn + 1);
+    bn = unique(b + 1, b + bn + 1) - (b + 1);
+    //
+    for(int i = 1; i <= n; i++) {
+        a[i] = lower_bound(b + 1, b + bn + 1, a[i]) - b;
+        merge(tree, tree, new item(getrand(), a[i]));
+    }
+    //
+    for(int i = 1; i <= q; i++) {
+        if (type[i] == 1) {
+            modify(tree, param1[i] - 1, lower_bound(b + 1, b + bn + 1, param2[i]) - b);
+        }
+        if (type[i] == 2) {
+            reverse(tree, param1[i] - 1, param2[i] - 1);
+        }
+        if (type[i] == 3)
+            solve(param1[i]-1, param2[i]-1, param3[i]);
+    }
+    return 0;
+}
+ 

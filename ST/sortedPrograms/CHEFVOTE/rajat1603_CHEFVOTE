@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+const int N = 52;
+int t , n , arr[N]={0};
+int voted[N];
+int main(){
+    t = scan();
+    while(t--){
+        int sum = 0;
+        n = scan();
+        for(int i = 1 ; i <= n ; ++i){
+            arr[i] = scan();
+            voted[i] = 0;
+            sum+=arr[i];
+            if(arr[i]>=n){
+                sum = n + 1;
+            }
+        }
+        if(sum!=n||n==1){
+            printf("-1\n");
+            continue;
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            for(int j = 1 ; j <= n ; ++j){
+                if(!voted[j]&&arr[i]){
+                    voted[j] = i;
+                    arr[i] --;
+                }
+            }
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            if(voted[i] == i){
+                for(int j = 1 ; j <= n ; ++j){
+                    if(voted[j] != i){
+                        voted[i] = voted[j];
+                        voted[j] = i;
+                        break;
+                    }
+                }
+            }
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            printf("%d ",voted[i]);
+        }
+        printf("\n");
+    }
+}

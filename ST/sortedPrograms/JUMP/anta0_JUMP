@@ -1,0 +1,169 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+
+struct DynamicParabolaEnvelope {
+	typedef pair<int, long long> P;
+	typedef long long X;
+	vector<P> ps;
+	vector<pair<X,P> > seq;
+	vector<int> sizes;
+
+	void clear() {
+		ps.clear();
+		seq.clear();
+		sizes.clear();
+	}
+
+	bool empty() const { return ps.empty();  }
+
+	void insert(const P &p) {
+		int n = (int)ps.size();
+		ps.push_back(p);
+		seq.push_back(make_pair(-1, P()));
+		int i;
+		for(i = 0; n >> i & 1; ++ i) {
+			int m = 1 << i;
+			inplace_merge(ps.end() - m * 2, ps.end() - m, ps.end());
+			sizes[i] = 0;
+		}
+		if(sizes.size() == i)
+			sizes.push_back(0);
+		assert(sizes[i] == 0);
+		int m = 1 << i;
+		makePE(&*(seq.end() - m), sizes[i], &*(ps.end() - m), &ps[0] + ps.size());
+	}
+
+	long long findMin(X x) const {
+		long long r = INFL;
+		const pair<X, P> *stk = &seq[0] + seq.size();
+		rep(i, sizes.size()) {
+			int n = sizes[i];
+			if(n != 0) {
+				stk -= 1 << i;
+				amin(r, findMinPE(stk, n, x));
+			}
+		}
+		return r;
+	}
+
+private:
+	static long long findMinPE(const pair<X,P> *stk, int size, X x) {
+		X l = 0, u = size - 1;
+		while(u - l > 0) {
+			X mid = (l + u + 1) / 2;
+			if(stk[mid].first <= x)
+				l = mid;
+			else
+				u = mid - 1;
+		}
+		P p = stk[l].second;
+		return evaluate(p, x);
+	}
+
+	static void makePE(pair<X,P> *stk, int &sp, const P *begin, const P *end) {
+		sp = 0;
+		for(const P *it = begin; it != end; ++ it) {
+			P p = *it;
+			if(sp > 0 && p.first == stk[sp-1].second.first)
+				continue;
+			for(; sp > 0; -- sp) {
+				X x = stk[sp-1].first;
+				if(evaluate(p, x) >= evaluate(stk[sp-1].second, x))
+					break;
+			}
+			X x;
+			if(sp == 0)
+				x = 0;
+			else
+				x = crosspoint(stk[sp-1].second, p);
+			assert(x >= 0);
+			stk[sp ++] = make_pair(x, p);
+		}
+	}
+
+	static long long evaluate(const P &p, X x) {
+		return (long long)(x - p.first) * (x - p.first) + p.second;
+	}
+
+	static X crosspoint(const P &p, const P &q) {
+		long long num =
+			((long long)q.first * q.first + q.second) -
+			((long long)p.first * p.first + p.second);
+		int den = (q.first - p.first) * 2;
+		assert(den > 0);
+		return (X)(num / den + (num > 0 && num % den != 0));
+	}
+};
+
+int main() {
+	int N;
+	while(~scanf("%d", &N)) {
+		vector<int> P(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &P[i]), -- P[i];
+		vector<int> A(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &A[i]);
+		vector<int> H(N);
+		for(int i = 0; i < N; ++ i)
+			scanf("%d", &H[i]);
+		vector<DynamicParabolaEnvelope> dpes(N);
+		long long ans = INFL;
+		rep(i, N) {
+			long long cost = INFL;
+			if(i == 0)
+				amin(cost, 0);
+			for(int y = P[i]; y > 0; y &= y - 1) {
+				if(!dpes[y-1].empty())
+					amin(cost, dpes[y-1].findMin(H[i]));
+			}
+			if(cost > INFL / 2)
+				continue;
+			cost += A[i];
+			if(i == N - 1) {
+				ans = cost;
+			} else {
+				DynamicParabolaEnvelope::P p(H[i], cost);
+				for(int y = P[i]; y < N; y |= y + 1)
+					dpes[y].insert(p);
+			}
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

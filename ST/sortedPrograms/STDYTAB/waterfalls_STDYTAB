@@ -1,0 +1,32 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+const int MOD = 1000000000;
+
+int binom[4013][4013];
+int dp[2013][2013];
+
+int main() {
+    binom[0][0] = 1;
+    for (int i=1;i<4013;i++) {
+        binom[i][0] = 1;
+        for (int j=1;j<=i;j++) binom[i][j] = (binom[i-1][j-1]+binom[i-1][j])%MOD;
+    }
+    int T;
+    scanf("%d",&T);
+    for (int t=0;t<T;t++) {
+        int N,M;
+        scanf("%d%d",&N,&M);
+        dp[0][0] = 1;
+        for (int i=1;i<=M;i++) dp[0][i] = 1;
+        for (int i=1;i<=N;i++) for (int j=0;j<=M;j++) {
+            dp[i][j] = ((long long) binom[M-1+j][M-1]*dp[i-1][j])%MOD;
+            if (j) dp[i][j] = (dp[i][j]+dp[i][j-1])%MOD;
+        }
+        printf("%d\n",dp[N][M]);
+    }
+
+    return 0;
+}

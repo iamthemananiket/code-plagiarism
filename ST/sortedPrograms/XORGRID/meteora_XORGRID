@@ -1,0 +1,120 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+#define TMAX ((262144*18)+10)
+
+using namespace std;
+
+class trie{
+	int ch[TMAX][2];
+
+	int N;
+
+	int create_node(){
+		ch[N][0] = ch[N][1] = -1;
+		return N++;
+	}
+	int root;
+
+public:
+
+	trie(){
+		N = 0;
+		root = create_node();
+	}
+
+	void ins(int str, int n){
+
+		int i,v,c;
+
+		v = root;
+
+		for(i = n-1; i >= 0; --i){
+			c = !!(str&(1<<i));
+			if(ch[v][c] < 0) ch[v][c] = create_node();
+			v = ch[v][c];
+		}
+	}
+
+	int maxxor(int str, int n){
+
+		int v,i,c,x;
+
+		x = 0;
+
+		v = root;
+		for(i = n-1; i >= 0; --i){
+			c = !((str&(1<<i)));
+
+			if(ch[v][c] >= 0) {
+				v = ch[v][c];
+				x |= (1<<i);
+			}else{
+				c ^= 1;
+				assert(ch[v][c] >= 0);//nonempty
+				v = ch[v][c];
+			}
+		}
+
+		return x;
+	}
+
+};
+
+
+trie paths[20];
+int N;
+
+int A[20][20];
+
+
+int main(){
+
+
+	int i,j;
+
+	scanf("%d",&N);
+
+	for(i = 0; i < N; ++i){
+		for(j =0 ; j < N; ++j){
+			scanf("%d",&A[i][j]);
+		}
+	}
+
+	int sel;
+
+	int x,y,val;
+
+
+	for(sel = 0; sel < (1<<(N-1)); ++sel){
+		x = y = N-1;
+		val = A[x][y];
+		for(i = 0; i < N-1; ++i){
+			x -= !!(sel&(1<<i));
+			y -= !(sel&(1<<i));
+			val ^= A[x][y];
+		}
+		paths[x].ins(val,30);
+	}
+
+	int mx  =0;
+	x=  0, y = 0;
+	cout << endl;
+	for(sel = 0; sel < (1<<(N-1)); ++sel){
+		x = y = 0;
+		val = 0;
+		for(i = 0; i < N-1; ++i){
+			val ^= A[x][y];
+			x += !!(sel&(1<<i));
+			y += !(sel&(1<<i));
+		}
+		mx = max(mx,paths[x].maxxor(val,30));
+	}
+
+	printf("%d\n",mx);
+
+	return 0;
+}

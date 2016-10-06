@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+#define pd pair < int, ull >
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 7;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n;
+char tp[MAX_N];
+int a[MAX_N];
+int ans;
+
+void calc(int l, int r) {
+    assert(l != -1 || r != n);
+    int sum = 0, maxi = 0;
+    for (int i = l; i + 1 <= r; i++) {
+        if (i == -1 || i + 1 == n)
+            continue;
+        sum += (a[i + 1] - a[i]);
+        maxi = max(maxi, a[i + 1] - a[i]);
+    }
+    assert(sum != 0 && maxi != 0);
+    if (l == -1 || r == n)
+        ans += sum;
+    else
+        ans += sum - maxi;
+}
+
+void solve() {
+    scanf("\n%d\n", &n);
+    for (int i = 0; i < n; i++) {
+        tp[i] = getchar();
+    }
+    scanf("\n");
+    for (int i = 0; i < n; i++)
+        scanf("%d ", &a[i]);
+    ans = 0;
+    for (int i = 0; i < n; ) {
+        if (tp[i] == '1') {
+            i++;
+            continue;
+        }
+        int r = i, l = i - 1;
+        while(r < n && tp[r] == '0')
+            r++;
+        calc(l, r);
+        i = r;
+    }
+    printf("%d\n", ans);
+}
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+    int t;
+    scanf("%d", &t);
+    while(t--)
+        solve();
+    return 0;
+}

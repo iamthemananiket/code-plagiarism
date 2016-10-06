@@ -1,0 +1,19 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t;
+	cin>>t;
+	for(int te=1;te<=t;te++)
+	 {
+	 	int n;
+		 cin>>n;
+		 vector<int> a(n);
+		 for(int i=0;i<n;i++)
+		  cin>>a[i];
+		sort(a.rbegin(),a.rend());
+		cout<<"Case "<<te<<": "<<a[0]+a[1]+a[2]<<endl;
+	 	
+	 }
+}

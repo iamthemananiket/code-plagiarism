@@ -1,0 +1,124 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const int P[] = { 2, 3, 5 };
+
+int N;
+int A[100010];
+
+int O[100010];
+
+int bitN;
+int bits[3][100010];
+void bitAdd(int bit[], int pos, int val) {
+	for (int x = pos; x < bitN; x |= x + 1) bit[x] += val;
+}
+int bitSum(int bit[], int pos) {
+	int ret = 0;
+	for (int x = pos - 1; x >= 0; x = (x & (x + 1)) - 1) ret += bit[x];
+	return ret;
+}
+
+int main() {
+	
+	
+	for (; ~scanf("%d", &N); ) {
+		for (int i = 1; i <= N; ++i) {
+			A[i] = in();
+		}
+		bitN = N + 5;
+		for (int s = 0; s < 3; ++s) {
+			fill(bits[s], bits[s] + bitN, 0);
+		}
+		for (int i = 1; i <= N; ++i) {
+			int a = A[i];
+			for (int s = 0; s < 3; ++s) {
+				int e = 0;
+				for (; a % P[s] == 0; a /= P[s]) {
+					++e;
+				}
+				bitAdd(bits[s], i - 1, +e);
+				bitAdd(bits[s], i    , -e);
+			}
+			O[i] = a;
+		}
+		for (int qry = in(); qry--; ) {
+			switch (in()) {
+				case 1: {
+					const int l = in();
+					const int r = in();
+					const int p = in();
+					const int s = find(P, P + 3, p) - P;
+					bitAdd(bits[s], l - 1, -1);
+					bitAdd(bits[s], r    , +1);
+				} break;
+				case 2: {
+					const int l = in();
+					const int d = in();
+					int a = d;
+					for (int s = 0; s < 3; ++s) {
+						const int now = bitSum(bits[s], l);
+						bitAdd(bits[s], l - 1, -now);
+						bitAdd(bits[s], l    , +now);
+						int e = 0;
+						for (; a % P[s] == 0; a /= P[s]) {
+							++e;
+						}
+						bitAdd(bits[s], l - 1, +e);
+						bitAdd(bits[s], l    , -e);
+					}
+					O[l] = a;
+				} break;
+				default: assert(false);
+			}
+		}
+		for (int i = 1; i <= N; ++i) {
+			if (i > 1) {
+				printf(" ");
+			}
+			int ans = O[i];
+			for (int s = 0; s < 3; ++s) {
+				const int now = bitSum(bits[s], i);
+				for (int e = 0; e < now; ++e) {
+					ans *= P[s];
+				}
+			}
+			printf("%d", ans);
+		}
+		puts("");
+	}
+	
+	return 0;
+}
+

@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+const int MOD = (int)(1e9 + 7);
+const int MAX = 1050;
+
+inline int prod( int x , int y ){
+	ll res = x * 1LL * y;
+	if( res >= MOD ) res %= MOD;
+	return res;
+}
+
+inline int add( int x , int y ){
+	int res = x + y;
+	if( res >= MOD ) res -= MOD;
+	return res;
+}	
+
+inline int power( int x , int y ){
+	if( y == 0 ) return 1;
+	ll res = power(x , y / 2);
+	res = prod( res , res );
+	if( y & 1 ) res = prod( res , x );
+	return res;
+}
+
+int DP[MAX][MAX]; // DP[i][msk] Number of ways to reach state = msk, using first (i - 1) filters
+int  F[MAX] , T , N; // Frequency of i'th filter
+string S , SS;
+
+int main(){
+	
+	cin.tie(0); ios::sync_with_stdio(false);
+	
+	cin >> T;
+	
+	while(T--){
+		
+		memset(F,0,sizeof F);
+		memset(DP,0,sizeof DP);
+
+		cin >> S >> N;
+		
+		int start = 0;
+		
+		for(int i = 0 ; i <= 9 ; i++){
+			if( S[9 - i] == 'b' ) start += ( 1 << i );
+		}
+
+		for(int i = 1 ; i <= N ; i++){
+			cin >> SS;
+			int msk = 0;
+			for(int i = 0 ; i <= 9 ; i++){
+				if( SS[9 - i] == '+' ) msk += ( 1 << i);
+			}
+			F[msk]++;
+		}
+
+
+		DP[0][start] = 1;
+
+		for(int i = 1 ; i <= 1024 ; i++){
+			for(int j = 0 ; j <= 1023 ; j++){
+				if( F[i - 1] == 0 ) DP[i][j] = DP[i - 1][j];
+				else{
+					DP[i][j] = prod ( power( 2 , F[i - 1] - 1) , add( DP[i - 1][j] , DP[i - 1][j ^ ( i - 1) ] ) );
+				}
+			}
+		}
+
+		cout << DP[1024][1023] << endl;
+
+	}
+}

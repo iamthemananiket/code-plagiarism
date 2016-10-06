@@ -1,0 +1,61 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <utility>
+
+#define mod 1000000009
+using namespace std;
+
+int m, p, n,a,b1,b2,c1,c2,x;
+vector<pair<int,int> > d;
+bool bisa;
+int main()
+{
+//	freopen("in.txt","r",stdin);
+//	freopen("out.txt","w",stdout);
+	scanf("%d %d %d",&n,&m,&p);
+	d.resize(p);
+	for(int i=0; i<p; i++)
+		scanf("%d %d",&d[i].first,&d[i].second);
+	sort(d.begin(),d.end());
+	a = 0;
+	for(int i=0; i<n; i++)
+	{
+		bisa = true;
+		b1 = b2 = c1 = c2 = x = 0;
+		c1 = d[a].second;
+		if(d[a].first == i+1 && d[a].second == 1)
+		{
+			while(d[a].first == i+1 && d[a].second == c1)
+			{
+				c2++; a++;
+			}
+			x -= c2;
+			
+		}
+		while(d[a].first == i+1)
+		{
+			b1 = c1; b2 = c2;
+			c1 = d[a].second; c2 = 0;
+			while(d[a].first == i+1 && d[a].second == c1)
+			{
+				c2++; a++;
+			}
+			if(b1+1 == c1)
+				bisa = bisa && (c2+1>=b2);
+			else
+				bisa = bisa && (b2<2);
+		}
+		if(c1 < m)
+			bisa = bisa && (c2<2);
+		else
+			x += c2;
+		if(bisa)
+			printf("%d\n",x+m-1);
+		else
+			printf("-1\n");
+	}
+	return 0;
+}

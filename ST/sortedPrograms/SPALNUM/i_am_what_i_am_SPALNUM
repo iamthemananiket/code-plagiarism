@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+using namespace std;
+bool valid(int n)
+{
+	int r=0,copy=n;
+	while(copy)
+	{
+		int d=copy%10;
+		r=10*r+d;
+		copy/=10;
+
+	}
+return (n==r);
+}
+int main()
+{
+//	freopen("in.txt","r",stdin);
+	int t;
+	cin>>t;
+	vector<long long> cf(1000006);
+	for(int i=1;i<=100000;i++)
+	 {
+	 	if(valid(i))
+	 	  cf[i]=cf[i-1]+i;
+	 	else
+	 	 cf[i]=cf[i-1];
+	 }
+	 int l,r;
+	while(t--)
+	 {
+	 	cin>>l>>r;
+	 	cout<<cf[r]-cf[l-1]<<endl;
+	 }
+}

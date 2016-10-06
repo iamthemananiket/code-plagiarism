@@ -1,0 +1,37 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ int usd[27],tt,i,t;
+ string a,b;
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    // freopen("input.txt","r",stdin);
+    // freopen("output.txt","w",stdout);
+
+      cin>>t;
+       while(t--)
+       {
+        cin>>a;
+        cin>>b;
+         memset(usd,0,sizeof(usd));
+          for(i=0;i<a.size();++i)
+           usd[a[i]-'a'] = 1;
+           tt=0;
+           for(i=0;i<b.size();++i)
+           if(usd[b[i]-'a'])
+           {
+            tt=1;
+            break;
+           }
+           if(tt) cout<<"Yes";else cout<<"No";
+           cout<<endl;
+       }
+
+    return 0;
+  }

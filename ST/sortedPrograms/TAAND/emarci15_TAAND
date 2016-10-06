@@ -1,0 +1,47 @@
+#include <cstdio>
+
+using namespace std;
+
+int n;
+
+int a[300000];
+
+int ssol[300000];
+int ssolv;
+
+int nsol[300000];
+int nsolv;
+
+int main()
+{
+    scanf("%d",&n);
+
+    for(int i=0; i<n; i++) {
+        scanf("%d",&a[i]);
+        ssol[i] = a[i];
+    }
+
+    ssolv = n;
+
+    for(int i=(1<<30); i>=1; i>>=1) {
+        nsolv = 0;
+        for(int j=0; j<ssolv; j++ ){
+            if(ssol[j] & i) {
+                nsol[nsolv++] = ssol[j];
+            }
+        }
+
+        if(nsolv >=2) {
+            ssolv = nsolv;
+            for(int j=0; j<nsolv; j++) {
+                ssol[j] = nsol[j];
+            }
+        }
+    }
+
+    int sol = ssol[0] & ssol[1];
+
+    printf("%d\n",sol);
+
+    return 0;
+}

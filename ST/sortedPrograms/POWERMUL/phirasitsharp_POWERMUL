@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <vector>
+#include <map>
+
+#define N 100010
+#define LL long long
+#define A first
+#define B second
+
+using namespace std;
+
+typedef pair<int, int> pii;
+
+vector<int> Prime, adj[N];
+int use[N];
+
+pii rng[4*N];
+LL val[4*N];
+LL cnt[4*N];
+
+LL ans[N];
+int n, q;
+LL m;
+
+void init(int idx, int a, int b) {
+	if(a < b) {
+		int mid = (a + b) / 2;
+		init(2*idx, a, mid);
+		init(2*idx+1, mid+1, b);
+	}
+	cnt[idx] = 0;
+	val[idx] = 1;
+	rng[idx] = pii(a, b);
+}
+LL div_pow(LL a, LL b) {
+	if(b == 0) {
+		return 1;
+	}
+	LL r = div_pow(a, b/2);
+	r = (r * r) % m;
+	if(b % 2) {
+		r = (r * a) % m;
+	}
+	return r;
+}
+void update(int idx, int x, LL v) {
+	if(rng[idx].A >= rng[idx].B) {
+		cnt[idx] = cnt[idx] + v;
+		val[idx] = div_pow(Prime[rng[idx].A], cnt[idx]);
+		return;
+	}
+	int mid = (rng[idx].A + rng[idx].B) / 2;
+	if(x <= mid) {
+		update(2*idx, x, v);
+	}else {
+		update(2*idx+1, x, v);
+	}
+	val[idx] = (val[2*idx] * val[2*idx+1]) % m;
+}
+void evaluate(void) {
+	scanf("%d", &n);
+	scanf("%lld", &m);
+	int sz = 0;
+	while(sz+1 < Prime.size() && Prime[sz+1] <= n) {
+		sz++;
+	}
+	init(1, 0, sz);
+	for(int i = 1;2*i <= n;i++) {
+		int v = n - i + 1, tmp = n - i + 1;
+		for(int j = 0;j < adj[v].size();j++) {
+			int x = Prime[adj[v][j]];
+			int cnt = 0;
+			while(tmp % x == 0) {
+				cnt++;
+				tmp /= x;
+			}
+			update(1, adj[v][j], cnt * (n - i + 1));
+		}
+		v = tmp = i;
+		for(int j = 0;j < adj[v].size();j++) {
+			int x = Prime[adj[v][j]];
+			int cnt = 0;
+			while(tmp % x == 0) {
+				cnt++;
+				tmp /= x;
+			}
+			update(1, adj[v][j], -(cnt * i));
+		}
+		ans[i] = ans[n-i] = val[1] % m;
+	}
+	scanf("%d", &q);
+	while(q--) {
+		int r;
+		scanf("%d", &r);
+		printf("%lld\n", ans[r]);
+	}
+}
+int main() {
+	for(int i = 2;i < N;i++) {
+		if(!use[i]) {
+			Prime.push_back(i);
+			for(int j = i;j < N;j += i) {
+				use[j] = 1;
+				adj[j].push_back(Prime.size() - 1);
+			}
+		}
+	}
+	int t;
+	scanf("%d", &t);
+	while(t--) {
+		evaluate();
+	}
+	return 0;
+}

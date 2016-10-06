@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(ll i=0;i<n;i++)
+#define REPN(i, n)	for(ll i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+
+#define MAX			50050
+#define INF			1e9
+#define pb			push_back
+
+using namespace std;
+
+typedef long long ll;
+
+ll n, nn, vis[MAX];
+vector<int>edge[MAX];
+ll dist[MAX];
+ll P[MAX], sub[MAX];
+vector<ll>prime;
+ll ans = 0;
+
+void init(){
+	ll sq = sqrt(MAX);
+	for(ll i=2;i<=sq;i++){
+		if(!P[i]){
+			for(ll j=i*i;j<MAX;j+=i){
+				P[j] = true;
+			}
+		}
+	}
+	for(ll i=2;i<MAX;i++){
+		if(!P[i]){
+			prime.pb(i);
+		}
+	}
+}
+
+void dfs1(ll at, ll past){
+	sub[at] = 1; nn++;
+	REP(i, edge[at].size()){
+		int v = edge[at][i];
+		if(v == past || vis[v]) continue;
+		dfs1(v, at);
+		sub[at] += sub[v];
+	}
+}
+
+ll dfs2(ll at, ll past){
+	REP(i, edge[at].size()){
+		int v = edge[at][i];
+		if(v == past || vis[v]) continue;
+		if(sub[v] > nn / 2) return dfs2(v, at);
+	}
+	return at;
+}
+
+void dfs3(ll at, ll past, ll dis, ll add){
+	// cout << " # "	;
+	// cout << at << ' ' << past << ' ' << depth << ' ' << dis << ' ' << add << endl;
+	dist[dis] += add;
+	// printf("depth[%lld][%lld] = %lld\n", depth, dis, dist[depth][dis]);
+	REP(i, edge[at].size()){
+		int v = edge[at][i];
+		if(v == past || vis[v]) continue;
+		dfs3(v, at, dis+1, add);
+	}
+}
+
+ll dfs4(ll at, ll past, ll dis){
+	// cout << at << " " << past << ' ' << depth << ' ' << dis << endl;
+	ll ret = 0;
+	REP(i, prime.size()){
+		// cout << "@@@@ " << prime[i] << ' ' << dis << ' ' << dist[prime[i]-dis] << endl;
+		if(prime[i] - dis < 0) continue;
+		if(dist[prime[i] - dis] == 0) break;
+		// cout << prime[i] << ' ' << dist[prime[i]-dis] << endl;
+		if(prime[i] != dis) ret += dist[prime[i] - dis];
+		else ret += 2 * dist[prime[i] - dis];
+	}
+	REP(i, edge[at].size()){
+		int v = edge[at][i];
+		if(v == past || vis[v]) continue;
+		ret += dfs4(v, at, dis+1);
+	}
+	return ret;
+}
+
+void decompose(ll at){
+	for(int i=0;i<MAX && dist[i];i++) dist[i] = 0;
+	nn = 0;
+	dfs1(at, at);
+	// cout << "- " << nn << " -\n";
+	ll centroid = dfs2(at, at);
+	// cout << "~~~~ " << centroid << " ~~~~\n";
+	dfs3(centroid, centroid, 0, 1);
+	set<ll, ll>::iterator it;
+	ll u = centroid, add = 0;
+	REP(i, edge[u].size()){
+		int v = edge[u][i];
+		if(vis[v]) continue;
+		dfs3(v, u, 1, -1);
+		ll f = dfs4(v, u, 1);
+		add += f;
+		// cout << " && " << v << " <> " << f << endl;
+		dfs3(v, u, 1, 1);
+	}
+	ans += add / 2;
+	vis[centroid] = 1;
+	REP(i, edge[u].size()){
+		int v = edge[u][i];
+		if(vis[v]) continue;
+		decompose(v);
+	}
+}
+
+int main(){
+	init();
+	ll x, y;
+	scanf("%lld", &n);
+	REP(i, n-1){
+		scanf("%lld %lld", &x, &y);
+		edge[x].pb(y);
+		edge[y].pb(x);
+	}
+	decompose(1);
+	// cout << ans << endl;
+	double ret = n * (n-1) / 2.0;
+	printf("%.6lf\n", ans / ret);
+	return 0;
+}

@@ -1,0 +1,332 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/point_xy.hpp>
+//#include <boost/geometry/geometries/polygon.hpp>
+
+//#include <boost/foreach.hpp>
+
+using namespace std;
+
+int S, D, W;
+
+long long Ttmp;
+
+vector<pair<int, int>> RES;
+vector<pair<int, pair<pair<int, int>, pair<int, int> > > > pk;
+vector<int> pp[111111];
+int idx[111111];
+
+vector<pair<int, int> > g[111111];
+vector<pair<int, int> > gt[111111];
+int p[111111];
+int getp(int v) {
+    if (p[v] == v) return v;
+    return p[v] = getp(p[v]);
+}
+bool un(int a, int b) {
+    a = getp(a);
+    b = getp(b);
+    if (a == b) return false;
+    if (rand()%2)
+        swap(a, b);
+    p[a] = b;
+    return true;
+}
+
+int tin[111111], tout[111111], dist[111111], timer = 0;
+int up[111111][33];
+bool used[111111];
+
+void dfs (int v, int p = 1) {
+    tin[v] = ++timer;
+    up[v][0] = p;
+    for (int i=1; i<=22; ++i)
+        up[v][i] = up[up[v][i-1]][i-1];
+    for (size_t i=0; i<gt[v].size(); ++i) {
+        int to = gt[v][i].first;
+        if (to != p) {
+            dist[to] = dist[v] + gt[v][i].second;
+            dfs (to, v);
+        }
+    }
+    tout[v] = ++timer;
+}
+bool upper (int a, int b) {
+    return tin[a] <= tin[b] && tout[a] >= tout[b];
+}
+int lca (int a, int b) {
+    if (upper (a, b))  return a;
+    if (upper (b, a))  return b;
+    for (int i=22; i>=0; --i)
+        if (! upper (up[a][i], b))
+            a = up[a][i];
+    return up[a][0];
+}
+
+int ds(int a, int b) {
+    if (a == b) return 0;
+    if (!upper(a, b) && !upper(b, a)) exit(-1);
+    if (!upper(a, b)) swap(a, b);
+    return dist[b] - dist[a];
+}
+
+int DS(int a, int b) {
+    int l = lca(a, b);
+    return ds(l, a) + ds(l, b);
+}
+
+int willBeThere[111111];
+int wws[111111];
+int bla = 1;
+int got;
+
+void mk_move(int A, int B, int C, int needTake, int val) {
+    
+    int a = A, b = B, c = C;
+    vector<int> way;
+    
+    int lc = lca(a, b);
+    
+    way.push_back(a);
+    
+    while (a != lc) {
+        a = up[a][0];
+        way.push_back(a);
+    }
+    
+    if (a != b) {
+        vector<int> tmp;
+    
+        while (b != lc) {
+            tmp.push_back(b);
+            b = up[b][0];
+        }
+        reverse(tmp.begin(), tmp.end());
+        for(int x : tmp)
+            way.push_back(x);
+    }
+    b = B;
+    
+    lc = lca(b, c);
+    while (b != lc) {
+        b = up[b][0];
+        way.push_back(b);
+    }
+    if (c != b) {
+        vector<int> tmp;
+        
+        while (c != lc) {
+            tmp.push_back(c);
+            c = up[c][0];
+        }
+        reverse(tmp.begin(), tmp.end());
+        for(int x : tmp)
+            way.push_back(x);
+    }
+    
+    
+    //bla++;
+    bool was = 0;
+    for(auto x : way) {
+        willBeThere[x]++;
+        wws[x] = was;
+        if (x == B) was = 1;
+    }
+    
+    map<int, vector<pair<int,int>>> carr;
+    for(int i = 1; i < way.size(); ++i) {
+        int ver = way[i-1];
+        
+        willBeThere[ver]--;
+        
+        if (carr.count(ver))
+        for(auto x : carr[ver]) {
+            RES.push_back({2, x.first});
+            got -= x.second;
+        }
+        
+        if (ver == B) {
+            bool good = 0;
+            for(int i = 0; i < pp[ver].size(); ++i)
+                if (!used[pk[pp[ver][i]].second.first.second])
+                if (pk[pp[ver][i]].second.first.second == needTake) {
+                    good = 1;
+                    
+                    used[pk[pp[ver][i]].second.first.second] = 1;
+                    got += pk[pp[ver][i]].second.first.first;
+                    if (got > W)
+                        exit(-1);
+                    carr[pk[pp[ver][i]].second.second.second].push_back({pk[pp[ver][i]].second.first.second,
+                        pk[pp[ver][i]].second.first.first});
+                    
+                    Ttmp += pk[pp[ver][i]].first;
+                    RES.push_back({1, pk[pp[ver][i]].second.first.second});
+                    
+                    break;
+                }
+            
+            if (!good) {
+                cout << "aa\n";
+                exit(-1);
+            }
+        }
+        
+        
+        for(int i = 0; i < pp[ver].size(); ++i) {
+            if (used[pk[pp[ver][i]].second.first.second]) continue;
+            if (willBeThere[pk[pp[ver][i]].second.second.second] != 1) continue;
+            if (got + pk[pp[ver][i]].second.first.first + 1 * val > W) continue;
+            
+            used[pk[pp[ver][i]].second.first.second] = 1;
+            got += pk[pp[ver][i]].second.first.first;
+            carr[pk[pp[ver][i]].second.second.second].push_back({pk[pp[ver][i]].second.first.second,
+                    pk[pp[ver][i]].second.first.first});
+            
+            Ttmp += pk[pp[ver][i]].first;
+            RES.push_back({1, pk[pp[ver][i]].second.first.second});
+        }
+        
+        D -= abs(dist[way[i]] - dist[way[i-1]]);
+        RES.push_back({0, way[i]});
+    }
+    
+    
+    int ver = way.back();
+    willBeThere[ver]--;
+    if (carr.count(ver))
+        for(auto x : carr[ver]) {
+            RES.push_back({2, x.first});
+            got -= x.second;
+        }
+    
+    return;
+}
+
+double c1, c2;
+
+int cmp(pair<int, pair<pair<int, int>, pair<int, int> > > a, pair<int, pair<pair<int, int>, pair<int, int> > > b) {
+    
+    return a.first * c1 + DS(a.second.second.first, a.second.second.second) * c2 >
+    b.first * c1 + DS(b.second.second.first, b.second.second.second) * c2;
+}
+
+int cmp2(int i1, int i2) {
+    return pk[i1] < pk[i2];
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    int n, m;
+    cin >> n >> m;
+    
+    vector<pair<int, pair<int, int>>> v;
+    for(int i = 0; i < m; ++i) {
+        int x, y, z;
+        cin >> x >> y >> z;
+        g[x].push_back({y, z});
+        g[y].push_back({x, z});
+        v.push_back({z, {x,y}});
+    }
+    for(int i = 1; i <= n; ++i)
+        p[i] = i;
+    
+    sort(v.begin(), v.end());
+    for(auto ed : v) {
+        if (un(ed.second.first, ed.second.second)) {
+            gt[ed.second.first].push_back({ed.second.second, ed.first});
+            gt[ed.second.second].push_back({ed.second.first, ed.first});
+        }
+    }
+    dist[1] = 0;
+    dfs(1);
+    
+    int k;
+    cin >> k;
+    int a, b, vv, c;
+    
+    pk.clear();
+    for(int i = 0; i < k; ++i) {
+        cin >> a >> b >> vv >> c;
+        pk.push_back({c, {{vv, i+1}, {a, b}}});
+    }
+    
+    
+    long long ans = 0;
+    vector<pair<int, int>> ress;
+    cin >> S >> D >> W;
+    
+    sort(pk.begin(), pk.end()); reverse(pk.begin(), pk.end());
+    
+    
+    int DD = D;
+    int SS = S;
+    int MOVES = 50;
+    c1 = 1, c2 = 0;
+    
+    for(int i = 0; i < MOVES; ++i) {
+        memset(used, 0, sizeof used);
+        for(int i = 0; i <= n; ++i) {
+            pp[i].clear();
+            idx[i] = 0;
+        }
+        
+        for(int i = 0; i < k; ++i)
+            pp[pk[i].second.second.first].push_back(i);
+        
+        
+        for(int i = 1; i <= n; ++i)
+            sort(pp[i].begin(), pp[i].end(), cmp2);
+        
+        RES.clear();
+        Ttmp = 0;
+        D = DD;
+        S = SS;
+        for(auto x : pk) {
+            if (used[x.second.first.second]) continue;
+            
+            if (DS(S, x.second.second.first) + DS(x.second.second.first, x.second.second.second) <= D) {
+                got = 0;
+                mk_move(S, x.second.second.first, x.second.second.second,
+                                        x.second.first.second, x.second.first.first);
+                S = x.second.second.second;
+            }
+            
+        }
+        
+        if (Ttmp >= ans) {
+            ress = RES;
+            ans = Ttmp;
+        }
+        
+        c1 -= 1.0 / MOVES;
+        c2 += 1.0 / MOVES;
+        sort(pk.begin(), pk.end(), cmp);
+        
+        if (clock() / (double) CLOCKS_PER_SEC > 4.3) break;
+    }
+    
+    
+    cout << ress.size() << "\n";
+    for(auto x : ress)
+        cout << x.first << " " << x.second << "\n";
+    
+    return 0;
+}

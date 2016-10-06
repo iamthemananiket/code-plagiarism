@@ -1,0 +1,40 @@
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+
+using namespace std;
+
+char s[100005];
+int w[100005];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n, k;
+    scanf("%d %d %s", &n, &k, s);
+    memset(w, 0, sizeof w);
+    int flip = 0, ans = 0;
+    for (int i = 0; i < n; ++i) {
+      flip ^= w[i];
+      if ((flip == 0 && s[i] == 'R') || (flip == 1 && s[i] == 'G')) {
+        ++ans;
+        if (i + k < n) {
+          w[i + k] ^= 1;
+        }
+        flip ^= 1;
+      }
+    }
+    printf("%d\n", ans);
+  }
+  return 0;
+}

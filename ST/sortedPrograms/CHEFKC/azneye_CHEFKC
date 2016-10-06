@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAXV = 80;
+vector<pair<int,int>> adj[MAXV], rev[MAXV];
+vector<pair<int,int>> ord;//(sum adj weight, vertex)
+int col[MAXV];
+int total, S,T, V, K;
+
+void go(int at, int rem) {
+  if (at==V) {
+    if(++total == K) {
+      throw string("vera");
+    }
+    return;
+  }
+  const int v=ord[at].second;
+  if (v != T) {
+    col[v] = 0;
+    int now = rem;
+    for(const auto& e : adj[v]) {
+      assert(~col[e.first]);
+      if(col[e.first] == 1) {
+        now -= e.second;
+        if(now<0)break;
+      }
+    }
+    if(now>=0) 
+      go(at+1, now);
+  }
+  if(v != S) {
+    col[v] = 1;
+    int now = rem;
+    for(const auto& e : rev[v]) {
+      assert(~col[e.first]);
+      if(col[e.first] == 0) {
+        now -= e.second;
+        if(now<0)break;
+      }
+    }
+    if(now>=0) 
+      go(at+1, now);
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int E;
+  cin >> V >> E >> K;
+  cin >> S >> T;
+  vector<tuple<int,int,int>> edges(E);
+  ord.resize(V);
+  for(auto& e : edges){
+    int a,b,c;
+    cin>>a>>b>>c;
+    e=make_tuple(a,b,c);
+    ord[a-1].first+=c;
+    ord[b-1].first+=c;
+  }
+  for(int v=1;v<=V;++v)
+    ord[v-1].second=v;
+  for(const auto& e : edges) {
+    int a, b, c;
+    tie(a,b,c)=e;
+    if(ord[a-1] < ord[b-1]) {
+      adj[a].push_back({b,c});
+    } else {
+      rev[b].push_back({a,c});
+    }
+  }
+  sort(ord.rbegin(),ord.rend());
+  int res=0,low=0, hig=int(777e6);
+  while(low<=hig) {
+    const int mid=(low+hig)>>1;
+    bool ok = true;
+    memset(col,-1,sizeof(col));
+    try {
+      total=0;
+      go(0,mid);
+    } catch (...) {
+      ok=false;
+    }
+    if(ok) {
+      res=mid+1;
+      low=mid+1;
+    } else {
+      hig=mid-1;
+    }
+  }
+  cout<<res<<endl;
+  return 0;
+}

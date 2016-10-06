@@ -1,0 +1,138 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 100;
+const int Lmax = 1000;
+
+int T, N, L;
+int B[Nmax], resturi[Nmax];
+int contor[10];
+int solution[Lmax];
+string A;
+
+int mod( const string &str, int M )
+{
+    int rest = 0;
+
+    for ( int i = str.size() - 1; i >= 0; i-- )
+    {
+        int c = str[i] - '0';
+
+        rest = ( 10 * rest + c ) % M;
+    }
+
+    return rest;
+}
+
+void solve()
+{
+    for ( int pos = L - 1; pos >= 0; pos-- )
+    {
+        int best = 1e9;
+        int bestD = -1;
+
+        for ( int d = 0; d <= 9; ++d )
+        {
+            if ( contor[d] != 0 )
+            {
+                int sumResturi = 0;
+
+                for ( int i = 0; i < N; ++i )
+                {
+                    int r = ( resturi[i] * 10 + d ) % B[i];
+
+                    sumResturi += r;
+                }
+
+                if ( sumResturi < best )
+                {
+                    best = sumResturi;
+                    bestD = d;
+                }
+            }
+        }
+
+        assert( bestD != -1 );
+
+        solution[pos] = bestD;
+        contor[bestD]--;
+
+        for ( int i = 0; i < N; ++i )
+            resturi[i] = ( resturi[i] * 10 + bestD ) % B[i];
+    }
+}
+
+int F( const string str )
+{
+    int ans = 0;
+
+    for ( int i = 0; i < N; ++i )
+        ans += mod( str, B[i] );
+
+    return ans;
+}
+
+string brute( string str )
+{
+    sort( str.begin(), str.end() );
+
+    string sol;
+    int best = 1e9;
+
+    do
+    {
+        int a = F( str );
+
+        if ( a < best )
+        {
+            best = a;
+            sol = str;
+        }
+
+    } while ( next_permutation( str.begin(), str.end() ) );
+
+    return sol;
+}
+
+int main()
+{
+   /// ifstream cin("data.in");
+
+    ios_base::sync_with_stdio( false );
+
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> A;
+        cin >> N;
+
+        for ( int i = 0; i < N; ++i )
+            cin >> B[i];
+
+        L = A.size();
+
+        if ( L <= 10 )
+        {
+            cout << brute( A ) << "\n";
+        }
+        else
+        {
+            memset( contor, 0, sizeof( contor ) );
+            memset( resturi, 0, sizeof( resturi ) );
+
+            for ( int i = 0; i < L; ++i )
+                contor[ A[i] - '0' ]++;
+
+            solve();
+
+            for ( int i = 0; i < L; ++i )
+                cout << solution[i];
+
+            cout << "\n";
+        }
+    }
+
+    return 0;
+}

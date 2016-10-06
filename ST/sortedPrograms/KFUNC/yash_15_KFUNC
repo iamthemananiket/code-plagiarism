@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+int f(ll x)
+{
+    if(x<10)
+        return (int)x;
+    int s=0;
+    while(x)
+    {
+        s+=x%10;
+        x/=10;
+    }
+    return f(s);
+}
+
+vector<int> val;
+bool used[10];
+
+int main() 
+{
+    int t,a,d,sum,x,y;
+    ll l,r,n,ans;
+    scanf("%d",&t);
+    while(t--)
+    {
+        ans=sum=0;
+        scanf("%d %d %lld %lld",&a,&d,&l,&r);
+        memset(used,0,sizeof used);
+        val.clear();
+        x=f(f(a)+f(l-1)*f(d));        
+        y=f(d);
+        while(!used[x])
+        {
+            val.push_back(x);
+            used[x]=1;
+            x=1+(x-1+y)%9;
+            sum+=x;
+        }
+        n=r-l+1;
+        ans=(n/val.size())*sum;
+        n%=val.size();
+        for(int i=0;i<n;i++)
+            ans+=val[i];
+        printf("%lld\n",ans);
+    }
+	return 0;
+}

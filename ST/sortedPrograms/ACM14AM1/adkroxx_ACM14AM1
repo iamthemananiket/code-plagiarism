@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+
+#define MOD 1000000007
+#define MAX 100
+#define identity 0
+#define ll long long
+#define slld(t) scanf("%lld",&t)
+#define sd(t) scanf("%d",&t)
+#define pd(t) printf("%d\n",t)
+#define plld(t) printf("%lld\n",t)
+#define DBUG(x) cout<<x<<endl;
+#define pcc pair<char,char>
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define tr(container,it) for(typeof(container.begin()) it=container.begin();it!=container.end();it++)
+#define mp(a,b) make_pair(a,b)
+
+using namespace std;
+
+int main()
+{
+	int t;
+	sd(t);
+	while(t--){
+		int n,p;
+		sd(n);sd(p);
+		int ans=0;
+		for(int i=1;i<=n;i++){
+			int x;
+			sd(x);
+			
+			if(x>=p) ans++;
+		}
+		pd(ans);
+	}
+}

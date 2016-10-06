@@ -1,0 +1,165 @@
+#include <cstdio>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+#include <stack>
+#include <vector>
+#include <ctime>
+#include <cassert>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+#define fname ""
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+#define ll long long
+#define ull unsigned long long
+#define inf 1000000000
+#define INF 1000000000000000000ll
+const int N = 100500;
+char a[66][66], ans[N];
+int sz = 0;
+int n, m;
+int sx, sy, ex, ey;
+int was[66][66];
+int dx[6] = {-1, 1, 0, 0};
+int dy[6] = {0, 0, 1, -1};
+char go[6] = {'U', 'D', 'R', 'L'};
+char anti[6] = {'D', 'U', 'L', 'R'};
+
+bool ok(int x, int y) {
+	return (x > 0 && y > 0 && x <= n && y <= m);
+}
+
+void dfs(int x, int y) {
+	was[x][y] = 1;
+	for (int it = 0; it < 4; ++ it) {
+		int nx = dx[it] + x;
+		int ny = dy[it] + y;
+		if (ok(nx, ny) && a[nx][ny] != '*' && !was[nx][ny]) {
+			ans[++sz] = go[it];
+			dfs(nx, ny);
+			ans[++sz] = anti[it];
+		}
+	}
+}
+
+void Try(int x, int y) {
+	for (int i = 1; i <= sz; ++ i) {
+		if (ans[i] == 'L' && y > 1 && a[x][y - 1] != '*') --y;
+		if (ans[i] == 'R' && y < m && a[x][y + 1] != '*') ++y;
+		if (ans[i] == 'U' && x > 1 && a[x - 1][y] != '*') --x;
+		if (ans[i] == 'D' && x < n && a[x + 1][y] != '*') ++x;
+//		cout << x << " " << y << endl;
+	}
+	cout << x << " " << y;
+}
+
+void MOVE() {
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'U';
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'L';
+	for (int it = 1; it <= 20; ++ it) {
+		for (int cc = 1; cc <= it; ++ cc) {
+			ans[++sz] = 'D';
+		}
+		for (int i = 1; i <= 20; ++ i) ans[++sz] = 'L';
+		for (int i = 1; i <= 20; ++ i) ans[++sz] = 'U';
+	}
+}
+
+void MOVEE() {
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'U';
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'L';
+	for (int it = 1; it <= 20; ++ it) {
+		for (int cc = 1; cc <= it; ++ cc) {
+			ans[++sz] = 'R';
+		}
+		for (int i = 1; i <= 20; ++ i) ans[++sz] = 'U';
+		for (int i = 1; i <= 20; ++ i) ans[++sz] = 'L';
+	}
+}
+
+
+int main() {
+	#ifndef ONLINE_JUDGE
+    freopen(fname"in", "r", stdin);
+    freopen(fname"out", "w", stdout);
+	#endif
+	srand(time(0));
+
+	scanf("%d %d\n", &n, &m);
+	
+	for (int i = 1; i <= n; ++ i) {
+		for (int j = 1; j <= m; ++ j) {
+			scanf("%c", &a[i][j]);
+		}
+		scanf("\n");
+	}
+	for (int i = 1; i <= 100000; ++ i) {
+		printf("%c", go[rand() % 4]);
+	}
+	return 0;
+///*
+/*
+	cout << n << " " << m << endl;
+	for (int i = 1; i <= n; ++ i) {
+		for (int j = 1; j <= m; ++ j) cout << a[i][j];
+		cout << endl;
+	}
+	cout << endl;
+*/
+
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'U';
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'L';
+	
+//	for (int it = 1; it <= 20; ++ it) {
+		MOVE();
+		MOVEE();
+//	}
+
+///*
+	cout << sz << endl;
+	for (int i = 1; i <= n; ++ i) {
+		for (int j = 1; j <= m; ++ j) {
+			if (a[i][j] != '*') {
+				cout << i << " " << j << " -> "; Try(i, j);
+				cout << endl;
+			}
+		}
+	}
+//	*/
+
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'U';
+	for (int i = 1; i <= 20; ++ i) ans[++sz] = 'L';
+	
+	sx = -1, sy = -1;
+	for (int i = 1; i <= n; ++ i) {
+		for (int j = 1; j <= m; ++ j) {
+			if (a[i][j] == '.' && sx == -1) {
+				sx = i, sy = j;
+			}
+			if (a[i][j] == 'C') {
+				ex = i, ey = j;
+			}
+		}
+	}
+	
+	cout << "start -> " << sx << " " << sy << endl;
+	
+	sz = 0;
+	dfs(sx, sy);
+	
+	for (int i = 1; i <= sz; ++ i) printf("%c", ans[i]);
+
+    return 0;
+}

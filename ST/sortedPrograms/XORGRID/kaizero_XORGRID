@@ -1,0 +1,50 @@
+#include<stdio.h>
+#include<algorithm>
+#include<map>
+#include<vector>
+using namespace std;
+int n, w[20][20];
+vector<int> A[20], B[20];
+map<int,int>Map;
+void DFS(int x, int y, int a, int ck){
+	if (x + y == 1 + n){
+		if (!ck)A[x].push_back(a);
+		else B[x].push_back(a);
+		return;
+	}
+	if (!ck){
+		if(x < n)DFS(x + 1, y, a^w[x + 1][y], ck);
+		if(y < n)DFS(x, y + 1, a^w[x][y + 1], ck);
+	}
+	else{
+		if (x > 1)DFS(x - 1, y, a^w[x][y], ck);
+		if (y > 1)DFS(x, y - 1, a^w[x][y], ck);
+	}
+}
+int Res;
+void Do(int x){
+	int S = 0, i, j, SS = 0;
+	for (i = 29; i >= 0; i--){
+		SS += (1 << i);
+		Map.clear();
+		for (j = 0; j < B[x].size(); j++){
+			Map[B[x][j] & SS] = 1;
+		}
+		for (j = 0; j < A[x].size(); j++){
+			if (Map[(S + (1 << i)) ^ (A[x][j] & SS)])break;
+		}
+		if (j != A[x].size())S += 1 << i;
+	}
+	Res = max(Res, S);
+}
+int main(){
+	int i, j;
+	scanf("%d", &n);
+	for (i = 1; i <= n; i++)for (j = 1; j <= n; j++)scanf("%d", &w[i][j]);
+	DFS(1, 1, w[1][1], 0);
+	DFS(n, n, 0, 1);
+	for (i = 1; i <= n; i++){
+		Do(i);
+	}
+	printf("%d\n", Res);
+}

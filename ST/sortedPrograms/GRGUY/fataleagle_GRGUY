@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N;
+char S[200001];
+char T[200001];
+
+int solve(int pos, char A[], char B[])
+{
+    if(A[pos]=='#')
+        return 0x3f3f3f3f;
+    if(pos==N-1)
+        return 0;
+    if(A[pos+1]=='.')
+        return solve(pos+1, A, B);
+    if(B[pos+1]=='.')
+        return 1+solve(pos+1, B, A);
+    return 0x3f3f3f3f;
+}
+
+void _main()
+{
+    scanf("%s%s", S, T);
+    N=strlen(S);
+    int ans=min(solve(0, S, T), solve(0, T, S));
+    if(ans>=0x3f3f3f3f)
+        printf("No\n");
+    else
+        printf("Yes\n%d\n", ans);
+}
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <algorithm>
+#include <math.h>
+#include <vector>
+
+#define N 410
+#define A first
+#define B second
+
+using namespace std;
+
+typedef pair<int, int> PII;
+typedef pair<PII, double> PI3;
+
+vector<PII> ans;
+int F[N];
+
+PII pos[N];
+PI3 Edge[N*N];
+int t, n;
+
+double dis(int a, int b) {
+    double dx = pos[a].A - pos[b].A;
+    double dy = pos[a].B - pos[b].B;
+    return sqrt(dx * dx + dy * dy);
+}
+int cmpDIS(PI3 a, PI3 b) {
+    return a.B < b.B;
+}
+int P(int u) {
+    if(F[u] == u) {
+        return u;
+    }
+    return F[u] = P(F[u]);
+}
+void evaluate() {
+    scanf("%d", &n);
+    for(int i = 1;i <= n;i++) {
+        scanf("%d%d", &pos[i].A, &pos[i].B);
+        F[i] = i;
+    }
+    int cnt = 0;
+    for(int i = 1;i <= n;i++) {
+        for(int j = i+1;j <= n;j++) {
+            Edge[cnt++] = PI3(PII(i, j), dis(i, j));
+        } 
+    }
+    sort(Edge, Edge+cnt, cmpDIS);
+    ans.clear();
+    for(int i = 0;i < cnt;i++) {
+        int u = Edge[i].A.A, v = Edge[i].A.B;
+        if(P(u) != P(v)) {
+            ans.push_back(PII(u, v));
+            F[P(u)] = P(v);
+        }
+    }
+    for(int i = 0;i < ans.size();i++) {
+        printf("%d %d\n", ans[i].A, ans[i].B);
+    }
+}
+int main() {
+    scanf("%d", &t);
+    while(t--) {
+        evaluate();
+    }
+    return 0;
+}

@@ -1,0 +1,78 @@
+#include<bits/stdc++.h>
+using namespace std;
+int POWER[17];
+int disc[65536+10];
+int countBit[65536+10];
+int countB(int x) {
+	int ret=0;
+	while(x!=0) {
+		ret++;
+		x-=x&-x;	
+	}
+	return ret;
+}
+int main() {
+	int t;
+	int mul=1;
+	for(int i=0;i<17;++i) {
+		POWER[i]=mul;
+		mul<<=1;
+	}
+	for(int i=0;i<POWER[15];++i) {
+		if(!(i&1))
+			countBit[i]=countB(i);
+		else
+			countBit[i]=countBit[i-1]+1;
+	}
+	scanf("%d",&t);
+	vector<int> sb;
+	while(t--) {
+		int n;
+		scanf("%d",&n);
+		int sum=0,ans=-1;
+		int i;
+		vector<int> ar(n);
+		for(i=0;i<n;++i)
+			scanf("%d",&ar[i]),sum+=ar[i];
+		for(i=0;i<POWER[n]+2;++i)
+			disc[i]=0;
+		sort(ar.rbegin(),ar.rend());
+		int m;
+		scanf("%d",&m);
+		for(i=0;i<m;i++) {
+			int c;
+			scanf("%d",&c);
+			int mm=0;
+			int j;
+			int upto=0;
+			int idx=1;
+			vector<int> v(n,true);
+			sb.clear();
+			sb.resize(POWER[n-c]);
+			sb[0]=0;
+			for(j=0;j<c;j++) {
+				int x;
+				scanf("%d",&x);
+				v[x-1]=false;
+				mm+=POWER[x-1];
+			}
+			for(j=0;j<n;j++) {
+				if(v[j]) {
+					int k;
+					for(k=0;k<=upto;k++) {
+						disc[sb[k]+mm]=max(disc[sb[k]+mm],disc[sb[k]]+ar[countBit[sb[k]]+c-1]);
+						sb[idx]=sb[k]+POWER[j];
+						disc[sb[idx]+mm]=max(disc[sb[idx]+mm],disc[sb[idx]]+ar[countBit[sb[idx]]+c-1]);
+						idx++;						
+					}
+					upto=idx-1;
+				}
+			}
+			
+		}
+		for(int j=0;j<POWER[n];j++)
+			ans=max(ans,disc[j]);
+		printf("%d\n",sum-ans);
+	}
+	return 0;
+} 

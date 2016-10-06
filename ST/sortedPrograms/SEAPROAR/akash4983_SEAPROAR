@@ -1,0 +1,130 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define sz size()
+
+typedef long long int LL;
+typedef unsigned int UI;
+typedef unsigned long long int ULL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int N = 131072 + 1;
+
+map<ULL, UI > M;
+
+unsigned X; // we assume that unsigned is a 32bit integer type
+
+void srand1(unsigned S){
+  X = S;
+}
+
+unsigned nextInteger1(void){
+  X = X * 1103515245 + 12345;
+  return (X / 65536) % 32768;
+}
+
+void generator1(int N, unsigned S){
+  srand1(S);
+  ULL num = 0;
+  for(int i=1;i<=N;i++){
+    UI ans = nextInteger1() % 2;
+    // printf("%u",ans);
+    num <<= 1;
+    num |= ans;
+  }
+  if(M.find(num) != M.end()) {
+    // printf("%u %u\n",S,M[num]);
+  } else {
+    M[num] = S;
+  }
+  // printf("\n");
+}
+
+/* ------------------ end here -----------------------*/
+
+/* ------------------ start here ---------------------*/
+UI x, y, z, w; // we assume that unsigned is a 32bit integer type
+
+void srand2(unsigned S){
+  x = S;
+  y = x * S;
+  z = y * S;
+  w = z * S;
+}
+
+unsigned nextInteger2(void){
+  unsigned t = x ^ (x << 11);
+  x = y; y = z; z = w;
+  return w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)); 
+}
+
+string generator2(int N, unsigned S){
+  srand2(S);
+  string res;
+  for(int i=1;i<=N;i++){
+    UI ans = nextInteger2() % 2;
+    res += ans + '0';
+  }
+  return res;
+  // printf("\n");
+}
+
+void pre() {
+  rep(i,0,N) {
+    generator1(64, i);
+  }
+}
+
+string s;
+
+int main() {
+  int t;
+  S(t);
+  pre();
+  while(t--) {
+    cin >> s;
+    if(s.size() < 64) {
+      bool Xorshift = false;
+      rep(i,0,501) {
+        if(generator2(s.size(), i) == s) {
+          Xorshift = true;
+          break;
+        }
+      }
+      if(!Xorshift) {
+        printf("LCG\n");
+      } else {
+        printf("Xorshift\n");
+      }
+    } else {
+      ULL num = 0;
+      rep(i,0,64) {
+        num <<= 1;
+        num |= s[i] - '0';
+      }
+      if(M.find(num) != M.end()) {
+        printf("LCG\n");
+      } else {
+        printf("Xorshift\n");
+      }
+    }
+  }
+  return 0;
+}

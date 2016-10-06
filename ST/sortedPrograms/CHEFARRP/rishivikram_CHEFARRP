@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define SET(a,b) fill(a.begin(),a.end(),b)
+#define ll long long int
+#define printl(x) printf("%lld\n",x)
+#define print(x) printf("%d\n",x)
+#define printLL(x) printf("%I64d\n",x)
+#define sc(x) scanf("%d",&x)
+#define scl(x) scanf("%lld",&x)
+#define DEBUG(x) cout<<">> : "<<#x<<" : "<<x<<"   "
+#define variable qwertypoiu
+
+inline bool EQ(double a,double b) { return fabs(a - b) < 1e-9; }
+
+const int MAXN = 55;
+ll prod[MAXN];
+ll sum[MAXN];
+int main() {
+	int t;
+	sc(t);
+	while(t--) {
+		int n;
+		ll c=0;
+		sc(n);
+		prod[0]=1;
+		sum[0]=0;
+		for(int i=1;i<=n;i++) {
+			ll x;
+			scl(x);
+			sum[i]=x+sum[i-1];
+			prod[i]=x*prod[i-1];
+			if(sum[i]==prod[i])
+				c++;
+		}
+		for(int i=2;i<=n;i++) {
+			for(int j=i;j<=n;j++) {
+				ll val1=prod[j]/prod[i-1];
+				ll val2=sum[j]-sum[i-1];
+				if(val1==val2)
+					c++;
+			}
+		}
+		printl(c);
+	}
+	return 0;
+}

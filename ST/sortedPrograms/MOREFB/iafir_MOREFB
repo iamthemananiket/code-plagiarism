@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int mod = 99991;
+
+int fib[33335], nfib, s[2020], dp[33333][2020], temp[2020];
+
+int main() {
+    int n, k;
+    fib[0] = 0; fib[1] = fib[2] = 1;
+    nfib = 3;
+    while(fib[nfib-2] != 0 || fib[nfib-1] != 1) {
+        fib[nfib] = (fib[nfib-1] + fib[nfib-2]) % mod;
+        nfib++;
+    }
+    nfib -= 2;
+    scanf("%d%d", &n, &k);
+    for(int i = 0; i<n; i++) {
+        scanf("%d", s+i);
+        s[i] %= nfib;
+    }
+    memset(dp, 0, sizeof dp);
+    dp[0][0] = 1;
+    for(int i = 0; i <n; i++) {
+        for(int l = k-1; l>=0; l--) {
+            for(int j = 0; j<nfib; j++) {
+                dp[j][l+1] += dp[(j+nfib-s[i]) % nfib][l];
+                dp[j][l+1] %= nfib;
+            }
+        }
+    }
+    long long ans = 0;
+    for(int i = 0; i<nfib; i++) {
+        ans += (dp[i][k]*fib[i] % mod);
+        ans %= mod;
+    }
+    printf("%lld\n", ans);
+	return 0;
+}

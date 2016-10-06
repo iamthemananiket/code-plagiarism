@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+void solve() {
+	ll n; sl(n); ll m = n;
+	int k = 0;
+	while (m%10 == 0) { m/=10; }
+	while (m%5 == 0) { k++; m/=5; }
+	k = (k+1)/2;
+	rep(i,1,k) {
+		n*=4;
+	}
+	prl(n); endc;
+	
+}
+
+
+int main() {
+	int t; s(t); rep(i,1,t) solve();
+}

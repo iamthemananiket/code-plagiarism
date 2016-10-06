@@ -1,0 +1,127 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <cstring>
+#include <queue>
+#include <utility>
+
+#define INF 1000000000
+
+#define MAXN 100
+#define MAXM 100
+#define MAXNODE (MAXN*MAXM+2)
+
+using namespace std;
+
+int score[MAXN][MAXM];
+
+struct edge {
+  int other, caps;
+};
+vector<edge> edges;
+vector<int> adj[MAXNODE];
+
+int dist[MAXNODE], pos[MAXNODE];
+
+bool bfs(int source, int sink, int nnode) {
+  queue<int> q;
+  
+  for (int v = 0; v < nnode; v++) dist[v] = INF;
+  
+  q.push(source);
+  dist[source] = 0;
+
+  while (!q.empty()) {
+    int v = q.front(); q.pop();
+
+    for (int id: adj[v]) {
+      edge &ed = edges[id];
+      if (ed.caps > 0 && dist[ed.other] > dist[v]+1) {
+	dist[ed.other] = dist[v]+1;
+	q.push(ed.other);
+      }
+    }
+  }
+
+  return dist[sink] < INF;
+}
+
+int dfs(int v, int sink, int maxf) {
+  if (v == sink) return maxf;
+  for (int &i = pos[v]; i < (int)adj[v].size(); i++) {
+    edge &ed = edges[adj[v][i]];
+    const int v2 = ed.other, caps = ed.caps;
+
+    if (caps > 0 && dist[v2] == dist[v]+1) {
+      int f = dfs(v2, sink, min(maxf, caps));
+      if (f > 0) {
+	ed.caps -= f;
+	edges[adj[v][i]^1].caps += f;
+	return f;
+      }
+    }
+  }
+  return 0;
+}
+
+int maxflow(int source, int sink, int nnode) {
+  int result = 0;
+
+  while (bfs(source, sink, nnode)) {
+    for (int v = 0; v < nnode; v++)
+      pos[v] = 0;
+    while (int flow = dfs(source, sink, INF))
+      result += flow;
+  }
+
+  return result;
+}
+
+void add_edge(int from, int to, int capsto, int capsback) {
+  adj[from].push_back((int)edges.size());
+  edges.push_back((edge){to, capsto});
+
+  adj[to].push_back((int)edges.size());
+  edges.push_back((edge){from, capsback});
+}
+
+int idxm;
+
+int index(int i, int j) {
+  return i*idxm + j;
+}
+
+int main() {
+  int n, m, nk;
+
+  scanf("%d %d %d", &n, &m, &nk);
+  idxm = m;
+
+  const int source = n*m, sink = n*m+1;
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      scanf("%d", &score[i][j]);
+      
+      int prev = (j-1 >= 0 ? index(i, j-1) : source);
+      add_edge(prev, index(i, j), (score[i][j] == -1 ? INF : 100 - score[i][j]), 0);
+    }
+    add_edge(index(i, m-1), sink, INF, 0);
+  }
+
+  for (int k = 0; k < nk; k++) {
+    int a, b;
+    scanf("%d %d", &a, &b); a--, b--;
+    for (int j = 0; j < m; j++)
+      add_edge((j-1 >= 0 ? index(a, j-1) : source), index(b, j), INF, 0);
+  }
+
+  double result = (100 * n - maxflow(source, sink, n*m+2)) / (1.0 * n);
+
+  printf("%.2f\n", result);
+  
+  return 0;
+}

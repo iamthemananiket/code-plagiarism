@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+#define N 500010
+using namespace std;
+int n,q,son[N][26],wz[N],fail[N],f[N],tot,v[N],ne[N],head[N],l,dad[N],i,x,y,j;
+long long g[N],k;
+char s[N];
+bool cmp(int x,int y){return wz[x]<wz[y];}
+void add(int x,int y,char c)
+{
+	c-='a';wz[y]=wz[x]+1;
+	for(;x>=0&&!son[x][c];x=fail[x])son[x][c]=y;
+	if(x<0){fail[y]=0;return;}
+	int t=son[x][c];
+	if(wz[t]==wz[x]+1){fail[y]=t;return;}
+	fail[++tot]=fail[t];wz[tot]=wz[x]+1;
+	fail[t]=fail[y]=tot;
+	for(int i=0;i<26;i++)son[tot][i]=son[t][i];
+	for(;x>=0&&son[x][c]==t;x=fail[x])son[x][c]=tot;
+}
+void add(int x,int y){v[++l]=y;ne[l]=head[x];head[x]=l;}
+void dfs(int x)
+{
+	add(dad[x],x,s[x]);
+	for(int i=head[x];i;i=ne[i])
+		if(dad[x]!=v[i])dad[v[i]]=x,dfs(v[i]);
+}
+int main()
+{
+	scanf("%d%d%s",&n,&q,s+1);
+	fail[0]=-1;
+	for(i=1;i<n;i++)
+		scanf("%d%d",&x,&y),add(x,y),add(y,x);
+	tot=n;dfs(1);
+	for(i=1;i<=tot;i++)f[i]=i;
+	sort(f+1,f+tot+1,cmp);
+	for(i=tot;i>=0;i--)
+	{
+		g[f[i]]=1;
+		for(j=0;j<26;j++)
+			if(son[f[i]][j])g[f[i]]+=g[son[f[i]][j]];
+	}
+	printf("%lld\n",g[0]);
+	while(q--)
+	{
+		scanf("%s%lld",s,&k);
+		if(k>g[0]){puts("-1");continue;}
+		for(i=0;k>1;)
+		{
+			k--;
+			for(j=0;j<26;j++)
+			if(son[i][s[j]-'a'])
+			{
+				if(g[son[i][s[j]-'a']]>=k)break;
+				else k-=g[son[i][s[j]-'a']];
+			}
+			putchar(s[j]);
+			i=son[i][s[j]-'a'];
+		}
+		puts("");
+	}
+}

@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+using namespace std;
+char ch[] = {'L', 'T', 'I', 'M', 'E'};
+int main(){
+	map<char, int> m;
+	m['L'] = 1;
+	m['T'] = 2;
+	m['I'] = 3;
+	m['M'] = 4;
+	m['E'] = 5; 
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		string s;
+		cin>>s;
+		if((int)s.length() < 5){
+			cout<<"NO\n";
+			continue;
+		}
+		int cnt[100];
+		for (int i = 0; i < 100; i++) cnt[i] = 0;
+		string ans = "";
+		for (int i = 0; i < (int)s.length(); i++) {
+			ans.push_back(','); 
+			cnt[s[i] - 'A']++;	
+		} 
+		bool ok = true;
+		for (int i = 0; i < 5; i++) {
+			if(cnt[ch[i] - 'A'] == 0) {
+				ok = false;
+				break;
+			}
+			else{
+				cnt[ch[i] - 'A']--;
+				ans[i] = ch[i];
+			}
+		}
+		for (int i = (int)s.length() - 1; i >= (int)s.length() - 5; i--) {
+			int ind = (int)s.length() - 1 - i;
+			if(ans[i] == ','){
+				if(cnt[ch[ind] - 'A'] == 0){
+					ok = false;
+					break;
+				}
+			}
+			else{
+				if(ans[i] != ch[ind]){
+					ok = false;
+					break;
+				}
+			}
+		}
+		if(ok) cout<<"YES\n";
+		else cout<<"NO\n"; 
+	}	
+}

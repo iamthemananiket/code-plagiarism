@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int a[111];
+int b[111];
+
+int main() {
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int m, x, y;
+    scanf("%d %d %d", &m, &x, &y);
+    memset(a, 0, sizeof a);
+    for (int i = 0; i < m; ++i) {
+      int pos;
+      scanf("%d", &pos);
+      a[pos] = 1;
+    }
+    memset(b, 0, sizeof b);
+    for (int i = 1; i <= 100; ++i) {
+      if (a[i] == 0) {
+        continue;
+      }
+      b[i] = 1;
+      {
+        int from = i;
+        for (int it = 0; it < y; ++it) {
+          for (int j = 0; j <= x; ++j) {
+            if (from + j <= 100) {
+              b[from + j] = 1;
+            }
+          }
+          from += x;
+        }
+      }
+      {
+        int from = i;
+        for (int it = 0; it < y; ++it) {
+          for (int j = 0; j <= x; ++j) {
+            if (from - j >= 1) {
+              b[from - j] = 1;
+            }
+          }
+          from -= x;
+        }
+      }
+    }
+    int ans = 0;
+    for (int i = 1; i <= 100; ++i) {
+      if (b[i] == 0) {
+        ++ans;
+      }
+    }
+    printf("%d\n", ans);
+  }
+  return 0;
+}

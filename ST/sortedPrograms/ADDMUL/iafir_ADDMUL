@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 1e5 + 5, mod = 1e9 + 7;
+
+//problem
+int n, q, a[N];
+
+//segment tree
+int s[N<<2], mul[N<<2], add[N<<2];
+
+void build(int id = 1, int l = 0, int r = n) {
+	if(r-l < 2) {
+		s[id] = a[l];
+		mul[id] = 1;
+		add[id] = 0;
+		return ;
+	}
+	int mid = (l+r) >> 1;
+	build(id*2, l, mid);
+	build(id*2 + 1, mid, r);
+	s[id] = (s[id*2] + s[id*2 + 1]) % mod;
+	mul[id] = 1;
+	add[id] = 0;
+}
+
+void upd(int id, int l, int r, int mm, int aa) {
+	mul[id] = (1LL*mul[id]*mm) % mod;
+	add[id] = (1LL*add[id]*mm + aa) % mod;
+	s[id] = (1LL*s[id]*mm + 1LL*(r-l)*aa) % mod;
+}
+
+void shift(int id, int l, int r) {
+	int mid = (l+r) >> 1;
+	upd(id*2, l, mid, mul[id], add[id]);
+	upd(id*2 +1, mid, r, mul[id], add[id]);
+	mul[id] = 1;
+	add[id] = 0;
+}
+
+void modify(int x, int y, int mm, int aa, int id = 1, int l = 0, int r = n) {
+	if(r <= x || y <= l) return;
+	if(x <= l &&  r <= y) {
+		upd(id, l, r, mm, aa);
+		return;
+	}
+	shift(id, l, r);
+	int mid = (l+r) >> 1;
+	modify(x, y, mm, aa, id*2, l, mid);
+	modify(x, y, mm, aa, id*2+1, mid, r);
+	s[id] = (s[id*2] + s[id*2 + 1]) % mod;
+}
+
+int sum(int x, int y, int id = 1, int l = 0, int r = n) {
+	if(x >= r || y <= l) return 0;
+	if(x <= l && r <= y) return s[id];
+	shift(id, l, r);
+	int mid = (l+r) >> 1;
+	int res1 = sum(x, y, id*2, l, mid);
+	int res2 = sum(x, y, id*2+1, mid, r);
+	return (res1 + res2) % mod;
+}
+
+int main() {
+	scanf("%d%d", &n, &q);
+	for(int i = 0; i<n; i++)
+		scanf("%d", a+i);
+	build();
+	while(q--) {
+		int c, x, y, v;
+		scanf("%d%d%d", &c, &x, &y);
+		x--;
+		if(c == 1) {
+			scanf("%d", &v);
+			modify(x, y, 1, v);
+		}
+		else if(c == 2) {
+			scanf("%d", &v);
+			modify(x, y, v, 0);
+		}
+		else if(c == 3) {
+			scanf("%d", &v);
+			modify(x, y, 0, v);
+		}
+		else 
+			printf("%d\n", sum(x, y));
+	}
+	return 0;
+}

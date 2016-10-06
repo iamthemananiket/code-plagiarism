@@ -1,0 +1,86 @@
+#include<stdio.h>
+#include<algorithm>
+#include<map>
+#include<vector>
+using namespace std;
+int n, w[101000], TC, Q, p[101000], cnt, G[101000], prv[101000], D[101000], chk[101000];
+vector<int>E[101000];
+map<int, int>DP, TP;
+void Do(int a, int b){
+	int i;
+	for (i = 1; i <= cnt; i++){
+		if (p[i] * p[i]>b)break;
+		if (b % p[i] == 0){
+			E[a].push_back(i);
+			while (b % p[i] == 0){
+				b /= p[i];
+			}
+		}
+	}
+	if (b != 1){
+		if (b <= 33000) E[a].push_back(chk[b]);
+		else G[a] = b;
+	}
+}
+bool ck[101000];
+int main(){
+	int i, j, a;
+	for (i = 2; i <= 33000; i++){
+		for (j = 2; j*j <= i; j++){
+			if (i%j == 0)break;
+		}
+		if (j*j > i){
+			cnt++;
+			chk[i] = cnt;
+			p[cnt] = i;
+		}
+	}
+	scanf("%d", &TC);
+	while (TC--){
+		scanf("%d", &n);
+		for (i = 1; i <= n; i++){
+			scanf("%d", &w[i]);
+			G[i] = 0;
+			E[i].clear();
+			Do(i, w[i]);
+		}
+		for (i = 1; i <= cnt; i++){
+			prv[i] = 0;
+			D[i] = 0;
+		}
+		TP.clear();
+		DP.clear();
+		for (i = 1; i <= n; i++){
+			for (j = 0; j < E[i].size(); j++){
+				if (prv[E[i][j]] == 0){
+					D[E[i][j]] = max(D[E[i][j]], 1);
+					prv[E[i][j]] = i;
+				}
+				else D[E[i][j]] = max(D[E[i][j]],i - prv[E[i][j]] + 1);
+				ck[E[i][j]] = true;
+			}
+			if (i != 1){
+				for (j = 0; j < E[i - 1].size(); j++){
+					if (!ck[E[i - 1][j]])prv[E[i - 1][j]] = 0;
+				}
+			}
+			for (j = 0; j < E[i].size(); j++)ck[E[i][j]] = false;
+			if (G[i]){
+				if (G[i] == G[i - 1]){
+					TP[G[i]]++;
+					DP[G[i]] = max(DP[G[i]], TP[G[i]]);
+				}
+				else{
+					TP[G[i]] = 1;
+					DP[G[i]] = max(DP[G[i]], 1);
+				}
+			}
+		}
+		scanf("%d", &Q);
+		while (Q--){
+			scanf("%d", &a);
+			if (a > 33000)printf("%d\n", DP[a]);
+			else printf("%d\n", D[chk[a]]);
+		}
+	}
+}

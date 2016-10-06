@@ -1,0 +1,75 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e4 + 4;
+const int inf = 1e5 + 5;
+int n , m , k , s;
+int arr[N];
+int dist[N];
+int a , b;
+vector < int > v[N];
+int p[N];
+int ans[N];
+int val;
+int when[N];
+int sum;
+int q[N];
+int h , t;
+int solve(){
+    for(int i = 1 ; i <= n ; ++i){
+        when[i] = inf;
+        dist[i] = inf;
+    }
+    for(int i = 1 ; i <= k ; ++i){
+        when[p[i]] = i;
+    }
+    h = 0;
+    t = 0;
+    q[t++] = s;
+    dist[s] = 0;
+    int ret = sum;
+    while(h < t){
+        int node = q[h++];
+        ret -= arr[node];
+        for(int next : v[node]){
+            if(dist[next] > dist[node] + 1){
+                if(when[next] > dist[node] + 1){
+                    dist[next] = dist[node] + 1;
+                    q[t++] = next;
+                }
+            }
+        }
+    }
+    return ret;
+}
+int main(){
+    clock_t timer = clock();
+    scanf("%d %d %d %d" , &n , &m , &k , &s);
+    sum = 0;
+    for(int i = 1 ; i <= n ; ++i){
+        scanf("%d" , arr + i);
+        sum += arr[i];
+    }
+    for(int i = 1 ; i <= m ; ++i){
+        scanf("%d %d" , &a , &b);
+        v[a].emplace_back(b);
+        v[b].emplace_back(a);
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        p[i] = i;
+        ans[i] = i;
+    }
+    val = solve();
+    while(1.0 * (clock() - timer) / CLOCKS_PER_SEC <= 2.98){
+        random_shuffle(p + 1 , p + 1 + n);
+        int tmp = solve();
+        if(tmp > val){
+            val = tmp;
+            for(int i = 1 ; i <= k ; ++i){
+                ans[i] = p[i];
+            }
+        }
+    }
+    for(int i = 1 ; i <= k ; ++i){
+        printf("%d%c" , ans[i] , " \n"[i == k]);
+    }
+}

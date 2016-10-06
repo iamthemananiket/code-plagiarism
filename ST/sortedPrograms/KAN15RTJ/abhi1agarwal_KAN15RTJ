@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define M 1000000007LL
+ll powd(ll a,ll b)
+{
+	if (b==0)
+		return 1;
+	ll ret=powd(a,b/2);
+	if (b&1)
+		return ((ret*ret)%M*a)%M;
+	else
+		return (ret*ret)%M;
+}
+int main()
+{
+	int t;
+	scanf("%d",&t);
+	while (t--)
+	{
+		ll n,k;
+		scanf("%lld%lld",&n,&k);
+		ll ans=(k*(k-1))%M;
+		ll x=((k-1)+((k-2)*(k-2))%M)%M;
+		x=powd(x,n-1);
+		ans=(ans*x)%M;
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

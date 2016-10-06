@@ -1,0 +1,94 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
+
+#define ll long long
+const int N = 1e6;
+const int M = 4;
+
+struct Node {
+	ll res[M][M];
+	int cnt[M];
+} a[4 * N + 5];
+
+Node f(Node a, Node b) {
+	Node c;
+	for (int i = 0; i < M; ++i) {
+		for (int j = 0; j < M; ++j) {
+			if (i != j) {
+				c.res[i][j] = a.res[i][j] + b.res[i][j] + (ll)a.cnt[i] * b.cnt[j];
+			}
+		}
+		c.cnt[i] = a.cnt[i] + b.cnt[i];
+	}
+	return c;
+}
+
+ll query(int l, int r, int c1, int c2) {
+	int cntL = 0;
+	ll resL = 0;
+	int cntR = 0;
+	ll resR = 0;
+	while (l <= r) {
+		if (l & 1) {
+			resL += a[l].res[c1][c2] + (ll)cntL * a[l].cnt[c2];
+			cntL += a[l].cnt[c1];
+			++l;
+		}
+		if (!(r & 1)) {
+			resR += a[r].res[c1][c2] + (ll)a[r].cnt[c1] * cntR;
+			cntR += a[r].cnt[c2];
+			--r;
+		}
+		l >>= 1;
+		r >>= 1;
+	}
+	return resL + resR + (ll)cntL * cntR;
+}
+
+char str[N + 5], tmp[25];
+int pow10[7], tmpLen;
+
+int nextInt() {
+	int res = 0;
+	int x = 0;
+	for (--tmpLen; tmpLen >= 0 && tmp[tmpLen] != ' '; --tmpLen) {
+		res += (tmp[tmpLen] - '0') * pow10[x];
+		++x;
+	}
+	return res;
+}
+
+int getID[] = {-1,-1,0,-1,2,3,-1,1};
+
+int main() {
+	pow10[0] = 1;
+	for (int i = 1; i <= 6; ++i) {
+		pow10[i] = pow10[i - 1] * 10;
+	}
+	gets(str);
+	int n = strlen(str);
+	int s = 1;
+	while (s < n) {
+		s <<= 1;
+	}
+	for (int i = 0; i < s; i++) {
+		if (i < n) {
+			a[s + i].cnt[getID[str[i]-'a']] = 1;
+		}
+	}
+	for (int i = s - 1; i > 0; i--) {
+		a[i] = f(a[i << 1], a[(i << 1) + 1]);
+	}
+	gets(tmp);
+	tmpLen = strlen(tmp);
+	int q = nextInt();
+	for (int qq = 0; qq < q; ++qq) {
+		gets(tmp);
+		tmpLen = strlen(tmp);
+		int r = nextInt();
+		int l = nextInt();
+		printf("%lld\n", query(l + s - 1, r + s - 1, getID[tmp[0]-'a'], getID[tmp[2]-'a']));
+	}
+	return 0;
+}

@@ -1,0 +1,46 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+int X[] = {1, 11, 111, 1111, 11111};
+int T, H, M;
+
+
+int main() {
+    scanf("%d", &T);
+    REP ($, T) {
+	scanf("%d%d", &H, &M);
+	int ans = 0;
+	REP (d, 10) {
+	    int h, m;
+	    if (d == 0) {
+		h = 1;
+		m = 1;
+	    } else {
+		for (h=0; X[h] * d < H; h++); 
+		for (m=0; X[m] * d < M; m++); 
+	    }
+
+	    ans += h * m;
+	}
+
+	printf("%d\n", ans);
+    }
+
+
+    return 0;
+}

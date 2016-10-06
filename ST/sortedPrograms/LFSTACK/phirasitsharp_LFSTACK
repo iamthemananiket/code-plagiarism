@@ -1,0 +1,103 @@
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <numeric>
+#include <vector>
+
+std::vector< std::vector< int > > data;
+std::vector< int > result;
+int n;
+
+const int N = 2e6 + 10;
+int rem[ N ];
+
+std::vector< int > idx;
+	
+void search( void ) {
+
+	int id = result.size() - std::accumulate( idx.begin(), idx.end(), 0 );
+
+	int hash = 0;
+	for ( int i = 0 ; i < n ; ++i ) {
+		hash = hash * ( data[i].size() + 1 ) + idx[ i ];
+	}
+
+	if ( rem[ hash ] ) {
+		return;
+	}
+
+	rem[ hash ] = true;
+
+	if ( id < 0 ) {
+		return;
+	}
+
+	for ( int i = 0 ; i < n ; ++i ) {
+		if ( idx[i] <= 0 ) {
+			continue;
+		}
+		if ( data[i][ idx[i]-1 ] == result[ id ] ) {
+			--idx[i];
+			search();
+			++idx[i];
+		}
+	}
+}
+
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	int test;
+	std::cin >> test;
+
+	while ( test-- ) {
+
+		std::cin >> n;
+		
+		int sum = 0;
+		data.resize( n );
+
+		for ( int i = 0 ; i < n ; ++i ) {
+			
+			int sz;
+			std::cin >> sz;
+			sum += sz;
+
+			data[i].resize( sz );
+			for ( int &val : data[i] ) {
+				std::cin >> val;
+			}
+		}
+
+		int sz = 1;
+		for ( int i = 0 ; i < n ; ++i ) {
+			sz *= data[i].size() + 1;
+		}
+		std::fill( rem, rem + sz + 1, 0 );
+
+		result.resize( sum );
+		for ( int &val : result ) {
+			std::cin >> val;
+		}
+
+		if ( n == 1 ) {
+
+			std::reverse( result.begin(), result.end() );
+			std::cout << ( data[0] == result ? "Yes" : "No" ) << "\n";
+
+		} else {
+			idx.resize( n );
+			for ( int i = 0 ; i < n ; ++i ) {
+				idx[i] = data[i].size();
+			}
+			search();
+
+			std::cout << ( rem[ 0 ] ? "Yes" : "No" ) << "\n";
+			
+		}
+	}
+
+	return 0;
+}

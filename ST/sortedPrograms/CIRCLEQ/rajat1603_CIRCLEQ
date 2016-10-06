@@ -1,0 +1,282 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const double pi = acos(-1);
+int n , q;
+int x[N] , y[N] , r[N];
+int a , b , c , d;
+/*long long sqr(int x){
+    return 1LL * x * x;
+}
+long long dist(int x , int y){
+    return sqrt(sqr(x) + sqr(y));
+}
+
+//1 side   pi*r*r - r*r*cos-1(d/r) + droot(rr - dd)
+//2 side   x*y + 1/2 * (y * root(rr - yy) + x * root(rr - xx)) + rr/2 * (3/2pi - cos-1(x / r) - cos-1(y / r))
+//3 side   y * (x + z) + 1/2(xroot(rr - xx) + zroot(rr - zz)) + (pi - cos-1(x / r) - cos-1(z / r))
+//4 side   xy + yz + xw + 1/2(wroot(rr - ww) + zroot(rr - zz)) + rr/2(pi/2 - acos(w/r) - acos(z / r))
+
+double get1(int r , int d){
+    return 1.0 * r * r * (pi - acos(1.0 * d / r)) + 1.0 * d * sqrt(1LL * r * r - 1LL * d * d);
+}
+double getsegment(int r , int d){
+    if(d >= r){
+        return 0;
+    }
+    return pi * r * r - get1(r , d);
+}
+double get2(int r , int x , int y){
+    return 1.0 * x * y + 0.5 * (1.0 * y * sqrt(1LL * r * r - 1LL * y * y) + 1.0 * x * sqrt(1LL * r * r - 1LL * x * x)) + 0.5 * r * r * (1.5 * pi - acos(1.0 * x / r) - acos(1.0 * y / r));
+}
+double get2segment(int r , int x , int y){
+    return pi * r * r - get2(r , x , y);
+}
+double get3(double r , double x , double y , double z , double chutiya){
+    double ret =  y * (x + z) + 0.5 * (x * sqrt(r * r - x * x) + z * sqrt(r * r - z * z)) + r * r * 0.5 * (pi - acos(x / r) - acos(z / r));
+    if(chutiya <= r){
+        ret -= getsegment(r , chutiya);
+    }
+    return ret;
+}
+double get4(double r , double x , double y , double z , double w){
+    return x * y + y * z + x * w + 0.5 * (w * sqrt(r * r - w * w) + z * sqrt(r * r - z * z)) + r * r * 0.5 * (0.5 * pi - acos(w / r) - acos(z / r));    
+}
+double intersect(int x1 , int y1 , int x2 , int y2 , int x , int y , int r){
+    if(x1 >= x + r ||)
+    int xl = x - x1;
+    int yt = y2 - y;
+    int xr = x2 - x;
+    int yb = y - y1;
+    double tpl = dist(xl , yt);
+    double tpr = dist(xr , yt);
+    double btr = dist(xr , yb);
+    double btl = dist(xl , yb);
+    bool a = 0;
+    bool b = 0;
+    bool c = 0;
+    bool d = 0;
+    if(tpl <= r){
+        a = 1;
+    }
+    if(tpr <= r){
+        b = 1;
+    }
+    if(btr <= r){
+        c = 1;
+    }
+    if(btl <= r){
+        d = 1;
+    }
+    //xl , yt , xr , yb
+    if(a && b && c && d){
+        return 1LL * (x2 - x1) * (y2 - y1);
+    }
+    if(a && b && c){
+        return get4(r , yt , xr , yb , xl);
+    }
+    if(a && b && d){
+        return get4(r , xl , yt , xr , yb);
+    }
+    if(a && c && d){
+        return get4(r , yb , xl , yt , xr);
+    }
+    if(b && c && d){
+        return get4(r , xr , yb , xl , yt);
+    }
+    if(a && b){
+        return get3(r , xl , yt , xr , yb);
+    }
+    if(b && c){
+        return get3(r , yt , xr , yb , xl);
+    }
+    if(c && d){
+        return get3(r , xr , yb , xl , yt);
+    }
+    if(d && a){
+        return get3(r , yb , xl , yt , xr);
+    }
+    if(a && c){
+        return get2(r , xl , yt) - get2segment(r , xr , yb);
+    }
+    if(b && d){
+        return get2(r , yt , xr) - get2segment(r , xr , yb);
+    }
+    if(a){
+        return get2(r , xl , yt) - getsegment(r , xr) - getsegment(r , yb);
+    }
+    if(b){
+        return get2(r , yt , xr) - getsegment(r , yb) - getsegment(r , xl);
+    }
+    if(c){
+        return get2(r , xr , yb) - getsegment(r , xl) - getsegment(r , yt);
+    }
+    if(d){
+        return get2(r , yb , xl) - getsegment(r , xr) - getsegment(r , yt);
+    }
+    if(min(min(yt , yb) , min(xl , xr)) < 0){
+        return 0;
+    }
+    return pi * r * r - getsegment(r , yt) - getsegment(r , yb) - getsegment(r , xl) - getsegment(r , xr);
+}*/
+double section(double h, double r) // returns the positive root of intersection of line y = h with circle centered at the origin and radius r
+{
+   // assert(r >= 0); // assume r is positive, leads to some simplifications in the formula below (can factor out r from the square root)
+    return (h < r)? sqrt(r * r - h * h) : 0; // http://www.wolframalpha.com/input/?i=r+*+sin%28acos%28x+%2F+r%29%29+%3D+h
+}
+
+ double g(double x, double h, double r) // indefinite integral of circle segment
+{
+    return .5* (sqrt(1 - x * x / (r * r)) * x * r + r * r * asin(x / r) - 2 * h * x); // http://www.wolframalpha.com/input/?i=r+*+sin%28acos%28x+%2F+r%29%29+-+h
+}
+
+ double area(double x0, double x1, double h, double r) // area of intersection of an infinitely tall box with lft edge at x0, rgt edge at x1, bottom edge at h and top edge at infinity, with circle centered at the origin with radius r
+{
+    if(x0 > x1)
+        {x0=x0+x1; x1=x0-x1;x0=x0-x1;} // this must be sorted otherwise we get negative area
+    double s = section(h, r);
+    return g(max(-s, min(s, x1)), h, r) - g(max(-s, min(s, x0)), h, r); // integrate the area
+}
+
+ double area(double x0, double x1, double y0, double y1, double r) // area of the intersection of a finite box with a circle centered at the origin with radius r
+{
+    if(y0 > y1)
+        {y0=y0+y1; y1=y0-y1;y0=y0-y1;} // this will simplify the reasoning
+    if(y0 < 0) {
+        if(y1 < 0)
+            return area(x0, x1, -y0, -y1, r); // the box is completely under, just flip it above and try again
+        else
+            return area(x0, x1, 0, -y0, r) + area(x0, x1, 0, y1, r); // the box is both above and below, divide it to two boxes and go again
+    } else {
+      //  assert(y1 >= 0); // y0 >= 0, which means that y1 >= 0 also (y1 >= y0) because of the swap at the beginning
+        return area(x0, x1, y0, r) - area(x0, x1, y1, r); // area of the lower box minus area of the higher box
+    }
+}
+
+
+ double area(double x0, double x1, double y0, double y1, double cx, double cy, double r) // area of the intersection of a general box with a general circle
+{
+    x0 -= cx; x1 -= cx;
+    y0 -= cy; y1 -= cy;
+    // get rid of the circle center
+
+    return area(x0, x1, y0, y1, r);
+}
+void solve(int x1 , int y1 , int x2 , int y2){
+    double ans = 0;
+    for(int i = 1 ; i <= n ; ++i){
+        ans += area(x1 , x2 , y1 , y2 , x[i] , y[i] , r[i]);
+    }
+    printf("%.6lf\n" , ans);
+}
+bool chutiyasubtask = 1;
+struct node{
+    int lft;
+    int rgt;
+    int sum;
+    node(){
+        lft = 0;
+        rgt = 0;
+        sum = 0;
+    }
+    node(int _lft , int _rgt , int _sum){
+        lft = _lft;
+        rgt = _rgt;
+        sum = _sum;
+    }
+};
+int cur;
+const int LN = 17;
+node st[N * LN];
+int newnode(int sum , int lft , int rgt){
+    ++cur;
+    st[cur] = node(lft , rgt , sum);
+    return cur;
+}
+void insert(int &curnode , int prenode , int l , int r , int value){
+    if(l == r){
+        curnode = newnode(st[prenode].sum + 1 , 0 , 0);
+        return;
+    }
+    int mid = l + r >> 1;
+    if(value <= mid){
+        curnode = newnode(st[prenode].sum + 1 , 0 , st[prenode].rgt);
+        insert(st[curnode].lft , st[prenode].lft , l , mid , value);
+    }
+    else{
+        curnode = newnode(st[prenode].sum + 1 , st[prenode].lft , 0);
+        insert(st[curnode].rgt , st[prenode].rgt , mid + 1 , r , value);
+    }
+}
+int query(int l , int r , int rnode , int lnode , int ql , int qr){
+    if(l > qr || r < ql){
+        return 0;
+    }
+    if(l >= ql && r <= qr){
+        return st[rnode].sum - st[lnode].sum;
+    }
+    int mid = l + r >> 1;
+    return query(l , mid , st[rnode].lft , st[lnode].lft , ql , qr) + query(mid + 1 , r , st[rnode].rgt , st[lnode].rgt , ql , qr);
+}
+int root[N];
+int query(int x1 , int y1 , int x2 , int y2){
+    if(x1 > x2 || y1 > y2){
+        return 0;
+    }
+    return query(1 , N - 1 , root[x2] , root[x1 - 1] , y1 , y2);
+}
+vector < int > v[N];
+void chutiyapa(){
+    cur = 0;
+    for(int i = 1 ; i <= n ; ++i){
+        ++x[i];
+        ++y[i];
+        v[x[i]].emplace_back(y[i]);
+    }
+    root[0] = 0;
+    for(int i = 1 ; i < N ; ++i){
+        root[i] = root[i - 1];
+        for(auto it : v[i]){
+            insert(root[i] , root[i] , 1 , N - 1 , it);
+        }
+    }
+    while(q--){
+        scanf("%d %d %d %d" , &a , &b , &c , &d);
+        ++a;
+        ++b;
+        ++c;
+        ++d;
+        int x1 = a;
+        int y1 = b;
+        int x2 = c;
+        int y2 = d;
+        int ans1 = 0;
+        int ans2 = 0;
+        int ans3 = 0;
+        ans1 = query(x1 + 1 , y1 + 1 , x2 - 1 , y2 - 1);
+        ans2 += query(x1 , y1 + 1 , x1 , y2 - 1);
+        ans2 += query(x2 , y1 + 1 , x2 , y2 - 1);
+        ans2 += query(x1 + 1 , y1 , x2 - 1 , y1);
+        ans2 += query(x1 + 1 , y2 , x2 - 1 , y2);
+        ans3 += query(x1 , y1 , x1 , y1);
+        ans3 += query(x1 , y2 , x1 , y2);
+        ans3 += query(x2 , y1 , x2 , y1);
+        ans3 += query(x2 , y2 , x2 , y2);
+        printf("%.6lf\n" , pi * (ans1 + 0.5 * ans2 + 0.25 * ans3));
+    }
+    exit(0);
+}
+int main(){
+    scanf("%d %d" , &n , &q);
+    for(int i = 1 ; i <= n ; ++i){
+        scanf("%d %d %d" , x + i , y + i , r + i);
+        chutiyasubtask &= (r[i] == 1);
+    }
+    if(chutiyasubtask){
+        chutiyapa();
+    }
+    while(q--){
+        scanf("%d %d %d %d" , &a , &b , &c , &d);
+        solve(a , b , c , d);
+    }
+}

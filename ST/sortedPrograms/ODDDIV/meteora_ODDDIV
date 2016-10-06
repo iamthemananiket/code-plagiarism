@@ -1,0 +1,32 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+
+using namespace std;
+typedef long long lli;
+
+
+int main(){
+
+	int t,i;
+
+	lli sum;
+
+	int l,r;
+	scanf("%d",&t);
+
+	while(t--){
+		sum = 0;
+
+		scanf("%d%d",&l,&r);
+
+		for(i = 1; i <= 100000; i+=2){
+			sum += 1LL*(r/i - (l+i-1)/i + 1)*i;
+		}
+
+		printf("%lld\n",sum);
+	}
+
+	return 0;
+}

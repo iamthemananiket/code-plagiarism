@@ -1,0 +1,99 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <cstdint>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, const pair<T1, T2> &a) { return os << "(" << a.first << ", " << a.second << ")"; };
+template <typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template <typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template <typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+Int MO;
+
+Int power(Int a, Int e) {
+	Int ret = 1 % MO;
+	for (; e; e >>= 1, (a *= a) %= MO) if (e & 1) (ret *= a) %= MO;
+	return ret;
+}
+
+int N, Q;
+
+Int ls[1000010];
+Int rs[1000010];
+
+int segN;
+Int seg[2100010];
+
+Int rangeProd(int a, int b) {
+	Int ret = 1 % MO;
+	for (a += segN, b += segN; a <= b; a >>= 1, b >>= 1) {
+		if ( a & 1) (ret *= seg[a++]) %= MO;
+		if (~b & 1) (ret *= seg[b--]) %= MO;
+	}
+	return ret;
+}
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		MO = in();
+		Q = in();
+		
+		ls[0] = 1 % MO;
+		for (int i = 1; i <= N; ++i) {
+			ls[i] = (ls[i - 1] * power(i, i - 1)) % MO;
+		}
+		rs[N] = 1 % MO;
+		for (int i = N; i >= 1; --i) {
+			rs[i - 1] = (rs[i] * power(i, N + 1 - i)) % MO;
+		}
+		for (segN = 1; segN < N + 1; segN <<= 1);
+		for (int i = 1; i <= N; ++i) {
+			seg[segN + i] = i;
+		}
+		for (int a = segN; --a; ) {
+			seg[a] = (seg[a << 1] * seg[a << 1 | 1]) % MO;
+		}
+		
+		for (; Q--; ) {
+			int r = in();
+			if (r > N - r) {
+				r = N - r;
+			}
+			Int ans = 1 % MO;
+			(ans *= ls[r]) %= MO;
+			(ans *= rs[N - r]) %= MO;
+			(ans *= power(rangeProd(r + 1, N - r), r)) %= MO;
+			printf("%lld\n", ans);
+		}
+	}
+	
+	return 0;
+}

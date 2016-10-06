@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+int A[1000001];
+int B[1000001];
+int main()
+{
+	int n,m,l,r,cnt,tag,i,j,x,y,val,c=0,k;
+	scanf("%d",&m);
+	for(i=0;i<m;i++)
+	{
+		scanf("%d",&tag);
+		if(tag==0)
+		{
+			scanf("%d",&x);
+			A[c++]=x;
+		}
+		if(tag==1)
+		{
+			scanf("%d %d %d",&l,&r,&x);
+			y=A[l-1];
+			val=A[l-1]^x;
+			for(j=l;j<=r-1;j++)
+			{
+				if(val<(A[j]^x))
+				{
+					y=A[j];
+					val=A[j]^x;
+				}
+			}
+			printf("%d\n",y);
+		}
+		if(tag==2)
+		{
+			scanf("%d",&k);
+			c-=k;
+		}
+		if(tag==3)
+		{
+			scanf("%d %d %d",&l,&r,&x);
+			cnt=0;
+			for(j=l-1;j<=r-1;j++)
+			{
+				if(A[j]<=x)
+				{
+					cnt++;
+				}
+			}
+			printf("%d\n",cnt);
+		}
+		if(tag==4)
+		{
+			scanf("%d %d %d",&l,&r,&x);
+			cnt=0;
+			for(j=l-1;j<=r-1;j++)
+			{
+				B[cnt++]=A[j];
+			}
+			sort(B,B+cnt);
+			printf("%d\n",B[x-1]);
+		}
+	}
+	return 0;
+}

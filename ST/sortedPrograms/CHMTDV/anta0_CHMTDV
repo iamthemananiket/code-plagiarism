@@ -1,0 +1,407 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+
+class FastInput {
+	bool _end;
+public:
+	FastInput() : _end(false) {}
+
+	operator void*() { return _end ? 0 : (void*)this; }
+
+	template<typename T>
+	void read_signed(T *res) {
+		char c = skip();
+		bool sign = false;
+		if(c == '-') sign = true, c = gc();
+		T x = 0;
+		for(; '0' <= c && c <= '9'; c = gc())
+			x = x * 10 + (c - '0');
+		*res = !sign ? x : -x;
+	}
+
+	FastInput &operator()(int &res) { read_signed(&res); return *this; }
+
+private:
+	static char gc() {
+#if defined(__GNUC__) && !defined(__MINGW32__)
+		return (char)getchar_unlocked();
+#elif defined(_MSC_VER)
+		return (char)_getchar_nolock();
+#else
+		return (char)getchar();
+#endif
+	}
+
+	static bool is_delim(char c) {
+		return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == EOF;
+	}
+
+	char skip() {
+		if(_end) return EOF;
+		char c;
+		for(c = gc(); c != -1 && is_delim(c); c = gc());
+		if(c == EOF) _end = true;
+		return c;
+	}
+} in;
+
+template<typename T>
+struct RectangeSum {
+	vector<vector<T> > sum;
+	template<typename U>
+	void init(int h, int w, U &a) {
+		sum.assign(h + 1, vector<T>(w + 1));
+		rer(y, 0, h) rer(x, 0, w) sum[y][x] = (y == 0 || x == 0) ? 0 :
+			sum[y - 1][x] + sum[y][x - 1] - sum[y - 1][x - 1] + a[y - 1][x - 1];
+	}
+	//[l, r), [t, b)
+	inline T get(int t, int l, int b, int r) const {
+		return sum[b][r] - sum[b][l] - sum[t][r] + sum[t][l];
+	}
+};
+
+#ifdef _WIN32
+extern "C" int __stdcall QueryPerformanceFrequency(long long*);
+extern "C" int __stdcall QueryPerformanceCounter(long long*);
+double getTime() {
+	long long c, freq;
+	QueryPerformanceCounter(&c);
+	QueryPerformanceFrequency(&freq);
+	return c * 1. / freq;
+}
+#else
+#include <sys/time.h>
+double getTime() {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec + tv.tv_usec / 1e6;
+}
+#endif
+
+struct Solution {
+	long long score;
+	vector<int> ySizes, xSizes;
+	pair<int, int> maxPos;
+
+	bool operator>(const Solution &that) const {
+		return score > that.score;
+	}
+
+	static uint64_t calcHash(const vector<int> &ySizes) {
+		uint64_t h = 0;
+		for(int x : ySizes)
+			h = h * 1000000007U + x;
+		return h;
+	}
+};
+
+void verify(const vector<int> &ySizes, const vector<int> &xSizes) {
+	assert(ySizes.size() == xSizes.size());
+	assert(accumulate(ySizes.begin(), ySizes.end(), 0) == accumulate(xSizes.begin(), xSizes.end(), 0));
+	assert(*min_element(ySizes.begin(), ySizes.end()) > 0);
+	assert(*min_element(xSizes.begin(), xSizes.end()) > 0);
+}
+
+Solution evaluate(const vector<int> &ySizes, const vector<int> &xSizes, const RectangeSum<long long> &rsum) {
+	int p = (int)ySizes.size();
+	vector<long long> preSum(p);
+	long long maxSum = 0;
+	pair<int, int> maxPos(-1, -1);
+
+	verify(ySizes, xSizes);
+
+	int y = 0;
+	rep(i, p) {
+		y += ySizes[i];
+		int x = 0;
+		ll psum2 = 0;
+		rep(j, p) {
+			x += xSizes[j];
+			ll sum1 = rsum.sum[y][x];
+			ll sum2 = sum1 - preSum[j];
+			preSum[j] = sum1;
+			ll sum3 = sum2 - psum2;
+
+			if(maxSum < sum3) {
+				maxSum = sum3;
+				maxPos = { i, j };
+			}
+
+			psum2 = sum2;
+		}
+	}
+	return Solution{ maxSum, ySizes, xSizes, maxPos };
+}
+
+#ifdef MY_LOCAL_RUN
+#define MY_TEST
+#endif
+
+long long optimalXSizes(const vector<int> &ySizes, vector<int> &xSizes, long long upperBound, const RectangeSum<long long> &rsum) {
+	int p = (int)ySizes.size();
+	int n = accumulate(ySizes.begin(), ySizes.end(), 0);
+	vector<int> row(p + 1);
+	rep(i, p) row[i + 1] = row[i] + ySizes[i];
+	auto getSum = [&rsum, &row](int i, int x) {
+		return rsum.sum[row[i + 1]][x] - rsum.sum[row[i]][x];
+	};
+	long long lo = 0, up = upperBound;
+	rep(i, p)
+		amax(lo, (getSum(i, n) - 1) / p + 1);
+	bool updated = false;
+	if(up == INFL) {
+		up = evaluate(ySizes, xSizes, rsum).score;
+		updated = true;
+	}
+	vector<int> cur(p);
+	while(up - lo > 0) {
+		long long mid = (lo + up) / 2;
+		bool ok = true;
+		int x = 0;
+		rep(j, p) {
+			int nxup = n;
+			rep(i, p) {
+				long long value = getSum(i, x) + mid;
+				int nxlo = x;
+				while(nxup - nxlo > 0) {
+					int nxmid = (nxlo + nxup + 1) / 2;
+					if(getSum(i, nxmid) <= value)
+						nxlo = nxmid;
+					else
+						nxup = nxmid - 1;
+				}
+				if(nxup == x)
+					break;
+			}
+			cur[j] = nxup - x;
+			if(nxup == n) {
+				int rem = p - j - 1;
+				rep(k, rem) {
+					cur[j + 1 + k] = 1;
+				}
+				while(rem > 0) {
+					for(int k = j; k >= 0 && rem > 0; -- k) {
+						if(cur[k] > 1) {
+							-- rem;
+							-- cur[k];
+						}
+					}
+				}
+				x = n;
+				break;
+			}
+			if(nxup == x)
+				break;
+			x = nxup;
+		}
+		if(x == n) {
+			long long maxSum = 0;
+			rep(i, p) {
+				int xx = 0;
+				long long pSum = 0;
+				rep(j, p) {
+					long long cSum = getSum(i, xx + cur[j]);
+					amax(maxSum, cSum - pSum);
+					pSum = cSum;
+					xx += cur[j];
+				}
+			}
+			up = maxSum;
+			xSizes = cur;
+			updated = true;
+		} else {
+			long long minDiff = INFL;
+			int xx = 0;
+			rep(j, p) {
+				assert(xx + cur[j] < n);
+				long long diff = 0;
+				rep(i, p)
+					amax(diff, getSum(i, xx + cur[j] + 1) - getSum(i, xx));
+				amin(minDiff, diff);
+				if(cur[j] == 0) break;
+				xx += cur[j];
+			}
+			lo = max(mid + 1, minDiff);
+		}
+	}
+	return updated ? up : INFL;
+}
+
+long long optimalYSizes(const vector<int> &xSizes, vector<int> &ySizes, long long upperBound, const RectangeSum<long long> &rsumT) {
+	return optimalXSizes(xSizes, ySizes, upperBound, rsumT);
+}
+
+long long alternateOptimizationSub(bool aaa, vector<int> &ys, vector<int> &xs, long long score, const RectangeSum<long long> &rsum, const RectangeSum<long long> &rsumT) {
+	for(int iters = 0; ; ++ iters) {
+		ll newScore;
+		if(!aaa) {
+			optimalXSizes(ys, xs, evaluate(ys, xs, rsum).score + 1, rsum);
+			newScore = optimalYSizes(xs, ys, evaluate(ys, xs, rsum).score + 1, rsumT);
+		} else {
+			optimalYSizes(xs, ys, evaluate(ys, xs, rsum).score + 1, rsumT);
+			newScore = optimalXSizes(ys, xs, evaluate(ys, xs, rsum).score + 1, rsum);
+		}
+		if(score > newScore) {
+			score = newScore;
+		} else {
+			break;
+		}
+	}
+	return score;
+}
+
+long long alternateOptimization(vector<int> &ySizes, vector<int> &xSizes, long long score, const RectangeSum<long long> &rsum, const RectangeSum<long long> &rsumT) {
+	vi ys1 = ySizes, xs1 = xSizes;
+	ll score1 = alternateOptimizationSub(false, ys1, xs1, score, rsum, rsumT);
+	vi ys2 = ySizes, xs2 = xSizes;
+	ll score2 = alternateOptimizationSub(true, ys2, xs2, score, rsum, rsumT);
+	if(score > score1)
+		score = score1, ySizes = ys1, xSizes = xs1;
+	if(score > score2)
+		score = score2, ySizes = ys2, xSizes = xs2;
+	return score;
+}
+
+int main() {
+	int n; int p;
+#ifdef MY_TEST
+	mt19937 testRE;
+	uniform_int_distribution<int> distN(450, 500);
+	uniform_int_distribution<int> distA(1, (int)1e9);
+#endif
+	for(int testcases = 0; ; ++ testcases) {
+		double startTime = getTime();
+#ifdef MY_TEST
+		testRE.seed(testcases + 1);
+		n = distN(testRE);
+		p = 50;
+		cerr << testcases << ": " << "n = " << n << ", p = " << p << endl;
+#else
+		scanf("%d%d", &n, &p);
+#endif
+		double timeLimit = startTime + 1.9 - p * p * 2e-6;
+
+		vector<vector<int>> A(n, vector<int>(n));
+		rep(i, n) rep(j, n) {
+#ifdef MY_TEST
+			A[i][j] = distA(testRE);
+#else
+			in(A[i][j]);
+#endif
+		}
+		vector<vector<int>> AT(n, vector<int>(n));
+		rep(i, n) rep(j, n)
+			AT[j][i] = A[i][j];
+		RectangeSum<long long> rsum, rsumT;
+		rsum.init(n, n, A);
+		rsumT.init(n, n, AT);
+
+		vector<int> initSizes(p);
+		rep(i, p)
+			initSizes[i] = n / p + (i < n % p);
+
+		Solution bestSol;
+		{
+			vi ys, xs;
+			ys = initSizes, xs = initSizes;
+			bestSol = evaluate(ys, xs, rsum);
+			priority_queue<Solution,vector<Solution>,greater<Solution>> pq;
+			pq.push(bestSol);
+			mt19937 re;
+
+			int iters = 0;
+			int lastUpdate = 0;
+
+			auto push = [&](ll score) {
+				if(score == INFL) return;
+				auto s = evaluate(ys, xs, rsum);
+				assert(s.score == score);
+				if(score < bestSol.score) {
+					bestSol = s;
+				}
+				pq.push(s);
+			};
+
+			for(; getTime() < timeLimit; ++ iters) {
+				//ll ub = iters - lastUpdate <= 100 ? evaluate(ySizes, xSizes, rsum).score : (ll)(bestSol.score * 1.00001);
+				if(pq.empty()) {
+					//cerr << "pq is empty" << endl;
+					pq.push(bestSol);
+					continue;
+				}
+				Solution sol = pq.top();
+				pq.pop();
+				ll ub = evaluate(sol.ySizes, sol.xSizes, rsum).score - 1;
+				ys = sol.ySizes, xs = sol.xSizes;
+				push(optimalXSizes(ys, xs, ub, rsum));
+				ys = sol.ySizes, xs = sol.xSizes;
+				push(optimalYSizes(xs, ys, ub, rsumT));
+
+				ll mini = ub;
+				rep(pp, 10) {
+					ys = sol.ySizes, xs = sol.xSizes;
+					rep(kk, 2) {
+						while(1) {
+							int i1 = re() % (p - 1), i2 = i1 + 1;
+							if(re() % 2) swap(i1, i2);
+							if(re() % 2) {
+								if(ys[i1] > 1) {
+									-- ys[i1], ++ ys[i2];
+									break;
+								}
+							} else {
+								if(xs[i1] > 1) {
+									-- xs[i1], ++ xs[i2];
+									break;
+								}
+							}
+						}
+					}
+					ll t;
+					if(re() % 2)
+						push(t = optimalYSizes(xs, ys, mini, rsumT));
+					else
+						push(t = optimalXSizes(ys, xs, mini, rsum));
+					amin(mini, t - 1);
+				}
+			}
+#ifdef MY_TEST
+			cerr << "iters = " << iters << endl;
+#endif
+		}
+
+#ifdef MY_TEST
+		double scoreCoeff = pow((double)n / p, -2);
+		cerr << "score = " << bestSol.score * scoreCoeff << endl;
+#else
+		{
+			int pre = 0;
+			rep(i, p - 1) {
+				pre += bestSol.ySizes[i];
+				if(i != 0) putchar(' ');
+				printf("%d", pre);
+			}
+			puts("");
+		}
+		{
+			int pre = 0;
+			rep(i, p - 1) {
+				pre += bestSol.xSizes[i];
+				if(i != 0) putchar(' ');
+				printf("%d", pre);
+			}
+			puts("");
+		}
+		break;
+#endif
+	}
+	return 0;
+}

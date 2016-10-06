@@ -1,0 +1,151 @@
+#include <iostream>
+#include <cmath>
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int N, M;
+pair<pair<int, int>, int> edges[100001];
+vector<int> adj[100001];
+int assoc[100001];
+int sz[100001];
+int parent[100001];
+int level[100001];
+int son[100001];
+int top[100001];
+int newid[100001], oldid[100001], nextid;
+int A[100001], seg[262144];
+
+void init(int idx, int begin, int end)
+{
+    if(begin==end)
+        seg[idx]=A[oldid[begin]];
+    else
+    {
+        int mid=(begin+end)/2;
+        init(idx*2, begin, mid);
+        init(idx*2+1, mid+1, end);
+        seg[idx]=seg[idx*2]+seg[idx*2+1];
+    }
+}
+
+void update(int idx, int begin, int end, int x)
+{
+    if(x<begin || end<x)
+        return;
+    if(begin==end)
+        seg[idx]=A[oldid[x]];
+    else
+    {
+        int mid=(begin+end)/2;
+        update(idx*2, begin, mid, x);
+        update(idx*2+1, mid+1, end, x);
+        seg[idx]=seg[idx*2]+seg[idx*2+1];
+    }
+}
+
+int query(int idx, int begin, int end, int i, int j)
+{
+    if(j<begin || end<i)
+        return 0;
+    if(i<=begin && end<=j)
+        return seg[idx];
+    int mid=(begin+end)/2;
+    return query(idx*2, begin, mid, i, j)+query(idx*2+1, mid+1, end, i, j);
+}
+
+void dfs(int u, int p)
+{
+    sz[u]=1;
+    for(auto& v: adj[u])
+    {
+        if(v==p)
+            continue;
+        parent[v]=u;
+        level[v]=level[u]+1;
+        dfs(v, u);
+        sz[u]+=sz[v];
+        if(sz[v]>sz[son[u]])
+            son[u]=v;
+    }
+}
+
+void dfs2(int u, int p)
+{
+    newid[u]=++nextid;
+    oldid[newid[u]]=u;
+    if(son[parent[u]]==u)
+        top[u]=top[parent[u]];
+    else
+        top[u]=u;
+    if(son[u])
+        dfs2(son[u], u);
+    for(auto& v: adj[u])
+    {
+        if(v==p || v==son[u])
+            continue;
+        dfs2(v, u);
+    }
+}
+
+int hld_query(int u, int v)
+{
+    int ret=0;
+    while(top[u]!=top[v])
+    {
+        if(level[top[u]]>level[top[v]])
+        {
+            ret+=query(1, 1, N, newid[top[u]], newid[u]);
+            u=parent[top[u]];
+        }
+        else
+        {
+            ret+=query(1, 1, N, newid[top[v]], newid[v]);
+            v=parent[top[v]];
+        }
+    }
+    if(level[u]<level[v])
+        ret+=query(1, 1, N, newid[u], newid[v])-A[u];
+    else
+        ret+=query(1, 1, N, newid[v], newid[u])-A[v];
+    return ret;
+}
+
+int main()
+{
+    scanf("%d", &N);
+    for(int i=1; i<N; i++)
+    {
+        scanf("%d%d%d", &edges[i].first.first, &edges[i].first.second, &edges[i].second);
+        adj[edges[i].first.first].push_back(edges[i].first.second);
+        adj[edges[i].first.second].push_back(edges[i].first.first);
+    }
+    dfs(1, -1);
+    dfs2(1, -1);
+    for(int i=1; i<N; i++)
+    {
+        int u=edges[i].first.first;
+        int v=edges[i].first.second;
+        if(level[u]>level[v])
+            assoc[i]=u;
+        else
+            assoc[i]=v;
+        A[assoc[i]]=edges[i].second;
+    }
+    init(1, 1, N);
+    scanf("%d", &M);
+    int a, b, c;
+    for(int i=0; i<M; i++)
+    {
+        scanf("%d%d%d", &a, &b, &c);
+        if(a==1)
+        {
+            A[assoc[b]]=c;
+            update(1, 1, N, newid[assoc[b]]);
+        }
+        else
+            printf("%d\n", hld_query(b, c));
+    }
+    return 0;
+}

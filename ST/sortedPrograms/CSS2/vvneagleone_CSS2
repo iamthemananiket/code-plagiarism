@@ -1,0 +1,64 @@
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<set>
+#include<unordered_map>
+#include<unordered_set>
+#include<map>
+using namespace std;
+typedef long long LL;
+#define MOD 1000000007LL
+
+#define gx getchar_unlocked
+#define px putchar_unlocked
+#define ps putchar_unlocked(' ')
+#define pn putchar_unlocked('\n')
+
+void scan(int &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*sign;}
+void lscan(LL &n){int sign=1;n=0;char c=gx();while(c<'0'||c>'9'){if(c=='-')sign=-1;c=gx();}while(c>='0'&&c<='9')n=(n<<3)+(n<<1)+c-'0',c=gx();n=n*(LL)(sign);}
+int sscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n')a[i++]=c,c=gx();a[i]=0;return i;}
+int wscan(char a[]){char c=gx();while(c==' '||c=='\n')c=gx();int i=0;while(c!='\n'&&c!=' ')a[i++]=c,c=gx();a[i]=0;return i;}
+void print(int n){if(n<0){n=-n;px('-');}int i=10;char o[10];do{o[--i]=(n%10)+'0';n/=10;}while(n);do{px(o[i]);}while(++i<10);}
+void lprint(LL n){if(n<0LL){n=-n;px('-');}int i=21;char o[21];do{o[--i]=(n%10LL)+'0';n/=10LL;}while(n);do{px(o[i]);}while(++i<21);}
+void sprint(const char*a){const char*p=a;while(*p)px(*p++);}
+
+int main() {
+    int n, mm, id, at, val, pr;
+    unordered_map< int, unordered_map< int, pair<int,int> > > m;
+    unordered_map< int, unordered_map< int, pair<int,int> > >:: iterator mi;
+    unordered_map< int, pair<int,int> >::iterator xi;
+    scan(n); scan(mm);
+    while(n--) {
+        scan(id); scan(at); scan(val); scan(pr);
+        mi = m.find(id);
+        if( mi == m.end() ) {
+            unordered_map< int, pair<int,int> > mx;
+            mx.insert(make_pair(at, pair<int,int>(val,pr)));
+            m.insert(make_pair(id,mx));
+        }
+        else {
+            xi = mi->second.find(at);
+            if( xi == mi->second.end() ) {
+                mi->second.insert(make_pair(at,pair<int,int>(val,pr)));
+            }
+            else {
+                if( xi->second.second > pr ) continue;
+                xi->second.first = val;
+                xi->second.second = pr;
+            }
+        }
+    }
+    while(mm--) {
+        scan(id); scan(at);
+        mi = m.find(id);
+        if( mi != m.end() ) xi = mi->second.find(at);
+        if( xi != mi->second.end() ) {print(xi->second.first);pn;}
+    }
+	return 0;
+}

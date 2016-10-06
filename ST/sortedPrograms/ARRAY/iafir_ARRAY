@@ -1,0 +1,52 @@
+    // iafir
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+     
+using namespace std;
+     
+int t,n;
+long long k,x;
+bool yes,bx[11111];
+     
+int main()
+{
+    scanf("%d",&t);
+    for(int i=0 ; i<t; i++)
+    {
+    	vector<long long> a,b;
+	    scanf("%d %lld",&n,&k);
+	    for(int j=0; j<n; j++)
+	    {
+		    scanf("%lld",&x);
+		    a.push_back(x);
+	    }
+	    for(int j=0; j<n; j++)
+	    {
+		    scanf("%lld",&x);
+		    b.push_back(x);
+	    }
+	    sort(a.begin(),a.end());
+	    sort(b.begin(),b.end());
+	    yes = true;
+	    memset(bx,false,sizeof(bx));
+	    for(int j=0; j<n && yes; j++)
+	    {
+		    yes = false;
+		    for(int l=0; l<n && !yes; l++)
+			    if(!bx[l] && b[l]+a[j]>=k)
+			    {
+				    bx[l]= true;
+				    yes = true;
+			    }
+	    }
+	    if(yes)
+	    	cout << "YES\n";
+	    else
+	    	cout << "NO\n";
+    }
+    return 0;
+}
+

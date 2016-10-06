@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+#define  all(X)  X.begin(), X.end()
+#define  UB  upper_bound
+#define  LB  lower_bound
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        int n ;
+        cin >> n ;
+        int a[n];
+        for( int i=0; i<n; i++ )
+        {
+                cin >> a[i] ;
+                if( n > 10000  &&  a[i] > 100 )
+                        return 0;
+        }
+
+        vector<int>  idx[111] ;
+        if( n > 10000 )
+                for( int i=0; i<n; i++ )
+                        idx[ a[i] ].push_back(i);
+
+        int m ;
+        for( cin >> m ;  m-- ;  )
+        {
+                int  L, R ;
+                cin >> L >> R ;
+                L--;
+                R--;
+                if( n > 10000 )
+                {
+                        vector<int> tmp ;
+                        for( int i=0; i<111; i++ )
+                                if( UB( all(idx[i]), R ) - LB( all(idx[i]), L ) )
+                                        tmp.push_back(i);
+                        long long ans = 0 ;
+                        for( int i=1; i<tmp.size(); i++ )
+                                ans += ( tmp[i] - tmp[i-1] ) * 1LL * ( tmp[i] - tmp[i-1] ) ;
+                        cout << ans << endl ;
+                        continue;
+                }
+                vector<int> tmp;
+                for( ; L <= R ;  L++ )
+                        tmp.push_back(a[L]);
+                sort( all(tmp) );
+                long long ans = 0 ;
+                for( int i=1; i<tmp.size(); i++ )
+                        ans += ( tmp[i] - tmp[i-1] ) * 1LL * ( tmp[i] - tmp[i-1] ) ;
+                cout << ans << endl ;
+        }
+
+        return 0 ;
+} 

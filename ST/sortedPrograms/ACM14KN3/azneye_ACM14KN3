@@ -1,0 +1,56 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+
+void solve(int test_num) {
+  string str;
+  int P, Q, cnt[26];
+  cin >> str >> P >> Q;
+  memset(cnt, 0, sizeof(cnt));
+  for (const char& c : str)
+    cnt[c - 'a'] += P;
+  for (int q = 0, N; q < Q; q++) {
+    cin >> N;
+    int res = 0;
+    while (res < 26 && N > cnt[res])
+      N -= cnt[res++];
+    if (res == 26)
+      cout << "-1\n";
+    else
+      cout << char(res + 'a') << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

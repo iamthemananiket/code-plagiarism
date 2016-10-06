@@ -1,0 +1,166 @@
+// "ios::sync_with_stdio(false);"
+ #include<iostream>
+#include<algorithm>
+#include<stdio.h>
+#include<unordered_map>
+#include <vector>
+#include<map>
+#include<set>
+#include<unordered_set>
+using namespace std;
+inline void Scan_f(int a)
+{
+char c = 0;
+while(c<33)
+//c = fgetc_unlocked(stdin);
+c = getc(stdin);
+a = 0;
+while(c>33)
+{
+a = a*10 + c - '0';
+//c = fgetc_unlocked(stdin);
+c = getc(stdin);
+}
+}
+
+# define mod 1000000007
+int readInt () {
+	bool minus = false;
+	int result = 0;
+	char ch;
+	ch = getchar();
+	while (true) {
+		if (ch == '-') break;
+		if (ch >= '0' && ch <= '9') break;
+		ch = getchar();
+	}
+	if (ch == '-') minus = true; else result = ch-'0';
+	while (true) {
+		ch = getchar();
+		if (ch < '0' || ch > '9') break;
+		result = result*10 + (ch - '0');
+	}
+	if (minus)
+		return -result;
+	else
+		return result;
+}
+ string str;
+//unordered_map  <int ,int> mymap;
+//unordered_map <int,int>::iterator it;
+unordered_map  <string,int> mymap;
+unordered_set <int> mymaps;
+unordered_map <string,int>::iterator it;
+unordered_set <int>::iterator it1;
+ int s,q;
+ vector<long long int > B;
+
+
+long long int fact[5001][5001]={{0}};
+
+int facot(int n,int r){
+    if(n==r)
+        fact[n][r]= 1;
+    else if(r==0)
+        fact[n][r] =1;
+     else if(n<r)
+        fact[n][r]=0;
+    else if(fact[n][r]==0)
+    fact[n][r]=(facot(n-1,r)%mod+facot(n-1,r-1)%mod)%mod;
+    return (fact[n][r])%mod;
+
+}
+int main(){
+int  t,s,q,k,sum,p,index,max;
+long long int n;
+cin>>t;
+
+////cout<<"reached"<<endl;
+while(t--){
+
+	//A.clear();
+long long int C[5001]={0};
+        cin>>s>>q;
+cin>>str;
+ string  elem;
+
+        for (int i = 0; i < str.length(); i++){
+                   n=(str[i]-'a'+1);
+                   elem=str[i];
+            for (int j = 0; j < str.length() - i; j++) {
+                if(j>0){
+                 n=(((n%mod)*(26))%mod+(str[i+j]-'a'+1)%mod)%mod;
+                 elem.push_back(str[i+j]);
+                }
+
+
+                it1 = mymaps.find(n);
+
+             if(it1==mymaps.end())
+             {
+                 mymaps.insert((n));
+                 mymap.insert(pair<string,int>(elem,1));
+              }
+             else{
+                     it = mymap.find(elem);
+                    if(it==mymap.end()){
+                          mymap.insert(pair<string,int>(elem,1));
+                         
+                    }
+                    else
+
+                   it->second=((it->second)%mod+1)%mod;
+}
+}
+        }
+max=0;
+for(it=mymap.begin();it!=mymap.end();++it)
+{
+    C[it->second]=(C[it->second]%mod+1)%mod;
+    //cout<<A[n]<<" ";
+if(it->second>max)
+    max=it->second;
+
+}
+//cout<<endl;
+
+     //   radixsort(A,n,max);
+        //cout<<"sorted Array"<<endl;
+   /* index=0;
+for(k=0;k<=max;k++){
+	B.push_back(0);
+      index=bsearch(k,index,n);
+      //cout<<index<<endl;
+	 for(int i=index;i<n;i++)
+        {
+                B[k]=(B[k]%mod+facot(A[i],k)%mod)%mod;
+    }
+    B[k]=B[k]%mod;
+    ////cout<<B[k]<<endl;
+}*/
+for(k=0;k<=max;k++){
+        	B.push_back(0);
+    for(int i=k;i<=max;i++)
+    {
+        if(C[i]>0)
+        B[k]=(B[k]%mod+((C[i]%mod)*(facot(i,k)%mod))%mod)%mod;
+    }
+B[k]=B[k]%mod;
+}
+
+while(q--){
+  k=readInt();
+//sum=0;
+   if(k<=max)
+  printf("%d\n",B[k]);
+   else
+ printf("0\n");
+
+}
+if(t>0){
+B.clear();
+mymap.clear();
+}
+
+}
+}

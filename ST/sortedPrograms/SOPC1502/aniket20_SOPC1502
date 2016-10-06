@@ -1,0 +1,70 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 200200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int graph[105][105];
+
+int main()
+{
+	int k,m,n,i,j,l,r;
+	iosbase;
+	cin>>k>>m>>n;
+	for(i=1;i<=100;i++){
+		for(j=1;j<=100;j++){
+			graph[i][j]=imax;
+		}
+	}
+	for(i=0;i<m;i++){
+		cin>>l>>r;
+		graph[l][r]=min(graph[l][r],1);
+	}
+	for(i=0;i<n;i++){
+		cin>>l>>r;
+		graph[l][r]=min(graph[l][r],1);
+	}
+	for(i=1;i<=100;i++){
+		for(j=1;j<=k;j++){
+			if((i+j)>100){
+				break;
+			}
+			graph[i][i+j]=min(graph[i][i+j],1);
+		}
+	}
+	for(k=1;k<=100;k++){
+		for(i=1;i<=100;i++){
+			for(j=1;j<=100;j++){
+				graph[i][j]=min(graph[i][j],graph[i][k]+graph[k][j]);
+			}
+		}
+	}
+	cout<<graph[1][100]<<"\n";
+	return 0;
+}

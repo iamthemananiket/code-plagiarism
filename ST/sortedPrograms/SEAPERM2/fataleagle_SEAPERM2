@@ -1,0 +1,196 @@
+#include <bits/stdc++.h>
+
+#ifdef getchar
+#undef getchar
+#endif
+#define getchar() (*_pinp?*_pinp++:(_inp[fread(_pinp=_inp, 1, 4096, stdin)]='\0', *_pinp++))
+char _inp[4097], *_pinp=_inp;
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+
+using namespace std;
+
+const long long X=301;
+int N;
+unsigned long long P[301];
+int A[301][301];
+unsigned long long prefix_hash_pool[301][302];
+unsigned long long suffix_hash_pool[301][303];
+int mperm[301][301];
+int mperm2[301][301];
+#define prefix_hash prefix_hash_pool[id]
+#define suffix_hash suffix_hash_pool[id]
+struct seq_hasher
+{
+    int id;
+    unsigned long long hash_val;
+    seq_hasher()
+    {
+        static int _id;
+        id=_id++;
+    }
+    inline void init(int orig[])
+    {
+        hash_val=0;
+        for(int i=N-2; i>=0; i--)
+            suffix_hash[i]=hash_val=orig[i]*P[N-2-i]+hash_val;
+        hash_val=1;
+        for(int i=0; i<N-1; i++)
+            prefix_hash[i]=hash_val=hash_val*X+orig[i];
+    }
+    inline void swap_next(int pos, int a, int b)
+    {
+        const unsigned long long x=(pos==0?1:prefix_hash[pos-1]);
+        //prefix_hash[pos+1]=(prefix_hash[pos]=x*X+a)*X+b;
+        prefix_hash[pos]=x*X+a;
+        //hash_val=x*P[N-pos-1]+(suffix_hash[pos]=(suffix_hash[pos+1]=suffix_hash[pos+2]+b*P[N-pos-3])+a*P[N-pos-2]);
+        hash_val=b*P[N-pos-3]+a*P[N-pos-2]+x*P[N-pos-1]+suffix_hash[pos+2];
+    }
+} hashers[301];
+
+inline void init(int v[], bool make_hashers=true)
+{
+    if(make_hashers)
+    {
+        for(int i=0; i<N; i++)
+        {
+            for(int j=0; j<i; j++)
+                mperm[i][j]=v[j]-(v[j]>v[i]);
+            for(int j=i+1; j<N; j++)
+                mperm[i][j-1]=v[j]-(v[j]>v[i]);
+            hashers[i].init(mperm[i]);
+        }
+    }
+    else
+    {
+        for(int i=0; i<N; i++)
+        {
+            for(int j=0; j<i; j++)
+                mperm[i][j]=v[j]-(v[j]>v[i]);
+            for(int j=i+1; j<N; j++)
+                mperm[i][j-1]=v[j]-(v[j]>v[i]);
+        }
+    }
+}
+
+inline void recalc(int perm[], int pos, int out[])
+{
+    for(int i=0; i<pos; i++)
+        out[i]=perm[i]-(perm[i]>perm[pos]);
+    for(int i=pos+1; i<N; i++)
+        out[i-1]=perm[i]-(perm[i]>perm[pos]);
+}
+
+inline void transition(int perm[], int pos)
+{
+    swap(perm[pos], perm[pos+1]);
+    for(int i=0; i<pos; i++)
+        hashers[i].swap_next(pos-1, mperm[i][pos], mperm[i][i]);
+    recalc(perm, pos, mperm[pos]);
+    hashers[pos].init(mperm[pos]);
+    recalc(perm, pos+1, mperm[pos+1]);
+    hashers[pos+1].init(mperm[pos+1]);
+    for(int i=pos+2; i<N; i++)
+        hashers[i].swap_next(pos, mperm[i][pos+1], mperm[i][0]);
+}
+
+bool cmp_mperm(int a, int b)
+{
+    return lexicographical_compare(mperm[a], mperm[a]+N-1, mperm[b], mperm[b]+N-1);
+}
+
+bool cmp_A(int a, int b)
+{
+    return lexicographical_compare(A[a], A[a]+N-1, A[b], A[b]+N-1);
+}
+
+bool validate(int perm[])
+{
+    memcpy(mperm2, mperm, sizeof mperm2);
+    init(perm, false);
+    static int order[301], order2[301];
+    for(int i=0; i<N; i++)
+        order[i]=order2[i]=i;
+    sort(order, order+N, cmp_mperm);
+    sort(order2, order2+N, cmp_A);
+    for(int i=0; i<N; i++)
+        for(int j=0; j<N-1; j++)
+            if(mperm[order[i]][j]!=A[order2[i]][j])
+            {
+                memcpy(mperm, mperm2, sizeof mperm);
+                return false;
+            }
+    memcpy(mperm, mperm2, sizeof mperm);
+    return true;
+}
+
+void solve()
+{
+    scan(N);
+    for(int i=0; i<N; i++)
+        for(int j=0; j<N-1; j++)
+            scan(A[i][j]);
+    static int order[301], B[301][301];
+    memcpy(B, A, sizeof B);
+    for(int i=0; i<N; i++)
+        order[i]=i;
+    random_shuffle(order, order+N);
+    for(int i=0; i<N; i++)
+        for(int j=0; j<N-1; j++)
+            A[i][j]=B[order[i]][j];
+    unsigned long long orig_hash=0;
+    for(int i=0; i<N; i++)
+    {
+        hashers[0].init(A[i]);
+        orig_hash^=hashers[0].hash_val;
+    }
+    static int perm[301];
+    set<vector<int>> seen;
+    vector<int> v;
+    for(int i=0; i<N; i++)
+    {
+        perm[0]=1;
+        for(int j=0; j<N-1; j++)
+            perm[j+1]=A[i][j]+1;
+        v.assign(perm, perm+N);
+        if(!seen.insert(v).second)
+            continue;
+        init(perm);
+        unsigned long long ans=0;
+        for(int k=0; k<N; k++)
+            ans^=hashers[k].hash_val;
+        if(ans==orig_hash && validate(perm))
+        {
+            for(int k=0; k<N; k++)
+                printf("%d%c", perm[k], " \n"[k==N-1]);
+            return;
+        }
+        for(int j=1; j<N; j++)
+        {
+            transition(perm, j-1);
+            ans=0;
+            for(int k=0; k<N; k++)
+                ans^=hashers[k].hash_val;
+            if(ans==orig_hash && validate(perm))
+            {
+                for(int k=0; k<N; k++)
+                    printf("%d%c", perm[k], " \n"[k==N-1]);
+                return;
+            }
+        }
+    }
+    assert(false);
+}
+
+int main()
+{
+    srand(0xdeadbeef);
+    P[0]=1;
+    for(int i=1; i<=300; i++)
+        P[i]=P[i-1]*X;
+    int T;
+    scan(T);
+    while(T--)
+        solve();
+    return 0;
+}

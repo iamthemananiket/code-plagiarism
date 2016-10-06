@@ -1,0 +1,240 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define MAX 200002
+
+int n;
+int m;
+
+vector<pair<int,int> > v[MAX];
+
+bool use[MAX];
+
+int ord = 0;
+int tp[MAX];
+vector<pair<int, long long int> > V[MAX];
+int belong[MAX];
+inline int root(int b){
+	if (belong[b] == -1){
+		return b;
+	}
+	belong[b] = root(belong[b]);
+	return belong[b];
+}
+void merge(int a, int b){
+	a = root(a);
+	b = root(b);
+	if (a == b){
+		return;
+	}
+	if (a < b){
+		swap(a, b);
+	}
+	belong[a] = b;
+}
+int vis[MAX];
+int num = 0;
+inline pair<int,int> dfs(int b,int pr=-1){
+	use[b] = true;
+	vis[b] = num;
+	num++;
+	pair<int, int> r = make_pair(-1, -1);
+	for (int i = 0; i < v[b].size(); i++){
+		if (v[b][i].first == pr)continue;
+		if (use[v[b][i].first]&&vis[v[b][i].first]<vis[b]){
+			r.first = ord;
+			r.second = v[b][i].first;
+			V[ord].push_back(v[b][i]);
+			tp[b] = ord;
+			ord++;
+		}
+		else{
+			if (use[v[b][i].first] == false){
+				pair<int, int> k = dfs(v[b][i].first, b);
+				if (k.first != -1){
+					V[k.first].push_back(v[b][i]);
+					if (k.second != b){
+						r = k;
+					}
+					tp[b] = k.first;
+				}
+			}
+		}
+	}
+	return r;
+}
+vector<pair<int, int> > ed;
+vector<long long int> cc;
+
+struct st{
+	int go;
+	int id_from;
+	int id_go;
+	long long int cost;
+	st(int go_, int id_from_,int id_go_, int cost_){
+		go = go_;
+		id_from = id_from_;
+		id_go = id_go_;
+		cost = cost_;
+	}
+};
+vector<st> G[MAX];
+
+long long int sum[MAX];
+int att[MAX];
+
+long long int in_dist(int a, int b){
+	if (a == b)return 0;
+	int r = tp[a];
+	int A = att[a];
+	int B = att[b];
+	if (A > B){
+		swap(A, B);
+	}
+	long long int k = V[r][B - 1].second;
+	if (A){
+		k -= V[r][A - 1].second;
+	}
+	return min(k, sum[r] - (k));
+}
+
+
+#define MAX_LOG 22
+int lcc[MAX_LOG][MAX];
+long long int im[MAX];
+int dep[MAX];
+int pa[MAX];
+int lec[MAX];
+void init(){
+	for (int i = 0; i + 1 < MAX_LOG; i++){
+		for (int j = 0; j < MAX; j++){
+			if (lcc[i][j] == -1){
+				lcc[i + 1][j] = -1;
+				continue;
+			}
+			lcc[i + 1][j] = lcc[i][lcc[i][j]];
+		}
+	}
+}
+int lca(int a, int b){
+	if (dep[a] < dep[b]){
+		swap(a, b);
+	}
+	for (int i = 0; i < MAX_LOG; i++){
+		if (((dep[a] - dep[b]) >> i) & 1){
+			a = lcc[i][a];
+		}
+	}
+	if (a == b){
+		return a;
+	}
+	for (int i = MAX_LOG - 1; i >= 0; i--){
+		if (lcc[i][a] != lcc[i][b]){
+			a = lcc[i][a];
+			b = lcc[i][b];
+		}
+	}
+	return lcc[0][a];
+}
+
+inline void dfs2(int b,int loc,int pr=-1,int d=0,long long int sum=0){
+	dep[b] = d;
+	lcc[0][b] = pr;
+	im[b] = sum;
+	lec[b] = loc;
+	for (int i = 0; i < G[b].size(); i++){
+		if (G[b][i].go == pr)continue;
+		int go = G[b][i].id_from;
+		long long int ad = G[b][i].cost + in_dist(loc,go);
+		pa[G[b][i].go] = G[b][i].id_from;
+		dfs2(G[b][i].go, G[b][i].id_go, b, d + 1, sum + ad);
+	}
+}
+int go(int b, int dep){
+	for (int i = 0; i < MAX_LOG; i++){
+		if ((dep >> i) & 1){
+			b = lcc[i][b];
+		}
+	}
+	return b;
+}
+int main(){
+	memset(belong, -1, sizeof(belong));
+	cin >> n >> m;
+	for (int i = 0; i < m; i++){
+		int u, vv, c;
+		scanf("%d%d%d", &u, &vv, &c);
+		u--;
+		vv--;
+		v[u].push_back(make_pair(vv, c));
+		v[vv].push_back(make_pair(u, c));
+		ed.push_back(make_pair(u, vv));
+		cc.push_back(c);
+	}
+	for (int i = 0; i < n; i++){
+		if (use[i] == false){
+			dfs(i);
+		}
+	}
+	for (int i = 0; i < ord; i++){
+		long long int im=0;
+		for (int j = 0; j < V[i].size(); j++){
+			merge(V[i][j].first, V[i][0].first);
+			sum[i] += V[i][j].second;
+			im += V[i][j].second;
+			V[i][j].second = im;
+			att[V[i][j].first] = j;
+		}
+	}
+	for (int i = 0; i < ed.size(); i++){
+		int a = root(ed[i].first);
+		int b = root(ed[i].second);
+		if (a != b){
+			G[a].push_back(st(b, ed[i].first, ed[i].second, cc[i]));
+			G[b].push_back(st(a, ed[i].second, ed[i].first, cc[i]));
+		}
+	}
+	memset(lcc, -1, sizeof(lcc));
+	dfs2(0,0,-1);
+	init();
+	int q;
+	scanf("%d", &q);
+	while (q--){
+		int u, v;
+		scanf("%d%d", &u, &v);
+		u--;
+		v--;
+		if (root(u) == root(v)){
+			printf("%lld\n", in_dist(u, v));
+		}
+		else{
+			int lc = lca(root(u), root(v));
+			int u_p;
+			int u_v;
+			{
+				if (lc == root(u)){
+					u_p = u;
+				}
+				else{
+					u_p = pa[go(root(u), dep[root(u)] - dep[lc] - 1)];
+				}
+			}
+			{
+				if (lc == root(v)){
+					u_v = v;
+				}
+				else{
+					u_v = pa[go(root(v), dep[root(v)] - dep[lc] - 1)];
+				}
+			}
+			long long int ans = im[root(u)] + im[root(v)] - 2LL * im[lc];
+			if(root(u)!=lc)ans -= in_dist(lec[lc], u_p);
+			if(root(v)!=lc)ans -= in_dist(lec[lc], u_v);
+			ans += in_dist(u_p, u_v);
+			if (root(u) != lc)ans += in_dist(lec[root(u)], u);
+			if (root(v) != lc)ans += in_dist(lec[root(v)], v);
+			printf("%lld\n", ans);
+		}
+	}
+	return 0;
+}

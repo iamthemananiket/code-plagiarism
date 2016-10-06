@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+struct Gem {
+  int x, y, val;
+  
+  bool operator<(const Gem& g) const {
+    return x < g.x;
+  }
+};
+
+const int PW = 1 << 17;
+
+struct Tree {
+  ll tree[2*PW], lazy[2*PW];
+  
+  void init() {
+    memset(tree, 0, sizeof(tree));
+    memset(lazy, 0, sizeof(lazy));
+  }
+  
+  void add(int l, int r, int x) {
+    rec_add(1, 0, PW - 1, l, r, x);
+  }
+  
+  void prog(int at) {
+    const int lch = at+at, rch = lch+1;
+    tree[lch] += lazy[at];
+    lazy[lch] += lazy[at];
+    tree[rch] += lazy[at];
+    lazy[rch] += lazy[at];
+    lazy[at] = 0;
+  }
+  
+  void rec_add(int at, int l, int r, int L, int R, int X) {
+    if (L > r || R < l) return;
+    if (L <= l && r <= R) {
+      tree[at] += X;
+      lazy[at] += X;
+    } else {
+      const int m = (l + r) >> 1;
+      prog(at);
+      rec_add(at+at,l,m,L,R,X);
+      rec_add(at+at+1,m+1,r,L,R,X);
+      tree[at] = max(tree[at+at], tree[at+at+1]);
+    }
+  }
+  
+  ll query() {
+    return tree[1];
+  }
+};
+
+Tree tree;
+
+ll calc(const vector<Gem>& gems, int S) {
+  tree.init();
+  ll res = 0;
+  for (auto lef = gems.begin(), rig = gems.begin(); rig != gems.end(); ++rig) {
+    tree.add(max(0,rig->y-S+1), rig->y, rig->val);
+    while (lef != rig && lef->x <= rig->x - S) {
+      tree.add(max(0,lef->y-S+1), lef->y, -lef->val);
+      ++lef;
+    }
+    res=max(res, tree.query());
+  }
+  return res;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int N, L;
+  cin >> N >> L;
+  vector<Gem> gems(N);
+  for(auto& g : gems)
+    cin >> g.x >> g.y >> g.val;
+  sort(gems.begin(), gems.end());
+  const ll tar = calc(gems, L);
+  ll side = L;
+  for(int low = 1, hig = L - 1; low <= hig; ) {
+    const int mid = (low + hig) >> 1;
+    if (calc(gems, mid) == tar) {
+      side = mid;
+      hig = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+  cout << tar << " " << side << endl;
+  return 0;
+}

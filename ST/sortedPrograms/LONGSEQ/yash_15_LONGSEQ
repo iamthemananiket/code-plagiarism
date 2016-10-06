@@ -1,0 +1,16 @@
+#include <bits/stdc++.h>
+using namespace std;
+char bt[100005];
+int main(){
+	int t,i,c[2];
+	cin >> t;
+	while(t--){
+		cin>>bt;
+		for(i=c[0]=c[1]=0;bt[i];i++)
+			c[bt[i]-'0']++;
+		if(c[0]==1 || c[1]==1)
+			cout<<"Yes\n";
+		else
+			cout<<"No\n";
+	}
+}

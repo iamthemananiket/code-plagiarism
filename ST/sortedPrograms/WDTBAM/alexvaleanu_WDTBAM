@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 1000;
+
+int W[MAX_N + 1];
+int P[MAX_N + 1];
+string A, B;
+int T, N;
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N;
+        cin >> A >> B;
+
+        for (int i = 0; i <= N; ++i)
+            cin >> W[i];
+
+        for (int i = 1; i <= N; ++i)
+            P[i] = i;
+
+        int correct = 0;
+        int wrong = 0;
+
+        for (int i = 0; i < N; ++i)
+        {
+            if (A[i] == B[i])
+                correct++;
+            else
+                wrong++;
+        }
+
+        if (correct == N)
+        {
+            cout << W[N] << "\n";
+        }
+        else if (wrong == N)
+        {
+            cout << W[0] << "\n";
+        }
+        else
+        {
+            int best = 0;
+
+            for (int i = 0; i <= correct; ++i)
+                best = max(best, W[i]);
+
+            cout << best << "\n";
+        }
+    }
+
+    return 0;
+}

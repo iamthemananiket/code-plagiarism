@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define yn fjalhfla
+const int N = 1e5 + 5;
+
+pair< int, int > k[N];
+
+int n, xm, xn, ym, yn, id[N];
+
+int main() {
+  int t; scanf("%d", &t);
+  while(t--) {
+    scanf("%d", &n);
+    for(int i = 0; i<n; i++)
+      scanf("%d%d", &k[i].first, &k[i].second), id[i] = i;
+    sort(id, id+n, [](int a, int b) { return k[a] < k[b]; });
+    xm = xn = k[0].first;
+    ym = yn = k[0].second;
+    for(int i = 1; i<n; i++) {
+      xm = max(xm, k[i].first);
+      xn = min(xn, k[i].first);
+      ym = max(ym, k[i].second);
+      yn = min(yn, k[i].second);
+    }
+    if(k[id[0]].first == xn && k[id[0]].second == yn) {
+      puts("1");
+      printf("%d NE\n", id[0]+1);
+      continue;
+    }
+    if(k[id[n-1]].first == xm && k[id[n-1]].second == ym) {
+      puts("1");
+      printf("%d SW\n", id[n-1]+1);
+      continue;
+    }
+    int ul, br;
+    ul = br = 0;
+    for(int i = 1; i<n; i++) {
+      if(k[i].first < k[ul].first || (k[i].first == k[ul].first && k[i].second > k[ul].second))
+        ul = i;
+      if(k[i].first > k[br].first || (k[i].first == k[br].first && k[i].second < k[br].second))
+        br = i;
+    }
+    if(k[ul].first == xn && k[ul].second == ym) {
+      puts("1");
+      printf("%d SE\n", ul+1);
+      continue;
+    }
+    if(k[br].first == xm && k[br].second == yn) {
+      puts("1");
+      printf("%d NW\n", br+1);
+      continue;
+    }
+    puts("2");
+    if(k[id[0]].second > k[id[1]].second) {
+      printf("%d SE\n", id[0]+1);
+      printf("%d NE\n", id[1]+1);
+    }
+    else {
+      printf("%d NE\n", id[0]+1);
+      printf("%d SE\n", id[1]+1);
+    }
+  }
+  return 0;
+}

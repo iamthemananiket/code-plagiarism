@@ -1,0 +1,122 @@
+#include<bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+ 
+ 
+typedef long long ll;
+typedef pair<int,int> pii;
+ 
+ll POWER[65];
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+vector<int> R;
+int k;
+const int MOD = 504;
+ll dp[2][19][512][504];
+ll go(int lft, bool last, int mask, int mod) {
+	if(lft==0) {
+		int v=0;
+		for(int i=0;v<k and i<9;i++) {
+			if(i==4) {
+				if((POWER[i]&mask) and last) v++;
+				continue;
+			}
+			if((mask&POWER[i]) and mod%(i+1)==0) v++;
+		}
+		if(v>=k) return 1;
+		return 0;
+	}
+	if(dp[last][lft][mask][mod]!=-1) return dp[last][lft][mask][mod];
+	int dif=k-__builtin_popcount(mask);
+	ll ret=0;
+	int upto=9;
+	for(int i=0;i<=upto;i++) {
+		if(dif>=lft and (i==0 or (mask&POWER[i-1]))) continue;
+		int mod1=mod*10;
+		if(mod1>=MOD) mod1%=MOD;
+		int mod2=mod*10+i;
+		if(mod2>=MOD) mod2%=MOD;
+		if(i==0) ret+=go(lft-1,true,mask,mod1);
+		else ret+=go(lft-1,(i==5),mask|POWER[i-1],mod2);
+	}
+	return dp[last][lft][mask][mod]=ret;
+}
+int main() {
+	//freopen("TASK.in","r",stdin);	
+	//freopen("TASK.out","w",stdout);
+	precompute();
+	int q;
+	scanf("%d",&q);
+	while(q--) {
+		memset(dp,-1,sizeof(dp));
+		ll l,r;
+		scanf("%lld%lld",&l,&r);
+		scanf("%d",&k);
+		R.clear();
+		r++;
+		while(r!=0) {
+			R.pb(r%10);
+			r/=10;
+		}
+		reverse(all(R));
+		ll ans=0;
+		int lft=sz(R);
+		int mask=0,mod=0;
+		for(int i=0;i<sz(R);i++) {
+			int dig=R[i];
+			lft--;
+			for(int j=0;j<dig;j++) {
+				if(j!=0) ans+=go(lft,(j==5),mask|POWER[j-1],(mod*10+j)%MOD);
+				else ans+=go(lft,true,mask,(mod*10)%MOD);
+			}
+			if(dig!=0) {
+				mask|=POWER[dig-1];
+				mod*=10;
+				mod+=dig;
+				mod%=MOD;
+			}
+			else {
+				mod*=10;
+				mod%=MOD;
+			}
+		}
+		R.clear();
+		while(l!=0) {
+			R.pb(l%10);
+			l/=10;
+		}
+		reverse(all(R));
+		lft=sz(R);
+		mask=0,mod=0;
+		for(int i=0;i<sz(R);i++) {
+			int dig=R[i];
+			lft--;
+			for(int j=0;j<dig;j++) {
+				if(j!=0) ans-=go(lft,(j==5),mask|POWER[j-1],(mod*10+j)%MOD);
+				else ans-=go(lft,true,mask,(mod*10)%MOD);
+			}
+			if(dig!=0) {
+				mask|=POWER[dig-1];
+				mod*=10;
+				mod+=dig;
+				mod%=MOD;
+			}
+			else {
+				mod*=10;
+				mod%=MOD;
+			}
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}  

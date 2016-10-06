@@ -1,0 +1,93 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+
+void solve(int test_num) {
+  int N, K;
+  ll inten[22];
+  cin >> N >> K;
+  for (int i = 0; i < N; i++)
+    cin >> inten[i];
+  const ll total = accumulate(inten, inten + N, 0LL);
+  if (total % K != 0 || K > N) {
+    cout << "no\n";
+    return;
+  }
+  const ll tar = total / K;
+  if (tar == 0) {
+    cout << "yes\n";
+    return;
+  }
+  for (int i = 0; i < N; i++) {
+    if (inten[i] > tar) {
+      cout << "no\n";
+      return;
+    }
+  }
+  sort(inten, inten + N);
+  //remove all values equal to tar
+  while (N > 0 && K > 0 && inten[N - 1] == tar) {
+    N--;
+    K--;
+  }
+  static ll sum[1 << 21];
+  memset(sum, 0, sizeof(sum));
+  for (int mask = 1; mask < (1 << N); mask++)
+    for (int i = 0; i < N; i++)
+      if (1 << i & mask)
+        sum[mask] += inten[i];
+  static bool dp[9][1 << 21];
+  memset(dp, false, sizeof(dp));
+  memset(dp[0], true, sizeof(dp[0]));
+  for (int k = 1; k <= K; k++) {
+    for (int mask = 1; mask < (1 << N); mask++) {
+      if (sum[mask] % tar == 0 && sum[mask] / tar == k)
+        for (int i = 0; i < N; i++)
+          if (1 << i & mask)
+            dp[k][mask] |= dp[k - 1][mask ^ 1 << i];
+      if (dp[k][mask])
+        for (int i = 0; i < N; i++)
+          if (1 << i & ~mask)
+            dp[k][mask | 1 << i] = true;
+    }
+  }
+  if (dp[K][(1 << N) - 1])
+    cout << "yes\n";
+  else
+    cout << "no\n";
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

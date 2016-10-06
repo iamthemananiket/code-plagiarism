@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define N 101000
+vector<int> v[N];
+int dp[N], dis[N], fin[N];
+int cnt;
+void dfs(int x, int p) {
+    dis[x] = ++cnt;
+    for(int i = 0; i < v[x].size(); i ++) {
+        int y = v[x][i];
+        if(y == p) continue;
+        dp[y] = dp[x] + 1;
+        dfs(y, x);
+    }
+    fin[x] = cnt;
+    return ;
+}
+int main() {
+    //freopen("1.in", "r", stdin);
+    int n, x, y, Q;
+    scanf("%d", &n);
+    for(int i = 1; i < n; i ++) scanf("%d%d", &x, &y), v[x].push_back(y), v[y].push_back(x);
+    dfs(1, 0);
+    for(scanf("%d", &Q); Q --;) {
+        scanf("%d%d", &x, &y);
+        if(dp[x] > dp[y]) swap(x, y);
+        if(dis[x] <= dis[y] && fin[y] <= fin[x]) {
+            printf("%d taught %d\n", x, y);
+        } else {
+            puts("No idea");
+        }
+    }
+    return 0;
+}

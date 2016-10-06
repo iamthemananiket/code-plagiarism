@@ -1,0 +1,224 @@
+/*
+*/
+
+#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000009
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 1000031;
+
+int pr[N];
+int n, m;
+int tests;
+int ar[N];
+set<int> S;
+int t[N * 4];
+int interesting_positions[N];
+int IC;
+set<int>::iterator it;
+
+void build(int v, int tl, int tr)
+{
+	if (tl == tr)
+	{
+		t[v] = pr[ar[tl]];
+		return;
+	}
+	int tm = tl + tr;
+	tm /= 2;
+	build(v * 2, tl, tm);
+	build(v * 2 + 1, tm + 1, tr);
+	t[v] = max(t[v * 2], t[v * 2 + 1]);
+}
+
+void update(int v, int tl, int tr, int ps)
+{
+	if (tl == tr)
+	{
+		t[v] = pr[ar[tl]];
+		return;
+	}
+	int tm = tl + tr;
+	tm /= 2;
+	if (ps <= tm)
+		update(v * 2, tl, tm, ps);
+	else
+		update(v * 2 + 1, tm + 1, tr, ps);
+	t[v] = max(t[v * 2], t[v * 2 + 1]);
+}
+
+int get(int v, int tl, int tr, int l, int r)
+{
+	if (l > r)
+		return -1;
+	if (tl == l&&tr == r)
+		return t[v];
+	int tm = tl + tr;
+	tm /= 2;
+	return max(get(v * 2, tl, tm, l, min(r, tm)), get(v * 2 + 1, tm + 1, tr, max(tm + 1, l), r));
+}
+
+int w[N], L[N], R[N];
+
+int get(int x)
+{
+	if (w[x] == x)
+		return x;
+	return w[x] = get(w[x]);
+}
+
+void merge(int a, int b)
+{
+	w[a] = b;
+	L[b] = min(L[b], L[a]);
+	R[b] = max(R[b], R[a]);
+}
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/in.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	cin.tie(0);
+
+	pr[1] = 1;
+	for (int i = 2; i < N; i++)
+	{
+		if (pr[i] == 0)
+		{
+			for (int j = i; j < N; j += i)
+			{
+				if (pr[j] == 0)
+					pr[j] = i;
+			}
+		}
+	}
+
+	cin >> tests;
+	//tests = 10;
+
+	for (; tests; --tests)
+	{
+		cin >> n >> m;
+		//n = 100000;
+		//m = 100000;
+
+		for (int i = 1; i <= n; i++)
+		{
+			cin >> ar[i];
+			//			ar[i] = 1000000;
+		}
+		build(1, 1, n);
+
+		for (int i = 1; i <= n; i++)
+		{
+			L[i] = R[i] = i;
+			w[i] = i;
+		}
+
+		for (int i = 2; i <= n; i++)
+		{
+			if (ar[i] == 1 && ar[i - 1] == 1)
+			{
+				int id1 = get(i);
+				int id2 = get(i - 1);
+				merge(id1, id2);
+			}
+		}
+
+		for (int i = 1; i <= m; i++)
+		{
+			int tp;
+			cin >> tp;
+			if (tp == 0)
+			{
+				int l, r;
+				cin >> l >> r;
+				IC = 0;
+				while (true)
+				{
+					if (l > r)
+						break;
+					if (ar[l] == 1)
+					{
+						int I = get(l);
+						l = R[I] + 1;
+						continue;
+					}
+					//cout << l << "%" << endl;
+					interesting_positions[IC] = l;
+					++IC;
+					//.push_back(l);
+
+					l++;
+				}
+
+				for (int i = 0; i < IC; i++)
+				{
+					int ps = interesting_positions[i];
+					int old = pr[ar[ps]];
+					ar[ps] /= pr[ar[ps]];
+					if (pr[ar[ps]] != old)
+						update(1, 1, n, ps);
+					if (ar[ps]>1)
+						continue;
+					if (ps>1 && ar[ps - 1] == 1)
+					{
+						int id1 = get(ps);
+						int id2 = get(ps - 1);
+						merge(id1, id2);
+					}
+					if (ps < n&&ar[ps + 1] == 1)
+					{
+						int id1 = get(ps);
+						int id2 = get(ps + 1);
+						merge(id1, id2);
+					}
+				}
+			}
+			else
+			{
+				int l, r;
+				cin >> l >> r;
+				cout << get(1, 1, n, l, r) << "\n";
+			}
+		}
+
+	}
+
+	cin.get(); cin.get();
+	return 0;
+}

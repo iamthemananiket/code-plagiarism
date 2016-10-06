@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 777777
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll x[maxs],y[maxs],z[maxs];
+ll power(ll a,ll b){
+	ll t=1;
+	while(b>0){
+		if(b&1){
+			t=t*a;
+		}
+		a*=a;
+		b>>=1;
+	}
+	return t;
+}
+int main()
+{
+	ll n,q,a,b,c,d,i,j;
+	sc("%lld %lld",&n,&q);
+	for(i=0;i<n;i++){
+		sc("%lld %lld %lld",&x[i],&y[i],&z[i]);
+	}
+	while(q--){
+		sc("%lld %lld %lld %lld",&a,&b,&c,&d);
+		double ans=0;
+		for(i=0;i<n;i++){
+			for(j=0;j<n;j++){
+				if(i!=j){
+					ll num=abs(a*(x[i]-x[j])+b*(y[i]-y[j])+c*(z[i]-z[j])+d);
+					double den=n*(n-1)*sqrt(power(x[i]-x[j],4)+power(y[i]-y[j],4)+power(z[i]-z[j],4));
+					ans+=(double)num/den;
+				}	
+			}
+		}
+		pr("%.10lf\n",ans);
+	}
+	return 0;
+}

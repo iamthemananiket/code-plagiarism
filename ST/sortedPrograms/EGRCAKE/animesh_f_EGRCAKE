@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+inline int scan(){
+    int x = 0;
+    char c = getchar_unlocked();
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x << 3) + (x << 1) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+
+
+int T;
+
+int main(){
+	T = scan();
+	while( T-- ){
+		int N = scan() , M = scan();
+		if( N == 1 and M == 0 ) cout << "Yes" << endl;
+		else if( M == 0 ) cout << "No 1" << endl;
+		else if( __gcd(N,M) == 1 ) cout << "Yes" << endl;
+		else cout << "No " << (N/__gcd(N,M) ) << endl;
+	}	
+}

@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+using namespace std;
+long long mod = 1e9 + 7;
+long long power(long long x, long long p, long long m) {
+	if(p == 0) return 1;
+	long long tmp = power(x, p / 2, m);
+	if(p % 2 == 0) return (tmp * tmp) % m;
+	else return (((tmp * tmp) % m) * x) % m;
+}
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		long long n, k;
+		cin>>n>>k;
+		printf("%lld\n", (k * power(k - 1, n - 1, mod)) % mod);    
+	}
+}

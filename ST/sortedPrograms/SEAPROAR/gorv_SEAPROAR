@@ -1,0 +1,70 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MAXN 1<<18
+unsigned X; 
+
+void srand1(unsigned S){
+  X = S;
+}
+
+unsigned nextInteger1(void){
+  X = X * 1103515245 + 12345;
+  return (X / 65536) % 32768;
+}
+
+void generator1(int N, unsigned S, int A[]){
+  srand1(S);
+  for(int i=0;i<N;i++){
+    A[i] = nextInteger1() % 2; 
+  }
+}
+int preprocess[MAXN+2][42];
+int main(){
+	
+	for(int i=0;i<=MAXN;i++){
+		generator1(40,i,preprocess[i]);
+	}
+	int t;
+	cin>>t;
+	while(t--){
+		char message[MAXN];
+		cin>>message;
+		int N=strlen(message);
+		bool isDone=false;
+    	
+    	int messageArray[N];
+    	for(int i=0;i<N;i++)
+    		messageArray[i]=message[i]-'0';
+    	/*
+		for(int i=0;i<N;i++){
+    		cout<<messageArray[i]<<" ";
+    	}*/
+
+    	for(int i=0;i<=MAXN;i++)
+    	{
+    		//cout<<"CALCULATING FOR "<<i<<"\n";
+    		//generator1(N,i,arrayFormed);
+    		/*
+			for(int ss=0;ss<N;ss++){
+    			cout<<arrayFormed[i]<<" ";
+    		}
+    		cout<<"\n";
+    		*/
+    		int j;
+    		for(j=0;j<min(N,40);j++){
+    			if(messageArray[j]!=preprocess[i][j]){
+    				break;
+    			}
+    		}
+    		if(j==min(N,40)){
+    			isDone=true;
+    			puts("LCG");
+    			break;
+    		}
+    			
+		}
+		if(!isDone){
+			puts("Xorshift");
+		}
+	}
+}

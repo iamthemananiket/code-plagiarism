@@ -1,0 +1,81 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<set>
+#include<queue>
+#include<iostream>
+#include<map>
+#include<vector>
+#include<stack>
+using namespace std;
+#define long long long
+
+int rint() { int ret; scanf("%d", &ret); return ret; }
+long rlong() { long ret; scanf("%lld", &ret); return ret; }
+
+const int MOD = 1000000007;
+const int MAX = 100005;
+int n;
+long a[MAX], b[MAX], lft[MAX], rght[MAX], del[MAX];
+
+vector<long> Fun(long v[])
+{
+	stack<int> st;
+	for (int i = 0; i < n; i++)
+	{
+		while (st.size() > 0 && v[st.top()] < v[i])
+			st.pop();
+		lft[i] = st.size() > 0 ? st.top() + 1 : 0;
+		st.push(i);
+	}
+	while (st.size() > 0)
+		st.pop();
+	for (int i = n - 1; i >= 0; i--)
+	{
+		while (st.size() > 0 && v[st.top()] <= v[i])
+			st.pop();
+		rght[i] = st.size() > 0 ? st.top() - 1 : n - 1;
+		st.push(i);
+	}
+
+	memset(del, 0, sizeof del);
+	for (int i = 0; i < n; i++)
+	{
+		long d = rght[i] - lft[i] + 1;
+		long o = min(i - lft[i], rght[i] - i);
+		del[0] = (del[0] + v[i]) % MOD;
+		del[d + 1] = (del[d + 1] + v[i]) % MOD;
+		del[o + 1] = (del[o + 1] + MOD - v[i]) % MOD;
+		del[d - o] = (del[d - o] + MOD - v[i]) % MOD;
+	}
+
+	vector<long> ret(n);
+	long y = 0, z = 0;
+	for (int i = 0; i < n; i++)
+	{
+		z = (z + del[i]) % MOD;
+		y = (y + z) % MOD;
+		ret[i] = y;
+	}
+	return ret;
+}
+
+int main()
+{
+#ifdef _DEBUG
+	freopen("..\\input.txt", "r", stdin);
+#endif
+
+	n = rint();
+	for (int i = 0; i < n; i++)
+		a[i] = (rint() + i + 1) % MOD;
+	for (int i = 0; i < n; i++)
+		b[i] = (rint() + i + 1) % MOD;
+	vector<long> va = Fun(a);
+	vector<long> vb = Fun(b);
+	for (int i = 0; i < n; i++)
+		printf("%d ", 1LL * va[i] * vb[i] % MOD);
+	printf("\n");
+
+	return 0;
+}

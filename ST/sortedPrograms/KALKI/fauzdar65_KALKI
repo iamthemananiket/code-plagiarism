@@ -1,0 +1,173 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <list>
+#include <cstring>
+using namespace std;
+ 
+int n,t;
+ 
+double x[405],y[405];
+vector<int> adj[405];
+double euc[405][405];
+ 
+ 
+double dist(int i,int j)
+{
+	return sqrt((x[i]-x[j])*(x[i]-x[j]) + (y[i]-y[j])*(y[i]-y[j]));
+}	
+ 
+bool visited[405];
+pair<int,int> key[405];
+int alloted[405];
+int radius[405];
+ 
+void bfs1()
+{
+	
+	
+	
+	
+	memset(visited,false,sizeof(visited));
+    memset(alloted,0,sizeof(alloted));
+    memset(radius,0,sizeof(radius));
+    for(int i=2;i<=n;i++)key[i]=make_pair(100000,0);
+    
+    key[1]=make_pair(0,0);
+	
+	vector<int> res;
+	
+ 
+	
+	while(res.size()<n)
+	{
+		int mink=100000; int minp,ap=100000,rad=-1;
+		
+		for(int i=1;i<=n;i++)
+		{
+			if(!visited[i])
+			{
+				if(radius[key[i].second]>rad)
+				{
+					mink=key[i].first;
+					minp=i;
+					ap=alloted[key[i].second];
+					rad=radius[key[i].second];
+				}
+				else if(key[i].first<mink && radius[key[i].second]==rad)
+				{
+					mink=key[i].first;
+					minp=i;
+					ap=alloted[key[i].second];
+					rad=radius[key[i].second];
+				}
+				else if(key[i].first==mink && alloted[key[i].second]<ap && radius[key[i].second]==rad)
+				{
+					mink=key[i].first;
+					minp=i;
+					ap=alloted[key[i].second];
+					rad=radius[key[i].second];
+				}
+				
+				
+				
+			}
+			
+		}
+		res.push_back(minp);
+		visited[minp]=true;
+		int oldr=radius[key[minp].second];
+		
+		if(minp!=1)
+		{
+		adj[key[minp].second].push_back(minp);
+		adj[minp].push_back(key[minp].second);
+		if(euc[minp][key[minp].second]>radius[key[minp].second])radius[key[minp].second]=euc[minp][key[minp].second];
+		
+		
+		radius[minp]=euc[minp][key[minp].second];
+		}
+		
+		alloted[minp]=1;
+		int pa=key[minp].second;
+		
+		for(int i=1;i<=n;i++)
+		{
+			if(visited[i])
+			{
+				if(i!=minp && euc[minp][i]<=(radius[i]+radius[minp])){ alloted[i]++; alloted[minp]++; }
+				if(i!=pa && i!=minp && euc[pa][i]<=(radius[i]+radius[pa]) && euc[pa][i]>(radius[i]+ oldr)){ alloted[i]++; alloted[pa]++; }
+			}
+		}
+		
+		for(int i=1;i<=n;i++)
+		{
+			if(!visited[i])
+			{
+				if(key[i].first> euc[i][minp])
+				{
+					key[i].first=euc[i][minp];
+					key[i].second=minp;
+				}
+				else if(key[i].first==euc[i][minp] && radius[key[i].second]<radius[minp])
+				{
+					key[i].first=euc[i][minp];
+					key[i].second=minp;
+				}
+				else if(key[i].first==euc[i][minp] && alloted[key[i].second]>alloted[minp] && radius[key[i].second]==radius[minp])
+				{
+					key[i].first=euc[i][minp];
+					key[i].second=minp;
+				}
+			}
+		}
+		
+	}
+	
+	
+	
+}
+ 
+void bfs2(int pos,int par)
+{
+	
+	for(int i=0;i<adj[pos].size();i++)
+	{
+		
+		if(adj[pos][i]!=par)
+		{
+			printf("%d %d\n",pos,adj[pos][i]);
+		bfs2(adj[pos][i],pos);
+		}
+	}
+	
+}
+ 
+int main() {
+cin.tie(NULL);
+cin>>t;
+ 
+while(t--)
+{
+	cin>>n;
+	
+	for(int i=1;i<=n;i++){ cin>>x[i]>>y[i]; adj[i].clear(); }
+	
+	for(int i=1;i<n;i++)
+	{
+		for(int j=i+1;j<=n;j++)
+		{
+			euc[i][j]=dist(i,j);
+			euc[j][i]=euc[i][j];
+		}
+	}
+	
+	bfs1();
+	
+	//cout<<adj[]
+	bfs2(1,0);
+	
+}
+	return 0;
+}  

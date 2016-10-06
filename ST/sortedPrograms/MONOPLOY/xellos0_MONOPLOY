@@ -1,0 +1,229 @@
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <iomanip>
+#define dibs reserve
+#define OVER9000 1234567890
+#define patkan 9
+#define tisic 47
+#define soclose 10e-7
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define chocolate win
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):(x))
+// mylittlepony
+using namespace std;
+
+struct finM {
+	vector<int> T;
+	finM() {}
+	finM(int N) {T.resize(N+1,OVER9000);}
+	
+	int lastone(int x) {return x&(x^(x-1));}
+	
+	int get(int pos) {
+		int ret =OVER9000;
+		for(int i =pos+1; i > 0; i -=lastone(i)) ret =min(ret,T[i]);
+		return ret;}
+		
+	void put(int pos, int val) {
+		for(int i =pos+1; i < T.size(); i +=lastone(i)) T[i] =min(T[i],val);}
+	};
+
+struct finS {
+	vector<long long> T;
+	finS() {}
+	finS(int N) {T.resize(N+1,0);}
+	
+	int lastone(int x) {return x&(x^(x-1));}
+	
+	long long get(int pos) {
+		long long ret =0;
+		for(int i =pos+1; i > 0; i -=lastone(i)) ret +=T[i];
+		return ret;}
+		
+	void put(int pos, int val) {
+		for(int i =pos+1; i < T.size(); i +=lastone(i)) T[i] +=val;}
+	};
+
+int main() {
+    cin.sync_with_stdio(0);
+	int T,N,Q,a,b;
+    cin >> T;
+    for(int t =0; t < T; t++) {
+    	cin >> N;
+    	vector< vector<int> > G(N);
+    	for(int i =1; i < N; i++) {
+    		cin >> a >> b;
+    		G[a].push_back(b);
+    		G[b].push_back(a);}
+
+    	vector< pair<int,int> > Ppath(N); // cesta a pozicia v nej
+    	vector< vector<int> > Vpath; // vrcholy cesty
+    	vector<int> Stree(N,1); // velkost podstromu
+    	vector<int> par(N,-1);
+    	vector< pair<int,int> > I(N,make_pair(0,1)); // interval podstromu
+    	
+    	par[0] =0;
+    	queue<int> q;
+    	q.push(0);
+    	vector<int> BFS(1,0);
+    	while(!q.empty()) {
+    		a =q.front();
+    		for(int i =0; i < G[a].size(); i++) if(par[G[a][i]] == -1) {
+    			par[G[a][i]] =a;
+    			BFS.push_back(G[a][i]);
+    			q.push(G[a][i]);}
+    		q.pop();}
+    	
+    	for(int j =BFS.size()-1; j >= 0; j--) {
+    		a =BFS[j];
+    		b =0;
+    		for(int i =0; i < G[a].size(); i++) if(par[a] != G[a][i]) {
+    			Stree[a] +=Stree[G[a][i]];
+    			b =max(b,Stree[G[a][i]]);}
+    		if(G[a].size()+(int)(a == 0) == 1) {
+    			Ppath[a] =make_pair(Vpath.size(),0);
+    			Vpath.push_back(vector<int>(1,a));}
+    		for(int i =0; i < G[a].size(); i++) 
+    			if(par[a] != G[a][i] && Stree[G[a][i]] == b) {
+    				Ppath[a] =Ppath[G[a][i]];
+    				Ppath[a].ss++;
+    				Vpath[Ppath[a].ff].push_back(a);
+    				break;}
+			}
+    	
+    	for(int j =0; j < BFS.size(); j++) {
+    		a =BFS[j];
+    		for(int i =0; i < G[a].size(); i++) if(par[a] != G[a][i]) {
+    			I[G[a][i]] =make_pair(I[a].ss,I[a].ss+1);
+    			I[a].ss +=Stree[G[a][i]];}}
+
+    	// skonstruuj finov cestam, uprav ich
+    	int P =Vpath.size();
+    	// stack rovnakych usekov ciest2 danej cesty 
+    	vector< vector< pair<int,int> > > A(P);
+    	finS Fsums(N); // sucty z podstromov vrchov ciest
+    	vector<int> Sums(N);
+    	for(int i =0; i < N; i++) {
+    		Sums[I[i].ff] =Stree[i];
+    		Fsums.put(I[i].ff,Stree[i]);}
+    	finS Fpath[P]; // vrchy ciest
+    	vector< vector<int> > Spath(P);
+    	for(int i =0; i < P; i++) {
+    		Fpath[i].T.resize(Vpath[i].size()+1,0);
+    		Spath[i].resize(Vpath[i].size()+1,0);
+    		reverse(Vpath[i].begin(),Vpath[i].end());
+    		for(int j =0; j < Vpath[i].size(); j++) Fpath[i].put(j,1);
+    		for(int j =0; j < Vpath[i].size(); j++) Ppath[Vpath[i][j]].ss =j;}
+    	vector<int> Ptop(N); // vrch cesty2
+		vector< vector<int> > Path2(N);
+    	for(int i =BFS.size()-1; i >= 0; i--) {
+    		Ptop[BFS.size()-1-i] =BFS[i];
+    		A[Ppath[BFS[i]].ff].push_back(make_pair(Ppath[BFS[i]].ss,BFS.size()-1-i));
+    		Path2[BFS.size()-1-i].push_back(BFS[i]);}
+	
+    	cin >> Q;
+    	Ptop.resize(N+Q);
+    	Path2.resize(N+Q);
+    	for(int q =0; q < Q; q++) {
+    		string s;
+    		cin >> s >> b;
+    		if(s == "q") {
+    			long long ans =0;
+    			int akt =b;
+    			while(true) {
+    				// vsetky cesty2 na danej ceste
+//    				cout << Vpath[Ppath[akt].ff].size() << " " << Ppath[akt].ss << "\n";
+    				ans +=Fpath[Ppath[akt].ff].get(Ppath[akt].ss);
+    				// navrch
+    				akt =Vpath[Ppath[akt].ff][0];
+    				if(akt == 0) break;
+    				akt =par[akt];}
+    			ans =Fsums.get(I[b].ss-1)-Fsums.get(I[b].ff)+(ans-1)*Stree[b];
+    			cout << fixed << setprecision(8) << 1.0*ans/Stree[b] << "\n";
+    			continue;}
+    		
+    		// prejdi po cestach2 hore
+    		// posuvaj 
+    		int akt =b;
+    		while(true) {
+    			// aktualna cesta, binsearch
+   				int xa =0, xb =A[Ppath[akt].ff].size();
+   				while(xa < xb-1) {
+   					int xc =A[Ppath[akt].ff].size()-1-(xa+xb)/2;
+   					if(A[Ppath[akt].ff][xc].ff <= Ppath[akt].ss) xa =(xa+xb)/2;
+   					else xb =(xa+xb)/2;}
+   				int p =(A[Ppath[akt].ff].end()-xa-1)->ss;
+
+   				// novy vrch
+   				int n =-1;
+				// nasleduje lahka hrana
+				if(xb < A[Ppath[akt].ff].size()) {
+					if((A[Ppath[akt].ff].end()-xb-1)->ff > Ppath[akt].ss+1)
+						n =Vpath[Ppath[akt].ff][Ppath[akt].ss+1];
+					}
+				else if(Ppath[akt].ss+1 < Vpath[Ppath[akt].ff].size())
+					n =Vpath[Ppath[akt].ff][Ppath[akt].ss+1];
+				// nasleduje tazka hrana
+				while(Ppath[*Path2[p].rbegin()].ff != Ppath[akt].ff) Path2[p].pop_back();
+				Path2[p].pop_back();
+				if(!Path2[p].empty() && n == -1) n =*Path2[p].rbegin();
+
+				// vyrob novy vrch
+				if(n >= 0) {
+					Fsums.put(I[n].ff,Stree[n]);
+					Sums[I[n].ff] =Stree[n];
+					Fpath[Ppath[n].ff].put(Ppath[n].ss,1);
+					Spath[Ppath[akt].ff][Ppath[akt].ss] =1;
+					if(Path2[p].empty()) Path2[p].push_back(n);
+					else if(*Path2[p].rbegin() != n) Path2[p].push_back(n);}
+				
+   				// zmaz stary vrch z Fsums,Sums,Fpath,Spath
+   				akt =Ptop[p];
+   				Fsums.put(I[akt].ff,-Sums[I[akt].ff]);
+   				Sums[I[akt].ff] =0;
+   				Fpath[Ppath[akt].ff].put(Ppath[akt].ss,-1);
+   				Spath[Ppath[akt].ff][Ppath[akt].ss] =0;
+
+   				Ptop[p] =n;
+    			if(akt == 0) break;
+    			akt =par[akt];}
+
+    		// prejdi po cestach hore
+    		// updatuj hodnoty A
+    		akt =b;
+    		while(true) {
+    			// update A
+    			int y =-1;
+    			while(!A[Ppath[akt].ff].empty()) {
+    				if(A[Ppath[akt].ff].rbegin()->ff > Ppath[akt].ss) break;
+    				y =A[Ppath[akt].ff].rbegin()->ss;
+    				A[Ppath[akt].ff].pop_back();}
+   				if(!A[Ppath[akt].ff].empty())
+   					if(A[Ppath[akt].ff].rbegin()->ff == Ppath[akt].ss+1) y =-1;
+    			if(y >= 0 && Ppath[akt].ss+1 < Vpath[Ppath[akt].ff].size())
+    				A[Ppath[akt].ff].push_back(make_pair(Ppath[akt].ss+1,y));
+    			A[Ppath[akt].ff].push_back(make_pair(0,N+q));
+
+    			akt =Vpath[Ppath[akt].ff][0];
+    			Path2[N+q].push_back(akt);
+	    		if(akt == 0) break;
+    			akt =par[akt];}
+    		Fpath[Ppath[0].ff].put(0,1);
+    		Spath[Ppath[0].ff][0] =1;
+    		Ptop[N+q] =0;}
+    	}
+    return 0;}
+        
+// look at my code
+// my code is amazing

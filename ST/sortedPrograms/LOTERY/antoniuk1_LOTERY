@@ -1,0 +1,150 @@
+//It shouldn't pass, but I hope :)
+ 
+//#include "testlib.h"
+//#include <spoj.h>
+ 
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+ 
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/point_xy.hpp>
+//#include <boost/geometry/geometries/polygon.hpp>
+ 
+//#include <boost/foreach.hpp>
+ 
+using namespace std;
+ 
+const int mod = 1000000007;
+ 
+int bin_pow(int o, int s) {
+    if (s == 0) return 1;
+    if (s == 1) return o % mod;
+    int d = bin_pow(o, s/2);
+    d = (d * 1ll * d) % mod;
+    if (s % 2)
+        d = (d * 1ll * o) % mod;
+    return d;
+}
+ 
+const int N = 111111;
+int lp[N+1];
+vector<int> steps[444];
+vector<int> pr;
+bool isPrime[N];
+ 
+int prod[N];
+int inv[N];
+ 
+void getPrimes() {
+    for (int i=2; i<=N; ++i) {
+        if (lp[i] == 0) {
+            lp[i] = i;
+            pr.push_back (i);
+        }
+        for (int j=0; j<(int)pr.size() && pr[j]<=lp[i] && i*pr[j]<=N; ++j)
+            lp[i * pr[j]] = pr[j];
+    }
+    for(int i = 0; i < pr.size(); ++i) {
+        isPrime[pr[i]] = 1;
+    }
+}
+ 
+int preans[111111];
+ 
+int get(int n, int k) { // lcm(n, n-1, n-2, ... n-k+1)
+    if (k == 1)
+        return n;
+    if (k == 2)
+        return (n * 1ll * (n-1)) % mod;
+    
+    if (n >= 5 && k > n/2 && preans[n] != -1) return preans[n];
+    
+    int res = 1, i = 0, j;
+    for(; pr[i] * pr[i] <= n; ++i) {
+        j = steps[i].size()-1;
+        while (j >= 0 && n % steps[i][j] >= k) j--;
+        
+        if (j >= 0)
+            res = (res * 1ll * steps[i][j]) % mod;
+    }
+    
+    int lowest = pr[i];
+    
+    int pr_l = n+1, l, r;
+    for(int x = 1; x * x <= n; ++x) {
+ 
+        r = min(n / x, pr_l);
+        pr_l = l = max((n-k)/x, lowest-1);
+        
+        
+        if (r >= l) {
+            res = (res * 1ll * prod[r]) % mod;
+            res = (res * 1ll * inv[l]) % mod;
+        }
+        else if (l == lowest-1)
+            break;
+        
+    }
+    
+    if (n >= 5 && k > n/2) return preans[n] = res;
+    return res;
+}
+ 
+int C[1111111];
+int D[1111111];
+ 
+int main() {
+    getPrimes();
+    prod[0] = 1;
+    for(int i = 1; i <= 100000; ++i)
+    if (isPrime[i])
+        prod[i] = (prod[i-1] * 1ll * i) % mod;
+    else
+        prod[i] = prod[i-1];
+    
+    for(int i = 0; i <= 100000; ++i)
+        inv[i] = bin_pow(prod[i], mod-2);
+    
+    
+    for(int i = 0; pr[i] * pr[i] <= 100000; ++i) {
+        steps[i].push_back(pr[i]);
+        while (steps[i].back() * pr[i] <= 1e5)
+            steps[i].push_back(steps[i].back() * pr[i]);
+    }
+ 
+    int t, n, k, A, B, M;
+    scanf("%d %d %d %d %d %d", &t, &n, &k, &A, &B, &M);
+    for(int i = 2; i <= t; ++i)
+        scanf("%d", C+i);
+    for(int i = 2; i <= t; ++i)
+        scanf("%d", D+i);
+    
+    
+    memset(preans, -1, sizeof preans);
+    
+    int ans;
+    for (int i = 1; i <= t; i++) {
+        ans = get(n, k);
+        
+        n = 1 + ((A * 1ll * ans + C[i + 1]) % M);
+        k = 1 + ((B * 1ll * ans + D[i + 1]) % n);
+        
+        printf("%d\n", ans);
+    }
+    
+    
+    return 0;
+} 

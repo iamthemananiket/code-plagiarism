@@ -1,0 +1,81 @@
+/*******************************
+*  Bismillahir Rahminir Rahim  * 
+*******************************/
+ 
+#include <bits/stdc++.h>
+ 
+#define READ(x)     freopen(x, "r", stdin) 
+#define WRITE(x)    freopen(x, "w", stdout)
+
+#define REP(i, n)   for(int i=0;i<n;i++)
+#define REPN(i, n)  for(int i=1;i<=n;i++)
+#define SET(i, n)   memset(i, n, sizeof(i))
+ 
+#define MAX         1050
+#define INF         (1 << 29)
+#define pb          push_back
+ 
+using namespace std;
+ 
+typedef long long       ll;
+typedef pair<int, int>  pii;
+typedef double          db;
+
+string str[MAX];
+int n;
+
+bool isPalin(string f){
+	int s = f.size();
+	for(int i=0, j=s-1;i<=j;i++, j--){
+		if(f[i] != f[j]) return false;
+	}
+	return true;
+}
+
+int solve(){
+   	// int n = str.size();
+   	// REP(i, n) dp[i][i] = 1;
+    // for(int k = 2;k <= n;k++){
+    // 	REP(i, n-k+1){
+    // 		int j = i + k - 1;
+    //         if (str[i] == str[j] && k == 2) dp[i][j] = 2;
+    //         else if (str[i] == str[j]) dp[i][j] = dp[i+1][j-1] + 2;
+    //         else dp[i][j] = max(dp[i][j-1], dp[i+1][j]);
+    //     }
+    // }
+    // return dp[0][n-1];
+	int ret = INF;
+	for(int i=0;i<(1 << n);i++){
+		string f = "";
+		REP(j, n){
+			if(i & (1 << j)){
+				f += str[j];
+			}
+		}
+		if(isPalin(f)){
+			// cout << f << endl;
+			// cout << i << ' ' << __builtin_popcount(i) << endl;
+			// cout << n -  (__builtin_popcount(i)) << endl;
+			ret = min(ret, n - __builtin_popcount(i));
+		}
+	}
+	// cout << "~ " << ret << endl;
+	if(ret == INF) ret = n;
+	return ret;
+
+}
+ 
+
+int main(){
+  	int tc;
+  	scanf("%d", &tc);
+  	while(tc--){
+  		scanf("%d", &n);
+  		REP(i, n){
+  			cin >> str[i];
+  		}
+  		int ret = solve();
+  		printf("%d\n", ret);
+  	}
+  	return 0;
+}

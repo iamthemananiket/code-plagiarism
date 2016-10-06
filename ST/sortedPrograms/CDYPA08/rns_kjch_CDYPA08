@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 2000010
+typedef int LL;
+
+int to[M], next[M], head[M], vis[M];
+LL w[M];
+int n, N;
+
+void AddEdge(int x, int y, LL z) {
+    ++N; to[N] = y; next[N] = head[x]; head[x] = N; w[N] = z;
+}
+
+bool ok(LL x) {
+    //if (!x) return 0;
+    while (x) {LL y = x % 10; if (y != 4 && y != 7) return 0; x /= 10;}
+    return 1;
+}
+long long sum, qsum, csum, ans, sz[M];
+
+int main() {
+    //freopen("1.in", "r", stdin);
+    while (scanf("%d", &n) > 0) {
+    for (int i = 1; i <= n; i++) head[i] = vis[i] = 0;
+    int x, y;
+    LL z;
+    for (int i = 0; i < n - 1; i++) {
+        cin >> x >> y >> z;
+        AddEdge(x, y, z); AddEdge(y, x, z);
+    }
+    queue <int> q;
+    int cnt = 0;
+    for (int i = 1; i <= n; i++) {
+        if (vis[i]) continue;
+        vis[i] = 1;
+        q.push(i);
+        sz[++cnt] = 1;
+        while (!q.empty()) {
+            x = q.front(); q.pop();
+            for (int j = head[x]; j; j = next[j]) {
+                y = to[j]; if (vis[y]) continue;
+                if (ok(w[j])) continue;
+                vis[y] = 1; sz[cnt]++; q.push(y);
+            }
+        }
+    }
+    sum = qsum = csum = ans = 0;
+    for (int i = 1; i <= cnt; i++) {
+        LL cnt = n - sz[i];
+        ans += sz[i] * cnt * (cnt - 1);
+    }
+    /*for (int i = 1; i <= cnt; i++) sum += sz[i], qsum += sz[i] * sz[i], csum += sz[i] * (sz[i] - 1);
+    for (int i = 1; i <= cnt; i++) {
+        ans += sz[i] * ((sum - sz[i]) * (sum - sz[i]) - qsum + sz[i] * sz[i] + csum - sz[i] * (sz[i] - 1));
+    }*/
+    cout << ans << endl;
+    break;
+    }
+}

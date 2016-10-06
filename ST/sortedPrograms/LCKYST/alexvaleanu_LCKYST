@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    int N;
+    long long A;
+
+    cin >> N;
+
+    for (int i = 1; i <= N; ++i)
+    {
+        cin >> A;
+
+        int x = 0;
+        int y = 0;
+
+        int aux = A;
+
+        while (aux % 2 == 0)
+        {
+            aux /= 2;
+            x++;
+        }
+
+        aux = A;
+
+        while (aux % 5 == 0)
+        {
+            aux /= 5;
+            y++;
+        }
+
+        while (y > x)
+        {
+            A *= 4LL;
+            x += 2;
+        }
+
+        cout << A << "\n";
+    }
+
+    return 0;
+}

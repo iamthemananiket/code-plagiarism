@@ -1,0 +1,39 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+
+using namespace std;
+
+
+int N,K;
+int main(){
+	ios::sync_with_stdio(0);
+	int t,i,m;
+	long long ct;
+
+	cin >> t;
+
+	while(t--){
+		cin >> N >> K;
+		ct = 0;
+
+		while(N--){
+			cin >> i;
+			if(i < K){
+				ct += K-i;
+				continue;
+			}
+
+			m = i%K;
+			ct += min(m,K-m);
+		}
+
+		cout << ct << "\n";
+	}
+
+
+	return 0;
+}

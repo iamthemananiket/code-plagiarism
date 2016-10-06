@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("sealcm.inp","r",stdin)
+#define OUTPUT freopen("sealcm.out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=1e3+10;
+
+int n,m,l,r,t[N],mis[N]={0};
+ll power(ll x,int y){
+    if (y==0) return 1;
+    if (y==1) return x;
+    ll tmp=power(x,y/2);
+    if (y%2) return ((tmp*tmp)%MOD*x)%MOD;
+    return (tmp*tmp)%MOD;
+}
+void prepare(){
+    FOR(i,2,1000) if (!t[i])
+        for(int j=i;j<=1000;j+=i) t[j]=i;
+}
+ll solve(){
+    ll ans=0,all=power(m,n);
+    vector <int> a;
+    FOR(x,l,r){
+        int tmp=x;
+        a.clear();
+        while (tmp>1){
+            int c=1;
+            while (tmp%(c*t[tmp])==0) c*=t[tmp];
+            tmp/=c;
+            a.push_back(c);
+        }
+        int m1=a.size();
+        ll cans=0;
+        REP(i,1,1<<m1){
+            int c=__builtin_popcount(i),rem=m;
+            REP(j,1,1<<m1) if ((i&j)==j){
+                int c1=0,cur=1;
+                REP(j1,0,m1) if (j&(1<<j1)) c1++,cur*=a[j1];
+                if (c1%2) rem-=m/cur;else rem+=m/cur;
+            }
+            //printf("%d %d\n",i,rem);
+            if (c%2) cans=(cans+power(rem,n))%MOD;
+            else cans=(cans-power(rem,n)+MOD)%MOD;
+            //printf("%d %d\n",i,cur);
+        }
+        ans=(ans+all-cans+MOD)%MOD;
+    }
+    return ans;
+}
+int main(){
+    int test;
+    prepare();
+    scanf("%d",&test);
+    while (test--){
+        scanf("%d%d%d%d",&n,&m,&l,&r);
+        printf("%lld\n",solve());
+    }
+}

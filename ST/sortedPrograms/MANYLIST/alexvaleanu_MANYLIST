@@ -1,0 +1,169 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class Scanner
+{
+private:
+
+    FILE *inputFile;
+    int cursor;
+
+    static const int MAX_SIZE = 1 << 20;
+    char buffer[MAX_SIZE];
+
+    inline char getChar()
+    {
+        if (cursor == MAX_SIZE)
+        {
+            cursor = 0;
+            fread(buffer, MAX_SIZE, 1, stdin);
+        }
+
+        return buffer[cursor++];
+    }
+
+    inline int getNr()
+    {
+        int a = 0;
+        int sign = 1;
+        char ch;
+
+        do
+        {
+            ch = getChar();
+
+        } while (!isdigit(ch) && ch != '-');
+
+        if (ch == '-')
+        {
+            sign = -1;
+            ch = getChar();
+        }
+
+        do
+        {
+            a = (a << 3) + (a << 1) + (ch - '0');
+            ch = getChar();
+
+        } while (isdigit(ch));
+
+        return a * sign;
+    }
+
+public:
+
+    Scanner() {
+    }
+
+    Scanner(const char *file)
+    {
+        inputFile = fopen(file, "r");
+        cursor = MAX_SIZE;
+    }
+
+    inline Scanner& operator >> (int &x)
+    {
+        x = getNr();
+        return *this;
+    }
+};
+
+const int MAX_N = 250000 + 1;
+
+const int SQRT_N = 100;
+
+struct Group
+{
+    int x, y;
+    unordered_set<int> Set;
+};
+
+unordered_set<int> A[MAX_N];
+Group G[MAX_N / SQRT_N + 1];
+int apar[MAX_N];
+
+void add(int l, int r, int X)
+{
+    int indL = apar[l];
+    int indR = apar[r];
+
+    if (indL == indR)
+    {
+        for (int i = l; i <= r; ++i)
+            A[i].insert(X);
+
+        return;
+    }
+
+    for (int i = l; i <= G[indL].y; ++i)
+        A[i].insert(X);
+
+    for (int i = indL + 1; i <= indR - 1; ++i)
+        G[i].Set.insert(X);
+
+    for (int i = G[indR].x; i <= r; ++i)
+        A[i].insert(X);
+}
+
+int query(int pos)
+{
+    int indP = apar[pos];
+
+    for (auto it : G[indP].Set)
+    {
+        for (int i = G[indP].x; i <= G[indP].y; ++i)
+            A[i].insert(it);
+    }
+
+    G[indP].Set.clear();
+
+    return A[pos].size();
+}
+
+int main()
+{
+    Scanner in("data.in");
+
+    int N, M;
+    in >> N >> M;
+
+    int indice = 1;
+    int cnt = 0;
+
+    for (int i = 1; i <= N; ++i)
+    {
+        apar[i] = indice;
+
+        if (G[indice].x == 0)
+            G[indice].x = i;
+
+        G[indice].y = i;
+
+        if (++cnt > SQRT_N)
+        {
+            indice++;
+            cnt = 0;
+        }
+    }
+
+    while (M--)
+    {
+        int tip, l, r, x, q;
+
+        in >> tip;
+
+        if (tip == 0)
+        {
+            in >> l >> r >> x;
+            add(l, r, x);
+        }
+        else
+        {
+            in >> q;
+            printf("%d\n", query(q));
+        }
+    }
+
+    return 0;
+}

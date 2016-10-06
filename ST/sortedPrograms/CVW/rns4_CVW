@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int t, n, k, a[100100];
+
+int main() {
+//	freopen("c.in", "r", stdin);
+	scanf("%d", &t);
+	while (t --) {
+		scanf("%d %d", &n, &k);
+		if (!k) {
+			for (int i = 1; i <= n; i ++) printf("%d%c", i, i < n ? ' ' : '\n');
+			continue;
+		}
+        if (n % k || ((n - 1) / k + 1) % 2) {
+			puts("CAPTAIN AMERICA EVADES");
+			continue;
+        }
+        for (int i = 1; i <= k; i ++) {
+			for (int j = i; j <= n; j += 2 * k) a[j] = j + k, a[j+k] = j;
+        }
+        for (int i = 1; i <= n; i ++) printf("%d%c", a[i], i < n ? ' ' : '\n');
+	}
+	return 0;
+}

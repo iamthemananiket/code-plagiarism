@@ -1,0 +1,114 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%.12Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 1e5 + 7;
+const ll md = 1e9 + 7;
+const int maxv = 1e9 + 5;
+
+typedef struct node {
+	int sum; int mx; node* lft; node* rgt;
+} node;
+
+node* root[maxn];
+
+inline void build(node* x,int v) {
+	x->sum = x->mx = v; x->lft = NULL; x->rgt = NULL;
+}
+
+int A[maxn];
+
+inline void cpy(node* from, node* to) {
+	to->sum = from->sum; to->lft = from->lft; to->rgt = from->rgt; to->mx = from->mx;
+}
+
+inline void upd(node* f, node* x, int l, int r, int p, int v) {
+	cpy(x,f); f->mx = max(f->mx,v);
+	if (l == r) {
+		f->sum+=v; return;
+	}
+	int mid = (l+r)/2;
+	if (p <= mid) {
+		if (!x->lft) { x->lft = new node(); build(x->lft, 0); }
+		f->lft = new node(); build(f->lft, 0);
+		upd(f->lft, x->lft, l, mid, p,v);
+	} else {
+		if (!x->rgt) { x->rgt = new node(); build(x->rgt, 0); }
+		f->rgt = new node(); build(f->rgt,0);
+		upd(f->rgt, x->rgt, mid+1,r,p,v);
+	}
+	f->sum = 0;
+	if (f->lft) f->sum += f->lft->sum;
+	if (f->rgt) f->sum += f->rgt->sum;
+}
+
+inline int qry(node* x, int k) {
+	if (!x) return 0;
+	if (x->mx <= k) return x->sum;
+	if (x->lft && x->lft->mx > k) {
+		return qry(x->lft, k);
+	}
+
+	
+	return ((x->lft)?x->lft->sum:0) + qry(x->rgt,k);
+}
+
+int pos[maxn];
+int gp[maxn];
+
+inline bool Asort(int a,int b) {
+	return A[a] < A[b];
+}
+
+int main() {
+	int n,m; s(n);
+	rep(i,1,n) {
+		s(A[i]);
+		pos[i] = i;
+	}
+
+	sort(pos+1,pos+n+1,Asort);
+
+	rep(i,1,n) {
+		gp[pos[i]] = i;
+	}
+
+	root[0] = new node(); build(root[0],0);
+
+	rep(i,1,n) {
+		root[i] = new node(); build(root[i],0);
+		upd(root[i], root[i-1], 1, n, gp[i], A[i]);
+	}
+
+	s(m);
+
+	while (m--) {
+		int l,r; s(l); s(r);
+		int s = 0;
+
+		while (true) {
+			int x = qry(root[r],s+1) - qry(root[l-1],s+1);
+			if (x == s) break;
+			s = x;
+		}
+		pr(s+1); endc;
+	}
+}

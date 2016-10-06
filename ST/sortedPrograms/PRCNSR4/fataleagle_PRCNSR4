@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N;
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+    {
+        scanf("%d", &N);
+        int hold;
+        scanf("%d", &hold);
+        for(int i=1; i<N; i++)
+        {
+            int a;
+            scanf("%d", &a);
+            printf("%d ", a);
+        }
+        printf("%d\n", hold);
+    }
+    return 0;
+}

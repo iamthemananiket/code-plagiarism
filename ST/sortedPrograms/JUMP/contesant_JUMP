@@ -1,0 +1,179 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+const int N = 3e5 + 100;
+const int LOG = 20;
+
+int n;
+int p[N], a[N], h[N];
+
+ll f[N];
+
+struct line{
+  ll m, n;
+  line () {}
+  line (ll _m,ll _n) : m(_m), n(_n) {}
+  bool operator < (const line &other) const {
+    if (m == other.m)
+      return n < other.n;
+    return m > other.m;
+  }
+};
+
+long double inter(line l1,line l2) {
+  return (long double)(l2.n - l1.n) / (l1.m - l2.m);
+}
+
+bool bad(line l1,line l2,line l3) {
+  return inter(l1, l3) < inter(l1, l2);
+}
+
+vector<line> binom[LOG];
+
+void init() {
+  for (int i = 0; i < LOG; i++) {
+    binom[i].clear();
+  }
+}
+
+void norm(vector<line> &h) {
+  int sz = 0;
+  for (int i = 0; i < h.size(); i++) {
+    if (i > 0 && h[i].m == h[i - 1].m)
+      continue;
+    while (sz >= 2 && bad(h[sz - 2], h[sz - 1], h[i]))
+      sz--;
+    h[sz++] = h[i];
+  }
+  h.resize(sz);
+}
+
+void add(int id) {
+  line ln = line(h[id], ll(h[id]) * h[id] + f[id]);
+  vector<line> carry;
+  carry.pb(ln);
+  for (int i = 0; i < LOG; i++) {
+    if (binom[i].size() == 0) {
+      binom[i] = carry;
+      norm(binom[i]);
+      break;
+    } else {
+      vector<line> tmp(carry.size() + binom[i].size());
+      merge(all(carry), all(binom[i]), tmp.begin());
+      carry = tmp;
+      binom[i].clear();
+    }
+  }
+}
+
+ll getbest(vector<line> &h,ll x) {
+  if (h.size() == 0)
+    return longinf;
+  int l = -1, r = int(h.size()) - 1;
+  while (l + 1 < r) {
+    int m = (l + r) >> 1;
+    if (x < inter(h[m], h[m + 1]))
+      r = m;
+    else
+      l = m;
+  }
+  return h[r].m * x + h[r].n;
+}
+
+ll calc(ll x) {
+  ll res = longinf;
+  for (int i = 0; i < LOG; i++) {
+    umin(res, getbest(binom[i], x));
+  }
+  return res;
+}
+
+void solve(int l,int r){
+  if (l == r)
+    return;
+  int m = (l + r) >> 1;
+  solve(l, m);
+  vi lf, rg;
+  for (int i = l; i <= m; i++) {
+    lf.pb(i);
+  }
+  for (int i = m + 1; i <= r; i++) {
+    rg.pb(i);
+  }
+  sort(all(lf), [&](int a,int b){
+    return p[a] < p[b];
+  });
+  sort(all(rg), [&](int a,int b){
+    return p[a] < p[b];
+  });
+  init();
+  int ptr = 0;
+  for (int i = 0; i < rg.size(); i++) {
+    int u = rg[i];
+    while (ptr < lf.size() && p[lf[ptr]] < p[u]) {
+      add(lf[ptr]);
+      ptr++;
+    }
+    /*eprintf("u = %d : \n", u);
+    for (int j = 0; j < ptr; j++) {
+      eprintf("%d ", lf[j]);
+    }
+    eprintf("\n");*/
+    umin(f[u], calc(-2 * h[u]) + ll(h[u]) * h[u] + a[u]);
+  }
+  solve(m + 1, r);
+}
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input","r",stdin);
+  freopen("f.output","w",stdout);
+  freopen("error","w",stderr);
+#endif
+
+  n = read();
+  for (int i = 0; i < n; i++) {
+    p[i] = read();
+  }
+  for (int i = 0; i < n; i++) {
+    a[i] = read();
+  }
+  for (int i = 0; i < n; i++) {
+    h[i] = read();
+  }
+
+  for (int i = 0; i < n; i++) {
+    f[i] = longinf;
+  }
+
+  f[0] = a[0];
+  solve(0, n - 1);
+
+  printf("%lld\n", f[n - 1]);
+
+  return 0;
+}

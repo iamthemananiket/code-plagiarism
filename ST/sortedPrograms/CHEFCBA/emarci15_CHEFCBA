@@ -1,0 +1,18 @@
+#include <iostream>
+
+using namespace std;
+
+bool prop(int a, int b, int c, int d) {
+    return ((a*d) == (b*c));
+}
+
+int main()
+{
+    int a,b,c,d; cin >> a >> b >> c >> d;
+
+    if(prop(a,b,c,d) || prop(a,b,d,c) || prop(a,c,b,d) || prop(a,c,d,b) || prop(a,d,b,c) || prop(a,d,c,b)) {
+        cout << "Possible" << endl;
+    } else cout << "Impossible" << endl;
+
+    return 0;
+}

@@ -1,0 +1,65 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <set>
+using namespace std;
+#define REP(i,a) for (int i = 0; i < (a); i++)
+typedef pair<int,int>PII;
+
+int dp[1<<16];
+int solve(vector<int>&v) {
+    int tot=0;
+    REP(i,v.size())tot+=v[i];
+    REP(i,(tot>>1)+1) {
+        dp[i]=0;
+    }
+    dp[0]=1;
+    REP(i,v.size()) {
+        for (int j = tot>>1; j>=0; j--) {
+            if (dp[j]==1) {
+                dp[j+v[i]]=1;
+            }
+        } 
+    }
+    for (int j = tot>>1; j>=0; j--) {
+        if (dp[j]==1) {
+            return tot-(j<<1);
+        }
+    }
+    return 0;
+}
+
+int main() {
+    int t;
+    cin>>t;
+    while(t--) {
+        int n;
+        cin>>n;
+        vector<int>v0,v1;
+        REP(i,n+1) {
+            int a;
+            char l;
+            if (i==0) {
+                cin>>a;
+            } else {
+                cin>>l>>a;
+            }
+            if (i%2) {
+                v1.push_back(a);
+            } else {
+                v0.push_back(a);
+            }
+            
+        }
+        if (v0.size() == 1 || v1.size() == 1) {
+            cout<<"NO\n";
+            continue;
+        }
+        cout<<solve(v0)+solve(v1)<<endl;
+    }
+  
+    return 0;
+}

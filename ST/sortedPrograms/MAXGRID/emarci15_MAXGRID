@@ -1,0 +1,103 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+long long sz[1000000],lazy[1000000];
+int k[1000000],v[1000000];
+
+void build(int t) {
+    if(k[t]==v[t]) return;
+
+    int f((k[t]+v[t])/2);
+    k[t<<1] = k[t];
+    v[t<<1] = f;
+    build(t<<1);
+    k[(t<<1)+1] = f+1;
+    v[(t<<1)+1] = v[t];
+    build((t<<1)+1);
+}
+
+void update(int t) {
+    if(k[t]<v[t]) {
+        lazy[t<<1] += lazy[t];
+        lazy[(t<<1)+1] += lazy[t];
+    }
+    sz[t] += lazy[t];
+    lazy[t] = 0ll;
+}
+
+void upd(int t, int l, int r, long long c) {
+    if((l<=k[t]) && (v[t]<=r)) {
+        lazy[t] += c;
+        update(t);
+        return;
+    }
+    update(t);
+
+    int f((k[t]+v[t])/2);
+
+    if(l<=f) {
+        upd(t<<1,l,r,c);
+    } else update(t<<1);
+    if(r>f) {
+        upd((t<<1)+1,l,r,c);
+    } else update((t<<1)+1);
+
+    sz[t] = max(sz[t<<1],sz[(t<<1)+1]);
+}
+
+int n;
+pair<pair<int,int>,int> g[100005];
+
+long long calc(int l) {
+    int j(0),k(0);
+    long long ret(0ll);
+    for(int i=0; i<=100000-l; i++) {
+        while(g[k].first.first<=(i+l)) {
+            upd(1,g[k].first.second+1-l,g[k].first.second,g[k].second);
+            k++;
+        }
+        while(g[j].first.first<=i) {
+            upd(1,g[j].first.second+1-l,g[j].first.second,-g[j].second);
+            j++;
+        }
+        ret = max(ret,sz[1]);
+    }
+    while(g[j].first.first<=100000) {
+        upd(1,g[j].first.second+1-l,g[j].first.second,-g[j].second);
+        j++;
+    }
+
+    return ret;
+}
+
+int main()
+{
+    int l;
+    scanf("%d%d",&n,&l);
+    for(int i=0; i<n; i++) {
+        scanf("%d%d%d",&g[i].first.first,&g[i].first.second,&g[i].second);
+    }
+
+    sort(g,g+n);
+    g[n].first.first = 200001;
+
+    k[1] = 1; v[1] = 100000;
+    build(1);
+
+    long long sol=calc(l);
+
+    int lb(1),ub(l);
+    while(lb<ub) {
+        int f((lb+ub)/2);
+
+        if(calc(f)==sol) {
+            ub = f;
+        } else lb = f+1;
+    }
+
+    printf("%lld %d\n",sol,lb);
+
+    return 0;
+}

@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int row[100005],col[100005],a[100005],b[100005];
+
+int main()
+{
+	int n,i,sum=0,ans,q,x,y;
+	cin>>n;
+	for(i=1;i<=n;i++)
+	{
+		scanf("%d%d",a+i,b+i);
+		row[i]=b[i]-a[i]+1;
+		col[a[i]]++;
+		col[b[i]+1]--;
+		sum=(sum+row[i])%2;
+	}
+	for(i=1;i<=n;i++)
+		col[i]+=col[i-1];
+	cin>>q;
+	while(q--)
+	{
+		scanf("%d%d",&x,&y);
+		ans=sum-(row[x]%2)-(col[y]%2);
+		if(a[x]<=y && b[x]>=y)
+			ans++;
+		ans=(ans+10)%2;
+		if(ans)
+			puts("O");
+		else
+			puts("E");
+	}
+}
+

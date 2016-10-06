@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef pair<long long,long long> Point;
+#define x first
+#define y second
+
+const int Nmax = 2000 + 2;
+
+set <Point> Set;
+Point P[Nmax];
+int N;
+
+long long dist( Point A, Point B )
+{
+    return ( A.x - B.x ) * ( A.x - B.x ) + ( A.y - B.y ) * ( A.y - B.y );
+}
+
+int main()
+{
+    ///ifstream cin("data.in");
+
+    cin >> N;
+
+    int n = 0;
+
+    for ( int i = 1; i <= N; ++i )
+    {
+        Point A;
+        cin >> A.first >> A.second;
+
+        if ( Set.find( A ) == Set.end() )
+        {
+            P[ ++n ] = A;
+            Set.insert( A );
+        }
+    }
+
+    N = n;
+
+    if ( N == 0 )
+    {
+        cout << "4\n";
+        return 0;
+    }
+
+    if ( N == 1 )
+    {
+        cout << "3\n";
+        return 0;
+    }
+
+    int ans = 2;
+
+    for ( int i = 1; i <= N; ++i )
+        for ( int j = 1; j <= N; ++j )
+        {
+            if ( P[i].x == P[j].x ) continue;
+            if ( P[i].y == P[j].y ) continue;
+
+            if ( P[i] < P[j] )
+            {
+                Point A( P[i].x, P[j].y );
+                Point B( P[j].x, P[i].y );
+
+                long long d1 = dist( P[i], A );
+                long long d2 = dist( A, P[j] );
+                long long d3 = dist( P[j], B );
+                long long d4 = dist( B, P[i] );
+
+                if ( d1 == d2 && d2 == d3 && d3 == d4 )
+                {
+                    int c = 0;
+
+                    if ( Set.find( A ) != Set.end() )
+                        c++;
+
+                    if ( Set.find( B ) != Set.end() )
+                        c++;
+
+                    if ( c == 2 )
+                    {
+                        cout << "0\n";
+                        return 0;
+                    }
+
+                    if ( c == 1 )
+                        ans = 1;
+                }
+            }
+        }
+
+    cout << ans << "\n";
+
+    return 0;
+}

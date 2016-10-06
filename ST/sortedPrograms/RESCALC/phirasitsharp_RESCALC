@@ -1,0 +1,86 @@
+#include <iostream>
+#include <algorithm>
+#include <numeric>
+
+using namespace std;
+
+const int N = 6;
+
+int calc( int cnt[N] );
+
+int main( void ) {
+    
+    cin.sync_with_stdio( false );
+    cin.tie( 0 );
+    
+    int test;
+    cin >> test;
+    while ( test-- ) {
+    
+        int mx = -1, cnt = 0, idx = -1;
+        
+        int n;
+        cin >> n;
+        
+        for ( int i = 0 ; i < n ; ++i ) {
+            
+            int x, rem[N];
+            fill( rem, rem + N, 0 );
+        
+            cin >> x;
+            while ( x-- ) {
+                int val;
+                cin >> val;
+                ++rem[ val-1 ];
+            }
+            
+            int val = calc( rem );
+            if ( val > mx ) {
+                mx = val;
+                cnt = 1;
+                idx = i;
+            } else if ( val == mx ) {
+                ++cnt;
+                idx = i;
+            }
+        }
+        
+        if ( cnt > 1 ) {
+            cout << "tie\n";
+        } else if ( idx != 0 ) {
+            cout << idx + 1 << "\n";
+        } else {
+            cout << "chef\n";
+        }
+    }
+    
+	return 0;
+}
+
+int calc( int rem[N] ) {
+    
+    sort( rem, rem + N );
+    int ans = accumulate( rem, rem + N, 0 );
+    
+    while ( rem[2] > 0 ) {
+        if ( rem[0] > 0 ) {
+            ans += 4;
+            for ( int i = 0 ; i < N ; ++i ) {
+                --rem[i];
+            }
+        } else if ( rem[1] > 0 ) {
+            ans += 2;
+            for ( int i = 1 ; i < N ; ++i ) {
+                --rem[i];
+            }
+        } else { 
+            ans += 1;
+            for ( int i = 2 ; i < N ; ++i ) {
+                --rem[i];
+            }
+        }
+        sort( rem, rem + N );
+    }
+    
+    return ans;
+}

@@ -1,0 +1,71 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int MAX = 1 << 10;
+const int mod = 1e9 + 7;
+inline int add(int a , int b){
+    int res = a + b;
+    if(res >= mod){
+        return res - mod;
+    }
+    return res;
+}
+inline int mult(int a , int b){
+    long long res = a;
+    res *= b;
+    if(res >= mod){
+        return res % mod;
+    }
+    return res;
+}
+int t;
+string str;
+int num;
+int n;
+string tmp;
+int dp[2][MAX];
+int cnt[MAX];
+int pw[N];
+int inp;
+int main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    pw[0] = 0;
+    pw[1] = 1;
+    for(int i = 2 ; i < N ; ++i){
+        pw[i] = add(pw[i - 1] , pw[i - 1]);
+    }
+    cin >> t;
+    while(t--){
+        cin >> str;
+        num = 0;
+        for(char c : str){
+            num += num;
+            if(c == 'w'){
+                ++num;
+            }
+        }
+        cin >> n;
+        memset(cnt , 0 , sizeof(cnt));
+        for(int i = 1 ; i <= n ; ++i){
+            cin >> tmp;
+            inp = 0;
+            for(char c : tmp){
+                inp += inp;
+                inp += (c == '+');
+            }
+            ++cnt[inp];
+        }
+        dp[1][0] = 1;
+        for(int i = 1 ; i < MAX ; ++i){
+            dp[1][i] = 0;
+        }
+        for(int i = 0 ; i < MAX ; ++i){
+            for(int j = 0 ; j < MAX ; ++j){
+                dp[i & 1][j] = add(mult(dp[!(i & 1)][j] , max(1 , pw[cnt[i]])) , mult(dp[!(i & 1)][j ^ i] , pw[cnt[i]]));
+            }
+        }
+        cout << dp[1][num] << "\n";
+    }
+}

@@ -1,0 +1,44 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 105;
+
+int t, n, m, k1, k2;
+int dist[2][N][N];
+int a[N][N];
+
+inline void bfs(int id, int src_x, int src_y, int k){
+	for(int i = 1; i <= n; i++)
+		for(int j = 1; j <= m; j++)
+			dist[id][i][j] = N * N;
+	dist[id][src_x][src_y] = 0;
+	queue < pair < int, int > > bfs;
+	bfs.push({src_x, src_y});
+	while(!bfs.empty()){
+		int x = bfs.front().first;
+		int y = bfs.front().second;
+		bfs.pop();
+		for(int i = max(1, x - k); i <= min(n, x + k); i++)
+			for(int j = max(1, y - k); j <= min(m, y + k); j++)
+				if((!a[i][j]) and (dist[id][i][j] > dist[id][x][y] + 1) and (abs(i - x) + abs(j - y) <= k))
+					dist[id][i][j] = dist[id][x][y] + 1, bfs.push({i, j});
+	}
+}
+
+int main(){
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d %d %d %d", &n, &m, &k1, &k2);
+		for(int i = 1; i <= n; i++)
+			for(int j = 1; j <= m; j++)
+				scanf("%d", &a[i][j]);
+		bfs(0, 1, 1, k1);
+		bfs(1, 1, m, k2);
+		int ans = N * N;
+		for(int i = 1; i <= n; i++)
+			for(int j = 1; j <= m; j++)
+				ans = min(ans, max(dist[0][i][j], dist[1][i][j]));
+		if(ans == N * N) ans = -1;
+		printf("%d\n", ans);
+	}
+}

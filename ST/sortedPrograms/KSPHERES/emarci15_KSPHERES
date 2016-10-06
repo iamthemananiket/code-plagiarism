@@ -1,0 +1,37 @@
+#include <cstdio>
+
+#define mod 1000000007
+
+using namespace std;
+
+int n,m,c;
+long long a[1001],b[1001];
+int u,l;
+
+long long dp[1002];
+
+int main()
+{
+    scanf("%d%d%d",&n,&m,&c);
+    for(int i=0; i<n; i++) {
+        scanf("%d",&u);
+        a[u]++;
+    }
+    for(int i=0; i<m; i++) {
+        scanf("%d",&l);
+        b[l]++;
+    }
+
+    dp[0] = 1ll;
+    for(int i=1; i<=c; i++) {
+        long long w = (a[i]*b[i]) % mod;
+        for(int j=c+1; j>=1; j--) {
+            dp[j] = (dp[j] + dp[j-1]*w) % mod;
+        }
+    }
+
+    for(int i=2; i<=c+1; i++) printf("%lld ",dp[i]);
+    printf("\n");
+
+    return 0;
+}

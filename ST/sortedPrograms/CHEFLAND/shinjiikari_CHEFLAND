@@ -1,0 +1,201 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define mp make_pair
+#define pb push_back
+#define X first
+#define Y second
+#define sz(a) int((a).size())
+#define N 100010
+#define M 200010
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+	while(t>=48 && t<=57)
+	{
+		x=(x<<3)+(x<<1)+t-48;
+		t=getchar();
+	}
+	if (neg) x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+vector <int> G[N];
+int low[N],vis[N],dfn[N],U[M],V[M],cnt,rm[N],dis[N],art[N],a,maxv;
+queue <int> Q[N];
+vector <int> Tree[N];
+
+inline int dfs(int v, int edge)
+{
+	vis[v]=1;
+	dfn[v]=cnt++;
+	low[v]=dfn[v];
+	int e,w,children=0;
+	REP(i,G[v].size())
+	{
+		e=G[v][i];
+		if (U[e]==v) w=V[e];
+		else w=U[e];
+		if (!vis[w])
+		{
+			low[v]=min(low[v],dfs(w,e));
+			children++;
+			if (children>1&&edge==-1) art[v]=1;
+			if (edge!=-1&&low[w]>=dfn[v]) art[v]=1; 
+		}
+		else if (e!=edge) low[v]=min(low[v],dfn[w]);
+	}
+	if (sz(G[v])==1) art[v]=1;
+	return low[v];
+}
+
+inline void maketree(int u)
+{
+	int v,e,w;
+	Q[u].push(u);
+	vis[u]=1;
+	while(!Q[u].empty())
+	{
+		v=Q[u].front();
+		Q[u].pop();
+		rm[v]=u;
+		REP(i,G[v].size())
+		{
+			e=G[v][i];
+			if (U[e]==v) w=V[e];
+			else w=U[e];
+			if (vis[w]) continue;
+			if (art[w])
+			{
+				Tree[u].pb(w);
+				Tree[w].pb(u);
+				maketree(w);
+			}
+			else
+			{
+				Q[u].push(w);
+				vis[w]=1;
+			}
+		}
+	}
+}
+
+inline void treedfs(int v)
+{
+	cnt++;
+	vis[v]=1;
+	int w;
+	REP(i,sz(Tree[v]))
+	{
+		w=Tree[v][i];
+		if (!vis[w])
+		{
+			dis[w]=dis[v]+1;
+			if (maxv<dis[w])
+			{
+				maxv=dis[w];
+				a=w;
+			}
+			treedfs(w);
+		}
+	}
+}
+
+inline void make(int n, int m)
+{
+	int x,y;
+	REP(i,m)
+	{
+		scanf("%d%d",&x,&y);
+		x--;
+		y--;
+		U[i]=x;
+		V[i]=y;
+		G[x].pb(i);
+		G[y].pb(i);
+	}
+	FILL(vis,0);
+	FILL(art,0);
+	cnt=0;
+	dfs(0,-1);
+	if (cnt<n)
+	{
+		printf("NO\n");
+		return;
+	}
+	if (n==2)
+	{
+		printf("YES\n");
+		return;
+	}
+	cnt=0;
+	FILL(vis,0);
+	REP(i,n)	if (art[i]) maketree(i);
+	//REP(i,n) if (art[i]) output(i+1);
+	FILL(vis,0);
+	dis[rm[0]]=0;
+	cnt=0;
+	maxv=0;
+	treedfs(rm[0]);
+	x=a;
+	FILL(vis,0);
+	dis[x]=0;
+	cnt=0;
+	maxv=0;
+	treedfs(x);
+	y=a;
+	if (dis[y]+1<cnt)
+	{
+		printf("NO\n");
+		return;
+	}
+	else printf("YES\n");
+}
+
+int main()
+{
+	ll n,m;
+	n=input();
+	m=input();
+	make(n,m);
+return 0;
+}

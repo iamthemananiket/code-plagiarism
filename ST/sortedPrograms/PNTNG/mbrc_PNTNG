@@ -1,0 +1,46 @@
+#include <cstdio>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <set> 
+#include <map>
+#include <string>
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 200000
+using namespace std;
+typedef long long LL;
+typedef struct layer {
+  LL T,C;
+} layer;
+
+inline bool lsort(layer a,layer b) {
+  return a.C < b.C;
+}
+
+layer L[MAXN];
+
+int main() {
+  LL N,M,H; scanf("%lld %lld %lld",&N,&M,&H);
+  for (int i=0;i<H;i++) {
+    scanf("%lld %lld",&L[i].T,&L[i].C);
+  }
+  sort(L,L+H,lsort);
+  LL left=N*M,ans=0;
+  for (int i=0;i<H;i++) {
+    if (left>=L[i].T) {
+      left-=L[i].T; ans+=L[i].T*L[i].C;
+    } else {
+      ans+=left*L[i].C; left=0;
+    }
+  }
+  if (left>0) {
+    cout<<"Impossible"<<endl;
+  } else {
+    cout<<ans<<endl;
+  }
+
+
+    
+}

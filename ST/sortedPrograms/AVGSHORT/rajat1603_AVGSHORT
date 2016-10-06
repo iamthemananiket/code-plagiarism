@@ -1,0 +1,92 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 505;
+const double inf = 1e5 + 5;
+const double eps = 1e-8;
+int t;
+int n , m;
+vector < pair < int , int > > v[N];
+vector < pair < int , int > > rv[N];
+int a , b , c;
+bool visited[N];
+double dist2[N];
+void bfs(){
+    for(int i = 1 ; i <= n ; ++i){
+        visited[i] = 0;
+    }
+    visited[a] = 1;
+    queue < int > q;
+    while(!q.empty()){
+        q.pop();
+    }
+    q.push(a);
+    while(!q.empty()){
+        int node = q.front();
+        q.pop();
+        for(auto it : v[node]){
+            if(!visited[it.first]){
+                visited[it.first] = 1;
+                q.push(it.first);
+            }
+        }
+    }
+}
+bool check(double val){
+    for(int i = 1 ; i <= n ; ++i){
+        dist2[i] = inf + eps;
+    }
+    dist2[b] = 0;
+    for(int x = 0 ; x <= n + n ; ++x){
+        for(int i = 1 ; i <= n ; ++i){
+            for(auto edge : rv[i]){
+                int s = i;
+                int e = edge.first;
+                double w = edge.second - val;
+                if(dist2[s] + eps < inf){
+                    if(dist2[e] > dist2[s] + w){
+                        dist2[e] = dist2[s] + w;
+                        if(x >= n){
+                            if(visited[e] || visited[s]){
+                                return 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return dist2[a] <= 0;
+}
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d %d" , &n , &m);
+        for(int i = 1 ; i <= n ; ++i){
+            v[i].clear();
+            rv[i].clear();
+        }
+        for(int i = 1 ; i <= m ; ++i){
+            scanf("%d %d %d" , &a , &b , &c);
+            v[a].emplace_back(make_pair(b , c));
+            rv[b].emplace_back(make_pair(a , c));
+        }
+        scanf("%d %d" , &a , &b);
+        bfs();
+        if(!visited[b]){
+            printf("-1\n");
+            continue;
+        }
+        double l = 1.0;
+        double r = 100.0;
+        for(int i = 0 ; i < 100 ; ++i){
+            double mid = (l + r) / 2.0;
+            if(check(mid)){
+                r = mid;
+            }
+            else{
+                l = mid;
+            }
+        }
+        printf("%.9lf\n" , (l + r) / 2.0);
+    }
+}

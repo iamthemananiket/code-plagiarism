@@ -1,0 +1,123 @@
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+#include <unordered_map>
+
+using namespace std;
+
+const int mod = 1e9 + 7;
+const int MAX = 1000000;
+
+long long a[105];
+long long b[105];
+
+inline long long gcd(long long a, long long b) {
+  while (a > 0 && b > 0) {
+    if (a > b) {
+      a %= b;
+    } else {
+      b %= a;
+    }
+  }
+  return a + b;
+}
+
+long long all[111 * 88];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n;
+    scanf("%d", &n);
+    int sz = 0;
+    int ans = 1;
+    //unordered_map <long long, int> cnt;
+    int sz_all = 0;
+    for (int i = 0; i < n; ++i) {
+      scanf("%lld", a + i);
+      ans = 1LL * ans * (a[i] % mod) % mod;
+      for (int j = 2; j <= MAX && j * j <= a[i]; ++j) {
+        if (a[i] % j == 0) {
+          //int k = 0;
+          while (a[i] % j == 0) {
+            a[i] /= j;
+            //k += 1;
+            all[sz_all++] = j;
+          }
+          //cnt[j] += k;
+        }
+      }
+      if (a[i] < MAX) {
+        all[sz_all++] = a[i];
+        //cnt[a[i]] += 1;
+      } else {
+        long long y = sqrt(a[i] + 0.0);
+        while (y * y < a[i]) {
+          ++y;
+        }
+        while (y * y > a[i]) {
+          --y;
+        }
+        if (y * y == a[i]) {
+          all[sz_all++] = y;
+          all[sz_all++] = y;
+          //cnt[y] += 2;
+        } else {
+          b[sz++] = a[i];
+        }
+      }
+    }
+    for (int i = 0; i < sz; ++i) {
+      bool found = false;
+      for (int j = 0; j < sz; ++j) {
+        long long g = gcd(b[i], b[j]);
+        if (g != 1 && g != b[i]) {
+          all[sz_all++] = g;
+          all[sz_all++] = b[i] / g;
+          //cnt[g] += 1;
+          //cnt[b[i] / g] += 1;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        all[sz_all++] = b[i];
+        //cnt[b[i]] += 1;
+      }
+    }
+    sort(all, all + sz_all);
+    int cnt = 1;
+    for (int i = 1; i < sz_all; ++i) {
+      if (all[i] != all[i - 1]) {
+        for (int j = 0; j < (3 - cnt % 3) % 3; ++j) {
+          ans = 1LL * ans * (all[i - 1] % mod) % mod;
+        }
+        cnt = 1;
+      } else {
+        ++cnt;
+      }
+    }
+    for (int j = 0; j < (3 - cnt % 3) % 3; ++j) {
+      ans = 1LL * ans * (all[sz_all - 1] % mod) % mod;
+    }
+    /*
+    for (auto e : cnt) {
+      for (int i = 0; i < (3 - e.second % 3) % 3; ++i) {
+        ans = 1LL * ans * (e.first % mod) % mod;
+      }
+    }
+    */
+    printf("%d\n", ans);
+  }
+  return 0;
+}

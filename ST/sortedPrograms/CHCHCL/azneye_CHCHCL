@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef double dd;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N, M;
+    cin >> N >> M;
+    if (~(1LL*N*M)&1)
+      cout << "Yes\n";
+    else
+      cout << "No\n";
+  }
+  return 0;
+}

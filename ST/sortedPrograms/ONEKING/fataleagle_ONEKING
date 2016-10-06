@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N;
+pair<int, int> A[100000];
+int bit[2002];
+
+void add(int x, int v)
+{
+    for(x++; x<=2001; x+=x&-x)
+        bit[x]+=v;
+}
+
+int sum(int x)
+{
+    int ret=0;
+    for(x++; x>0; x-=x&-x)
+        ret+=bit[x];
+    return ret;
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        memset(bit, 0, sizeof bit);
+        scanf("%d", &N);
+        for(int i=0; i<N; i++)
+            scanf("%d%d", &A[i].second, &A[i].first);
+        sort(A, A+N);
+        int ans=0;
+        for(int i=0; i<N; i++)
+            if(sum(A[i].first)-sum(A[i].second-1)<1)
+                ans++, add(A[i].first, 1);
+        printf("%d\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,26 @@
+#include <cstdio>
+
+const int MAX = 20000;
+
+int T, n, v1, v2, prev[MAX + 1];
+
+int main() {
+	scanf("%d", &T);
+	while(T--) {
+		scanf("%d%d%d", &n, &v1, &v2);
+		for(int i = 1; i < v1; i++) { scanf("%d", &prev[i]); }
+		for(int i = v1 + 1; i <= n; i++) { scanf("%d", &prev[i]); }
+		prev[v1] = -1;
+		for(int v = prev[v2], p = v2; v != -1; ) {
+			const int next = prev[v];
+			prev[v] = p;
+			p = v;
+			v = next;
+		}
+		bool ok = true;
+		for(int i = 1; i < v2; i++) { if(!ok) printf(" "); ok = false; printf("%d", prev[i]); }
+		for(int i = v2 + 1; i <= n; i++) { if(!ok) printf(" "); ok = false; printf("%d", prev[i]); }
+		printf("\n");
+	}
+	return 0;
+}

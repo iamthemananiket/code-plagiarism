@@ -1,0 +1,153 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int Nmax  = 100005;
+const int LgMax = 20;
+
+struct sir
+{
+    int nr[2];
+    int p;
+
+} SA[Nmax];
+
+vector <int> G[Nmax];
+int pos[Nmax][LgMax], father[Nmax][LgMax];
+int depth[Nmax], parent[Nmax], degree[Nmax];
+
+int N;
+
+void read()
+{
+    scanf("%d", &N);
+
+    for ( int i = 1, u, v; i < N; ++i )
+    {
+        scanf("%d %d", &u, &v);
+
+        G[u].push_back ( v );
+        G[v].push_back ( u );
+
+        degree[u]++;
+        degree[v]++;
+    }
+}
+
+void DFS( int node )
+{
+    for ( unsigned i = 0; i < G[node].size(); ++i )
+    {
+        int nd = G[node][i];
+
+        if ( !depth[nd] )
+        {
+            depth[nd] = depth[node] + 1;
+            parent[nd] = node;
+            DFS( nd );
+        }
+    }
+}
+
+void init()
+{
+    depth[1] = 1;
+    parent[1] = 0;
+
+    DFS( 1 );
+
+    for ( int i = 1; i <= N; ++i )
+            father[i][0] = parent[i];
+
+    for ( int i = 1; i < LgMax; ++i )
+            for ( int j = 1; j <= N; ++j )
+                    father[j][i] = father[ father[j][i - 1] ][i - 1];
+}
+
+inline int cmp( sir a, sir b )
+{
+    if ( a.nr[0] != b.nr[0] )
+            return a.nr[0] < b.nr[0];
+
+    return a.nr[1] < b.nr[1];
+}
+
+void SuffixArray()
+{
+    for ( int i = 1; i <= N; ++i )
+            pos[i][0] = degree[i];
+
+    for ( int step = 1; step < LgMax; ++step )
+    {
+        for ( int i = 1; i <= N; ++i )
+        {
+            SA[i].nr[0] = pos[i][step - 1];
+
+            if ( depth[i] <= ( 1 << ( step - 1 ) ) )
+                    SA[i].nr[1] = -1;
+            else
+                    SA[i].nr[1] = pos[ father[i][step - 1] ][step - 1];
+
+            SA[i].p = i;
+        }
+
+        sort ( SA + 1, SA + N + 1, cmp );
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            if ( SA[i].nr[0] == SA[i - 1].nr[0] && SA[i].nr[1] == SA[i - 1].nr[1] )
+                    pos[ SA[i].p ][step] = pos[ SA[i - 1].p ][step];
+            else
+                    pos[ SA[i].p ][step] = i;
+        }
+    }
+}
+
+int lcp( int u, int v )
+{
+    int len = 0;
+
+    if ( pos[u][LgMax - 1] == pos[v][LgMax - 1] )
+            return min ( depth[u], depth[v] );
+
+    for ( int step = LgMax - 1; step >= 0; step-- )
+    {
+        if ( pos[u][step] == pos[v][step] )
+        {
+            len += ( 1 << step );
+            u = father[u][step];
+            v = father[v][step];
+
+            if ( !u || !v )
+                    break;
+        }
+    }
+
+    return len;
+}
+
+void Count()
+{
+    long long sum = depth[ SA[1].p ];
+
+    for ( int i = 2; i <= N; ++i )
+    {
+        sum += depth[ SA[i].p ];
+        sum -= lcp( SA[i].p, SA[i - 1].p );
+    }
+
+    printf("%lld\n", sum);
+}
+
+int main()
+{
+    read();
+    init();
+    SuffixArray();
+    Count();
+
+    return 0;
+}

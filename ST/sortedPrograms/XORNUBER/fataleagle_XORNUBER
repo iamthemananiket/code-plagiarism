@@ -1,0 +1,24 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+    {
+        int N;
+        scanf("%d", &N);
+        if(N==1)
+            printf("2\n");
+        else if(__builtin_popcount(N+1)!=1)
+            printf("-1\n");
+        else
+        {
+            int x=(N+1)/2-1;
+            printf("%d\n", x);
+        }
+    }
+    return 0;
+}

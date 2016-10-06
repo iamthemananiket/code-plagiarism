@@ -1,0 +1,99 @@
+
+#include<bits/stdc++.h>
+using namespace std;
+
+
+int t;
+
+vector<int> v[32];
+vector<int> id;
+vector<int> vv;
+#include<unordered_set>
+#include<unordered_map>
+unordered_map<long long int, int> mp;
+#define MAX 1000000009
+#define MM 10000000007
+long long int conv(vector<int> &a){
+	long long int sum = 0;
+	int siz = a.size();
+	long long int b = MAX;
+	for (int j = 0; j < siz; j++){
+		sum += a[j]*b;
+		sum %= MM;
+		b *= MAX;
+		b %= MM;
+	}
+	return sum;
+}
+vector<int> cur;
+int S = 0;
+int ord = 0;
+bool ok[1000002];
+inline void dfs(int b){
+	if (b == id.size()){
+		int way = 1;
+		if (S == 0)ord++;
+		if(S==0)return;
+		for (int i = cur.size() - 1; i >= 0; i--){
+			if (cur[i]){
+				if (vv[S - 1] == v[i][cur[i] - 1]){
+					int nex = ord - way;
+					if (ok[nex]){
+						ok[ord] = true;
+					}
+				}
+			}
+			way *= (id[i]+1);
+		}
+		ord++;
+	}
+	else{
+		for (int j = 0; j <= id[b]; j++){
+			cur[b] = j;
+			S += j;
+			dfs(b + 1);
+			S -= j;
+		}
+	}
+}
+int main(){
+	cin >> t;
+	while (t--){
+		int n;
+		scanf("%d", &n);
+		int sum = 0;
+		id.clear();
+		for (int i = 0; i < n; i++){
+			int m;
+			scanf("%d", &m);
+			sum += m;
+			id.emplace_back(m);
+			v[i].clear();
+			for (int j = 0; j < m; j++){
+				int b;
+				scanf("%d", &b);
+				v[i].push_back(b);
+			}
+		}
+		vv.clear();
+		for (int i = 0; i < sum; i++){
+			int a;
+			scanf("%d",&a);
+			vv.push_back(a);
+		}
+		mp.clear();
+		reverse(vv.begin(), vv.end());
+		cur.assign(id.size(), 0);
+		ok[0] = true;
+		dfs(0);
+		if (ok[ord - 1] == true){
+			puts("Yes");
+		}
+		else{
+			puts("No");
+		}
+		ord = 0;
+		memset(ok, false, sizeof(ok));
+	}
+	return 0;
+}

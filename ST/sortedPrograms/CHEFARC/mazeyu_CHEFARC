@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+#define rep(i,a,b) for (int i=a;i<=b;++i)
+#define dep(i,a,b) for (int i=a;i>=b;--i)
+#define re(i,a,b) for (int i=a;i<b;++i)
+#define mp make_pair
+#define pb push_back
+using namespace std;
+template<class T> inline void read(T&x){char c;bool fu=0;for(c=getchar();c<=32;c=getchar());if(c=='-')fu=1,c=getchar();for(x=0;c>32;c=getchar())x=x*10+c-'0';if(fu)x*=-1;}
+template<class T> inline void read(T&x,T&y){read(x);read(y);}
+template<class T> inline void read(T&x,T&y,T&z) {read(x,y);read(z);}
+typedef long long ll;
+typedef pair<int,int> pii;
+const int N=111111,INF=0x7fffffff;
+struct pos{int x,y,st;};
+pos q[N];
+int T,n,m,K1,K2;
+bool a[111][111],f[111][111];
+int ste1[N],ste2[N];
+int ps(int x,int y){return (x-1)*m+y;}
+void bfs(int K,int x,int y,int *ste){
+	int l=1,r=0;
+	q[++r]=(pos){x,y,0};f[x][y]=1;
+	ste[ps(x,y)]=0;
+	while(l<=r){
+		pos now=q[l++];
+		int X=now.x,Y=now.y,ST=now.st;
+		rep(i,max(1,X-K),min(n,X+K))
+			rep(j,max(1,Y-K),min(m,Y+K))
+			if(abs(i-X)+abs(j-Y)<=K&&f[i][j]==0&&a[i][j]==0){
+				q[++r]=(pos){i,j,ST+1};
+				f[i][j]=1;
+				ste[ps(i,j)]=ST+1;
+			}
+	}
+}
+int main() {
+	read(T);while(T--){
+		read(n,m);read(K1,K2);
+		rep(i,1,n*m)ste1[i]=ste2[i]=100000000;
+		rep(i,1,n)rep(j,1,m)read(a[i][j]),f[i][j]=0;
+		bfs(K1,1,1,ste1);
+		rep(i,1,n)rep(j,1,m)f[i][j]=0;
+		bfs(K2,1,m,ste2);
+		int mn=100000000;
+		rep(i,1,n)rep(j,1,m)if(a[i][j]==0&&mn>max(ste1[ps(i,j)],ste2[ps(i,j)]))mn=max(ste1[ps(i,j)],ste2[ps(i,j)]);
+		if(mn==100000000)puts("-1");
+		else printf("%d\n",mn);
+	}
+	return 0;
+}

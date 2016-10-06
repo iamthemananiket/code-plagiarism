@@ -1,0 +1,64 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MOD = 1000000007;
+const int B = 100001;
+
+int main() {
+  int n, m, K;
+  bitset<100000> a;
+  vector<int> ct(100001);
+  string s;
+  cin >> s;
+  n = s.size();
+  for (int i = 0; i < n; i++) {
+    a[i] = s[i] == '1';
+    ct[i + 1] += a[i] + ct[i];
+  }
+  cin >> K;
+  while (K--) {
+    bitset<100000> b;
+    string t;
+    cin >> t;
+    m = t.size();
+    for (int i = 0; i < m; i++) {
+      b[i] = t[i] == '1';
+    }
+    int r = 0;
+    for (int i = 0; i < (n - m + 1); i++) {
+      int v = (a ^ b).count() - ct[i] - (ct[n] - ct[i + m]);
+      r = ((ll)B * r + v) % MOD;
+      b <<= 1;
+    }
+    cout << r << endl;
+  }
+}

@@ -1,0 +1,85 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)1e9;
+const int MOD = (int)1e9 + 7;
+
+struct Segment {
+	ll sum;
+	int l, r;
+
+	Segment() {}
+
+	Segment(ll _sum, int _l, int _r) {
+		sum = _sum;
+		l = _l;
+		r = _r;
+	}
+
+	const bool operator<(Segment other) const {
+		return sum < other.sum;
+	}
+};
+
+int a[(int)1e5 + 9];
+ll prefSum[(int)1e5 + 9];
+
+int main() {
+	//freopen("in.txt", "rt", stdin);
+	//freopen("out.txt", "wt", stdout);
+	int n, k;
+	scanf("%d %d", &n, &k);
+	for (int i = 1; i <= n; ++i) {
+		scanf("%d", &a[i]);
+		prefSum[i] = prefSum[i - 1] + a[i];
+	}
+	priority_queue<Segment> q;
+	q.push(Segment(prefSum[n], 1, n));
+	set<pair<int,int> > used;
+	while (!q.empty() && k > 0) {
+		Segment s = q.top();
+		q.pop();
+		printf("%lld", s.sum);
+		--k;
+		if (k == 0) {
+			printf("\n");
+		} else {
+			printf(" ");
+		}
+		if (s.l + 1 <= s.r && used.find(make_pair(s.l + 1, s.r)) == used.end()) {
+			q.push(Segment(prefSum[s.r] - prefSum[(s.l + 1) - 1], s.l + 1, s.r));
+			used.insert(make_pair(s.l + 1, s.r));
+		}
+		if (s.r - 1 >= s.l && used.find(make_pair(s.l, s.r - 1)) == used.end()) {
+			q.push(Segment(prefSum[s.r - 1] - prefSum[s.l - 1], s.l, s.r - 1));
+			used.insert(make_pair(s.l, s.r - 1));
+		}
+	}
+	return 0;
+}

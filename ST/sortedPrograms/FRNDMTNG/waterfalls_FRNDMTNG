@@ -1,0 +1,25 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    int T;
+    scanf("%d",&T);
+    for (int t=0;t<T;t++) {
+        long long T1,T2,t1,t2;
+        scanf("%lld%lld%lld%lld",&T1,&T2,&t1,&t2);
+        long long ans = 2*T1*T2;
+        if (T1>t2) {
+            ans-=(T1-t2)*(T1-t2);
+            if (T1-t2>T2) ans+=(T1-t2-T2)*(T1-t2-T2);
+        }
+        if (T2>t1) {
+            ans-=(T2-t1)*(T2-t1);
+            if (T2-t1>T1) ans+=(T2-t1-T1)*(T2-t1-T1);
+        }
+        printf("%1.9f\n",(double) ans/(2*T1*T2));
+    }
+
+    return 0;
+}

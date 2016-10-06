@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <set>
+#include <time.h>
+#include <algorithm>
+using namespace std;
+
+#define ll long long
+
+char res[20][20];
+int w;
+int a[20][20];
+unsigned int h[20][20], pow1[20], pow2[20];
+
+void fill(int n, int m, int d) {
+	for (int i = 1; i <= n; ++i) {
+		for (int j = 1; j <= m; ++j) {
+			a[i][j] = (abs(rand()) % d) + 1;
+		}
+	}
+}
+
+unsigned int getHash(int x1, int y1, int x2, int y2) {
+	return h[x2][y2] - h[x2][y1-1] - h[x1-1][y2] + h[x1-1][y1-1];
+}
+
+struct Hash {
+	int x1, y1, x2, y2;
+
+	bool operator<(const Hash &b) const {
+		return getHash(x1, y1, x2, y2) * pow1[b.x1] * pow2[b.y1] <
+			getHash(b.x1, b.y1, b.x2, b.y2) * pow1[x1] * pow2[y1];
+	}
+};
+
+char g[5] = {'#', 'G', 'C', 'A', 'T'};
+
+void check(int n, int m, int k) {
+	for (int i = 1; i <= n; ++i) {
+		for (int j = 1; j <= m; ++j) {
+			h[i][j] = h[i-1][j] + h[i][j-1] - h[i-1][j-1] + a[i][j] * pow1[i] * pow2[j];
+		}
+	}
+	set<Hash> used;
+	int cnt = 0;
+	for (int X = 1; X <= n; ++X) {
+		for (int Y = 1; Y <= m; ++Y) {
+			used.clear();
+			for (int x1 = 1; x1 + X - 1 <= n; ++x1) {
+				for (int y1 = 1; y1 + Y - 1 <= m; ++y1) {			
+					Hash tmp;
+					tmp.x1 = x1;
+					tmp.y1 = y1;
+					tmp.x2 = x1 + X - 1;
+					tmp.y2 = y1 + Y -1;
+					used.insert(tmp);
+				}
+			}
+			cnt += (int) (used.size());
+		}
+	}
+	if (abs(cnt - k) < w) {
+		w = abs(cnt - k);
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j <= m; ++j) {
+				res[i][j] = g[a[i][j]];
+			}
+		}
+	}
+}
+
+int main() {
+	srand(time(NULL));
+	pow1[0] = 1;
+	pow2[0] = 1;
+	for (int i = 1; i <= 15; ++i) {
+		pow1[i] = pow1[i-1] * 5;
+		pow2[i] = pow2[i-1] * 7;
+	}
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n, m, k;
+		scanf("%d %d %d", &n, &m, &k);
+		w = abs(n * m - k);
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j <= m; ++j) {
+				res[i][j] = g[1];
+			}
+		}
+		for (int d = 2; d <= 4; ++d) {
+			fill(n, m, d);
+			check(n, m, k);
+		}
+		fill(n, m, 4);
+		check(n, m, k);
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j <= m; ++j) {
+				printf("%c", res[i][j]);
+			}
+			printf("\n");
+		}
+	}
+	return 0;
+}

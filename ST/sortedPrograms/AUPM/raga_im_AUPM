@@ -1,0 +1,40 @@
+// A union by rank and path compression based program to detect cycle in a graph
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main(){
+ int t;
+
+ int n,p,k;
+ k=0;
+ cin>>t;
+ while(t--){
+    cin>>n;
+    k++;
+    p=n/2;
+    cout<<"Case"<<" "<<k<<":"<<endl;
+    for(int i=0;i<n+p;i++){
+         for(int j=0;j<n+p;j++){
+            if(i < n &&j<n &&( i%(n-1)==0||j%(n-1)==0))
+                cout<<"#";
+           else if(i-p>=0&&j-p>=0){
+            if((i-p)%(n-1)==0||(j-p)%(n-1)==0)
+                cout<<"#";
+            else
+                cout<<" ";
+
+           }
+           else
+            cout<<" ";
+         }
+         cout<<endl;
+    }
+ }
+
+}   

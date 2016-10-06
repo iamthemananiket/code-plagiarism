@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    //ifstream cin("data.in");
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        int N, K;
+
+        string C;
+        queue<int> Q;
+
+        cin >> N >> K;
+        cin >> C;
+
+        int sum = 0;
+
+        for (int i = 0; i < N; ++i)
+        {
+            while (Q.size() && Q.front() + K - 1 < i)
+                Q.pop();
+
+            if (Q.size() % 2)
+            {
+                if (C[i] == 'R')
+                    C[i] = 'G';
+                else
+                    C[i] = 'R';
+            }
+
+            if (C[i] != 'G')
+            {
+                C[i] = 'G';
+                Q.push(i);
+                sum++;
+            }
+        }
+
+        cout << sum << "\n";
+    }
+
+    return 0;
+}

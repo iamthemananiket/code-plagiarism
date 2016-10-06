@@ -1,0 +1,424 @@
+#include <iostream>
+#include <map>
+#include <cstring>
+#include <fstream>
+#include <cstdio>
+#include <math.h>
+#include <queue>
+#include <stack>
+#include <set>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <cassert>
+#include <algorithm>        
+#include <ctime>
+#include <vector>
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+#define mp make_pair
+#define pb push_back
+const int N = 400500;
+const int mod = INF + 7;
+const int BlockSize = 700;
+const int inv6 = 166666668;
+ 
+int n, m, a[N], a2[N], a3[N];
+ 
+struct query {
+	int type, l, r;
+	void in() {
+		scanf("%d", &type);
+		if (type == 3) scanf("%d", &l);
+		else scanf("%d%d", &l, &r);
+	}
+}q[N];
+ 
+struct node {
+	node *l, *r;
+	int cnt, x, y, way, sum;
+	node() {
+		l = r = NULL;
+		cnt = x = way = sum = 0;
+		y = rand();
+	}
+}*t;
+ 
+inline void upd(node *&x) {
+	if (!x) return;
+	x -> cnt = 1;
+	x -> sum = x -> way;
+	if (x -> l) x -> cnt += x -> l -> cnt, x -> sum += x -> l -> sum;
+	if (x -> r) x -> cnt += x -> r -> cnt, x -> sum += x -> r -> sum;
+}
+ 
+node * merge(node *l, node *r) {
+	if (!l) return r;
+	if (!r) return l;
+	if (l -> y > r -> y) {
+		l -> r = merge(l -> r, r);
+		upd(l);
+		return l;
+	}
+	else {
+		r -> l = merge(l, r -> l);
+		upd(r);
+		return r;
+	}
+}
+ 
+inline int key(node *&x) {
+	if (!x) return 0;
+	int ret = 1;
+	if (x -> l) ret += x -> l -> cnt;
+	return ret;
+}
+ 
+void split(node *t, int x, node *&l, node *&r) {
+	if (!t) {
+		l = r = NULL;
+		return;
+	}
+	if (key(t) < x) {
+		l = t;
+		split(l -> r, x - key(t), l -> r, r);
+		upd(l);
+	}
+	else {
+		r = t;
+		split(r -> l, x, l, r -> l);
+		upd(r);
+	}
+}
+ 
+int FindPos(int k, node *now) {
+	int ret = 0;
+	if (now -> l) {
+		if (now -> l -> sum >= k) return FindPos(k, now -> l);
+		k -= now -> l -> sum;
+		ret += now -> l -> cnt;
+	}
+	if (now -> way >= k) return 1 + ret;
+	++ret;
+	k -= now -> way;
+	return ret + FindPos(k, now -> r);
+}
+ 
+int total = 0;
+int pos[N], nachalo[N];
+ 
+void out(node *&x) {
+	if (!x) return;
+	out(x -> l);
+	pos[x -> x] = ++total;
+	out(x -> r);
+}
+ 
+struct MyNode {
+	ll sum, sum2, sum3;
+	MyNode(){
+		sum = sum2 = sum3 = 0;
+	}
+	MyNode(ll sum, ll sum2, ll sum3) : sum(sum), sum2(sum2), sum3(sum3) {}
+};
+ 
+int nn = 1, rmq[4 * N];
+ 
+set <int> all[N];
+map <int, int> last;
+int Next[N], AllBlock;
+ 
+vector <int> block[N], xx;
+vector <MyNode> T[N];
+int wh[N], IsStart[N];
+ 
+int FindPosxx(int x) {
+	return (lower_bound(xx.begin(), xx.end(), x) - xx.begin());
+}
+ 
+inline bool cmp(int i, int j) {
+	return Next[i] > Next[j];
+}
+ 
+inline void recalc(int id) {
+	sort(block[id].begin(), block[id].end(), &cmp);
+	if (!(int)T[id].size()) T[id].resize((int)block[id].size());
+	for (int i = 0; i < (int)block[id].size(); ++ i) {
+		T[id][i].sum = a[block[id][i]];
+		T[id][i].sum2 = a2[block[id][i]];
+		T[id][i].sum3 = a3[block[id][i]];
+		if (i) {
+			T[id][i].sum += T[id][i - 1].sum;
+			T[id][i].sum2 += T[id][i - 1].sum2;
+			T[id][i].sum3 += T[id][i - 1].sum3;
+			if (T[id][i].sum >= mod) T[id][i].sum -= mod;
+			if (T[id][i].sum2 >= mod) T[id][i].sum2 -= mod;
+			if (T[id][i].sum3 >= mod) T[id][i].sum3 -= mod;
+		}
+	}
+}
+ 
+inline void upd(int v, int x) {
+	v += nn - 1;
+	rmq[v] = x;
+	v >>= 1;
+	while(v) {
+		rmq[v] = rmq[v + v] + rmq[v + v + 1];
+		v >>= 1;
+	}
+}
+inline int GetSum(int l, int r) {
+	if (l > r) return 0;
+	int ret = 0;
+	l += nn - 1, r += nn - 1;
+	while(l <= r) {
+		if (l & 1) ret += rmq[l++];
+		if (!(r & 1)) ret += rmq[r--];
+		l >>= 1, r >>= 1;
+	}
+	return ret;
+}
+int kth(int k, int v = 1, int tl = 1, int tr = nn) {
+	if (tl == tr) return tl;
+	int mid = (tl + tr) >> 1;
+	if (k <= rmq[v + v]) return kth(k, v + v, tl, mid);
+	else return kth(k - rmq[v + v], v + v + 1, mid + 1, tr);
+}
+ 
+set <int> :: iterator it;
+ 
+inline void Replace(int pos, int x) {
+	int id = FindPosxx(a[pos]);
+	it = all[id].lower_bound(pos);
+	if (it != all[id].begin()) {
+		it--;
+		Next[(*it)] = Next[pos];
+		recalc(wh[(*it)]);
+	}
+	all[id].erase(pos);
+	id = FindPosxx(x);
+	it = all[id].lower_bound(pos);
+	if (it != all[id].end()) {
+		Next[pos] = (*it);
+	}
+	else {
+		Next[pos] = n + 1;
+	}                  
+	if (it != all[id].begin()) {
+		it--;
+		Next[(*it)] = pos;
+		recalc(wh[(*it)]);
+	}
+ 
+	all[id].insert(pos);
+	if (x) upd(pos, 1);
+	else upd(pos, 0);
+	a[pos] = x;
+	a2[pos] = ((ll)x * x) % mod;
+	a3[pos] = ((ll)a2[pos] * x) % mod;
+	recalc(wh[pos]);
+}
+
+int L, R, MyId, mid;
+ 
+inline int distinct(int l, int r) {
+	int ans = 0;
+	if (GetSum(l, r) < r - l + 1) --ans;
+	while (l <= r && !IsStart[l]) {
+		if (Next[l] > r) ++ans;
+		++l;
+	}
+	if (l <= r) {
+		for (int id = wh[l]; id < wh[r]; ++ id) {
+			L = 0, R = (int)block[id].size() - 1, MyId = -1;
+			while (L <= R) {
+				mid = (L + R) >> 1;
+				if (Next[block[id][mid]] > r) {
+					MyId = mid;
+					L = mid + 1;
+				}
+				else R = mid - 1;
+			}
+			ans += MyId + 1;
+		}
+		for (int i = r; i > 0; -- i) {
+			if (Next[i] > r) ++ans;
+			if (IsStart[i]) break;
+		}
+	}
+	return ans;
+}
+ 
+inline ll QuerySum(int l, int r) {
+	ll sum = 0, sum2 = 0, sum3 = 0;
+	while (l <= r && !IsStart[l]) {
+		if (Next[l] > r) {
+			sum += a[l];
+			if (sum >= mod) sum -= mod;
+			sum2 += a2[l];
+			if (sum2 >= mod) sum2 -= mod;
+			sum3 += a3[l];
+			if (sum3 >= mod) sum3 -= mod;
+		}
+		++l;
+	}
+	if (l <= r) {
+		for (int id = wh[l]; id < wh[r]; ++ id) {
+			L = 0, R = (int)block[id].size() - 1, MyId = -1;
+			while (L <= R) {
+				mid = (L + R) >> 1;
+				if (Next[block[id][mid]] > r) {
+					MyId = mid;
+					L = mid + 1;
+				}
+				else R = mid - 1;
+			}
+			if (MyId != -1) {
+				sum += T[id][MyId].sum;
+				sum2 += T[id][MyId].sum2;
+				sum3 += T[id][MyId].sum3;
+				if (sum >= mod) sum -= mod;
+				if (sum2 >= mod) sum2 -= mod;
+				if (sum3 >= mod) sum3 -= mod;
+			}
+		}
+		for (int i = r; i > 0; -- i) {
+			if (Next[i] > r) {
+				sum += a[i];
+				if (sum >= mod) sum -= mod;
+				sum2 += a2[i];
+				if (sum2 >= mod) sum2 -= mod;
+				sum3 += a3[i];
+				if (sum3 >= mod) sum3 -= mod;
+			}
+			if (IsStart[i]) break;
+		}
+	}
+	ll ret = (sum * sum) % mod;
+	ret *= sum;
+	ret -= sum2 * 3 * sum;
+	ret += sum3 * 2;
+	ret %= mod;
+	if (ret < 0) ret += mod;
+	return (ret * inv6) % mod;
+}
+ 
+int mas[N];
+ 
+int main () {
+	#ifndef ONLINE_JUDGE
+    freopen ("in", "r", stdin);
+    freopen ("out", "w", stdout);
+    #endif
+ 
+    scanf("%d%d", &n, &m);
+ 
+    for (int i = 1; i <= n; ++ i) {
+    	scanf("%d", &nachalo[i]);
+    	xx.pb(nachalo[i]);
+    	node *z = new node;
+    	z -> x = i;
+    	z -> cnt = 1;
+    	z -> sum = 1;
+    	z -> way = 1;
+    	t = merge(t, z);
+    }
+    
+    total = n;
+ 
+    for (int i = 1; i <= m; ++ i) {
+    	q[i].in();
+    	if (q[i].type == 4) {
+    		node * z = new node;
+    		z -> x = ++total;
+    		z -> cnt = 1;
+    		z -> way = 1;
+    		z -> sum = 1;
+    		if (q[i].l == 0) {
+    			t = merge(z, t);
+    		}
+    		else {
+    			int CurPos = FindPos(q[i].l, t) + 1;
+    			node *L = NULL, *R = NULL;
+    			split(t, CurPos, L, R);
+    			t = merge(L, merge(z, R));
+    		}
+    		xx.push_back(q[i].r);
+    	}
+    	else if (q[i].type == 3) {
+    		int CurPos = FindPos(q[i].l, t);
+   			node *L = NULL, *R = NULL, *M = NULL;
+   			split(t, CurPos, L, R);
+   			split(R, 2, M, R);
+   			M -> way = 0;
+   			upd(M);
+   			t = merge(L, merge(M, R));
+    	}
+    	else if (q[i].type == 2) xx.push_back(q[i].r);
+    }
+ 
+    xx.push_back(0);
+    sort(xx.begin(), xx.end());
+    xx.resize((unique(xx.begin(), xx.end()) - xx.begin()));
+    
+    total = 0;
+    out(t);
+ 
+    for (int i = 1; i <= n; ++ i) {
+    	a[pos[i]] = nachalo[i];
+    	a2[pos[i]] = ((ll)a[pos[i]] * a[pos[i]]) % mod;
+    	a3[pos[i]] = ((ll)a2[pos[i]] * a[pos[i]]) % mod;
+    }
+ 
+    swap(total, n);
+ 
+    for (int i = n; i > 0; -- i) {
+    	if (!last[a[i]]) {
+    		Next[i] = n + 1;
+    	}
+    	else Next[i] = last[a[i]];
+    	last[a[i]] = i;
+    }
+	
+	AllBlock = (n + BlockSize - 1) / BlockSize;
+ 
+    for (int i = 1; i <= n; ++ i) {
+    	wh[i] = (i - 1) / BlockSize + 1;
+    	block[wh[i]].pb(i);
+    	all[FindPosxx(a[i])].insert(i);
+    	if (i % BlockSize == 1) IsStart[i] = 1;
+    }
+ 
+    while(nn < n) nn <<= 1;
+    for (int i = 1; i <= total; ++ i) {
+    	rmq[nn + pos[i] - 1] = 1;
+    }
+    for (int i = nn - 1; i > 0; -- i) rmq[i] = rmq[i + i] + rmq[i + i + 1];
+ 
+    for (int i = 1; i <= AllBlock; ++ i) recalc(i);
+ 
+    for (int i = 1; i <= m; ++ i) {
+    	if (q[i].type == 1) {
+    		printf("%I64d\n", QuerySum(kth(q[i].l), kth(q[i].r)));
+    	}
+    	else if (q[i].type == 2) {
+    		Replace(kth(q[i].l), q[i].r);
+    	}
+    	else if (q[i].type == 3) {
+    		Replace(kth(q[i].l), 0);
+    	}
+    	else if (q[i].type == 4) {
+    		Replace(pos[++total], q[i].r);
+    	}
+    	else {
+    		printf("%d\n", distinct(kth(q[i].l), kth(q[i].r)));
+    	}
+    }
+ 
+ 	return 0;
+}

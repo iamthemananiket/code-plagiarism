@@ -1,0 +1,126 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1005;
+const int INF = 10000;
+
+int N, T;
+int A[MAX_N][MAX_N];
+ll dp[MAX_N][MAX_N];
+int p[MAX_N][MAX_N];
+int color[MAX_N];
+vector<int> bnodes[MAX_N][2];
+
+bool cmax(ll& a, ll b){
+  if(a < b){
+    a = b;
+    return 1;
+  }
+  return 0;
+}
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d", &N);
+    for(int i = 0; i < N; i++){
+      color[i] = -1;
+      for(int j = 0; j < N; j++){
+	scanf("%d", &A[i][j]);
+      }
+    }
+
+    int ncomp = 0;
+    int good = 1;
+    for(int i = 0; i < N && good; i++){
+      if(color[i] != -1) continue;
+      bnodes[ncomp][0].clear();
+      bnodes[ncomp][1].clear();
+      
+      queue<int> q;
+      q.push(i);
+      color[i] = 0;
+      while(!q.empty()){
+	int u = q.front();
+	q.pop();
+	bnodes[ncomp][color[u]].push_back(u);
+	for(int v = 0; v < N; v++){
+	  if(!A[u][v]) continue;
+	  if(color[v] != -1){
+	    good &= color[v] != color[u];
+	  } else {
+	    color[v] = 1 - color[u];
+	    q.push(v);
+	  }
+	}
+      }
+      ncomp ++;
+    }
+
+    for(int i = 0; i <= ncomp; i++)
+      fill(dp[i], dp[i] + N + 1, -1);
+    
+    dp[0][0] = 0;
+
+    int sn = 0;
+    for(int i = 0; i < ncomp; i++){
+      int a = SZ(bnodes[i][0]);
+      int b = SZ(bnodes[i][1]);
+      for(int white = 0; white <= sn; white++){
+	if(dp[i][white] < 0) continue;
+	int black = sn - white;
+
+	ll cost0 = dp[i][white] + 1LL * black * a + 1LL * white * b;
+	if(cmax(dp[i + 1][white + a], cost0)){
+	  p[i + 1][white + a] = 0; // side 0 becomes white
+	}
+	ll cost1 = dp[i][white] + 1LL * black * b + 1LL * white * a;
+	if(cmax(dp[i + 1][white + b], cost1)){
+	  p[i + 1][white + b] = 1; // side 1 becomes white
+	}
+      }
+      sn += a + b;
+    }
+
+    int bw = 0;
+    for(int i = 0; i <= N; i++)
+      if(dp[ncomp][i] > dp[ncomp][bw])
+	bw = i;
+
+    for(int i = ncomp; i >= 1; i--){
+      for(int v: bnodes[i - 1][p[i][bw]]) color[v] = 0;
+      for(int v: bnodes[i - 1][1 - p[i][bw]]) color[v] = 1;
+      bw -= SZ(bnodes[i - 1][p[i][bw]]);
+    }
+
+    if(good){
+      for(int i = 0; i < N; i++)
+	printf("%d%c", color[i], " \n"[i + 1 == N]);
+
+      // for(int i = 0; i < N; i++, puts(""))
+      // 	for(int j = 0; j < N; j++){
+      // 	  printf("%d ", color[i] ^ color[j]);
+      // 	}
+    } else {
+      puts("-1");
+    }
+  }
+  return 0;
+}

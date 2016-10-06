@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int N;
+vector<int> order;
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%d",&N);
+		order.clear();
+		int ans = 0;
+		for (int i=0;i<N;i++) {
+			int A;
+			scanf("%d",&A);
+			int loc = 0;
+			for (int j=0;j<i;j++) if (order[j]==A) loc = j+1;
+			ans+=min(loc,i-loc);
+			order.insert(order.begin()+loc,i+1);
+		}
+		printf("%d\n",ans);
+	}
+
+	return 0;
+}

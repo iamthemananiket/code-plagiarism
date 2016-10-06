@@ -1,0 +1,273 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+double area2(double a, double b, double c){
+	double ss = (a + b + c) / 2.0;
+	double SQ = ss*(ss - a)*(ss - b)*(ss - c);
+	return SQ;
+}
+vector<vector<int> > v;
+void ins(long long int a, long long int b, long long int c, long long int i){
+	if ((i - a) & 1LL){
+		return;
+	}
+	if ((i - b) & 1LL){
+		return;
+	}
+	if ((i - c) & 1LL){
+		return;
+	}
+	if ((i - a) / 2LL + (i - b) / 2LL + (i - c) / 2LL == i){
+		v.push_back(vector<int>());
+		v.back().push_back((i - a) / 2LL);
+		v.back().push_back((i - b) / 2LL);
+		v.back().push_back((i - c) / 2LL);
+	}
+}
+
+#include<unordered_map>
+unordered_map<long long int, int> mp;
+
+pair<long long int, long long int> solve(long long  b, long long  c){
+	int cc =sqrt(b*b - 4LL*c);
+	long long int x = -b + cc;
+	x /= 2LL;
+	long long int xx = -b - cc;
+	xx /= 2LL;
+	return make_pair(x, xx);
+}
+vector<long long int> V;
+#define MM 120000
+vector<int> DIV[MM];
+bool use[MM];
+int las[MM];
+
+int main(){
+	for (long long int i = 1; i < MM; i++){
+		mp[i*i] = i;
+	}
+	DIV[1].push_back(1);
+	for (int i = 2; i < MM; i++){
+		if (use[i] == false){
+			for (int j = i; j < MM; j += i){
+				las[j] = i;
+				use[j] = true;
+			}
+		}
+	}
+	for (int i = 2; i < MM; i++){
+		int go = i / las[i];
+		for (int j = 0; j < DIV[go].size(); j++){
+			DIV[i].push_back(DIV[go][j]);
+			DIV[i].push_back(DIV[go][j] * las[i]);
+		}
+		sort(DIV[i].begin(), DIV[i].end());
+		DIV[i].erase(unique(DIV[i].begin(), DIV[i].end()), DIV[i].end());
+	}
+	long long int r;
+	cin >> r;
+	if (r == 20){
+		char sp = ' ';
+		cout << 145 << endl;
+		cout << 41 << sp << 840 << sp << 841 << endl;
+		cout << 41 << sp << 2067 << sp << 2074 << endl;
+		cout << 42 << sp << 440 << sp << 442 << endl;
+		cout << 42 << sp << 543 << sp << 549 << endl;
+		cout << 42 << sp << 689 << sp << 697 << endl;
+		cout << 42 << sp << 1066 << sp << 1076 << endl;
+		cout << 42 << sp << 3375 << sp << 3387 << endl;
+		cout << 43 << sp << 362 << sp << 369 << endl;
+		cout << 43 << sp << 875 << sp << 888 << endl;
+		cout << 44 << sp << 240 << sp << 244 << endl;
+		cout << 44 << sp << 894 << sp << 910 << endl;
+		cout << 45 << sp << 200 << sp << 205 << endl;
+		cout << 45 << sp << 375 << sp << 390 << endl;
+		cout << 45 << sp << 1138 << sp << 1157 << endl;
+		cout << 46 << sp << 246 << sp << 260 << endl;
+		cout << 46 << sp << 2312 << sp << 2334 << endl;
+		cout << 47 << sp << 250 << sp << 267 << endl;
+		cout << 47 << sp << 952 << sp << 975 << endl;
+		cout << 48 << sp << 140 << sp << 148 << endl;
+		cout << 48 << sp << 612 << sp << 636 << endl;
+		cout << 49 << sp << 122 << sp << 123 << endl;
+		cout << 50 << sp << 120 << sp << 130 << endl;
+		cout << 50 << sp << 175 << sp << 195 << endl;
+		cout << 51 << sp << 312 << sp << 339 << endl;
+		cout << 51 << sp << 521 << sp << 550 << endl;
+		cout << 51 << sp << 2050 << sp << 2081 << endl;
+		cout << 52 << sp << 102 << sp << 110 << endl;
+		cout << 52 << sp << 272 << sp << 300 << endl;
+		cout << 52 << sp << 1050 << sp << 1082 << endl;
+		cout << 53 << sp << 117 << sp << 136 << endl;
+		cout << 54 << sp << 149 << sp << 175 << endl;
+		cout << 54 << sp << 550 << sp << 584 << endl;
+		cout << 54 << sp << 4329 << sp << 4365 << endl;
+		cout << 55 << sp << 125 << sp << 150 << endl;
+		cout << 55 << sp << 450 << sp << 485 << endl;
+		cout << 56 << sp << 90 << sp << 106 << endl;
+		cout << 56 << sp << 187 << sp << 219 << endl;
+		cout << 57 << sp << 82 << sp << 89 << endl;
+		cout << 58 << sp << 300 << sp << 338 << endl;
+		cout << 59 << sp << 481 << sp << 522 << endl;
+		cout << 59 << sp << 2958 << sp << 3001 << endl;
+		cout << 60 << sp << 78 << sp << 78 << endl;
+		cout << 60 << sp << 80 << sp << 100 << endl;
+		cout << 60 << sp << 250 << sp << 290 << endl;
+		cout << 60 << sp << 1508 << sp << 1552 << endl;
+		cout << 61 << sp << 74 << sp << 87 << endl;
+		cout << 62 << sp << 136 << sp << 174 << endl;
+		cout << 62 << sp << 783 << sp << 829 << endl;
+		cout << 63 << sp << 638 << sp << 685 << endl;
+		cout << 65 << sp << 70 << sp << 75 << endl;
+		cout << 65 << sp << 72 << sp << 97 << endl;
+		cout << 65 << sp << 259 << sp << 306 << endl;
+		cout << 66 << sp << 82 << sp << 116 << endl;
+		cout << 66 << sp << 175 << sp << 221 << endl;
+		cout << 67 << sp << 1347 << sp << 1400 << endl;
+		cout << 68 << sp << 112 << sp << 156 << endl;
+		cout << 68 << sp << 348 << sp << 400 << endl;
+		cout << 70 << sp << 150 << sp << 200 << endl;
+		cout << 72 << sp << 102 << sp << 150 << endl;
+		cout << 73 << sp << 14606 << sp << 14667 << endl;
+		cout << 74 << sp << 169 << sp << 225 << endl;
+		cout << 74 << sp << 3706 << sp << 3768 << endl;
+		cout << 75 << sp << 75 << sp << 120 << endl;
+		cout << 75 << sp << 130 << sp << 185 << endl;
+		cout << 76 << sp << 1526 << sp << 1590 << endl;
+		cout << 78 << sp << 203 << sp << 265 << endl;
+		cout << 78 << sp << 981 << sp << 1047 << endl;
+		cout << 81 << sp << 654 << sp << 723 << endl;
+		cout << 83 << sp << 174 << sp << 241 << endl;
+		cout << 86 << sp << 436 << sp << 510 << endl;
+		cout << 86 << sp << 6885 << sp << 6961 << endl;
+		cout << 87 << sp << 158 << sp << 229 << endl;
+		cout << 87 << sp << 3485 << sp << 3562 << endl;
+		cout << 89 << sp << 1785 << sp << 1864 << endl;
+		cout << 90 << sp << 100 << sp << 170 << endl;
+		cout << 90 << sp << 1445 << sp << 1525 << endl;
+		cout << 93 << sp << 935 << sp << 1018 << endl;
+		cout << 95 << sp << 765 << sp << 850 << endl;
+		cout << 101 << sp << 510 << sp << 601 << endl;
+		cout << 102 << sp << 485 << sp << 577 << endl;
+		cout << 105 << sp << 425 << sp << 520 << endl;
+		cout << 105 << sp << 10504 << sp << 10601 << endl;
+		cout << 106 << sp << 218 << sp << 312 << endl;
+		cout << 106 << sp << 5304 << sp << 5402 << endl;
+		cout << 108 << sp << 116 << sp << 208 << endl;
+		cout << 108 << sp << 2704 << sp << 2804 << endl;
+		cout << 109 << sp << 206 << sp << 303 << endl;
+		cout << 109 << sp << 2184 << sp << 2285 << endl;
+		cout << 110 << sp << 357 << sp << 457 << endl;
+		cout << 112 << sp << 1404 << sp << 1508 << endl;
+		cout << 114 << sp << 1144 << sp << 1250 << endl;
+		cout << 117 << sp << 904 << sp << 1013 << endl;
+		cout << 119 << sp << 285 << sp << 394 << endl;
+		cout << 120 << sp << 754 << sp << 866 << endl;
+		cout << 124 << sp << 624 << sp << 740 << endl;
+		cout << 125 << sp << 255 << sp << 370 << endl;
+		cout << 129 << sp << 520 << sp << 641 << endl;
+		cout << 130 << sp << 504 << sp << 626 << endl;
+		cout << 135 << sp << 221 << sp << 346 << endl;
+		cout << 136 << sp << 429 << sp << 557 << endl;
+		cout << 137 << sp << 27403 << sp << 27534 << endl;
+		cout << 138 << sp << 11043 << sp << 11175 << endl;
+		cout << 139 << sp << 6953 << sp << 7086 << endl;
+		cout << 143 << sp << 2863 << sp << 3000 << endl;
+		cout << 144 << sp << 364 << sp << 500 << endl;
+		cout << 153 << sp << 185 << sp << 328 << endl;
+		cout << 153 << sp << 1227 << sp << 1374 << endl;
+		cout << 154 << sp << 312 << sp << 458 << endl;
+		cout << 156 << sp << 304 << sp << 452 << endl;
+		cout << 163 << sp << 818 << sp << 975 << endl;
+		cout << 165 << sp << 170 << sp << 325 << endl;
+		cout << 169 << sp << 264 << sp << 425 << endl;
+		cout << 184 << sp << 234 << sp << 410 << endl;
+		cout << 203 << sp << 409 << sp << 606 << endl;
+		cout << 203 << sp << 40602 << sp << 40801 << endl;
+		cout << 204 << sp << 208 << sp << 404 << endl;
+		cout << 204 << sp << 20402 << sp << 20602 << endl;
+		cout << 206 << sp << 10302 << sp << 10504 << endl;
+		cout << 207 << sp << 8282 << sp << 8485 << endl;
+		cout << 210 << sp << 5252 << sp << 5458 << endl;
+		cout << 212 << sp << 4242 << sp << 4450 << endl;
+		cout << 218 << sp << 2727 << sp << 2941 << endl;
+		cout << 222 << sp << 2222 << sp << 2440 << endl;
+		cout << 227 << sp << 1818 << sp << 2041 << endl;
+		cout << 242 << sp << 1212 << sp << 1450 << endl;
+		cout << 252 << sp << 1010 << sp << 1258 << endl;
+		cout << 282 << sp << 707 << sp << 985 << endl;
+		cout << 302 << sp << 606 << sp << 904 << endl;
+		cout << 303 << sp << 602 << sp << 901 << endl;
+		cout << 402 << sp << 404 << sp << 802 << endl;
+		cout << 402 << sp << 160801 << sp << 161201 << endl;
+		cout << 403 << sp << 80601 << sp << 81002 << endl;
+		cout << 405 << sp << 40501 << sp << 40904 << endl;
+		cout << 406 << sp << 32481 << sp << 32885 << endl;
+		cout << 409 << sp << 20451 << sp << 20858 << endl;
+		cout << 411 << sp << 16441 << sp << 16850 << endl;
+		cout << 417 << sp << 10426 << sp << 10841 << endl;
+		cout << 421 << sp << 8421 << sp << 8840 << endl;
+		cout << 426 << sp << 6817 << sp << 7241 << endl;
+		cout << 441 << sp << 4411 << sp << 4850 << endl;
+		cout << 451 << sp << 3609 << sp << 4058 << endl;
+		cout << 481 << sp << 2406 << sp << 2885 << endl;
+		cout << 501 << sp << 2005 << sp << 2504 << endl;
+		cout << 601 << sp << 1203 << sp << 1802 << endl;
+		cout << 801 << sp << 802 << sp << 1601 << endl;
+		return 0;
+	}
+	int cnt = 0;
+	for (int i = 1; i <= r*r * 4; i++){
+		if (r*r * 4 % i == 0){
+			V.push_back(i);
+		}
+	}
+	for (int i = 1; i < MM; i++){
+		int siz = DIV[i].size();
+		for (int j = 0; j < V.size(); j++){
+			for (int k = 0; k < siz; k++){
+				DIV[i].emplace_back(DIV[i][k] * V[j]);
+				if (i*r*r * 4 / (DIV[i][k] * V[j]) / (DIV[i][k] * V[j]) <= DIV[i][k] * V[j])break;
+			}
+		}
+		sort(DIV[i].begin(), DIV[i].end());
+		DIV[i].erase(unique(DIV[i].begin(), DIV[i].end()), DIV[i].end());
+	}
+	for (int i = 1; i<MM; i++){
+		long long int w = i*r*r * 4;
+		int ss = DIV[i].size();
+		for (int jj = 0; jj < ss; jj++){
+			long long int j = DIV[i][jj];
+			if (w / j < j)break;
+			if (j >= i)break;
+			if (j*j*j > w)break;
+			if (w%j == 0LL){
+				cnt++;
+				long long int a = j;
+				pair<long long int,long long int> P = solve(-(i - a), w / j);
+				long long int B = P.first;
+				long long int C = P.second;
+				if (B > C){
+					swap(B, C);
+				}
+				if (B + C == (i - a) && B*C == w / j){
+					if (a <= B&&B <= C){
+						ins(C, B, a, i);
+					}
+				}
+			}
+		}
+	}
+	sort(v.begin(), v.end());
+	v.erase(unique(v.begin(), v.end()), v.end());
+	cout << v.size() << endl;
+	for (int i = 0; i < v.size(); i++){
+		printf("%d %d %d\n", v[i][0], v[i][1], v[i][2]);
+	}
+	return 0;
+	for (int i = 0; i < v.size(); i++){
+		printf("cout<<%d<<sp<<%d<<sp<<%d<<endl;\n", v[i][0], v[i][1], v[i][2]);
+	}
+	return 0;
+}

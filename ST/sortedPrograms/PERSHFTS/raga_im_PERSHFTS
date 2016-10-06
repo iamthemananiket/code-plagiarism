@@ -1,0 +1,204 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const unsigned long long int M=1000000007;
+const unsigned long long int m =1000000007; 
+unsigned long long int facto[1000005]={0};
+unsigned long long int factoo[1000005]={0};
+unsigned long long int fact(int i){
+    if(i==0)
+        return 1;
+    else if(facto[i]!=0)
+        return facto[i]%m;
+    else
+    {
+        facto[i]=((fact(i-1))%m*(i)%m)%m;
+        return facto[i]%m;
+    }
+}
+unsigned long long int facti(int i){
+    if(i<=1)
+        return 0;
+    if(i==2)
+        return 1;
+    else if(factoo[i]!=0)
+        return factoo[i]%m;
+    else
+    {
+        factoo[i]=((facti(i-1))%m*(i)%m)%m;
+        return factoo[i]%m;
+    }
+}
+int tree[400005],vis[1000005];
+int b[1000005],a[1000005];
+unsigned long long int sum,sum1;
+unsigned long long rankk,rankk1;
+void update(int idx,unsigned long long int val)
+{
+   while(idx<=100005)
+   {
+       tree[idx]=(tree[idx]%m+val%m)%m;
+       idx+=(idx & -idx);
+   }
+}
+long long int summ(int idx)
+{
+   long long  int sm=0;
+    while(idx>0)
+    {
+       sm=(sm%m+tree[idx]%m)%m;
+       idx-=(idx & -idx);
+    }
+    return sm;
+}
+ 
+void viscycle(int i){
+    if(vis[i]==1)
+        return;
+    else{
+        vis[i]=1;
+        viscycle(a[i]);
+    }
+}
+int main(){
+    std::ios::sync_with_stdio(false);
+    int t;
+    int n,k;
+    cin>>t;
+    while(t--){
+    cin>>n>>k;
+    rankk=1;
+    for(int i=1;i<=n;i++){
+        cin>>a[i];
+    }
+    for(int i=0;i<=4*n+3;i++){
+        tree[i]=0;
+    }
+        
+    if(k==n){
+       for(int i=1;i<=n;i++)
+           cin>>b[i];
+       int j;
+        for(j=1;j<=n;j++)
+            {
+            if(a[1]==b[j])
+                break;
+           
+        }
+        //cout<<j<<endl;
+        for(int i=1;i<=n;i++){
+            if(a[i]!=b[(i+j-2)%(n)+1])
+                rankk=0;
+        }
+        if(rankk==0)
+            cout<<"-1"<<endl;
+        else
+            {
+            cout<<b[1]<<endl;
+        }
+    }
+     else if(k%2==0){
+         rankk=0;
+         for(int i=0;i<=n;i++)
+            b[i]=0;
+     for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+       int s=0,sz=n+2;
+        b[sz-1]=0;
+           for(int i=n-1;i>=0;i--)
+        {
+            if(a[i]!=0)
+        {
+            update(a[i],1);
+            b[i]=summ(a[i]-1)+s;
+        }
+        else s++;
+        }
+         //for(int i=0;i<n;i++)
+          //cout<<b[i]<<" ";
+         //cout<<endl;
+        for(int i=0;i<n;i++){
+            rankk=(rankk%m+((b[i]%m)*(fact(n-i-1)%m)%m)%m)%m;
+        }
+           // rankk=rank/2+1;
+         rankk=rankk%M;
+         rankk=(rankk+1)%M;
+            cout<<rankk<<endl;
+    }
+    else{
+    //getparity(n);
+        for(int i=0;i<=n;i++)
+            b[i]=0;
+        sum=0;
+        sum1=0;
+        for(int i=1;i<=n;i++){
+            vis[i]=0;
+        }
+        for(int i=1;i<=n;i++){
+            if(vis[i]==0)
+            {
+                sum=1-sum;
+                viscycle(i);
+        }
+        }
+      
+        for(int i=1;i<=n;i++){
+            vis[i]=0;
+        }
+         for(int i=1;i<=n;i++){
+             cin>>a[i];
+         }
+        
+        for(int i=1;i<=n;i++){
+            if(vis[i]==0)
+            {
+                sum1=1-sum1;
+                viscycle(i);
+        }
+        }
+      
+        
+        
+       // sum1=sum1%2;
+        if(sum1!=sum){
+            cout<<"-1"<<endl;
+        }
+        else{
+          for(int i=0;i<n;i++)
+            b[i]=a[i+1];
+        for(int i=0;i<n;i++)
+            a[i]=b[i];
+           unsigned long long int s=0,sz=n+2;
+            b[sz-1]=0;
+            b[n]=0;
+           for(int i=n-1;i>=0;i--)
+            {
+            if(a[i]!=0)
+           {
+            update(a[i],1);
+            b[i]=summ(a[i]-1)+s;
+            }
+        else s++;
+        }
+            rankk=0; 
+        for(int i=0;i<n;i++){
+            rankk1=((b[i]%m)*(facti(n-i-1)%m))%m;
+            rankk=(rankk%m+rankk1%m)%m;
+            rankk=rankk%m;
+        }
+            rankk=rankk%M;
+            rankk=((rankk+1)%M);
+            //rankk=(rankk*(500000004))%m;
+            rankk=rankk%M;
+            cout<<rankk<<endl;
+        }
+     
+    }
+   //cout<<fact(100000)%m<<endl;
+}
+}
+   

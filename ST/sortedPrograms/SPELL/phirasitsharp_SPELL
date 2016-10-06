@@ -1,0 +1,13 @@
+#include<stdio.h>
+
+#define N 1000010
+
+char str[N];
+
+int main() {
+	while(!feof(stdin)) {
+		scanf("%s", str);
+		printf("%s ", str);
+	}
+	return 0;
+}	

@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N=1e3+10;
+int n,m,v[N][N],h[N];
+
+int q[N];
+void prepare(){
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=n;i++) 
+        fill(v[i]+1,v[i]+n+1,0);
+    while (m--){
+        int x,y;
+        scanf("%d%d",&x,&y);
+        v[x][y]=v[y][x]=1;
+    }
+}
+bool BFS(int st){
+    h[st]=1;
+    int top=1,bot=1;
+    q[1]=st;
+    while (top<=bot){
+        int x=q[top++];
+        //cout<<x<<" "<<h[x]<<'\n';
+        for(int y=1;y<=n;y++) if (y!=x&&!v[x][y]){
+            if (!h[y]) {
+                h[y]=-h[x];
+                q[++bot]=y;
+            }
+            if (h[y]!=-h[x]) {
+                //cout<<y<<"=>"<<h[y]<<'\n';
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+string solve(){
+    memset(h,0,sizeof(h));
+    for(int i=1;i<=n;i++) if (!h[i])
+        if (!BFS(i)) return "NO";
+    return "YES";
+}
+int main() {
+	// your code goes here
+	int test;
+	scanf("%d",&test);
+	while (test--){
+	    prepare();
+	    cout<<solve()<<'\n';
+	}
+	return 0;
+}

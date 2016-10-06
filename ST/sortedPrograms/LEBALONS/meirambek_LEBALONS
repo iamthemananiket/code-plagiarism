@@ -1,0 +1,84 @@
+#include <iostream>
+#include <cassert>
+#include <fstream>
+#include <cstdio>
+#include <cassert>
+#include <cmath>
+#include <queue>
+#include <deque>
+#include <map>
+#include <stack>
+#include <set>
+#include <iomanip>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <algorithm>
+#include <cstring>
+#include <ctime>
+#include <vector>                              
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define ll long long int
+#define INF 1000*1000*1000
+#define F first
+#define S second
+#define mp make_pair
+#define pb push_back
+const int N = 42;
+ll sum[N][N], d[N][N];
+ll n, k;
+ll cnt[N], ss[N];
+ll p[N];
+void solve() {
+	memset(ss, 0, sizeof ss);
+	memset(cnt, 0, sizeof cnt);
+	cin >> n >> k;
+	for (int i = 1; i <= n; ++ i) {
+		ll cc, x;
+		cin >> cc >> x;
+		assert(1 <= cc && cc <= 40);
+		cnt[cc]++;
+		ss[cc] += x;
+	}
+	long long int d[41][41],sum[41][41]={0};
+	for(int i=0;i<41;i++)d[0][i]=0;
+	for(int i=0;i<41;i++)d[i][0]=1;
+	
+	for(int i=1;i<41;i++){
+		for(int j=1;j<41;j++){
+			d[i][j]=d[i-1][j] + d[i-1][j-1]*(pow(2,cnt[i])-1);
+		}
+	}
+	for(int i=1;i<41;i++){
+		for(int j=1;j<41;j++){
+			sum[i][j]=sum[i-1][j] +sum[i-1][j-1]*(pow(2,cnt[i])-1) +d[i-1][j-1]*ss[i]*pow(2,(cnt[i]-1));
+		}
+	}
+	ll s1 = 0, s2 = 0;
+	for (int i = k; i <= 40; ++ i) {
+		s1 += d[40][i];
+		s2 += sum[40][i];
+	}
+	printf("%.9f\n", (double)s2 / (double)s1);
+}
+
+int main ()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname"in","r",stdin);
+	freopen (fname"out","w",stdout);
+	#endif
+
+	p[0] = 1;
+	for (int i = 1; i <= 60; ++ i) p[i] = (p[i - 1] << 1);
+
+	int test;
+
+	cin >> test;
+
+	while(test--) solve();
+
+	return 0;
+}

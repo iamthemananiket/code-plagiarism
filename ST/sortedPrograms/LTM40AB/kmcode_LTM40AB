@@ -1,0 +1,22 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int t;
+int main(){
+	cin >> t;
+	while (t--){
+		long long int a, b, c, d;
+		scanf("%lld%lld%lld%lld", &a, &b, &c, &d);
+		long long int ans = 0;
+		for (int i = a; i <= b; i++){
+			if (i > d){
+				break;
+			}
+			int cc = max(c, (long long int)(i + 1));
+			int dd = d;
+			ans += dd - cc + 1;
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

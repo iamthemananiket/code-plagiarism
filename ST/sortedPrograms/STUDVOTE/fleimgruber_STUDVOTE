@@ -1,0 +1,44 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 105
+
+int n,k,a[MAX_N],cnt[MAX_N];
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d %d",&n,&k);
+		for (int i=1; i<=n; i++)
+		{
+			scanf("%d",a+i);
+			cnt[i]=0;
+		}
+		for (int i=1; i<=n; i++)
+			cnt[a[i]]++;
+		int ans=0;
+		for (int i=1; i<=n; i++)
+			if (cnt[i]>=k&&a[i]!=i)
+				ans++;
+		printf("%d\n",ans);
+	}
+	return 0;
+}

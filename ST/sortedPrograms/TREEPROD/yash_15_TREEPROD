@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define debug false
+#define ll long long
+#define mp make_pair
+#define pb push_back
+#define err(x) if(debug) cerr<<x
+int m;
+
+vector< pair<int,int> > v[100005];
+bool vis[100005];
+int fac[25],cnt,ind[501];
+ll dp[100005][25];
+
+ll merge(int x, int y, int val)
+{
+	err("::: "<<x<<" "<<y<<" "<<val<<"\n");
+	ll ans=0;
+	int i,j,reqd;
+	for(i=0;i<cnt;i++)
+	{
+		if(!dp[y][i])
+			continue;
+		reqd=m/__gcd(m,fac[i]*val);
+		err(fac[i]<<" -> "<<reqd<<" : "<<dp[y][i]<<"\n");
+		for(j=0;j<cnt;j++)
+			if(fac[j]%reqd==0)
+				ans+=dp[x][j]*1ll*dp[y][i];
+	}
+	for(i=0;i<cnt;i++)
+		dp[x][ind[__gcd(m,fac[i]*val)]]+=dp[y][i];
+	
+	err("ans "<<x<<" :: "<<ans<<"\n");
+	for(i=0;i<cnt;i++)
+		err(dp[x][i]<<" ");
+	err("\n");
+	return ans;
+}
+
+ll solve(int x)
+{
+	ll ans=0;
+	for(int i=0;i<v[x].size();i++)
+		if(!vis[v[x][i].first])
+		{
+			vis[v[x][i].first]=1;
+			ans+=solve(v[x][i].first);
+			ans+=merge(x,v[x][i].first,v[x][i].second);
+		}
+	dp[x][0]++;
+	err("done "<<x<<" "<<ans<<" "<<dp[x][ind[m]]<<"\n");
+	return ans+dp[x][ind[m]];
+}
+
+int main()
+{
+	int n,i,a,b,c;
+	cin>>n>>m;
+	if(m==1)
+	{
+		cout<<(n*(n-1ll))/2<<"\n";
+		return 0;
+	}
+	err(n<<" "<<m<<"\n");
+	for(i=1,cnt=0;i<=m;i++)
+		if(m%i==0)
+		{
+			ind[i]=cnt;
+			fac[cnt++]=i;
+		}
+	for(i=1;i<n;i++)
+	{
+		scanf("%d%d%d",&a,&b,&c);
+		c=__gcd(c,m);
+		v[a].pb(mp(b,c));
+		v[b].pb(mp(a,c));
+	}
+	vis[1]=1;
+	cout<<solve(1)<<endl;
+}

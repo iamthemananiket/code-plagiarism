@@ -1,0 +1,74 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+int A[10][10]={{0,1,0,0,1,1,0,0,0,0},{1,0,1,0,0,0,1,0,0,0},{0,1,0,1,0,0,0,1,0,0},{0,0,1,0,1,0,0,0,1,0},{1,0,0,1,0,0,0,0,0,1},{1,0,0,0,0,0,0,1,1,0},{0,1,0,0,0,0,0,0,1,1},{0,0,1,0,0,1,0,0,0,1},{0,0,0,1,0,1,1,0,0,0},{0,0,0,0,1,0,1,1,0,0}};
+int main()
+{
+	int t,i,prev,now;
+	string str,ans;
+	scanf("%d",&t);
+	while(t--)
+	{
+		cin>>str;
+		prev=str[0]-65;
+		int fl=0;
+		ans="";
+		ans+=prev+48;
+		for(i=1;i<str.size();i++)
+		{
+			now=str[i]-65;
+			if(A[prev][now]==1)
+			{
+				prev=now;
+				ans+=now+48;
+			}
+			else if(A[prev][now+5]==1)
+			{
+				prev=now+5;
+				ans+=now+53;
+			}
+			else
+			{
+				fl=1;
+				break;
+			}
+		}
+		if(fl==0)
+		{
+			cout<<ans<<endl;
+			continue;
+		}
+		fl=0;
+		prev=str[0]-65+5;
+		ans="";
+		ans+=prev+48;
+		for(i=1;i<str.size();i++)
+		{
+			now=str[i]-65;
+			if(A[prev][now]==1)
+			{
+				prev=now;
+				ans+=now+48;
+			}
+			else if(A[prev][now+5]==1)
+			{
+				prev=now+5;
+				ans+=now+48+5;
+			}
+			else
+			{
+				fl=1;
+				break;
+			}
+		}
+		if(fl==1)
+		{
+			cout<<-1<<endl;
+		}
+		else
+		{
+			cout<<ans<<endl;
+		}
+	}
+	return 0;
+}

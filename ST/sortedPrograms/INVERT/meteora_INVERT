@@ -1,0 +1,192 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+
+#define NMAX 100010
+
+using namespace std;
+
+struct node{
+	int lft,rht,val,sz;
+	int pr;
+};
+
+node tree[NMAX];
+int N,T,mx = 100002;
+
+int create_node(int val){
+	tree[T].lft = tree[T].rht = mx;
+	tree[T].sz = 1;
+	tree[T].pr = rand();
+	tree[T].val = val;
+	return T++;
+}
+
+int upd(int x){
+	if(x >= mx) return x;
+	tree[x].sz = tree[tree[x].lft].sz+ tree[tree[x].rht].sz + 1;
+	return x;
+}
+
+pair<int,int> split(int node, int val){
+	if(node >= mx) return make_pair(mx,mx);
+
+	pair<int,int> sp;
+
+	if(tree[node].val >= val){
+		sp = split(tree[node].lft,val);
+		tree[node].lft = sp.second;
+		sp.second = upd(node);
+		return sp;
+	}
+
+	sp = split(tree[node].rht,val);
+	tree[node].rht = sp.first;
+	sp.first = upd(node);
+	return sp;
+}
+
+int merge(int l, int r){
+	if(l >= mx) return r;
+	if(r >= mx) return l;
+
+	if(tree[l].pr > tree[r].pr){
+		tree[l].rht = merge(tree[l].rht,r);
+		return upd(l);
+	}
+
+	tree[r].lft = merge(l,tree[r].lft);
+	return upd(r);
+}
+
+int root;
+int ins(int val){
+	pair<int,int> sp;
+
+	sp = split(root,val);
+	int ret = tree[sp.first].sz;
+
+	int x = create_node(val);
+	sp.first = merge(sp.first,x);
+	root = merge(sp.first,sp.second);
+	return ret;
+}
+
+
+class bit{
+	int tree[NMAX];
+
+	int N,root;
+public:
+
+	void upd(int x, int val){
+		for(; x  < N; x += (x&-x)){
+			tree[x] += val;
+			if(!x) break;
+		}
+
+	}
+	void init(int n){
+		N = n;
+		root = 1<<(32-__builtin_clz(N)-1);
+		int i;
+		for(i= 0; i < N; ++i) upd(i,1);
+	}
+
+	int lower(int x){
+		int i,n;
+
+		i = 0;
+		n = root;
+		if(tree[0] >= x) return 0;
+		x -= tree[0];
+
+		while(n){
+			if(i+n < N && tree[i+n] < x){
+				x -= tree[i+n];
+				i += n;
+			}
+			n >>=1;
+		}
+		return i+1;
+	}
+};
+
+int A[NMAX];
+
+bit B;
+
+int A2[NMAX];
+int M;
+
+int ins2(int x, int pos){
+	int i;
+	for(i = M; i > pos; --i){
+		A2[i] = A2[i-1];
+	}
+	A2[pos] = x;
+	++M;
+	int ct=0;
+
+	for(i = pos+1; i < M; ++i){
+		ct += A2[i] < x;
+	}
+	for(i = 0; i < pos; ++i){
+		ct += A2[i] > x;
+	}
+	return ct;
+}
+
+int sub;
+
+int K=0;
+int upd(int i, int k){
+
+	int x;
+
+	i = B.lower(i+1);
+	x = A[i];
+	B.upd(i,-1);
+
+
+	if(sub) return ins2(x,k);
+//	assert(k == K);
+//	++K;
+	return ins(-x);
+}
+
+int Q;
+
+
+int main(){
+	int i;
+
+	scanf("%d%d",&N,&Q);
+
+	for(i = 0; i < N; ++i) scanf("%d",&A[i]);
+
+	int n,k;
+
+	B.init(N);
+
+	root = mx;
+	int ct = 0;
+
+	sub = (N <= 2000);
+
+	while(Q--){
+		scanf("%d%d%d",&i,&n,&k);
+		--i,--k,--n;
+		n = n-i+1;
+		if(!sub) assert(k == K);
+		K += n;
+		while(n--){
+			ct += upd(i,k++);
+		}
+		printf("%d\n",ct);
+	}
+
+	return 0;
+}

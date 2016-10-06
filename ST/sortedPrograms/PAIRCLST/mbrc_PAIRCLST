@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 4e5 + 7;
+const int inf = 1e9 + 6;
+
+int fac[maxn];
+set<int> V;
+int dist[maxn];
+set<pii> Q;
+vector<pii> G[maxn];
+tuple<int,int,int> E[maxn];
+
+int main() {
+	int n,m,k; s(n);s(m);s(k); V.clear();
+
+	rep(i,1,k) {
+		int x; s(x); V.insert(x);
+	}
+
+	rep(i,1,n) {
+		fac[i] = -1; dist[i] = inf;
+		if (V.count(i) > 0) {
+			fac[i] = i; dist[i] = 0; Q.insert(mp(0,i));
+		}
+	}
+
+	rep(i,1,m) {
+		int x,y,z; s(x); s(y); s(z);
+		G[x].pb(mp(y,z)); G[y].pb(mp(x,z));
+		E[i] = mt(x,y,z);
+	}
+
+	while (Q.size() > 0) {
+		int d = Q.begin()->first, x=Q.begin()->second; Q.erase(Q.begin());
+		if (d > dist[x]) continue;
+		for (pii p : G[x]) {
+			int y = p.first, z = p.second;
+			if (dist[y] > dist[x] + z) {
+				Q.erase(mp(dist[y],y));
+				dist[y] = dist[x] + z;
+				fac[y] = fac[x];
+				Q.insert(mp(dist[y],y));
+			}
+		}
+	}	
+
+	/*rep(i,1,n) {
+		cout<<i<<" : "<<dist[i]<<endl;
+	}*/
+
+	int ans = inf;
+
+	rep(i,1,m) {
+		int x,y,z; tie(x,y,z) = E[i];
+		if (fac[x] != fac[y]) {
+			ans = MIN(ans,dist[x] + z + dist[y]);
+		}
+	}
+
+	pr(ans); endc;
+}

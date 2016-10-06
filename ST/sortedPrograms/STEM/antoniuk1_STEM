@@ -1,0 +1,57 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/point_xy.hpp>
+//#include <boost/geometry/geometries/polygon.hpp>
+//#include <boost/foreach.hpp>
+
+using namespace std;
+
+int n;
+string s[111];
+
+bool good(string ss) {
+    for(int i = 0; i < n; ++i)
+        if (s[i].find(ss) == string::npos)
+            return 0;
+    return 1;
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    int t;
+    cin >> t;
+    while (t --> 0) {
+        cin >> n;
+        for(int i = 0; i < n; ++i)
+            cin >> s[i];
+        
+        string ans = "";
+        for(int i = 0; i < s[0].length(); ++i)
+            for(int j = 1; i+j <= s[0].length(); ++j)
+            if (good(s[0].substr(i, j))) {
+                if (ans == "" || ans.size() < s[0].substr(i, j).size() || (ans > s[0].substr(i, j) && ans.size() == s[0].substr(i, j).size()))
+                    ans = s[0].substr(i, j);
+            }
+        
+        cout << ans << "\n";
+    }
+    return 0;
+}

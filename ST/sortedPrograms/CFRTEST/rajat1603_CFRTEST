@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+const int N = 101;
+int t , n;
+bool arr[N];
+int main(){
+    t = scan();
+    while(t--){
+        n = scan();
+        memset(arr,0,sizeof(bool)*N);
+        int ans = 0;
+        while(n--){
+            int temp = scan();
+            if(!arr[temp]){
+                ans++;
+            }
+            arr[temp] = 1;
+        }
+        printf("%d\n",ans);
+    }
+}

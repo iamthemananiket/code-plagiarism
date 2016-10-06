@@ -1,0 +1,60 @@
+//Program: lckyst
+//Author: gary
+//Date: 03/07/2015
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAXN = ;
+
+int num(ll x, int y)
+{
+    int r = 0;
+    while(x % y == 0)
+    {
+        x /= y;
+        r ++;
+    }
+    return r;
+}
+
+int main()
+{
+    int N;
+    scanf("%d", &N);
+    for(int i = 0; i < N; i++)
+    {
+        ll x, y;
+        scanf("%lld", &x);
+        y = num(x, 5) - num(x, 2);
+        if(y > 0)
+        {
+            y = (y + 1) / 2;
+            for(int j = 0; j < y; j++)
+                x *= 4;
+        }
+        printf("%lld\n", x);
+    }
+
+    return 0;
+}

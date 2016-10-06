@@ -1,0 +1,45 @@
+// Na2a
+
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <iomanip>
+
+#define F first
+#define S second
+
+#define mp make_pair
+#define pb push_back
+
+#define llong long long
+
+using namespace std;
+
+const int MXN = (int) 1e2 + 7;
+const int INF = (int) 1e7 + 7;
+
+int n, m;
+int a[MXN][MXN];
+
+llong ans[MXN];
+
+int main() {
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+            scanf("%d", &a[i][j]);
+
+    ans[0] = 1;
+    for (int i = 1; i <= m; i++) {
+        for (int cur = 1; cur <= n; cur++) {
+            llong add = ans[i - 1] * a[cur][i];
+            ans[i] = (ans[i] + add) % INF;
+            if (ans[i] < 0) ans[i] += INF;
+        }
+    }
+    cout << ans[m];
+    return 0;
+}

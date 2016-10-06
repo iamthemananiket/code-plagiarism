@@ -1,0 +1,72 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v, w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+int INF = INT_MAX / 2;
+
+int pow_mod(ll x, ll n, int m) {
+	ll res = 1;
+	for (; n > 0; n >>= 1) {
+		if (n & 1) res = (res * x) % m;
+		x = (x * x) % m;
+	}
+	return res;
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N, M, Q;
+		scanf("%d%d%d", &N, &M, &Q);
+		vector<ll> a(N / 2 + 1);
+		a[1] = 1 % M;
+		for (int i = 2; i <= N / 2; i++)
+			a[i] = a[i - 1] * pow_mod(i, i - 1, M) % M;
+		vector<ll> b(N / 2 + 1);
+		b[1] = 1 % M;
+		for (int i = 2; i <= N / 2; i++)
+			b[i] = b[i - 1] * pow_mod(N - i + 2, i - 1, M) % M;
+		vector<ll> c(N / 2 + 1);
+		c[N / 2] = (N % 2 ? (ll)(N / 2 + 1) * (N / 2 + 2) : N / 2 + 1) % M;
+		for (int i = N / 2 - 1; i >= 1; i--) {
+			c[i] = c[i + 1] * (i + 1) % M;
+			c[i] = c[i] * (N - i + 1) % M;
+		}
+		while (Q--) {
+			int r; scanf("%d", &r);
+			if (r > N / 2) r = N - r;
+			ll ans = 1 % M;
+			ans = ans * a[r] % M;
+			ans = ans * b[r] % M;
+			ans = ans * pow_mod(c[r], r, M) % M;
+			printf("%d\n", ans);
+		}
+	}
+}

@@ -1,0 +1,32 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    
+    cin.sync_with_stdio( false );
+    cin.tie( 0 );
+    
+    int test;
+    cin >> test;
+    while ( test-- ) {
+        string str;
+        cin >> str;
+        bool err = false;
+        for ( int i = 0, j = str.size() - 1 ; i <= j ; ++i, --j ) {
+            if ( str[i] == '.' and str[j] == '.' ) {
+                str[i] = str[j] = 'a';
+            } else if ( str[i] == '.' ) {
+                str[i] = str[j];
+            } else if ( str[j] == '.' ) {
+                str[j] = str[i];
+            } else if ( str[i] != str[j] ) {
+                err = true;
+            }
+        }
+        cout << ( err ? "-1" : str ) << "\n";
+    }
+    
+	return 0;
+}

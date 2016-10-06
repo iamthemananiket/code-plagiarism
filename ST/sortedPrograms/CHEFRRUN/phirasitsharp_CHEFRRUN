@@ -1,0 +1,59 @@
+#include <algorithm>
+#include <iostream>
+
+const int N = 100010;
+
+int A[ N ];
+int pass[ N ], inPath[ N ];
+int n;
+
+int ans = 0;
+
+int dfs( int x ) {
+
+	if ( pass[x] ) {
+		return ( inPath[ x ] ? x : -1 );
+	}
+
+	pass[ x ] = 1;
+	inPath[ x ] = 1;
+
+	int r = dfs( ( x + A[x] + 1 ) % n );
+	if ( r != -1 ) {
+		ans++;
+	}
+
+	inPath[ x ] = 0;
+
+	return ( r == x ? -1 : r );
+}
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	int test;
+	std::cin >> test;
+
+	while ( test-- ) {
+		
+		std::cin >> n;
+
+		for ( int i = 0 ; i < n ; ++i ) {
+			std::cin >> A[i];
+		}
+
+		std::fill( pass, pass + n, 0 );
+
+		ans = 0;
+		for ( int i = 0 ; i < n ; ++i ) {
+			if ( !pass[i] ) {
+				dfs( i );
+			}
+		}
+
+		std::cout << ans << "\n";
+	}
+
+	return 0;
+}

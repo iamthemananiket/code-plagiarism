@@ -1,0 +1,216 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX_N = 1024;
+
+int n, m, lg_n;
+int deg[MAX_N];
+int id[MAX_N];
+int d[MAX_N];
+bool g[MAX_N][MAX_N];
+vector<int> us;
+
+bool bfs() {
+  memset(d, -1, sizeof(d));
+  queue<int> q;
+  d[0] = 0;
+  q.push(0);
+  while (!q.empty()) {
+    int v = q.front();
+    if (d[v] >= 4) us.push_back(v);
+    q.pop();
+    for (int u = 0; u < n; u++) {
+      if (g[v][u] && d[u] == -1) {
+        d[u] = d[v] + 2;
+        q.push(u);
+      }
+    }
+  }
+  for (int v = 0; v < n; v++) {
+    if (d[v] == -1) return false;
+  }
+  return true;
+}
+
+bool solve(int v0, int v3, int v5, int v6) {
+  if (v0 == -1 || v3 == -1 || v5 == -1 || v6 == -1) {
+    return false;
+  }
+  memset(id, -1, sizeof(id));
+  id[v0] = 0;
+  id[v3] = 3;
+  id[v5] = 5;
+  id[v6] = 6;
+  vector<int> vs;
+  int p = 1, q = 2;
+  vs.push_back(v0);
+  vs.push_back(v3);
+  vs.push_back(v5);
+  vs.push_back(v6);
+  int x = 8, w = -1, step = 1;
+  while (x <= n) {
+    int u = -1;
+    for (int v = 0; v < n; v++) {
+      if (id[v] == -1 && g[v0][v] && g[vs[q]][v] && g[vs[q + 1]][v]) {
+        u = v;
+        break;
+      }
+    }
+    if (u == -1) {
+      return false;
+    }
+    id[u] = x | (x >> 1);
+    for (int i = 0; i <= q - p; i++) {
+      int u1 = (i == q - p) ? (p + i - 1) : (p + i);
+      int u2 = q + i;
+      int w = -1;
+      for (int v = 0; v < n; v++) {
+        if (id[v] == -1 && g[v0][v] && g[u][v] && g[vs[u1]][v] && g[vs[u2]][v]) {
+          w = v;
+          break;
+        }
+      }
+      if (w == -1) {
+        return false;
+      }
+      id[w] = x | (1 << i);
+      vs.push_back(w);
+    }
+    vs.push_back(u);
+    p += step;
+    q += step + 1;
+    x <<= 1;
+    step++;
+  }
+  for (int u : us) {
+    id[u] = 0;
+    for (int v = 0; v < n; v++) {
+      if (g[u][v] && d[v] == d[u] - 2) {
+        id[u] |= id[v];
+      }
+    }
+    if (__builtin_popcount(id[u]) != d[u]) {
+      return false;
+    }
+  }
+  for (int u = 0; u < n; u++) {
+    for (int v = 0; v < n; v++) {
+      if (g[u][v] && __builtin_popcount(id[v] ^ id[u]) != 2) {
+        return false;
+      }
+      if (!g[u][v] && __builtin_popcount(id[v] ^ id[u]) == 2) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+int main() {
+  int T;
+  scanf("%d", &T);
+  while (T--) {
+    memset(g, 0, sizeof(g));
+    memset(deg, 0, sizeof(deg));
+    memset(id, -1, sizeof(id));
+    us.clear();
+    scanf("%d%d", &n, &m);
+    for (int i = 0; i < m; i++) {
+      int u, v;
+      cin >> u >> v;
+      u--, v--;
+      if (!g[u][v]) {
+        g[u][v] = g[v][u] = true;
+        deg[u]++;
+        deg[v]++;
+      }
+    }
+    if (n == 1 && m == 0) {
+      puts("YES");
+      continue;
+    }
+    bool ok = true;
+    if ((n & (n - 1)) != 0) {
+      puts("NO");
+      continue;
+    }
+    lg_n = 0;
+    while((1 << lg_n) != n) lg_n++;
+    for (int v = 0; v < n; v++) {
+      if (deg[v] != lg_n * (lg_n + 1) / 2) {
+        ok = false;
+        break;
+      }
+    }
+    if (!ok) {
+      puts("NO");
+      continue;      
+    }
+    if (!bfs()) {
+      puts("NO");
+      continue;
+    }
+    int v0 = 0;
+    int v3 = -1;
+    int v5 = -1;
+    int v6 = -1;
+    for (int v = 0; v < n; v++) {
+      if (g[v0][v]) {
+        v3 = v;
+        break;
+      }
+    }
+    if (v3 == -1) {
+      puts("NO");
+      continue;      
+    }    
+    if (n == 2) {
+      puts("YES");
+      continue;
+    }
+    for (int v = 0; v < n; v++) {
+      if (g[v0][v] && g[v3][v]) {
+        v5 = v;
+        break;
+      }
+    }
+    ok = false;
+    for (int v = 0; v < n; v++) {
+      if (g[v0][v] && g[v3][v] && g[v5][v]) {
+        if (solve(v0, v3, v5, v)) {
+          ok = true;
+          break;
+        }
+      }
+    }
+    puts(ok ? "YES" : "NO");
+  }
+}

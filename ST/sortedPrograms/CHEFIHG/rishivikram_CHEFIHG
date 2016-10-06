@@ -1,0 +1,115 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+
+ll POWER[65];
+ll power(ll a, ll b) {ll ret=1;while(b) {if(b&1) ret*=a;a*=a;if(ret>=MOD) ret%=MOD;if(a>=MOD) a%=MOD;b>>=1;}return ret;}
+ll inv(ll x) {return power(x,MOD-2);}
+
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+
+const int MAXN = 25;
+char str[MAXN][MAXN];
+int glo=0;
+const int MAXN2 = 1e5+5;
+char ans[MAXN2];
+char func[MAXN2];
+char to[MAXN][MAXN];
+bool vis[MAXN][MAXN];
+bool dont;
+pii findPos(int x, int y) {
+	for(int i=0;i<glo;i++) {
+		if(str[x][y]=='C') dont=true;
+		if(ans[i]=='R' and str[x][y+1]!='*') y++;
+		else if(ans[i]=='L' and str[x][y-1]!='*') y--;
+		else if(ans[i]=='U' and str[x-1][y]!='*') x--;
+		else if(ans[i]=='D' and str[x+1][y]!='*') x++;
+	}
+	return mp(x,y);
+}
+void f(int fx, int fy, int tx, int ty) {
+	memset(vis,false,sizeof(vis));
+	queue<pii> q;
+	q.push(mp(fx,fy));
+	vis[fx][fy]=true;
+	int cfx=fx,cfy=fy;
+	while(!q.empty()) {
+		pii tp = q.front();
+		q.pop();
+		fx=tp.ff;
+		fy=tp.ss;
+		if(vis[tx][ty]) break;
+		if(!vis[fx+1][fy] and str[fx+1][fy]!='*') {
+			q.push(mp(fx+1,fy));
+			vis[fx+1][fy]=true;
+			to[fx+1][fy]='D';
+			// cout<<fx+1<<" "<<fy<<" "<<to[fx+1][fy]<<endl;
+		}
+		if(!vis[fx-1][fy] and str[fx-1][fy]!='*') {
+			q.push(mp(fx-1,fy));
+			vis[fx-1][fy]=true;
+			to[fx-1][fy]='U';
+			// cout<<fx-1<<" "<<fy<<" "<<to[fx-1][fy]<<endl;
+		}
+		if(!vis[fx][fy+1] and str[fx][fy+1]!='*') {
+			q.push(mp(fx,fy+1));
+			vis[fx][fy+1]=true;
+			to[fx][fy+1]='R';
+			// cout<<fx<<" "<<fy+1<<" "<<to[fx][fy+1]<<endl;
+		}
+		if(!vis[fx][fy-1] and str[fx][fy-1]!='*') {
+			q.push(mp(fx,fy-1));
+			vis[fx][fy-1]=true;
+			to[fx][fy-1]='L';
+			// cout<<fx<<" "<<fy-1<<" "<<to[fx][fy-1]<<endl;
+		}
+	}
+	int c=0;
+	while(tx!=cfx or ty!=cfy) {
+		if(to[tx][ty]=='R') func[c++]='R',ty--;
+		else if(to[tx][ty]=='L') func[c++]='L',ty++;
+		else if(to[tx][ty]=='U') func[c++]='U',tx++;
+		else if(to[tx][ty]=='D') func[c++]='D',tx--;
+	}
+	for(int i=c-1;i>=0;i--) ans[glo++]=func[i];
+}
+int main() {
+//	freopen("TASK.in","r",stdin);	
+//	freopen("TASK.out","w",stdout);
+	precompute();
+	int n,m;
+	cin>>n>>m;
+	int idx,idy;
+	for(int i=1;i<=n;i++) {
+		scanf("%s",str[i]+1);
+		for(int j=1;j<=m;j++) if(str[i][j]=='C') idx=i,idy=j;
+	}
+	for(int i=1;i<=n;i++) {
+		for(int j=1;j<=m;j++) {
+			if(str[i][j]=='*' or str[i][j]=='C') continue;
+			dont=false;
+			pii pos = findPos(i,j);
+			if(dont) continue;
+			f(pos.ff,pos.ss,idx,idy);
+		}
+	}
+	for(int i=0;i<glo;i++) printf("%c",ans[i]);
+	printf("\n");
+	return 0;
+}

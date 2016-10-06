@@ -1,0 +1,48 @@
+#include<bits/stdc++.h>
+using namespace std;
+double areaOfPolygon(long long int ar1[],long long int ar2[],long long int numPoints) 
+{ 
+  long long int i;
+  double area = 0;        
+  long long int j = numPoints-1; 
+
+  for (i=0; i<numPoints; i++)
+    { area += (ar1[j]+ar1[i]) * (ar2[j]-ar2[i]); 
+      j = i;  
+	}
+  return area/2;
+}
+int main()
+{
+	long long int t,ans,j,n,i,x;
+	double ar;
+	cin>>t;
+	while(t--)
+	{
+		map<double , long long int> m;
+		map<double , long long int>::iterator mit;
+		cin>>n;
+		long long int ans[n];
+		for(i=0;i<n;i++)
+		{
+			cin>>x;
+			long long int ar1[x],ar2[x];
+			for(j=0;j<x;j++)
+			{
+				scanf("%lld",&ar1[j]);
+				scanf("%lld",&ar2[j]);
+			}
+			ar=areaOfPolygon(ar1,ar2,x);
+			if(ar<0)
+				ar*=-1;
+			m[ar]=i;
+		}
+		long long int copy=0;
+		for(mit=m.begin();mit!=m.end();mit++)
+			ans[mit->second]=(copy++);
+		for(i=0;i<n;i++)
+			cout<<ans[i]<<" ";
+		cout<<endl;
+	}
+	return 0;
+}

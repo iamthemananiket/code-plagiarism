@@ -1,0 +1,62 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+int main() {
+	const int X = 12 * 60;
+	vector<vi> ans(X);
+	rep(h, 12) rep(m, 60) {
+		int a = h * 60 + m, b = m * 12;
+		int d = min(abs(a - b), min(abs(a + X - b), abs(b + X - a)));
+		ans[d].push_back(h * 60 + m);
+	}
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		double A;
+		scanf("%lf", &A);
+		int a = (int)(A / 360 * X + .5);
+		vi v;
+		rer(b, a - 5, a + 5) if(abs(A - b * 1. / X * 360) <= 1. / 120 + 1e-7) {
+			each(i, ans[b])
+				v.push_back(*i);
+		}
+		sort(all(v));
+		each(i, v)
+			printf("%02d:%02d\n", *i / 60, *i % 60);
+	}
+	return 0;
+}

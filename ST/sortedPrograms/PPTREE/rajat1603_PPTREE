@@ -1,0 +1,108 @@
+#include "bits/stdc++.h"
+#define mp make_pair
+#define pb push_back
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+const int N = 1e5 + 1;
+const int LN = 29;
+int t , n;
+vector< pair < int , int > > v[N];
+int xorsum[N];
+void dfs(int node , int parent){
+    int x = v[node].size();
+    while(x--){
+        int next = v[node][x].first;
+        int weight = v[node][x].second;
+        if(next != parent){
+            xorsum[next] = xorsum[node] xor weight;
+            dfs(next , node);
+        }
+    }
+}
+#define left fucking_left
+#define right fucking_right
+int left[N * LN];//why doesnt c++ allow me to name variables as left or right
+int right[N * LN];
+int cur;
+void insert(int val){
+    int node = 0;
+    for(int i = LN ; i >= 0 ; --i){
+        if(val & (1 << i)){
+            if(right[node] == -1){
+                right[node] = cur++;
+                right[right[node]] = -1;
+                left[right[node]] = -1;
+            }
+            node = right[node];
+        }
+        else{
+            if(left[node] == -1){
+                left[node] = cur++;
+                left[left[node]] = -1;
+                right[left[node]] = -1;
+            }
+            node = left[node];
+        }
+    }
+}
+int query(int val){
+    int res = 0;
+    int node = 0;
+    for(int i = LN ; i >= 0 ; --i){
+        if(val & (1 << i)){
+            if(left[node] == -1){
+                node = right[node];
+            }
+            else{
+                node = left[node];
+                res |= 1 << i;
+            }
+        }
+        else{
+            if(right[node] == -1){
+                node = left[node];
+            }
+            else{
+                node = right[node];
+                res |= 1 << i;
+            }
+        }
+    }
+    return res;
+}
+int main(){
+    t = scan();
+    while(t--){
+        n = scan();
+        for(int i = 1 ; i <= n ; ++i){
+            v[i].clear();
+        }
+        xorsum[1] = 0;
+        for(int i = 1 ; i < n ; ++i){
+            int a = scan() , b = scan() , c = scan();
+            v[a].pb(mp(b,c));
+            v[b].pb(mp(a,c));
+        }
+        dfs(1 , 0);
+        left[0] = -1;
+        right[0] = -1;
+        cur = 1;
+        int ans = 0;
+        for(int i = 1 ; i <= n ; ++i){
+            insert(xorsum[i]);
+            ans = max(ans,query(xorsum[i]));
+        }
+        printf("%d\n",ans);
+    }
+}

@@ -1,0 +1,189 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+ 
+typedef long long LL;
+typedef vector<int> VI;
+ 
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+ 
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+ 
+LL powMod(LL x, LL y, LL m){
+    LL r = 1;
+    for (; y; y>>=1) {
+	if (y&1) r = r * x % m;
+	x = x * x % m;
+    }
+    return r;
+}
+ 
+// MOD == 3*5*(1<<27)+1; ROOT has order (1<<27);
+const LL MOD = 2013265921LL, ROOT = 440564289, LEN = 27;
+// MOD == 7*17*(1<<23)+1; ROOT has order (1<<23);
+// const LL MOD = 998244353, ROOT = 31, LEN = 23;
+ 
+void ntt(vector<int> &a, bool inv=false){
+    static vector<LL> e, er;
+    int n = a.size(); // n == 1<<k && k < LEN
+    if(n != (int)e.size()) {
+	e.resize(n); er.resize(n);
+	e[0] = 1; e[1] = powMod(ROOT, (1<<LEN)/n, MOD);
+	er[0] = 1; er[1] = powMod(e[1], MOD-2, MOD);
+	for (int i=2; i<n; i++) e[i] = e[i-1] * e[1] % MOD;
+	for (int i=2; i<n; i++) er[i] = er[i-1] * er[1] % MOD;
+    }
+    if (inv) swap(e, er);
+    for (int m=n, th=1; m>=2; m>>=1, th*=2) {
+	int mh = m>>1;
+	for (int i=0; i<mh; i++) {
+	    for (int j=i; j<n; j+=m) {
+		int k = j + mh;
+		LL x = (LL)a[j] + a[k], y = a[j] - a[k];
+		a[j] = (x>=MOD?x-MOD:x);
+		a[k] = e[i*th] * (y<0?y+MOD:y) % MOD;
+	    }
+	}
+    }
+    for (int i=0, j=1; j<n-1; j++) {
+	for (int k=n/2; k>(i^=k); k/=2) ;
+	if (j<i) swap(a[i], a[j]);
+    }
+    if(inv) {
+	swap(e, er);
+	LL d = powMod(n, MOD-2, MOD);
+	for (int i=0; i<n; i++) a[i] = a[i] * d % MOD;
+    }
+}
+
+const int M = 100003;
+void mulPolynomial(VI &p, VI &q, VI &r) {
+    int n = p.size()/2;
+    r.assign(n*2, 0);
+    REP (i, n) REP (j, n) {
+	r[i+j] = (r[i+j] + (LL)p[i] * q[j]) % M;
+    }
+    // ntt(p); ntt(q);
+    // for (int i=0; i<(int)p.size(); i++) r[i]=(LL)p[i]*q[i]%MOD;
+    // ntt(r, true);
+};
+ 
+const int MAX = 1000000;
+LL inv[MAX+1], fact[MAX+1], fact_inv[MAX+1];
+ 
+// const int SZ = 6001, HF = 3001;
+// int tbl[SZ+10][HF+10];
+void init() {
+    LL MOD = M;
+    inv[1] = 1;
+    for (int i=2; i<=MAX; i++) inv[i] = inv[M%i] * (M-M/i) % M;
+ 
+    fact[0] = fact_inv[0] = 1;
+    for (int i=1; i<=MAX; i++) {
+	fact[i] = fact[i-1] * i % M;
+	fact_inv[i] = fact_inv[i-1] * inv[i] % M;
+    }
+ 
+    // tbl[0][0] = 1;
+    // for (int i=1; i<SZ; i++) {
+    // 	tbl[i][0] = 1;
+    // 	for (int j=1; j<min(i+1, HF); j++) {
+    // 	    tbl[i][j] = tbl[i-1][j-1] + tbl[i-1][j];
+    // 	    if (tbl[i][j] >= M) tbl[i][j] -= M;
+    // 	}
+    // }
+    // for (int i=1; i<SZ; i++) {
+    // 	for (int j=1; j<min(i+1, HF)+1; j++) {
+    // 	    tbl[i][j] += tbl[i][j-1];
+    // 	    if (tbl[i][j] >= M) tbl[i][j] -= M;
+    // 	}
+    // }
+}
+ 
+LL nCk(int n, int k) {
+//    amin(k, n-k);
+//    if (k == 0) return 1;
+//    return tbl[n][k] - tbl[n][k-1];
+    return fact[n] * fact_inv[k] % M * fact_inv[n-k] % M;
+}
+LL nRk(int n, int k) {
+//    if (k <= 0) return 0;
+//    if (k > n) return powMod(2, n, M);
+//    if (k > n-k) {
+//	int r = powMod(2, n, M) - tbl[n][n-k-1];
+//	if (r < 0) r += M;
+//	return r;
+//    } else {
+//	return tbl[n][k-1];
+//    }
+//    LL r = 0;
+//    REP (i, min(k, n+1)) r += nCk(n, i);
+//
+//    return r % M;
+}
+ 
+int N, K;
+ 
+const int L = 11;
+VI D[1<<(L+1)];
+ 
+void MAIN() {
+    scanf("%d%d", &N, &K);
+ 
+    REP (i, 1<<L) {
+	int k = i + (1<<L);
+	D[k].assign(4, 0);
+	D[k][0] = 1;
+	if (i == 0) {
+	    D[k][1] = 9;
+	} else if (i < N) {
+	    REP (z, 5) {
+		LL B = nCk(4, z) * powMod(3, z, M) % M;
+		if (z >= i+1) {
+		    D[k][1] = (D[k][1] + powMod(2, (i-1)*6, M) * B) % M;
+		} else {
+		    LL t = 0;
+		    for (int j=i+1-z; j<=(i-1)*6; j++) {
+			t += nCk((i-1)*6, j);
+			if (t >= M) t -= M;
+		    }
+		    D[k][1] = (D[k][1] + t * B) % M;
+//		    LL lo = nRk((i-1)*6, i+1-z);
+//		    LL hi = powMod(2, (i-1)*6, M);
+//		    D[k][1] = (D[k][1] + (hi - lo) * B) % M;
+		}
+	    }
+	} else {
+	    D[k][0] = 1;
+	}
+    }
+    for (int i=1<<L; --i; ) {
+	int s = D[2*i].size();
+	D[i].assign(s, 0);
+	mulPolynomial(D[2*i], D[2*i+1], D[i]);
+	REP (j, s) {
+	    D[i][j] %= M;
+	    D[i].push_back(0);
+	}
+    }
+ 
+    int ans = 0;
+    for (int i=K; i<(int)D[1].size(); i++) ans = (ans + D[1][i]) % M;
+    // for (int i=0; i<=N; i++) eprintf("%d ", D[1][i]);
+    printf("%d\n", ans);
+}
+ 
+int main() {
+    init();
+    int T;
+    scanf("%d", &T);
+    REP (_, T) MAIN();
+    return 0;
+}

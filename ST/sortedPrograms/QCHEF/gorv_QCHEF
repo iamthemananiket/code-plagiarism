@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	int N,M,K;
+	cin>>N>>M>>K;
+	vector<int> arr(N);
+	for(int i=0;i<N;i++){
+		cin>>arr[i];
+	}
+	while(K--){
+		int L,R;
+		cin>>L>>R;
+		L--;
+		R--;
+		int maxAns=0;
+		for(int i=L;i<=R;i++){
+			for(int j=L+1;j<=R;j++){
+				if(arr[i]==arr[j]){
+					if(abs(i-j)>maxAns){
+						maxAns=abs(i-j);
+					}
+				}
+			}
+		}
+		cout<<maxAns<<"\n";
+	}
+}

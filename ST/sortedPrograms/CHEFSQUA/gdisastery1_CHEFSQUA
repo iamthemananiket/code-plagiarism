@@ -1,0 +1,91 @@
+//Program: chefsqua
+//Author: gary
+//Date: 04/10/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+
+int N;
+vector<pii> v;
+
+bool contains(int x, int y){
+  return binary_search(v.begin(), v.end(), mp(x, y));
+}
+
+void rotateLeft(int& x, int& y, int mx, int my){
+  x -= mx, y -= my;
+  int t = x;
+  x = -y;
+  y = t;
+  x += mx, y += my;
+}
+
+void rotateRight(int& x, int& y, int mx, int my){
+  x -= mx, y -= my;
+  int t = x;
+  x = y;
+  y = -t;
+  x += mx, y += my;
+}
+
+int solve(){
+  if(N == 0) return 4;
+  if(N == 1) return 3;
+  int res = 2;
+  sort(v.begin(), v.end());
+  for(int i = 0; i < N; i++)
+    for(int j = 0; j < N; j++){
+      if(i == j) continue;
+      int dx = v[j].fi - v[i].fi, dy = v[j].se - v[i].se;
+      if(dx % 2 == 0 && dy % 2 == 0) {
+	int mx = v[i].fi + dx / 2;
+	int my = v[i].se + dy / 2;
+	int need = 2;
+	int x1 = v[j].fi, y1 = v[j].se;
+	int x2 = v[j].fi, y2 = v[j].se;
+	rotateLeft(x1, y1, mx, my);
+	rotateRight(x2, y2, mx, my);
+	need -= contains(x1, y1);
+	need -= contains(x2, y2);
+	res = min(res, need);
+      }
+      
+      int x1 = v[j].fi, y1 = v[j].se;
+      rotateLeft(x1, y1, v[i].fi, v[i].se);
+      if(contains(x1, y1))
+	res = min(res, 1);
+      rotateRight(x1, y1, v[i].fi, v[i].se);
+      rotateRight(x1, y1, v[i].fi, v[i].se);
+      if(contains(x1, y1))
+	res = min(res, 1);
+    }
+  return res;
+}
+
+int main(){
+  while(scanf("%d", &N) != EOF){
+    v.assign(N, mp(0,0));
+    for(int i = 0; i < N; i++)
+      scanf("%d%d", &v[i].fi, &v[i].se);
+    printf("%d\n", solve());
+  }
+  return 0;
+}

@@ -1,0 +1,198 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+vector<int> primes;
+vector<int> smallestPrimeFactor;
+void linearSieve(int n) {
+	if(n < 1) n = 1;
+	if((int)smallestPrimeFactor.size() >= n + 1) return;
+	int primePiBound = n < 20 ? n - 1 : (int)(n / (log(n * 1.) - 2) + 2);
+	primes.assign(primePiBound + 1, numeric_limits<int>::max());
+	int P = 0;
+	smallestPrimeFactor.assign(n + 1, 0);
+	smallestPrimeFactor[1] = 1;
+	int n2 = n / 2, n3 = n / 3, n5 = n / 5;
+	if(n >= 2)
+		primes[P ++] = 2;
+	if(n >= 3)
+		primes[P ++] = 3;
+	for(int q = 2; q <= n; q += 2)
+		smallestPrimeFactor[q] = 2;
+	for(int q = 3; q <= n; q += 6)
+		smallestPrimeFactor[q] = 3;
+	for(int q = 5; q <= n5; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+		int bound = smallestPrimeFactor[q];
+		for(int i = 2; ; ++ i) {
+			int p = primes[i];
+			if(p > bound) break;
+			int pq = p * q;
+			if(pq > n) break;
+			smallestPrimeFactor[pq] = p;
+		}
+	}
+	for(int q = (n5 + 1) | 1; q <= n; q += 2) {
+		if(smallestPrimeFactor[q] == 0)
+			primes[P ++] = smallestPrimeFactor[q] = q;
+	}
+	primes.resize(P);
+}
+
+int exgcd(int a, int b, int &g) {
+	int u = 1, v = 0;
+	while(b) {
+		int t = a / b;
+		a -= t * b; swap(a, b);
+		u -= t * v; swap(u, v);
+	}
+	g = a;
+	return u;
+}
+
+long long crt(long long a1, long long n1, int a2, int n2, long long &resn) {
+	int t, g;
+	t = exgcd(n1 % n2, n2, g);
+	if((a1 - a2) % g != 0) return -1;
+	int n2_g = n2 / g;
+	int d = (a2 - a1) / g % n2_g;
+	int h = (long long)d * t % n2_g;
+	if(h < 0) h += n2_g;
+	long long n = n1 * n2_g;
+	long long a = a1 + n1 * h;
+	resn = n;
+	return a;
+}
+
+typedef int FactorsInt;
+typedef vector<pair<FactorsInt, int> > Factors;
+void primeFactors(FactorsInt x, Factors &out_v) {
+	out_v.clear();
+	for(int p : primes) {
+		if((FactorsInt)p * p > x) break;
+		if(x % p == 0) {
+			int t = 1;
+			x /= p;
+			while(x % p == 0) {
+				t ++;
+				x /= p;
+			}
+			out_v.push_back(make_pair(p, t));
+		}
+	}
+	if(x != 1)
+		out_v.push_back(make_pair(x, 1));
+}
+
+int inverse(signed a, const int MOD) {
+	a %= MOD;
+	if(a < 0) a += MOD;
+	signed b = MOD, u = 1, v = 0;
+	while(b) {
+		signed t = a / b;
+		a -= t * b; swap(a, b);
+		u -= t * v; swap(u, v);
+	}
+	if(u < 0) u += MOD;
+	return u;
+}
+
+unsigned powmod(unsigned long long a, unsigned long long k, const unsigned MOD) {
+	a %= MOD;
+	unsigned long long r = MOD == 1 ? 0 : 1;
+	while(k) {
+		if(k & 1)
+			(r *= a) %= MOD;
+		(a *= a) %= MOD;
+		k >>= 1;
+	}
+	return (unsigned)r;
+}
+
+struct ModProd {
+	int remainder;
+	long long valuation;
+	ModProd() : remainder(1), valuation(0) {}
+	ModProd(int remainder, long long valuation) : remainder(remainder), valuation(valuation) {}
+	static ModProd multiply(ModProd x, ModProd y, int Mod) {
+		return ModProd((ll)x.remainder * y.remainder % Mod, x.valuation + y.valuation);
+	}
+	static ModProd divide(ModProd x, ModProd y, int Mod) {
+		int inv = inverse(y.remainder, Mod);
+		return ModProd((ll)x.remainder * inv % Mod, x.valuation - y.valuation);
+	}
+	static ModProd power(ModProd x, int y, int Mod) {
+		return ModProd(powmod(x.remainder, y, Mod), x.valuation * y);
+	}
+};
+
+
+struct CRTInfo {
+	int n1;
+	int n2;
+	int t;
+};
+
+int main() {
+	linearSieve(31622);
+	int T;
+	scanf("%d", &T);
+	for(int ii = 0; ii < T; ++ ii) {
+		int N; int M; int Q;
+		scanf("%d%d%d", &N, &M, &Q);
+		Factors fs;
+		primeFactors(M, fs);
+		vector<vector<ModProd>> table(fs.size(), vector<ModProd>(N + 1));
+
+		int prefixM = 1;
+		vector<CRTInfo> crt(fs.size());
+		rep(fi, fs.size()) {
+			int p = fs[fi].first, q = fs[fi].second;
+			int P = 1;
+			rep(k, q) P *= p;
+
+			vector<ModProd> &v = table[fi];
+			v[0] = ModProd();
+			for(int i = 1; i <= N; ++ i) {
+				int x = i, y = 0;
+				while(x % p == 0) x /= p, ++ y;
+				ModProd z = ModProd::power(ModProd(x, y), i, P);
+				v[i] = ModProd::multiply(v[i - 1], z, P);
+			}
+			int g;
+			int t = exgcd(prefixM % P, P, g);
+			assert(g == 1);
+			crt[fi] = CRTInfo{ prefixM, P, t };
+			prefixM *= P;
+		}
+		assert(prefixM == M);
+		rep(ii, Q) {
+			int r;
+			scanf("%d", &r);
+			int ans = 0;
+			rep(fi, fs.size()) {
+				int p = fs[fi].first, q = fs[fi].second;
+				int P = crt[fi].n2;
+				ModProd num = table[fi][N];
+				ModProd den = ModProd::multiply(table[fi][r], table[fi][N - r], P);
+				ModProd x = ModProd::divide(num, den, P);
+				int a = x.remainder;
+				int v = (int)min((ll)q, x.valuation);
+				rep(k, v)
+					a = (ll)a * p % P;
+				int h = (ll)(a - ans) * crt[fi].t % P;
+				if(h < 0) h += P;
+				ans += crt[fi].n1 * h;
+			}
+			printf("%d\n", ans);
+		}
+	}
+	return 0;
+}

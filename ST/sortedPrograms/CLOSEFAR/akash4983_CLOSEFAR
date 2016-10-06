@@ -1,0 +1,275 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int N = 35001;
+const int K = 16;
+
+map<int, int > M;
+map<int, int >::iterator it;
+int parent[N], dep[N];
+int tin[N], tout[N];
+vi g[N];
+int P[N][K+1];
+int MX[N][K+1];
+int MN[N][K+1];
+int n;
+int _tm;
+int A[N];
+
+void dfs(int c, int p, int d) {
+  parent[c] = p;
+  dep[c] = d;
+  tin[c] = ++_tm;
+  for(int i = 0; i < g[c].size(); i++) {
+    int u = g[c][i];
+    if(u != p) dfs(u, c, d+1);
+  }
+  tout[c] = ++_tm;
+}
+
+void init() {
+  memset(P, -1, sizeof(P));
+  for(int i = 1; i <= n; i++) {
+    P[i][0] = parent[i];
+    MX[i][0] = MN[i][0] = A[i];
+    if(parent[i] != -1) {
+      MX[i][0] = max(MX[i][0], A[parent[i]]);
+      MN[i][0] = min(MN[i][0], A[parent[i]]);
+    }
+  }
+
+  for(int j = 1; j <= K; j++) {
+    for(int i = 1; i <= n; i++) {
+      if(P[i][j-1] != -1) {
+        P[i][j] = P[P[i][j-1]][j-1];
+        MX[i][j] = max(MX[i][j-1], MX[P[i][j-1]][j-1]);
+        MN[i][j] = min(MN[i][j-1], MN[P[i][j-1]][j-1]);
+      }
+    }
+  }
+}
+
+int lca(int p, int q) {
+  if(dep[p] < dep[q]) {
+    swap(p,q);
+  }
+
+  for(int i = K; i >= 0; i--) {
+    if(dep[p] - (1<<i) >= dep[q]) {
+      p = P[p][i];
+    }
+  }
+
+  if(p == q) return p;
+
+  for(int i = K; i >= 0; i--) {
+    if(P[p][i] != -1 && P[p][i] != P[q][i]) {
+      p = P[p][i];
+      q = P[q][i];
+    }
+  }
+  return parent[p];
+}
+
+int mx(int p, int q) {
+  if(dep[p] < dep[q]) {
+    swap(p,q);
+  }
+
+  int res = 0;
+  for(int i = K; i >= 0; i--) {
+    if(dep[p] - (1<<i) >= dep[q]) {
+      res = max(res, MX[p][i]);
+      p = P[p][i];
+    }
+  }
+
+  if(p == q) return res;
+
+  for(int i = K; i >= 0; i--) {
+    if(P[p][i] != -1 && P[p][i] != P[q][i]) {
+      res = max(res, MX[p][i]);
+      res = max(res, MX[q][i]);
+      p = P[p][i];
+      q = P[q][i];
+    }
+  }
+  if(parent[p] != -1) return max(res, max(MX[p][0], MX[q][0]));
+  return res;
+}
+
+int mn(int p, int q) {
+  if(dep[p] < dep[q]) {
+    swap(p,q);
+  }
+
+  int res = 1e9+5;;
+  for(int i = K; i >= 0; i--) {
+    if(dep[p] - (1<<i) >= dep[q]) {
+      res = min(res, MN[p][i]);
+      p = P[p][i];
+    }
+  }
+
+  if(p == q) return res;
+
+  for(int i = K; i >= 0; i--) {
+    if(P[p][i] != -1 && P[p][i] != P[q][i]) {
+      res = min(res, MN[p][i]);
+      res = min(res, MN[q][i]);
+      p = P[p][i];
+      q = P[q][i];
+    }
+  }
+  if(parent[p] != -1) return min(res, min(MN[p][0], MN[q][0]));
+  return res;
+}
+
+vector<pair<pii, pii > > Q;
+string s;
+int first[N], ans[N], _prev[N];
+
+bool onPath(int id, int y) {
+  int a = Q[id].FF.FF;
+  int b = Q[id].FF.SS;
+  int c = Q[id].SS.FF;
+  if(y == c) return true;
+  int cnt = (tin[y] <= tin[a] && tout[y] >= tout[a]) + (tin[y] <= tin[b] && tout[y] >= tout[b]);
+  return cnt == 1;
+}
+
+vector<pii > tops;
+vi inp;
+
+LL tot(int x) {
+  int res = 0;
+  int j = 0;
+  rep(i,0,inp.size()) {
+    while(j < inp.size()) {
+      if(inp[j] - inp[i] > x) break;
+      j++;
+    }
+    res += j - i;
+  }
+  return res;
+}
+
+void pre() {
+  for(it = M.begin(); it != M.end(); it++) {
+    inp.push_back(it->FF);
+  }
+
+  int lo = 1, hi = 1000000000;
+  const int SZ = 500;
+  int res;
+  while(lo <= hi) {
+    int mi = (lo + hi) >> 1;
+    LL k = tot(mi);
+    if(k <= SZ) {
+      res = mi;
+      lo = mi + 1;
+    } else {
+      hi = mi - 1;
+    }
+  }
+
+  rep(i,0,inp.size()) {
+    for(int j = i + 1; j < inp.size() && inp[j] - inp[i] <= res; j++) {
+      tops.push_back(make_pair(M[inp[i]], M[inp[j]]));
+    }
+  }
+
+}
+
+int main() {
+  S(n);
+  rep(i,1,n+1) {
+    S(A[i]);
+    M[A[i]] = i;
+  }
+
+  pre();
+
+  rep(i,0,n-1) {
+    int u,v;
+    S2(u,v);
+    g[u].push_back(v);
+    g[v].push_back(u);
+  }
+
+  dfs(1, -1, 0);
+  init();
+
+
+  int q;
+  S(q);
+  vi v;
+  rep(i,0,q) {
+    cin >> s;
+    int x,y;
+    S2(x,y);
+    if(s == "C") {
+      Q.push_back(make_pair(make_pair(x,y), make_pair(lca(x,y),0)));
+      bool ok = false;
+      rep(j,0,tops.size()) {
+        if(onPath(i, tops[j].FF) && onPath(i, tops[j].SS)) {
+          ans[i] = min(ans[i], abs(A[tops[j].FF] - A[tops[j].SS]));
+          ok = true;
+        }
+      }
+      if(!ok) v.push_back(i);
+    } else {
+      Q.push_back(make_pair(make_pair(x,y), make_pair(lca(x,y),1)));
+      ans[i] = mx(x,y) - mn(x,y);
+      // printf("yaha %d %d\n",mx(x,y), mn(x,y));
+    }
+  }
+
+  for(it = M.begin(); it != M.end(); it++) {
+    int x = it->FF;
+    int y = it->SS;
+    rep(it,0,v.size()) {
+      int i = v[it];
+      if(onPath(i, y)) {
+        if(!first[i]) {
+          first[i] = x;
+          _prev[i] = -1e9;
+          if(!Q[i].SS.SS) {
+            ans[i] = 1e9;
+          }
+        }
+        if(Q[i].SS.SS) {
+          ans[i] = max(ans[i], x - first[i]);
+        } else {
+          ans[i] = min(ans[i], x - _prev[i]);
+        }
+        _prev[i] = x;
+      }
+    }
+  }
+  rep(i,0,Q.size()) P(ans[i]);
+  return 0;
+}

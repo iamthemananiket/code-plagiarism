@@ -1,0 +1,32 @@
+#include <cstdio>
+
+#define M 10005
+
+bool bf[M];
+int a[M];
+
+main() {
+    int T, n, m;
+    for (scanf("%d", &T); T --; ) {
+        scanf("%d %d", &n, &m);
+        int tot = 0;
+        for (int i = 1; i <= n; i ++) scanf("%d", a + i), tot += a[i];
+        if (m >= tot) {
+            puts("YES");
+            continue;
+        }
+        if (2 * m < tot) {
+            puts("NO");
+            continue;
+        }
+        for (int i = 0; i <= m; i ++) bf[i] = 0;
+        bf[0] = 1;
+        for (int i = 1; i <= n; i ++) {
+            for (int j = m - a[i]; j >= 0; j --) if (bf[j]) bf[j + a[i]] = 1;
+        }
+        int i;
+        for (i = 0; i <= m; i ++) if (bf[i] && tot - i <= m) break;
+        if (i <= m) puts("YES");
+        else puts("NO");
+    }
+}

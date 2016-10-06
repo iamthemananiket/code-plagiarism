@@ -1,0 +1,42 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+long long maxLcm(long long a,long long b,long long c)
+{
+	long long n=(a*b)/__gcd(a,b);
+	n=(n*c)/__gcd(n,c);
+	return n;
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	long long  n;
+	while(t--)
+	{
+		cin>>n;
+		if(n<=2)
+		 cout<<n<<endl;
+		else if(n==3)
+		  cout<<6<<endl;
+		else if(n==4)
+		 cout<<12<<endl;
+		else
+		{
+		  long long ans=0;
+		for(int i=n-4;i<=n;i++)
+		 {
+		 	for(int j=i;j<=n;j++)
+		 	 {
+		 	 	for(int k=j;k<=n;k++)
+		 	 	 {
+		 	 	 	ans=max(ans, maxLcm(i,j,k));
+				   }
+			  }
+		 }
+		 cout<<ans<<endl;
+	 	}
+		
+	}
+}

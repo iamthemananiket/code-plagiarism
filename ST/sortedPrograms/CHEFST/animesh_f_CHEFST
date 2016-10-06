@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+#define MP make_pair
+#define  F first
+#define  S second
+
+using namespace std;
+
+int T;
+
+int main(){
+		
+	cin.tie(0);
+	ios::sync_with_stdio(0);
+
+	cin >> T;
+
+	while(T--){
+
+		long long n1 , n2 , m;
+		
+		cin >> n1 >> n2 >> m;
+		
+		long long x = min(n1,n2);
+		
+		long long maxRem = ( m * (m+1) ) / 2;
+		maxRem = min( x , maxRem );
+		
+		long long res = (n1 + n2 - maxRem * 2 );
+		cout << res << endl;
+	}
+
+}

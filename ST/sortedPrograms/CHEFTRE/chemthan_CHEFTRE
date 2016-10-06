@@ -1,0 +1,295 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return a > val ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+
+const int maxn = 20000000 + 10;
+const int mod = (int) 1e9 + 7;
+int cur;
+int pr = 1001;
+int pw[1000000];
+
+struct Node {
+	Node *l, *r;
+	int key, size, rev;
+	int hs[2];
+} mem[maxn], *nil = mem + (cur++);
+void init() {
+	nil->l = nil->r = nil;
+	nil->key = nil->size = nil->rev = 0;
+	nil->hs[0] = nil->hs[1] = 0;
+	pw[0] = 1;
+	for (int i = 1; i < 1000000; i++) {
+		pw[i] = (long long) pw[i - 1] * pr % mod;
+	}
+}
+inline void pushup(Node* x) {
+	if (x == nil) return;
+	x->size = x->l->size + 1 + x->r->size;
+	x->hs[0] = x->l->hs[0];
+	x->hs[0] = (x->hs[0] + (long long) pw[x->l->size] * x->key) % mod;
+	x->hs[0] = (x->hs[0] + (long long) pw[x->l->size + 1] * x->r->hs[0]) % mod;
+	x->hs[1] = x->r->hs[1];
+	x->hs[1] = (x->hs[1] + (long long) pw[x->r->size] * x->key) % mod;
+	x->hs[1] = (x->hs[1] + (long long) pw[1 + x->r->size] * x->l->hs[1]) % mod;
+}
+inline Node* newNode(Node* l, Node* r, int key) {
+	Node* x = mem + (cur++);
+	x->l = l, x->r = r, x->key = key;
+	x->rev = 0;
+	pushup(x);
+	return x;
+}
+Node* reverse(Node* x) {
+	if (x == nil) return x;
+	Node* y = newNode(x->r, x->l, x->key);
+	y->hs[0] = x->hs[1], y->hs[1] = x->hs[0];
+	y->rev = x->rev ^ 1;
+	return y;
+}
+void pushdown(Node* x) {
+	if (x == nil) return;
+	if (x->rev) {
+		x->l = reverse(x->l);
+		x->r = reverse(x->r);
+		x->rev = 0;
+	}
+}
+Node* join(Node* l, Node* r) {
+	if (l == nil) return r;
+	if (r == nil) return l;
+	if (rand() % (l->size + r->size) < l->size) {
+		pushdown(l);
+		return newNode(l->l, join(l->r, r), l->key);
+	}
+	else {
+		pushdown(r);
+		return newNode(join(l, r->l), r->r, r->key);
+	}
+}
+Node* splitL(Node* x, int pos) {
+	if (x == nil || !pos) return nil;
+	pushdown(x);
+	if (x->l->size >= pos) return splitL(x->l, pos);
+	if (x->l->size + 1 == pos) return newNode(x->l, nil, x->key);
+	return newNode(x->l, splitL(x->r, pos - x->l->size - 1), x->key);
+}
+Node* splitR(Node* x, int pos) {
+	if (x == nil || !pos) return nil;
+	pushdown(x);
+	if (x->r->size >= pos) return splitR(x->r, pos);
+	if (x->r->size + 1 == pos) return newNode(nil, x->r, x->key);
+	return newNode(splitR(x->l, pos - 1 - x->r->size), x->r, x->key);
+}
+Node* split(Node* x, int pos1, int pos2) {
+	Node* y = splitL(x, pos2);
+	return splitR(y, pos2 - pos1 + 1);
+}
+
+const int MAXN = 100000 + 10;
+int n, q;
+vector<int> adj[MAXN];
+int a[MAXN];
+int size[MAXN];
+int lev[MAXN];
+int p[MAXN];
+int num[MAXN];
+int head[MAXN];
+int cnt;
+Node* root = nil;
+vector<int> ver;
+
+void dfs1(int u, int dad = -1) {
+	size[u] = 1;
+	for (int i = 0; i < adj[u].size(); i++) {
+		int v = adj[u][i];
+		if (v != dad) {
+			p[v] = u, lev[v] = lev[u] + 1;
+			dfs1(v, u);
+			size[u] += size[v];
+		}
+	}
+}
+void dfs2(int u, int h = 0, int dad = -1) {
+	num[u] = ++cnt, head[u] = h;
+	root = join(root, newNode(nil, nil, a[u]));
+	pair<int, int> best = make_pair(-1, -1);
+	for (int i = 0; i < adj[u].size(); i++) {
+		int v = adj[u][i];
+		if (v != dad) {
+			best = max(best, make_pair(size[v], v));
+		}
+	}
+	if (~best.second) {
+		dfs2(best.second, h, u);
+	}
+	for (int i = 0; i < adj[u].size(); i++) {
+		int v = adj[u][i];
+		if (v != dad && v != best.second) {
+			dfs2(v, v, u);
+		}
+	}
+}
+Node* segquery(int u, int v) {
+	if (u <= v) return split(root, u, v);
+	return reverse(split(root, v, u));
+}
+void segupd(int u, int v, Node* x) {
+	if (u <= v) {
+		Node* l = splitL(root, u - 1);
+		Node* r = splitR(root, root->size - v);
+		root = join(join(l, x), r);
+	}
+	else {
+		Node* l = splitL(root, v - 1);
+		Node* r = splitR(root, root->size - u);
+		root = join(join(l, reverse(x)), r);
+	}
+}
+Node* query(int u, int v) {
+	Node *l = nil, *r = nil;
+	int dir = 1;
+	int hu = head[u], hv = head[v];
+	while (hu != hv) {
+		if (lev[hu] < lev[hv]) swap(u, v), swap(hu, hv), dir ^= 1;
+		if (dir) {
+			l = join(segquery(num[hu], num[u]), l);
+		}
+		else {
+			r = join(segquery(num[hu], num[u]), r);
+		}
+		u = p[hu], hu = head[u];
+	}
+	if (lev[u] > lev[v]) swap(u, v), dir ^= 1;
+	if (dir) {
+		r = join(segquery(num[u], num[v]), r);
+	}
+	else {
+		l = join(segquery(num[u], num[v]), l);
+	}
+	return join(reverse(l), r);
+}
+void upd(int u, int v, Node* x) {
+	int lptr = 1, rptr = x->size, dir = 1;
+	int hu = head[u], hv = head[v];
+	while (hu != hv) {
+		if (lev[hu] < lev[hv]) swap(u, v), swap(hu, hv), dir ^= 1;
+		if (dir) {
+			segupd(num[u], num[hu], split(x, lptr, lptr + num[u] - num[hu]));
+			lptr += num[u] - num[hu] + 1;
+		}
+		else {
+			segupd(num[hu], num[u], split(x, rptr + num[hu] - num[u], rptr));
+			rptr += num[hu] - num[u] - 1;
+		}
+		u = p[hu], hu = head[u];
+	}
+	if (lev[u] > lev[v]) swap(u, v), dir ^= 1;
+	if (dir) {
+		segupd(num[u], num[v], split(x, lptr, lptr + num[v] - num[u]));
+	}
+	else {
+		segupd(num[v], num[u], split(x, rptr + num[u] - num[v], rptr));
+	}
+}
+
+int ptr;
+int tmp[MAXN];
+void trace(Node* x) {
+	if (x == nil) return;
+	pushdown(x);
+	trace(x->l);
+	tmp[ptr++] = x->key;
+	trace(x->r);
+}
+
+void rebuild() {
+	ptr = 0, trace(root);
+	cur = 1, root = nil;
+	FOR(i, 0, n) root = join(root, newNode(nil, nil, tmp[i]));
+}
+
+void solve() {
+	init();
+	cin >> n >> q;
+	FOR(i, 0, n) cin >> a[i];
+	FOR(i, 0, n - 1) {
+		int u, v; cin >> u >> v; u--, v--;
+		adj[u].pb(v), adj[v].pb(u);
+	}
+	dfs1(0), dfs2(0);
+	while (q--) {
+		int op; cin >> op;
+		if (op == 1) {
+			int u, v; cin >> u >> v; u--; v--;
+			upd(v, u, query(u, v));
+		}
+		else if (op == 2) {
+			int u1, v1, u2, v2; cin >> u1 >> v1 >> u2 >> v2; u1--, v1--, u2--, v2--;
+			Node* x = query(u1, v1);
+			Node* y = query(u2, v2);
+			if (x->hs[0] == y->hs[0] && x->hs[1] == y->hs[1]) {
+				cout << "Yes\n";
+			}
+			else {
+				cout << "No\n";
+			}
+		}
+		else if (op == 3) {
+			int u1, v1, u2, v2; cin >> u1 >> v1 >> u2 >> v2; u1--, v1--, u2--, v2--;
+			upd(u2, v2, query(u1, v1));
+		}
+		if (cur > maxn - 1000000) {
+			rebuild();
+		}
+	}
+}
+
+int main() {
+	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

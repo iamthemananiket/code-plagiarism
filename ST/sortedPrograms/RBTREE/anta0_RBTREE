@@ -1,0 +1,41 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+int main() {
+	int Q;
+	while(~scanf("%d", &Q)) {
+		bool color = false;
+		for(int ii = 0; ii < Q; ++ ii) {
+			char ty[10];
+			scanf("%s", ty);
+			if(ty[1] == 'i') {
+				color = !color;
+			} else if(ty[1] == 'b' || ty[1] == 'r') {
+				int x; int y;
+				scanf("%d%d", &x, &y);
+				int lvx = 0;
+				while((x >> lvx) != 1) ++ lvx;
+				int lvy = 0;
+				while((y >> lvy) != 1) ++ lvy;
+				int lvz = 0;
+				while(lvz < lvx && lvz < lvy &&
+					(x >> (lvx - lvz - 1)) == (y >> (lvy - lvz - 1)))
+					++ lvz;
+				int ans = 0;
+				int target = (ty[1] == 'b') != color ? 0 : 1;
+				int i = lvx;
+				while(i > lvz) ans += i % 2 == target, -- i;
+				while(i <= lvy) ans += i % 2 == target, ++ i;
+				printf("%d\n", ans);
+			} else abort();
+		}
+	}
+	return 0;
+}

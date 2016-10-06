@@ -1,0 +1,129 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define gc getchar_unlocked
+#define pc putchar_unlocked
+#define ll long long
+#define sci(x) {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define scll(x)  {register char c = gc();*x = 0;for(; (c<48)||(c>57);c = gc());for(; (c>47)&&(c<58);c = gc())*x =  (ll)((((*x)<<1) + ((*x)<<3)) + c - 48);}
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+char putnb[20];
+#define putn(n) {if(!n)pc('0');if(n<0)pc('-'),n=0-n;int pi=0;while(n)putnb[pi++]=(n%10)+'0',n/=10;while(pi)pc(putnb[--pi]);}
+using namespace std;
+const int inf=1e8;
+const ll infl=1e18;
+const int N=100000;
+
+int n,m;
+
+ll dp[N+5];
+ll dp1[505][N+5];
+//ll cum[505][N+5];
+
+
+vi nos[500];
+void pre()
+{
+
+	afor(i,0,500)
+	{
+		
+		nos[i].pb(0);
+		afor(j,1,m-1)
+		{
+			if((i*j)%m==0)nos[i].pb(j);
+			
+		}
+		//maxv=max(maxv,(int)nos[i].size());
+	}
+	//cout<<maxv;
+}
+
+vector<pp> adj[N+5];
+
+void dfs(int pos,int par)
+{
+	
+	dp1[1][pos]=1LL;
+ll tot[505];
+
+	afor(i,0,m-1)tot[i]=0;
+	ll totval=0LL;
+
+	afor(k,0,(int)adj[pos].size() -1)
+	{
+		pp i=adj[pos][k];
+		int ps=i.first;
+		int cst=i.second;
+		if(ps==par)continue;
+		dfs(ps,pos);		
+		dp[pos]+=dp[ps];
+
+		afor(j,0,m-1)
+		{
+			int curr=(j*cst)%m;
+			dp1[curr][pos]+=dp1[j][ps];
+			if(!curr)
+				{
+					dp[pos]+=dp1[j][ps];
+					dp[pos]+=dp1[j][ps]*totval;
+					continue;
+				}
+			//if(__gcd(curr,m)!=1)continue;
+			//cout<<"h ";
+				afor(z,0,(int)nos[curr].size() - 1)
+				{
+					int req1=nos[curr][z];
+					//if(j==1 && ps==4)cout<<tot[req1]<<" ";
+			//int req2= (req1*raiser[cst][phi[m]-1])%m;
+			dp[pos]+= dp1[j][ps]*(tot[req1]);
+			}
+		}
+
+		
+		afor(j,0,m-1)
+		{
+
+			tot[(j*cst)%m]+=dp1[j][ps];
+			//if(j==1 && ps==2)cout<<tot[2]<<" ";
+			totval+=dp1[j][ps];
+		}
+	}
+}
+
+int main()
+{
+  finp;
+  cin>>n>>m;
+
+  if(m==1)
+  {
+  	cout<<((n-1)*n)/2;
+  	return 0;
+  }
+  afor(i,1,n-1)
+  {
+  	int u,v,c;
+  	cin>>u>>v>>c;
+  	c%=m;
+  	adj[u].pb({v,c});
+  	adj[v].pb({u,c});
+  }
+  pre();
+  //cout<<nos[2].size()<<endl;
+  dfs(1,-1);
+
+  cout<<dp[1];
+  
+return 0;
+}

@@ -1,0 +1,104 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, m;
+vector < pair < int, int > > g[MAX_N];
+ll ans;
+
+vector < pair < int, int > > f;
+map < vector < int >, int > d[MAX_N];
+vector < int > emp;
+
+map < vector < int >, int > update(map < vector < int >, int > &v, int val) {
+	vector < int > now, nw;
+	map < vector < int >, int > res;
+	for (auto i : f) {
+		int cnt = 0;
+		while(val % i.f == 0)
+			val /= i.f, cnt++;
+		now.pb(cnt);
+	}
+	for (auto i : v) {
+		nw = i.f;
+		for (int j = 0; j < sz(now); j++)
+			nw[j] = min(nw[j] + now[j], f[j].s);
+	    if (!res.count(nw))
+	    	res[nw] = 0;
+		res[nw] += i.s;
+	}
+	return res;
+}
+
+void what(map < vector < int >, int > &v, map < vector < int >, int > &ch) {
+	for (auto i : v)
+		for (auto j : ch) {
+			bool ok = 1;
+			for (int k = 0; k < sz(i.f); k++)
+				if (i.f[k] + j.f[k] < f[k].s) {
+					ok = 0;
+					break;
+				}
+			if (ok)
+				ans += 1ll * i.s * j.s;
+		}
+}
+
+void dfs(int v, int pr = -1) {
+	d[v][emp]++;
+	for (auto to : g[v]) {
+		if (to.f == pr)
+			continue;
+		dfs(to.f, v);
+		d[to.f] = update(d[to.f], to.s);
+		what(d[v], d[to.f]);
+		for (auto j : d[to.f])
+			d[v][j.f] += j.s;
+	}
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	cin >> n >> m;
+	for (int i = 1, u, v, c; i < n; i++) {
+		cin >> u >> v >> c;
+		g[u].pb(mp(v, c));
+		g[v].pb(mp(u, c));
+	}
+	for (int i = 2; i * i <= m; i++) 
+		if (m % i == 0) {
+			f.pb(mp(i, 0));
+			while(m % i == 0)
+				m /= i, f.back().s++;
+		}
+	if (m > 1)
+		f.pb(mp(m, 1));
+	while(sz(emp) != sz(f))
+		emp.pb(0);
+	dfs(1);
+	cout << ans;
+	return 0;
+}

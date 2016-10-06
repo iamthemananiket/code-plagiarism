@@ -1,0 +1,27 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+
+using namespace std;
+
+double solve(int a,int b,int c,int d)
+{
+	double ret=0.0;
+	ret+=(double) max(0,min(a,b-c))/(double) a*(double) c/(double) b;
+	ret+=(double) (min(a,b)-max(0,min(a,b-c)))/(double) a*(double) (min(b,c)+max(0,min(b,c)-(min(a,b)-max(0,min(a,b-c)))))/(double) (2*b);
+	return ret;
+}
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int a,b,c,d;
+		scanf("%d %d %d %d",&a,&b,&c,&d);
+		printf("%.10f\n",solve(a,b,c,d)+solve(b,a,d,c));
+	}
+	return 0;
+}

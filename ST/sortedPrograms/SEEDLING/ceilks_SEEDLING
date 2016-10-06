@@ -1,0 +1,96 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+
+#include <cassert>
+#include <limits>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#define each(it,o) for(auto it= (o).begin(); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define inrep int t;cin>>t; while(t--)
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> pii;
+typedef vector<pii > vpii;
+typedef long long ll;
+typedef vector<ll> vll;
+typedef pair<ll,ll> pll;
+typedef vector<pll > vpll;
+typedef vector<string> vs;
+typedef long double ld;
+
+template<typename T> ostream& operator<< ( ostream &o,vector<T> v ) {
+    if ( v.size() >0 )
+        o<<v[0];
+    for ( unsigned   i=1; i<v.size(); i++ )
+        o<<" "<<v[i];
+    return o<<endl;
+}
+template<typename U,typename V> ostream& operator<< ( ostream &o,pair<U,V> p ) {
+    return o<<"("<<p.first<<", "<<p.second<<") ";
+}
+template<typename T> istream& operator>> ( istream &in,vector<T> &v ) {
+
+    for ( unsigned   i=0; i<v.size(); i++ )
+        in>>v[i];
+    return in;
+}
+
+int n,s;
+vi a,b,c;
+int maxP;
+vector<vector<vi>> _store;
+const int MOD=1000000007;
+int getPoss ( int S, int mi, int p ) {
+    if ( p>maxP ) p=maxP;
+    int p0=p+maxP;
+    int s0=S;
+    if ( mi==n ) return p>0;
+    if ( _store[s0][mi][p0]>=0)
+        return _store[s0][mi][p0];
+    ll su=0;
+    while ( S>=0 ) {
+        su+=getPoss ( S,mi+1,p );
+        p+=c[mi]-b[mi];
+        S-=a[mi];
+    }
+    _store[s0][mi][p0]=su%MOD;
+    return _store[s0][mi][p0];
+}
+int main() {
+    ios_base::sync_with_stdio ( false );
+    inrep {
+        cin>>n>>s;
+      
+        a=vi ( n );
+        b=vi ( n ),c=vi ( n );
+        maxP=s;
+        rep ( i,n ) {
+            int x,y,z;
+            cin>>x>>y>>z;
+            a[i]=x;
+            b[i]=y;
+            c[i]=z;
+            int mx=b[i]-c[i];
+             mx=(s/a[i]+1)*mx;
+            maxP=max(maxP,mx);
+//             assert ( c[i]<100 );
+
+        }
+          _store=vector<vector<vi>> ( s+1,vector<vi>(n,vi(2*maxP+1,-1)) );
+        cout<<getPoss ( s,0,0 ) <<endl;
+
+    }
+}

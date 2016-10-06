@@ -1,0 +1,90 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+char retc(int a)
+    {
+    int i,j;
+    j=a;
+    i=0;
+    while(j>0)
+        {
+       j=j-pow(2,i);
+        i++;
+    }
+    if(i%2==0)
+        return 'r';
+     
+     return 'b';
+
+}
+
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */
+    int t,k;
+    long long int a,b,sumr,sumb;
+    k=0;
+    char c;
+    cin>>t;
+    string s;
+    while(t--)
+        {
+        sumr=0;
+        sumb=0;
+        cin>>s;
+        if(s[1]=='i')
+           k++;
+             else{
+                cin>>a>>b;
+                while(1)
+                    {
+                if(a>b)
+                    {
+                     c=retc(a);
+                      if(c=='b')
+                       sumb++;
+                       else
+                      sumr++;
+                        a=a/2;
+                     }
+                   else if(b>a){
+                       c=retc(b);
+                      if(c=='b')
+                       sumb++;
+                       else
+                      sumr++;
+                        b=b/2;
+                           }
+                      else {
+                        c=retc(b);
+                      if(c=='b')
+                       sumb++;
+                       else
+                      sumr++;
+                        break;
+                    }
+
+                }
+                 if(s[1]=='r')
+                     {
+           if(k%2!=0)
+               cout<<sumb<<endl;
+                 else
+                 cout<<sumr<<endl;
+             }
+        else if(s[1]=='b')
+                  {
+           if(k%2==0)
+               cout<<sumb<<endl;
+                 else
+                 cout<<sumr<<endl;
+             }
+
+
+
+    }
+    }
+    return 0;
+}

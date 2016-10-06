@@ -1,0 +1,161 @@
+
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int N = 2007;
+
+using namespace std;
+
+int n,kind[N];
+long long val[N];
+
+// row - ps - last digit - sum_row - carry_needed - bitmask -  ans_flag
+int dp[2][9][3][81][9][256][2];
+vector<int> VE[100];
+
+void add(int&a,int b)
+{
+	a+=b;
+	if (a>=bs)
+		a-=bs;
+}
+
+vector<int> parse(long long x)
+{
+	vector<int> res;
+	for (int iter=0;iter<20;iter++)
+	{
+		res.push_back(x%10);
+		x/=10;
+	}
+	reverse(res.begin(),res.end());
+	return res;
+}
+
+int main(){
+//	freopen("path2.in","r",stdin);
+//	freopen("path2.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>n;
+	for (int i=0;i<n;i++)
+	{
+		cin>>kind[i]>>val[i];
+		VE[i]=parse(val[i]);
+	}
+	
+	// row - ps - last digit - sum_row - carry_needed - bitmask -  ans_flag
+	
+	dp[0][0][0][0][0][0][0]=1;
+	
+	for (int row=0;row<20;row++)
+	{
+		for (int ps=0;ps<n;ps++)
+			for (int last_digit=0;last_digit<=1;last_digit++)
+				for (int sum_row=0;sum_row<=9*ps;sum_row++)
+					for (int carry_needed=0;carry_needed<=7;carry_needed++)
+						for (int bitmask=0;bitmask<(1<<n);bitmask++)
+							for (int ans_flag=0;ans_flag<=1;ans_flag++)
+								dp[1^(row%2)][ps][last_digit][sum_row][carry_needed][bitmask][ans_flag]=0;
+		
+		for (int ps=0;ps<n;ps++)
+			for (int last_digit=0;last_digit<=1;last_digit++)
+				for (int sum_row=0;sum_row<=9*ps;sum_row++)
+					for (int carry_needed=0;carry_needed<=7;carry_needed++)
+					{
+						
+						if (sum_row+9*(n-ps)+7<10*carry_needed)
+							continue;
+						if (sum_row>10*carry_needed+9)
+							continue;
+						for (int bitmask=0;bitmask<(1<<n);bitmask++)
+							for (int ans_flag=0;ans_flag<=1;ans_flag++)
+							{
+								
+								if (dp[row%2][ps][last_digit][sum_row][carry_needed][bitmask][ans_flag]==0)
+									continue;
+									
+								for (int add_dig=0;add_dig<=9;add_dig++)
+								{
+									if (row<2&&add_dig>0) // >=1e18
+										continue;
+									int new_mask=bitmask;
+									if (add_dig!=VE[ps][row])
+										new_mask|=(1<<ps);
+											
+											
+									if (add_dig>VE[ps][row]&&(!(bitmask&(1<<ps)))&&(kind[ps]==0))
+										break;
+									if (add_dig<VE[ps][row]&&(!(bitmask&(1<<ps)))&&(kind[ps]==1))	
+										continue;
+									if (ps+1==n) // new row
+									{
+										for (int taken_val=0;taken_val<=8;taken_val++)// from next row
+										{
+										int rez_carry=(sum_row+add_dig+taken_val)/10;
+										if (rez_carry!=carry_needed)
+											continue;
+										int digit_here=(sum_row+add_dig+taken_val)%10;
+										int new_ans_flag=(ans_flag|(last_digit==1&&digit_here==7));
+										add(dp[1^(row%2)][0][digit_here==4][0][taken_val][new_mask][new_ans_flag],dp[row%2][ps][last_digit][sum_row][carry_needed][bitmask][ans_flag]);
+										}
+										
+									}
+									else // stay here
+									{
+										add(dp[row%2][ps+1][last_digit][sum_row+add_dig][carry_needed][new_mask][ans_flag],
+											dp[row%2][ps][last_digit][sum_row][carry_needed][bitmask][ans_flag]);
+									}
+								}
+							}
+					}
+	}
+	
+	int ans=0;
+	
+	for (int mask=0;mask<(1<<n);mask++)
+	{
+		for (int last_dig=0;last_dig<=1;last_dig++)
+		{
+			add(ans,dp[0][0][last_dig][0][0][mask][1]);
+		}
+	}
+	
+	cout<<ans<<endl;
+	
+	return 0;
+}

@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+#define author animesh_f
+using namespace std;
+int segTree[400010];
+int arr[100001];
+int query(int node , int l , int r , int qs , int qe)
+    {
+    if(l>qe||r<qs)
+        return 0;
+    if(l>=qs&&r<=qe)
+        return segTree[node];
+    return max(query(node*2,l,(l+r)/2,qs,qe),query(node*2+1,(l+r)/2+1,r,qs,qe));
+    }
+void build(int node , int l , int r)
+    {
+    if(l==r)
+        {
+        segTree[node]=arr[l];
+        return;
+        }
+    int mid = (l+r)/2;
+    int lc = node*2; int rc= lc+1;
+    build(lc,l,mid);
+    build(rc,mid+1,r);
+    segTree[node]=max(segTree[lc],segTree[rc]);
+    }
+int main()
+{
+       int N,M,x1,y1;
+       long long ans;
+       scanf("%d",&N);
+       for(int i=0;i<N;i++)
+           scanf("%d\n",&arr[i]);
+       build(1,0,N-1);
+       scanf("%d\n",&M);
+       scanf("%d\n",&x1);
+       scanf("%d\n",&y1);
+       ans = query(1,0,N-1,min(x1,y1),max(x1,y1));
+       int prevX = x1 , prevY = y1;
+       for(int i=1;i<M;i++)
+           {
+                x1=(prevX+7)%(N-1);
+                y1=(prevY+11)%N;
+                ans+=query(1,0,N-1,min(x1,y1),max(x1,y1));
+                prevX=x1;
+                prevY=y1;
+           }
+           printf("%lld\n",ans);
+       return 0;
+}

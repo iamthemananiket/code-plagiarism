@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+
+const int N = (int)1e5 + 123;
+
+using namespace std;
+
+int H(int x) {
+	int res = 0;
+	for (int i = 2; i * i <= x; i++) {
+		if (x % i != 0)
+			continue;
+		res++;
+		while(x % i == 0)
+			x /= i;
+	}
+	if (x > 1)
+		res++;
+	return res;
+}
+
+int t;
+int h[N][10];
+int x, y, z;
+
+int main() {
+	for (int i = 2; i <= int(1e5); i++) {
+		for (int j = 1; j < 10; j++)
+			h[i][j] = h[i - 1][j];
+//		cout << i << ' ' << H(i) << endl;
+		h[i][H(i)]++;
+	}
+	cin >> t;
+	while(t--) {
+		cin >> x >> y >> z;
+		x--;
+		cout << h[y][z] - h[x][z] << endl;
+	}
+}

@@ -1,0 +1,25 @@
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+long long tot,l,r,mid,X,Te,b,i,c;
+struct mjj{long long x,y,z,f;}a[100010];
+bool cmp(mjj x,mjj y){if(x.x!=y.x)return x.x<y.x;return y.f;}
+int main()
+{
+	scanf("%lld",&Te);
+	while(Te--)
+	{
+		scanf("%lld%lld",&X,&b);r=1;
+		for(i=1;i<=b;i++)scanf("%lld%lld",&a[i].x,&a[i].y),a[i].f=1,r+=a[i].y;
+		scanf("%lld",&c);r=r*2;
+		for(i=b+1;i<=b+c;i++)scanf("%lld%lld%lld",&a[i].x,&a[i].y,&a[i].z),a[i].f=0;
+		sort(a+1,a+b+c,cmp);l=1;
+		while(l<r)
+		{
+			mid=(l+r)>>1;tot=mid;
+			for(i=1;i<=b+c&&tot>0;i++)if(a[i].f)tot-=a[i].y;
+			else if(tot>=a[i].y)tot+=a[i].z;
+			if(tot>0)r=mid;else l=mid+1;
+		}printf("%lld\n",l);
+	}
+}

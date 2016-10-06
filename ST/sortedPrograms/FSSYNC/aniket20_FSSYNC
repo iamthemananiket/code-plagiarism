@@ -1,0 +1,75 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+vector<int>adj[maxs];
+int dead[maxs],cnt[maxs],mark[maxs];
+
+void dfs(int k,int p){
+	cnt[k]=p;
+	mark[k]=1;
+	for(int i=0;i<adj[k].size();i++){
+		if(!mark[adj[k][i]])
+			dfs(adj[k][i],p+(dead[k]==1));
+	}
+}
+
+int main()
+{
+	int t,n,i,m,j,x,y;
+	sc("%d",&t);
+	while(t--){
+		sc("%d",&n);
+		for(i=0;i<n-1;i++){
+			sc("%d %d",&x,&y);
+			adj[x].pb(y);
+			adj[y].pb(x);
+		}
+		sc("%d",&m);
+		for(i=0;i<m;i++){
+			sc("%d",&x);
+			dead[x]=1;
+		}
+		dfs(1,0);
+		double val=0;
+		for(i=1;i<=n;i++){
+			val+=(1/((double)cnt[i]+1));
+		}
+		val=(double)n-val;
+		pr("%.6lf\n",val);
+		for(i=1;i<=n;i++){
+			adj[i].clear();
+			dead[i]=0;
+			mark[i]=0;
+		}
+	}
+	return 0;
+}

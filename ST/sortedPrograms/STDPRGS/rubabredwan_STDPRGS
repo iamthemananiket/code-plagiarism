@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(z,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<=b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			2000050
+#define INF			INT_MAX
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+ll ara[100000], bara[100000];
+
+
+int main()
+{
+	ll n, m, s;
+	scanf("%lld", &n);
+
+	REP(i, n) scanf("%lld", &ara[i]);
+	ll q, l, r;
+	scanf("%lld", &q);
+	while(q--){
+		scanf("%lld %lld", &l, &r); int idx = 0;
+		l--, r--;
+		set<ll>st;
+		for(ll i=l;i<=r;i++) st.insert(ara[i]);
+		
+		ll sum = 0;
+		
+		set<ll>::iterator it;
+		it = st.begin(); 
+		ll past = *it;
+		it++;
+		for(;it!=st.end();it++){
+		    sum += (*it - past) * (*it - past);
+		    past = *it;
+		}
+		
+		printf("%lld\n", sum);
+	}
+	return 0;
+}

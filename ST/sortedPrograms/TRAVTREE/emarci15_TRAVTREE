@@ -1,0 +1,184 @@
+#include <iostream>
+#include <vector>
+ 
+using namespace std;
+ 
+int n,q;
+vector<int> h[200000];
+int s[200000];
+int apa[200000];
+int bs[200000];
+int d[200000];
+ 
+int vp[200000]; int vpv;
+ 
+bool heavy[200000];
+int skip[200000];
+int pos[200000];
+ 
+int anc[200000][20];
+ 
+int dfsw[400001];
+int in[200000];
+int out[200000];
+int szum[400001];
+int dfswe;
+ 
+void dfs0(int p) {
+    in[p] = dfswe;
+    dfsw[dfswe++] = p;
+    out[p] = dfswe;
+ 
+    s[p] = 1;
+    bs[p] = -1;
+    for(auto q:h[p]) {
+        if(apa[p] == q) continue;
+        d[q] = d[p] + 1;
+        apa[q] = p;
+        dfs0(q);
+        if((bs[p] < 0) || (s[q] > bs[p])) bs[p] = q;
+        s[p] += s[q];
+ 
+        out[p] = dfswe;
+    }
+}
+ 
+vector<vector<long long> > bit;
+ 
+void dfs(int p) {
+    bit[vp[p]].push_back(0ll);
+    for(auto q:h[p]) {
+        if(q==apa[p]) continue;
+        if(bs[p] == q) {
+            heavy[q] = 1;
+            skip[q] = skip[p];
+            pos[q] = pos[p]+1;
+            vp[q] = vp[p];
+        } else {
+            skip[q] = q;
+            vp[q] = vpv++;
+            bit.push_back(vector<long long>());
+        }
+        dfs(q);
+    }
+}
+ 
+int w[200000];
+ 
+void update(vector<long long>& b, int p, int v) {
+    while(p < (int)b.size()) {
+        b[p] += v;
+        p += p & (-p);
+    }
+}
+ 
+long long query(vector<long long>& b, int p) {
+    long long ret(0ll);
+    while(p > 0) {
+        ret += b[p];
+        p -= p & (-p);
+    }
+    return ret;
+}
+ 
+int lca(int p, int q) {
+    if(d[p] > d[q]) swap(p,q);
+    for(int i=19; i>=0; i--) {
+        if((d[q] - d[p]) >= (1<<i)) q = anc[q][i];
+    }
+ 
+    if(p==q) return p;
+ 
+    for(int i=19; i>=0; i--) {
+        if(anc[p][i] != anc[q][i]) {
+            p = anc[p][i];
+            q = anc[q][i];
+        }
+    }
+ 
+    return anc[p][0];
+}
+ 
+void updatesz(int p, int v) {
+    while(p < dfswe) {
+        szum[p] += v;
+        p += p & (-p);
+    }
+}
+ 
+long long querysz(int p) {
+    long long ret(0ll);
+    while(p > 0) {
+        ret += szum[p];
+        p -= p & (-p);
+    }
+    return ret;
+}
+ 
+long long querysz(int x, int y) {
+    return querysz(y-1)-querysz(x-1);
+}
+ 
+long long dist(int p) {
+    if(!p) return 0ll;
+    if(!heavy[p]) {
+        return (dist(apa[p])+w[p]);
+    } else {
+        return (dist(skip[p]) + query(bit[vp[p]],pos[p]));
+    }
+}
+ 
+void upd(int p, int x) {
+    w[p]+= x;
+    if(heavy[p]) update(bit[vp[p]],pos[p],x);
+}
+
+void scan(int &x) {
+    x=0; char c=getchar_unlocked();
+    while(c < '0') c = getchar_unlocked();
+    while(c>='0') {
+    	x = (x<<3) + (x<<1) + c - '0';
+    	c = getchar_unlocked();
+    }
+}
+ 
+int main()
+{ 
+    scan(n);
+    for(int i=0; i<n-1; i++) {
+        int x,y; scan(x); scan(y); x--; y--;
+        h[x].push_back(y);
+        h[y].push_back(x);
+    }
+ 
+    apa[0] = -1;
+    skip[0] = 0;
+    pos[0] = 0;
+    bit.push_back(vector<long long>());
+    vpv++;
+    dfswe=1;
+    dfs0(0);
+    dfs(0);
+ 
+    for(int i=0; i<n; i++) anc[i][0] = apa[i];
+    for(int i=1; i<20; i++) {
+        for(int j=0; j<n; j++) {
+            anc[j][i] = anc[j][i-1]<0?-1:anc[anc[j][i-1]][i-1];
+        }
+    }
+ 
+    for(scan(q); q--;) {
+        int x,y;
+        scan(x); scan(y); x--; y--;
+ 
+        int l = lca(x,y);
+ 
+        printf("%lld\n",((querysz(in[l],out[l])) + (dist(x) + dist(y) + w[l] - (2*dist(l)))));
+ 
+        upd(l,1);
+        updatesz(in[x],1); updatesz(in[y],1); updatesz(in[l],-2);
+    }
+ 
+    return 0;
+}
+ 

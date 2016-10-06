@@ -1,0 +1,18 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define N 1000000007
+#define e 2.718281828459
+using namespace std;
+int main()
+{
+	ll t;
+	double x;
+	scanf("%lld",&t);
+	while(t--)
+	{
+		scanf("%lf",&x);
+		ll pre=(long long)(x*log10(e));
+		printf("%lld\n",pre+1);
+	}
+	return 0;
+}

@@ -1,0 +1,345 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+struct node{
+    int v, l, r, p, sz;
+} T[200001];
+int A[100001];
+
+vector < int > vc[100001];
+
+struct SplayTree{
+    int n, root;
+    SplayTree(){
+        n = root = 0;
+        T[0].sz = T[0].l = T[0].r = 0;
+    }
+    int newNode(int v, int p){
+        n++;
+        T[n].v = v;
+        T[n].l = T[n].r = 0;
+        T[n].sz = 1;
+        T[n].p = p;
+        return n;
+    }
+    void update(int c){
+        T[c].sz = 1 + T[ T[c].l ].sz + T[ T[c].r ].sz;
+    }
+    void Zig(int c){
+        int p = T[c].p, q = T[p].p;
+        T[p].l = T[c].r;
+        if(T[p].l != 0) T[T[p].l].p = p;
+        T[c].r = p; T[c].p = q; T[p].p = c;
+        if(q != 0){
+            if(T[q].l == p) T[q].l = c;
+            else T[q].r = c;
+        }
+        update(p);
+    }
+    void Zag(int c){
+        int p = T[c].p, q = T[p].p;
+        T[p].r = T[c].l;
+        if(T[p].r != 0) T[T[p].r].p = p;
+        T[c].l = p; T[c].p = q; T[p].p = c;
+        if(q != 0){
+            if(T[q].l == p) T[q].l = c;
+            else T[q].r = c;
+        }
+        update(p);
+    }
+    void splay(int c){
+        while(T[c].p != 0){
+            int p = T[c].p, q = T[p].p;
+            if(q != 0 && T[q].l == p){
+                if(T[p].l == c) Zig(p),Zig(c);
+                else Zag(c),Zig(c);
+            } else if(q != 0 && T[q].r == p){
+                if(T[p].r == c) Zag(p),Zag(c);
+                else Zig(c),Zag(c);
+            } else {
+                if(T[p].l == c) Zig(c);
+                else Zag(c);
+            }
+        }
+        root = c;
+        update(c);
+    }
+
+    int build(int l, int r, int p){
+        if(l > r) return 0;
+        int mid = (l + r) / 2;
+        int c = newNode(A[mid], p);
+        if(p == 0) root = c;
+        if(l < mid) T[c].l = build(l, mid - 1, c);
+        if(r > mid) T[c].r = build(mid + 1, r, c);
+        update(c);
+        return c;
+    }
+
+    int search(int p){
+        if(T[root].sz == 0) return 0;
+        int c = root;
+        while(p > 0){
+            if(T[ T[c].l ].sz >= p) c = T[c].l;
+            else {
+                p -= T[ T[c].l ].sz + 1;
+                if(p == 0) {
+                    splay(c);
+                    return T[c].v;
+                }
+                c = T[c].r;
+            }
+        }
+    }
+
+    void add(int p, int q){
+        if(p == 1){
+            search(1);
+            T[root].l = q;
+            T[q].p = root;
+            update(root);
+            return;
+        }
+        if(p == T[root].sz){
+            search(p-1);
+            T[root].r = q;
+            T[q].p = root;
+            update(root);
+        }
+
+        search(p-1);
+        int tmp = root;
+        root = T[root].r;
+        T[root].p = 0;
+        search(1);
+        T[root].l = q;
+        T[q].p = root;
+        update(root);
+
+        T[root].p = tmp;
+        T[tmp].r = root;
+        root = tmp;
+        update(root);
+    }
+
+    void go(int p, int q, int v){
+//        cout << v << " " << p << " " << q << " " << T[root].sz << endl;
+//        search(p);
+//        cout << T[root].v << " ppppppppp" << endl;
+        if(p == 1){
+            search(p);
+            vc[v].pb(T[root].v);
+            return;
+        }
+        if(p == T[root].sz){
+            search(p-1);
+            int tmp = T[root].r;
+            T[root].r = 0;
+            T[tmp].p = 0;
+            update(root);
+            vc[v].pb(T[tmp].v);
+
+            add(q, tmp);
+            return;
+        }
+        search(p-1);
+        int tmp = root;
+        root = T[root].r;
+        T[root].p = 0;
+        search(2);
+        int tmp1 = T[root].l;
+        T[root].l = 0;
+        T[tmp1].p = 0;
+        vc[v].pb(T[tmp1].v);
+        update(root);
+
+        T[tmp].r = root;
+        T[root].p = tmp;
+        root = tmp;
+        update(root);
+
+        add(q, tmp1);
+    }
+
+
+} SP;
+
+int ar[100001], val[100001];
+int bar[100001];
+int bit[400][100001];
+map < int, int > mm;
+
+void insert(int x, int y){
+    for(int i = y; i <= 100000; i += i & -i) bit[x][i]++;
+}
+int query(int x, int y){
+    int ret = 0;
+    for(int i = y; i > 0; i -= i & -i) ret += bit[x][i];
+    return ret;
+}
+int qq[100001][3];
+
+int seg[400001];
+void insert2(int idx, int s, int e, int p, int v){
+    if(s == e){
+        seg[idx] = v;
+        return;
+    }
+    int mid = (s + e) / 2;
+    if(p <= mid) insert2(idx * 2 + 1, s, mid, p, v);
+    else insert2(idx * 2 + 2, mid + 1, e, p, v);
+    seg[idx] = (seg[idx * 2 + 1] + seg[idx * 2 + 2]);
+}
+int query2(int idx, int s, int e, int v){
+    if(s == e) return s;
+    int mid = (s + e) / 2;
+    if(seg[idx * 2 + 1] >= v) return query2(idx * 2 + 1, s, mid, v);
+    else return query2(idx * 2 + 2, mid + 1, e, v - seg[idx * 2 + 1]);
+}
+
+int bit1[100001];
+void insert1(int x){
+    for(int i = x; i <= 100000; i += i & -i) bit1[i]++;
+}
+int query1(int x){
+    int ret = 0;
+    for(int i = x; i > 0; i -= i & -i) ret += bit1[i];
+    return ret;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    int n, q; cin >> n >> q;
+    FOR(i, 1, n+1){
+        cin >> ar[i];
+        A[i] = i;
+        mm[ar[i]] = 1;
+    }
+
+    SP.build(1, n, 0);
+    int B = 0;
+
+    int fl = 0;
+    FOR(ts, 1, q+1){
+        int l, r, k; cin >> l >> r >> k;
+        qq[ts][0] = l; qq[ts][1] = r; qq[ts][2] = k;
+        if(k != B+1) fl = 1;
+        B += r - l + 1;
+    }
+
+    int cnt = 0;
+    for(auto &v: mm){
+        v.yy = ++cnt;
+    }
+    FOR(i, 1, n+1) ar[i] = mm[ar[i]];
+
+    if(fl){
+    B = 0;
+    FOR(ts, 1, q+1){
+        int l = qq[ts][0], r = qq[ts][1], k = qq[ts][2];
+        for(int i = l; i <= r; i++){
+            SP.go(B + l, k + i - l, ts);
+            B++;
+        }
+    }
+
+    for(int i = 1; i <= B; i++){
+        SP.search(i);
+        bar[ T[SP.root].v ] = i;
+    }
+
+
+    int sz = 300;
+    LL res = 0;
+    for(int ts = 1; ts <= q; ts++){
+        REP(i, vc[ts].size()){
+            int p = bar[ vc[ts][i] ];
+
+            int id = p / sz;
+
+            for(int j = 0; j < id; j++)
+                res += query(j, cnt) - query(j, ar[ vc[ts][i] ]);
+            for(int j = id + 1; j < 400; j++)
+                res += query(j, ar[ vc[ts][i] ] - 1);
+
+            for(int j = sz*id; j < p; j++)
+                if(val[j] > ar[ vc[ts][i] ])
+                    res++;
+
+            for(int j = p + 1; j < sz*(id+1); j++){
+                if(j > n) break;
+                if(val[j] > 0 && val[j] < ar[ vc[ts][i] ]) res++;
+            }
+
+            val[p] = ar[ vc[ts][i] ];
+//            cout << p << " " << val[p] << endl;
+            insert(id, val[p]);
+        }
+
+        cout << res << endl;
+    }
+
+    } else {
+
+        for(int i = 1; i <= n; i++)insert2(0, 1, n, i, 1);
+
+        LL res = 0;
+        FOR(ts, 1, q+1){
+            int l = qq[ts][0], r = qq[ts][1], k = qq[ts][2];
+            for(int i = l; i <= r; i++){
+                int v = query2(0, 1, n, l);
+                insert2(0, 1, n, v, 0);
+                res += query1(100000) - query1(ar[ v ]);
+                insert1(ar[v]);
+            }
+            cout << res << endl;
+        }
+    }
+
+
+}

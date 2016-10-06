@@ -1,0 +1,25 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+ int main()
+ {
+    long long a[60][60];
+     memset(a,sizeof(a),0);
+     a[1][1]=1;
+      for (int i=2; i<=50; i++)
+        for (int j=1; j<=i; j++)
+        a[i][j]=(a[i-1][j]+a[i-1][j-1])%1000;
+ int t,n;
+      cin>>t;
+       long long sum=0;
+
+     for (int i=0; i<t; i++ )
+     {
+        cin>>n;
+          sum=0;
+         for (int j=1; j<=n; j++ )
+             sum=(sum+a[n][j])% 1000;
+          cout<<sum<<endl;
+     }
+     return 0;
+ }

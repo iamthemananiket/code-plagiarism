@@ -1,0 +1,181 @@
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+
+#define N 500010
+#define LG_N 19
+#define INF (-1u/2)
+#define TMP -1
+
+#define A first
+#define B second
+
+using namespace std;
+
+typedef pair<int, int> PII;
+
+vector<int> data[4*N], Ftree[4*N];
+PII rng[4*N];
+
+vector<int> inTree[N];
+int pos[N];
+
+int type[N], mem[N][3];
+int arr[N], mn = INF, mx = -INF;
+int m, len = 0;
+vector<int> ls_idx;
+
+void init(int idx, int a, int b) {
+	data[idx].push_back(TMP);
+	Ftree[idx].push_back(0);
+	if(a < b) { 
+		int mid = (a + b) / 2;
+		int x = 2 * idx, y = 2 * idx + 1;
+		init(x, a, mid);
+		init(y, mid+1, b);
+		int i, j;
+		for(i = 1, j = 1;i < data[x].size() && j < data[y].size();) {
+			int lf = data[x][i], rg = data[y][j];
+			if(arr[lf] <= arr[rg]) {
+				inTree[lf].push_back(data[idx].size());
+				data[idx].push_back(lf);
+				i++;
+			}else {
+				inTree[rg].push_back(data[idx].size());
+				data[idx].push_back(rg);
+				j++;
+			}
+		}
+		while(i < data[x].size()) {
+			int lf = data[x][i];
+			inTree[lf].push_back(data[idx].size());
+			data[idx].push_back(lf);
+			i++;
+		}
+		while(j < data[y].size()) {
+			int rg = data[y][j];
+			inTree[rg].push_back(data[idx].size());
+			data[idx].push_back(rg);
+			j++;
+		}
+		Ftree[idx].resize(b - a + 2);
+		for(int i = 0;i < b - a + 2;i++) {
+			Ftree[idx][i] = 0;
+		}
+	}else {
+		data[idx].push_back(a);
+		Ftree[idx].push_back(0);
+		pos[a] = idx;
+		inTree[a].push_back(1);
+	}
+	rng[idx].A = a;
+	rng[idx].B = b;
+}
+void updateFtree(vector<int>& tree, int idx, int val) {
+	while(idx < tree.size()) {
+		tree[idx] += val;
+		idx += idx & (-idx);
+	}
+}
+int queryFtree(vector<int>& tree, int idx) {
+	int ans = 0;
+	while(idx > 0) {
+		ans += tree[idx];
+		idx -= idx & (-idx);
+	}
+	return ans;
+}
+int query(int idx, int l, int r, int val) {
+	if(val < arr[data[idx][1]]) {
+		return 0;
+	}
+	if(l <= rng[idx].A && rng[idx].B <= r) {
+		int a = 0, b = data[idx].size() - 1;
+		while(a < b) {
+			int mid = (a + b) / 2 + 1;
+			if(arr[data[idx][mid]] <= val) {
+				a = mid;
+			}else {
+				b = mid - 1;
+			}
+		}
+		return queryFtree(Ftree[idx], a);
+	}
+	if(r < rng[idx].A || rng[idx].B < l) {
+		return 0;
+	}
+	return query(2*idx, l, r, val) + query(2*idx+1, l, r, val);
+}
+int main() {
+	scanf("%d", &m);
+	for(int i = 0;i < m;i++) {
+		scanf("%d", &type[i]);
+		if(type[i] == 0 || type[i] == 2) {
+			scanf("%d", &mem[i][0]);
+		}else {
+			for(int j = 0;j < 3;j++) {
+				scanf("%d", &mem[i][j]);
+			}
+		}
+		if(type[i] == 0) {
+			arr[++len] = mem[i][0];
+			mx = max(mx, arr[len]);
+			mn = min(mn, arr[len]);
+		}
+	}
+	init(1, 1, len);
+	int sz = 0;
+	ls_idx.push_back(TMP);
+	for(int i = 0;i < m;i++) {
+		if(type[i] == 0) {
+			int id = ++sz;
+			int idx = pos[id];
+			for(int i = 0;i < inTree[id].size();i++) {
+				updateFtree(Ftree[idx], inTree[id][i], 1);
+				idx /= 2;
+			}
+			ls_idx.push_back(id);
+		}else if(type[i] == 1) {
+			int l = ls_idx[mem[i][0]], r = ls_idx[mem[i][1]], x = mem[i][2];
+			int ans = 0;
+			for(int i = LG_N;i >= 0;i--) {
+				int v = !!(x & (1 << i));
+				if(v == 0) {
+					int result = query(1, l, r, ans + (1 << (i+1)) - 1) - query(1, l, r, ans + (1 << i) - 1);
+					ans = result > 0 ? (ans + (1 << i)) : ans;
+				}else {
+					int result = query(1, l, r, ans + (1 << i) - 1) - query(1, l, r, ans-1);
+					ans = result > 0 ? ans : (ans + (1 << i));
+				}
+			}
+			printf("%d\n", ans);
+		}else if(type[i] == 2) {
+			int k = mem[i][0];
+			while(k--) {
+				int id = ls_idx[ls_idx.size() - 1];
+				int idx = pos[id];
+				for(int i = 0;i < inTree[id].size();i++) {
+					updateFtree(Ftree[idx], inTree[id][i], -1);
+					idx /= 2;
+				}
+				ls_idx.pop_back();
+			}
+		}else if(type[i] == 3) {
+			int l = ls_idx[mem[i][0]], r = ls_idx[mem[i][1]], x = mem[i][2];
+			printf("%d\n", query(1, l, r, x));
+		}else if(type[i] == 4) {
+			int l = ls_idx[mem[i][0]], r = ls_idx[mem[i][1]], k = mem[i][2];
+			int a = mn, b = mx;
+			while(a < b) {
+				int mid = (a + b) / 2;
+				if(query(1, l, r, mid) < k) {
+					a = mid + 1;
+				}else {
+					b = mid;
+				}
+			}
+			printf("%d\n", a);
+		}
+	}
+	return 0;
+}

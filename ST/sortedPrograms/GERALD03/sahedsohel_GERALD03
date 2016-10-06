@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+    int t,n,i,k,l,r,j,m;
+    string s;
+    cin>>t;
+    while(t--)
+    {
+        cin>>n;
+        int a[n],b[n];
+        m=0;
+        if(n>0);
+        cin>>a[0]>>b[0];
+        for(i=1;i<n;i++)
+        {
+            cin>>a[i]>>b[i];
+            m+=abs(a[i]-a[i-1])+abs(b[i]-b[i-1]);
+        }
+
+        cout<<m<<endl;
+
+        i=1;
+        l=a[0];
+        r=b[0];
+        while(a[i-1]==a[i]&&b[i-1]==b[i])
+            i++;
+        while(m--)
+        {
+            if(l<a[i]&&(l+1)!=r)
+            {
+                printf("L+");
+                l++;
+            }
+            else if(l>a[i]&&(l-1)!=r)
+            {
+                printf("L-");
+                l--;
+            }
+            else if(r<b[i]&&(r+1)!=l)
+            {
+                printf("R+");
+                r++;
+            }
+            else if(r>b[i]&&(r-1)!=l)
+            {
+                printf("R-");
+                r--;
+            }
+            while(l==a[i]&&r==b[i])
+                i++;
+        }
+        cout<<endl;
+    }
+    return 0;
+}

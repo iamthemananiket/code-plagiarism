@@ -1,0 +1,130 @@
+#include<map>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+template<class T>
+struct Fenwick : vector<T> {
+    typedef vector<T> S;
+    int N;
+    Fenwick(int N_=0): S(N_), N(N_) {}
+    void add(int i, T x) {
+	for (; i<N; i|=i+1) S::operator[](i) += x;
+    }
+    inline T sum(int r) {
+	T s = 0;
+	for (; r; r&=r-1) s += S::operator[](r-1);
+	return s;
+    }
+    T sum(int l, int r) {
+	return sum(r) - sum(l);
+    }
+    int lower_bound(T x) { // argmin_i x <= sum(0,i)
+	int i = 1, j = 0;
+	T s = T();
+	while (i<N) i<<=1;
+	for (; i; i>>=1) {
+	    if (i+j <= N && s + S::operator[](i+j-1) < x) {
+		s += S::operator[](i+j-1);
+		j += i;
+	    }
+	}
+	return j;
+    }
+};
+const int MAXN = 500011;
+const int MAGIC = 2000;
+int N;
+int A[MAXN];
+map<int, int> mp;
+VI G[MAXN];
+
+
+int main() {
+    scanf("%d", &N);
+    REP (i, N) {
+	scanf("%d", A+i);
+	map<int, int>::iterator it = mp.find(A[i]);
+	if (it == mp.end()) {
+	    int s = mp.size();
+	    mp[A[i]] = s;
+	    A[i] = s;
+	} else {
+	    A[i] = it->second;
+	}
+
+	G[A[i]].push_back(i);
+    }
+
+
+    LL ans = 0;
+    REP (x, MAXN) {
+	if ((int)G[x].size() > MAGIC) {
+	    Fenwick<int> F(2*N+2);
+	    int cur = N;
+	    REP (i, N) {
+		F.add(cur, 1);
+		if (A[i] == x) cur++;
+		else cur--;
+
+		ans += F.sum(cur);
+	    }
+	} else if (G[x].size()) {
+	    REP (j, G[x].size()) REP (i, j+1) {
+		int l = (i? G[x][i-1]: -1);
+		int a = G[x][i];
+		int b = G[x][j];
+		int r = (j+1<(int)G[x].size()? G[x][j+1]: N);
+
+		LL t = 2 * (j-i+1) - (b-a+1);
+		if (t > 0) {
+		    LL m1 = a-l, m2 = r-b;
+		    if (m1 > m2) swap(m1, m2);
+//		    eprintf("%lld %lld %lld\n", m1, m2, t);
+		    // z < m1: z+1
+		    // m1 <= z < m2: m1
+		    // m2 <= z < m1+m2-1: m1+1+(m2-z)
+		    // 0 <= z < t
+		    if (m1 < t) {
+			ans += m1 * (m1+1) / 2;
+			if (m2 < t) {
+			    ans += (m2 - m1) * m1;
+			    if (m1 + m2-1 < t) {
+				// z: m2, m2+1, ..., m1+m2-2
+				// c: m1-1, m1-2,.., 1
+				ans += m1 * (m1-1)/2;
+			    } else {
+				// z: m2, m2+1, ..., t-1
+				// c: m1-1, m1-2, ..., m1+m2-t
+				ans += (t-m2) * (m1-1) - (t-m2) * (t-m2-1) / 2;
+			    }
+			} else {
+			    ans += (t - m1) * m1;
+			}
+		    } else {
+			ans += t * (t+1) / 2;
+		    }
+		}
+	    }
+	}
+    }
+
+
+    printf("%lld\n", ans);
+
+    return 0;
+}

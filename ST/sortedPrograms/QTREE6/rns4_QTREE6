@@ -1,0 +1,163 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define N 101000
+vector<int> v[N];
+
+int sz[N], son[N], dep[N], pa[N], top[N], st[N], rev[N], val[3][N], col[N];
+
+void DFS(int x, int p) {
+    sz[x] = 1;
+    son[x] = 0;
+    int mx = 0;
+    for(int i = 0; i < v[x].size(); i ++) {
+        int y = v[x][i];
+        if(y == p) continue;
+        dep[y] = dep[x] + 1;
+        pa[y] = x;
+        DFS(y, x);
+        sz[x] += sz[y];
+        if(mx < sz[y]) mx = sz[y], son[x] = y;
+    }
+    return ;
+}
+
+int fin;
+
+void decom(int x, int p) {
+    top[x] = p;
+    st[x] = ++fin;
+    rev[fin] = x;
+    if(!son[x]) return ;
+    decom(son[x], p);
+    for(int i = 0; i < v[x].size(); i ++) {
+        int y = v[x][i];
+        if(y == pa[x] || y == son[x]) continue;
+        decom(y, y);
+    }
+    return ;
+}
+
+int n;
+
+void add(int id, int x, int va) {
+    while(x <= n) {
+        val[id][x] += va;
+        x += x & -x;
+    }
+    return ;
+}
+
+void add1(int id, int l, int r, int va) {
+    add(id, l, va);
+    add(id, r + 1, -va);
+    return ;
+}
+
+int sum(int id,int x) {
+    int ans = 0;
+    while(x) {
+        ans += val[id][x];
+        x -= x & -x;
+    }
+    return ans;
+}
+
+int sum1(int id, int l, int r) {
+    return sum(id, r)  - sum(id, l - 1);
+}
+
+int ance(int x, int c) {
+    int k = 1;
+    while(k < N) k = k * 2;
+    while(1) {
+        if(x == 1) return 1;
+        int y = pa[x];
+        if(col[y] != c) return x;
+        if(sum1(2, st[top[y]], st[y]) == c * (st[y] - st[top[y]] + 1)) x= top[y];
+        else {
+            int sta = st[y];
+            int ene = st[top[y]];
+            while(1) {
+                if(sta - k + 1>= ene) {
+                    if(sum1(2, sta - k + 1, sta) == c * k) {
+                        sta = sta - k + 1;
+                        if(col[rev[sta - 1]] != c) return rev[sta];
+                        sta --;
+                    }
+                }
+                k /= 2;
+                if(k == 0) {
+                    return y;
+                }
+            }
+        }
+    }
+}
+
+int Calc(int x) {
+    int c = col[x];
+    int k = ance(x, c);
+    //printf("%d %d\n", x, k);
+    return sum(c, st[k]);
+}
+
+void Change(int c, int co, int x) {
+    int va = sum(c, st[x]);
+    if(c == co) va = -va;
+    int y = pa[x];
+    if(col[y] != c) {
+        add1(c, st[y], st[y], va);
+        return ;
+    }
+    int z = ance(y, c);
+    z = pa[z];
+    if(z == 0) z = 1;
+    while(top[y] != top[z]) {
+        add1(c, st[top[y]], st[y], va);
+        y = pa[top[y]];
+    }
+    add1(c, st[z], st[y], va);
+    return ;
+}
+
+void Ch(int x) {
+    int c = col[x];
+    if(x > 1) {
+        Change(0, c, x);
+        Change(1, c, x);
+    }
+    if(c) add(2, st[x], -1);
+    else add(2, st[x], 1);
+    col[x] = 1 - c;
+}
+
+
+int main() {
+    //freopen("2.in", "r", stdin);
+    //freopen("out.txt", "w", stdout);
+    int x, y, Q, ty;
+    scanf("%d", &n);
+    for(int i = 1; i < n; i ++) {
+        scanf("%d%d", &x, &y);
+        v[x].push_back(y);
+        v[y].push_back(x);
+    }
+    fin  = 0;
+    DFS(1, 0);
+    decom(1, 1);
+    for(int i = 1; i <= n; i ++) col[i] = 1;
+    for(int i = 1; i <= n; i ++) add1(1, st[i], st[i], sz[i]), add(2, i, 1);
+    add1(0, 1, n, 1);
+    scanf("%d", &Q);
+    while(Q --) {
+        scanf("%d%d", &ty, &x);
+        if(ty == 0) printf("%d\n", Calc(x));
+        else {
+            Ch(x);
+            //for(int i = 1; i <= n; i ++) printf("%d\n", Calc(i));
+            //puts("");
+        }
+    }
+    return 0;
+}

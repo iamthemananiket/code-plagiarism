@@ -1,0 +1,29 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+long double PI  = 3.14159265358979323846264;
+
+void eval()
+{
+	long double r1,h1,r2,h2;
+	
+	cin>>r1>>h1>>r2>>h2;
+	
+	long double ar2 = PI * r2*r2*h2;
+	
+	long double ar1 = (PI* r1*r1*h1)/3.0 + (2*PI*r1*r1*r1)/3.0;
+	
+//	cout<<ar1<<" "<<ar2<<endl;
+	printf("%.9Lf %.9Lf\n",ar1, ar2);
+	
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	 {
+	 	eval();
+	 }
+}

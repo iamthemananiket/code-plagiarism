@@ -1,0 +1,137 @@
+#include <bits/stdc++.h>
+
+#define llong long long
+
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+const int MXN = (int) 1e6 + 7;
+const int INF = (int) 1e9 + 7;
+
+struct point {
+    int x, y;
+    int id;
+};
+
+struct edge {
+    int to, from;
+    int w;
+};
+
+int t, n;
+point a[MXN];
+
+int dis(int x, int y) {
+    int l = a[x].x - a[y].x;
+    int r = a[x].y - a[y].y;
+    return l * l + r * r;
+}
+
+int sz;
+int lvl[MXN], p[MXN];
+
+edge e[MXN];
+
+bool cmp(edge a, edge b) {
+        return a.w < b.w;
+}
+
+int get(int x) {
+    if (p[x] == x) return x;
+    return p[x] = get(p[x]);
+}
+
+
+int join(int a, int b) {
+    //a = get(a);
+    //b = get(b);
+    if (a != b) {
+		if (lvl[a] < lvl[b])
+			swap (a, b);
+		p[b] = a;
+		if (lvl[a] == lvl[b])
+			++lvl[a];
+	}
+}
+
+vector<pair<int, int> > pr, k;
+
+int prima() {
+    vector<bool> used (n + 1, false);
+    vector<int> min_e (n + 1, INF), sel_e (n + 1, -1);
+    int ans = -INF;
+    min_e[1] = 0;
+    for (int i = 1; i <= n; ++i) {
+        int v = -1;
+        for (int j = 1; j <= n; ++j)
+            if (!used[j] && (v == -1 || min_e[j] < min_e[v]))
+                v = j;
+
+        used[v] = true;
+        if (sel_e[v] != -1)
+            pr.pb(mp(a[v].id, a[sel_e[v]].id)), ans = max(ans, dis(v, sel_e[v]));
+
+        for (int to = 1; to <= n; ++to)
+            if (to != v && dis(v, to) < min_e[to]) {
+                min_e[to] = dis(v, to);
+                sel_e[to] = v;
+            }
+    }
+    return ans;
+}
+
+int kruskal() {
+    for (int i = 1; i <= n; i++) lvl[i] = 0, p[i] = i;
+    sz = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = i + 1; j <= n; j++) {
+            ++sz;
+            e[sz].to = j;
+            e[sz].from = i;
+            e[sz].w = dis(i, j);
+        }
+    }
+    int id = 0;
+    stable_sort(e + 1, e + sz + 1, cmp);
+    int pos = 1;
+    while (pos <= sz) {
+        int en = pos;
+        while (en + 1 <= sz && e[en + 1].w == e[pos].w) en++;
+        //reverse(e + pos, e + en + 1);
+        pos = en + 1;
+    }
+    int ans = -INF;
+    for (int i = 1; i <= sz; i++) {
+        int x = e[i].to,
+            y = e[i].from;
+
+        x = get(x);
+        y = get(y);
+        if (x != y) {
+            k.pb(mp(a[e[i].from].id, a[e[i].to].id));
+            ans = max(ans, e[i].w);
+            join(x, y);
+        }
+    }
+    return ans;
+}
+
+int main() {
+    srand(time(NULL));
+
+    scanf("%d", &t);
+    while (t--) {
+        scanf("%d", &n);
+        for (int i = 1; i <= n; i++) {
+            scanf("%d%d", &a[i].x, &a[i].y);
+            a[i].id = i;
+        }
+        reverse(a + 1, a + n + 1);
+        k.clear(); pr.clear();
+        if (prima() <= kruskal()) swap(k, pr);
+        for (int i = 0; i < k.size(); i++) printf("%d %d\n", k[i].first, k[i].second);
+    }
+    return 0;
+}

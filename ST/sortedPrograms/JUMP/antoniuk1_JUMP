@@ -1,0 +1,199 @@
+//It shouldn't pass, but I hope :)
+
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/point_xy.hpp>
+//#include <boost/geometry/geometries/polygon.hpp>
+
+//#include <boost/foreach.hpp>
+
+using namespace std;
+
+const int magic = 3333;
+const int magic2 = 20;
+
+int p[333333];
+int a[333333];
+int h[333333];
+long long dp[333333];
+
+vector<long long> A[333333];
+vector<long long> B[333333];
+int len[333333];
+int ptr[333333];
+
+long long vdp[333333];
+long long vh[333333];
+bool used[333333];
+vector< pair<long long, long long> > reserv[333333];
+
+bool canOverflow(long long a, long long b) {
+    a = abs(a);
+    b = abs(b);
+    if (b == 0) return false;
+    if (a > 1e18 / b) return true;
+    return false;
+}
+bool comp(long long a, long long b, long long c, long long d) { // a*b >= c*d
+    int sg1 = 1, sg2 = 1;
+    if (a < 0) sg1 *= -1;
+    if (b < 0) sg1 *= -1;
+    if (c < 0) sg2 *= -1;
+    if (d < 0) sg2 *= -1;
+    
+    if (a == 0 || b == 0) {
+        if (c == 0 || b == 0)
+            return true;
+        
+        return 0 >= sg2;
+    }
+    if (c == 0 || d == 0)
+        return sg1 >= 0;
+    
+    if (sg1 != sg2)
+        return sg1 >= sg2;
+    
+    if (sg1 == 1)
+        return log(abs(a)) + log(abs(b)) + 1e-7 > log(abs(c)) + log(abs(d));
+    return log(abs(a)) + log(abs(b)) - 1e-7 < log(abs(c)) + log(abs(d));
+}
+
+// a -> 0
+bool addLine_2(int id, long long a, long long b) {
+    // intersection of (A[len-2],B[len-2]) with (A[len-1],B[len-1]) must lie to the left of intersection of (A[len-1],B[len-1]) with (a,b)
+    
+    if (A[id].size() > 0 && A[id].back() < a)
+        return 0;
+    
+    int l = len[id];
+    
+    while (l >= 2 && comp((B[id][l - 2] - B[id][l - 1]), (a - A[id][l - 1]),
+                          (B[id][l - 1] - b), (A[id][l - 1] - A[id][l - 2]))) {
+        --l;
+        A[id].pop_back();
+        B[id].pop_back();
+    }
+    A[id].push_back(a);
+    B[id].push_back(b);
+    ++l;
+    
+    len[id] = l;
+    return 1;
+}
+
+// x ascends
+long long minValue_2(int id, long long x) {
+    if (len[id] == 0) return 1e18;
+    
+    int l = 0, r = len[id]-1;
+    while (r-l > 3) {
+        int m1 = (2*l + r)/3; // (3l + r-l)/3
+        int m2 = (2*r + l)/3; // (3r - r+l)/3
+        
+        if (A[id][m1] * x + B[id][m1] > A[id][m2] * x + B[id][m2])
+            l = m1;
+        else
+            r = m2;
+    }
+    
+    long long ans = 1e18;
+    for(int i = max(0, l-1); i < min(len[id], r+2); ++i)
+        ans = min(ans, A[id][i] * x + B[id][i]);
+    
+    for(auto bla : reserv[id])
+        ans = min(ans, bla.first * x + bla.second);
+    
+    return ans;
+}
+
+void rebuild(int id) {
+    for(int i = 0; i < A[id].size(); ++i) {
+        reserv[id].push_back({A[id][i], B[id][i]});
+    }
+    A[id].clear();
+    B[id].clear();
+    len[id] = 0;
+    
+    sort(reserv[id].begin(), reserv[id].end());
+    reverse(reserv[id].begin(), reserv[id].end());
+    for(auto x : reserv[id])
+        addLine_2(id, x.first, x.second);
+    reserv[id].clear();
+}
+
+void add_2(int i) {
+    if (!addLine_2(p[i] / magic, -2 * h[i], dp[i])) {
+        reserv[p[i] / magic].push_back({-2 * h[i], dp[i]});
+    
+        if (reserv[p[i] / magic].size() > magic2) {
+            rebuild(p[i] / magic);
+        }
+    }
+    vdp[p[i]] = dp[i];
+    vh[p[i]] = h[i];
+    used[p[i]] = 1;
+}
+
+long long get_2(int i) {
+    // segment = [t*magic, (t+1)*magic)
+    long long ans = 1e18;
+    int id = 0;
+    
+    while (id < p[i] / magic) {
+        ans = min(ans, minValue_2(id, h[i]));
+        id++;
+    }
+    
+    id *= magic;
+    while (id < p[i]) {
+        if (used[id])
+            ans = min(ans, vdp[id] - 2 * h[i] * 1ll * vh[id]);
+        id++;
+    }
+    return ans;
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    int n;
+    cin >> n;
+    
+    for(int i = 0; i < n; ++i)
+        cin >> p[i];
+    for(int i = 0; i < n; ++i)
+        cin >> a[i];
+    for(int i = 0; i < n; ++i)
+        cin >> h[i];
+    
+    dp[0] = a[0] + h[0] * 1ll * h[0];
+    
+    add_2(0);
+    for(int i = 1; i < n; ++i) {
+        dp[i] = get_2(i);
+        
+        dp[i] += a[i] + 2 * h[i] * 1ll * h[i];
+        
+        add_2(i);
+    }
+    
+    cout << dp[n-1] - h[n-1] * 1ll * h[n-1] << "\n";
+    return 0;
+}

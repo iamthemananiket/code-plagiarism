@@ -1,0 +1,109 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+vector<int>adj[10001],dist[10001];
+int city[10001][101];
+bool mark[10001];
+int parent[10001],food[10001];
+queue<int>q;
+int find(int a,int b)
+{
+	if(city[a][b]!=INT_MAX)
+	{
+		return city[a][b];
+	}
+	else if(parent[a]!=-1)
+	{
+		int d=find(parent[a],b);
+		city[a][b]=d;
+		return d;
+	}
+	else
+    {
+        return -1;
+    }
+}
+int main()
+{
+	int n,ko,k,i,j,p1,s,x,y,a,b,m,cnt,t;
+	scanf("%d %d",&n,&ko);
+	scanf("%d",&b);
+	for(i=0;i<n-1;i++)
+	{
+		scanf("%d %d",&x,&y);
+		adj[x].push_back(y);
+		adj[y].push_back(x);
+	}
+	for(i=0;i<=n;i++)
+	{
+		mark[i]=0;
+	}
+	for(i=1;i<=n;i++)
+	{
+		scanf("%d",&food[i]);
+	}
+	scanf("%d",&m);
+	q.push(b);
+	mark[b]=1;
+	cnt=1;
+	dist[0].push_back(b);
+	parent[b]=-1;
+	q.push(-1);
+	while(!q.empty())
+	{
+		t=q.front();
+        q.pop();
+		if(t==-1)
+		{
+			cnt++;
+			if(!q.empty())
+			{
+				q.push(-1);
+			}
+			continue;
+		}
+		//cout<<t<<" ";
+		for(i=0;i<adj[t].size();i++)
+		{
+			if(!mark[adj[t][i]])
+			{
+				dist[cnt].push_back(adj[t][i]);
+				parent[adj[t][i]]=t;
+				q.push(adj[t][i]);
+				mark[adj[t][i]]=1;
+			}
+		}
+	}
+	for(i=0;i<=n;i++)
+	{
+		for(j=0;j<=ko;j++)
+		{
+			city[i][j]=INT_MAX;
+		}
+	}
+	for(i=cnt;i>=0;i--)
+	{
+		for(j=0;j<dist[i].size();j++)
+		{
+			p1=dist[i][j];
+			//cout<<p1<<" ";
+			for(k=0;k<adj[p1].size();k++)
+			{
+				if(adj[p1][k]!=parent[p1])
+				{
+					for(s=1;s<=ko;s++)
+					{
+						city[p1][s]=min(city[p1][s],city[adj[p1][k]][s]);
+					}
+				}
+				city[p1][food[p1]]=min(city[p1][food[p1]],p1);
+			}
+		}
+	}
+	for(j=0;j<m;j++)
+	{
+		scanf("%d %d",&a,&b);
+		printf("%d\n",find(a,b));
+	}
+	return 0;
+}

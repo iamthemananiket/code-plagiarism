@@ -1,0 +1,22 @@
+#include<stdio.h>
+int n, m, S[10100000];
+long long T, Res, a;
+int main()
+{
+	int i;
+	scanf("%d%d", &n, &m);
+	T = 1;
+	for (i = 1; i < m; i++){
+		T = T*i%m;
+		S[i] = S[i - 1];
+		S[i] = (S[i] + T*i%m) % m;
+	}
+	while (n--){
+		scanf("%lld", &a);
+		if (a >= m)Res = (Res + S[m - 1]) % m;
+		else Res = (Res + S[a]) % m;
+		a = a % (2 * m);
+		Res = (Res + (a * (a + 1) / 2) % m *a%m) % m;
+	}
+	printf("%lld\n", Res);
+}

@@ -1,0 +1,169 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+#define count_bits(x) __builtin_popcount(x)
+#define count_bitsll(x) __builtin_popcountll(x)
+#define least_bits(x) __builtin_ffs(x)
+#define least_bitsll(x) __builtin_ffsll(x)
+#define most_bits(x) 32 - __builtin_clz(x)
+#define most_bitsll(x) 64 - __builtin_clz(x)
+ 
+vector<string> split(const string &s, char c) {
+	vector<string> v;
+	stringstream ss(s);
+	string x;
+	while (getline(ss, x, c)) v.push_back(x);
+	return v;
+}
+ 
+#define error(args...) { vector<string> _v = split(#args, ','); err(_v.begin(), args); }
+ 
+void err(vector<string>::iterator it) {}
+ 
+template<typename T, typename... Args>
+void err(vector<string>::iterator it, T a, Args... args) {
+	cerr << it -> substr((*it)[0] == ' ', it -> length()) << " = " << a << '\n';
+	err(++it, args...);
+}
+ 
+typedef long long ll;
+const int MOD = 1000000007;
+ 
+template<class T> inline T tmin(T a, T b) {return (a < b) ? a : b;}
+template<class T> inline T tmax(T a, T b) {return (a > b) ? a : b;}
+template<class T> inline void amax(T &a, T b) {if (b > a) a = b;}
+template<class T> inline void amin(T &a, T b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+ 
+const int N = 100005, NB = 350;
+int n, m, k, B, maxi, maxi_tmp;
+int a[N], ans[N], up[N], dw[N], up_tmp[N], dw_tmp[N];
+int bc[NB];
+ 
+struct Q {
+    int l, r, id;
+};
+ 
+bool comp(Q q1, Q q2) {
+    if (q1.l / B != q2.l / B) return q1.l / B < q2.l / B;
+    return q1.r < q2.r;
+}
+ 
+char pb[20];
+ 
+template<class T> inline void readNum(T &val) {
+    val = 0;
+    int c = getchar_unlocked(), f = 1;
+    while (c != '-' && (c < '0' || c > '9'))
+        c = getchar_unlocked();
+    if (c == '-') {
+        f = -1; c = getchar_unlocked();
+    }
+    while (c >= '0' && c <= '9') {
+        val = (val << 3) + (val << 1) + c - '0';
+        c = getchar_unlocked();
+    }
+    if (f < 0) val = -val;
+}
+ 
+template<class T> inline void putNum(T val, char d) {
+    if (!val) putchar_unlocked('0');
+    if (val < 0) {
+        putchar_unlocked('-');
+        val = -val;
+    }
+    int pi = 0;
+    while (val) {
+        pb[pi++] = (val % 10) + '0';
+        val /= 10;
+    }
+    while (pi) {
+        putchar_unlocked(pb[--pi]);
+    }
+    putchar_unlocked(d);
+}
+
+inline void init() {
+	maxi = 0;
+	mem(dw, -1); mem(up, -1);
+}
+
+inline void update(int idx) {
+	if (dw[a[idx]] == -1 || dw[a[idx]] > idx) dw[a[idx]] = idx;
+	amax(up[a[idx]], idx);
+}
+
+int main(int argc, char *argv[]) {
+    //ios_base::sync_with_stdio(false);
+ 
+    readNum(n); readNum(m); readNum(k);
+    B = (int) sqrt(n);
+    repu(i, 0, n) readNum(a[i]);
+
+    init();
+    vector<Q> queries(k);
+    repu(i, 0, k) {
+    	readNum(queries[i].l); readNum(queries[i].r);
+    	--queries[i].l; --queries[i].r;
+    	queries[i].id = i;
+    	
+    	int x = queries[i].l / B;
+    	amax(bc[x], queries[i].l);
+        
+        if (queries[i].r - queries[i].l <= B) {
+            maxi = 0;
+        	repu(j, queries[i].l, queries[i].r + 1) {
+        		if (dw[a[j]] > j || dw[a[j]] < queries[i].l || dw[a[j]] > queries[i].r) {
+                    dw[a[j]] = j;
+                }
+                amax(maxi, j - dw[a[j]]);
+        	}
+        	ans[i] = maxi;
+        }
+        
+    }
+    sort(all(queries), comp);
+    int lb, rb;
+    int last_bucket = -1;
+    repu(i, 0, k) {
+    	if (queries[i].r - queries[i].l <= B) continue;
+    	int bucket = queries[i].l / B;
+    	if (bucket != last_bucket) {
+    		init();
+    		lb = bc[bucket];
+    		rb = queries[i].r;
+    		repu(j, lb, rb + 1) {
+    			update(j);
+    			amax(maxi, j - dw[a[j]]);
+    		}
+    		last_bucket = bucket;
+    	}
+    	while (rb < queries[i].r) {
+    		++rb;
+    		update(rb);
+    		amax(maxi, rb - dw[a[rb]]);
+    	}
+    	maxi_tmp = maxi;
+    	repu(j, queries[i].l, lb) {
+    		if (up[a[j]] >= lb || up[a[j]] == -1) up_tmp[a[j]] = up[a[j]];
+    		if (dw[a[j]] >= lb || dw[a[j]] == -1) dw_tmp[a[j]] = dw[a[j]];
+    		update(j);
+    		amax(maxi, up[a[j]] - dw[a[j]]);
+    	}
+    	ans[queries[i].id] = maxi;
+    	maxi = maxi_tmp;
+    	repu(j, queries[i].l, lb) {
+    		up[a[j]] = up_tmp[a[j]];
+    		dw[a[j]] = dw_tmp[a[j]];
+    	}
+    }
+ 
+    repu(i, 0, k) putNum(ans[i], '\n');
+    return 0;
+} 

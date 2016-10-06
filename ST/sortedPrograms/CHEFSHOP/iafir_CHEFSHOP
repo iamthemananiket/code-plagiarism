@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int M = (1<<15) + 5;
+
+int n, m, k;
+int a[20], mem[M];
+vector< int > tra[M];
+
+int solve(int mask) {
+  if(mask == 0)
+    return 0;
+  if(mem[mask] != -1)
+    return mem[mask];
+  int &ret = mem[mask];
+  ret = 0;
+  int cnt = __builtin_popcount(mask);
+  for(int i = 0; i<cnt; i++)
+    ret += a[i];
+  for(int i = 0; i<tra[mask].size(); i++) {
+    int off = cnt-__builtin_popcount(tra[mask][i]);
+    int sum = 0;
+    for(int j = off+1; j < cnt; j++)
+      sum += a[j];
+    int res = sum + solve(mask^tra[mask][i]);
+    ret = min(ret, res);
+  }
+  return ret;
+}
+
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    scanf("%d", &n);
+    for(int i = 0; i<n; i++) {
+      scanf("%d", a+i);
+    }
+    sort(a, a+n);
+    k = (1<<n) - 1;
+    for(int i = 0; i<=k; i++)
+      tra[i].clear();
+    scanf("%d", &m);
+    for(int i = 0; i<m; i++) {
+      int now, c, x;
+      scanf("%d", &c);
+      now = 0;
+      while(c--) {
+        scanf("%d", &x);
+        x--;
+        now |= (1<<x);
+      }
+      for(int i = now; i <= k; i = (i+1)|now)
+        tra[i].push_back(now);
+    }
+    memset(mem, -1, sizeof mem);
+    printf("%d\n", solve(k));
+  }
+  return 0;
+}

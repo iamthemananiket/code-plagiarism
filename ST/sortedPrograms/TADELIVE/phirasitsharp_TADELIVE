@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <queue>
+
+#define N 100010
+
+using namespace std;
+
+int A[N], B[N];
+priority_queue<int> heap;
+int n, x, y, cnt;
+
+int main() {
+	scanf("%d%d%d", &n, &x, &y);
+	for(int i = 0;i < n;i++) {
+		scanf("%d", &A[i]);
+	}
+	for(int i = 0;i < n;i++) {
+		scanf("%d", &B[i]);
+	}
+	int ans = 0, sum = 0;
+	cnt = n;
+	for(int i = 0;i < n;i++) {
+		sum += A[i];
+		heap.push(B[i] - A[i]);
+	}
+	if(cnt <= x) {
+		ans = sum;
+	}
+	while(!heap.empty()) {
+		sum += heap.top();
+		heap.pop();
+		cnt--;
+		if(cnt <= x && n-cnt <= y) {
+			if(sum > ans) {
+				ans = sum;
+			}
+		}
+	}
+	printf("%d\n", ans);
+	return 0;
+}

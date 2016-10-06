@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ const int N = 1e5 + 10, T = N * 8;
+ long long t[T],a[T],l[N],r[N];
+ int i,j,n,m;
+
+ inline void up(int v,int tl,int tr,int l,int r)
+ {
+     if(tl>r || tr<l) return;
+     if(tl>=l && tr<=r) ++t[v]; else
+     {
+         int tm = (tl+tr)>>1;
+         int one = v<<1;
+         int two = one+1;
+         up(one,tl,tm,l,r);
+         up(two,tm+1,tr,l,r);
+     }
+ }
+
+ inline void push(int v,int tl,int tr)
+ {
+     if(tl==tr) a[tl] = t[v]; else
+     {
+         int tm = (tl+tr)>>1;
+         int one = v<<1;
+         int two = one+1;
+         t[one]+=t[v];
+         t[two]+=t[v];
+         push(one,tl,tm);
+         push(two,tm+1,tr);
+     }
+ }
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+   //  freopen("input.txt","r",stdin);     freopen("output.txt","w",stdout);
+
+        cin>>n;
+
+   int     sz=1;
+         while(sz<n) sz+=sz;
+
+         long long sum = 0;
+
+         for(i=1;i<=n;++i) cin>>l[i]>>r[i],sum+=r[i] - l[i] + 1, up(1,1,sz,l[i],r[i]);
+
+          push(1,1,sz);
+
+          cin>>m;
+           while(m--)
+           {
+               int x,y;
+               cin>>x>>y;
+               long long SUM;
+               SUM = sum - (r[x] - l[x] + 1 + a[y] - (y>=l[x] && y<=r[x]));
+               if(SUM & 1) cout<<'O'; else cout<<'E';
+               cout<<endl;
+           }
+
+    return 0;
+  }

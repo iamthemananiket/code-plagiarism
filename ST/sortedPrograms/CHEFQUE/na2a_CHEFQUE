@@ -1,0 +1,99 @@
+/* @nazarbek.altybay */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+#include <queue>
+#include <unordered_set>
+
+#define pii pair<int, int>
+
+#define pb push_back
+#define mp make_pair
+
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int INF = (int) 1e9 + 7;
+const int MAXN = (int) 2e7 + 7;
+
+const int MOD = (int) 3e7 + 7;
+
+int queries;
+unsigned int cur, a, b;
+unsigned long long sum;
+
+struct myMap {
+  int t[MOD];
+  myMap() {
+    for (int i = 0; i < MOD; i++)
+      t[i] = -1;
+  }
+  void add(int x) {
+    int key = x % MOD;
+    while (t[key] != -1 && t[key] != x) {
+      key++;
+      if (key == MOD) key = 0;
+    }
+    t[key] = x;
+  }
+  void del(int x) {
+    int key = x % MOD;
+    while (t[key] != -1 && t[key] != x) {
+      key++;
+      if (key == MOD) key = 0;
+    }
+    t[key] = -1;
+  }
+};
+
+myMap SHIT;
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  scanf("%d", &queries);
+  cin >> cur >> a >> b;
+  while (queries--) {
+    if (cur & 1) {
+      int x = (cur >> 1);
+      SHIT.add(x);
+    } else {
+      int x = (cur >> 1);
+      SHIT.del(x);
+    }
+    cur = a * cur + b;
+  }
+  for (int i = 0; i < MOD; i++)
+    if (SHIT.t[i] != -1) 
+      sum += SHIT.t[i];
+  cout << sum;
+  return 0;
+}

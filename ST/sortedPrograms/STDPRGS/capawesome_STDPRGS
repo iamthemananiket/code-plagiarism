@@ -1,0 +1,92 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 6e4;
+
+int n;
+int a[MAX_N];
+int m;
+int l, r;
+int b[MAX_N], sz;
+long long ans;
+
+int used[60200];
+int comp[1000100];
+int rev[60200];
+
+int main ()
+{
+	int i, j, tt = 0;
+	long long cc;
+	scanf ("%d", &n);
+	for (i = 1; i <= n; i ++)
+	{
+		scanf ("%d", &a[i]);
+		b[i] = a[i];
+	}
+	sort (b + 1, b + n + 1);
+	b[0] = b[1];
+	for (i = 1; i <= n; i ++)
+	{
+		if (b[i] != b[i - 1])
+			tt ++;
+		comp[b[i]] = tt;
+		rev[tt] = b[i];
+	}
+	
+	/**if (n <= 10000)
+	{
+		scanf ("%d", &m);
+		for (i = 1; i <= m; i ++)
+		{
+			ans = 0;
+			scanf ("%d%d", &l, &r);
+			sz = 0;
+			for (j = l; j <= r; j ++)
+				b[sz ++] = a[j];
+			sort (b, b + sz);
+			for (j = 1; j < sz; j ++)
+				cc = b[j] - b[j - 1], ans += cc * cc;
+			printf ("%lld\n", ans);
+		}
+		return 0;
+	}**/
+	
+	/**
+	for (i = 1; i <= n; i ++)
+		printf ("%d ", comp[a[i]]);
+	printf ("\n");
+	**/
+	
+	int prv;
+	scanf ("%d", &m);
+	for (i = 1; i <= m; i ++)
+	{
+		ans = 0;
+		scanf ("%d%d", &l, &r);
+		for (j = l; j <= r; j ++)
+			used[comp[a[j]]] = 1;
+		prv = -1;
+		for (j = 0; j <= tt; j ++)
+		{
+			if (!used[j])
+				continue;
+			///printf ("%d %d\n", j, rev[j]);
+			if (prv != -1)
+				cc = rev[j] - rev[prv], ans += cc * cc;
+			prv = j;
+			used[j] = 0;
+		}
+		printf ("%lld\n", ans);
+	}
+	return 0;
+}

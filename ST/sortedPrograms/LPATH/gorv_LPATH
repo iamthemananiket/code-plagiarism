@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+int rowNbr[]={-1,-1,-1,0,0,1,1,1};
+int colNbr[]={-1,0,1,-1,1,-1,0,1};
+int ROW,COL;
+int M[205][205];
+bool visited[205][205];
+int isSafe(int row,int col,int befrow,int befcol)
+{
+return ((row>=0) && (row<ROW) && (col>=0) && (col<COL) 
+		&& (M[row][col]==M[befrow][befcol]+1) && !visited[row][col]);
+}
+int dfs(int row,int col)
+{
+	int k3=0;
+	visited[row][col]=true;
+	for (int k=0;k<8;k++)
+		if (isSafe(row+rowNbr[k],col+colNbr[k],row,col))
+			k3=max(k3,dfs(row+rowNbr[k],col+colNbr[k])+1);
+		return k3;
+}
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--){
+		cin>>ROW>>COL;
+		for(int i=0;i<ROW;i++)
+			for(int j=0;j<COL;j++)
+				cin>>M[i][j];
+		int ans=0;
+		memset(visited,0,sizeof(visited));
+		for (int i=0;i<ROW;++i)
+			for (int j=0;j<COL;++j)
+				if(M[i][j]==0 && !visited[i][j])
+				{
+					ans=max(ans,dfs(i,j)+1);
+				}
+		cout<<ans<<"\n";
+	}
+} 

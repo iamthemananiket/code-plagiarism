@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+struct point
+{
+	int a;
+	int b;
+};
+bool comp(point p1,point p2)
+{
+	if(p1.b<p2.b)
+	{
+		return true;
+	}
+	else if(p1.b>p2.b)
+	{
+		return false;
+	}
+	else
+	{
+		return p1.a<p2.a;
+	}
+}
+point A[100001];
+int main()
+{
+//	ios_base::sync_with_stdio(false);
+	int t,n,ans,p,k,fl,cnt,x,y,i,j,pos;
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d",&n);
+		for(i=0;i<n;i++)
+		{
+			scanf("%d %d",&A[i].a, &A[i].b);
+		}
+		sort(A,A+n,comp);
+		pos=0;
+		cnt=1;
+		for(i=1;i<n;i++)
+		{
+			if(A[pos].b<A[i].a)
+			{
+				cnt++;
+				pos=i;
+			}
+		}
+		printf("%d\n",cnt);
+	}
+	return 0;
+}

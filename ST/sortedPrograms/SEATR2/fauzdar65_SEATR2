@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+using namespace std;
+const int N=100000;
+
+int t;
+int n,m;
+int dp1[501][20001];
+int dp2[501][20001];
+
+vi adj[501];
+
+void solve(int pos,int par)
+{
+	afor(i,1,m)dp1[pos][i]=1;
+
+	afor(z,0,(int)adj[pos].size() - 1)
+	{
+		int i=adj[pos][z];
+		if(i==par)continue;
+		solve(i,pos);
+		afor(j,1,m)
+		{
+			dp1[pos][j]=((ll)dp1[pos][j]*dp2[i][j])%mod;
+		}
+	}
+
+	afor(j,1,m)
+	{
+		dp2[pos][j]=0;
+		for(int k=j;k<=m;k+=j)
+		{
+			dp2[pos][j]+=dp1[pos][k];
+			if(dp2[pos][j]>=mod)dp2[pos][j]-=mod;
+		}
+	}
+
+
+}
+
+int main()
+{
+  finp;
+  cin>>t;
+  while(t--)
+  {
+  	cin>>n>>m;
+  	afor(i,1,500)
+  	{
+  		adj[i].clear();
+  		//afor(j,0,20000)dp[i][j]=-1;
+  	}
+  	afor(i,1,n-1)
+  	{
+  		int u,v;
+  		cin>>u>>v;
+  		adj[u].pb(v);
+  		adj[v].pb(u);
+  	}
+  	int ans=0;
+  	solve(1,-1);
+  	afor(i,1,m)
+  	{
+  		ans+=dp1[1][i];
+  		if(ans>=mod)ans-=mod;
+  	}
+  	cout<<ans<<"\n";
+  }
+
+return 0;
+}

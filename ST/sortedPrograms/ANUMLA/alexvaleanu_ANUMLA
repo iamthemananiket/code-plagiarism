@@ -1,0 +1,241 @@
+#include <bits/stdc++.h>
+
+#define VI vector<int>
+#define VII vector<pair<int,int>>
+#define QI queue<int>
+
+#define ms(a,v) memset( a, v, sizeof( a ) )
+#define FOR(i,a,b) for(int i = a; i <= b; ++i)
+#define ROF(i,a,b) for(int i = a; i >= b; i--)
+#define foreach(v, c) for( typeof( (c).begin() ) v = (c).begin(); v != (c).end(); ++v)
+
+#define pb push_back
+#define pp pair<int,int>
+#define mp make_pair
+#define fi first
+#define se second
+
+#define popcount __builtin_popcount
+#define gcd __gcd
+#define bit(n,i) ( n & ( 1LL << i ) )
+#define lsb(x) ( x & ( -x ) )
+
+#define FIN(str) freopen(str,"r",stdin)
+#define FOUT(str) freopen(str,"w",stdout)
+#define Fin(str) ifstream(str)
+#define Fout(str) ostream(str)
+#define SYNC ios_base::sync_with_stdio(0);
+
+#define ll long long
+#define ull unsigned long long
+
+inline void read( int &a )
+{
+    register char ch;
+    a = 0;
+    int sign = 1;
+
+    do
+    {
+        ch = getchar();
+
+    } while ( !isdigit( ch ) && ch != '-' );
+
+    if ( ch == '-' )
+    {
+        sign = -1;
+        ch = getchar();
+    }
+
+    do
+    {
+        a = a * 10 + ch - '0';
+        ch = getchar();
+
+    } while( isdigit( ch ) );
+
+    a *= sign;
+}
+
+inline void write( int a )
+{
+    char s[20];
+    int i = 0;
+    int sign = 1;
+
+    if ( a < 0 )
+        sign = -1,
+        a = -a;
+
+    do
+    {
+        s[ i++ ] = a % 10 + '0';
+        a /= 10;
+
+    } while ( a );
+
+    i--;
+
+    if ( sign == -1 )
+        putchar( '-' );
+
+    while ( i >= 0 ) putchar( s[ i-- ] );
+}
+
+const int dx[] = { -1, 0, 1, 0 };
+const int dy[] = { 0, 1, 0, -1 };
+
+const int dl[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
+const int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+const int INF = 2e9;
+const double EPS = 1e-9;
+
+const int Nmax = ( 1 << 16 );
+
+const int LgMax = log2(Nmax) + 1;
+
+using namespace std;
+
+int A[Nmax];
+multiset <int> Set;
+int T, N;
+
+void gen()
+{
+    ofstream out("data.in");
+
+    srand( time( NULL ) );
+
+    T = 1;
+    N = 3;
+
+    int v[10];
+
+    for ( int i = 1; i <= N; ++i )
+    {
+        v[i] = rand() % 5 + 1;
+
+        cout << v[i] << " ";
+    }
+
+    cout << endl<<endl;
+
+    int ind = 1;
+
+    out << T << "\n";
+    out << N << "\n";
+
+    for ( int i = 0; i < ( 1 << N ); ++i )
+    {
+        int s = 0;
+
+        for ( int j = 0; j < N; ++j )
+            if ( bit( i, j ) )
+                s += v[j + 1];
+
+        ///cout << s << " ";
+
+        out << s << " ";
+    }
+
+    cout << endl;
+
+    out.close();
+}
+
+bool check( vector<int>&v )
+{
+    int L = ( 1 << N );
+
+    sort( A + 1, A + L + 1 );
+    vector<int> a;
+
+    for ( int i = 0; i < ( 1 << N ); ++i )
+    {
+        int s = 0;
+
+        for ( int j = 0; j < N; ++j )
+            if ( bit( i, j ) )
+                s += v[j];
+
+        a.push_back( s );
+    }
+
+    sort( a.begin(), a.end() );
+
+    for ( int i = 0; i < L; ++i )
+        if ( a[i] != A[i + 1] )
+            return false;
+
+    return true;
+}
+
+int main()
+{
+    ///gen();
+
+    ///FIN("data.in");
+    ///FOUT("data.out");
+
+    read( T );
+
+    while ( T-- )
+    {
+        Set.clear();
+
+        read( N );
+
+        int L = ( 1 << N );
+
+        for ( int i = 1; i <= L; ++i )
+        {
+            read( A[i] );
+            Set.insert( A[i] );
+        }
+
+        int suma = 0;
+
+        vector <int> v = { 0 };
+
+        for ( int j = 1; j <= N; ++j )
+        {
+            int m = 2e9;
+
+            for ( int i = 1; i <= L; ++i )
+            {
+                int val = A[i] - suma;
+
+                if ( val > 0 && val < m && Set.find( val ) != Set.end() )
+                {
+                    m = min( m, val );
+                }
+            }
+
+            cout << m << " ";
+
+            vector <int> aux;
+
+            for ( int i = 0; i < v.size(); ++i )
+            {
+                int x = m + v[i];
+
+                ///cout << x << " ";
+
+                if ( Set.find( x ) != Set.end() ) Set.erase( Set.find( x ) );
+                aux.push_back( x );
+            }
+
+            for ( auto x: aux )
+                v.push_back( x );
+
+            suma += m;
+
+            if ( j == 1 ) Set.erase( 0 );
+        }
+
+        cout << "\n";
+    }
+
+    return 0;
+}

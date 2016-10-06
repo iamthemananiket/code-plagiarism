@@ -1,0 +1,92 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+const int MOD = 1000000007;
+typedef unsigned long long ll;
+ll orig[1666], cur[1666], key[1666], temp[1666];
+int cnt[1 << 16];
+
+inline int bit_count(ll x) {
+  return cnt[x & 65535] + cnt[x >> 16 & 65535] + cnt[x >> 32 & 65535] + cnt[x >> 48 & 65535];
+  //return __builtin_popcount(x & 4294967295u) + __builtin_popcount(x >> 32);
+}
+
+void solve(int test_num) {
+  string binary;
+  cin >> binary;
+  const int N = binary.size();
+  const int B = (N + 63) / 64;
+  memset(orig, 0, sizeof(orig));
+  for (int i = 0; i < N; i++)
+    if (binary[i] == '1')
+      orig[i >> 6] |= 1LLu << (i & 63);
+  cnt[0] = 0;
+  for (int i = 1; i < (1 << 16); i++)
+    cnt[i] = 1 + cnt[i - (i & -i)];
+  int Q;
+  cin >> Q;
+  while (Q-- > 0) {
+    string str;
+    cin >> str;
+    memset(key, 0, sizeof(key));
+    memcpy(cur, orig, sizeof(orig));
+    const int M = str.size();
+    const int C = (M + 63) / 64;
+    for (int i = 0; i < M; i++)
+      if (str[i] == '1')
+        key[i >> 6] |= 1LLu << (i & 63);
+    for (int i = M & 63; i < 64; i++)
+      if (1LLu << i & cur[C - 1])
+        cur[C - 1] ^= 1LLu << i;
+    for (int i = C; i < B; i++)
+      cur[i] = 0;
+    ll res = 0;
+    for (int i = 0; i < N - M + 1; i++) {
+      int now = 0;
+      for (int b = 0; b < B; b++)
+        now += bit_count(key[b] ^ cur[b]);
+      //pln(now);
+      res = (res * 100001 + now) % MOD;
+      for (int b = 0; b < B; b++) {
+        cur[b] >>= 1;
+        cur[b] |= ll(cur[b + 1] & 1) << 63;
+      }
+      if (i + M < N && binary[i + M] == '1')
+        cur[C - 1] |= 1LLu << ((M - 1) & 63);
+    }
+    cout << res << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

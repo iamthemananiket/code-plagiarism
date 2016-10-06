@@ -1,0 +1,58 @@
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+
+void MAIN() {
+    int N, M;
+    scanf("%d%d", &N, &M);
+    
+    if (N == 1) {
+	// never
+    } else if (N == 2) {
+	// M must be 1
+	puts("1 2");
+    } else if (N == 3) {
+	if (M == 3) {
+	    puts("1 2\n2 3\n3 1");
+	} else {
+	    puts("-1 -1");
+	}
+    } else if (M < N) {
+	puts("-1 -1");
+    } else { // N >= 4
+	for (int i=4; i<=N; i++) {
+	    if (i + (N-i)*2 == M) {
+		for (int j=0; j<i; j++) {
+		    printf("%d %d\n", j+1, (j+1)%i+1);
+		}
+		for (int j=i+1; j<=N; j++) {
+		    printf("1 %d\n3 %d\n", j, j);
+		}
+		return;
+	    }
+	}
+	puts("-1 -1");
+    }
+}
+int main() {
+    int T;
+    scanf("%d", &T);
+    REP ($, T) MAIN();
+
+    return 0;
+}

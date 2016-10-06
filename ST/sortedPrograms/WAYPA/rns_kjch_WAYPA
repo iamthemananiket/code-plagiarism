@@ -1,0 +1,225 @@
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+#define M 300005
+#define mod 1000000007
+#define Q 17
+typedef long long LL;
+template <class T> void chkmax(T &a, T b) { if (a < b) a = b; }
+ 
+int n, K, ans, tn, FLAG;
+int head[M], to[M], next[M], w[M];
+ 
+bool vis[M];
+ 
+void init() {
+	for (int i = 1; i <= n; i ++) {
+		head[i] = 0;
+		vis[i] = 0;
+	}
+}
+ 
+void AddEdge(int a, int b, int c, int i) {
+	to[i] = b;
+	next[i] = head[a];
+	head[a] = i;
+	w[i] = c;
+}
+ 
+int sz[M], mx[M];
+ 
+void fdfs(int u, int pa = 0) {
+	sz[u] = 1, mx[u] = 0;
+	for (int i = head[u]; i; i = next[i]) {
+		int v = to[i];
+		if (v == pa || vis[v]) continue;
+		fdfs(v, u);
+		sz[u] += sz[v];
+		chkmax(mx[u], sz[v]);
+	}
+}
+ 
+int froot(int u, int m) {
+	int x = u;
+	chkmax(mx[u], m - sz[u]);
+	for (int i = head[u]; i; i = next[i]) {
+		int v = to[i];
+		if (sz[v] > sz[u] || vis[v]) continue;
+		int y = froot(v, m);
+		if (mx[y] < mx[x]) x = y;
+	}
+	return x;
+}
+ 
+LL down[M], up[M], p[M], m_p[M];
+int m;
+int arr[M], dp[M];
+ 
+int root, ML, L, ANS;
+int path[M], pn;
+ 
+#define P 150001
+int TN, chk[P+10], F[P+10];
+LL val[P+10];
+ 
+void insert(LL x) {
+	int y = x % P; if (y < 0) y += P;
+	for ( ; chk[y] == TN; y = F[y]) if (val[y] == x) return;
+	val[y] = x; chk[y] = TN;
+}
+ 
+bool search(LL x) {
+	int y = x % P; if (y < 0) y += P;
+	for ( ; chk[y] == TN; y = F[y]) if (val[y] == x) return 1;
+	return 0;
+}
+ 
+int DFS(int u, int pa) {
+	path[pn++] = u;
+	int t, x, tt;
+	LL y;
+	if (dp[u] >= (L + 1) / 2) {
+		t = 2 * dp[u] - L, tt = dp[u] - t;
+		x = path[t];
+		if (down[x] == up[x]) {
+			if (FLAG) {
+				y = down[u] - m_p[tt] * down[x];
+				y %= mod; if (y < 0) y += mod;
+			}
+			else y = down[u] - p[tt] * down[x];
+			if (search(y)) return 1;
+		}
+	}
+	for (int i = head[u]; i; i = next[i]) {
+		int v = to[i];
+		if (!vis[v] && v != pa) {
+			if (DFS(v, u)) return 1;
+		}
+	}
+	pn--;
+	return 0;
+}
+ 
+void update(int bf, int v) {
+	int l = (ans - 1) / 2, r = min(ANS, ML + 1);
+	while (l < r - 1) {
+		int mid = (l + r + 1) >> 1;
+		pn = 1; L = 2 * mid + bf;
+		if (DFS(v, root)) {
+			if (ans < L) ans = L; l = mid;
+		}
+		else r = mid;
+	}
+}
+ 
+void add(int u, int pa) {
+	insert(down[u]);
+	for (int i = head[u]; i; i = next[i]) {
+		int v = to[i]; if (!vis[v] && v != pa) add(v, u);
+	}
+}
+ 
+void calc(int bf, int m) {
+	++TN;
+	if (bf) {
+		for (int i = 0; i < m; i++) {
+			int v = arr[i];
+			if (i)
+				for (int j = 0; j < 2; j++) update(j, v);
+			add(v, root);
+		}
+	}
+	else {
+		for (int i = m - 1; i >= 0; i--) {
+			int v = arr[i];
+			if (i < m - 1)
+				for (int j = 0; j < 2; j++) update(j, v);
+			add(v, root);
+		}
+	}
+}
+ 
+void dfs(int u, int pa, LL U, LL D) {
+	if (D == U && ans < dp[u]) ans = dp[u];
+	down[u] = D; up[u] = U;
+	LL DD, UU;
+	for (int i = head[u]; i; i = next[i]) {
+		int v = to[i];
+		if (!vis[v] && v != pa) {
+			if (FLAG) {
+				UU = w[i] * m_p[dp[u]] + U;
+				DD = D * Q + w[i];
+				UU %= mod, DD %= mod;				
+			}
+			else {
+				UU = w[i] * p[dp[u]] + U;
+				DD = D * Q + w[i];
+			}
+			dfs(v, u, UU, DD);
+		}
+	}
+}
+ 
+void pdfs(int u, int pa) {
+	dp[u] = dp[pa] + 1;
+	if (ML < dp[u]) ML = dp[u];
+	for (int i = head[u]; i; i = next[i]) {
+		int v = to[i]; if (!vis[v] && v != pa) pdfs(v, u);
+	}
+}
+ 
+void solve() {
+	for (int i = 1; i <= n; i++) vis[i] = 0;
+	for (int u = 1; u <= n; u ++) while (!vis[u]) {
+		fdfs(u);
+		int r = froot(u, sz[u]);
+		vis[r] = 1; ML = m = 0; root = r;
+		dp[r] = 0; down[r] = up[r] = 0; path[0] = r;
+		for (int i = head[r]; i; i = next[i]) {
+			int v = to[i]; if (!vis[v]) pdfs(v, r);
+		}
+		if (2 * ML <= ans) continue;
+		for (int i = head[r]; i; i = next[i]) {
+			int v = to[i];
+			if (!vis[v]) {
+				dfs(v, r, w[i], w[i]); arr[m++] = v;
+			}
+		}
+		for (int i = 0; i < 2; i++) calc(i, m);
+	}
+	return;
+}
+ 
+int main() {
+	#ifndef ONLINE_JUDGE
+	freopen("WAYPA.in", "r", stdin);
+	#endif
+ 
+	int siz = 256 << 20; // 256MB
+	char *_ = (char*)malloc(siz) + siz;
+	__asm__("movl %0, %%esp\n"::"r"(_));
+ 
+	int T;
+	p[0] = m_p[0] = 1;
+	for (int i = 1; i < M; i++) p[i] = p[i-1] * Q;
+	for (int i = 1; i < M; i++) m_p[i] = m_p[i-1] * Q % mod;
+	for (int i = 0; i < P; i++) F[i] = i + 1; F[P-1] = 0;
+	for (scanf("%d", &T); T--; ) {
+		scanf("%d", &n);
+		init();
+		for (int i = 1; i < n; i ++) {
+			int a, b, c;
+			scanf("%d %d %d", &a, &b, &c); c++;
+			AddEdge(a, b, c, i);
+			AddEdge(b, a, c, i + n - 1);
+		}
+		ans = 1; ANS = n + 1;
+		FLAG = 0;
+		solve();
+		int tmp = ans;
+		FLAG = 1; ans = 1;
+		ANS = tmp;
+		solve();
+		printf("%d\n", min(tmp, ans) + 1);
+	}
+}   

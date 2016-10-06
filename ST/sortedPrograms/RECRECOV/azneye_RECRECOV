@@ -1,0 +1,61 @@
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
+
+using namespace std;
+
+typedef long long ll;
+
+const int MAX = 111;
+vector<int> adj[MAX];
+bool vis[MAX];
+int mr[MAX];
+
+bool dfs(int v) {
+  if (v < 0) {
+    return true;
+  }
+  for (const int& to : adj[v]) {
+    if (!vis[to]) {
+      vis[to] = true;
+      if (dfs(mr[to])) {
+        mr[to] = v;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int V, E;
+    cin >> V >> E;
+    for (int v = 1; v <= V; ++v) {
+      adj[v].clear();
+    }
+    for (int e = 0, a, b; e < E; ++e) {
+      cin >> a >> b;
+      adj[a].push_back(b);
+    }
+    memset(vis, false, sizeof(vis));
+    memset(mr, -1, sizeof(mr));
+    int res = 0;
+    for (int v = 1; v <= V; ++v) {
+      memset(vis, false, sizeof(vis));
+      if (!dfs(v)) {
+        ++res;
+      }
+    }
+    cout << res << endl;
+  }
+  return 0;
+}

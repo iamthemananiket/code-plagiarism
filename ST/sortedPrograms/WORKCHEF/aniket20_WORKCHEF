@@ -1,0 +1,136 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+#define M 504
+
+ll dp[20][(1<<10)][M+1][2];
+int pw[11];
+ll dp1[(1<<10)][M][2];
+
+int sz,k;
+
+ll go(int mask,int rem,int fl){
+	if(dp1[mask][rem][fl]!=-1){
+		return dp1[mask][rem][fl];
+	}
+	int cnt=0;
+	for(int i=1;i<10;i++){
+		if(i==5){
+			continue;
+		}
+		if(pw[i]&mask){
+			if((rem%i)==0){
+				cnt++;
+			}
+		}
+	}
+	if(pw[5]&mask && fl==1){
+		cnt++;
+	}
+	if(cnt>=k){
+		return (dp1[mask][rem][fl]=1);
+	}
+	else{
+		return (dp1[mask][rem][fl]=0);
+	}
+}
+
+
+ll fun2(int pos,int mask,int rem,int fl){
+	if(dp[pos][mask][rem][fl]!=-1){
+		return dp[pos][mask][rem][fl];
+	}
+	if(pos==sz){
+		return (dp[pos][mask][rem][fl]=go(mask,rem,fl));
+	}
+	ll ret=0;
+	for(int i=0;i<10;i++){
+		int fl=(i==0 || i==5)?1:0;
+		ret+=fun2(pos+1,mask|pw[i],(rem*10+i)%M,fl);
+	}
+	dp[pos][mask][rem][fl]=ret;
+	return ret;
+}
+
+ll fun(ll val){
+	if(val==0){
+		return 0;
+	}
+	vector<ll>v;
+	while(val){
+		v.pb(val%10);
+		val/=10;
+	}
+	reverse(v.begin(),v.end());
+	sz=v.size();
+	int mask=0,rem=0,i,j;
+	for(i=0;i<=v.size();i++){
+		for(j=0;j<pw[10];j++){
+			for(int p=0;p<M;p++){
+				dp[i][j][p][0]=-1;
+				dp[i][j][p][1]=-1;
+			}
+		}
+	}
+	for(i=0;i<pw[10];i++){
+		for(j=0;j<M;j++){
+			dp1[i][j][0]=-1;
+			dp1[i][j][1]=-1;
+		}	
+	}
+	ll ret=0;
+	for(i=0;i<v.size();i++){
+		for(j=0;j<v[i];j++){
+			int fl=(j==5 || j==0)?1:0;
+			ret+=fun2(i+1,mask|pw[j],(rem*10+j)%M,fl);
+		}
+		rem=(rem*10+v[i])%M;
+		mask|=(1<<v[i]);
+	}
+	int fl=(v[sz-1]==5 || v[sz-1]==0)?1:0;
+	ret+=fun2(sz,mask,rem,fl);
+	return ret;
+}
+
+int main(){
+	ll q,l,r,i;
+	pw[0]=1;
+	for(i=1;i<=10;i++){
+		pw[i]=pw[i-1]*2;
+	}
+	sc("%lld",&q);
+	for(i=0;i<q;i++){
+		sc("%lld %lld %d",&l,&r,&k);
+		ll ans=fun(r)-fun(l-1);
+		pr("%lld\n", ans);
+	}
+	return 0;
+}

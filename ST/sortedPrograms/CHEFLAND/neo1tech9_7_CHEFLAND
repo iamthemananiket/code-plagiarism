@@ -1,0 +1,134 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, d, b, x;
+const int N = 1e5 + 500;
+const int LN = 19;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+int H = 0;
+int tin[N], low[N], p[N];
+int ok = 0;
+bool vis[N];
+int cp[N], ccp[N];
+int comp = 0;
+set < int > kk[N];
+void findb(int cur, vector < int > adj[]) {
+    ++H;
+    tin[cur] = H;
+    low[cur] = H;
+    vis[cur] = true;
+    int edg = N - 1, c = 0;
+    for (int i = 0; i < adj[cur].size(); ++i) {
+        int v = adj[cur][i];
+        if (v == p[cur]) {
+            c++;
+        } else {
+            if (!vis[v]) {
+                p[v] = cur;
+                findb(v, adj);
+            }
+            low[cur] = min(low[v], low[cur]);
+        }
+    }
+    if (c == 1 && tin[cur] == low[cur]) {
+        ok++;
+        kk[cur].insert(p[cur]);
+        kk[p[cur]].insert(cur);
+    }
+}
+vii adj[N];
+void dfs(int v, int par) {
+    if (vis[v]) return;
+    vis[v] = true;
+    cp[v] = comp;
+    for (int u : adj[v]) {
+        if (vis[u] && cp[u] != cp[v]) {
+            ccp[cp[v]]++;
+            ccp[cp[u]]++;
+            continue;
+        }
+        if (kk[u].find(v) != kk[u].end() || kk[v].find(u) != kk[v].end()) continue;
+        dfs(u, v);
+    }
+}
+int main() {
+    csl;
+        cin >> n >> m;
+        for (int i = 0; i < m; ++i) {
+            cin >> u >> v;
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+    for (int i = 1; i <= n; ++i) {
+        if (vis[i]) continue;
+        comp++;
+        findb(i, adj);
+    }
+    ok = 0;
+    if (comp > 1)
+        cout << "NO\n";
+    else {
+        memset(vis, false, sizeof(vis));
+        comp = 0;
+        for (int i = 1; i <= n; ++i) {
+            if (vis[i])continue;
+            comp++;
+            dfs(i, 0);
+        }
+        for (int i = 1; i <= n; ++i) {
+            //cout << ccp[i] << '\n';
+            if (ccp[i] >= 3) {
+                cout << "NO\n";
+                return 0;
+            }
+        }
+        cout << "YES\n";
+    }
+    return 0;
+}
+
+

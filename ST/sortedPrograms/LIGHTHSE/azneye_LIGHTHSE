@@ -1,0 +1,95 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+struct Point {
+  int x, y, id;
+
+  bool operator<(const Point& p) const {
+    return x < p.x || (x == p.x && y < p.y);
+  }
+};
+typedef long long ll;
+const int MOD = int(1e9) + 7;
+
+void solve(int test_num) {
+  int N;
+  cin >> N;
+  vector<Point> pt(N);
+  for (int i = 0; i < N; ++i) {
+    cin >> pt[i].x >> pt[i].y;
+    pt[i].id = i + 1;
+  }
+  int minx = MOD, maxx = -MOD, miny = MOD, maxy = -MOD;
+  sort(pt.begin(), pt.end());
+  for (int i = 0; i < N; ++i) {
+    minx = min(minx, pt[i].x);
+    maxx = max(maxx, pt[i].x);
+    miny = min(miny, pt[i].y);
+    maxy = max(maxy, pt[i].y);
+  }
+  for (int i = 0; i < N; i++) {
+    if (pt[i].x == minx && pt[i].y == miny) {
+      cout << "1\n";
+      cout << pt[i].id << " NE\n";
+      return;
+    }
+    if (pt[i].x == minx && pt[i].y == maxy) {
+      cout << "1\n";
+      cout << pt[i].id << " SE\n";
+      return;
+    }
+    if (pt[i].x == maxx && pt[i].y == miny) {
+      cout << "1\n";
+      cout << pt[i].id << " NW\n";
+      return;
+    }
+    if (pt[i].x == maxx && pt[i].y == maxy) {
+      cout << "1\n";
+      cout << pt[i].id << " SW\n";
+      return;
+    }
+  }
+  cout << "2\n";
+  if (pt[0].y < pt[N - 1].y) {
+    cout << pt[0].id << " NE\n";
+    cout << pt[N - 1].id << " SW\n";
+  } else {
+    cout << pt[0].id << " SE\n";
+    cout << pt[N - 1].id << " NW\n";
+  }
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

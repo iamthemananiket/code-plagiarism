@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+string s;
+int main(){
+	int test;
+	cin>>test;
+	while (test--){
+		cin>>s;
+		int n=s.length(),n0=count(s.begin(),s.end(),'0');
+		if (n0==1||n0==n-1) cout<<"Yes\n";
+		else cout<<"No\n";
+	}
+} 

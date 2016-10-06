@@ -1,0 +1,59 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+#define eps 1e-9
+#define fast_cin ios_base::sync_with_stdio(false)
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+
+ll POWER[65];
+ll power(ll a, ll b) {ll ret=1;while(b) {if(b&1) ret*=a;a*=a;if(ret>=MOD) ret%=MOD;if(a>=MOD) a%=MOD;b>>=1;}return ret;}
+ll inv(ll x) {return power(x,MOD-2);}
+
+void precompute() {
+	POWER[0]=1;
+	for(int i=1;i<63;i++) POWER[i]=POWER[i-1]<<1LL;
+}
+const int MAXN = 1e6+5;
+bool vis[MAXN];
+int mob[MAXN];
+int f[MAXN];
+int ar[MAXN];
+ll C(ll x) {
+	ll ret=x*(x-1)*(x-2);
+	return ret/6LL;
+}
+int main() {
+	// freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	precompute();
+	int n;
+	cin>>n;
+	for(int i=1;i<=n;i++) scanf("%d",&ar[i]),f[ar[i]]++;
+	ll ans = C(n);
+	for(int i=1;i<MAXN;i++) mob[i]=1;
+	for(int i=2;i<MAXN;i++) {
+		if(vis[i]) continue;
+		for(int j=i;j<MAXN;j+=i) {
+			vis[j]=true;
+			mob[j]*=-1;
+			if((j/i)%i==0) mob[j]=0;
+		}
+	}
+	for(int i=2;i<MAXN;i++) {
+		int s=0;
+		for(int j=i;j<MAXN;j+=i) s+=f[j];
+		ans+=mob[i]*C(s);
+	}
+	cout<<ans<<endl;
+	return 0;
+}

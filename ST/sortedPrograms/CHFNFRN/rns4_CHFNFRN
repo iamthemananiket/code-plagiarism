@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define M 1010
+
+int C, n, m;
+
+int vis[M], col[M];
+int chk[M][M];
+
+vector <int> v[M];
+
+int q[M];
+
+bool solve() {
+	for (int j = 1; j <= n; j++) {
+		if (vis[j] == C) continue;
+		int h = 0, t = 0;
+		q[t++] = j; vis[j] = C; col[j] = 0;
+		while (h < t) {
+			int x = q[h++];
+			for (int i = 0; i < v[x].size(); i++) {
+				int u = v[x][i];
+				if (vis[u] == C && col[u] != 1 - col[x]) return 0;
+				if (vis[u] != C) {
+					vis[u] = C; col[u] = 1 - col[x]; q[t++] = u;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+int main() {
+	//freopen("in.txt", "r", stdin);
+	int T;
+	for (scanf("%d", &T); T--; ) {
+		++C;
+		scanf("%d %d", &n, &m);
+		for (int i = 1; i <= n; i++) v[i].clear();
+		for (int i = 0; i < m; i++) {
+			int x, y;
+			scanf("%d %d", &x, &y); chk[x][y] = chk[y][x] = C;
+		}
+		for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++)
+			if (chk[i][j] != C && i != j) v[i].push_back(j);
+
+		if (solve()) puts("YES");
+		else puts("NO");
+	}
+}

@@ -1,0 +1,47 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+ int main()
+ {
+    fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+    int t;
+     cin>>t;
+      while(t--)
+      {
+          int d,a,b,n,m;
+          cin>>n>>m;
+          a = n , b = m;
+           while(1)
+           {
+               if(a==0 || b==0) break;
+               if(a>b) swap(a,b);
+               b%=a;
+           }
+           d = a+b;
+           if(d>1) cout<<"No "<<n/d<<endl; else cout<<"Yes"<<endl;
+      }
+
+    return 0;
+ }

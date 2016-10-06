@@ -1,0 +1,88 @@
+//#include "testlib.h"
+//#include <spoj.h>
+ 
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <unordered_map>
+#include <climits>
+ 
+using namespace std;
+ 
+int n;
+int ans = 1e9;
+int sp[111111];
+vector<pair<int, int> > g[111111];
+ 
+void dijkstra(vector<int> &s, vector<int> &dest) {
+    
+    vector<int> prio, pred;
+    prio.assign(n, INT_MAX);
+    for(int x : s)
+        prio[x] = 0;
+    pred.assign(n, -1);
+    priority_queue<pair<int, int>, vector<pair<int, int>> , greater<pair<int, int>> > q;
+    for(int x : s)
+        q.push(make_pair(0, x));
+    
+    while (!q.empty()) {
+        int d = q.top().first;
+        int u = q.top().second;
+        q.pop();
+        if (d != prio[u])
+            continue;
+        for (int i = 0; i < (int) g[u].size(); i++) {
+            int v = g[u][i].first;
+            int nprio = prio[u] + g[u][i].second;
+            if (prio[v] > nprio) {
+                prio[v] = nprio;
+                pred[v] = u;
+                q.push(make_pair(nprio, v));
+            }
+        }
+    }
+    for(int x : dest)
+        ans = min(ans, prio[x]);
+    
+}
+ 
+int main() {
+    ios::sync_with_stdio(0);
+    int m, k, spp, a, b, c;
+    cin >> n >> m >> k;
+    
+    vector<int> cool;
+    while (k --> 0) {cin >> spp; cool.push_back(spp-1);}
+    for(int i = 0; i < m; ++i) {
+        cin >> a >> b >> c; a--, b--;
+        g[a].push_back({b, c});
+        g[b].push_back({a, c});
+    }
+    
+    for(int kk = 0; kk < 3; ++kk) {
+        random_shuffle(cool.begin(), cool.end());
+        int sz = cool.size() / 2;
+        vector<int> a, b;
+        for(int i = 0; i < cool.size(); ++i)
+        if (i < sz)
+            a.push_back(cool[i]);
+        else
+            b.push_back(cool[i]);
+        
+        dijkstra(a, b);
+    }
+    cout << ans << "\n";
+    return 0;
+}  

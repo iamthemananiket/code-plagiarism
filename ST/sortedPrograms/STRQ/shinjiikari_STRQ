@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <map>
+#include <cstring>
+using namespace std;
+
+inline long long int fast_input(void)
+{
+	char t;
+	long long int x=0;
+	long long int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void fast_output(long long int x)
+{
+	char a[20];
+	long long int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+long long int count[4][1000001],ans[4][4][1000001];
+
+int main()
+{
+long long int q,i,l,r,len,j,k,curr;
+char a[1000001],b,c;
+map <char, int> m;
+m['c']=0;
+m['h']=1;
+m['e']=2;
+m['f']=3;
+memset(ans,0,sizeof(ans));
+memset(count,0,sizeof(count));
+scanf("%s",a);
+len=strlen(a);
+count[m[a[0]]][0]=1;
+for(i=1;i<len;i++)
+{
+    for(j=0;j<4;j++)
+        for(k=0;k<4;k++)
+            ans[j][k][i]=ans[j][k][i-1];
+    for(j=0;j<4;j++)
+        ans[j][m[a[i]]][i]=ans[j][m[a[i]]][i-1]+count[j][i-1];
+    for(j=0;j<4;j++) count[j][i]=count[j][i-1];
+    for(j=0;j<4;j++) ans[j][j][i]=0;
+    count[m[a[i]]][i]++;
+}
+q=fast_input();
+while(q--)
+{
+    b=getchar();
+    getchar();
+    c=getchar();
+    l=fast_input();
+    r=fast_input();
+    curr=ans[m[b]][m[c]][r-1];
+    if (l!=1)
+    {
+        curr-=ans[m[b]][m[c]][l-2];
+        curr-=count[m[b]][l-2]*(count[m[c]][r-1]-count[m[c]][l-2]);
+    }
+    fast_output(curr);
+}
+return 0;
+}

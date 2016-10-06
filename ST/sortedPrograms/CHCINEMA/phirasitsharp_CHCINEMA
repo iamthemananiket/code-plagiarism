@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <algorithm>
+
+using namespace std;
+
+typedef long long ll;
+
+ll calc(ll N, ll M, ll Z, ll L, ll B) {
+  if(M == 1ll) return min(N, Z + L + B); 
+  ll ans = 0ll, area = N * M;
+  if(M % 2 == 0ll and L > 0) {
+    ll k = min(N, L);
+    ans += k;
+    ll r = calc(k, M-1, 0, L - k, B);
+    N = N - k;
+    B = B - max(0ll, r - (L-k));
+    L = max(0ll, L-k - r);
+    if(N > 0) {
+      ll per_row = (M + 1ll) / 2ll;
+      ans += min(N * per_row, B);
+    }
+    ans += r;
+    ans += min(Z, area - ans);
+    return ans;
+  }
+  if(N > 0 and L >= M-1 and B > 0) {
+    ll r = min(N, min(B, L / (M-1)));
+    ans += r * M;
+    N -= r; L -= r * (M-1); B -= r;
+  }
+  if(N > 0 and L >= M) {
+    ll r = min(N, L / M);
+    ans += r * M;
+    N -= r; L -= r * M;
+  }
+  while(N > 0 and L > 0) {
+    ll val = min(L, M);
+    ll lf = M - val;
+    if(val > 1 and lf % 2ll == 0 and lf / 2ll < B) {
+      val--;
+      lf = M - val;
+    }
+    ll val2 = min(B, (lf + 1ll) / 2ll);
+    ans += val + val2;
+    N = N-1; L -= val; B -= val2;
+  }
+  ll per_row = (M + 1ll) / 2ll;
+  ans += min(N * per_row, B);
+  ans += min(Z, area - ans);
+  return ans;
+}
+void evaluate(void) {
+  ll N, M, Z, L, R, B;
+  scanf("%lld%lld", &N, &M);
+  scanf("%lld%lld%lld%lld", &Z, &L, &R, &B);
+  printf("%lld\n", calc(N, M, Z, L+R, B));
+}
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    evaluate();
+  }
+  return 0;
+}

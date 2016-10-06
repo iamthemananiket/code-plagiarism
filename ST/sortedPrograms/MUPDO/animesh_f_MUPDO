@@ -1,0 +1,99 @@
+/*
+Bomber Man
+Author & Problem Setter - Animesh Fatehpuria
+*/
+
+#include <bits/stdc++.h> 
+#define MP make_pair
+using namespace std;
+
+/* 
+
+Persistent Binary Indexed Tree
+O(log N * log N) per query
+O(log N) per update
+
+*/
+
+const int MAX = 1e6 + 5;
+ 
+int N , K , U , Q , val, x1 , x2 , ql , qr , inf = (int)(1e7);
+long long x , y;
+ 
+vector < pair < int , int > > v[MAX];
+vector < pair < int , int > > BIT[MAX];
+
+int cur;
+
+inline bool cmp( pair < int , int > a , pair < int , int > b){
+    if(a.second == b.second) return a.first < b.first;
+    else return a.second < b.second;
+}
+
+// Update and maintain level of update
+inline void update(int idx , int val){
+    for(; idx <= N + N ; idx += idx & (-idx) ){
+        BIT[idx].push_back( MP(BIT[idx].back().first + val , cur) );
+    }
+}
+
+inline int query(int idx , int upd_id){
+    int res = 0;
+    for( ; idx ; idx -= idx & (-idx) ){
+        auto it = upper_bound( BIT[idx].begin() , BIT[idx].end() , MP(inf,upd_id) , cmp) - 1;
+        res += it->first;
+    }
+    return res;
+}
+ 
+inline int fix( int ans ){ // Boundary cases
+    if( ans < 1 ) ans = 1;
+    if( ans > N + N ) ans = N + N;
+    return ans;
+}
+ 
+int main(){
+	
+    cin.tie(0) , ios::sync_with_stdio(0);
+	
+    cin >> N >> K >> U >> Q;
+	
+    for(int i = 1 ; i <= U ; ++i){
+        cin >> x >> y;
+        int rot_x = x + y - 1; // Mapping x co ordinate
+        int rot_y = y - x + N; // Mapping y co ordinate
+        v[rot_x].push_back(make_pair(rot_y , 1));
+    }
+ 
+    for(int i = 0 ; i <= N + N ; i++)
+        BIT[i].push_back({0,0});
+    
+    for(int i = 1 ; i <= N + N ; ++i){ 
+        cur = i;
+        for(auto it : v[i])
+            update(it.first , it.second);
+    }
+ 
+    cin >> x >> y;
+    long long A , B;
+    cin >> A >> B;
+ 
+    do{
+
+    	x1 = x + y - 1 - K  , x2 = x + y - 1 + K; // Top Row , Bottom Row
+    	ql = y - x + N - K  , qr = y - x + N + K ;// Top Col , Bottom Col
+ 
+    	x1 = fix(x1) , x2 = fix(x2) , ql = fix(ql) , qr = fix(qr); 
+    	int res = query(qr,x2) -  query(ql - 1,x2) - query(qr,x1 - 1) + query(ql - 1, x1 - 1);
+    	
+        if( res > 0 ) puts("Not Safe\n");
+    	else          puts("Safe\n");    
+ 
+    	if( res ) x = ( x * A + B) % N + 1 , y = ( y * A + B ) % N + 1;
+    	else  x = ( x * B + A) % N + 1 , y = ( y * B + A ) % N + 1;
+ 
+    	Q--;
+ 
+    }while(Q);
+ 
+}   

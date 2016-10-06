@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int val[11];
+
+int main() {
+  for(int i = 0; i<=9; i++)
+    val[i] = i;
+  val[0] = 9;
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    int a;
+    long long r, l, d;
+    scanf("%d%lld%lld%lld", &a, &d, &l, &r);
+    long long ans = 0;
+    int cnt = 1;
+    d %= 9;
+    ans = val[(a + (l-1)*d) % 9];
+    for(int i = 1; i < 9; i++) {
+      if((i*d) % 9 ==0)
+        break;
+      cnt++;
+      ans += val[(a + (l+i-1)*d) % 9];
+    }
+    ans *= (r-l+1)/cnt;
+    long long k = (r-l+1) % cnt;
+    for(int i =1; i<=k; i++)
+      ans += val[(a+(l-2 + i)*d) % 9];
+    printf("%lld\n", ans);
+  }
+  return 0;
+}

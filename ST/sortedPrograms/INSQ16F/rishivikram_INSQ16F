@@ -1,0 +1,116 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+const int MAXN = 7e5+3;
+const int MAX = 1e5+3;
+const int LOGN = 23;
+struct node {
+	int f,s,idx;
+};
+struct node L[MAXN];
+int P[LOGN][MAXN];
+int rnk[MAXN];
+char s[MAX];
+char str[MAXN];
+int siz[MAX];
+int strt[MAX];
+const ll BASE = 37;
+ll POWER[70];
+bool cmp(const struct node &A, const struct node &B) {
+	if(A.f!=B.f) return A.f<B.f;
+	return A.s<B.s;
+}
+int step;
+int n;
+int lcp(int x, int y) {
+	int ret=0;
+	if(x==y) return n-x+1;
+	for(int k=step;k>=0 and x<=n and y<=n;k--) {
+		if(P[k][x]==P[k][y]) ret+=POWER[k],x+=POWER[k],y+=POWER[k];
+	}
+	return ret;
+}
+int main() {
+	// freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	POWER[0]=1;
+	for(int i=1;i<30;i++) POWER[i]=POWER[i-1]<<1;
+	scanf("%d",&n);
+	int c=1;
+	for(int i=1;i<=n;i++) {
+		scanf("%s",s+1);
+		int len=strlen(s+1);
+		strt[i]=c;
+		siz[i]=len;
+		for(int j=1;j<=len;j++) str[c++]=s[j];
+		str[c++]='#';
+	}
+	n=c-1;
+	str[n+1]='\0';
+	for(int i=1;i<=n;i++) P[0][i]=str[i]-'a';
+	step=1;
+	for(int i=1;POWER[i-1]/2<n;i++,step++) {
+		for(int j=1;j<=n;j++) {
+			L[j].idx=j;
+			L[j].f=P[i-1][j];
+			if(j+POWER[i-1]<=n) L[j].s=P[i-1][j+POWER[i-1]];
+			else L[j].s=-1;
+		}
+		sort(L+1,L+1+n,cmp);
+		P[i][L[1].idx]=1;
+		int r=1;
+		for(int j=2;j<=n;j++) {
+			bool dont=false;
+			if(L[j].f==L[j-1].f and L[j].s==L[j-1].s) dont=true;
+			if(!dont) ++r;
+			P[i][L[j].idx]=r;
+		}
+	}
+	--step;
+	for(int i=1;i<=n;i++) rnk[L[i].idx]=i;
+	int q;
+	scanf("%d",&q);
+	while(q--) {
+		int x,y;
+		scanf("%d%d",&x,&y);
+		int longest;
+		if(x!=y) longest=lcp(strt[x],strt[y]);
+		else longest=siz[x];
+		longest=min(longest,min(siz[x],siz[y]));
+		if(longest==0) {
+			printf("0\n");
+			continue;
+		}
+		if(rnk[strt[x]]>rnk[strt[y]]) swap(x,y);
+		int lo=1,hi=rnk[strt[x]];
+		int lft=-1;
+		while(lo<=hi) {
+			int mid=lo+(hi-lo+1)/2;
+			int k = lcp(L[mid].idx,strt[x]);
+			if(k>=longest) lft=mid,hi=mid-1;
+			else lo=mid+1;
+		}
+		int rght;
+		lo=rnk[strt[y]];
+		hi=n;
+		while(lo<=hi) {
+			int mid=lo+(hi-lo+1)/2;
+			int k = lcp(L[mid].idx,strt[y]);
+			if(k>=longest) rght=mid,lo=mid+1;
+			else hi=mid-1;
+		}
+		printf("%d\n",rght-lft+1);
+	}
+	return 0;
+}

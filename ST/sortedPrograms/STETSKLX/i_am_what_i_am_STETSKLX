@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+using namespace std;
+int n,l,r;
+vector<vector<pair<int,int> > > a;
+vector<long long> v;
+int minLength;
+	
+void dfs(int idx)
+{
+	vector<vector<int> > distances(n);
+	queue<pair<int,int> > q;
+	q.push(make_pair(idx,-1)); //source,prev
+	while(!q.empty())
+	 {
+	 	pair<int,int> node=q.front();
+	 	q.pop();
+	 	int currIdx = node.first;
+	 	int currPrev = node.second;
+	 	for(int i=0;i<a[currIdx].size();i++)
+	 	 {
+	 	 	int index=a[currIdx][i].first;
+	 	 	if(index==currPrev) continue;
+	 	 	distances[index]=distances[currIdx];
+	 	 	distances[index].push_back(a[currIdx][i].second);
+	 	 	if(distances[index].size()>=l && distances[index].size()<=r && index<idx)
+	 	 	 {
+				sort(distances[index].begin(),distances[index].end());
+				int value=distances[index][distances[index].size()/2];
+				minLength=min(minLength,value);
+			 }
+			if(distances[index].size()<r)
+			q.push(make_pair(index,currIdx));
+		 }
+	 	
+	 }
+}
+
+void solve()
+{
+		int x,y,c;
+		cin>>n>>l>>r;
+		a.clear();
+		a.resize(n);
+		for(int i=0;i<n-1;i++)
+		 {
+		 	cin>>x>>y>>c;
+		 	x--;
+		 	y--;
+		 	a[x].push_back(make_pair(y,c));
+		 	a[y].push_back(make_pair(x,c));
+		 	
+		 }
+		
+		//preprocess();
+		
+	//	v.clear();
+		minLength=INT_MAX;
+		for(int i=0;i<n;i++)
+		 {
+			dfs(i);
+		 }
+		if(minLength==INT_MAX)
+		  cout<<"-1"<<endl;
+		else
+		  cout<<minLength<<endl;
+	//	sort(v.begin(),v.end());
+	//	cout<<v[v.size()/2]<<endl;
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--) 
+	{
+		solve();
+		
+	}
+}

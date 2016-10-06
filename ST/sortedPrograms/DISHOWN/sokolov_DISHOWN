@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int p[10005], maxV[10005];
+
+int find(int x) {
+	if (x == p[x]) {
+		return x;
+	}
+	return p[x] = find(p[x]);
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int n;
+		scanf("%d", &n);
+		for (int i = 1; i <= n; ++i) {
+			scanf("%d", &maxV[i]);
+			p[i] = i;
+		}
+		int q;
+		scanf("%d", &q);
+		while (q--) {
+			int tt;
+			scanf("%d", &tt);
+			if (tt == 0) {
+				int x, y;
+				scanf("%d %d", &x, &y);
+				x = find(x);
+				y = find(y);
+				if (x == y) {
+					printf("Invalid query!\n");
+				} else {
+					if (maxV[x] > maxV[y]) {
+						p[y] = x;
+					} else if (maxV[x] < maxV[y]) {
+						p[x] = y;
+					}
+				}
+			} else {
+				int x;
+				scanf("%d", &x);
+				printf("%d\n", find(x));
+			}
+		}
+	}
+	return 0;
+}

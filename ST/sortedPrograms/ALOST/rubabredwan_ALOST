@@ -1,0 +1,65 @@
+/*******************************
+*  Bismillahir Rahminir Rahim  * 
+*******************************/
+ 
+#include <bits/stdc++.h>
+ 
+#define READ(x)     freopen(x, "r", stdin) 
+#define WRITE(x)    freopen(x, "w", stdout)
+
+#define REP(i, n)   for(ll i=0;i<n;i++)
+#define REPN(i, n)  for(ll i=1;i<=n;i++)
+#define SET(i, n)   memset(i, n, sizeof(i))
+ 
+#define MAX         100050
+#define INF         (1 << 29)
+#define pb          push_back
+ 
+using namespace std;
+ 
+typedef long long       ll;
+typedef pair<ll, ll>  pii;
+typedef double          db;
+// typedef chocolate
+
+ll A[MAX];
+
+ll nC2(ll n){
+    return (n * (n + 1)) / 2;
+}
+
+int main(){
+    ll tc, n, o, e;
+    scanf("%lld", &tc);
+    while(tc--){
+        scanf("%lld", &n);
+        scanf("%lld %lld", &e, &o);
+        if(n == 1){
+            if(e) printf("2\n");
+            else printf("1\n");
+        }
+        else if(e == (n * (n + 1)) / 2){
+            REP(i, n-1) printf("2 ");
+            printf("2\n");
+        }
+        else{
+            ll ret = -1;
+            for(ll i=1;i<=n;i++){
+                ll e1 = nC2(i-1) + nC2(n-i);
+                ll e2 = (i-1) * (n-i+1) + (n - i + 1);
+                if(e1 == e && e2 == o){
+                    REPN(j, n){
+                        if(j == i) printf("1");
+                        else printf("2");
+                        if(j != n) printf(" ");
+                    }
+                    printf("\n");
+                    ret = 1;
+                    break;
+                }
+            }
+            if(ret == -1) printf("-1\n"); 
+        }
+    }
+    return 0;
+}

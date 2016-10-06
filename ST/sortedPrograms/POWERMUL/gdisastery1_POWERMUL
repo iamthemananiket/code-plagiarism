@@ -1,0 +1,124 @@
+//Program: powermul
+//Author: gary
+//Date: 07/11/2014
+#include <cstdio>
+#include <cassert>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+
+int N, M;
+int mul(int a, int b){
+  return (1LL * a * b) % M;
+}
+int mpow(int a, ll n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1) r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+int idx[MAX_N];
+int out[MAX_N];
+
+int primes[MAX_N], nprimes;
+vector<pii> pf[MAX_N];
+
+ll C[MAX_N];
+int ST[MAX_N * 4];
+
+void update(int n, int L, int R, int i, ll x){
+  if(L == R){
+    ST[n] = mpow(primes[L], x);
+  } else {
+    if(i <= (L + R) / 2) update(n * 2, L, (L + R) / 2, i, x);
+    else update(n * 2 + 1, (L + R) / 2 + 1, R, i, x);
+    ST[n] = mul(ST[n * 2], ST[n * 2 + 1]);
+  }
+}
+
+void update(int i, ll x){update(1, 0, nprimes - 1, i, x);}
+
+void calc(){
+  for(int r = 1; r * 2 <= N; r++){
+    for(pii p: pf[N - r + 1]){
+      C[p.fi] += 1LL * p.se * (N - r + 1);
+      assert(C[p.fi] >= 0);
+      update(idx[p.fi], C[p.fi]);
+    }
+    for(pii p: pf[r]){
+      C[p.fi] -= 1LL * p.se * r;
+      assert(C[p.fi] >= 0);
+      update(idx[p.fi], C[p.fi]);
+    }
+    out[r] = ST[1];
+  }
+}
+
+void clean(){
+  set<int> pr;
+  for(int r = 1; r * 2 <= N; r++){
+    for(pii p: pf[N - r + 1]) pr.insert(p.fi);
+    for(pii p: pf[r]) pr.insert(p.fi);
+  }
+  for(int p: pr) C[p] = 0LL, update(idx[p], C[p]);
+}
+
+void sieve(){
+  for(int i = 2; i < MAX_N; i++){
+    if(SZ(pf[i]) == 0){
+      for(int j = i; j < MAX_N; j += i)
+	pf[j].pb(mp(i, 0));
+      idx[i] = nprimes;
+      primes[nprimes++] = i;
+    }
+  }
+  for(int i = 2; i < MAX_N; i++){
+    int x = i;
+    for(int j = 0; j < SZ(pf[i]); j++)
+      while(x % pf[i][j].fi == 0)
+	x /= pf[i][j].fi, pf[i][j].se++;
+  }
+}
+
+int main(){
+  int r, T, Q;
+  // Pre init (of all test cases)
+  sieve();
+  fill(ST, ST + MAX_N * 4, 1);
+
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d%d%d", &N, &M, &Q);
+    // Init of test case
+    calc();
+    // Now we can clean because the answer is stored in out
+    clean();
+    while(Q--){
+      scanf("%d", &r);
+      printf("%d\n", out[min(r, N - r)]);
+    }
+  }
+  return 0;
+}

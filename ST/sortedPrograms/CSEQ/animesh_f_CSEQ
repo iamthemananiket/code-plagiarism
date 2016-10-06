@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+#define author animesh_f
+using namespace std;
+// Find Degree of n,p
+int get_degree(int n, int p)
+{
+    int k=0;
+    while (n>=p)
+    {
+        k+=n/p;
+        n/=p;
+    }
+    return k;
+}
+ 
+long long expoMod(int a, int b, int MOD)
+{
+    // Exponentiation By Squaring in Log N
+    long long x=1,y=a; 
+    while(b > 0)
+    {
+        if(b%2 == 1)
+        {
+            x=(x*y);
+            if(x>MOD) x%=MOD;
+        }
+        y = (y*y);
+        if(y>MOD) y%=MOD; 
+        b /= 2;
+    }
+    return x;
+}
+ 
+long long eulerPhi(int n, int MOD)
+{
+    return expoMod(n,MOD-2,MOD);
+}
+ 
+long long get_degree_mod(int n, int MOD)
+{
+    long long answer = 1; 
+    while (n > 0)
+    {
+        for (int i=2, m=n%MOD; i<=m; i++)
+            answer = (answer * i) % MOD;
+        if ((n/=MOD)%2 > 0) 
+            answer = MOD - answer;
+    }
+    return answer;
+}
+ 
+long long Combinations(int n, int r, int MOD)
+{
+    if (get_degree(n, MOD) > get_degree(r, MOD) + get_degree(n-r, MOD))
+        return 0;
+     return (get_degree_mod(n, MOD) *
+            ((eulerPhi(get_degree_mod(r, MOD), MOD) * 
+            eulerPhi(get_degree_mod(n-r, MOD), MOD)) % MOD)) % MOD;
+}
+int main()
+{
+       int mod = 1000003;
+       long long ans;
+       int t,N,L,R;
+       scanf("%d",&t);
+       while(t--)
+           {
+           scanf("%d",&N);
+           scanf("%d",&L);
+           scanf("%d",&R);
+           ans=(Combinations(N+R-L+1,R-L+1,mod)-1+mod)%mod;
+           printf("%lld\n",ans);
+           }
+      return 0;
+}

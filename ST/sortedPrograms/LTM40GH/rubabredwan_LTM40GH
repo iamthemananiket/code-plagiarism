@@ -1,0 +1,69 @@
+/* Bismillahir Rahmanir Rahim */
+
+#include <bits/stdc++.h>
+
+#define read(x)		freopen(x, "r", stdin)
+#define write(x) 	freopen(x, "w", stdout)
+
+#define rep(i, n)	for(int i=0;i<n;i++)
+#define repn(i, n)	for(int i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx		10005
+#define pb		push_back
+
+#define inf		(1 << 29)	
+#define	eps		1e-6
+#define pi 		acos(-1)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+int n, a[mx];
+vector<int>edge[mx], con[mx];
+int ans[mx];
+
+void init(){
+	rep(i, mx) edge[i].clear(), con[i].clear();
+	set(ans, 0);
+}
+
+void dfs(int at, int past){
+	ans[at] = a[at];
+	con[at].pb(a[at]);
+	for(auto u : edge[at]){
+		if(u == past) continue;
+		dfs(u, at);
+		ans[at] = max(ans[at], ans[u]);
+		for(auto f : con[u]){
+			for(auto x : con[at]){
+				ans[at] = max(ans[at], f ^ x);
+			}
+			ans[at] = max(ans[at], f);
+		}
+		for(auto f : con[u]){
+			con[at].pb(f ^ a[at]);
+		}
+	}
+}
+
+int main(){
+	int tc, x, y;
+	scanf("%d", &tc);
+	while(tc--){
+		init();
+		scanf("%d", &n);
+		repn(i, n) scanf("%d", &a[i]);
+		rep(i, n-1){
+			scanf("%d %d", &x, &y);
+			edge[x].pb(y);
+			edge[y].pb(x);
+		}
+		dfs(1, -1);
+		repn(i, n) printf("%d\n", ans[i]);
+	}
+	return 0;
+}
+

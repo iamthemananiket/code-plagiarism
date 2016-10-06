@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main()
+{
+    int T, N;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d", &N);
+        set<int> a;
+        while(N--)
+        {
+            int b;
+            scanf("%d", &b);
+            a.insert(b);
+        }
+        printf("%d\n", a.size());
+    }
+    return 0;
+}

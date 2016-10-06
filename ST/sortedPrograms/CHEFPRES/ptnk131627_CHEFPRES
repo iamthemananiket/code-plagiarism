@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("chefpres.inp","r",stdin)
+#define OUTPUT freopen("chefpres.out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=1e4+10;
+
+int lv[N],f[N<<1][20],h[N]={0},n,k,x,y,q,root,c;
+vector <int> a[N],p[N];
+int opt(int x,int y){
+    if (lv[x]<lv[y]) return x;
+    return y;
+}
+void DFS(int par,int x){
+    lv[x]=lv[par]+1;
+    f[++c][0]=x;
+    if (h[x]==0) h[x]=c;
+    for(auto &i:a[x]) if (i!=par)
+        DFS(x,i),f[++c][0]=x;
+}
+void prepare(){
+    scanf("%d%d%d",&n,&k,&root);
+    FOR(i,1,n-1){
+        scanf("%d%d",&x,&y);
+        a[x].push_back(y);
+        a[y].push_back(x);
+    }
+    FOR(i,1,n){
+        scanf("%d",&x);
+        p[x].push_back(i);
+    }
+    lv[0]=0;
+    c=0;
+    DFS(0,root);
+    FOR(j,1,15){
+        int bar=1<<j;
+        FOR(i,1,c-bar) f[i][j]=opt(f[i][j-1],f[i+bar/2][j-1]);
+    }
+}
+int LCA(int x,int y){
+    x=h[x],y=h[y];
+    if (x>y) swap(x,y);
+    int j=int(log2(y-x)),bar=1<<j;
+    return opt(f[x][j],f[y-bar+1][j]);
+}
+bool maximize(int &a,int b){
+    if (a<b) a=b;else return false;
+    return true;
+}
+int main(){
+    prepare();
+    scanf("%d",&q);
+    while (q--){
+        scanf("%d%d",&x,&y);
+        int ans=0,cur=0;
+        for(auto &i:p[y]) if (maximize(cur,lv[LCA(x,i)])) ans=i;
+        printf("%d\n",ans?ans:-1);
+    }
+}

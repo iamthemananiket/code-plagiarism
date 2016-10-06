@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int N, P;
+  cin >> N >> P;
+  vector<int> ord(N-1);
+  for(int i=0;i<N-1;++i){
+    ord[i]=i+1;
+  }
+  random_shuffle(ord.begin(),ord.end());
+  sort(ord.begin(),ord.begin()+P-1);
+  for(int i=0;i<P-1;++i)
+    cout<<ord[i]<<" \n"[i==P-2];
+  random_shuffle(ord.begin(),ord.end());
+  sort(ord.begin(),ord.begin()+P-1);
+  for(int i=0;i<P-1;++i)
+    cout<<ord[i]<<" \n"[i==P-2];
+  return 0;
+}

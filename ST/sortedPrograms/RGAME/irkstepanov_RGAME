@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+#define mp make_pair
+#define pb push_back
+#define sz(a) static_cast<int>((a).size())
+#define all(a) (a).begin(), (a).end()
+#define forn(i, n) for (int i = 0; i < n; ++i)
+
+using namespace std;
+
+typedef long long ll;
+
+const ll mod = static_cast<ll>(1e9 + 7);
+
+void add(ll& a, ll b)
+{
+    a += b;
+    if (a >= mod) {
+        a -= mod;
+    }
+}
+
+void mult(ll& a, ll b)
+{
+    a *= b;
+    if (a >= mod) {
+        a %= mod;
+    }
+}
+
+void ret(ll& a, ll b)
+{
+    a -= b;
+    if (a < 0) {
+        a += mod;
+    }
+}
+
+int main()
+{
+
+    int tt;
+    cin >> tt;
+
+    vector<ll> deg(100500);
+    deg[0] = 1;
+    for (int i = 1; i < 100500; ++i) {
+        deg[i] = deg[i - 1];
+        mult(deg[i], 2);
+    }
+
+    while (tt--) {
+        int n;
+        cin >> n;
+        ll ans = 0;
+        ll a0;
+        vector<ll> a(n);
+        cin >> a0;
+        forn(i, n) {
+            cin >> a[i];
+            ll x = a0;
+            mult(x, a[i]);
+            mult(x, deg[n - i]);
+            add(ans, x);
+        }
+        ll sum = 0;
+        forn(i, n - 1) {
+            ll x = a[i];
+            mult(x, deg[i + 1]);
+            add(sum, x);
+        }
+        for (int i = n - 1; i; --i) {
+            ll x = a[i];
+            mult(x, sum);
+            add(ans, x);
+            ll d = a[i - 1];
+            mult(d, deg[n - 1]);
+            ret(sum, d);
+            mult(sum, 2);
+        }
+        cout << ans << "\n";
+    }
+
+}

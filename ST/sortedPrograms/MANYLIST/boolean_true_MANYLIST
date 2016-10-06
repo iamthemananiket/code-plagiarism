@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+set<int>memo[300009];
+int main()
+{
+    int n,q;
+    scanf("%d%d",&n,&q);
+    while(q--)
+    {
+        int c;
+        scanf("%d",&c);
+        if(c==0)
+        {
+            int l,r,x;
+            scanf("%d%d%d",&l,&r,&x);
+            for(int i=l;i<=r;i++)
+                memo[i].insert(x);
+        }
+        else
+        {
+            int p;
+            scanf("%d",&p);
+            printf("%d\n",memo[p].size());
+        }
+    }
+    return 0;
+}

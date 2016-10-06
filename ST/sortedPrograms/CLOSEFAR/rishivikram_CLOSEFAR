@@ -1,0 +1,186 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define all(x) x.begin(),x.end()
+#define sz(x) ((int)x.size())
+
+const int MOD = 1e9+7;
+
+typedef long long ll;
+typedef pair<int,int> pii;
+const int MAXN = 35006*2;
+const int MM = 35006;
+const int LOGN = 16;
+int n;
+int tme=0;
+int rev[MM];
+int lev[MM];
+int P[LOGN][MM];
+int id[MAXN],tin[MM],tout[MM];
+bool vis[MM];
+int answer[MM];
+int POWER[35];
+int ar[MM];
+vector<int> adj[MM];
+void DFS(int s, int par=-1) {
+	P[0][s]=par;
+	tin[s]=++tme;
+	id[tme]=s;
+	for(auto it:adj[s]) {
+		if(it==par) continue;
+		lev[it]=lev[s]+1;
+		DFS(it,s);
+	}
+	tout[s]=++tme;
+	id[tme]=s;
+}
+inline void pre() {
+	for(int i=1;i<LOGN;i++) for(int j=1;j<=n;j++) P[i][j]=-1;
+	for(int i=1;i<LOGN;i++) for(int j=1;j<=n;j++) if(P[i-1][j]!=-1) P[i][j]=P[i-1][P[i-1][j]];
+}
+inline int lca(int x, int y) {
+	if(lev[x]>lev[y]) swap(x,y);
+	for(int i=LOGN-1;i>=0;i--) if(lev[y]-POWER[i]>=lev[x]) y=P[i][y];
+	if(x==y) return x;
+	for(int i=LOGN-1;i>=0;i--) if(P[i][y]!=P[i][x]) y=P[i][y],x=P[i][x];
+	return P[0][y];
+}
+struct Query {
+	char ch;
+	int idx;
+	int lf,rt,aux;
+};
+struct Query Q[MM];
+int BLOCK;
+const int INF = 1e9+5;
+inline bool cmp(const struct Query &A, const struct Query &B) {
+	int bl1=A.lf/BLOCK;
+	int bl2=B.lf/BLOCK;
+	if(bl1!=bl2) return bl1<bl2;
+	return A.rt<B.rt;
+}
+map<int,int> comp;
+
+struct node {
+	int mini,maxi,ans;
+	int on;
+};
+struct node v[4*MM];
+struct node combine(struct node A, struct node B) {
+	if(A.mini==INF and A.maxi==-INF) return B;
+	if(B.mini==INF and B.maxi==-INF) return A;
+	struct node ret=A;
+	ret.maxi=max(ret.maxi,B.maxi);
+	ret.mini=min(ret.mini,B.mini);
+	ret.ans=min(ret.ans,min(B.ans,B.mini-A.maxi));
+	return ret;
+}
+inline bool valid(int a, int b, int c, int d) {
+	if(a>b or d<a or c>b) return false;
+	return true;
+}
+void update(int node, int start, int end, int qs, int qe, int inc) {
+	if(start>end or qe<start or qs>end) return;
+	if(start>=qs and end<=qe) {
+		v[node].on+=inc;
+		if(v[node].on) v[node].mini=v[node].maxi=rev[start],v[node].ans=INF;
+		else v[node].mini=INF,v[node].ans=INF,v[node].maxi=-INF;
+		return;
+	}
+	int mid=(start+end)>>1;
+	if(valid(start,mid,qs,qe)) update(2*node,start,mid,qs,qe,inc);
+	if(valid(mid+1,end,qs,qe)) update(2*node+1,mid+1,end,qs,qe,inc);
+	v[node]=combine(v[2*node],v[2*node+1]);
+}
+inline int get(char f) {
+	if(f=='F') return v[1].maxi-v[1].mini;
+	return v[1].ans;
+}
+inline void check(int t) {
+	int p = id[t];
+	if(vis[p]) update(1,1,n,comp[ar[p]],comp[ar[p]],-1);
+	else update(1,1,n,comp[ar[p]],comp[ar[p]],1);
+	vis[p] ^= 1;
+}
+int main() {
+	// freopen("TASK.in","r",stdin);freopen("TASK.out","w",stdout);
+	POWER[0]=1;
+	for(int i=1;i<30;i++) POWER[i]=POWER[i-1]<<1;
+	for(int i=0;i<4*MM;i++) v[i].mini=v[i].ans=INF,v[i].maxi=-INF;
+	cin>>n;
+	BLOCK = sqrt(2*n);
+	for(int i=1;i<=n;i++) {
+		scanf("%d",&ar[i]);
+		comp[ar[i]]++;
+	}
+	int c=1;
+	for(auto &it:comp) it.ss=c++,rev[it.ss]=it.ff;
+	for(int i=1;i<n;i++) {
+		int x,y;
+		scanf("%d%d",&x,&y);
+		adj[x].pb(y);
+		adj[y].pb(x);
+	}
+	lev[1]=0;
+	DFS(1);
+	pre();
+	int q;
+	cin>>q;
+	for(int i=1;i<=q;i++) {
+		char ch;
+		int u,v;
+		scanf(" %c%d%d",&ch,&u,&v);
+		if(tin[u]>tin[v]) swap(u,v);
+		int lc=lca(u,v);
+		Q[i].idx=i;
+		Q[i].ch=ch;
+		if(u!=lc) {
+			Q[i].lf = tout[u];
+			Q[i].rt = tin[v];
+			Q[i].aux = tin[lc];
+		}
+		else {
+			Q[i].lf = tin[u];
+			Q[i].rt = tin[v];
+			Q[i].aux=-1;
+		}
+	}
+	sort(Q+1,Q+1+q,cmp);
+	int ML=1,MR=0;
+	for(int i=1;i<=q;i++) {
+		int lf = Q[i].lf;
+		int rt = Q[i].rt;
+		int idx = Q[i].idx;
+		while(MR<rt) {
+			++MR;
+			check(MR);
+		}
+		while(MR>rt) {
+			check(MR);
+			--MR;
+		}
+		while(ML<lf) {
+			check(ML);
+			++ML;
+		}
+		while(ML>lf) {
+			--ML;
+			check(ML);
+		}
+		int ansq;
+		if(Q[i].aux==-1) ansq=get(Q[i].ch);
+		else {
+			check(Q[i].aux);
+			ansq=get(Q[i].ch);
+			check(Q[i].aux);
+		}
+		answer[idx]=ansq;
+	}
+	for(int i=1;i<=q;i++) printf("%d\n",answer[i]);
+	return 0;
+}

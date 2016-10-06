@@ -1,0 +1,24 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 1e5 + 5;
+
+int t, n, arr[N];
+
+int main(){
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d", &n);
+		bool rekt = false, seen_five = false;
+		int sum = 0;
+		for(int i = 1; i <= n; i++){
+			scanf("%d", arr + i);
+			if(arr[i] == 2) rekt = true;
+			if(arr[i] == 5) seen_five = true;
+			sum += arr[i];
+			if(i == n and sum < n * 4) rekt = true;
+		}
+		if(rekt || !seen_five) printf("No\n");
+		else printf("Yes\n");
+	}
+}

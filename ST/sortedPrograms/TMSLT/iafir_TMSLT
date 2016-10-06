@@ -1,0 +1,47 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+     
+using namespace std;
+     
+int t;
+long long n,a,b,c,d,si,sel,s[1000000],sd;
+
+int main()
+{
+    scanf("%d",&t);
+    for(int i=0; i<t; i++)
+    {
+    	scanf("%lld %lld %lld %lld %lld",&n,&a,&b,&c,&d);
+    	if(n<2)
+    	{
+    		printf("%lld\n",d);
+    		continue;
+    	}
+    	memset(s,0,sizeof(s));
+    	si = d;
+    	s[si]++;
+    	for(int j = 1; j<n; j++)
+    	{
+    		si = (a*si*si+b*si+c) % 1000000;
+   		 	s[si]++;
+    	}
+    	sel = 0; sd = 1;
+    	for(int j=0; j<1000000; j++)
+    	{
+    		s[j] %= 2;
+    		if(s[j])
+    		{
+    			sel += sd*j;
+    			sd = -sd;
+    		}
+    	}
+	   	if (sel>=0)
+	   		printf("%lld\n",sel);
+	   	else
+	   		printf("%lld\n",-sel);
+    }
+    return 0;
+}
+

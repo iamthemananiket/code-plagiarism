@@ -1,0 +1,70 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = 2e9;
+
+unsigned x;
+
+void srand1(unsigned s) {
+	x = s;
+}
+
+unsigned nextInteger1(void) {
+	x = x * 1103515245 + 12345;
+	return (x / 65536) % 32768;
+}
+
+char a[200005];
+
+int main() {
+	//freopen("input.in", "rt", stdin);
+	//freopen("output.out", "wt", stdout);
+	int t;
+	scanf("%d\n", &t);
+	for (int tt = 0; tt < t; ++tt) {
+		gets(a);
+		int n = strlen(a);
+		bool res = false;
+		for (int s = 0; s <= (1 << 17); ++s) {
+			srand1(s);
+			bool ok = true;
+			for (int i = 0; i < n; ++i) {
+				if ((int) (nextInteger1() & 1) != (int) (a[i] - '0')) {
+					ok = false;
+					break;
+				}
+			}
+			if (ok) {
+				res = true;
+				break;
+			}
+		}
+		puts(res ? "LCG" : "Xorshift");
+	}
+	return 0;
+}

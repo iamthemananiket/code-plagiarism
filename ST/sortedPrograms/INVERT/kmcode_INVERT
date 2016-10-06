@@ -1,0 +1,594 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+struct st {
+	unsigned int randxor()
+	{
+		static unsigned int x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+		unsigned int t;
+		t = (x ^ (x << 11)); x = y; y = z; z = w; return(w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+	}
+	st *l;
+	st *r;
+	int val;
+	int pr;
+	int countt = 0;
+	int maxt;
+	st() {
+		pr = randxor();
+		l = r = NULL;
+	}
+	void update() {
+		maxt = val;
+		countt = 1;
+		if (l) {
+			countt += l->countt;
+			maxt = max(maxt, l->maxt);
+		}
+		if (r) {
+			countt += r->countt;
+			maxt = max(maxt, r->maxt);
+		}
+	}
+	void set_val(int vall) {
+		maxt = vall;
+		countt = 1;
+		val = vall;
+		l = r = NULL;
+	}
+};
+template<typename ty>
+class Set {
+public:
+	
+	st *root;
+	Set() {
+		root = NULL;
+	}
+	bool find(ty val) {
+		st *b = root;
+		while (b) {
+			if (b->val == val) {
+				return true;
+			}
+			if (b->val > val) {
+				b = b->l;
+			}
+			else {
+				b = b->r;
+			}
+		}
+		return false;
+	}
+	int get_countt(st *b) {
+		if (b) {
+			return b->countt;
+		}
+		else {
+			return 0;
+		}
+	}
+	int lower_bound_split(ty val) {
+		if (root->maxt < val) {
+			return root->countt + 1;
+		}
+		st *tt;
+		st *t;
+		split(root, val, t, tt);
+		int ans = 0;
+		if (t) {
+			ans += t->countt;
+		}
+		root = merge(t, tt);
+		if (find(val) == false) {
+			ans++;
+		}
+		return ans;
+	}
+	int lower_bound(ty val) {
+		if (root->maxt < val) {
+			return root->countt + 1;
+		}
+		st *b = root;
+		int ans = 0;
+		while (b) {
+			if (b->val == val) {
+				ans += get_countt(b->l);
+				ans++;
+				break;
+			}
+			if (b->val > val) {
+				b = b->l;
+				continue;
+			}
+			ans += get_countt(b->l);
+			ans++;
+			b = b->r;
+		}
+		if (find(val) == false) {
+			ans++;
+		}
+		return ans;
+	}
+	int upper_bound(ty val) {
+		if (root->maxt < val) {
+			return root->countt + 1;
+		}
+		int c = lower_bound(val);
+		if (find(val)) {
+			c++;
+		}
+		return c;
+	}
+	inline st* merge(st *b, st *l) {
+		if (!b || !l) {
+			if (b == NULL) {
+				return l;
+			}
+			return b;
+		}
+		if (b->pr > l->pr) {
+			b->r = merge(b->r, l);
+			b->r->update();
+			b->update();
+			return b;
+		}
+		else {
+			l->l = merge(b, l->l);
+			l->l->update();
+			l->update();
+			return l;
+		}
+	}
+	inline void split(st *b, ty countt, st *&l, st *&r) {  //countt=val
+		l = NULL;
+		r = NULL;
+		if (!b) {
+			return;
+		}
+		ty &val = b->val;
+		if (val == countt) {
+			l = b;
+			r = b->r;
+			b->r = NULL;
+			if (l) {
+				l->update();
+			}
+			if (r) {
+				r->update();
+			}
+			return;
+		}
+		if (val > countt) {
+			if (!b->l) {
+				r = b;
+				if (l) {
+					l->update();
+				}
+				if (r) {
+					r->update();
+				}
+				return;
+			}
+			split(b->l, countt, l, b->l);
+			r = b;
+			if (l) {
+				l->update();
+			}
+			if (r) {
+				r->update();
+			}
+			return;
+		}
+		if (!b->r) {
+			l = b;
+			if (l) {
+				l->update();
+			}
+			if (r) {
+				r->update();
+			}
+			return;
+		}
+		split(b->r, countt, b->r, r);
+		l = b;
+		if (l) {
+			l->update();
+		}
+		if (r) {
+			r->update();
+		}
+		return;
+	}
+	void insert(ty val) {
+		if (find(val)) {
+			return;
+		}
+		st *a = new st();
+		a->val = val;
+		a->countt = 1;
+		a->maxt = val;
+		st *t;
+		st *tt;
+		split(root, val, t, tt);
+		if (t) {
+			t->update();
+		}
+		if (tt) {
+			tt->update();
+		}
+		root = merge(t, a);
+		if (root) {
+			root->update();
+		}
+		root = merge(root, tt);
+		if (root) {
+			root->update();
+		}
+	}
+	void erase(ty val) {
+		st *t;
+		st *tt;
+		split(root, val, t, tt);
+		if (t) {
+			t->update();
+		}
+		if (tt) {
+			tt->update();
+		}
+		st *er;
+		st *ner;
+		split(t, val - 1, ner, er);
+		if (er) {
+			er->update();
+		}
+		if (ner) {
+			ner->update();
+		}
+		root = merge(ner, tt);
+		if (root) {
+			root->update();
+		}
+	}
+	int count(ty val) {
+		if (find(val)) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	int size() {
+		if (root == NULL) {
+			return 0;
+		}
+		return root->countt;
+	}
+	ty get_nth_val(int n) {  //begin 1st
+		if (n <= 0) {
+			return NULL;
+		}
+		if (size() < n) {
+			return NULL;
+		}
+		st *b = root;
+		int countt = 0;
+		while (1) {
+			if (countt + get_countt(b->l) + 1 == n) {
+				return b->val;
+			}
+			if (countt + get_countt(b->l) + 1 > n) {
+				b = b->l;
+			}
+			else {
+				countt++;
+				countt += get_countt(b->l);
+				b = b->r;
+			}
+		}
+	}
+	void remove_nth_val(int n) {
+		ty v = get_nth_val(n);
+		st *l;
+		st *r;
+		l = r = NULL;
+		ty vv = get_nth_val(n - 1);
+		split(root, v, l, r);
+		if (n == 1) {
+			root = r;
+			return;
+		}
+		st *del;
+		st *ll;
+		split(l, vv, ll, del);
+		root = merge(ll, r);
+	}
+	/*
+	ich  is index 1based.
+	*/
+	inline void ich_split(st *b, st *&l, st *&r, int countt) {   //st->countt==countt less than or equal to countt->l,other->r 
+		if (!b) {
+			l = r = NULL;
+			return;
+		}
+		if (b->countt == countt) {
+			l = b;
+			r = NULL;
+			l->update();
+			return;
+		}
+		if (get_countt(b->l) + 1 == countt) {
+			l = b;
+			r = b->r;
+			b->r = NULL;
+			if (b) {
+				b->update();
+			}
+			if (l) {
+				l->update();
+			}
+			if (r) {
+				r->update();
+			}
+			return;
+		}
+		if (get_countt(b->l) >= countt) {
+			r = b;
+			ich_split(b->l, l, b->l, countt);
+			b->update();
+			if (l) {
+				l->update();
+			}
+			if (r) {
+				r->update();
+			}
+			return;
+		}
+		l = b;
+		ich_split(b->r, b->r, r, countt - get_countt(b->l) - 1);
+		b->update();
+		if (l) {
+			l->update();
+		}
+		if (r) {
+			r->update();
+		}
+	}
+	void ich_remove_range(int a, int b) {  //remove from a to b both contain 1-based
+		st *l;
+		st *r;
+		ich_split(root, l, r, a);
+		st *rr;
+		ich_split(r, r, rr, b - a + 1);
+		root = merge(l, rr);
+	}
+	void ich_insert(int a, ty val) {  //1-based
+		st *l;
+		st *r;
+		ich_split(root, l, r, a - 1);
+		st *ll = new st();
+		ll->set_val(val);
+		root = merge(l, ll);
+		root = merge(root, r);
+	}
+};
+struct stt {
+	vector<int> bit;
+	vector<int> new_number;
+	int get_number(int x) {
+		return lower_bound(new_number.begin(), new_number.end(), x) - new_number.begin();
+	}
+	int get_upper(int x) {
+		return upper_bound(new_number.begin(), new_number.end(), x) - new_number.begin();
+	}
+	void resize(int num) {
+		bit.assign(num + 2, 0);
+	}
+	int anss;
+	stt() {
+		anss = 0;
+	}
+	void add(int i, int x) {
+		i++;
+		anss += x;
+		while (i < bit.size()) {
+			bit[i] += x;
+			i += i&-i;
+		}
+	}
+	long long int sum(int i) {
+		int r = 0;
+		i++;
+		while (i) {
+			r += bit[i];
+			i -= i&-i;
+		}
+		return r;
+	}
+};
+#define MAX 100002
+stt seg[MAX * 4];
+inline void init(int b, int l, int r) {
+	seg[b].resize(r - l);
+	if (l + 1 == r) {
+		return;
+	}
+	init(b * 2 + 1, l, (l + r) >> 1);
+	init(b * 2 + 2, (l + r) >> 1, r);
+}
+struct query {
+	int l;
+	int r;
+	int x;
+	query(int l_, int r_, int x_) {
+		l = l_;
+		r = r_;
+		x = x_;
+	}
+};
+int churu[MAX];
+int n;
+int m;
+vector<query> vv;
+Set<int> S;
+int poin[MAX];
+int ar[MAX];
+int siz = 0;
+inline void dfs(st *bb) {
+	if (bb->l) {
+		dfs(bb->l);
+	}
+	poin[bb->val] = siz;
+	ar[siz] = bb->val;
+	siz++;
+	if (bb->r) {
+		dfs(bb->r);
+	}
+}
+long long int ANSWER = 0;
+
+inline void add(int b, int l, int r, int ll, int x) {
+	if (l <= ll&&ll < r) {
+		seg[b].add(seg[b].get_number(x), 1);
+		if (l + 1 == r) {
+			return;
+		}
+		add(b * 2 + 1, l, (l + r) >> 1, ll, x);
+		add(b * 2 + 2, (l + r) >> 1, r, ll, x);
+	}
+	return;
+}
+inline void init2(int b,int l,int r) {
+	for (int i = l;i <= r;i++) {
+		seg[b].new_number.push_back(churu[ar[i]]);
+	}
+	sort(seg[b].new_number.begin(), seg[b].new_number.end());
+	seg[b].new_number.erase(unique(seg[b].new_number.begin(), seg[b].new_number.end()), seg[b].new_number.end());
+	if (l + 1 == r) {
+		return;
+	}
+	init2(b * 2 + 1, l, (l + r) >> 1);
+	init2(b * 2 + 2, (l + r) >> 1, r);
+}
+
+int bit[MAX];
+void add_bit(int b, int x) {
+	b++;
+	while (b < MAX) {
+		bit[b] += x;
+		b += b&-b;
+	}
+}
+int sum_bit(int b) {
+	b++;
+	int r = 0;
+	while (b) {
+		r += bit[b];
+		b -= b&-b;
+	}
+	return r;
+}
+
+inline int get_higher(int b, int l, int r, int ll,int rr, int x) {
+	if (r <= ll || rr <= l) {
+		return 0;
+	}
+	if (ll <= l&&r <= rr) {
+		return seg[b].anss-seg[b].sum(seg[b].get_upper(x)-1);
+	}
+	return get_higher(b * 2 + 1, l, (l + r) >> 1, ll, rr, x) + get_higher(b * 2 + 2, (l + r) >> 1, r, ll, rr, x);
+}
+inline int get_lower(int b, int l, int r, int ll, int rr, int x) {
+	if (r <= ll || rr <= l) {
+		return 0;
+	}
+	if (ll <= l&&r <= rr) {
+		return seg[b].sum(seg[b].get_number(x) - 1);
+	}
+	return get_lower(b * 2 + 1, l, (l + r) >> 1, ll, rr, x) + get_lower(b * 2 + 2, (l + r) >> 1, r, ll, rr, x);
+}
+void add_number(int num, int x) {
+	add(0, 0, n, x, num);
+	ANSWER += (long long int)(get_higher(0, 0, n, 0,x+1,num));
+	ANSWER += (long long int)(get_lower(0, 0, n, x,n, num));
+}
+Set<int> ss;
+inline void dfs2(st *b) {
+	if (b->l) {
+		dfs2(b->l);
+	}
+	add_number(churu[b->val], poin[b->val]);
+	if (b->r) {
+		dfs2(b->r);
+	}
+}
+int main() {
+	scanf("%d%d", &n, &m);
+	for (int i = 0;i < n;i++) {
+		scanf("%d", &churu[i]);
+	}
+	for (int i = 0;i < n;i++) {
+		S.ich_insert(i + 1, i);
+	}
+	while (m--) {
+		int l, r, x;
+		scanf("%d%d%d", &l, &r, &x);
+		l--;
+		r--;
+		x--;
+		vv.push_back(query(l, r, x));
+		st *tmp;
+		st *tmp2;
+		S.ich_split(S.root,S.root, tmp,l);
+		S.ich_split(tmp,tmp, tmp2,r-l+1);
+		S.root = S.merge(S.root, tmp2);
+		ss.ich_split(ss.root, ss.root, tmp2, x);
+		ss.root = ss.merge(ss.root, tmp);
+		ss.root = ss.merge(ss.root, tmp2);
+	}
+	S.root = NULL;
+	for(int i = 0;i < n;i++) {
+		S.ich_insert(i + 1, i);
+	}
+	dfs(ss.root);
+	init(0, 0, n);
+	init2(0, 0, n);
+	for (int i = 0;i < vv.size();i++) {
+		int l = vv[i].l;
+		int r = vv[i].r;
+		st *tmp;
+		st *tmp2;
+		S.ich_split(S.root, S.root, tmp, l);
+		S.ich_split(tmp, tmp, tmp2, r - l + 1);
+		S.root = S.merge(S.root, tmp2);
+		dfs2(tmp);
+		//int x = vv[i].x;
+		printf("%lld\n", ANSWER);
+	}
+	return 0;
+}

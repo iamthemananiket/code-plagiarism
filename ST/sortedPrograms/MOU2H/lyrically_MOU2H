@@ -1,0 +1,77 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int MO = 1000000009;
+
+int N;
+int H[1000010];
+int A[1000010];
+
+unordered_map<int,int> app;
+int prv[1000010];
+
+Int dpSum[1000010];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int i = 0; i < N; ++i) {
+			H[i] = in();
+		}
+		for (int i = 1; i < N; ++i) {
+			A[i] = H[i] - H[i - 1];
+		}
+// cout<<"A : ";pv(A+1,A+N);
+		app.clear();
+		for (int i = 1; i < N; ++i) {
+			prv[i] = app.count(A[i]) ? app.at(A[i]) : 0;
+			app[A[i]] = i;
+		}
+// cout<<"prv : ";pv(prv+1,prv+N);
+		dpSum[0] = 0;
+		dpSum[1] = 1;
+		for (int i = 1; i < N; ++i) {
+			dpSum[i + 1] = (dpSum[i] + (dpSum[i] - dpSum[prv[i]])) % MO;
+		}
+// cout<<"dpSum : ";pv(dpSum,dpSum+N+1);
+		Int ans = dpSum[N] - 1;
+		ans = (ans % MO + MO) % MO;
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}
+

@@ -1,0 +1,167 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%.12Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxk = 50;
+
+typedef bitset<maxk> col;
+
+const int maxn = 2e5 + 7;
+const ll md = 1e9 + 7;
+const int lmaxn = 19;
+
+map< pair<int, pii>, col > M;
+
+int dep[maxn];
+col S[lmaxn][4*maxn];
+int lazy[lmaxn][4*maxn];
+
+int n;
+
+void push(int h,int x) {
+	if (lazy[h][x] < 0) return;
+	S[h][x+x] = 0; S[h][x+x].set(lazy[h][x]);
+	S[h][x+x+1] = 0; S[h][x+x+1].set(lazy[h][x]);
+	lazy[h][x+x] = lazy[h][x]; lazy[h][x+x+1] = lazy[h][x];
+	lazy[h][x] = -1;
+}
+
+void init(int h,int x,int l,int r) {
+	S[h][x] = 1; lazy[h][x] = -1;
+	if (l == r) return;
+	int mid = (l+r)>>1;
+	init(h,x+x,l,mid); init(h,x+x+1,mid+1,r);
+}
+
+col qry(int h,int x,int l,int r,int i,int j) {
+	if (l != r) { push(h,x); }
+	if (i <= l && r <= j) return S[h][x];
+	if (j < l || r < i) return 0;
+
+	int mid = (l+r)>>1;
+
+	return qry(h,x+x,l,mid,i,j) | qry(h,x+x+1,mid+1,r,i,j);
+}
+
+void update(int h,int x,int l,int r,int i,int j,int v) {
+
+	//cout<<" --> "<<x<<" "<<l<<" "<<r<<endl;
+
+	if (l != r) { push(h,x); }
+	if (i <= l && r <= j) { S[h][x] = 0; S[h][x].set(v); lazy[h][x] = v; return; }
+	if (j < l || r < i) return;
+	int mid = (l+r)>>1;
+	update(h,x+x,l,mid,i,j,v); update(h,x+x+1,mid+1,r,i,j,v);
+	S[h][x] = S[h][x+x] | S[h][x+x+1];
+}
+
+void dfs(int x,int h) {
+	dep[x] = h;
+
+	if (x*2 <= n) dfs(x*2,h+1);
+	if (x*2 + 1 <= n) dfs(x*2 + 1,h+1);
+}
+
+inline col getcol(int x) {
+	return qry(dep[x],1,1,n,x,x);
+}
+
+inline void upd(int x,int d,int k) {
+
+	//cout<<x<<" : "<<d<<" : "<<k<<endl;
+
+	int l = x, r = x; 
+	while (l <= n) {
+		if (d > k) break;
+		update(dep[l],1,1,n,l,r,d);
+
+		//cout<<l<<" : "<<r<<" : "<<d<<endl;
+
+		d++; l*=2; r*=2; r++;
+	}
+}
+
+int main() {
+	s(n); int q; s(q);
+
+	dfs(1,0);
+
+	repe(i,0,lmaxn) {
+		init(i,1,1,n);
+	}
+
+	while (q--) {
+		int t; s(t);
+		if (t == 1) {
+			int x,k; s(x); s(k); k = min(k,maxk); int cur = 0;
+			upd(x,cur,k);
+
+			while (true) {
+				int pi = x/2; cur++;
+				
+				if (pi <= 0) break;
+
+				if (cur <= k) {
+					upd(pi,cur,cur); //cout<<pi<<endl;
+				} else break;
+
+				if (cur + 1 <= k) {
+					if (pi+pi == x) {
+						upd(pi+pi+1, cur+1,k); //cout<<pi+pi+1<<endl;
+					} else {
+						upd(pi+pi,cur+1,k); //cout<<pi+pi<<endl;
+					}
+				}
+				x = pi;
+			}
+
+		} else if (t == 2) {
+			col z = 0;
+			int x,y; s(x); s(y);
+
+			while (dep[x] > dep[y]) {
+				//cout<<x<<endl;
+				z |= getcol(x); x = x/2;
+				
+			}
+			while (dep[y] > dep[x]) {
+				//cout<<y<<endl; 
+				z |= getcol(y); y = y/2;
+			}
+			z |= getcol(x) | getcol(y);
+			while (x != y) {
+				x/=2; y/=2; z |= getcol(x); z |= getcol(y);
+				//cout<<x<<" & "<<y<<endl;
+			}
+
+			pr(z.count() - z.test(0)); endc;
+		} else {
+			int x; s(x);
+			col z = getcol(x); int l = x, r = x;
+			int h = dep[x];
+			while (l*2 <= n) {
+				l*=2; r*=2; r++; h++;
+				z |= qry(h,1,1,n,l,r);
+			}
+			pr(z.count() - z.test(0)); endc;
+		}
+	}
+}

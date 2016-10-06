@@ -1,0 +1,35 @@
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <algorithm>
+
+using namespace std;
+
+int main()
+{
+    int T;
+    cin >> T;
+
+    while (T --> 0){
+        int A, B, C, D;
+        cin >> A >> B >> C >> D;
+
+        if (A > B || C > D){
+            cout << "0\n";
+            continue;
+        }
+
+        long long nrSolutions = 0;
+
+        for (int x = A; x <= B; ++x){
+            if (x < C)
+                nrSolutions += D - C + 1;
+            else
+                nrSolutions += max(D - x, 0);
+        }
+
+        cout << nrSolutions << "\n";
+    }
+
+    return 0;
+}

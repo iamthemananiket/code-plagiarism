@@ -1,0 +1,232 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int S = 2010000;
+
+using namespace std;
+
+int tests;
+string st1,st2;
+int L;
+int N;
+vector<int> ans;
+int elem[200][200];
+int v1[S],v2[S];
+
+long long get_rand()
+{
+	long long res=0;
+	for (int i=0;i<=60;i++)
+		res=res*2+rand()%2;
+	return res;
+}
+
+const int SZ = 5;
+
+string make(long long x)
+{
+	string res="";
+	while (x)
+	{
+		res+=char(x%7+48);
+		x/=7;
+	}
+	reverse(res.begin(),res.end());
+	return res;
+}
+
+
+int pw[100];
+
+
+int get_digit(int ps)
+{
+	int R=v1[ps/SZ]/pw[ps%SZ];
+	return R%7;
+}
+
+int main(){
+	//freopen("beavers.in","r",stdin);
+	//freopen("beavers.out","w",stdout);
+//	freopen("F:/in.txt","r",stdin);
+//	freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	pw[0]=1;
+	for (int i=1;i<=50;i++)
+		pw[i]=pw[i-1]*7;
+	
+	for (int i=1;i<7;i++)
+		for (int j=1;j<7;j++)
+		{
+			elem[i*j%7][j]=i;
+		}
+	
+//	cout<<pw[8]<<endl;
+	
+	cin>>tests;
+//	getline(cin,st1);
+	for (;tests;--tests)
+	{
+		int ful;
+	//	if (tests==1)
+	//		break;
+//		cin>>st1;
+		getline(cin,st1);
+		getline(cin,st1);
+		assert(st1!="0");
+//		cin>>st2;
+		getline(cin,st2);
+		
+/*		long long a,b,c;
+		a=get_rand()%1000000000+1;
+		b=get_rand()%1000000000+1;
+		c=a*b;
+		st1=make(c);
+		st2=make(b);
+		cout<<st1<<endl;
+		cout<<st2<<endl;
+*/		
+		//L=5;
+		
+		while (st1.size()>0&&st2[st2.size()-1]=='0'&&st1[st1.size()-1]=='0')
+			st1.erase(st1.end()-1),
+			st2.erase(st2.end()-1);
+		
+		cin>>L;
+		//L=rand()%10+1;
+		if(st1.size()==0)
+		{
+			cout<<0<<endl;
+			continue;
+		}
+		if (st1=="0")
+		{
+			cout<<0<<endl;
+			continue;
+		}
+		
+		for (int i=0;i<=st1.size();i++)
+			v1[i]=v2[i]=0;
+		
+		ans.clear();
+		while (st1[st1.size()-1]=='0')
+		{
+			ans.push_back(0);
+			st1.erase(st1.end()-1);
+			if (ans.size()==L)
+				break;
+		}
+		
+		reverse(st1.begin(),st1.end());
+		reverse(st2.begin(),st2.end());
+		
+		for (int i=0;i<st1.size()&&i<=30000;i+=SZ)
+		{
+			//v1[i/8]=(st1[i]-48);
+			for (int j=i;j<i+SZ;j++)
+				if (j<st1.size())
+					v1[i/SZ]+=(st1[j]-48)*pw[j-i];
+		}
+		for (int i=0;i<st2.size();i+=SZ)
+		{
+			//v2[i/8]=(st2[i]-48);
+			for (int j=i;j<i+SZ;j++)
+				if (j<st2.size())
+					v2[i/SZ]+=(st2[j]-48)*pw[j-i];
+		}
+		
+	//	cout<<v1[0]<<" "<<v1[1]<<endl;
+		
+		assert(v2[0]!=0);
+		
+		N=st1.size()/SZ+(st1.size()%SZ>0);
+		int M=st2.size()/SZ+(st2.size()%SZ>0);
+		
+		for (int i=0;i<st1.size();i++)
+		{
+			if (ans.size()>=L)
+				break;
+			while (v1[i/SZ]<0)
+				v1[i/SZ]+=pw[SZ],
+				v1[i/SZ+1]--;
+			
+			int here=get_digit(i);
+			int dig=elem[here][v2[0]%7];
+			
+			if (dig==0)
+			{
+				ans.push_back(dig);
+				continue;
+			}
+//			cout<<"!!"<<dig<<endl;
+			for (int j=0;j<M&&j*SZ+i<L;j++)
+				{
+					//int ad=dig*v2[j]*pw[i%SZ];
+	//				ad*=pw[i%SZ];
+				//	cout<<"#"<<ad<<endl;
+					
+				///	cout<<"@"<<v1[i/2+j]<<endl;
+					v1[i/SZ+j]-=dig*v2[j]*pw[i%SZ];
+					if (v1[i/SZ+j]<0)
+						ful=-((v1[i/SZ+j]-pw[SZ]+1)/pw[SZ]);
+					else
+						ful=0;
+					if (ful)
+						v1[i/SZ+j+1]-=ful,
+						v1[i/SZ+j]+=ful*pw[SZ];
+				}
+			ans.push_back(dig);
+		/*	for (int j=0;j<st1.size();j++)
+				cout<<v1[j]<<" ";
+			cout<<endl;*/
+		}
+		while (ans.size()>1&&ans.back()==0||ans.size()>L)
+			ans.pop_back();
+		reverse(ans.begin(),ans.end());
+		
+		for (int i=0;i<ans.size();i++)
+			cout<<ans[i];
+		cout<<endl;
+		/*
+		string st3=make(a);
+		cout<<st3<<endl;
+		cout<<"!"<<L<<endl;
+		cin.get();
+		*/
+	}
+	
+	return 0;
+}

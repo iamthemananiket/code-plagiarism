@@ -1,0 +1,31 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+ 
+using namespace std;
+ 
+#define Nx 1000000
+ 
+long long p,q;
+ 
+ 
+long long solution(long long x, long long y)
+{
+	if(x>y)
+		return solution(y,x);
+	long long ret;
+	ret = (x+y-2)*x*y + 2*((x-2)*(x-1)*2*x/3+(y-x+1)*x*(x-1));
+	return ret;
+}
+ 
+int main()
+{
+   scanf("%lld%lld",&p,&q);
+   while(p || q)
+   {
+        printf("%lld\n",solution(p,q));
+        scanf("%lld%lld",&p,&q);
+   }
+   return 0;
+}
+ 

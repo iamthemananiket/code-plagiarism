@@ -1,0 +1,96 @@
+#include <iostream>
+#include <map>
+#include <cstring>
+#include <fstream>
+#include <cstdio>
+#include <math.h>
+#include <queue>
+#include <stack>
+#include <set>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <cassert>
+#include <algorithm>
+#include <ctime>
+#include <vector>
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+#define mp make_pair
+#define pb push_back
+
+const int N = 400500;
+
+bool one(int mask, int i) {
+    return (mask & (1 << i));
+}
+
+int n, a[N];
+
+int t[N * 31][2], sz = 0;
+
+void add(int x) {
+    int v = 1;
+    for (int i = 30; i >= 0; -- i) {
+        int cur = one(x, i);
+        if (!t[v][cur]) t[v][cur] = ++sz;
+        v = t[v][cur];
+    }
+}
+
+int get(int x) {
+    int v = 1;
+    int ans = 0;
+    for (int i = 30; i >= 0; -- i) {
+        int cur = one(x, i);
+        if (t[v][cur ^ 1]) ans |= (1 << i), v = t[v][cur ^ 1];
+        else v = t[v][cur];
+    }
+    return ans;
+}
+
+int L[N], R[N];
+
+void solve() {
+    scanf("%d", &n);
+    for (int i = 1; i <= n; ++ i) {
+        scanf("%d", &a[i]);
+    }
+    memset(t, 0, sizeof t);
+    sz = 1;
+    add(0);
+    int now = 0;
+    for (int i = 1; i <= n; ++ i) {
+        now ^= a[i];
+        L[i] = max(L[i - 1], get(now));
+        add(now);
+    }
+    memset(t, 0, sizeof(t[0]) * sz);
+    sz = 1;
+    add(0);
+    now = 0;
+    R[n + 1] = 0;
+    for (int i = n; i > 0; -- i) {
+        now ^= a[i];
+        R[i] = max(R[i + 1], get(now));
+        add(now);
+    }
+    int res = 0;
+    for (int i = 1; i < n; ++ i) res = max(res, L[i] + R[i + 1]);
+    printf("%d\n", res);
+}
+
+int main () {
+    int test = 1;
+    
+   // scanf("%d", &test);
+    
+    while(test--) solve();
+    
+    return 0;
+}

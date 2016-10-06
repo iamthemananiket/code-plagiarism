@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+int t;
+long long n;
+vector < long long > X;
+vector < long long > Y;
+int main(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cin >> t;
+	while(t--){
+		long long sum, cnt1, cnt2;
+		cin >> n;
+		X.clear(),Y.clear();
+		Y.resize(n),X.resize(n);
+		for(int i = 0; i < n; ++i)
+			cin >> X[i] >> Y[i];
+		sort(X.begin(), X.end());
+		sort(Y.begin(), Y.end());
+		long long u = X[n / 2] - X[(n - 1) / 2] + 1;
+		long long v = Y[n / 2] - Y[(n - 1) / 2] + 1;
+		cout << u * v << '\n';
+	}
+    return 0;
+}

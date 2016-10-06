@@ -1,0 +1,24 @@
+#include<stdio.h>
+int TC;
+char p[101000];
+int main()
+{
+	int i, c1, c2;
+	scanf("%d", &TC);
+	while (TC--){
+		c1 = c2 = 0;
+		scanf("%s", p);
+		for (i = 0; p[i]; i++){
+			if (i % 2 == 0){
+				if (p[i] == '-')c1++;
+				else c2++;
+			}
+			else{
+				if (p[i] == '+')c1++;
+				else c2++;
+			}
+		}
+		if (c1 > c2)c1 = c2;
+		printf("%d\n", c1);
+	}
+}

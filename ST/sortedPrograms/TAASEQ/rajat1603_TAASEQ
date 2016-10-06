@@ -1,0 +1,74 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 1e5 + 5;
+const int inf = 1e9 + 9;
+int t;
+int n;
+int arr[N];
+int pre[N];
+int suf[N];
+int ans;
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d" , &n);
+        for(int i = 1 ; i <= n ; ++i){
+            scanf("%d" , arr + i);
+        }
+        ans = inf;
+        if(n <= 3){
+            for(int i = 1 ; i <= n ; ++i){
+                ans = min(ans , arr[i]);
+            }
+            printf("%d\n" , ans);
+            continue;
+        }
+        pre[1] = arr[2] - arr[1];
+        for(int i = 2 ; i <= n ; ++i){
+            pre[i] = arr[i] - arr[i - 1];
+            if(pre[i - 1] == inf){
+                pre[i] = inf;
+            }
+            else if(pre[i] != pre[i - 1]){
+                pre[i] = inf;
+            }
+        }
+        suf[n] = arr[n] - arr[n - 1];
+        for(int i = n - 1 ; i >= 1 ; --i){
+            suf[i] = arr[i + 1] - arr[i];
+            if(suf[i + 1] == inf){
+                suf[i] = inf;
+            }
+            else if(suf[i] != suf[i + 1]){
+                suf[i] = inf;
+            }
+        }
+        if(suf[2] != inf){
+            ans = min(ans , arr[1]);
+        }
+        if(suf[3] != inf){
+            if(arr[3] - arr[1] == suf[3]){
+                ans = min(ans , arr[2]);
+            }
+        }
+        if(pre[n - 2] != inf){
+            if(arr[n] - arr[n - 2] == pre[n - 2]){
+                ans = min(ans , arr[n - 1]);
+            }
+        }
+        for(int i = 3 ; i < n - 1 ; ++i){
+            if(pre[i - 1] != inf && pre[i - 1] == suf[i + 1]){
+                if(arr[i + 1] - arr[i - 1] == pre[i - 1]){
+                    ans = min(ans , arr[i]);
+                }
+            }
+        }
+        if(pre[n - 1] != inf){
+            ans = min(ans , arr[n]);
+        }
+        if(ans >= inf){
+            ans = -1;
+        }
+        printf("%d\n" , ans);
+    }
+}

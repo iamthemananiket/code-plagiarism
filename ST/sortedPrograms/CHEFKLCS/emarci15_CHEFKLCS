@@ -1,0 +1,85 @@
+#include <iostream>
+
+using namespace std;
+
+int lcs[1001][1001];
+long long nlcs[1001][1001];
+int lx[1001][1001][26],ly[1001][1001][26];
+
+char s[1001];
+char t[1001];
+
+int n,k;
+
+char r[1001];
+int rv;
+
+int main()
+{
+    cin >> n >> k;
+    cin >> s >> t;
+    for(int i=1; i<=n/2; i++) {
+        swap(s[i-1],s[n-i]);
+        swap(t[i-1],t[n-i]);
+    }
+
+    for(int i=1; i<=n; i++) {
+        for(int j=1; j<=n; j++) {
+            if(s[i-1] == t[j-1]) {
+                lcs[i][j] = lcs[i-1][j-1] + 1;
+                nlcs[i][j] = max(nlcs[i-1][j-1],1ll);
+                lx[i][j][s[i-1]-'a'] = i;
+                ly[i][j][s[i-1]-'a'] = j;
+            } else {
+                lcs[i][j] = max(lcs[i][j-1],lcs[i-1][j]);
+                if(lcs[i][j-1] >= lcs[i][j]) {
+                    for(int l=0; l<26; l++) {
+                        lx[i][j][l] = lx[i][j-1][l];
+                        ly[i][j][l] = ly[i][j-1][l];
+                    }
+                }
+                if(lcs[i-1][j] >= lcs[i][j]) {
+                    for(int l=0; l<26; l++) {
+                        if(ly[i-1][j][l] > ly[i][j][l]) {
+                            lx[i][j][l] = lx[i-1][j][l];
+                            ly[i][j][l] = ly[i-1][j][l];
+                        }
+                    }
+                }
+                for(int l=0; l<26; l++) {
+                    if((lx[i][j][l] > 0) && (ly[i][j][l] > 0)) {
+                        nlcs[i][j] += nlcs[lx[i][j][l]][ly[i][j][l]];
+                        if(nlcs[i][j] > k) nlcs[i][j] = k+1;
+                    }
+                }
+            }
+        }
+    }
+
+    int i(n),j(n);
+    if(nlcs[n][n] < k) {
+        cout << -1 << endl;
+        return 0;
+    }
+    while((i>0) && (j>0)) {
+        if(s[i-1] == t[j-1]) {
+            r[rv++] = s[i-1];
+            i--; j--;
+        } else {
+            if(!lcs[i][j]) break;
+            for(int l=0; l<26; l++) {
+                int ii = lx[i][j][l];
+                int jj = ly[i][j][l];
+                if(nlcs[ii][jj] >= k) {
+                    i = ii;
+                    j = jj;
+                } else k -= nlcs[ii][jj];
+            }
+        }
+    }
+
+    r[rv] = '\0';
+    cout << r << endl;
+
+    return 0;
+}

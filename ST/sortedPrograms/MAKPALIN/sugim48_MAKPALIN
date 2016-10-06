@@ -1,0 +1,72 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <fstream>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <unordered_set>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-8;
+int INF = INT_MAX / 2;
+
+vector<ll> f(string& s, vector<ll>& c) {
+	int n = s.length();
+	vector<ll> a(n + 1);
+	for (int i = 1; i <= n; i++)
+		a[i] = (a[i - 1] + c[i - 1] * (s[i - 1] - 'a' + 1)) % MOD;
+	return a;
+}
+
+ll g(vector<ll>& a, vector<ll>& c, int i, int k) {
+	int n = a.size() - 1;
+	return ((a[i] + (a[n] - a[i]) * 30 + c[i] * k) % MOD + MOD) % MOD;
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		string s; cin >> s;
+		int n = s.length();
+		vector<ll> c(n + 1);
+		c[0] = 1;
+		for (int i = 1; i <= n; i++)
+			c[i] = c[i - 1] * 30 % MOD;
+		vector<ll> a = f(s, c);
+		reverse(s.begin(), s.end());
+		vector<ll> b = f(s, c);
+		int cnt = 0;
+		for (int i = 0; i <= n; i++) {
+			bool ok = false;
+			for (int k = 1; k <= 26; k++)
+				if (g(a, c, i, k) == g(b, c, n - i, k))
+					ok = true;
+			if (ok) cnt++;
+		}
+		cout << cnt << endl;
+	}
+}

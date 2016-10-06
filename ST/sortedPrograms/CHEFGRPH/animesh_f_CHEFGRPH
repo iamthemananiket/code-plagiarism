@@ -1,0 +1,167 @@
+
+#include<iostream>
+#include<cstdio>
+#include<vector>
+#include<algorithm>
+#include<map>
+#define MODULO 1000000007
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+inline long long scanl(){
+    char c = getchar_unlocked();
+    long long x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+long long expoMod(long long base,long long power)
+{
+if(power<=0)
+return 1;
+long long result=1;
+while(power!=0)
+{
+if(power%2==1)
+result=(result*base)%MODULO;
+base=(base*base)%MODULO;
+power/=2;
+}
+return result;
+}
+struct vertx
+{
+long long ind;
+long long store;
+vertx(long long a,long long b)
+{
+ind=a;
+store=b;
+}
+};
+struct layerVertices
+{
+long long lyr,pos;
+layerVertices(long long x,long long y)
+{
+lyr=x;
+pos=y;
+}
+};
+bool operator < (layerVertices a,layerVertices b)
+{
+if(a.lyr!=b.lyr)
+return a.lyr<b.lyr;
+return a.pos<b.pos;
+}
+
+vector<layerVertices> v;
+vector<layerVertices> elements[50015];
+map<layerVertices,long long> ::iterator lol;
+map<layerVertices,long long> ::iterator goThrough;
+vector<vertx> store;
+map<layerVertices,long long> ma;
+map<layerVertices,long long> mapTot;
+long long find(long long val)
+{
+long long under=0;
+long long above=store.size()-1;
+long long middle=0;
+while(under<=above)
+{
+middle=(under+above)/2;
+if(store[middle].ind==val)
+return middle;
+if(val<store[middle].ind)
+above=middle-1;
+else
+under=middle+1;
+}
+while(val<store[middle].ind&&middle>0)
+middle--;
+return middle;
+}
+int main()
+{
+long long n,m,query,layerOne,vertexOne,layerTwo,vertexTwo;
+n=scanl();
+m=scanl();
+query=scanl();
+long long l=0;
+while(query-->0)
+{
+layerOne=scanl();
+vertexOne=scanl();
+layerTwo=scanl();
+vertexTwo=scanl();
+lol=ma.find(layerVertices(layerTwo,vertexTwo));
+v.push_back(layerVertices(layerTwo,vertexTwo));
+if(lol==ma.end())
+{
+ma[layerVertices(layerTwo,vertexTwo)]=l++;
+elements[l-1].push_back(layerVertices(layerOne,vertexOne));
+}
+else
+{
+long long tVari=lol->second;
+elements[tVari].push_back(layerVertices(layerOne,vertexOne));
+}
+}
+sort(v.begin(),v.end());
+store.push_back(vertx(0,1));
+mapTot[layerVertices(0,0)]=1;
+for(long long i=0;i<v.size();i++)
+{
+long long tVari=ma[v[i]];
+long long addendum=0;
+if(store[store.size()-1].ind!=v[i].lyr)
+{
+long long t=find(v[i].lyr-1);
+if(v[i].lyr==n+1)
+store.push_back(vertx(v[i].lyr,(store[t].store*expoMod(m,v[i].lyr-store[t].ind-1))%MODULO));
+else
+store.push_back(vertx(v[i].lyr,(store[t].store*expoMod(m,v[i].lyr-store[t].ind))%MODULO));
+}
+for(long long j=0;j<elements[tVari].size();j++)
+{
+layerVertices chosen=elements[tVari][j];
+goThrough=mapTot.find(chosen);
+if(goThrough!=mapTot.end())
+{
+addendum=(addendum+goThrough->second)%MODULO;
+}
+else
+{
+long long t=find(chosen.lyr-1);
+addendum=(addendum+(store[t].store*expoMod(m,chosen.lyr-1-store[t].ind))%MODULO)%MODULO;
+}
+}
+elements[tVari].clear();
+goThrough=mapTot.find(v[i]);
+if(goThrough==mapTot.end())
+{
+long long t=find(v[i].lyr-1);
+long long addendum1=(store[t].store*expoMod(m,v[i].lyr-1-store[t].ind))%MODULO;
+mapTot[v[i]]=(addendum+addendum1)%MODULO;
+}
+store[store.size()-1].store=(store[store.size()-1].store+addendum)%MODULO;
+}
+long long ans=(store[store.size()-1].store*expoMod(m,n-store[store.size()-1].ind))%MODULO;
+printf("%lld",ans);
+return 0;
+} 

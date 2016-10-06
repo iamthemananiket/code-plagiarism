@@ -1,0 +1,285 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+using namespace std;
+const int N=100;
+ll fp(ll x,ll y)
+{
+  if(y==0)return 1;
+  if(y==1)return x%mod;
+  ll res=fp(x,y/2);
+  res=(res*res)%mod;
+  if(y%2)res=(res*x)%mod;
+  return res;
+}
+map<int,ll> dp[N+5];
+ll dp2[N+5];
+ll prefl[N+5];
+ll prefr[N+5];
+ll sol[N+5];
+vi adj[N+5];
+ll A[N+5];
+int t,n;
+
+ll tree[8305],tree1[8305],tree2[8305];
+
+void update(int node,int a,int b,int i,int j,ll val,int type)
+{
+  if(a>b)return;
+
+  if(a>=i && b<=j)
+  {
+    if(type==1){tree1[node]*=val;tree2[node]*=val;}else tree2[node]+=val;
+
+    tree1[node]%=mod;
+    tree2[node]%=mod;
+
+  }
+
+  tree[node]*=tree1[node];
+  tree[node]%=mod;
+
+  tree[node]+=(tree2[node]*(b-a+1))%mod;
+  tree[node]%=mod;
+
+  if(a<b)
+  {
+    tree1[node*2]*=tree1[node];
+    tree1[node*2]%=mod;
+
+    tree2[node*2]*=tree1[node];
+    tree2[node*2]%=mod;
+
+    tree2[node*2]+=tree2[node];
+    tree2[node*2]%=mod;
+
+    tree1[node*2 +1]*=tree1[node];
+    tree1[node*2 +1]%=mod;
+
+    tree2[node*2 +1]*=tree1[node];
+    tree2[node*2 +1]%=mod;
+
+    tree2[node*2 +1]+=tree2[node];
+    tree2[node*2 +1]%=mod;
+
+   
+  }
+     tree1[node]=1;
+    tree2[node]=0;
+
+  if(a>j || b<i)return;
+  if(a>=i && b<=j)return;
+
+  int mid=(a+b)/2;
+
+  update(node*2,a,mid,i,j,val,type);
+  update(node*2+1,mid+1,b,i,j,val,type);
+
+  tree[node]=(tree[node*2]+tree[node*2+1])%mod;
+}
+
+ll query(int node,int a,int b,int i,int j)
+{
+if(a>b)return 0;
+
+  tree[node]*=tree1[node];
+  tree[node]%=mod;
+
+  tree[node]+=tree2[node];
+  tree[node]%=mod;
+
+  if(a<b)
+  {
+    tree1[node*2]*=tree1[node];
+    tree1[node*2]%=mod;
+
+    tree2[node*2]*=tree1[node];
+    tree2[node*2]%=mod;
+
+    tree2[node*2]+=tree2[node];
+    tree2[node*2]%=mod;
+
+    tree1[node*2 +1]*=tree1[node];
+    tree1[node*2 +1]%=mod;
+
+    tree2[node*2 +1]*=tree1[node];
+    tree2[node*2 +1]%=mod;
+
+    tree2[node*2 +1]+=tree2[node];
+    tree2[node*2 +1]%=mod;
+
+    
+  }
+    tree1[node]=1;
+    tree2[node]=0;
+
+  if(a>j || b<i)return 0;
+  if(a>=i && b<=j)return tree[node];
+
+  int mid=(a+b)/2;
+
+  ll res1=query(node*2,a,mid,i,j);
+  ll res2=query(node*2+1,mid+1,b,i,j);
+
+  return (res1+res2)%mod;
+}
+
+
+void dfs(int pos,int par)
+{
+  int num=0;
+  vi childs;
+  childs.pb(0);
+
+  for(auto i:adj[pos])
+  {
+    if(i==par)continue;
+    num++;
+    childs.pb(i);
+    dfs(i,pos);
+  }
+
+  afor(i,0,8300)
+  {
+    tree[i]=0LL;
+    tree1[i]=1LL;
+    tree2[i]=0LL;
+  }
+
+  prefl[0]=1LL;
+  prefr[num+1]=1LL;
+
+
+  afor(i,1,num)
+  {
+    int x=childs[i];
+    sol[i]=dp2[x];
+    for(auto z:dp[x])
+    {
+      if(z.first>=0)sol[i]+=z.second;
+      sol[i]%=mod;
+    }
+  }
+
+ 
+  afor(i,1,num)
+  {
+    prefl[i]=(prefl[i-1]*sol[i])%mod;
+  }
+
+  bfor(i,num,1)
+  {
+    prefr[i]=(prefr[i+1]*sol[i])%mod;
+  }
+
+    dp[pos][A[pos]]+=prefl[num];
+    dp[pos][A[pos]]%=mod;
+  
+    afor(i,1,num)
+    {
+      int x=childs[i];
+
+      for(auto z:dp[x])
+      {
+        dp[pos][z.first + A[pos]]+= ((z.second*prefl[i-1])%mod * prefr[i+1])%mod;
+        dp[pos][z.first + A[pos]]%= mod;
+
+        int lim=0- A[pos] - z.first;
+
+        lim+=1000;
+        if(lim<0)lim=0;
+        if(lim>2000)continue;
+
+        ll toadd=query(1,0,2000,lim,2000);
+
+       
+        toadd*=(z.second*prefr[i+1])%mod;
+        toadd%=mod;
+
+      
+        dp2[pos]+=toadd;
+        dp2[pos]%=mod;
+      }
+
+      update(1,0,2000,0,2000,sol[i],1);
+
+      for(auto z:dp[x])
+      {
+        assert(z.first>=(-1000) && z.first<=1000);
+        ll toadd=(prefl[i-1]*z.second)%mod;
+        update(1,0,2000,z.first+1000,z.first+1000,toadd,2);
+       
+        
+      }
+
+      
+
+
+    }
+ 
+
+}
+
+
+int main()
+{
+  finp;
+  cin>>t;
+
+  while(t--)
+  {
+    cin>>n;
+    assert(n<=100);
+    afor(i,1,n)
+    {
+      cin>>A[i];
+      adj[i].clear();
+      dp[i].clear();
+      dp2[i]=0;
+    }
+
+    afor(i,1,n-1)
+    {
+      int x,y;
+      cin>>x>>y;
+      adj[x].pb(y);
+      adj[y].pb(x);
+    }
+
+    dfs(1,-1);
+
+    //cout<<dp[2][9]<<endl;
+
+    ll ans=dp2[1];
+    //cout<<dp2[1]<<"\n";
+
+    for(auto x:dp[1])
+    {
+      if(x.first>=0)
+        {
+          //cout<<x.first<<" "<<x.second<<"\n";
+          ans+=x.second;
+        }
+
+      ans%=mod;
+    }
+
+    cout<<ans<<"\n";
+  }
+
+return 0;
+}

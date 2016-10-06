@@ -1,0 +1,88 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+#define time romka
+
+using namespace std;
+const ld eps = 1e-18;
+const int N = 1e3 + 10;
+ld ans[N][N][3],d;
+ll a[N][N][3];
+int i,j,k,n,m,time;
+inline ld max(ld a,ld b)
+{
+    if(a-b>eps) return a;
+    return b;
+}
+ int main()
+ {
+    fast;
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+     cin>>n>>m>>d;
+     for(i=1;i<=n;++i)
+      for(j=0;j<m;++j)
+       for(k=0;k<2;++k) cin>>a[i][j][k];
+        for(i=1;i<=n;++i) ans[i][0][0] = d;
+        ld mx = d,inf = 1e18;
+         for(time=1;time<=m;++time)
+         {
+             int time_p = time - 1;
+             for(i=1;i<=n;++i)
+              {
+                  ld val1  =inf / a[i][time_p][1];
+                  ans[i][time][0] = ans[i][time-1][0];
+                  ans[i][time][1] = ans[i][time-1][1];
+                  int diff = 0;
+                  for(j=i;j>max(0,i-6);--j)
+                  {
+                    if(diff<=time_p)
+                    {
+                        if (ans[j][time_p- diff][1] -  val1>eps)
+                        {
+                            cout<<"Quintillionnaire\n";
+                            exit(0);
+                        }
+                          ans[i][time][0]=max(ans[i][time][0],ans[j][time_p - diff][1] * a[i][time_p][1]);
+                          ans[i][time][1]=max(ans[i][time][1],ans[j][time_p - diff][0] / a[i][time_p][0] + eps);
+                    } else break;
+                    ++diff;
+                  }
+
+                   diff = 0;
+                  for(j=i+1;j<=min(n,i+5);++j)
+                  {
+                    ++diff;
+                    if(diff<=time_p)
+                    {
+                        if (ans[j][time_p- diff][1] -  val1>eps)
+                        {
+                            cout<<"Quintillionnaire\n";
+                            exit(0);
+                        }
+                          ans[i][time][0]=max(ans[i][time][0],ans[j][time_p - diff][1] * a[i][time_p][1]);
+                          ans[i][time][1]=max(ans[i][time][1],ans[j][time_p - diff][0] / a[i][time_p][0] + eps);
+                    } else break;
+                  }
+
+                  mx=max(mx,ans[i][time][0]);
+              }
+         }
+         cout<<setprecision(6)<<fixed<<mx<<endl;
+ }

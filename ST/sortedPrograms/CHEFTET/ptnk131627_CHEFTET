@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("long.inp","r",stdin)
+#define OUTPUT freopen("long.out","w",stdout)
+#define FOR(i,l,r) for(auto i=(l);i<=(r);i++)
+#define REP(i,l,r) for(auto i=(l);i<(r);i++)
+#define FORD(i,l,r) for(auto i=(l);i>=(r);i--)
+#define REPD(i,l,r) for(auto i=(l);i>(r);i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=1e5+10;
+
+int n,a[N],b[N];
+int f[N][4],g[8];
+void prepare(){
+    scanf("%d",&n);
+    FOR(i,1,n) scanf("%d",b+i);
+    b[n+1]=0;
+    FOR(i,1,n) scanf("%d",a+i);
+}
+int solve(){
+    int ans=-1;
+    FOR(st,0,3){
+        memset(f,-1,sizeof(f));
+        f[1][st]=a[1];
+        FOR(i,0,1) if (st&(1<<i)) f[1][st]+=b[2-i];
+        REP(i,1,n){
+            FOR(k,0,2) g[1<<k]=b[i+2-k];
+            REP(k,1,8) g[k]=g[k&-k]+g[k^(k&-k)];
+            REP(j,0,4){
+                int cur=j<<1;
+                REP(k,0,8) if (!(cur&k)&&a[i+1]+g[k]==f[i][j]){
+                    int ncur=cur|k;
+                    if (ncur&4)
+                        f[i+1][ncur&3]=max(f[i+1][ncur&3],f[i][j]);
+                }
+            }
+        }
+        ans=max(ans,f[n][3]);
+    }
+    return ans;
+}
+int main(){
+//    freopen("input.inp","r",stdin);
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        cout<<solve()<<'\n';
+    }
+}

@@ -1,0 +1,29 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        long long  t, n, v, ans, po, sm, MOD = 1000000007 ;
+
+        for(  cin >> t ;  t-- ;  )
+        {
+                cin >> n >> v ;
+                ans = 0 ;
+                po = 1 ;
+                sm = 2*v ;
+                while(n--)
+                {
+                        cin >> v ;
+                        ans = ( ans*2 + sm*v ) % MOD ;
+                        po = ( po * 2 ) % MOD ;
+                        sm = ( sm + po*v ) % MOD ;
+                }
+                cout << ans << endl ;
+        }
+
+        return 0;
+} 

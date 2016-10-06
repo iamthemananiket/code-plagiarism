@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define N 100100
+#define M 33
+
+const int inf = N * M;
+
+int dx[] = {1, 0, -1, 0};
+int dy[] = {0, 1, 0, -1};
+
+int t, n, m, q, f[N][M], d[N][M];
+bool ORCS[N][M], path[N][M];
+priority_queue < pair <int, int> > pq;
+
+void dijkstra() {
+	for (int i = 0; i <= n + 1; i ++) {
+		for (int j = 0; j <= m + 1; j ++) f[i][j] = inf;
+	}
+	f[1][1] = 0;
+	while (!pq.empty()) pq.pop();
+	pq.push(make_pair(-f[1][1], 1 * M + 1));
+	while (!pq.empty()) {
+		int x = pq.top().second / M, y = pq.top().second % M, z = -pq.top().first;
+		pq.pop();
+		if (f[x][y] != z) continue;
+		for (int i = 0; i < 4; i ++) {
+			int X = x + dx[i], Y = y + dy[i];
+			if (X < 1 || X > n || Y < 1 || Y > m) continue;
+			if ((X < n || Y < m) && ORCS[X][Y]) continue;
+			if (f[X][Y] > z + 1) {
+				f[X][Y] = z + 1;
+				d[X][Y] = (i + 2) % 4;
+				pq.push(make_pair(-f[X][Y], X * M + Y));
+			}
+		}
+	}
+}
+
+int main() {
+//	freopen("l.in", "r", stdin);
+	scanf("%d", &t);
+	while (t --) {
+		scanf("%d %d %d", &n, &m, &q);
+		memset(ORCS, 0, sizeof ORCS);
+		while (q --) {
+			int x, y;
+			scanf("%d %d", &x, &y);
+			x ++, y ++;
+			ORCS[x][y] = 1;
+		}
+		if (ORCS[1][1]) {
+			puts("Frodo Dies"); continue;
+		}
+		memset(d, -1, sizeof d);
+		dijkstra();
+		if (f[n][m] == inf) {
+			puts("Frodo Dies"); continue;
+		}
+		memset(path, 0, sizeof path);
+		int x = n, y = m;
+		while (1) {
+			path[x][y] = 1;
+			if (x == 1 && y == 1) break;
+			int r = d[x][y];
+			x += dx[r], y += dy[r];
+		}
+		for (int i = 1; i <= n; i ++) {
+			for (int j = 1; j <= m; j ++) printf("%c", path[i][j] ? '1' : 'x');
+			puts("");
+		}
+	}
+	return 0;
+}

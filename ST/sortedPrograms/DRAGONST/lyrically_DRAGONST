@@ -1,0 +1,212 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int INF = 1001001001001001001LL;
+
+int N;
+Int X[200010], Y[200010];
+int Q;
+int A[200010], B[200010];
+
+int edgesLen;
+pair<int,pint> edges[1600010];
+
+inline void ae(int u, int v) {
+	edges[edgesLen++] = mp(abs(X[u] - X[v]) + abs(Y[u] - Y[v]), mp(u, v));
+}
+
+int uf[200010];
+int root(int u) {
+	return (uf[u] < 0) ? u : (uf[u] = root(uf[u]));
+}
+bool conn(int u, int v) {
+	u = root(u);
+	v = root(v);
+	if (u == v) return false;
+	if (uf[u] > uf[v]) swap(u, v);
+	uf[u] += uf[v];
+	uf[v] = u;
+	return true;
+}
+
+bool cmpDivide(const int &u, const int &v) {
+	return ((Y[u] != Y[v]) ? (Y[u] < Y[v]) : (X[u] < X[v]));
+}
+bool cmpConquer(const int &u, const int &v) {
+	return (Y[u] - X[u] < Y[v] - X[v]);
+}
+
+Int bestVals[200010];
+int bests[200010];
+int ps[200010];
+
+void solve(int S, int T) {
+	if (T - S <= 4) {
+		for (int i = S; i < T; ++i) for (int j = i + 1; j < T; ++j) {
+			if (Y[ps[j]] - X[ps[j]] <= Y[ps[i]] - X[ps[i]]) {
+				if (bestVals[ps[i]] > X[ps[j]] + Y[ps[j]]) {
+					bestVals[ps[i]] = X[ps[j]] + Y[ps[j]];
+					bests[ps[i]] = ps[j];
+				}
+			}
+		}
+		sort(ps + S, ps + T, cmpConquer);
+		return;
+	}
+	const int U = (S + T) / 2;
+	solve(S, U);
+	solve(U, T);
+	Int opt = INF;
+	int vm = -1;
+	for (int i = S, j = U; i < U; ++i) {
+		for (; j < T && Y[ps[j]] - X[ps[j]] <= Y[ps[i]] - X[ps[i]]; ++j) {
+			if (opt > X[ps[j]] + Y[ps[j]]) {
+				opt = X[ps[j]] + Y[ps[j]];
+				vm = ps[j];
+			}
+		}
+		if (bestVals[ps[i]] > opt) {
+			bestVals[ps[i]] = opt;
+			bests[ps[i]] = vm;
+		}
+	}
+	inplace_merge(ps + S, ps + U, ps + T, cmpConquer);
+}
+
+const int E = 20;
+int V;
+int ids[400010];
+int P[E][400010];
+int dep[400010];
+Int ds[400010];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int u = 0; u < N; ++u) {
+			X[u] = in();
+			Y[u] = in();
+		}
+		Q = in();
+		for (int q = 0; q < Q; ++q) {
+			A[q] = in() - 1;
+			B[q] = in() - 1;
+		}
+		
+		edgesLen = 0;
+		for (int phase = 0; phase < 8; ++phase) {
+// cout<<"X : ";pv(X,X+N);
+// cout<<"Y : ";pv(Y,Y+N);
+			fill(bestVals, bestVals + N, INF);
+			fill(bests, bests + N, -1);
+			iota(ps, ps + N, 0);
+			sort(ps, ps + N, cmpDivide);
+			solve(0, N);
+// cout<<"bests : ";pv(bests,bests+N);
+			for (int u = 0; u < N; ++u) if (~bests[u]) {
+				ae(u, bests[u]);
+			}
+			if (phase % 2 == 0) {
+				for (int u = 0; u < N; ++u) {
+					swap(X[u], Y[u]);
+				}
+			} else {
+				for (int u = 0; u < N; ++u) {
+					X[u] *= -1;
+				}
+			}
+		}
+		
+		sort(edges, edges + edgesLen);
+		fill(uf, uf + N, -1);
+		V = N;
+		iota(ids, ids + N, 0);
+		fill(ds, ds + N, 0);
+		for (int e = 0; e < edgesLen; ++e) {
+			const int u = edges[e].second.first;
+			const int v = edges[e].second.second;
+			const int ru = root(u);
+			const int rv = root(v);
+			if (conn(u, v)) {
+				P[0][ids[ru]] = P[0][ids[rv]] = V;
+				ids[ru] = ids[rv] = ids[V] = V;
+				ds[V] = edges[e].first;
+				++V;
+			}
+		}
+		assert(-uf[root(0)] == N);
+		P[0][V - 1] = V - 1;
+// cout<<"P[0] : ";pv(P[0],P[0]+V);
+// cout<<"ds : ";pv(ds,ds+V);
+		for (int e = 1; e < E; ++e) {
+			for (int u = 0; u < V; ++u) {
+				P[e][u] = P[e - 1][P[e - 1][u]];
+			}
+		}
+		dep[V - 1] = 0;
+		for (int u = V - 1; u--; ) {
+			dep[u] = dep[P[0][u]] + 1;
+		}
+		
+		for (int q = 0; q < Q; ++q) {
+			int u = A[q];
+			int v = B[q];
+			for (int e = E; e--; ) {
+				if (dep[u] - (1 << e) >= dep[v]) {
+					u = P[e][u];
+				}
+				if (dep[v] - (1 << e) >= dep[u]) {
+					v = P[e][v];
+				}
+			}
+			for (int e = E; e--; ) {
+				if (P[e][u] != P[e][v]) {
+					u = P[e][u];
+					v = P[e][v];
+				}
+			}
+			if (u != v) {
+				u = P[0][u];
+				v = P[0][v];
+			}
+// cout<<"lca("<<A[q]<<", "<<B[q]<<") = "<<u<<endl;
+			printf("%lld\n", ds[u]);
+		}
+	}
+	
+	return 0;
+}
+

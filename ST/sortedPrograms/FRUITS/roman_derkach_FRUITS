@@ -1,0 +1,42 @@
+#include<bits/stdc++.h>
+
+#define f first
+#define s second
+#define int long long
+#define pb push_back
+#define mp make_pair
+#define time otoshol
+#define y1 otoshol_
+#define ld long double
+
+
+ using namespace std;
+
+   main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+ //freopen("input.txt","r",stdin);freopen("output.txt","w",stdout);
+
+    int t;
+ cin>>t;
+  while(t--)
+  {
+      int n,m,k;
+      cin>>n>>m>>k;
+      if(n>m) swap(n,m);
+       int mn=abs(n-m);
+        for(int i=1;i<=k;++i){
+         if(n<m) ++n; else ++m;
+         mn=min(mn,abs(n-m));
+        }
+
+        cout<<mn<<endl;
+
+  }
+
+    return 0;
+  }

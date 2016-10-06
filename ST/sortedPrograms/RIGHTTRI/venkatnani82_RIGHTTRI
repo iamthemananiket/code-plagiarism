@@ -1,0 +1,16 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	int test;
+	cin >> test;
+	while(test--) {
+		double h, s;
+		scanf("%lf %lf", &h, &s);
+		if(h * h - 4 * s < 0) printf("-1\n");
+		else {
+			double val1 = sqrt(h * h + 4 * s);
+			double val2 = sqrt(h * h - 4 * s);
+			printf("%.10lf %.10lf %.10lf\n", (val1 - val2) / 2.0, (val1 + val2) / 2.0, h);
+		}
+	}
+}

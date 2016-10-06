@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+long long N;
+int K;
+
+int get(long long x)
+{
+    long long lo=0, mid, hi=100000;
+    while(lo<hi)
+    {
+        mid=(lo+hi+1)/2;
+        if(mid*(mid+1)/2>x)
+            hi=mid-1;
+        else
+            lo=mid;
+    }
+    return lo;
+}
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+    {
+        scanf("%lld%d", &N, &K);
+        if(1LL*K*(K+1)/2<N)
+            printf("-1\n");
+        else
+            printf("%d\n", get(1LL*K*(K+1)/2-N));
+    }
+    return 0;
+}

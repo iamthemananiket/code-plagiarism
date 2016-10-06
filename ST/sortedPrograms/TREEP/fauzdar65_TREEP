@@ -1,0 +1,363 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 50000273
+#define gc getchar_unlocked
+#define pc putchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+using namespace std;
+const int N=100000;
+const int B=26;
+
+inline void scanint(int* x)
+{
+	register char c = gc();
+	*x = 0;
+	for(; (c<48)||(c>57);c = gc());
+	for(; (c>47)&&(c<58);c = gc())
+		*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+}
+
+char pb[10];
+inline void putn(int x){
+  if(!x) pc('0');
+  int pi = 0;
+  while(x) pb[pi++] = (x%10) + '0', x /= 10;
+  while(pi) pc(pb[--pi]);
+}
+
+ll fp(ll a,ll b)
+{
+	if(b==0)return 1;
+	if(b==1)return a%mod;
+	ll res=fp(a,b/2);
+	res*=res;
+	if(res>=mod)res%=mod;
+	if(b%2)res=(res*a)%mod;
+	return res;
+}
+
+ll inv(ll val)
+{
+	return fp(val,mod-2);
+}
+
+int powb[N+5];
+int powtwo[N+5];
+int P2[N+5];
+int ipowb[N+5];
+int fhash[N+5];
+int bhash[N+5];
+int bit[3][N+5];
+
+int t,n,m;
+vector<pair<int,char>> adj[N+5];
+int dfsin[N+5];
+int dfsout[N+5];
+int par[N+5];
+int L[N+5];
+char D[N+5];
+
+void update(int bno,int idx,int val)
+{
+while (idx <= N){
+        bit[bno][idx] += val;
+        if(bit[bno][idx]>=mod)bit[bno][idx]-=mod;
+        idx += (idx & -idx);
+    }
+}
+
+void rangeupdate(int bno,int idx1,int idx2,int val)
+{
+	update(bno,idx1,val);
+	update(bno,idx2+1,(mod-val)%mod);
+}
+int query(int bno,int idx,int pos)
+{
+  int ret=0;
+  while (idx > 0){
+        ret += bit[bno][idx];
+        if(ret>=mod)ret-=mod;
+        idx -= (idx & -idx);
+    }
+
+    if(bno==1)ret+=fhash[pos];
+    else ret+=bhash[pos];
+
+    if(ret>=mod)ret-=mod;
+    return ret;
+}
+
+void dfs(int pos,int pr,int lev,int &tstamp)
+{
+par[pos]=pr;
+L[pos]=lev;
+	dfsin[pos]=tstamp++;
+	
+	if(pos!=1)
+	{
+		fhash[pos]=fhash[pr] + ((D[pos]-'a')*powb[lev-1])%mod;
+		if(fhash[pos]>=mod)fhash[pos]-=mod;
+		bhash[pos]= bhash[pr] + ((D[pos]-'a')*powb[n-lev])%mod;
+		if(bhash[pos]>=mod)bhash[pos]-=mod;
+	}
+
+	for(auto i:adj[pos])
+	{
+	if(i.first==pr)continue;
+	D[i.first]=i.second;
+	dfs(i.first,pos,lev+1,tstamp);
+	}
+	dfsout[pos]=tstamp-1;
+}
+
+int P[40][100005];
+void pro()
+  {
+      int i, j;
+   
+      for (i = 1; i <= n; i++)
+          for (j = 0; 1 << j < n; j++)
+              P[j][i] = -1;
+   
+      for (i = 1; i <=n; i++)
+          P[0][i] = par[i];
+
+      for (j = 1; 1 << j < n; j++)
+         for (i = 1; i <=n; i++)
+             if (P[j - 1][i] != -1)
+                 P[j][i] = P[j - 1][P[j - 1][i]];
+  }
+  
+  int lcquery(int p, int q)
+  {
+      int tmp, log, i;
+
+      if (L[p] < L[q])
+          tmp = p, p = q, q = tmp;
+  
+      for (log = 1; 1 << log <= L[p]; log++);
+      log--;
+   
+      for (i = log; i >= 0; i--)
+          if (L[p] - (1 << i) >= L[q])
+              p = P[i][p];
+   
+      if (p == q)
+          return p;
+
+      for (i = log; i >= 0; i--)
+          if (P[i][p] != -1 && P[i][p] != P[i][q])
+              p = P[i][p], q = P[i][q];
+   
+      return par[p];
+  }
+
+
+
+int goup(int x,int len)
+{
+	while(len)
+	{
+		x=P[P2[len]][x];
+		//assert(powtwo[P2[len]]);
+		len-=powtwo[P2[len]];
+	}
+	return x;
+}
+
+int calchash(int x,int y,int root,int len)
+{
+	int up=root;
+
+	if(len<(L[x]-L[root]))
+	{
+		up=goup(x,len);
+	}
+	int curhash=query(2,dfsin[x],x) + mod - query(2,dfsin[up],up);
+	if(curhash>=mod)curhash-=mod;
+
+	curhash=((ll)curhash*ipowb[n-L[x]])%mod;
+	//if(curhash>=mod)curhash%=mod;
+
+	len-=L[x]-L[root];
+
+	if(up==root && len>0)
+	{
+		int dn=goup(y,L[y]-L[root]-len);
+		int cur2;
+		cur2=query(1,dfsin[dn],dn) + mod - query(1,dfsin[root],root);
+		if(cur2>=mod)cur2-=mod;
+
+		cur2=((ll)cur2*ipowb[L[root]])%mod;
+		//if(cur2>=mod)cur2%=mod;
+
+		cur2=((ll)cur2*powb[L[x]-L[root]])%mod;
+		//if(cur2>=mod)cur2%=mod;
+
+		curhash+=cur2;
+		if(curhash>=mod)curhash-=mod;
+	}
+	return curhash;
+}
+
+bool check(int x,int y,int root,ll tothash,int i,int len)
+{
+	int curhash=calchash(x,y,root,i);
+
+	int sthash=tothash + mod - curhash;
+	if(sthash>=mod)sthash-=mod;
+
+	sthash=((ll)sthash*ipowb[i])%mod;
+	//if(sthash>=mod)sthash%=mod;
+	sthash+=((ll)curhash*powb[len-i])%mod;
+	if(sthash>=mod)sthash-=mod;
+
+	if(sthash==tothash)return true;
+	return false;
+}
+
+
+int solve(int x,int y)
+{
+if(L[x]<L[y])swap(x,y);
+
+int root=lcquery(x,y);
+
+int len=L[x]-L[root];
+len+=L[y]-L[root];
+
+int tothash=calchash(x,y,root,len);
+//cout<<tothash<<"\n";
+//return 0;
+
+int mval=len;
+	for(int i=1;i*i<=len;i++)
+	{
+		if(len%i)continue;
+		if(mval>i)
+		{
+			if(check(x,y,root,tothash,i,len))return i;
+		}
+
+		if(i!=(len/i) && mval>(len/i))
+		{
+			if(check(x,y,root,tothash,len/i,len))mval=len/i;
+		}
+
+	}
+return mval;
+}
+
+void updfinal(int x,int y,char tto)
+{
+	if(L[x]<L[y])swap(x,y);
+
+	if(D[x]==tto)return;
+
+	int toadd1,toadd2;
+
+	toadd1= ((tto-'a')*powb[L[x]-1])%mod;
+	toadd1+= mod - ((D[x]-'a')*powb[L[x]-1])%mod;
+	if(toadd1 >= mod)toadd1-=mod;
+
+	toadd2= ((tto-'a')*powb[n-L[x]])%mod;
+	toadd2+= mod - ((D[x]-'a')*powb[n-L[x]])%mod;
+	if(toadd2 >= mod)toadd2-=mod;
+
+	rangeupdate(1,dfsin[x],dfsout[x],toadd1);
+	rangeupdate(2,dfsin[x],dfsout[x],toadd2);
+
+	D[x]=tto;
+}
+
+int main()
+{
+	powtwo[0]=1;
+	afor(i,1,30)powtwo[i]=powtwo[i-1]*2;
+
+	P2[1]=0;
+	int curr=2;
+	while(curr<=(N+1))
+	{
+		P2[curr]=1;
+		curr*=2;
+	}
+	afor(i,2,N+1)
+	{
+		P2[i]+=P2[i-1];
+	}
+	//assert(fp(B,mod-1)==1);
+	powb[0]=ipowb[0]=1;
+	afor(i,1,N+2)
+	{
+		powb[i]=(powb[i-1]*B)%mod;
+		ipowb[i]=fp(B,(mod-i-1)%mod);
+	}
+
+  scanint(&t);
+
+  while(t--)
+  {
+  	scanint(&n);
+  	//assert(n<=50000);
+  	afor(i,1,n)
+  	{
+  		adj[i].clear();
+  		bit[1][i]=bit[2][i]=0;
+  	}
+  	afor(i,1,n-1)
+  	{
+  		int u,v;
+  		char c;
+  		//scanf("%d %d %c",&u,&v,&c);
+  		scanint(&u);
+  		scanint(&v);
+  		c=gc();
+  		adj[v].pb({u,c});
+  		adj[u].pb({v,c});
+  	}
+  	scanint(&m);
+  	//assert(m<=50000);
+  	int tst=1;
+  	dfs(1,-1,1,tst);
+  	pro();
+
+  	//cout<<bhash[3]<<" "<<bhash[4]<<endl;
+  	while(m--)
+  	{
+  	
+  		int type,x,y;
+  		//scanf("%d %d %d",&type,&x,&y);
+  		scanint(&type);scanint(&x);scanint(&y);
+  		//assert(type==1);
+
+  		if(type==2)
+  		{
+  			char tto;
+  			//scanf(" %c",&tto);
+  			tto=gc();
+  			updfinal(x,y,tto);
+  		}
+  		else 
+  		{
+  		putn(solve(x,y));
+  		pc('\n');
+  		}
+  	}
+  }
+
+
+return 0;
+}

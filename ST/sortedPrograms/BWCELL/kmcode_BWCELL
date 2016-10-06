@@ -1,0 +1,63 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+//#include<unordered_set>
+//#include<unordered_map>
+using namespace std;
+int t;
+#define MAX 10002
+char s[MAX];
+int main() {
+	int t;
+	cin >> t;
+	while (t--) {
+		scanf("%s", s);
+		int siz = strlen(s);
+		int lef = 0;
+		int countt = 0;
+		for (int i = 0;i < siz;i++) {
+			if (s[i] == 'W') {
+				break;
+			}
+			countt++;
+			lef = i;
+		}
+		int countt2 = 0;
+		for (int j = siz - 1;j > lef;j--) {
+			if (s[j] == 'W') {
+				break;
+			}
+			countt2++;
+		}
+		countt ^= countt2;
+		if (countt) {
+			puts("Aleksa");
+		}
+		else {
+			puts("Chef");
+		}
+	}
+	return 0;
+}

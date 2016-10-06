@@ -1,0 +1,113 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+uint xrand() {
+	static uint x = 314159265, y = 358979323, z = 846264338, w = 327950288;
+	uint t = x ^ x << 11; x = y; y = z; z = w; return w = w ^ w >> 19 ^ t ^ t >> 8;
+}
+
+char buf[100010];
+
+int M;
+int A[1010];
+int N;
+int B[110];
+
+int ten[1010][110];
+int rs[110];
+
+int main() {
+	const int TC = in();
+	
+	for (int tc = 0; tc < TC; ++tc) {
+		scanf("%s", buf);
+		M = strlen(buf);
+		for (int i = 0; i < M; ++i) {
+			A[i] = buf[M - 1 - i] - '0';
+		}
+		N = in();
+		for (int j = 0; j < N; ++j) {
+			B[j] = in();
+		}
+		fill(ten[0], ten[0] + N, 1);
+		for (int i = 0; i < M; ++i) {
+			for (int j = 0; j < N; ++j) {
+				ten[i + 1][j] = (ten[i][j] * 10) % B[j];
+			}
+		}
+		fill(rs, rs + N, 0);
+		for (int i = 0; i < M; ++i) {
+			for (int j = 0; j < N; ++j) {
+				(rs[j] += ten[i][j] * A[i]) %= B[j];
+			}
+		}
+		const int sumB = accumulate(B, B + N, 0);
+		const int NUM_ITER = 7000;
+		for (int iter = 0; iter < NUM_ITER; ++iter) {
+			const double temp = 0.1 * sumB * pow(1e+8, -iter / (double)NUM_ITER);
+			for (; ; ) {
+				const int i0 = xrand() % M;
+				const int i1 = xrand() % M;
+				if (A[i0] != A[i1]) {
+					int diff = 0;
+					for (int j = 0; j < N; ++j) {
+						int rr = rs[j] - (A[i0] - A[i1]) * (ten[i0][j] - ten[i1][j]);
+						if ((rr %= B[j]) < 0) {
+							rr += B[j];
+						}
+						diff += (rr - rs[j]);
+					}
+					if (diff < 0 || xrand() / 4294967296.0 < exp(-diff / temp)) {
+// cout<<"iter = "<<iter<<", diff = "<<diff<<endl;
+						for (int j = 0; j < N; ++j) {
+							rs[j] -= (A[i0] - A[i1]) * (ten[i0][j] - ten[i1][j]);
+							if ((rs[j] %= B[j]) < 0) {
+								rs[j] += B[j];
+							}
+						}
+						swap(A[i0], A[i1]);
+					}
+					break;
+				}
+			}
+		}
+		for (int i = 0; i < M; ++i) {
+			buf[M - 1 - i] = '0' + A[i];
+		}
+		buf[M] = '\0';
+		puts(buf);
+	}
+	
+	return 0;
+}

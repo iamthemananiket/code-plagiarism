@@ -1,0 +1,40 @@
+#include <iostream>
+
+#define mod 1000000007
+
+using namespace std;
+
+int T;
+long long n,m;
+long long dp[100001];
+long long fact;
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(NULL);
+    for(cin >> T; T--;) {
+        cin >> n >> m;
+
+        fact = 1ll;
+        for(long long i=2; i<m; i++) fact = (fact * i) % mod;
+
+        for(int i=n; i>=n-m; i--) dp[i] = 1;
+        long long sz(m);
+        for(int i=n-(m+1); i>=1; i--) {
+            dp[i] = sz;
+            sz = (sz+dp[i]+mod-dp[i+m]) % mod;
+        }
+
+        long long sol(0ll);
+        for(long long i=1; i<=m; i++) {
+            sol += ((m+1ll-i)*dp[i]) % mod;
+        }
+        sol %= mod;
+        sol = (((sol*m)%mod)*fact)%mod;
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

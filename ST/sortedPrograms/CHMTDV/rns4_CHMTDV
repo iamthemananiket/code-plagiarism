@@ -1,0 +1,270 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+#define M 510
+#define INF (1LL << 60)
+#define homea
+#define Error(x) cerr << #x << ": " << x << endl;
+#define PER CLOCKS_PER_SEC
+#define eprintf(...) fprintf(stderr, __VA_ARGS__)
+#define TL 1.8
+
+LL s[M][M], csum[M][M], rsum[M][M], sum;
+int a[M][M];
+int n, p;
+
+int rr[M], cc[M];
+
+double start;
+
+LL best;
+
+
+double cur_time() {
+  return (clock() - start) / PER;
+}
+
+int Rand() {return rand() * rand();}
+
+namespace easy {
+  int col[M], cnt;
+
+  LL calc(int x, int y, int xx, int yy) {
+    return s[xx][yy] - s[x][yy] - s[xx][y] + s[x][y];
+  }
+
+  bool check(LL lim) {
+
+    LL cur = 0; int i;
+
+    cnt = 0; col[0] = 0;
+    for (i = 1; i <= n; i++) {
+      if (cur + csum[n][i] > lim) {
+        col[++cnt] = i - 1; cur = 0;
+        if (cnt >= p) return 0;
+        i--;
+      }
+      else cur += csum[n][i];
+    }
+
+    if (i <= n) return 0;
+
+    col[++cnt] = n;
+
+    int id;
+
+    while (cnt < p) {
+      for (int j = 0; j < cnt; j++) {
+        if (col[j + 1] - col[j] > 1) {
+          id = j; break;
+        }
+      }
+      ++cnt;
+      int tmp = (col[id] + col[id + 1]) / 2;
+      for (int j = cnt; j >= id + 2; j--) col[j] = col[j - 1];
+      col[id + 1] = tmp;
+    }
+
+    return 1;
+  }
+
+  void solve() {
+    LL l = sum / p, r = sum;
+    while (l < r) {
+      LL mid = (l + r) >> 1;
+      if (check(mid)) {
+        r = mid;
+      }
+      else l = mid + 1;
+    }
+    assert(cnt == p);
+    check(l);
+  }
+}
+
+namespace cut {
+  int cnt, row[M], col[M], cid, flag;
+  LL cur[M], before;
+
+  bool check(LL lim) {
+    int i, j;
+    cnt = 0; row[0] = 0;
+
+    for (i = 0; i < p; i++) cur[i] = 0;
+
+    for (i = 1; i <= n; i++) {
+      for (j = 0; j < p; j++) {
+        if (cur[j] + rsum[i][col[j + 1]] - rsum[i][col[j]] > lim) break;
+      }
+      if (j == p) {
+        for (j = 0; j < p; j++) cur[j] += rsum[i][col[j + 1]] - rsum[i][col[j]];
+      }
+      else {
+        for (j = 0; j < p; j++) cur[j] = 0; row[++cnt] = i - 1;
+        if (cnt >= p) return 0;
+        i--;
+      }
+    }
+    if (i <= n) return 0;
+    row[++cnt] = n;
+
+    int id;
+    while (cnt < p) {
+      for (int i = 0; i < cnt; i++) {
+        if (row[i + 1] - row[i] > 1) {
+          id = i; break;
+        }
+      }
+      ++cnt;
+      int tmp = (row[id] + row[id + 1]) / 2;
+      for (int i = cnt; i >= id + 2; i--) row[i] = row[i - 1];
+      row[id + 1] = tmp;
+    }
+    return 1;
+  }
+
+  void solve() {
+    flag = 0;
+    LL l = sum / (p * p), r = best;
+    while (l < r) {
+      LL mid = (l + r) >> 1;
+      if (check(mid)) r = mid;
+      else l = mid + 1;
+    }
+    check(l);
+    assert(cnt == p);
+/*
+    if (before > l) {
+      flag = 1;
+      for (int i = 0; i < p; i++) for (int j = 0; j < p; j++) {
+        LL tmp = s[row[i + 1]][col[j + 1]] - s[row[i]][col[j + 1]] - s[row[i + 1]][col[j]] + s[row[i]][col[j]];
+        if (tmp == best) cid = j;
+      }
+      before = l;
+    }
+*/
+    if (best > l) {
+      best = l; flag = 1;
+
+      for (int i = 0; i < p; i++) for (int j = 0; j < p; j++) {
+        LL tmp = s[row[i + 1]][col[j + 1]] - s[row[i]][col[j + 1]] - s[row[i + 1]][col[j]] + s[row[i]][col[j]];
+        if (tmp == best) cid = j;
+      }
+
+      for (int i = 0; i <= p; i++) rr[i] = row[i];
+      for (int i = 0; i <= p; i++) cc[i] = col[i];
+    }
+  }
+}
+
+
+LL score() {
+  LL mx = 0;
+  for (int i = 0; i < p; i++) for (int j = 0; j < p; j++) {
+    LL tmp = s[rr[i + 1]][cc[j + 1]] - s[rr[i]][cc[j + 1]] - s[rr[i + 1]][cc[j]] + s[rr[i]][cc[j]];
+    mx = max(tmp, mx);
+  }
+  return mx;
+}
+
+void print() {
+  #ifdef home
+  LL val = score();
+  assert(val == best);
+  Error(best); Error(sum/p/p);
+  #else
+  for (int i = 1; i < p; i++) printf("%d ", rr[i]); puts("");
+  for (int i = 1; i < p; i++) printf("%d ", cc[i]); puts("");
+  #endif
+}
+
+int chk[M], chkT;
+
+void get_primary_column_divide() {
+  ++chkT;
+  cut::col[0] = 0; cut::col[p] = n;
+  for (int i = 1; i < p; i++) {
+    int x = Rand() % (n - 1) + 1;
+    if (chk[x] == chkT) continue;
+    chk[x] = chkT; cut::col[i] = x;
+  }
+  sort(cut::col, cut::col + p);
+}
+
+int D;
+
+int main() {
+
+  start = clock();
+
+  #ifdef home
+  n = Rand() % 51 + 450;
+  p = 333;
+  for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++) a[i][j] = Rand() % 1000000000 + 1;
+  #else
+  scanf("%d %d", &n, &p);
+  for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++) scanf("%d", &a[i][j]);
+  #endif
+
+  D = min(p / 2, p - 2);
+
+
+  for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++) sum += a[i][j];
+  for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++)
+    s[i][j] = s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1] + a[i][j];
+
+  for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++) {
+    rsum[i][j] = rsum[i][j - 1] + a[i][j];
+    csum[i][j] = csum[i - 1][j] + a[i][j];
+  }
+
+  best = sum;
+
+  easy::solve();
+
+  for (int i = 0; i <= p; i++) {
+    cut::col[i] = easy::col[i];
+  }
+
+  cut::solve();
+
+  int bf = 0;
+  int runs = 0;
+
+  while (cur_time() < TL) {
+    int id = cut::cid;
+
+    #ifdef home
+    eprintf("%d\n", ++runs);
+    #endif
+
+    if (cut::col[id] < cut::col[id + 1] - 1) {
+      for (int d = 1; d < D; d++) {
+		if (cur_time() > TL) break;
+        if (id >= d) {
+          for (int j = id; j > id - d; j--) {
+            cut::col[j]++;
+          }
+          cut::solve();
+          if (cut::flag) break;
+          for (int j = id; j > id - d; j--) {
+            cut::col[j]--;
+          }
+        }
+        if (id < p - d) {
+          for (int j = id + 1; j <= id + d; j++) {
+            cut::col[j]--;
+          }
+          cut::solve();
+          if (cut::flag) break;
+          for (int j = id + 1; j <= id + d; j++) {
+            cut::col[j]++;
+          }
+        }
+      }
+    }
+    else break;
+    if (!cut::flag) break;
+  }
+  print();
+}

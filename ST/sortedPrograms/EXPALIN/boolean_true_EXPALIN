@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+#define N 2000009
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+bool check(char str[],int n)
+{
+    for(int i=0;i<n;i++)
+        if(str[i]!=str[n-i-1])
+            return false;
+    return true;
+}
+char str[N];
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        ll ans=0;
+        scanf("%s",str);
+        int n=strlen(str);
+        for(ll i=1;i<=n;i++)
+        {
+            ll exp=2;
+            while(true)
+            {
+                ll cur=i;
+                char cur_str[N];
+                int k=0;
+                cur_str[k++]=str[i-1];
+                while(true)
+                {
+                    if(cur*exp>n)
+                        break;
+                    cur*=exp;
+                    if(cur==i*exp)
+                    {
+                        cur_str[k++]=str[cur-1];
+                        if(str[i-1]==str[cur-1])
+                            ans++;
+                        continue;
+                    }
+                    cur_str[k++]=str[cur-1];
+                    if(check(cur_str,k))
+                        ans++;
+                }
+                if(cur==i)
+                    break;
+                exp++;
+            }
+        }
+        printf("%lld\n",ans+n);
+    }
+    return 0;
+}

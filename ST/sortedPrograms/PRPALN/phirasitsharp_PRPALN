@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <string.h>
+
+#define N 100010
+
+char str[N];
+
+bool pal(int a, int b) {
+	while(a < b) {
+		if(str[a] != str[b]) {
+			return false;
+		}
+		a++;
+		b--;
+	}
+	return true;
+}
+void evaluate(void) {
+	int cnt = 0;
+	scanf("%s", str);
+	int i = 0, j = strlen(str) - 1;
+	while(i < j) {
+		if(str[i] != str[j]) {
+			if(pal(i + 1, j) || pal(i, j-1)) {
+				printf("YES\n");
+			}else {
+				printf("NO\n");
+			}
+			return;
+		}else {
+			i++;
+			j--;
+		}
+	}
+	printf("YES\n");
+}
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--) {
+		evaluate();
+	}
+	return 0;
+}

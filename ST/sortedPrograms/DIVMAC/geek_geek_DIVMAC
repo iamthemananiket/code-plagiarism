@@ -1,0 +1,177 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<bitset>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%lld",&x)
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+#define FS ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define lli long long int
+using namespace std;
+int seive[1050000];
+int seive1[1050000];
+int *tree,*A;
+void build(int node, int start, int end)
+{
+    if(start == end)
+    {
+        tree[node] = A[start];
+    }
+    else
+    {
+        int mid = (start + end) / 2;
+        build(2*node, start, mid);
+        build(2*node+1, mid+1, end);
+        tree[node] = max(tree[2*node] ,tree[2*node+1]);
+    }
+}
+void update(int node, int start, int end, int idx, int val)
+{
+    if(start == end)
+    {
+        A[idx] = val;
+        tree[node] = val;
+    }
+    else
+    {
+        int mid = (start + end) / 2;
+        if(start <= idx and idx <= mid)
+        {
+            update(2*node, start, mid, idx, val);
+        }
+        else
+        {
+            update(2*node+1, mid+1, end, idx, val);
+        }
+        tree[node] = max(tree[2*node] ,tree[2*node+1]);
+    }
+}
+int query(int node, int start, int end, int l, int r)
+{
+    if(r < start or end < l)
+    {
+        return 1;
+    }
+    if(l <= start and end <= r)
+    {
+        return tree[node];
+    }
+    int mid = (start + end) / 2;
+    int p1 = query(2*node, start, mid, l, r);
+    int p2 = query(2*node+1, mid+1, end, l, r);
+    return max(p1 , p2);
+}
+void update_next(int *next,int *num,int ind ,int n)
+{
+    int j,i;
+    i = ind;
+    if(num[i]!=1)
+        next[i]=i;
+    else
+    {
+        j = i+1;
+        while(j<n && num[j]==1)
+            j = next[j];
+        next[i] = j;
+    }
+}
+int prog()
+{
+    int i,j,k,n,m,tt,q,l,r;
+    sd(n);sd(m);
+    int *num = new int [n];
+    A = new int [5*n];
+    tree = new int [5*n];
+    fl(i,0,n)
+        {
+            sd(num[i]);
+            A[i]=seive[num[i]];
+        }
+    int *next = new int [n];
+    fl(i,0,n)
+        update_next(next,num,(n-1)-i,n);
+    build(1,0,n-1);
+    fl(tt,0,m)
+    {
+        sd(q);sd(l);sd(r);
+        l--;r--;
+        l= next[l];
+        if(q==1)
+        {
+            printf("%d ",query(1,0,n-1,l,r));
+        }
+        else
+        {
+            while(l<=r)
+            {
+                if(num[l]==1)
+                    l = next[l];
+                else
+                {
+                    num[l]=seive1[num[l]];
+                    A[l]=seive[num[l]];
+                    update(1,0,n-1,l,A[l]);
+                    if(num[l]==1)
+                        update_next(next,num,l,n);
+                    l++;
+                }
+            }
+        }
+    }
+    r0;
+}
+int main()
+{
+    //f_in;
+    int t;
+    int i,j;
+    fl(i,0,1050000)
+        seive[i] = i;
+    fl(i,2,1050)
+    {
+        if(seive[i]!=i)
+            continue;
+        j = i;
+        while(j<1050000)
+        {
+            seive[j]=min(seive[j],i);
+            j+=i;
+        }
+    }
+     fl(i,2,1050000)
+        seive1[i]=i/seive[i];
+    sd(t);
+    while(t--)
+        {
+            prog();
+        }
+    r0;
+}

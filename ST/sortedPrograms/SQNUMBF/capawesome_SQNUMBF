@@ -1,0 +1,88 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <set>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+int n;
+long long a[110];
+
+long long mgcd (long long aa, long long bb)
+{
+	long long cc;
+	while (bb)
+	{
+		cc = bb;
+		bb = aa % bb;
+		aa = cc;
+	}
+	return aa;
+}
+
+int main ()
+{
+	int t, i, j, p;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		p = 0;
+		scanf ("%d", &n);
+		for (i = 0; i < n; i ++)
+			scanf ("%lld", &a[i]);
+		for (i = 0; i < n; i ++)
+		{
+			long long x;
+			for (j = i + 1; j < n; j ++)
+			{
+				x = mgcd (a[i], a[j]);
+				if (x != 1)
+					break;
+			}
+			if (j < n)
+			{
+				printf ("%lld\n", x);
+				p = 1;
+				break;
+			}
+		}
+		if (p)
+			continue;
+		
+		long long x, d, k;
+		for (i = 0; i < n; i ++)
+		{
+			x = a[i];	
+			for (d = 2; d * d * d <= x; d ++)
+			{
+				if (x % d)
+					continue;
+				if (x % (d * d) == 0)
+				{
+					printf ("%lld\n", d);
+					p = 1;
+					break;
+				}
+				x /= d;
+			}
+			if (p)
+				break;
+			if (x == 1)
+				continue;
+			k = (long long) sqrt (x);
+			if (k * k == x)
+			{
+				printf ("%lld\n", k);
+				p = 1;
+				break;
+			}
+		}
+
+	}
+	return 0;
+}

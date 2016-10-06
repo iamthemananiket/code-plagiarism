@@ -1,0 +1,30 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+
+using namespace std;
+
+long long t,x,y,ans;
+
+int main()
+{
+	//freopen("in.txt","r",stdin);
+	//freopen("out.txt","w",stdout);
+	
+	scanf("%lld",&t);
+	while(t--)
+	{
+		scanf("%lld%lld",&x,&y);
+		ans = 0;
+		while(x != y)
+		{
+			ans++;
+			if(x>y)
+				x /= 2;
+			else
+				y /= 2;
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

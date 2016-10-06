@@ -1,0 +1,79 @@
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#define maxn 100005
+
+struct palt{
+	char s[maxn];
+	int next[maxn][26],fail[maxn],cnt[maxn],len[maxn],palness[maxn], mx[maxn];
+	int hfail[maxn];
+	int last,p,n;
+	inline int newnode(int l){
+		len[p]=l;
+		cnt[p]=0;
+		return p++;
+	}
+	inline void init(){
+		memset(s,0,sizeof s);
+		memset(next,0,sizeof next);
+		memset(fail,0,sizeof fail);
+		memset(hfail,0,sizeof hfail);
+		memset(cnt,0,sizeof cnt);
+		memset(len,0,sizeof len);
+		memset(palness,0,sizeof palness);
+		last=p=n=0;
+		newnode(0),newnode(-1);
+		s[n]=-1;
+		hfail[0]=fail[0]=1;
+	}
+	inline int FL(int x){
+		while(s[n-len[x]-1]!=s[n]) x=fail[x];
+		return x;
+	}
+	void add(char c){
+		c-='a';
+		s[++n]=c;
+		int cur=FL(last);
+		if(!next[cur][c]){
+			int now=newnode(len[cur]+2);
+			fail[now]=next[FL(fail[cur])][c];
+			hfail[now]=next[FL(hfail[cur])][c];
+			while(len[hfail[now]]<<1>len[now]) hfail[now]=fail[hfail[now]];
+			next[cur][c]=now;
+			palness[now]=1+palness[hfail[now]]*(len[now]/2==len[hfail[now]]);
+		}
+		last=next[cur][c];
+		++cnt[last];
+	}
+	inline unsigned long long count(){
+		unsigned long long pq=0;
+		for(int i=p-1;i>1;--i){
+			cnt[fail[i]]+=cnt[i];
+			mx[cnt[i]] = std::max(mx[cnt[i]] , len[i]);
+		}
+		return pq;
+	}
+} PalTree;
+int n,i,j,k;
+char s[100005];
+
+int main(){
+	scanf("%s",s);
+    i = strlen(s);
+    PalTree.init();
+    for(j=0;j<i;++j) PalTree.add(s[j]);
+    PalTree.count();
+
+    for(int j = i - 1; j >= 1; j--)
+        PalTree.mx[j] = std::max(PalTree.mx[j] , PalTree.mx[j + 1]);
+    int q;
+    scanf("%d", &q);
+
+    while(q-- ){
+        int x;
+        scanf("%d" , &x);
+        printf("%d\n", PalTree.mx[x]);
+    }
+
+	return 0;
+}

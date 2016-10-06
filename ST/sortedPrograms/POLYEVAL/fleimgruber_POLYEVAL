@@ -1,0 +1,140 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MOD 786433
+#define MAGIC (3*(1<<18))
+
+ll fpow(ll a, ll b)
+{
+	ll r=1;
+	for (;b;b/=2,a=(a*a)%MOD)
+		if (b&1)
+			r=(r*a)%MOD;
+	return r;
+}
+
+//based on http://e-maxx.ru/algo/fft_multiply
+const int root = 10;
+
+void fft(vi &a, int wn=root)
+{
+	int n=sz(a);
+	if (n == 3)
+	{
+		int a1=a[0]+a[1]+a[2];
+		int a2=(a[0]+a[1]*1LL*root+a[2]*(root*1LL*root))%MOD;
+		a[1]=a1;
+		a[2]=a2;
+		return;
+	}
+ 
+	vi a0(n/2), a1(n/2);
+	for (int i=0, j=0; i<n; i+=2, ++j)
+	{
+		a0[j]=a[i];
+		a1[j]=a[i+1];
+	}
+	int wnp=(wn*1LL*wn)%MOD;
+	fft(a0,wnp);
+	fft(a1,wnp);
+ 
+	int w=1;
+	for (int i=0; i<n/2; ++i) {
+		int twiddle=(w*1LL*a1[i])%MOD;
+		a[i] = (a0[i] + twiddle)%MOD;
+		a[i+n/2] = (a0[i] - twiddle+MOD)%MOD;
+		w = (w*1LL*wn)%MOD;
+	}
+}
+//end
+
+
+int n;
+vi coef;
+
+int naive(int x)
+{
+	int r=0,px=1;
+	for (int i=0; i<sz(coef); i++)
+	{
+		r=(r+coef[i]*1LL*px)%MOD;
+		px=(px*1LL*x)%MOD;
+	}
+	return r;
+}
+
+int main()
+{
+	scanf("%d",&n);
+	n++;
+	for (int i=0; i<n; i++)
+	{
+		int x;
+		scanf("%d",&x);
+		coef.pb(x);
+	}
+	while (sz(coef)<MAGIC)
+		coef.pb(0);
+
+	vi ntt=coef;
+	fft(ntt);
+
+/*
+	for (int i=0; i<10; i++)
+		printf("%d ",ntt[i]);
+	printf("\n");
+
+	int prr=1;
+	for (int i=1; i<=10; i++)
+	{
+		printf("%d ",naive(prr));
+		prr=(prr*1LL*root)%MOD;
+	}
+	printf("\n");
+*/
+
+
+	vector<pint> sm;
+	sm.pb(mp(0,coef[0]));
+	int pr=1;
+	for (int i=0; i<sz(ntt); i++)
+	{
+		sm.pb(mp(pr,ntt[i]));
+		pr=(pr*1LL*root)%MOD;
+	}
+	sort(all(sm));
+
+	int q;
+	scanf("%d",&q);
+	while (q--)
+	{
+		int x;
+		scanf("%d",&x);
+		int lo=0,hi=sz(sm)-1;
+		while (lo<hi)
+		{
+			int m=(lo+hi)/2;
+			if (sm[m].fi<x)
+				lo=m+1;
+			else
+				hi=m;
+		}
+		printf("%d\n",sm[lo].se);
+	}
+	return 0;
+}

@@ -1,0 +1,101 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define LIM 500
+map<vector<ll>,int > mapp;
+ll gcd(ll a,ll b)
+{
+	ll t;
+	while(b!=0)
+	{
+		t=b;
+		b=a%b;
+		a=t;
+	}
+	return a;
+}
+void solve(ll k,ll mn,ll factor)
+{
+	mn=mn+k*k;
+	for(ll n=1;n*n<=mn;n++)
+	{
+		if(mn%n)	continue;
+		ll m=mn/n;
+		ll a=n*(m*m+k*k);
+		ll b=m*(n*n+k*k);
+		ll c=(m+n)*(m*n-k*k);
+		ll g=gcd(a,b);
+		g=gcd(g,c);
+
+		if(g%factor)
+			continue;
+
+		a/=factor;
+		b/=factor;
+		c/=factor;
+		vector<ll> temp={a,b,c};
+		sort(temp.begin(),temp.end());
+		mapp[temp]=1;
+	}
+}
+int main()
+{
+	ll r;
+	sl(r);
+	ll k,m,n,i;
+	for(k=1;k<=r;++k)
+	{
+		for(m=1;k*(m-k*k) <= r;++m)
+		{
+			for(n= k*k/m;k*(m*n-k*k) <= r && n<=m;++n)
+			{
+				if(m*n <= k*k)	continue;
+				if(k*k*(2ll*m+n) < m*m*n)	continue;
+
+				ll g=gcd(m,n);
+				g=gcd(g,k);
+				if(g!=1)	continue;
+				ll a=n*(m*m+k*k);
+				ll b=m*(n*n+k*k);
+				ll c=(m+n)*(m*n-k*k);
+				ll r1=k*(m*n-k*k);
+				g=gcd(a,b);
+				g=gcd(g,c);
+				a/=g;
+				b/=g;
+				c/=g;
+				if((r*g)%r1==0)
+				{
+					vector<ll> temp={a*((r*g)/r1),b*((r*g)/r1),c*((r*g)/r1)};
+					sort(temp.begin(),temp.end());
+					mapp[temp]=1;
+				}
+			}
+		}
+	}
+
+	for(ll R=r;R<=1000*r;R+=r)
+	{
+		for(ll k1=1;k1*k1<=R;k1++)
+		{
+			if(R%k1)	continue;
+			solve(k1,R/k1,R/r);
+			solve(R/k1,k1,R/r);
+
+		}
+	}
+
+	printf("%d\n",(int)mapp.size());
+	for(auto it:mapp)
+		printf("%lld %lld %lld\n",it.F[0],it.F[1],it.F[2]);
+}

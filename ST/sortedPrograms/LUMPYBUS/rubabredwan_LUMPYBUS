@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n)	for(ll i=0;i<n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+#define repn(i, n)	for(ll i=1;i<=n;i++)
+
+#define mx			100005
+
+using namespace std;
+
+typedef long long ll;
+
+ll n, a[mx], p, q;
+
+ll solve(){
+	sort(a, a+n);
+	ll ret = 0;
+	rep(i, n){
+		ll two = min(a[i] / 2, q);	
+		ll one = min(a[i] - two * 2, p);
+		if(one + 2 * two == a[i]){
+			ret++;
+			p -= one;
+			q -= two;
+		}
+	}
+	return ret;
+}
+
+int main(){
+	ll tc;
+	scanf("%lld", &tc);
+	while(tc--){
+		scanf("%lld %lld %lld", &n, &p, &q); // change to long long
+		rep(i, n) scanf("%lld", &a[i]);
+		ll ret = solve();
+		printf("%lld\n", ret);
+	}
+	return 0;
+}

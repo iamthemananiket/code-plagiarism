@@ -1,0 +1,19 @@
+#include <iostream>
+
+using namespace std;
+
+int main () {
+
+	ios :: sync_with_stdio ( false );
+
+	int test_num;
+	cin >> test_num;
+
+	while ( test_num-- ) {
+		int n;
+		cin >> n;
+		cout << ( n % 6 ? "Chef" : "Misha" ) << "\n";
+	}
+
+	return 0;
+}

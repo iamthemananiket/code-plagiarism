@@ -1,0 +1,52 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 100005
+
+int n,r[MAX_N],c[MAX_N];
+int a[MAX_N],b[MAX_N];
+
+int main()
+{
+	scanf("%d",&n);
+	ll cake=0;
+	for (int i=1; i<=n; i++)
+	{
+		scanf("%d %d",a+i,b+i);
+		c[a[i]]++;
+		c[b[i]+1]--;
+		r[i]+=b[i]-a[i]+1;
+		cake+=b[i]-a[i]+1;
+	}
+	for (int i=1; i<=n; i++)
+		c[i]+=c[i-1];
+	int q;
+	scanf("%d",&q);
+	int x,y;
+	while (q--)
+	{
+		scanf("%d %d",&x,&y);
+		ll ans=cake;
+		ans-=r[x];
+		ans-=c[y];
+		if (a[x]<=y&&b[x]>=y)
+			ans++;
+		printf("%c\n",(ans&1)?'O':'E');
+	}
+	return 0;
+}

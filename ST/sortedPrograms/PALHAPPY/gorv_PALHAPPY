@@ -1,0 +1,35 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	ios::sync_with_stdio(false);
+	int t;
+	cin>>t;
+	while(t--){
+		string s;
+		cin>>s;
+		int countChanged=0;
+		int lowptr=0;
+		int highptr=s.size()-1;
+		int flag=0;
+		while(lowptr<=highptr){
+			if(countChanged>1){
+				flag=1;
+				break;
+			}
+			if(s[lowptr]!=s[highptr]){
+				//cout<<"CHANGED ";
+				countChanged++;
+			}	
+			lowptr++;
+			highptr--;
+			
+		}
+		if(flag || countChanged>1){
+			cout<<"no\n";
+		}
+		else{
+			cout<<"yes\n";
+		}
+		
+	}
+}

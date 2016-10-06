@@ -1,0 +1,14 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+int x,y;
+
+int main() {
+	for(cin >>T; T--;) {
+		cin >> x >> y;
+		cout << (((x%2) && (y%2))?"No":"Yes") << endl;
+	}
+	return 0;
+}

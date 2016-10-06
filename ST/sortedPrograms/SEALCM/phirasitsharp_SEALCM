@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <vector>
+
+#define N 1010
+#define MOD 1000000007
+
+using namespace std;
+
+vector<int> fac[N*N];
+long long dp[N*N];
+int cnt[N*N];
+int t, n, m, l, r;
+
+int gcd(int a, int b) {
+	return a%b ? gcd(b, a%b) : b;
+}
+long long pw(long long a, long long b) {
+	if(b == 0) {
+		return 1;
+	}
+	long long r = pw(a, b/2);
+	r = (r * r) % MOD;
+	if(b%2) {
+		r = (a * r) % MOD;
+	}
+	return r;
+}
+int main() {
+	for(int i = 1;i < N*N;i++) {
+		for(int j = i;j < N*N;j += i) {
+			fac[j].push_back(i);
+		}
+	}
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d%d%d", &n, &m, &l, &r);
+		int lim = 2520;
+		for(int i = 1;i <= lim;i++) {
+			int a = 0,b = fac[i].size() - 1;
+			while(a < b) {
+				int mid = (a + b) / 2 + 1;
+				if(fac[i][mid] <= m) {
+					a = mid;
+				}else {
+					b = mid - 1;
+				}
+			}
+			dp[i] = pw(a+1, n);
+		}
+		for(int i = 1;i <= lim;i++) {
+			for(int j = i+i;j <= lim;j+=i) {
+				dp[j] -= dp[i];
+			}
+		}
+		for(int i = 1;i <= m;i++) {
+			int a = 0,b = fac[i].size() - 1;
+			while(a < b) {
+				int mid = (a + b) / 2 + 1;
+				if(fac[i][mid] <= m) {
+					a = mid;
+				}else {
+					b = mid - 1;
+				}
+			}
+		}
+		long long ans = 0;
+		for(int i = l;i <= r;i++) {
+			for(int j = i;j <= lim;j += i) {
+				ans = (ans + dp[j]) % MOD;
+			}
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

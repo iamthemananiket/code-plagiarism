@@ -1,0 +1,34 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+int main() {
+  int nt;
+  cin >> nt;
+
+  for (int t = 0; t < nt; ++t) {
+    int n;
+    cin >> n;
+    string correct, given;
+    cin >> correct >> given;
+    int ngood = 0;
+    for (int i = 0; i < n; ++i) ngood += correct[i] == given[i];
+    vector<int> values(n+1);
+    for (int i = 0; i <= n; ++i) cin >> values[i];
+    int ret = (ngood == n ? values[n] : *max_element(values.begin(), values.begin() + ngood + 1));
+    cout << ret << endl;
+  }
+
+  return 0;
+}

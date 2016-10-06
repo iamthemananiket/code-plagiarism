@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair <int, int> PII;
+#define M 200010
+const int mod = 1e9 + 7;
+
+int n;
+int w[M], rt[M], vis[M];
+PII ed[M];
+
+int to[M], head[M], nxt[M];
+
+void AddEdge(int x, int y, int N) {
+  to[N] = y; nxt[N] = head[x]; head[x] = N;
+}
+
+int f[M], g[M];
+
+void dfs(int x, int pa) {
+  int fi = 0, se = 0, mx = 0;
+  for (int i = head[x]; i; i = nxt[i]) {
+    int u = to[i]; if (vis[i] || u == pa) continue;
+
+    rt[u] = rt[x];
+
+    dfs(u, x);
+    mx = max(mx, g[u]);
+    if (f[u] >= fi) se = fi, fi = f[u];
+    else if (f[u] > se) se = f[u];
+  }
+  f[x] = fi + w[x]; g[x] = max(fi + se + w[x], mx);
+}
+
+int modpow(int x, int m) {
+  int res = 1;
+  while (m) {
+    if (m & 1) res = 1LL * res * x % mod;
+    x = 1LL * x * x % mod;
+    m >>= 1;
+  }
+  return res;
+}
+
+int main() {
+  //freopen("in.txt", "r", stdin);
+  scanf("%d", &n);
+  for (int i = 1; i <= n; i++) {
+    scanf("%d", w + i);
+  }
+  int x, y;
+  for (int i = 1; i < n; i++) {
+    scanf("%d %d", &x, &y); AddEdge(x, y, i); AddEdge(y, x, i + n);
+    ed[i] = PII(x, y);
+  }
+  rt[1] = 1;
+  dfs(1, 0);
+
+  printf("%d\n", g[1]);
+
+  int rlt = g[1];
+
+  for (int i = 1; i < n; i++) {
+    scanf("%d", &x); vis[x] = vis[x + n] = 1;
+    int u = ed[x].first;
+    rlt = 1LL * rlt * modpow(g[rt[u]], mod - 2) % mod;
+    rt[u] = u;
+    dfs(u, 0);
+    rlt = 1LL * g[u] * rlt % mod;
+
+    u = ed[x].second;
+    rt[u] = u;
+    dfs(u, 0);
+    rlt = 1LL * g[u] * rlt % mod;
+    printf("%d\n", rlt);
+  }
+}

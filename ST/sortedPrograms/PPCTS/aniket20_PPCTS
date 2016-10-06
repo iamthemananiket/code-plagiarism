@@ -1,0 +1,78 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 500005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+
+ll x[maxs],y[maxs],d1[maxs],d2[maxs];
+string str;
+
+int main()
+{
+	iosbase;
+	ll n,m,i,j,ans,curx,cury,k;
+	cin>>n>>m;
+	for(i=0;i<n;i++){
+		cin>>x[i]>>y[i];
+	}
+	cin>>str;
+	sort(x,x+n);
+	sort(y,y+n);
+	d1[0]=x[0];
+	for(i=1;i<n;i++){
+		d1[i]=d1[i-1]+x[i];
+	}
+	d2[0]=y[0];
+	for(i=1;i<n;i++){
+		d2[i]=d2[i-1]+y[i];
+	}
+	curx=0;
+	cury=0;
+	for(i=0;i<m;i++){
+		if(str[i]=='R'){
+			curx++;
+		}
+		else if(str[i]=='D'){
+			cury--;
+		}
+		else if(str[i]=='L'){
+			curx--;
+		}
+		else{
+			cury++;
+		}
+		ll idx=upper_bound(x,x+n,curx)-x-1;
+		ans=(-d1[idx]+(d1[n-1]-d1[idx])+(idx+1)*curx-(n-idx-1)*curx);
+		idx=upper_bound(y,y+n,cury)-y-1;
+		ans+=(-d2[idx]+(d2[n-1]-d2[idx])+(idx+1)*cury-(n-idx-1)*cury);
+		cout<<ans<<"\n";
+	}
+	return 0;
+}

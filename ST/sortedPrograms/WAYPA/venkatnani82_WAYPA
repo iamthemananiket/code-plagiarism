@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+using namespace std;
+vector<pair<int, int> > g[200]; 
+bool visited[200];
+long long mod = 1e9 + 9;
+long long base = 999983;
+int depth[200];
+long long fhash[200], rhash[200], pbase[200];
+int maxi;
+void dfs(int root) {
+	visited[root] = true;
+	for (int i = 0; i < (int)g[root].size(); i++) {
+		if(visited[g[root][i].first]) continue;
+		depth[g[root][i].first] = depth[root] + 1;
+		fhash[g[root][i].first] = (fhash[root] * base + g[root][i].second) % mod;
+		rhash[g[root][i].first] = (rhash[root] + pbase[depth[root]] * g[root][i].second) % mod;
+		if(fhash[g[root][i].first] == rhash[g[root][i].first]) maxi = max(maxi, depth[g[root][i].first]);
+		dfs(g[root][i].first);
+	}
+}
+int main(){
+	pbase[0] = 1;
+	for (int i = 1; i < 200; i++) pbase[i] = pbase[i - 1] * base, pbase[i] %= mod;
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		int n;
+		maxi = 0;
+		scanf("%d", &n);
+		for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) g[i].clear();
+		int u, v, c;
+		for (int i = 0; i < n - 1; i++) {
+			scanf("%d %d %d", &u, &v, &c);
+			g[u - 1].push_back(make_pair(v - 1, c));
+			g[v - 1].push_back(make_pair(u - 1, c));
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) visited[j] = false, depth[j] = fhash[j] = rhash[j] = 0;
+			dfs(i);
+		}
+		printf("%d\n", maxi + 1);
+	}
+}

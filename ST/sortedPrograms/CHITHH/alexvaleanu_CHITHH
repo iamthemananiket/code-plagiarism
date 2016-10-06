@@ -1,0 +1,72 @@
+#include <cstdio>
+#include <cmath>
+
+const int Nmax = 1e5 + 3;
+
+int N, M;
+
+int L, V, K;
+
+int v[Nmax];
+int nr_cif[Nmax];
+int sum[Nmax];
+
+int MagicInteger( int ll, int vv, int kk )
+{
+    int s = 0;
+
+    for ( int q = 0; ; q++ )
+    {
+        int i = ll + vv * q;
+
+        if ( i > N )
+        {
+            return -1;
+        }
+
+        s += nr_cif[i];
+
+        if ( s >= kk )
+        {
+            int diff = s - kk;
+
+            int nr = v[i] / pow(10,diff);
+
+            return nr % 10;
+        }
+    }
+
+    return -1;
+}
+
+int main()
+{
+    scanf("%d\n", &N);
+
+    for ( int i = 1; i <= N; ++i )
+            scanf("%d", &v[i]);
+
+    for ( int i = 1; i <= N; ++i )
+    {
+        if ( v[i] == 0 )
+                nr_cif[i] = 1;
+        else
+                nr_cif[i] = log10( v[i] ) + 1;
+    }
+
+    scanf("%d", &M);
+
+    for ( int i = 1; i <= M; ++i )
+    {
+        scanf("%d %d %d", &L, &V, &K);
+
+        int x = MagicInteger( L, V, K );
+
+        if ( x == -1 )
+                printf("So sad\n");
+        else
+                printf("%d\n", x);
+    }
+
+    return 0;
+}

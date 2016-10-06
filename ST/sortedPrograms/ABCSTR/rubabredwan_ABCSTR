@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n)	for(int i=0;i<n;i++)
+#define repn(i, n)	for(int i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx			1000050
+#define pb			push_back
+
+using namespace std;
+
+typedef pair<int, int> pii;
+
+map<pii, int>mp;
+
+int main(){
+	string str;
+	cin >> str;
+	mp[pii(0, 0)] = 1;
+	int a = 0, b = 0, c = 0;
+	long long ret = 0;
+	rep(i, str.size()){
+		int cur = str[i] - 'A';
+		a += cur == 0;
+		b += cur == 1;
+		c += cur == 2;
+		ret += mp[pii(a-b, b-c)];
+		mp[pii(a-b, b-c)]++;
+	}
+	cout << ret << endl;
+	return 0;
+}

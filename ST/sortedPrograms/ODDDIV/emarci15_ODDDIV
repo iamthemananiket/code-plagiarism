@@ -1,0 +1,48 @@
+#include <iostream>
+
+using namespace std;
+
+long long f[100001];
+long long sz[100001];
+
+int main()
+{
+    f[1] = 1;
+    for(int i=2; i<=100000; i++) {
+        if(!(i%2)) {
+            f[i] = f[i/2];
+        } else {
+            f[i] = 0;
+            for(long long j=3ll; j*j<=i; j++) {
+                if(i%j) continue;
+                int ii(i);
+                int dc(0);
+                while(!(ii%j)) {
+                    ii/=j;
+                    dc++;
+                }
+                long long ssz(0ll),poww(1ll);
+                for(int k=0; k<=dc; k++) {
+                    ssz+=poww;
+                    poww*=j;
+                }
+                poww /= j;
+                if(i!= (poww*ii)) return 101;
+                f[i] = (ssz)*f[ii];
+                break;
+            }
+            if(!f[i]) f[i] = i+1ll;
+        }
+    }
+
+    for(int i=1; i<=100000; i++) sz[i] = sz[i-1]+f[i];
+
+    int T,l,r;
+    for(cin >> T; T--;) {
+        cin >> l >> r;
+        long long sol((sz[r]-sz[l-1]));
+        cout << sol << endl;
+    }
+
+    return 0;
+}

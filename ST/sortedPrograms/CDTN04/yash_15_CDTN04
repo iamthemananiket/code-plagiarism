@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+ll num[100],den[100],gcd,x1,x2;
+void add(int i, ll n, ll d){
+//	cout<<"add "<<n<<" "<<d<<endl;
+	gcd=__gcd(den[i],d);
+	x1=den[i]/gcd;
+	x2=d/gcd;
+	num[i]=num[i]*x2+n*x1;
+	den[i]=den[i]*x2;
+	gcd=__gcd(den[i],num[i]);
+	num[i]/=gcd;
+	den[i]/=gcd;
+}
+int main(){
+	int n,k,i,j;
+	cin >> n >> k;
+	for(i=0;i<=n;i++)
+		num[i]=0,den[i]=1;
+	for(i=k;i<=n;i++){
+		for(j=1;j<=k;j++)
+			add(i,num[i-j],(den[i-j]<<j));
+		add(i,1,(1ll<<k));
+	//	cout<<i<<" : "<<num[i]<<" "<<den[i]<<endl;
+	}
+	// for(i=1;i<=n;i++)
+	// 	add(0,num[i],den[i]);
+	 cout<<num[n]<<"/"<<den[n]<<"\n";
+}

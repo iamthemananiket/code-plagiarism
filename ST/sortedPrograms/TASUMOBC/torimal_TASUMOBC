@@ -1,0 +1,67 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef unsigned long long ll;
+typedef pair<ll, ll> pll;
+
+const int MOD = 1000000007;
+
+ll n;
+map<pll, ll> memo;
+
+ll rec(int t, ll n) {
+  if (memo.count(pll(t, n))) {
+    return memo[pll(t, n)];
+  } else if (n == 0) {
+    return (t == 0 ? 1 : 2);
+  } else if (n == 1) {
+    return (t == 0 ? 2 : 4);
+  } else if (n == 2) {
+    return (t == 0 ? 4 : 5);
+  } else {
+    ll p = 3;
+    while (p + 2 * p <= n) p *= 3;
+    if (2 * p > n) {
+      return memo[pll(t, n)] = 2 * rec(t, n - p) % MOD;
+    } else {
+      return memo[pll(t, n)] = (2 * rec(t, n - 2 * p) + rec(1 - t, n - 2 * p)) % MOD;
+    }
+  }
+}
+
+int main() {
+  int T;
+  scanf("%d", &T);
+  while (T--) {
+    scanf("%llu", &n);
+    memo.clear();
+    printf("%llu\n", rec(0, n));
+  }
+}

@@ -1,0 +1,73 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <list>
+#include <cassert>
+#include <limits>
+#include <iterator>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii;
+typedef long long ll; typedef vector<long long> vl; typedef pair<long long,long long> pll; typedef vector<pair<long long,long long> > vpll;
+typedef vector<string> vs; typedef long double ld;
+
+typedef pair<int,int> Seg1D;
+
+inline Seg1D intersectSeg1D(const Seg1D &a, const Seg1D &b) {
+	return Seg1D(max(a.first, b.first), min(a.second, b.second));
+}
+inline int lengthSeg1D(const Seg1D &a) {
+	if(a.first >= a.second) return 0;
+	else return a.second - a.first;
+}
+
+typedef pair<Seg1D,Seg1D> Seg2D;
+
+inline Seg2D intersectSeg2D(const Seg2D &a, const Seg2D &b) {
+	return Seg2D(intersectSeg1D(a.first, b.first), intersectSeg1D(a.second, b.second));
+}
+inline long long lengthSeg2D(const Seg2D &a) {
+	return (long long)lengthSeg1D(a.first) * lengthSeg1D(a.second);
+}
+
+int main() {
+	int T;
+	scanf("%d", &T);
+	rep(ii, T) {
+		Seg2D rect[2];
+		rep(i, 2) {
+			int x1, x2, y1, y2;
+			scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+			rect[i] = Seg2D(Seg1D(x1, x2), Seg1D(y1, y2));
+		}
+		ll ans = lengthSeg2D(rect[0]) + lengthSeg2D(rect[1]) - lengthSeg2D(intersectSeg2D(rect[0], rect[1]));
+		cout << ans << endl;
+	}
+	return 0;
+}

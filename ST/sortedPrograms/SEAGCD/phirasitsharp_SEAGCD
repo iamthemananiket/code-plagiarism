@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+#define LL long long
+#define MOD 1000000007
+#define N 10000010
+
+LL arr[N];
+int t, n, m, l, r;
+
+LL pw(LL a, LL b) {
+    if(b <= 0) {
+        return 1;
+    }
+    LL r = pw(a, b/2);
+    r = (r * r) % MOD;
+    if(b%2) {
+        r = (r * a) % MOD;
+    }
+    return r;
+}
+void evaluate2(void) {
+	LL ans = 0;
+	for(int i = m;i >= l;i--) {
+		arr[i] = pw(m/i, n);
+		for(int j = i + i;j <= m;j += i) {
+			arr[i] = (arr[i] - arr[j]) % MOD;
+		}
+	}
+	for(int i = l;i <= r;i++) {
+		ans = (ans + arr[i]) % MOD;
+	}
+	printf("%lld\n", (ans + MOD) % MOD);
+}
+int main() {
+    scanf("%d", &t);
+    while(t--) {
+        scanf("%d%d%d%d", &n, &m, &l, &r);
+        evaluate2();
+    }
+    return 0;
+}

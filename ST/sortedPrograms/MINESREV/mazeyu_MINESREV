@@ -1,0 +1,114 @@
+#include<bits/stdc++.h>
+#define maxn 10010
+using namespace std;
+char s[60][60];
+int N,M,gs[60][60],use[60][60],T,ans,pp,i,j,k;
+int n,ln,vT,x,link[maxn],mat[maxn],col[maxn],q[maxn];
+int v[maxn],ne[maxn],head[maxn],dad[maxn],vis[maxn],l,r;
+void add(int x,int y)
+{
+	v[++ln]=y;ne[ln]=head[x];head[x]=ln;
+}
+int find(int x){return dad[x]==x?x:dad[x]=find(dad[x]);}
+int lca(int x,int y)
+{
+	for(vT++;;swap(x,y))if(x)
+	{
+		if(vis[x=find(x)]==vT)return x;
+		vis[x]=vT;x=link[mat[x]];
+	}
+}
+void Union(int x,int y)
+{
+	int s,t;
+	for(;x!=y;x=t)
+	{
+		s=mat[x];t=link[s];
+		if(find(t)!=y)link[t]=s;
+		if(col[s]==2)col[q[++r]=s]=1;
+		if(col[t]==2)col[q[++r]=t]=1;
+		dad[find(x)]=find(s);
+		dad[find(s)]=find(t);
+	}
+}
+void bfs(int x)
+{
+	int i,u,s,t;
+	for(i=1;i<=n;i++)col[i]=link[i]=0,dad[i]=i;
+	for(col[q[l=r=1]=x]=1;l<=r;l++)
+	{
+		t=q[l];
+		for(i=head[t];i;i=ne[i])
+		if(v[i]!=mat[t]&&col[v[i]]!=2&&find(v[i])!=find(t))
+		{
+			if(col[v[i]]==1)
+			{
+				s=lca(v[i],t);
+				if(find(v[i])!=s)link[v[i]]=t;
+				if(find(t)!=s)link[t]=v[i];
+				Union(v[i],s);Union(t,s);
+			}else
+			{
+				if(!mat[v[i]])
+				{
+					for(link[s=v[i]]=t;s;s=u)
+						u=mat[link[s]],mat[s]=link[s],mat[link[s]]=s;
+					return;
+				}else
+				{
+					q[++r]=mat[v[i]];
+					col[v[i]]=2;col[q[r]]=1;
+					link[v[i]]=t;
+				}
+			}
+		}
+	}
+}
+void dfs(int x,int y)
+{
+	if(x<1||x>N||y<1||y>M)return;
+	use[x][y]=n;
+	for(int i=-1;i<=1;i++)
+		for(int j=-1;j<=1;j++)
+			if(!gs[x+i][y+j]&&!use[x+i][y+j])dfs(x+i,y+j);
+}
+int main()
+{
+	scanf("%d",&T);
+	while(T--)
+	{
+		memset(s,0,sizeof(s));
+		memset(gs,0,sizeof(gs));
+		memset(use,0,sizeof(use));
+		memset(mat,0,sizeof(mat));
+		memset(head,0,sizeof(head));
+		scanf("%d%d",&N,&M);n=ans=pp=ln=0;
+		for(i=1;i<=N;i++)
+			scanf("%s",s[i]+1);
+		for(i=1;i<=N;i++)
+			for(j=1;j<=M;j++)
+				for(k=-1;k<=1;k++)
+					for(l=-1;l<=1;l++)
+						if(s[i+k][j+l]=='*')gs[i][j]++;
+		for(i=1;i<=N;i++)
+			for(j=1;j<=M;j++)
+				if(!gs[i][j]&&!use[i][j])++n,dfs(i,j);
+		for(i=1;i<=N;i++)
+			for(j=1;j<=M;j++)if(gs[i][j])
+			{
+				int s=0,t=0;
+				for(k=-1;k<=1;k++)
+					for(l=-1;l<=1;l++)if(use[i+k][j+l])
+					{
+						if(!s)s=use[i+k][j+l];else 
+						if(s!=use[i+k][j+l])t=use[i+k][j+l];
+					}
+				if(!s)pp++;
+				if(s&&t)add(s,t),add(t,s);
+			}
+		for(i=1;i<=n;i++)if(!mat[i])bfs(i);
+		for(i=1;i<=n;i++)if(mat[i])ans++;
+		ans=n-ans/2;
+		printf("%d\n",pp+ans);
+	}
+}

@@ -1,0 +1,48 @@
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <deque>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen(".inp","r",stdin)
+#define OUTPUT freopen(".out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=5e2+10;
+
+int test,m,n,r,f[2][N];
+string s;
+void solve(){
+    memset(f[0],0,sizeof(f[0]));
+    int ans=0;
+    REP(i,0,n){
+        int v=s[i]-'0';
+        memset(f[(i+1)%2],0,sizeof(f[(i+1)%2]));
+        REP(j,0,m) f[(i+1)%2][(10*j+v)%m]+=f[i%2][j];
+        f[(i+1)%2][v%m]++;
+        ans+=f[(i+1)%2][r];
+    }
+    cout<<ans<<'\n';
+}
+int main(){
+    cin>>s>>test;
+    n=s.length();
+    while (test--) cin>>m>>r,solve();
+}

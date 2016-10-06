@@ -1,0 +1,57 @@
+#include<stdio.h>
+#include<math.h>
+using namespace std;
+#define ep 1e-9
+#define N 1001000
+typedef long long ll;
+long double R[N];
+long double fa;
+ 
+long double fab(long double x){
+	return x<-ep?-x:x;
+}
+ 
+long double calc(long double r) {
+	long double x = 1.0*(r - r/R[1]*R[2] + R[2] + 2 * fa * sqrt(R[2]/R[1])*sqrt(r)*sqrt(R[1]-R[2]-r));
+	long double y = 1.0*r/R[1]*(R[1] + R[2])/R[2] * (R[1] + R[2])/R[1] + 2 * (R[2]-R[1])/R[1] + R[2]/r;
+	return x / y;
+}
+ 
+long double ans;
+ 
+void solve(ll x){
+	if(x>1000000){
+		return ;
+	}
+	ans+=R[x];
+	return ;
+}
+ 
+int main(){
+	int T;
+	//freopen("1.in", "r", stdin);
+	ll n, P, M, B;
+	scanf("%d", &T);
+	scanf("%lld%lld%lld%lld", &n, &P, &M, &B);
+	double xxx;
+	for(int i=1; i<=4; i++)scanf("%lf", &xxx), R[i] = xxx;
+	
+	for (int i = 5; i <= 100000; i++) {
+		fa = 1;
+		R[i] = calc(R[i-1]);
+		if (fab(R[i] - R[i-2]) < ep) {
+			fa = -1;
+			R[i] = calc(R[i-1]);
+		}
+	}	
+ 
+	long double ans = 0;
+	for(int i=0; i<T; i++){
+		n = 1ll*(P*n)%M + B;
+		if (n > 100000) continue;
+		ans += R[n];
+	}
+	printf("%.6lf\n", (double)ans);
+	return 0;
+ 
+}  

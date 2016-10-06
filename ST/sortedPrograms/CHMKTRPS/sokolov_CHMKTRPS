@@ -1,0 +1,107 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+ 
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = (int)2e9;
+const int MOD = (int)1e9 + 7;
+ 
+struct triple {
+	int first, second, third;
+ 
+	triple() {}
+ 
+	triple(int _first, int _second, int _third) {
+		first = _first;
+		second = _second;
+		third = _third;
+	}
+ 
+	/*const bool operator<(triple& other) const {
+		if (first == other.first) {
+			if (second == other.second) {
+				return third < other.third;
+			}
+			return second < other.second;
+		}
+		return first < other.first;
+	}*/
+};
+ 
+const int ITERATIONS_NUMBER = 5000;
+pair<int,int> a[(int)3e5 + 9];
+map<int, vector<int> > positions;
+vector<triple> res;
+bool used[(int)3e5 + 9];
+ 
+int main() {
+	//freopen("input.in", "rt", stdin);
+	//freopen("output.out", "wt", stdout);
+	srand(time(0));
+	clock_t start = clock();
+	int n;
+	scanf("%d", &n);
+	for (int i = 0; i < 3 * n; ++i) {
+		scanf("%d", &a[i].first);
+		a[i].second = i + 1;
+	}
+	sort(a, a + 3 * n);
+	int pos1 = rand() % n;
+	int pos2 = n + (rand() % n);
+	ll desiredSum = (ll)a[3 * n - 1].first + a[pos1].first + a[pos2].first;
+	used[pos1] = used[pos2] = true;
+	res.push_back(triple(a[3 * n - 1].second, a[pos1].second, a[pos2].second));
+	for (int i = 0; i < n; ++i) {
+		if (!used[i]) {
+			positions[a[i].first].push_back(a[i].second);
+		}
+	}
+	for (int i = 1; i < n; ++i) {
+		for (int it1 = 0; it1 < ITERATIONS_NUMBER && ((double)clock() - start) / CLOCKS_PER_SEC < 4.5; ++it1) {
+			pos2 = n + rand() % n;
+			if (used[pos2] || positions[desiredSum - a[3 * n - 1 - i].first - a[pos2].first].empty()) {
+				continue;
+			}
+			used[pos2] = true;
+			res.push_back(triple(a[3 * n - 1 - i].second, a[pos2].second, positions[desiredSum - a[3 * n - 1 - i].first - a[pos2].first].back()));
+			positions[desiredSum - a[3 * n - 1 - i].first - a[pos2].first].pop_back();
+			break;
+		}
+	}
+	bool is_first = true;
+	printf("%d\n", (int)res.size());
+	for (int i = 0; i < (int)res.size(); ++i) {
+		if (is_first) {
+			is_first = false;
+		} else {
+			printf(" ");
+		}
+		printf("%d %d %d", res[i].first, res[i].second, res[i].third);
+	}
+	printf("\n");
+	return 0;
+} 

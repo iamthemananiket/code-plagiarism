@@ -1,0 +1,190 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+#define pd pair < int, ull >
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)2e5 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 7;
+
+using namespace std;
+
+ll dp[19][(1 << 9)][2][2][2][2][3][9][7];
+// length - mask - two - four - five - eight - three - nine - seven
+
+int ten[20];
+
+inline int get_mask(int x) {
+    int res = 0;
+    while(x) {
+        if (x % 10 > 0)
+            res |= (1 << (x % 10 - 1));
+        x /= 10;
+    }
+    return res;
+}
+
+inline int get_sum(int x) {
+    int res = 0;
+    while(x) {
+        res += x % 10;
+        x /= 10;
+    }
+    return res;
+}
+
+inline void init() {
+    ten[0] = 1;
+    for (int i = 1; i < 20; i++)
+        ten[i] = ten[i - 1] * 10 % 7;
+    for (int i = 0; i < 1000; i++)
+        dp[3][get_mask(i)][(i % 2) == 0][(i % 4) == 0][(i % 5) == 0][(i % 8) == 0][get_sum(i) % 3][get_sum(i) % 9][i % 7]++;
+    for (int length = 4; length < 19; length++)
+    for (int mask = 0; mask < (1 << 9); mask++)
+    for (int two = 0; two < 2; two++)
+    for (int four = 0; four < 2; four++)
+    for (int five = 0; five < 2; five++)
+    for (int eight = 0; eight < 2; eight++)
+    for (int three = 0; three < 3; three++)
+    for (int nine = 0; nine < 9; nine++)
+    for (int seven = 0; seven < 7; seven++) {
+        ll &now = dp[length - 1][mask][two][four][five][eight][three][nine][seven];
+        if (!now)
+            continue;
+        for (int digit = 0; digit < 10; digit++) {
+            int nw = mask;
+            if (digit > 0)
+                nw |= (1 << (digit - 1));
+            dp[length][nw][two][four][five][eight][(three + digit) % 3][(nine + digit) % 9][(seven + ten[length - 1] * digit) % 7] += now;
+        }
+    }
+}
+
+inline bool check(int digit, bool two, bool four, bool five, bool eight, int three, int nine, int seven) {
+    if (digit == 1)
+        return 1;
+    if (digit == 2)
+        return two;
+    if (digit == 4)
+        return four;
+    if (digit == 5)
+        return five;
+    if (digit == 8)
+        return eight;
+    if (digit == 3)
+        return (three == 0);
+    if (digit == 9)
+        return (nine == 0);
+    if (digit == 6)
+        return (two && (three == 0));
+    if (digit == 7)
+        return (seven == 0);
+    assert(0);
+}
+
+int used[10], timer;
+
+inline int cnt(ll x) {
+    ll X = x;
+    timer++;
+    int res = 0;
+    while(x) {
+        if (x % 10 > 0 && used[x % 10] != timer && X % (x % 10) == 0)
+            res++;
+        used[x % 10] = timer;
+        x /= 10;
+    }
+    return res;
+}
+
+int slow(int l, int r, int k) {
+    int res = 0;
+    for (int i = l; i <= r; i++)
+        res += (cnt(i) >= k);
+    return res;
+}
+
+inline ll calc(ll x, int k) {
+    ll X = x;
+    ll res = 0;
+    int sum = 0, mask = 0, for_seven = 0;
+    string s = "";
+    while(x) {
+        s += char(x % 10 + '0');
+        x /= 10;
+    }
+    for (int i = sz(s) - 1; i > 2; i--) {
+        for (int digit = 0, nw, cnt, hey, heyo; digit < s[i] - '0'; digit++) {
+            sum += digit;
+            nw = mask;
+            if (digit > 0)
+                nw |= (1 << (digit - 1));
+            hey = (for_seven + digit * ten[i]) % 7;
+            for (int mask = 0; mask < (1 << 9); mask++)
+            for (int two = 0; two < 2; two++)
+            for (int four = 0; four < 2; four++)
+            for (int five = 0; five < 2; five++)
+            for (int eight = 0; eight < 2; eight++)
+            for (int three = 0; three < 3; three++)
+            for (int nine = 0; nine < 9; nine++)
+            for (int seven = 0; seven < 7; seven++) {
+                ll &now = dp[i][mask][two][four][five][eight][three][nine][seven];
+                if (!now)
+                    continue;
+                heyo = (nw | mask);
+                cnt = 0;
+                for (int digit = 1; digit < 10; digit++)
+                    if (heyo & (1 << (digit - 1)) && check(digit, two, four, five, eight, (three + sum) % 3, (nine + sum) % 9, (seven + hey) % 7))
+                        cnt++;
+                if (cnt >= k)
+                    res += now;
+            }
+            sum -= digit;
+        }
+        sum += (s[i] - '0');
+        if (s[i] > '0')
+            mask |= (1 << (s[i] - '0' - 1));
+        for_seven = (for_seven + ten[i] * (s[i] - '0')) % 7;
+    }
+    x = 0;
+    for (int i = sz(s) - 1; i > 2; i--)
+        x = 10 * x + s[i] - '0';
+    x *= 1000;
+    while(x < X) {
+        if (cnt(x) >= k)
+            res++;
+        x++;
+    }
+    return res;
+}
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+	init();
+    int tests;
+    cin >> tests;
+    ll l, r, k;
+    while(tests--) {
+        cin >> l >> r >> k;
+        cout << calc(r + 1, k) - calc(l, k) << endl;
+    }
+    return 0;
+}

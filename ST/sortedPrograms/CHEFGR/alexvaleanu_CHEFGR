@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 1e2 + 2;
+
+int N, M, T;
+int A[Nmax];
+
+int main()
+{
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> N >> M;
+
+        int maxim = 0;
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            cin >> A[i];
+            maxim = max( maxim, A[i] );
+        }
+
+        int contor = 0;
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            contor += maxim - A[i];
+        }
+
+        M -= contor;
+
+        if ( M < 0 || M % N != 0 )
+            cout << "No\n";
+        else
+            cout << "Yes\n";
+    }
+
+    return 0;
+}

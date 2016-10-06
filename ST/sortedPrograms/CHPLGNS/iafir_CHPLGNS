@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const double PI2 = 2*acos(-1), EPS = 0.01;
+
+struct point {
+	int x, y;
+	point(int _x, int _y) { x = _x; y = _y; }
+};
+
+typedef vector< point > polygon;
+
+double area(polygon p) {
+	double result = 0.0;
+	for(int i = 0; i<p.size()-1; i++) {
+		result += (double)p[i].x * p[i+1].y - (double)p[i+1].x * p[i].y;
+	}
+	return fabs(result) / 2.0;
+}
+
+
+int t, n, xi, yi, m;
+vector< polygon > vpol;
+vector<int> par, ans;
+vector< double > vA;
+
+
+bool cmp(int a, int b) {
+	return vA[a] < vA[b];
+}
+int main() {
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d", &n);
+		vpol.assign(n, polygon());
+		vA.assign(n, 0.0);
+		par.assign(n, 0);
+		for(int i = 0; i<n; i++) {
+			par[i] = i;
+			scanf("%d", &m);
+			while(m--) {
+				scanf("%d%d", &xi, &yi);
+				vpol[i].push_back(point(xi, yi));
+			}
+			vpol[i].push_back(vpol[i][0]);
+			vA[i] = area(vpol[i]);
+		}
+		sort(par.begin(), par.end(), cmp);
+		ans.assign(n, 0);
+		for(int i = 0; i<n; i++)	
+			ans[par[i]] = i;
+		for(int i = 0; i<n; i++)
+			printf("%d ", ans[i]);
+		printf("\n");
+	}
+
+	return 0;
+}

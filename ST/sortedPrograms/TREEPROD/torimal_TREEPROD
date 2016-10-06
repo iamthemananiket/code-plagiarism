@@ -1,0 +1,132 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cinttypes>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+#define endl '\n'
+typedef long long ll;
+
+typedef pair<int, int> Edge;
+
+const int MAX_N = 110000;
+const int MAX_M = 550;
+
+template<typename T, typename U>
+ostream &operator<<(ostream &os, pair<T, U> p) { return (os << '(' << p.first << ',' << p.second << ')'); }
+template<typename T> ostream &operator<<(ostream &os, vector<T> a) {
+  for (auto v : a) { os << v << ' '; } return os; }
+template<typename T, typename U> ostream &operator<<(ostream &os, map<T, U> a) {
+  for (auto v : a) { os << v << ' '; } return os; }
+template<typename T, typename U> ostream &operator<<(ostream &os, unordered_map<T, U> a) {
+  for (auto v : a) { os << v << ' '; } return os; }
+
+
+
+int n;
+int m;
+vector<Edge> g[MAX_N];
+int gtbl[MAX_M * MAX_M];
+int par[MAX_N];
+map<int, ll> ct[MAX_N];
+ll ans;
+
+int gcd(int x, int y) {
+  return (y == 0 ? x : gcd(y, x % y));
+}
+
+int main() {
+  ios_base::sync_with_stdio(false); cin.tie(0);
+  cin >> n >> m;
+  for (int i = 0; i < n - 1; i++) {
+    int u, v, c;
+    cin >> u >> v >> c;
+    u--, v--;
+    int d = gcd(m, c);
+    g[u].emplace_back(v, d);
+    g[v].emplace_back(u, d);
+  }
+  for (int i = 0; i < MAX_M * MAX_M; i++) {
+    gtbl[i] = gcd(i, m);
+  }
+  par[0] = 0;
+  stack<tuple<int, int, int>> st;
+  st.emplace(0, 0, 0);
+  while (!st.empty()) {
+    int v, type, it;
+    tie(v, type, it) = st.top();
+    st.pop();
+    switch (type) {
+    case 0: {
+      ct[v][1] = 1;
+      st.emplace(v, 1, 0);
+      break;
+    }
+    case 1: {
+      int u, c;
+      tie(u, c) = g[v][it];
+      if (u != par[v]) {
+	par[u] = v;
+	st.emplace(v, 2, it);
+	st.emplace(u, 0, 0);
+      } else {
+	st.emplace(v, 3, it);
+      }
+      break;
+    }
+    case 2: {
+      int u, c;
+      tie(u, c) = g[v][it];
+      for (const auto &p : ct[u]) {
+	int x = gtbl[c * p.first];
+	for (const auto &q : ct[v]) {
+	  if (gtbl[x * q.first] == m) {
+	    ans += p.second * q.second;
+	  }
+	}
+      }
+      for (const auto &p : ct[u]) {
+	ct[v][gtbl[c * p.first]] += p.second;
+      }
+      st.emplace(v, 3, it);
+      break;
+    }
+    case 3: {
+      if (it + 1 < (int)g[v].size()) {
+	st.emplace(v, 1, it + 1);
+      }
+      break;
+    }
+    default: {
+      assert(false);
+    }
+    }
+  }
+  cout << ans << endl;
+}

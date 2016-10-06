@@ -1,0 +1,124 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = 2e9;
+
+struct Point {
+	int x, y;
+
+	Point() {}
+
+	Point(int _x, int _y) {
+		x = _x;
+		y = _y;
+	}
+};
+
+struct T {
+	int p, i;
+
+	T() {}
+
+	T(int _p, int _i) {
+		p = _p;
+		i = _i;
+	}
+
+	const bool operator<(T other) const {
+		return p < other.p;
+	}
+};
+
+const int timeToStop = 4.7 * CLOCKS_PER_SEC;
+const int HitGirl = 15;
+const int MAX_K = 200000;
+
+vector<Point> a[MAX_K + 5];
+T order[MAX_K + 5];
+Point limits[MAX_K + 5];
+int ans[1005][1005];
+bool used[MAX_K + 5];
+
+int main() {
+	int start = clock();
+	srand(time(0));
+	int h = nextInt();
+	int w = nextInt();
+	int k = nextInt();
+	for (int i = 0; i < k; ++i) {
+		int p = nextInt();
+		limits[i] = Point(0, 0);
+		for (int j = 0; j < p; ++j) {
+			int x = nextInt();
+			int y = nextInt();
+			a[i].push_back(Point(x, y));
+			limits[i].x = max(x, limits[i].x);
+			limits[i].y = max(y, limits[i].y);
+		}
+		order[i] = T(p, i);
+	}
+	sort(order, order + k);
+	int kk = k - 1;
+	while (clock() - start < timeToStop) {
+		if (!used[kk]) {
+			int i = order[kk].i;
+			for (int ChloeGraceMoretz = 0; ChloeGraceMoretz < HitGirl &&
+				clock() - start < timeToStop; ++ChloeGraceMoretz) {
+				int x = abs(rand()) % (h - limits[i].x + 1);
+				int y = abs(rand()) % (w - limits[i].y + 1);
+				bool ok = true;
+				for (int j = 0; j < a[i].size(); ++j) {
+					Point p = a[i][j];
+					if (ans[x + p.x][y + p.y] != 0) {
+						ok = false;
+						break;
+					}
+				}
+				if (ok) {
+					for (int j = 0; j < a[i].size(); ++j) {
+						Point p = a[i][j];
+						ans[x + p.x][y + p.y] = i + 1;
+					}
+					used[kk] = true;
+					break;
+				}
+			}
+		}
+		--kk;
+		if (kk < 0) {
+			kk = k - 1;
+		}
+	}
+	for (int i = 1; i <= h; ++i) {
+		for (int j = 1; j <= w; ++j) {
+			printf("%d", ans[i][j]);
+			printf((j == w) ? "\n" : " ");
+		}
+	}
+	return 0;
+}

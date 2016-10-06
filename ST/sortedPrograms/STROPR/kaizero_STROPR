@@ -1,0 +1,35 @@
+#include<stdio.h>
+int n, x;
+long long m, Inv[101000], Mod = 1000000007, w[101000];
+long long GetInv(long long a){
+    long long b = Mod-2, r=1;
+    while(b){
+        if(b%2)r=r*a%Mod;
+        a=a*a%Mod,b/=2;
+    }
+    return r;
+}
+int main(){
+    int i, TC;
+    long long a, t, res;
+    for(i=1;i<=100000;i++){
+        Inv[i]=GetInv(i);
+    }
+    scanf("%d",&TC);
+    while(TC--){
+        scanf("%d%d%lld",&n,&x,&m);
+        for(i=1;i<=n;i++){
+            scanf("%lld",&w[i]);
+            w[i]%=Mod;
+        }
+        res = 0;
+        for(i=x;i>=1;i--){
+            if(i==x)t=1;
+            else{
+                t = (x-i+m-1)%Mod * t % Mod * Inv[x-i]%Mod;
+            }
+            res = (res+t*w[i])%Mod;
+        }
+        printf("%lld\n",res);
+    }
+}

@@ -1,0 +1,115 @@
+//Program: mchef
+//Author: gary
+//Date: 03/07/2015
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAXN = 1e5 + 10;
+const int MAXK = 505;
+
+ll F[MAXK];
+int A[MAXN];
+int P[MAXN];
+vector<int> R[MAXN];
+int C[MAXK];
+int N, K, M;
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%d%d", &N, &K, &M);
+
+        ll sum = 0;
+        for(int i = 1; i <= N; i++)
+        {
+            scanf("%d", A + i);
+            sum += A[i];
+            R[i].clear();
+            P[i] = -1;
+        }
+
+        for(int i = 0; i < M; i++)
+        {
+            int l, r, c;
+            scanf("%d%d%d", &l, &r, &c);
+            R[l].pb(c);
+            R[r + 1].pb(-c);
+        }
+
+        for(int i = 0; i < MAXK; i++)
+            C[i] = 0;
+
+        priority_queue<int> pq;
+        for(int i = 1; i <= N; i++)
+        {
+            for(int r: R[i])
+                if(r < 0)
+                    C[-r] --;
+                else
+                {
+                    C[r] ++;
+                    pq.push(-r);
+                }
+
+            while(!pq.empty())
+            {
+                int t = -pq.top();
+                if(C[t] == 0)
+                {
+                    pq.pop();
+                    continue;
+                }
+                P[i] = t;
+                break;
+            }
+        }
+
+        for(int i = 0; i <= K; i++)
+            F[i] = -1;
+        F[0] = 0;
+
+        ll best = 0;
+        for(int i = 1; i <= N; i++)
+        {
+            // printf("P[i]=%d\n", P[i]);
+            if(P[i] == -1)
+                continue;
+            for(int j = K; j >= P[i]; j--)
+            {
+                if(F[j - P[i]] >= 0)
+                {
+                    F[j] = max(F[j], F[j - P[i]] - A[i]);
+                    best = max(best, F[j]);
+                }
+            }
+        }
+
+        printf("%lld\n", sum + best);
+    }
+
+    return 0;
+}

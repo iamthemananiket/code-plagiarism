@@ -1,0 +1,32 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std ;
+
+typedef long long ll ;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        ll  t, n, i ;
+        vector<ll> a(310728);
+
+        a[1] = n = i = 1 ;
+
+        while( n <= 10000000000000000LL )
+        {
+                i++ ;
+                n += i*i ;
+                a[i] = n ;
+        }
+
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> n ;
+                cout << upper_bound( a.begin(), a.end(), n ) - a.begin() - 1 << endl ;
+        }
+
+        return 0;
+} 

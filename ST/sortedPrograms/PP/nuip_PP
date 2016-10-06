@@ -1,0 +1,105 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<unordered_map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y)-1;(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+#define eb emplace_back
+#define UNIQUE(X) (X).erase(unique(all(X)),(X).end())
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> using vv=vector<vector<T>>;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+const ll MOD=1e9+7,R=1003;
+
+void manacher(const string &st,const string &str,vector<int> &re){
+  re.resize(st.size());
+  int i=0,j=0,n=st.size();
+  while(i<st.size()){
+    while(i-j>=0 && i+j<n && st[i-j]==str[i+j] && st[i+j]==str[i-j]) ++j;
+    re[i]=j;
+    int k = 1;
+    while(i-k>=0 && i+k<st.size() && k+re[i-k]<j) re[i+k]=re[i-k], ++k;
+    i+=k; j=max(0,j-k);
+  }
+}
+
+ll solve(vector<string> &strs,int f=0){
+  map<pll,ll> st;
+  for(string str:strs){
+    ll hash=0,h2=0;
+    rep(i,str.size()){
+      hash=(hash*R%MOD+str[i])%MOD;
+      h2=h2*R+str[i];
+    }
+    ++st[pll(hash,h2)];
+  }
+
+  ll re=0;
+  for(string str:strs){
+    string s(str.size()*2+1,'_');
+    rep(i,str.size()) s[i*2+1]=str[i];
+    vector<int> pal;
+    manacher(s,s,pal);
+    ll hash=0,h2=0;
+    //cout<<str<<endl;//<<pal;
+    rrep(i,str.size()){
+      hash=(hash*R%MOD+str[i])%MOD;
+      h2=h2*R+str[i];
+      if(pal[i]+1>i){//cout<<i<<":"<<st[hash]<<endl;
+	if(i || f)re+=max(0ll,st[pll(hash,h2)]-(i==0&&pal[str.size()]+1>str.size()));
+      }
+    }
+  }
+  //cout<<"ret"<<re<<endl;
+  return re;
+}
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(0);
+  int T;
+  cin>>T;
+  while(T--){
+    int n;
+    cin>>n;
+    vector<string> strs(n);
+    rep(i,n) 
+      cin>>strs[i];
+    ll re=0;
+    re+=solve(strs,1);
+    for(string &str:strs) reverse(all(str));
+    re+=solve(strs);
+    cout<<re<<endl;
+  }
+  return 0;
+}

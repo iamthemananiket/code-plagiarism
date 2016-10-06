@@ -1,0 +1,115 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int _pool[500010], *pool;
+
+int N;
+char GG[1010][1010];
+int Q;
+int S[10010], M[10010];
+int *A[10010], *B[10010];
+
+typedef unsigned long long UInt;
+static_assert(sizeof(UInt) == 8, "size of UInt is not proper");
+const int BITS_LEN = 20;
+UInt G[1010][BITS_LEN + 10];
+
+int que[1010], *qb, *qe;
+int d[1010];
+UInt unvis[BITS_LEN + 10];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		for (int u = 0; u < N; ++u) {
+			scanf("%s", GG[u]);
+		}
+		Q = in();
+		pool = _pool;
+		for (int q = 0; q < Q; ++q) {
+			S[q] = in() - 1;
+			M[q] = in();
+			A[q] = pool; pool += M[q];
+			B[q] = pool; pool += M[q];
+			for (int i = 0; i < M[q]; ++i) {
+				A[q][i] = in() - 1;
+				B[q][i] = in() - 1;
+			}
+		}
+		
+		for (int u = 0; u < N; ++u) {
+			fill(G[u], G[u] + BITS_LEN, 0);
+			for (int v = 0; v < N; ++v) if (GG[u][v] == '1') {
+				G[u][v >> 6] |= 1ULL << (v & 63);
+			}
+		}
+		
+		for (int q = 0; q < Q; ++q) {
+			for (int i = 0; i < M[q]; ++i) {
+				const int u = A[q][i];
+				const int v = B[q][i];
+				G[u][v >> 6] ^= 1ULL << (v & 63);
+			}
+			qb = qe = que;
+			fill(d, d + N, -1);
+			fill(unvis, unvis + BITS_LEN, -1ULL);
+			d[S[q]] = 0;
+			unvis[S[q] >> 6] ^= 1ULL << (S[q] & 63);
+			*qe++ = S[q];
+			for (; qb != qe; ) {
+				const int u = *qb++;
+				for (int b = 0; b < BITS_LEN; ++b) {
+					for (UInt nei = G[u][b] & unvis[b]; nei; nei &= nei - 1) {
+						const int v = b << 6 | __builtin_ctzll(nei);
+						d[v] = d[u] + 1;
+						unvis[v >> 6] ^= 1ULL << (v & 63);
+						*qe++ = v;
+					}
+				}
+			}
+			int ans = 0;
+			for (int u = 0; u < N; ++u) {
+				if (~d[u]) {
+					ans += d[u];
+				}
+			}
+			printf("%d\n", ans);
+		}
+	}
+	
+	return 0;
+}
+

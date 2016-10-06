@@ -1,0 +1,111 @@
+#include <iostream>
+#include <iosfwd>
+#include <iomanip>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <bitset>
+#include <set>
+#include <queue>
+#include <stack>
+#include <map>
+#include <deque>
+#include <string>
+#include <list>
+#include <iterator>
+#include <sstream>
+#include <complex>
+#include <fstream>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <assert.h>
+#include <unordered_map>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double ld;
+typedef vector < long long > vll;
+typedef pair <long long, long long> pll;
+typedef pair <int, int> pii;
+typedef vector < int > vii;
+typedef complex < double > Point;
+
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define mp make_pair
+#define fst first
+#define snd second
+#define prev PREV
+ll t, n, m, u, v, q, r, ql, qr, k, l, s, w, z, x, y, d;
+const int N = 105;
+const int K = 1001;
+const int LN = 20;
+const long long mod = 1e9 + 7;
+const long long INF = 1LL << 52LL;
+queue < pii > Q;
+int d1[N][N], d2[N][N];
+bool vis[N][N];
+int ka, kb;
+bool can[N][N];
+void bfs(pii src, int k, int dist[][N]) {
+    for (int i = 1; i <= n; ++i) {
+        for (int j = 1; j <= m; ++j) dist[i][j] = mod, vis[i][j] = false;
+    }
+    dist[src.fst][src.snd] = 0;
+    Q = queue < pii > ();
+    Q.push(src);
+    while (!Q.empty()) {
+        int x = Q.front().fst;
+        int y = Q.front().snd;
+        Q.pop();
+        if (vis[x][y]) continue;
+        vis[x][y] = true;
+        for (int i = x - k; i <= x + k; ++i) {
+            for (int j = y - k; j <= y + k; ++j) {
+                if (abs(i - x) + abs(y - j) > k) continue;
+                if (i <= 0 || i > n || j <= 0 || j > m) continue;
+                if (!can[i][j]) continue;
+                if (dist[i][j] > dist[x][y] + 1) {
+                    dist[i][j] = dist[x][y] + 1;
+                    Q.push(mp(i, j));
+                }
+            }
+        }
+    }
+}
+int main() {
+    csl;
+    cin >> t;
+    while (t--) {
+        cin >> n >> m >> ka >> kb;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= m; ++j) {
+                cin >> can[i][j];
+                can[i][j] ^= 1;
+            }
+        }
+        bfs(mp(1, 1), ka, d1);
+        bfs(mp(1, m), kb, d2);
+        int sol = mod;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= m; ++j) {
+                sol = min(sol, max(d1[i][j], d2[i][j]));
+            }
+        }
+        if (sol < mod)
+            cout << sol << '\n';
+        else cout << -1 << '\n';
+    }
+    return 0;
+}
+
+
+

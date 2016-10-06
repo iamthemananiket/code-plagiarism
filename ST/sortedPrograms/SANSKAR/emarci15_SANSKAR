@@ -1,0 +1,88 @@
+#include <cstdio>
+#include <queue>
+
+using namespace std;
+
+int T;
+
+int n,k;
+
+bool eler[1<<21];
+
+long long a[21];
+
+int sor[1<<21];
+int se,sv;
+
+long long msum(int m) {
+    long long ret = 0;
+    for(int i=0; i<n; i++) {
+        if(m&(1<<i)) {
+            ret += a[i];
+        }
+    }
+    return ret;
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&k);
+
+        long long sum = 0;
+
+        for(int i=0; i<n; i++) {
+            scanf("%lld",&a[i]);
+            sum += a[i];
+        }
+
+        if(sum%k) {
+            printf("no\n");
+            continue;
+        }
+        if(sum == 0) {
+            printf("yes\n");
+            continue;
+        }
+
+        long long h = (sum/k);
+
+        for(int i=0; i<(1<<21); i++) {
+            eler[i] = 0;
+        }
+
+        eler[0] = 1;
+
+        se = 0;
+        sv = 0;
+
+        sor[0] = 0;//sor.push(0);
+
+        while((se <= sv) && (!eler[(1<<n)-1])) { //(!sor.empty())
+            int q = sor[se++];//sor.front();
+            //sor.pop();
+
+            long long ms = msum(q);
+            int c = ms/h;
+
+            for(int i=0; i<n; i++) {
+                if(q&(1<<i)) continue;
+                if((ms+a[i]) > (h*(c+1))) continue;
+                if(eler[q|(1<<i)]) continue;
+
+                eler[q|(1<<i)] = 1;
+                sor[++sv] = (q|(1<<i));//.push(q|(1<<i));
+
+            }
+        }
+
+        if(eler[(1<<n)-1]) {
+            printf("yes\n");
+        } else {
+            printf("no\n");
+        }
+
+    }
+
+    return 0;
+}

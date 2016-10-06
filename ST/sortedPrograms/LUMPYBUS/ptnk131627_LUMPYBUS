@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+typedef long long ll;
+const int N=1e5+10;
+
+
+int n,a[N];
+ll c1,c2,f[N];
+vector<int> v[2];
+void prepare(){
+	scanf("%d%lld%lld",&n,&c1,&c2);
+	v[0].clear();
+	v[1].clear();
+	for(int i=1;i<=n;i++) {
+		int x;
+		scanf("%d",&x);
+		v[x&1].push_back(x);
+	}
+}
+int solve(){
+	for(int i=0;i<=1;i++) sort(v[i].begin(),v[i].end());
+	int n1=v[0].size();
+	for(int i=1;i<=n1;i++) f[i]=f[i-1]+v[0][i-1];
+	int ans=upper_bound(f+1,f+n1+1,2*c2+c1)-f-1;
+	ll sum=0;
+	for(int use=1;use<=v[1].size();use++){
+		sum+=v[1][use-1];
+		if (sum>2*c2+c1||use>c1) break;
+		int add=upper_bound(f+1,f+n1+1,2*c2+c1-sum)-f-1;
+		ans=max(ans,use+add);
+	}
+	return ans;
+}
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		prepare();
+		printf("%d\n",solve());
+	}
+}

@@ -1,0 +1,118 @@
+/* Let's go */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cassert>
+#include <cstdlib>
+#include <queue>
+#include <ctime>
+
+#define pii pair<int, int>
+  
+#define pb push_back
+#define mp make_pair
+  
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+typedef double ld;
+
+typedef vector<int> vi;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+  
+const int MOD = (int) 1e9 + 7;
+const int MAXN = (int) 3e5 + 7;
+
+int n;
+ll a[111];
+
+ll gcd(ll x, ll y) {
+  while (x && y) {
+    if (x >= y) x %= y;
+    else y %= x;
+  }
+  return x + y;
+}
+
+ll is(ll x) {
+  ll root = (ll) sqrt(x + 0.0);
+  root = max(0ll, root - 1);
+  while (root * root < x)
+    root++;
+  if (root * root == x)
+    return root;
+  return 1;
+}
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  //freopen("out", "w", stdout);
+  #endif
+
+  ios_base::sync_with_stdio(0);
+  cin.tie(0);
+
+  int t;
+  cin >> t;
+  while (t--) {
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+      cin >> a[i];
+    }
+    ll ans = 1;
+    for (int i = 1; i <= n; i++) {
+      for (int j = i + 1; j <= n; j++) {
+        ll g = gcd(a[i], a[j]);
+        ans = max(ans, g);
+      }
+    }
+    if (ans == 1) {
+      for (int i = 1; i <= n && ans == 1; i++) {
+        ll x = a[i];
+        if (is(x) > 1) {
+          ans = is(x);
+          break;
+        }
+        for (ll p = 2; p * p * p <= x; p++) {
+          if (x % p == 0) {
+            x /= p;
+            if (x % p == 0) {
+              ans = p;
+              break;
+            }
+            ll tata = is(x);
+            if (tata > 1) {
+              ans = tata;
+              break;
+            }
+          }
+        }
+      }
+    }
+    assert(ans > 1);
+    cout << ans << "\n";
+  }
+  
+  return 0;
+}

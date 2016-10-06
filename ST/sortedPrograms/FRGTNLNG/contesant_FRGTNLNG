@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#ifdef KAZAR
+  #define eprintf(...) fprintf(stderr,__VA_ARGS__)
+#else
+  #define eprintf(...) 0
+#endif
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+string s[1111];
+
+int main(){
+
+#ifdef KAZAR
+  freopen("f.input","r",stdin);
+  freopen("f.output","w",stdout);
+  freopen("error","w",stderr);
+#endif
+
+  int t = read();
+
+  for (int it = 0; it < t; it++) {
+    int n = read();
+    int k = read();
+    for (int i = 0; i < n; i++) {
+      cin >> s[i];
+    }
+    vector<string> vs;
+    for (int i = 0; i < k; i++) {
+      int sz = read();
+      for (int j = 0; j < sz; j++) {
+        string tmp;
+        cin >> tmp;
+        vs.pb(tmp);
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      bool res = false;
+      for (string one : vs) {
+        if (one == s[i]) {
+          res = true;
+        }
+      }
+      if (res) printf("YES "); else printf("NO ");
+    }
+    puts("");
+  }
+
+  return 0;
+}

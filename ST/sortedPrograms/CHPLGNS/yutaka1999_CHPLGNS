@@ -1,0 +1,43 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#define SIZE 100005
+#define INF 1000000005
+
+using namespace std;
+typedef pair <int,int> P;
+
+int mx[SIZE];
+P pos[SIZE];
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		int n;
+		scanf("%d",&n);
+		for(int i=0;i<n;i++)
+		{
+			int c;
+			scanf("%d",&c);
+			mx[i]=-INF;
+			for(int j=0;j<c;j++)
+			{
+				int x,y;
+				scanf("%d %d",&x,&y);
+				mx[i]=max(mx[i],x);
+			}
+			pos[i]=P(mx[i],i);
+		}
+		sort(pos,pos+n);
+		for(int i=0;i<n;i++) mx[pos[i].second]=i;
+		for(int i=0;i<n;i++)
+		{
+			if(i!=0) printf(" ");
+			printf("%d",mx[i]);
+		}puts("");
+	}
+	return 0;
+}

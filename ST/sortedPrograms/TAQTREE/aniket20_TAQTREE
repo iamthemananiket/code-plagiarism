@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll adj[1001][1001];
+ll n;
+struct point
+{
+	ll a;
+	ll b;
+};
+point edge[1001];
+int marked[1001];
+ll dfs(ll u,ll v,ll cost)
+{
+	marked[u]=1;
+//	cout<<cost<<" "<<u<<endl;
+	int i,val;
+	for(i=1;i<=n;i++)
+	{
+		if(!marked[i] && adj[u][i]!=0)
+		{
+			if(i==v) return (cost+adj[u][i]);
+			val=dfs(i,v,cost+adj[u][i]);
+			if(val!=-1)
+			{
+				return val;
+			}
+		}
+	}
+	return -1;
+}
+int main()
+{
+	ios_base::sync_with_stdio(false);
+	ll q,x,y,i,c,tag;
+	cin>>n;
+	for(i=0;i<n-1;i++)
+	{
+		cin>>x>>y>>c;
+		adj[x][y]=c;
+		adj[y][x]=c;
+		edge[i].a=x;
+		edge[i].b=y;
+	}
+	 q;
+	cin>>q;
+	while(q--)
+	{
+		cin>>tag;
+		if(tag==1)
+		{
+			cin>>x>>y;
+			adj[edge[x-1].a][edge[x-1].b]=y;
+			adj[edge[x-1].b][edge[x-1].a]=y;
+		}
+		else
+		{
+			cin>>x>>y;
+			for(i=1;i<=n;i++)
+			{
+				marked[i]=0;
+			}
+			cout<<dfs(x,y,0)<<endl;
+		}
+	}
+	return 0;
+}

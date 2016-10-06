@@ -1,0 +1,88 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 2000005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+class comp{
+public:
+	bool operator()(pii &p1,pii &p2){
+		return p2.S<p1.S;
+	}
+};
+priority_queue<pii, vector<pii>,comp>pq;
+
+set<int>st;
+int a[maxs];
+vector<int>v;
+map<int,int>mp;
+int main()
+{
+	int t,i,n,j;
+	sc("%d",&t);
+	while(t--){
+		sc("%d",&n);
+		for(i=0;i<n;i++){
+			sc("%d",&a[i]);
+			mp[a[i]]=0;
+		}
+		for(i=0;i<n;i++){
+			siter it=st.ub(a[i]);
+			if(it==st.end()){
+				st.insert(a[i]);
+				mp[a[i]]++;
+			}
+			else{
+				mp[(*it)]--;
+				if(mp[(*it)]==0)
+					st.erase(it);
+				
+				st.insert(a[i]);
+				mp[a[i]]++;
+			}
+		}
+		int ans=st.size();
+		for(siter it=st.begin();it!=st.end();it++){
+			for(j=0;j<mp[(*it)];j++){
+				v.pb((*it));
+			}
+		}
+		ans=v.size();
+		pr("%d ",ans);
+		for(i=0;i<v.size();i++){
+			pr("%d ",v[i]);
+		}
+		pr("\n");
+		st.clear();
+		v.clear();
+		mp.clear();
+	}
+	return 0;
+
+}

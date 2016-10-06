@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int A[1000];
+int B[1000];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        int N;
+        scanf("%d", &N);
+        int a, b;
+        int ra=0, rb=0, ans=1;
+        for(int i=1; i<=N; i++)
+            scanf("%d", A+i);
+        for(int i=1; i<=N; i++)
+            scanf("%d", B+i);
+        for(int i=1; i<=N; i++)
+        {
+            a=A[i], b=B[i];
+            if(a*b>ra*rb || (a*b==ra*rb && b>rb))
+                ans=i, ra=a, rb=b;
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}

@@ -1,0 +1,71 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e4 + 10;
+const int MAX_K = 100 + 1;
+int N, K, B;
+
+vector<int> E[MAX_N];
+int P[MAX_N];
+int par[MAX_N];
+int best[MAX_N][MAX_K];
+
+void dfs(int u){
+  best[u][P[u]] = u;
+  for(int v: E[u]){
+    if(par[u] != v){
+      par[v] = u;
+      dfs(v);
+      for(int k = 1; k <= K; k++){
+	if(best[v][k] > 0 && (best[u][k] == 0 || best[u][k] > best[v][k])){
+	  best[u][k] = best[v][k];
+	}
+      }
+    }
+  }
+}
+
+int query(int u, int t){
+  while(u && !best[u][t])
+    u = par[u];
+  if(!best[u][t])
+    return -1;
+  return best[u][t];
+}
+
+int main(){
+  int u, v, Q;
+  scanf("%d%d%d", &N, &K, &B);
+  for(int i = 0; i < N - 1; i++){
+    scanf("%d%d", &u, &v);
+    E[u].pb(v);
+    E[v].pb(u);
+  }
+  for(int i = 1; i <= N; i++)
+    scanf("%d", P + i);
+  dfs(B);
+  scanf("%d", &Q);
+  while(Q--){
+    scanf("%d%d", &u, &v);
+    printf("%d\n", query(u, v));
+  }
+  return 0;
+}

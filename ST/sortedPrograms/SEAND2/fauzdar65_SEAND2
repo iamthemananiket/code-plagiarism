@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define pb push_back
+#define mp make_pair
+using namespace std;
+
+int tens[105][1005],n,len;
+ 
+ 
+ int b[105];
+ 
+ vector<pair<int,pair<int,int>>> od; 
+ 
+ 
+ int calcsum(string str)
+ {
+     int ret=0;
+     
+     for(int k=0;k<n;k++)
+     {
+         int val=0;
+         for(int j=0;j<len;j++)
+         {
+             assert(str[j]>='0' && str[j]<='9');
+             
+             //if(str[j]<'0' || str[j]>'9')cout<<str[j]<<"    "<<endl;
+             
+             val= (val+ (((int)(str[j]-'0'))*tens[k][len-1-j]))%b[k];
+         }
+         ret+=val;
+     }
+     
+     return ret;
+ }
+ 
+int main() {
+    ios_base::sync_with_stdio(false);
+    
+    string s,res,tres;
+  
+    int t;
+    cin>>t;
+   
+    while(t--)
+    {
+        
+        int ct[11];
+        for(int i=0;i<=9;i++)ct[i]=0;
+        
+        cin>>s>>n;
+       
+        for(int i=0;i<n;i++)cin>>b[i];
+        
+        
+        len=s.length();
+        res.resize(len);
+        tres.resize(len);
+        
+        for(int i=0;i<len;i++)ct[(int)(s[i]-'0')]++;
+        
+        sort(b,b+n);
+        
+        for(int j=0;j<n;j++)
+        {
+            tens[j][0]=(1%b[j]);
+        for(int i=1;i<=1000;i++)tens[j][i]=(tens[j][i-1]*10)%b[j];
+        }
+        
+        int mins;
+        
+        bool done[1005];
+        
+        for(int i=max(0,n-30);i<n;i++)
+        {
+            int tt[11];
+            od.clear();
+            for(int j=0;j<=9;j++)tt[j]=ct[j];
+            
+            for(int j=0;j<=9;j++)
+            {
+                for(int k=0;k<len;k++)
+                {
+                    od.pb(mp((tens[i][len-1-k]*j)%b[i],mp(j,k)));
+                }
+            }
+            
+           sort(od.begin(),od.end());
+           
+            for(int j=0;j<=len;j++)done[j]=false;
+            int te=0;
+            
+           
+            for(int j=0;j<od.size();j++)
+            {
+                if(done[od[j].second.second]==true || tt[od[j].second.first]<=0)continue;
+                
+                te++;
+                tt[od[j].second.first]--;
+                done[od[j].second.second]=true;
+                tres[od[j].second.second]=(char)(od[j].second.first+48);
+            }
+            assert(te==len);
+            
+            
+            
+            
+            int cur=calcsum(tres);
+            
+           if(i==0 || i==(n-10) || cur<mins ){ mins=cur; res=tres;}
+        }
+        
+        
+        assert(res.length()==len);
+      
+        cout<<res<<endl;
+    }
+	
+	return 0;
+}

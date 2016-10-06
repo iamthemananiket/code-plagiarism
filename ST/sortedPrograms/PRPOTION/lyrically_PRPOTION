@@ -1,0 +1,63 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int NA, NB, NC, M;
+int A[110], B[110], C[110];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		NA = in();
+		NB = in();
+		NC = in();
+		M = in();
+		for (int i = 0; i < NA; ++i) A[i] = in();
+		for (int i = 0; i < NB; ++i) B[i] = in();
+		for (int i = 0; i < NC; ++i) C[i] = in();
+		int xs[3];
+		xs[0] = *max_element(A, A + NA);
+		xs[1] = *max_element(B, B + NB);
+		xs[2] = *max_element(C, C + NC);
+		sort(xs, xs + 3);
+		for (int m = 0; m < M; ++m) {
+			xs[2] /= 2;
+			sort(xs, xs + 3);
+		}
+		printf("%d\n", xs[2]);
+	}
+	
+	return 0;
+}
+

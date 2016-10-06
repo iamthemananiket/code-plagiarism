@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+int a[1010][1010];
+int sum[1010][1010];
+vector<int> dq[1010];
+vector<int> getRangeMax(vector<int> val, int range) {
+	deque<int> store;
+	vector<int> ret;
+	ret.push_back(0);
+	for(int i = 0; i < val.size(); i++) {
+		while(!store.empty() && store.back() < val[i]) store.pop_back();
+		store.push_back(val[i]);
+		if (i >= range && val[i - range] == store.front()) store.pop_front();
+  		if (i >= range - 1) ret.push_back(store.front());
+	}
+	return ret;
+}
+int main() {
+	int n, m;
+	cin >> n >> m;
+	for(int i = 1; i <= n; i++) for(int j = 1; j <= m; j++) scanf("%d", &a[i][j]);
+	for(int i = 1; i <= n; i++) for(int j = 1; j <= m; j++) 
+		sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] + a[i][j];
+	int q, w, h;
+	cin >> q;
+	while(q--) {
+		int ans = 2e9;
+		cin >> h >> w;
+		for(int j = 1; j <= m; j++) {
+			vector<int> val;
+			for(int i = 1; i <= n; i++) val.push_back(a[i][j]);
+			dq[j] = getRangeMax(val, h);
+		}
+		for(int i = 1; i <= n - h + 1; i++) {
+			vector<int> val, store;
+			for(int j = 1; j <= m; j++) val.push_back(dq[j][i]);
+			store = getRangeMax(val, w);
+			for(int j = 1; j <= m - w + 1; j++) {
+				int foo = sum[i + h - 1][j + w - 1] - sum[i + h - 1][j - 1] - sum[i - 1][j + w - 1] + sum[i - 1][j - 1];
+				ans = min(ans, h * w * store[j] - foo);
+			}
+		}
+		printf("%d\n", ans);
+	}
+}

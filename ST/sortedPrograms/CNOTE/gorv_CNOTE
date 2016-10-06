@@ -1,0 +1,24 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		int X,Y,K,N;
+		cin>>X>>Y>>K>>N;
+		int isPossible=false;
+		for(int i=0;i<N;i++) {
+			int page,cost;
+			cin>>page>>cost;
+			if(page>=X-Y && cost<=K)
+				isPossible=1;
+		}
+		if(isPossible){
+			puts("LuckyChef");
+		}
+		else{
+			puts("UnluckyChef");
+		}
+		
+	}
+}

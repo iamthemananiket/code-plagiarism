@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int n;
+int a[51];
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int t=0;t<T;t++) {
+		scanf("%d",&n);
+		for (int i=0;i<n;i++) scanf("%d",&a[i]);
+		int ans = 0;
+		for (int i=0;i<n;i++) for (int j=i;j<n;j++) {
+			int s = 0, p = 1;
+			for (int k=i;k<=j;k++) s+=a[k], p*=a[k];
+			if (s==p) ans+=1;
+		}
+		printf("%d\n",ans);
+	}
+
+	return 0;
+}

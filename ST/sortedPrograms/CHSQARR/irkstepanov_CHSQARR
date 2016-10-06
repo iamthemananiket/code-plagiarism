@@ -1,0 +1,141 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+
+const int rmax = 10;
+const int inf = 1e9 + 100;
+vector<vector<int> > a;
+vector<vector<vector<vector<int> > > > c;
+vector<int> deg(1200);
+
+int x, y;
+
+int get(int l, int r)
+{
+    int r1 = deg[x];
+    int r2 = deg[y];
+    int ans = 0;
+    ans = max(ans, c[l][r][r1][r2]);
+    ans = max(ans, c[l + x - (1 << r1)][r][r1][r2]);
+    ans = max(ans, c[l][r + y - (1 << r2)][r1][r2]);
+    ans = max(ans, c[l + x - (1 << r1)][r + y - (1 << r2)][r1][r2]);
+    return ans;
+}
+
+vector<vector<int> > sum;
+int ans;
+
+void update(int l, int r)
+{
+    int s = sum[l + x - 1][r + y - 1];
+    if (r) {
+        s -= sum[l + x - 1][r - 1];
+    }
+    if (l) {
+        s -= sum[l - 1][r + y - 1];
+    }
+    if (l && r) {
+        s += sum[l - 1][r - 1];
+    }
+    ans = min(ans, get(l, r) * x * y - s);
+}
+
+int main()
+{
+
+    //freopen("input", "r", stdin);
+    //ifstream cin("input");
+    //ofstream cout("output");
+
+    int n, m;
+    scanf("%d%d", &n, &m);
+
+    deg[1] = 0;
+    for (int i = 2; i < 1200; ++i) {
+        deg[i] = deg[i - 1];
+        if (!(i & (i - 1))) {
+            ++deg[i];
+        }
+    }
+
+    a.resize(n);
+    c.resize(n);
+    for (int i = 0; i < n; ++i) {
+        a[i].resize(m);
+        c[i].resize(m);
+        for (int j = 0; j < m; ++j) {
+            c[i][j].resize(rmax);
+            for (int t = 0; t < rmax; ++t) {
+                c[i][j][t].resize(rmax);
+            }
+            scanf("%d", &a[i][j]);
+            c[i][j][0][0] = a[i][j];
+        }
+    }
+
+    for (int r1 = 0; r1 < rmax; ++r1) {
+        for (int r2 = 0; r2 < rmax; ++r2) {
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < m; ++j) {
+                    if (r1 == 0) {
+                        if (r2 == 0) {
+                            continue;
+                        }
+                        int t = j + (1 << (r2 - 1));
+                        if (t >= m) {
+                            t = m - 1;
+                        }
+                        c[i][j][r1][r2] = max(c[i][j][r1][r2 - 1], c[i][t][r1][r2 - 1]);
+                    } else {
+                        int t = i + (1 << (r1 - 1));
+                        if (t >= n) {
+                            t = n - 1;
+                        }
+                        c[i][j][r1][r2] = max(c[i][j][r1 - 1][r2], c[t][j][r1 - 1][r2]);
+                    }
+                }
+            }
+        }
+    }
+
+    sum.resize(n);
+    for (int i = 0; i < n; ++i) {
+        sum[i].resize(m);
+        for (int j = 0; j < m; ++j) {
+            sum[i][j] = a[i][j];
+            if (i) {
+                sum[i][j] += sum[i - 1][j];
+            }
+            if (j) {
+                sum[i][j] += sum[i][j - 1];
+            }
+            if (i && j) {
+                sum[i][j] -= sum[i - 1][j - 1];
+            }
+        }
+    }
+
+    int q;
+    scanf("%d", &q);
+
+    while (q--) {
+        scanf("%d%d", &x, &y);
+        //cout << get(0, 0) << "\n";
+        ans = inf;
+        for (int i = 0; i + x <= n; ++i) {
+            for (int j = 0; j + y <= m; ++j) {
+                update(i, j);
+            }
+        }
+        printf("%d\n", ans);
+    }
+
+}

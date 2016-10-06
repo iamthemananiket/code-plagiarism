@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+int main(){
+	int t,cnt;
+	ll r,k,z,lo,hi,mid,x,y;
+	cin >> t;
+	while(t--){
+		cin >> r >> k;
+		z=k*(200*r-k)/10000;
+		if(!z){
+			puts("-1");
+			continue;
+		}
+		lo=r*r-z;hi=r*r-1;
+		for(x=r-1,cnt=0;cnt<1000000 && x>=(r/2);cnt++,x--){
+			y=sqrt(r*r-x*x);
+			if(x*x+y*y>=lo && x*x+y*y<=hi){
+				printf("%lld %lld\n",x,y);
+				goto E;
+			}
+		}
+		puts("-1");
+		E:;
+	}
+}

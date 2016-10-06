@@ -1,0 +1,88 @@
+#include <cstdlib>
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int N = 101000;
+const int MAXK = 366;
+
+typedef long long ll;
+
+struct line{
+  ll m, n;
+  ll get(ll x) {
+    return m * x + n;
+  }
+};
+
+typedef vector<line> poly;
+
+line racer[N];
+poly bucket[MAXK];
+int ptr[MAXK];
+
+double inter(line l1,line l2) {
+  return double(l2.n - l1.n) / (l1.m - l2.m);
+}
+
+bool bad(line l1,line l2,line l3) {
+  return inter(l1, l3) < inter(l1, l2);
+}
+
+void hullify(poly &h) {
+  sort(h.begin(), h.end(), [&](line a,line b){
+    return (a.m == b.m)? a.n > b.n : a.m < b.m;
+  });
+  int sz = 0;
+  for (int i = 0; i < h.size(); i++) {
+    while (sz >= 2 && bad(h[sz - 2], h[sz - 1], h[i]))
+      sz--;
+    h[sz++] = h[i];
+  }
+  h.resize(sz);
+}
+
+ll CalcMax(poly &h,int &ptr,int x) {
+  while (ptr + 1 < h.size() && h[ptr].get(x) < h[ptr + 1].get(x))
+    ptr++;
+  return h[ptr].get(x);
+}
+
+int main() {
+  int n, q;
+  scanf(" %d %d", &n, &q);
+  int K = 1;
+  while (K * K < q)
+    K++;
+  for (int it = 0; it < q; it++) {
+    int op, t;
+    scanf(" %d %d", &op, &t);
+    if (op == 1) {
+      int id, nv;
+      scanf(" %d %d", &id, &nv);
+      ll d = nv - racer[id].m;
+      racer[id].m = nv;
+      racer[id].n -= d * t;
+      bucket[it / K].push_back(racer[id]);
+    } else {
+      ll ans = 0;
+      for (int i = 0; i <= it / K; i++) {
+        if (i < it / K) {
+          ans = max(ans, CalcMax(bucket[i], ptr[i], t));  
+        } else {
+          for (line l : bucket[i]) {
+            ans = max(ans, l.get(t));
+          }
+        }
+      }
+      printf("%lld\n", ans);
+    }
+    if (it % K == K - 1) {
+      hullify(bucket[it / K]);
+    }
+  }
+  return 0;
+}

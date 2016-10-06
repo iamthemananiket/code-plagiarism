@@ -1,0 +1,37 @@
+#include<bits/stdc++.h>
+using namespace std;
+int m,n,i,j,k,N,T;
+double f[70][70],a[70][70],c[70][70],x;
+void mul(double A[70][70],double B[70][70],double C[70][70])
+{
+	memset(c,0,sizeof(c));
+	for(i=0;i<N;i++)
+		for(j=0;j<N;j++)
+			for(k=0;k<N;k++)
+				c[i][j]+=A[i][k]*B[k][j];
+	for(i=0;i<N;i++)
+		for(j=0;j<N;j++)
+			C[i][j]=c[i][j];
+}
+int main()
+{
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%d%d%lf",&m,&n,&x);
+		memset(f,0,sizeof(f));
+		memset(a,0,sizeof(a));
+		for(i=0;i<=m;i++)f[i+m+1][i]=1;
+		for(i=1;i<=m;i++)
+		{
+			f[i+m][i+m+1]=sin(x);
+			f[i+m+1][i+m+1]=2*cos(x);
+			f[i][i+m+1]=-1;
+		}
+		N=(m+1)<<1;
+		for(i=0;i<N;i++)a[i][i]=1;
+		for(n--;n;n>>=1,mul(f,f,f))
+			if(n&1)mul(a,f,a);
+		printf("%.10lf\n",a[0][N-1]+a[m+2][N-1]*sin(x));
+	}
+}

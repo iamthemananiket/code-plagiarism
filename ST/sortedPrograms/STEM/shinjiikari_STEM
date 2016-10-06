@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+#define mod 1000000007
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define	debug(ccc)	cout << #ccc << " = " << ccc << endl;
+typedef long double ld;
+#define INF 2000000000
+#define maxn 1000010
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int main()
+{
+ll t,n,i,j,k,len,x,m,l,flag,alen,curr;
+vector <string> ans;
+string w[12];
+t=input();
+while(t--)
+{
+	ans.clear();
+	n=input();
+	for(i=0;i<n;i++) cin >> w[i];
+	len=w[0].length();
+	if (n==1)
+	{
+		cout << w[0] <<endl;
+		continue;
+	}
+	alen=-1;
+	for(i=0;i<len;i++)
+		for(j=1;j<=len-i;j++)
+		{
+			for(k=1;k<n;k++)
+			{
+				x=w[k].length();
+				flag=1;
+				for(m=0;m<=x-j;m++)
+					if (w[0].substr(i,j).compare(w[k].substr(m,j))==0) {flag=0; break;}
+				if (flag==1) break;
+			}
+			if (!flag)
+			{
+				if (alen==-1)
+				{
+					alen=j;
+					ans.pb(w[0].substr(i,j));
+				}
+				else if (j>alen)
+				{
+					alen=j;
+					ans.clear();
+					ans.pb(w[0].substr(i,j));
+				}
+				else if (j==alen) ans.pb(w[0].substr(i,j));
+			}
+		}
+	while(ans.size()>1)
+	{
+		x=ans.size();
+		if (ans[x-1].compare(ans[x-2])<0) ans.erase(ans.begin()+x-2);
+		else ans.pop_back();
+	}
+	cout << ans[0];
+	putchar('\n');
+}
+return 0;
+}

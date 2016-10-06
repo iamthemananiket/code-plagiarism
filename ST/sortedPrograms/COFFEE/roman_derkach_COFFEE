@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+ using namespace std;
+
+ int dp[201][201][201],N,K,D,M,n,a[100],mx;
+
+  void tt(int len,int kol,int d,int sum)
+{
+    if(len==n)
+    {
+        if(kol==0)
+        mx=max(mx,sum);
+        return;
+    }
+
+    if(d>0) tt(len+1,kol,d-1,sum + a[len] * M); else
+            tt(len+1,kol,0,sum + a[len]);
+
+    if(kol>0) tt(len+1,kol-1,D,sum);
+
+}
+
+  int main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+   //  freopen("input.txt","r",stdin); freopen("output.txt","w",stdout);
+
+        int t;
+      cin>>t;
+       while(t--)
+       {
+
+        cin>>N>>K>>D>>M;
+
+    /*    if(max(N,max(K,D))<=18)
+        {
+              n=N+1;
+         for(int i=1;i<=N;++i) cin>>a[i];
+         mx=0;
+          tt(1,K,0,0);
+          cout<<mx<<endl;
+
+        } else */
+         {
+
+        memset(dp,0,sizeof(dp));
+        int x;
+        cin>>x;
+         dp[1][0][0]=x;
+         dp[1][1][D]=0;
+         for(int i=2;i<=N;++i)
+         {
+             int x;
+             cin>>x;
+
+           // dp[i][0][0] = dp[i-1][0][0] + x;
+            for(int d=0;d<=D;++d)
+             dp[i][0][d]=dp[i-1][0][d] + x,
+             dp[i][1][D]=max(dp[i][1][D],dp[i-1][0][d]);
+
+             for(int k=1;k<=min(i-1,K);++k)
+                for(int d=D; d>=0;--d)
+                //if(dp[i-1][k][d]>0 || i-1==0)
+             {
+                dp[i][k+1][D]=max(dp[i][k+1][D],dp[i-1][k][d]);
+                if(d>0) dp[i][k][d-1]=max(dp[i][k][d-1],dp[i-1][k][d] + x * M); else
+                        dp[i][k][0]=max(dp[i][k][0],dp[i-1][k][0] + x);
+             }
+         }
+
+            int mx=0;
+         for(int d=0;d<=D;++d)
+            //if(dp[N][K][d]==120) cout<<d<<endl;
+            mx=max(mx,dp[N][K][d]);
+         cout<<mx<<endl;
+        }
+
+       }
+
+    return 0;
+  }

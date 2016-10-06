@@ -1,0 +1,49 @@
+#include <cstdio>
+
+#define mod 1000000007
+
+using namespace std;
+
+int T;
+
+long long n;
+
+int dn;
+int d[40];
+
+void setD(int k, long long nn) {
+    if(nn==0) return;
+    dn = k+1;
+    d[k] = nn%3;
+    setD(k+1,nn/3);
+}
+
+long long calc(int dig,long long nor, long long inv) {
+    if(dig == 1) {
+        if(d[0] == 0) {
+            return ((((nor*1ll)%mod)+((inv*2ll)%mod))%mod);
+        } else if(d[0] == 1) {
+            return ((((nor*2ll)%mod)+((inv*4ll)%mod))%mod);
+        } else {
+            return ((((nor*4ll)%mod)+((inv*5ll)%mod))%mod);
+        }
+    }
+    if(!d[dig-1]) return calc(dig-1,nor,inv);
+
+    if(d[dig-1] == 1) {
+        return calc(dig-1,(2ll*nor)%mod,(2ll*inv)%mod);
+    } else {
+        return calc(dig-1,(((2ll*nor)%mod) + ((1ll*inv)%mod))%mod,(((1ll*nor)%mod) + ((2ll*inv)%mod))%mod);
+    }
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%lld",&n);
+        setD(0,n);
+        printf("%lld\n",calc(dn,1ll,0ll));
+    }
+
+    return 0;
+}

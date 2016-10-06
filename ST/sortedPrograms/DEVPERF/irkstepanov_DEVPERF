@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+#define mp make_pair
+#define pb push_back
+#define sz(a) static_cast<int>((a).size())
+#define all(a) (a).begin(), (a).end()
+#define forn(i, n) for (int i = 0; i < n; ++i)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+const int inf = static_cast<int>(1e9);
+
+int main()
+{
+
+    int tt;
+    cin >> tt;
+
+    while (tt--) {
+        int n, m;
+        cin >> n >> m;
+        char c;
+        int xmin = inf, xmax = -1, ymin = inf, ymax = -1;
+        forn(i, n) {
+            forn(j, m) {
+                cin >> c;
+                if (c == '*') {
+                    xmin = min(xmin, i);
+                    xmax = max(xmax, i);
+                    ymin = min(ymin, j);
+                    ymax = max(ymax, j);
+                }
+            }
+        }
+        if (xmin == inf) {
+            cout << "0\n";
+            continue;
+        }
+        int d = max(ymax - ymin, xmax - xmin);
+        cout << (d + 3) / 2 << "\n";
+    }
+
+}

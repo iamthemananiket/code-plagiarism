@@ -1,0 +1,46 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <set>
+#include <cstring>
+#include <string>
+
+using namespace std;
+
+
+char strs[110][10];
+int N,K;
+
+char S[2510][10];
+
+int main(){
+	int i;
+
+	int t,n;
+	int k;
+	scanf("%d",&t);
+	while(t--){
+		k =0;
+		scanf("%d%d",&N,&K);
+		for(i =0 ; i < N; ++i) scanf("%s",strs[i]);
+
+		while(K--){
+			scanf("%d",&n);
+			while(n--){
+				scanf("%s",S[k]);
+				++k;
+			}
+		}
+		int k1;
+
+		for(i = 0; i < N; ++i){
+			for( k1 = 0; k1 < k; ++k1) if(!strcmp(S[k1],strs[i])) break;
+			if(k1 < k) printf("YES ");
+			else printf("NO ");
+		}
+		printf("\n");
+	}
+
+
+	return 0;
+}

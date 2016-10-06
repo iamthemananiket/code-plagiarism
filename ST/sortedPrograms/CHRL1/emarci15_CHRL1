@@ -1,0 +1,32 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+
+int n,k;
+
+int c[10];
+int w[10];
+
+int solve(int b, int sc, int sw) {
+    if(sc > k) return 0;
+    if(b == n) return sw;
+
+    return max(solve(b+1,sc+c[b],sw+w[b]),solve(b+1,sc,sw));\
+}
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    for(cin >> T; T--;) {
+        cin >> n >> k;
+        for(int i=0; i<n; i++) {
+            cin >> c[i] >> w[i];
+        }
+
+        cout << solve(0,0,0) << endl;
+    }
+
+    return 0;
+}

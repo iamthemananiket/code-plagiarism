@@ -1,0 +1,82 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <list>
+#include <cassert>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define EPS 1e-9
+using namespace std;
+typedef vector<int> vi; typedef pair<int,int> pii; typedef vector<pair<int,int> > vpii;
+typedef long long ll; typedef vector<long long> vl; typedef pair<long long,long long> pll; typedef vector<pair<long long,long long> > vpll;
+typedef vector<string> vs; typedef long double ld;
+
+template<typename T> struct GetID {
+	map<T,int> ids;
+	void clear() { ids.clear(); }
+	int get(const T &x) {
+		typename map<T,int>::iterator it = ids.find(x);
+		if(it != ids.end()) return it->second;
+		int newID = ids.size();
+		ids.insert(make_pair(x, newID));
+		return newID;
+	}
+};
+
+int main() {
+	int T;
+	scanf("%d", &T);
+	GetID<int> id;
+	rep(ii, T) {
+		int N, K;
+		scanf("%d%d", &N, &K);
+		id.clear();
+		vector<vpii> v;
+		rep(i, N) {
+			int s, f, p;
+			scanf("%d%d%d", &s, &f, &p);
+			int pi = id.get(p);
+			if(pi == v.size()) v.pb(vpii());
+			v[pi].push_back(mp(s, f));
+		}
+		int ans = 0;
+		each(i, v) {
+			vpii &w = *i;
+			sort(all(w), [](const pii &p, const pii &q) { return p.second < q.second; });
+			int t = -INF;
+			each(j, w) {
+				if(j->first >= t) {
+					ans ++;
+					t = j->second;
+				}
+			}
+		}
+		printf("%d\n", ans);
+	}
+	return 0;
+}

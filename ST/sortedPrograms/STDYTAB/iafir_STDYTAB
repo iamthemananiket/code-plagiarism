@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int mod = 1000000000;
+long long r[2002];
+int c[4004][4004];
+
+
+int main() {
+	int t, n, m;
+	for(int i = 0; i<4001; i++) {
+		c[i][0] = c[i][i] = 1;
+	}
+	for(int i = 2; i<4001; i++) {
+		for(int j = 1; j<i; j++)
+			c[i][j] = (c[i-1][j-1] + c[i-1][j]) % mod;
+	}
+
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d", &n, &m);
+		for(int i = 0; i<=m; i++)
+			r[i] = 0;
+		r[0] = 1;
+		for(int i = 0; i<n; i++) {
+			long long sum = 0;
+			for(int j = 0; j<=m; j++) {
+				sum = (sum + r[j]) % mod;
+				r[j] = sum * c[m+j-1][j] % mod;
+			}
+		}
+		long long ans = 0;
+		for(int i = 0; i<=m; i++)
+			ans = (ans + r[i]) % mod;
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

@@ -1,0 +1,89 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 105
+#define INF 123456789
+
+int n,m,k1,k2,dist[2][MAX_N][MAX_N];
+bool good[MAX_N][MAX_N],vis[MAX_N][MAX_N];
+
+void bfs(int si, int sj, int dist[MAX_N][MAX_N], int k)
+{
+	for (int i=1; i<=n; i++)
+		for (int j=1; j<=m; j++)
+		{
+			vis[i][j]=false;
+			dist[i][j]=INF;
+		}
+	queue<pint> q;
+	q.push(mp(si,sj));
+	dist[si][sj]=0;
+	vis[si][sj]=true;
+	while (!q.empty())
+	{
+		int i=q.front().fi,
+			j=q.front().se;
+		q.pop();
+		int d=dist[i][j]+1;
+		for (int dx=-k; dx<=k; dx++)
+			for (int dy=-k; dy<=k; dy++)
+			{
+				int ni=i+dx,
+					nj=j+dy;
+				if (abs(ni-i)+abs(nj-j)>k)
+					continue;
+				if (ni<=0||nj<=0||ni>=n+1||nj>=m+1)
+					continue;
+				if (vis[ni][nj]||!good[ni][nj])
+					continue;
+				vis[ni][nj]=true;
+				dist[ni][nj]=d;
+				q.push(mp(ni,nj));
+		}
+	}
+}
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d %d %d %d",&n,&m,&k1,&k2);
+		for (int i=1; i<=n; i++)
+			for (int j=1; j<=m; j++)
+			{
+				int x;
+				scanf("%d",&x);
+				good[i][j]=x==0;
+			}
+		bfs(1,1,dist[0],k1);
+		bfs(1,m,dist[1],k2);
+		int ans=INF;
+		for (int i=1; i<=n; i++)
+			for (int j=1; j<=m; j++)
+				if (good[i][j])
+					ans=min(ans,max(dist[0][i][j],dist[1][i][j]));
+		if (ans==INF)
+			printf("-1\n");
+		else
+			printf("%d\n",ans);
+	}
+	return 0;
+}

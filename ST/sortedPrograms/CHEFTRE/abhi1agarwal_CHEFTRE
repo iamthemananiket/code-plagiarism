@@ -1,0 +1,184 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+#define sc(x) scanf("%d",&x)
+#define sc2(x,y) scanf("%d%d",&x,&y)
+#define sc3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define scl(x) scanf("%lld",&x)
+#define scl2(x,y) scanf("%lld%lld",&x,&y)
+#define scl3(x,y,z) scanf("%lld%lld%lld",&x,&y,&z)
+#define scstr(x) scanf("%s",x)
+#define pd(x) printf("%d",x)
+#define pstr(x) printf("%s",x)
+#define newl() printf("\n")
+#define fl(i,n) for (i=0;i<n;i++)
+#define fle(i,n) for (i=1;i<=n;i++)
+#define fla(i,a,n) for (i=a;i<n;i++)
+#define mem(a,i) memset(a,i,sizeof(a))
+#define fi first
+#define se second
+typedef pair<int,int> pii;
+typedef pair<int,pair<int,int> > piii ;
+typedef pair<ll,ll> pll;
+typedef pair<ll,int> pli;
+#define gcd __gcd
+#define wl(n) while (n--)
+#define debug(x) cout<<"debug->"<<#x<<"::"<<x<<endl
+#define debug2(x,y) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\n"
+#define debug3(x,y,z) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\t"<<#z<<" :: "<<z<<"\n"
+#define tr(container, it)  for(typeof(container.begin()) it = container.begin(); it != container.end(); it++) 
+#define all(v) v.begin(),v.end()
+const double eps=0.000000000000001 ;
+#define MOD 1000000007
+typedef long double LF;
+typedef double lF;
+//-------------
+int n,q;
+int A[100010];int lev[100010]={0},par[100010];
+vector<int>gr[100010];
+void dfs(int c,int p)
+{
+	int i,z=gr[c].size();
+	par[c]=p;
+	for(i=0;i<z;i++)
+	{
+		if (gr[c][i]!=p)
+		{
+			lev[gr[c][i]]=lev[c]+1;
+			dfs(gr[c][i],c);
+		}
+
+	}
+}
+int lca(int u,int v)
+{
+	if (u==v)return u;
+	
+	if (lev[u]<lev[v])swap(u,v);
+	while(lev[u]>lev[v])
+		u=par[u];
+	assert(u>0&&v>0);
+	if (u==v)return u;
+	while (par[u]!=par[v])
+	{
+		u=par[u];
+		v=par[v];
+	}
+	assert(par[u]>0);
+	return par[u];
+}
+void tracp(int u,int v,vector<int *>&pp)
+{
+	pp.clear(); // clar out the vector 
+	int cc=lca(u,v);
+	while (u!=cc)
+	{
+		pp.pb(&A[u]);
+		u=par[u];
+	}
+	pp.pb(&A[u]);
+	vector<int *>gg;
+	while(v!=cc)
+	{
+		gg.pb(&A[v]);
+		v=par[v];
+	}
+	reverse(gg.begin(),gg.end());
+	int i;
+	for (i=0;i<gg.size();i++)
+	{
+		pp.pb(gg[i]);
+	}
+}
+void revit(int u,int v)
+{
+	vector<int *>ww;
+	tracp(u,v,ww);
+	int i,j;
+	i=0,j=ww.size()-1;
+	assert(ww.size()>0);
+	while(i<j)
+	{
+		swap(*ww[i],*ww[j]);
+		i++;j--;
+	}
+}
+void cp(int u,int v,int u_,int v_)
+{
+	vector <int *>p1,p2;
+	vector<int>vals;
+	tracp(u,v,p1);
+	tracp(u_,v_,p2);
+	int i,z=p1.size();
+	assert(p1.size()==p2.size());
+	for (i=0;i<z;i++)
+		vals.pb(*(p1[i]));
+	for (i=0;i<z;i++)
+	{
+		*(p2[i])=(vals[i]);
+	}
+}
+int que(int u,int v,int u_,int v_)
+{
+	vector <int *>p1,p2;
+	tracp(u,v,p1);
+	tracp(u_,v_,p2);
+	int i,z=p1.size();
+	assert(p1.size()==p2.size());
+	for (i=0;i<z;i++)
+	{
+		if ((*p1[i])!=(*p2[i]))
+			return 0;
+	}
+	return 1;
+}
+int main()
+{
+	sc2(n,q);
+
+	int i,j;
+	for(i=1;i<=n;i++)
+		sc(A[i]);
+	
+	for (i=0;i<n-1;i++)
+	{
+		int x,y;
+		sc2(x,y);
+		gr[x].pb(y);
+		gr[y].pb(x);
+	}
+	lev[1]=1; // put 1 on level 1
+	dfs(1,-1);
+	wl(q)
+	{
+		int typ;
+		sc(typ);
+		if (typ==1)
+		{
+			int u,v;sc2(u,v);
+			revit(u,v);
+		}
+		else if (typ==2)
+		{
+			int u,v,u_,v_;
+			sc3(u,v,u_);sc(v_);
+			int ans=que(u,v,u_,v_);
+			if (ans)
+				printf("Yes\n");
+			else printf("No\n");
+		}
+		else 
+		{
+			int u,v,u_,v_;
+			sc3(u,v,u_);sc(v_);
+			cp(u,v,u_,v_);
+		}
+	}
+	return 0;
+
+}

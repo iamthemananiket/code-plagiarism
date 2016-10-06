@@ -1,0 +1,213 @@
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class gauss_elim {
+    public:
+
+    inline double ABS(double &d) {
+        return (d<0.0F)?-d:d;
+    }
+
+    inline bool equalszero(double d) {
+        return ABS(d)<0.000001F;
+    }
+
+    int n;
+    double co[100][100]; //coefficients
+    bool u[100]; //already used to eliminate some var
+    double res[100]; //constant part of each equation
+
+    bool notok;
+
+    int used[100]; //equation used to eliminate the i'th var
+
+    double ans[100]; //value of each variable
+
+    void clear() {
+        notok = 0;
+        for(int i=0; i<n; i++) {
+            res[i] = 0;
+            u[i] = 0;
+            for(int j=0; j<n; j++) {
+                co[i][j] = 0.0F;
+            }
+        }
+    }
+
+    void read() {
+        cin >> n;
+        for(int i=0; i<n; i++) {
+            cin >> res[i];
+            for(int j=0; j<n; j++) {
+                cin >> co[i][j];
+            }
+        }
+    }
+
+    void run()
+    {
+        for(int i=0; i<n; i++) {
+            used[i] = -1;
+            for(int j=0; j<n; j++) {
+                if(u[j]) continue;
+                if(equalszero(co[j][i])) continue;
+
+                used[i] = j;
+                break;
+            }
+
+            if(used[i] < 0) { //variable already eliminated from all the equations
+                cout << "Linearly dependent equations found!" << endl;
+                notok = 1;
+                return;
+            }
+            u[used[i]] = 1;
+
+            for(int j=0; j<n; j++) {
+                if(u[j]) continue;
+                if(equalszero(co[j][i])) continue;
+
+                //eliminating variable i from equation j
+                double C = co[j][i]/co[used[i]][i];
+                for(int k=0; k<n; k++) co[j][k] -= C*co[used[i]][k];
+                res[j] -= C*res[used[i]];
+            }
+
+        }
+
+        for(int i=n-1; i>=0; i--) {
+            for(int j=i+1; j<n; j++) {
+                res[used[i]] -= co[used[i]][j]*ans[j];
+                co[used[i]][j] = 0;
+            }
+            res[used[i]] /= co[used[i]][i];
+            co[used[i]][i] = 1.0F;
+
+            ans[i] = res[used[i]];
+        }
+    }
+
+    void print() {
+        if(notok) return;
+        for(int i=0; i<n; i++) {
+            cout << ans[i] << endl;
+        }
+
+        return;
+    }
+};
+
+gauss_elim ge;
+
+vector<int> c[42];
+int cv;
+
+int n;
+
+vector<int> cc;
+void genc(int n, int l) {
+    if(n<0) return;
+    if(!n) {
+        c[cv++] = cc;
+        return;
+    }
+
+    for(int i=1; i<=l; i++) {
+        cc.push_back(i);
+        genc(n-i,i);
+        cc.pop_back();
+    }
+}
+
+inline bool desc(int a, int b) {
+    return a>b;
+}
+
+bool equals(vector<int>& a, vector<int>& b) {
+    if(a.size() != b.size()) return 0;
+    for(int i=0; i<(int)a.size(); i++) if(a[i]!=b[i]) return 0;
+    return 1;
+}
+
+int getC() {
+    int ret(-1);
+    sort(cc.begin(),cc.end(),desc);
+    for(int i=0; i<cv; i++) if(equals(cc,c[i])) ret = i;
+    return ret;
+}
+
+int a[11];
+bool e[11];
+
+int start;
+
+int T;
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+        cv = 0;
+        fill(e,e+n+1,0);
+        genc(n,n);
+        for(int i=1; i<=n; i++) cin >> a[i];
+        for(int i=1; i<=n; i++) {
+            if(e[i]) continue;
+            int k(0);
+            for(int j=i; !e[j]; j=a[j],k++) e[j] = 1;
+
+            cc.push_back(k);
+        }
+
+        int nc2 = (n*(n-1))/2;
+
+        start = getC();
+        cc.clear();
+
+        ge.n = cv;
+        ge.clear();
+
+        ge.co[0][0] = 1.0F;
+        for(int i=1; i<cv; i++) {
+            ge.res[i] = -nc2;
+            ge.co[i][i] = -nc2;
+
+            //unite
+            for(int j=0; j<(int)c[i].size(); j++) {
+                for(int k=j+1; k<(int)c[i].size(); k++) {
+                    for(int l=0; l<(int)c[i].size(); l++) {
+                        if((l==j) || (l==k)) continue;
+                        cc.push_back(c[i][l]);
+                    }
+                    cc.push_back(c[i][j]+c[i][k]);
+                    int u = getC();
+                    ge.co[i][u] += (c[i][j]*c[i][k]);
+                    cc.clear();
+                }
+            }
+            //divide
+            for(int j=0; j<(int)c[i].size(); j++) {
+                for(int k=1; 2*k<=c[i][j]; k++) {
+                    for(int l=0; l<(int)c[i].size(); l++) {
+                        if(l==j) continue;
+                        cc.push_back(c[i][l]);
+                    }
+                    cc.push_back(k);
+                    cc.push_back(c[i][j]-k);
+                    int u = getC();
+                    ge.co[i][u] += (k==(c[i][j]-k))?k:c[i][j];
+                    cc.clear();
+                }
+            }
+        }
+
+        ge.run();
+        cout << setprecision(7) << fixed << ge.ans[start] << endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,2 @@
+#include<stdio.h>
+int main(){int t;scanf("%d",&t);int m,d,y;while(t--){scanf("%d%d%d",&d,&m,&y);printf("%d\n",(d+=m<3?y--:y-2,23*m/9+d+4+y/4-y/100+y/400)%7);}return 0;} 

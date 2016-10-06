@@ -1,0 +1,33 @@
+#include<bits/stdc++.h>
+//#define maxx(a,b) (a)>(b)?(a):(b)
+using namespace std;
+int main()
+{
+	long long int maxxi,n,q,maxi,a,b;
+	string str;
+	cin>>n>>q;
+	long long int row[314165]={0};
+	long long int col[314165]={0};
+	maxi=0;
+	maxxi=0;
+	//memset(row,0,sizeof(row));
+	//memset(col,0,sizeof(col));
+	while(q--)
+	{
+		cin>>str>>a>>b;
+		if(str=="RowAdd")
+		{
+			row[a]+=b;
+			if(row[a]>maxi)
+				maxi=row[a];
+		}
+		else
+		{
+			col[a]+=b;
+			if(col[a]>maxxi)
+				maxxi=col[a];
+		}
+	}
+	cout<<maxi+maxxi<<endl;
+	return 0;
+}

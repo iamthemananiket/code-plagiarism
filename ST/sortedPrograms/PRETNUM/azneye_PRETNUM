@@ -1,0 +1,105 @@
+/*
+ * Codechef 2013 November Challenge
+ * Yet Another Cute Girl
+ * File:   PRETNUM.cpp
+ * Author: Andy Y.F. Huang
+ * Created on 2013-11-04, 9:41:02 PM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace PRETNUM {
+typedef long long ll;
+vector<ll> sq;
+bool sieve[1 << 20];
+vector<int> primes;
+
+void solve(int test_num) {
+  ll L, R;
+  cin >> L >> R;
+  int res = upper_bound(sq.begin(), sq.end(), R) - lower_bound(sq.begin(), sq.end(), L);
+  memset(sieve, false, sizeof(sieve));
+  for (const int& p : primes)
+    for (ll x = max(2LL, (L + p - 1) / p) * p; x <= R; x += p)
+      sieve[x - L] = true;
+  for (ll i = max(2LL, L); i <= R; i++)
+    res += !sieve[i - L];
+  //plnarr(sieve, sieve + R - L + 1);
+  cout << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  static int divs[1 << 20];
+  static bool ispr[1 << 20];
+  memset(ispr, true, sizeof(ispr));
+  ispr[0] = ispr[1] = false;
+  for (int i = 2; i * i <= 1000000; i++)
+    if (ispr[i])
+      for (int j = i * i; j <= 1000000; j += i)
+        ispr[j] = false;
+  for (int i = 0; i <= 1000000; i++) {
+    divs[i] = 1;
+    if (ispr[i])
+      primes.push_back(i);
+  }
+  //plnarr(primes.begin(), primes.begin() + 20);
+  for (const int& p : primes) {
+    for (int x = p; x <= 1000000; x += p) {
+      int cnt = 0, t = x;
+      for (; t % p == 0; t /= p)
+        cnt++;
+      divs[x] *= cnt + cnt + 1;
+    }
+  }
+  for (int i = 2; i <= 1000000; i++)
+    if (ispr[divs[i]])
+      sq.push_back(ll(i) * i);
+  //pln(sq.size());
+  //plnarr(divs, divs + 11);
+  //plnarr(sq.begin(), sq.begin() + 20);
+  int tests;
+  cin >> tests;
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  PRETNUM::solve();
+  return 0;
+}

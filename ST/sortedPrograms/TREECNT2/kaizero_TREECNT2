@@ -1,0 +1,198 @@
+#include<stdio.h>
+#include<algorithm>
+#include<vector>
+using namespace std;
+vector<int>E[101000], L[101000];
+int n, id[201000][2], Q[101000], par[101000], D[101000], DP[1010000], w[1010000][10], cc[1010000], DP2[1010000];
+int GG[201000];
+int divi[2010], C;
+bool chk[101000], isPrime[1010000];
+long long Res;
+int BFS(int a){
+	int i, h = 0, t = 0, x;
+	Q[++t] = a;
+	while (h < t){
+		x = Q[++h];
+		D[x] = 1;
+		for (i = 0; i < E[x].size(); i++){
+			if (!chk[E[x][i]] && par[x] != E[x][i]){
+				par[E[x][i]] = x;
+				Q[++t] = E[x][i];
+			}
+		}
+	}
+	return t;
+}
+int get_mid(int SZ){
+	int i, M = SZ + 1, x, r;
+	for (i = SZ; i >= 1; i--){
+		x = Q[i];
+		if (D[x] * 2 > SZ&&D[x] < M)M = D[x], r = x;
+		D[par[x]] += D[x];
+		par[x] = 0;
+	}
+	return r;
+}
+int gcd(int a, int b){
+	return b ? gcd(b, a%b) : a;
+}
+void Insert(int g, int pv, int g2, int ck){
+	if (pv == cc[g]){
+		DP[g2] += ck;
+		return;
+	}
+	Insert(g, pv + 1, g2*w[g][pv], ck);
+	Insert(g, pv + 1, g2, ck);
+}
+long long SS;
+void Pro(int g, int pv, int g2, bool ck){
+	if (pv == cc[g]){
+		if (!ck)Res += DP[g2];
+		else Res -= DP[g2];
+		return;
+	}
+	Pro(g, pv + 1, g2*w[g][pv], !ck);
+	Pro(g, pv + 1, g2, ck);
+}
+void DFS3(int a, int pp, int g){
+	if (g == 1)Res++;
+	int i;
+	Pro(g, 0, 1, 0);
+	for (i = 0; i < E[a].size(); i++){
+		if (!chk[E[a][i]] && E[a][i] != pp){
+			DFS3(E[a][i], a, gcd(g, L[a][i]));
+		}
+	}
+}
+void DFS2(int a, int pp, int g, int ck){
+	int i;
+	GG[a] = g;
+	for (i = 0; i < E[a].size(); i++){
+		if (!chk[E[a][i]] && E[a][i] != pp){
+			DFS2(E[a][i], a, gcd(g, L[a][i]), ck);
+		}
+	}
+	if (ck == 1 || ck == -1){
+		Insert(g, 0, 1, ck);
+		return;
+	}
+}
+int Num[1010000];
+void DFS(int a){
+	int SZ = BFS(a), mid, i;
+	if (SZ == 1)return;
+	mid = get_mid(SZ);
+	chk[mid] = true;
+	for (i = 0; i < E[mid].size(); i++){
+		if (!chk[E[mid][i]])DFS(E[mid][i]);
+	}
+	SS = 0;
+	for (i = 0; i < E[mid].size(); i++){
+		if (chk[E[mid][i]])continue;
+		DFS3(E[mid][i], mid, L[mid][i]);
+		DFS2(E[mid][i], mid, L[mid][i], 1);
+	}
+	for (i = 0; i < E[mid].size(); i++){
+		if (chk[E[mid][i]])continue;
+		DFS2(E[mid][i], mid, L[mid][i], -1);
+	}
+	chk[mid] = false;
+}
+int Gap(int a){
+	int i, t = 1;
+	for (i = 2; i*i <= a; i++){
+		if (a%i == 0){
+			t *= i;
+			while (a%i == 0)a /= i;
+		}
+	}
+	if (a != 1)t *= a;
+	return t;
+}
+void BFS2(int a, int ck){
+	int h = 0, t = 0, x, i;
+	Q[++t] = a;
+	while (h < t){
+		x = Q[++h];
+		if (ck == 0)DP[GG[x]]++;
+		else DP2[GG[x]]++;
+		for (i = 0; i < E[x].size(); i++){
+			if (E[x][i] == par[x])continue;
+			par[E[x][i]] = x;
+			Q[++t] = E[x][i];
+			GG[E[x][i]] = gcd(GG[x], L[x][i]);
+		}
+	}
+}
+void BFS3(int a, int ck){
+	int h = 0, t = 0, x, i;
+	Q[++t] = a;
+	while (h < t){
+		x = Q[++h];
+		if (ck == 0)DP[GG[x]]--;
+		else DP2[GG[x]]--;
+		for (i = 0; i < E[x].size(); i++){
+			if (E[x][i] == par[x])continue;
+			par[E[x][i]] = x;
+			Q[++t] = E[x][i];
+		}
+	}
+}
+long long Do(int a, int b, int c){
+	par[a] = b, par[b] = a;
+	GG[a] = GG[b] = c;
+	BFS2(a, 0);
+	BFS2(b, 1);
+	int i, j;
+	long long r = 0;
+	C = 0;
+	for (i = 1; i*i < c; i++){
+		if (c%i == 0){
+			divi[++C] = i;
+			divi[++C] = c / i;
+		}
+	}
+	if (i*i == c)divi[++C] = i;
+	for (i = 1; i <= C; i++){
+		for (j = 1; j <= C; j++){
+			if (gcd(divi[i], divi[j]) != 1)continue;
+			r += DP[divi[i]] * DP2[divi[j]];
+		}
+	}
+	BFS3(a, 0);
+	BFS3(b, 1);
+	return r;
+}
+int main(){
+	int i, a, b, c, j, Q;
+	for (i = 2; i <= 1000000; i++){
+		if (isPrime[i])continue;
+		for (j = i; j <= 1000000; j += i){
+			w[j][cc[j]++] = i;
+			isPrime[j] = true;
+		}
+	}
+	scanf("%d", &n);
+	for (i = 1; i < n; i++){
+		scanf("%d%d%d", &a, &b, &c);
+		E[a].push_back(b);
+		E[b].push_back(a);
+		c = Gap(c);
+		L[a].push_back(c);
+		L[b].push_back(c);
+		id[i][0] = a, id[i][1] = E[a].size() - 1;
+		id[n + i][0] = b, id[n + i][1] = E[b].size() - 1;
+	}
+	DFS(1);
+	printf("%lld\n", Res);
+	scanf("%d", &Q);
+	while (Q--){
+		scanf("%d%d", &a, &c);
+		c = Gap(c);
+		Res -= Do(id[a][0], id[a + n][0], L[id[a][0]][id[a][1]]);
+		L[id[a][0]][id[a][1]] = c;
+		L[id[a + n][0]][id[a + n][1]] = c;
+		Res += Do(id[a][0], id[a + n][0], c);
+		printf("%lld\n", Res);
+	}
+}

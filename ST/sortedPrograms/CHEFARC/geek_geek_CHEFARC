@@ -1,0 +1,271 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) scanf("%lld",&x)
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+#define FS ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL)
+//#define lli long long int
+using namespace std;
+# define INF 0x3f3f3f3f
+
+// This class represents a directed graph using
+// adjacency list representation
+class Graph
+{
+    int V;    // No. of vertices
+
+    // In a weighted graph, we need to store vertex
+    // and weight pair for every edge
+    list< int > *adj;
+
+public:
+    Graph(int V);  // Constructor
+
+    // function to add an edge to graph
+    void addEdge(int u, int v);
+
+    // prints shortest path from s
+    vector<int> shortestPath(int s);
+};
+
+// Allocates memory for adjacency list
+Graph::Graph(int V)
+{
+    this->V = V;
+    adj = new list< int >[V];
+}
+
+void Graph::addEdge(int u, int v)
+{
+    adj[u].push_back(v);
+}
+
+// Prints shortest paths from src to all other vertices
+vector<int> Graph::shortestPath(int src)
+{
+        priority_queue< pair<int, int>, vector <pair<int, int> > , greater<pair<int, int> > > pq;
+
+    // Create a vector for distances and initialize all
+    // distances as infinite (INF)
+    vector<int> dist(V, INF);
+
+    // Insert source itself in priority queue and initialize
+    // its distance as 0.
+    pq.push(make_pair(0, src));
+    dist[src] = 0;
+
+    /* Looping till priority queue becomes empty (or all
+      distances are not finalized) */
+    while (!pq.empty())
+    {
+        // The first vertex in pair is the minimum distance
+        // vertex, extract it from priority queue.
+        // vertex label is stored in second of pair (it
+        // has to be done this way to keep the vertices
+        // sorted distance (distance must be first item
+        // in pair)
+        int u = pq.top().second;
+        pq.pop();
+
+        // 'i' is used to get all adjacent vertices of a vertex
+        list< int >::iterator i;
+        for (i = adj[u].begin(); i != adj[u].end(); ++i)
+        {
+            // Get vertex label and weight of current adjacent
+            // of u.
+            int v = (*i);
+            int weight = 1;
+
+            //  If there is shorted path to v through u.
+            if (dist[v] > dist[u] + weight)
+            {
+                // Updating distance of v
+                dist[v] = dist[u] + weight;
+                pq.push(make_pair(dist[v], v));
+            }
+        }
+    }
+
+    return dist;
+}
+bool isin(long long int x,long long int y ,long long int n,long long int m)
+{
+    if((x<0) || (y<0))
+        return false;
+    if((x>=n) || (y>=m))
+        return false;
+    return true;
+}
+int prog()
+{
+    long long int n,m,i,j,x,y,z,k1,k2,k,p1,p2,nx,ny;
+    gi(n);gi(m);
+    gi(k1);gi(k2);
+    int V = n*m;
+    Graph g(V);
+    int mat[n][m];
+    fl(i,0,n)
+        fl(j,0,m)
+            sd(mat[i][j]);
+    k=k1;
+    fl(i,0,n)
+        fl(j,0,m)
+            {
+                if(mat[i][j]==1)
+                    continue;
+                fl(x,0,k+1)
+                    fl(y,0,(k+1)-x)
+                        {
+                            nx = i+x;
+                            ny = j+y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g.addEdge(p1,p2);
+                                }
+                            }
+                            nx = i-x;
+                            ny = j+y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g.addEdge(p1,p2);
+                                }
+                            }
+                            nx = i+x;
+                            ny = j-y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g.addEdge(p1,p2);
+                                }
+                            }
+                            nx = i-x;
+                            ny = j-y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g.addEdge(p1,p2);
+                                }
+                            }
+                        }
+            }
+    vector<int> td1;
+    vector<int> td2;
+    td1 = g.shortestPath(0);
+    Graph g1(V);
+    k=k2;
+    fl(i,0,n)
+        fl(j,0,m)
+            {
+                if(mat[i][j]==1)
+                    continue;
+                fl(x,0,k+1)
+                    fl(y,0,(k+1)-x)
+                        {
+                            nx = i+x;
+                            ny = j+y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g1.addEdge(p1,p2);
+                                }
+                            }
+                            nx = i-x;
+                            ny = j+y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g1.addEdge(p1,p2);
+                                }
+                            }
+                            nx = i+x;
+                            ny = j-y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g1.addEdge(p1,p2);
+                                }
+                            }
+                            nx = i-x;
+                            ny = j-y;
+                            if(isin(nx,ny,n,m))
+                            {
+                                if(mat[nx][ny]==0)
+                                {
+                                    p1 = i*m + j;
+                                    p2 = nx*m + ny;
+                                    g1.addEdge(p1,p2);
+                                }
+                            }
+                        }
+            }
+    td2 = g1.shortestPath(m-1);
+     int ans = INF;
+    fl(i,0,n*m)
+        ans = min(ans ,  max(td1[i],td2[i]));
+    if(ans == INF)
+        ans = -1;
+    printf("%d\n",ans);
+    r0;
+}
+int main()
+{
+    //f_in;
+    int t;
+    t=1;
+    sd(t);
+    while(t--)
+        prog();
+    r0;
+}

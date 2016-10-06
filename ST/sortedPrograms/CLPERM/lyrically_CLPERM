@@ -1,0 +1,72 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+Int N;
+int K;
+Int A[100010];
+
+Int solve() {
+	sort(A, A + K);
+	Int s = 0;
+	for (int i = 0; i <= K; ++i) {
+		const Int a = (i == 0) ? 1 : (A[i - 1] + 1);
+		const Int b = (i == K) ? N : (A[i    ] - 1);
+		if (a <= b) {
+// cout<<a<<" "<<b<<endl;
+			if (s + 1 < a) {
+				return s + 1;
+			}
+			s += (a + b) * (b - a + 1) / 2;
+		}
+	}
+	return s + 1;
+}
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		K = in();
+		for (int i = 0; i < K; ++i) {
+			A[i] = in();
+		}
+		const Int res = solve();
+// cout<<"res = "<<res<<endl;
+		puts((res % 2 != 0) ? "Chef" : "Mom");
+	}
+	
+	return 0;
+}
+

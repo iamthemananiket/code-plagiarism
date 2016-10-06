@@ -1,0 +1,230 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+template<int MOD>
+struct ModInt {
+	static const int Mod = MOD;
+	unsigned x;
+	ModInt() : x(0) {}
+	ModInt(signed sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	ModInt(signed long long sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	int get() const { return (int)x; }
+
+	ModInt &operator+=(ModInt that) { if((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator-=(ModInt that) { if((x += MOD - that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % MOD; return *this; }
+
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+	ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+};
+typedef ModInt<1000000009> mint;
+
+struct ModPoly {
+	static const int D = 5;
+	mint coeff[D];
+	static mint mod[D];
+	ModPoly() {}
+	explicit ModPoly(mint c0) : coeff{ c0 } {}
+	explicit ModPoly(mint c0, mint c1) : coeff{ c0, c1 } {}
+	static ModPoly one() {
+		return ModPoly(1);
+	}
+	static ModPoly X() {
+		return ModPoly(mint(), 1);
+	}
+	ModPoly operator*(const ModPoly &that) const {
+		mint prod[D * 2 - 1];
+		rep(i, D) rep(j, D)
+			prod[i + j] += coeff[i] * that.coeff[j];
+		for(int i = D * 2 - 2; i >= D; -- i) {
+			mint c = prod[i];
+			rep(j, D)
+				prod[i - D + j] -= c * mod[j];
+		}
+		ModPoly res;
+		rep(i, D)
+			res.coeff[i] = prod[i];
+		return res;
+	}
+	ModPoly &operator+=(const ModPoly &that) {
+		rep(i, D)
+			coeff[i] += that.coeff[i];
+		return *this;
+	}
+	ModPoly &operator-=(const ModPoly &that) {
+		rep(i, D)
+			coeff[i] -= that.coeff[i];
+		return *this;
+	}
+	ModPoly operator+(const ModPoly &that) const {
+		return ModPoly(*this) += that;
+	}
+	ModPoly operator-(const ModPoly &that) const {
+		return ModPoly(*this) -= that;
+	}
+
+	mint dot(const mint seq[D]) const {
+		mint res;
+		rep(i, D)
+			res += coeff[i] * seq[i];
+		return res;
+	}
+};
+mint ModPoly::mod[ModPoly::D];
+
+ModPoly operator^(const ModPoly& x, ll k) {
+	if(k == 0)
+		return ModPoly::one();
+	if(k % 2 == 0)
+		return ((x * x) ^ (k / 2));
+	else
+		return x * (x ^ (k - 1));
+}
+
+struct Mat {
+	ModPoly x00, x01;
+	Mat() {}
+	Mat(const ModPoly &x00, const ModPoly &x01) : x00(x00), x01(x01) {}
+	static Mat identity() {
+		return Mat(ModPoly::one(), ModPoly());
+	}
+	Mat operator*(const Mat &that) const {
+		return Mat(x00 * that.x00, x00 * that.x01 + x01);
+	}
+};
+
+Mat operator^(const Mat& x, ll k) {
+	if(k == 0)
+		return Mat::identity();
+	if(k % 2 == 0)
+		return ((x * x) ^ (k / 2));
+	else
+		return x * (x ^ (k - 1));
+}
+
+Mat calc(long long a, long long b, const Mat &x, const Mat &y) {
+	if(b == 0) return x ^ a;
+	if(a == 0) return y ^ b;
+	if(a >= b)
+		return calc(a % b, b, x, (x ^ (a / b)) * y);
+	else
+		return calc(a, b % a, x * (y ^ (b / a)), y);
+}
+
+struct Segment {
+	int ax, ay;
+	int bx, by;
+};
+
+template<typename T>T gcd(T x, T y) { if(y == 0)return x; else return gcd(y, x%y); }
+
+inline ll cross(int ax, int ay, int bx, int by) {
+	return (ll)ax*by - (ll)ay*bx;
+}
+
+int main() {
+	int T;
+	scanf("%d", &T);
+	mt19937 re;
+	for(int ii = 0; ii < T; ++ ii) {
+		int N;
+		scanf("%d", &N);
+		int orgcoeff[4], orginit[4];
+		rep(k, 4)
+			scanf("%d", &orgcoeff[k]);
+		rep(k, 4)
+			scanf("%d", &orginit[k]);
+
+		vpii polygon(N);
+		rep(i, N) {
+			int x; int y;
+			scanf("%d%d", &x, &y);
+			polygon[i] = { x, x + y + 1 };
+		}
+		mint phi[6];
+		phi[5] = 1;
+		rep(i, 5)
+			phi[4 - i] = (i == 0 ? -1 : orgcoeff[i - 1]) - (i == 4 ? 0 : orgcoeff[i]);
+		mint seq[5];
+		seq[0] = 0;
+		rep(i, 4)
+			seq[i + 1] = seq[i] + orginit[i];
+		rep(i, 5)
+			ModPoly::mod[i] = phi[i];
+		//clockwise
+		reverse(polygon.begin(), polygon.end());
+		vector<Segment> segments;
+		rep(i, N) {
+			int ax, ay, bx, by;
+			tie(ax, ay) = polygon[i];
+			tie(bx, by) = polygon[(i + 1) % N];
+			if(ax != bx)
+				segments.push_back(Segment{ ax, ay, bx, by });
+		}
+		ModPoly sum;
+		ModPoly X = ModPoly::X();
+		Mat matX(ModPoly::one(), ModPoly::one()), matY(X, ModPoly());
+		rep(i, segments.size()) {
+			const Segment &s = segments[i];
+			Mat A = calc(abs(s.bx - s.ax), abs(s.by - s.ay), matX, matY);
+			ModPoly p = (X ^ min(s.ay, s.by)) * A.x01;
+			if(s.ay > s.by) {
+				p += X ^ s.ay;
+				p -= X ^ s.by;
+			}
+
+			if(s.ax < s.bx)
+				sum += p;
+			else
+				sum -= p;
+
+			const Segment &t = segments[(i + 1) % segments.size()];
+			assert(s.bx == t.ax);
+			if(s.ax < s.bx) {
+				int my = max(s.by, t.ay);
+				if(t.ax > t.bx)
+					sum += X ^ my;
+				else if(s.by > t.ay)
+					sum += (X ^ s.by) - (X ^ t.ay);
+
+				if(t.ax > t.bx && make_pair(t.ay - s.by, cross(s.bx - s.ax, s.by - s.ay, t.bx - s.ax, t.by - s.ay)) > make_pair(0, 0LL)) {
+					sum -= (X ^ my) - (X ^ (my - 1));
+				}
+			} else {
+				int my = min(s.by, t.ay);
+				if(t.ax < t.bx)
+					sum -= X ^ (my - 1);
+				else if(s.by < t.ay)
+					sum += (X ^ (t.ay - 1)) - (X ^ (s.by - 1));
+
+				if(t.ax < t.bx && make_pair(s.by - t.ay, cross(s.bx - s.ax, s.by - s.ay, t.bx - s.ax, t.by - s.ay)) > make_pair(0, 0LL)) {
+					sum -= (X ^ my) - (X ^ (my - 1));
+				}
+			}
+
+			if(s.ax > s.bx) {
+				int g = gcd(s.ax - s.bx, abs(s.ay - s.by));
+				int first = s.ay, diff = (s.by - s.ay) / g, num = g;
+				if(diff < 0) {
+					first += diff * (num - 1);
+					diff = -diff;
+				}
+				Mat B(X ^ diff, ModPoly::one());
+				B = B ^ num;
+				sum += ((X ^ first) - (X ^ (first - 1))) * B.x01;
+			}
+		}
+
+		mint ans = sum.dot(seq);
+		printf("%d\n", ans.get());
+	}
+	return 0;
+}

@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n, k;
+    scanf("%d %d", &n, &k);
+    int ans = 0;
+    for (int i = 1; i <= k; ++i) {
+      ans = max(ans, n % i);
+    }
+    printf("%d\n", ans);
+  }
+  return 0;
+}

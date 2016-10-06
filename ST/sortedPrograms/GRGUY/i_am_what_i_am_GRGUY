@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--) 
+	{
+		string a,b;
+		cin>>a>>b;
+		int n=a.size();
+		
+		vector<int> C(a.size()+1,INT_MAX);
+		vector<int> D(a.size()+1,INT_MAX);
+		
+		C[0]=0;
+		D[0]=0;
+		
+		for(int x=1;x<=n;x++) 
+		{
+			if(a[x-1]!='#')
+			  {
+			  	if(C[x-1]!=INT_MAX)
+			  	   C[x]=min(C[x],C[x-1]);
+			  	if(D[x]!=INT_MAX)
+			  	   C[x]=min(C[x],D[x]+1);
+			  	if(D[x-1]!=INT_MAX)
+			  	   C[x]=min(C[x],D[x-1]+1);
+			  	
+			  }
+			
+			if(b[x-1]!='#')
+			  {
+			  	if(D[x-1]!=INT_MAX)
+			  	   D[x]=min(D[x],D[x-1]);
+			  	if(C[x]!=INT_MAX)
+			  	   D[x]=min(D[x],C[x]+1);
+			  	if(C[x-1]!=INT_MAX)
+			  	   D[x]=min(D[x],C[x-1]+1);
+			  	
+			  }
+			
+			
+		}
+	 if(C[n]==INT_MAX && D[n]==INT_MAX)
+	   puts("No");
+	 else
+	  {
+	  	puts("Yes");
+	  	cout<<min(C[n],D[n])<<endl;
+	  }
+		
+		
+		
+	}
+}

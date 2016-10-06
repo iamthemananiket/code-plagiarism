@@ -1,0 +1,156 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 100000 + 3;
+typedef unsigned long long ULL;
+
+const ULL BASE = 137;
+ULL hashLR[MAX_N], hashRL[MAX_N];
+int lengthOdd[MAX_N], lengthEven[MAX_N];
+
+int T, N, K;
+string S;
+
+long long solution;
+
+int getRadius(int &l, int &r)
+{
+    if (l < 1 || r > N)
+        return 0;
+
+    int lg = 1;
+
+    while (l - 1 >= 1 && r + 1 <= N && S[l - 1] == S[r + 1])
+    {
+        l--;
+        r++;
+        lg++;
+    }
+
+    return lg;
+}
+
+void solveOdd()
+{
+    for (int i = 1; i <= N; ++i)
+    {
+        int k = K;
+        int l = i - 1, r = i + 1;
+        long long totalRadius = 0;
+
+        if (1 <= l && r <= N)
+        {
+            if (S[l] != S[r])
+                k--;
+
+            if (k >= 0)
+            {
+                int radius = getRadius(l, r);
+                totalRadius += radius;
+
+                while (k--)
+                {
+                    l--;
+                    r++;
+
+                    radius = getRadius(l, r);
+                    totalRadius += radius;
+                }
+            }
+        }
+
+        lengthOdd[2 * totalRadius + 1]++;
+    }
+}
+
+void solveEven()
+{
+    for (int i = 1; i < N; ++i)
+    {
+        ///(i, i+1)
+
+        int k = K;
+
+        if (S[i] != S[i + 1])
+            k--;
+
+        if (k < 0)
+            continue;
+
+        int l = i - 1;
+        int r = i + 2;
+        long long totalRadius = 0;
+
+        if (1 <= l && r <= N)
+        {
+            if (S[l] != S[r])
+                k--;
+
+            if (k >= 0)
+            {
+                int radius = getRadius(l, r);
+                totalRadius += radius;
+
+                while (k--)
+                {
+                    l--;
+                    r++;
+
+                    radius = getRadius(l, r);
+                    totalRadius += radius;
+                }
+            }
+        }
+
+        lengthEven[2 * totalRadius + 2]++;
+    }
+}
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        ifstream cin("data.in");
+    #endif // ONLINE_JUDGE
+
+    ios_base::sync_with_stdio(false);
+
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N >> K >> S;
+        S = " " + S;
+
+        memset(hashLR, 0, sizeof(hashLR));
+        memset(hashRL, 0, sizeof(hashRL));
+
+        memset(lengthEven, 0, sizeof(lengthEven));
+        memset(lengthOdd, 0, sizeof(lengthOdd));
+
+        for (int i = 1; i <= N; ++i)
+            hashLR[i] = hashLR[i - 1] * BASE + S[i];
+
+        for (int i = N; i >= 1; i--)
+            hashRL[i] = hashRL[i + 1] * BASE + S[i];
+
+        solveOdd();
+        solveEven();
+
+        solution = 0;
+
+        for (int i = N; i >= 1; i--)
+        {
+            lengthEven[i] += lengthEven[i + 2];
+            lengthOdd[i] += lengthOdd[i + 2];
+
+           /// cout << i << " " << lengthEven[i] << " " << lengthOdd[i] << endl;
+
+            solution += 1LL * i * (lengthEven[i] + lengthOdd[i]);
+        }
+
+        cout << solution << "\n";
+    }
+
+    return 0;
+}

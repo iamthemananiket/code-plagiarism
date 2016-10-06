@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n) for(int i=0;i<n;i++)
+#define REPN(i, n)  for(int i=1;i<=n;i++)
+#define SET(i, n) memset(i, n, sizeof(i))
+#define ALL(i)    i.begin(), i.end()
+
+#define MAX     1000050
+#define pb      push_back
+#define cl      clear
+#define INF     1e9
+#define EPS     1e-9
+
+using namespace std;
+
+typedef long long ll;
+typedef long double LB;
+
+const ll MOD = 1e9 + 7;
+
+ll bigmod(int n, int r){
+  if(r == 0) return 1LL;
+  if(r % 2 == 0){
+    ll ret = bigmod(n, r/2);
+    return (ret * ret) % MOD;
+  }
+  return (n * bigmod(n, r-1)) % MOD;
+}
+
+int n, q;
+ll F[MAX], R[MAX];
+LB lg[MAX], ff[MAX];
+vector<int>factors[MAX];
+
+int main(){
+  int t, x, y;
+  scanf("%d", &n);
+  REPN(i, n){ 
+    scanf("%lld", &F[i]); 
+    ff[i] = log10(F[i]);
+    R[i] = 1; 
+    lg[i] = 0.0;
+  }
+  for(int i=2;i<=n;i++){
+    for(int j=i;j<n;j+=i){
+      factors[j+1].pb(i);
+      R[i] = (R[i] * F[j+1]);
+      R[i] %= MOD;
+      lg[i] += ff[j+1];
+      // printf("%d -> %.8lf\n", i, lg[i]);
+    }
+    R[1] *= F[i];
+    R[1] %= MOD;
+    lg[1] += ff[i];
+    factors[i].pb(1);
+  }
+  // if(n != 1){
+  //  R[1] *= F[n];
+  //  lg[1] += log10(F[n]);
+  // }
+  // REPN(i, n){
+  //  printf("%d = %.8lf %lld\n", i, lg[i], R[i]);
+  // }
+
+  scanf("%d", &q);
+  // cout << endl;
+
+  while(q--){
+    scanf("%d", &t);
+    if(t == 2){
+      scanf("%d", &x);
+      LB fac = lg[x] + ff[1] - LB(int(lg[x] + ff[1]));
+      // printf("%.8lf ADS\n", lg[x] + log10(F[1]));
+      // printf("%.8lf\n", fac);
+      int ret = int(pow(10, fac)+EPS);
+      while(ret >= 10) ret /= 10;
+      printf("%d %lld\n", ret, (R[x] * F[1])%MOD);
+    }
+    else{
+      scanf("%d %d", &x, &y);
+      LB add = log10(y);
+      ll b = bigmod(F[x], MOD-2);
+      REP(i, factors[x].size()){
+        int f = factors[x][i];
+        // cout << f << " * \n";
+        // cout << "! " << R[f] << ' ' << F[x] << endl;
+        // printf("%d P -> %.6lf\n", f, lg[f]);
+        // cout << x << " --> " << f << endl;
+        R[f] *= b;
+        R[f] %= MOD;
+        lg[f] -= ff[x];
+        // printf("%d S -> %.6lf\n", f, lg[f]);
+        // cout << "% " << R[f] << endl;
+        // cou
+
+        //F[x] = y;
+        R[f] *= y;
+        R[f] %= MOD;
+        lg[f] += add;
+        // printf("%d C -> %.6lf\n", f, lg[f]);
+        // cout << "- " << R[f] << endl;
+      }
+      F[x] = y;
+      ff[x] = add;
+    }
+  }
+
+  return 0;
+}

@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+#define int long long
+ using namespace std;
+
+const int md = 1e9 + 7,N = 2e5 + 121;
+ int dp[2000],dp1[2000],p[N],a[N],b[N],c[N],kol;
+
+  main()
+  {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+
+     //freopen("input.txt","r",stdin); freopen("output.txt","w",stdout);
+
+     p[0] = 1;
+      for(int i=1;i<N;++i) p[i] = p[i-1] * 2 % md;
+
+     int t;
+      cin>>t;
+       while(t--)
+       {
+       string s;
+        cin>>s;
+        int mask = 0;
+         for(int i=0;i<10;++i)
+         if(s[i]=='b') mask+=p[i];
+         memset(dp,0,sizeof(dp));
+         dp[mask] = 1;
+         int n;
+         cin>>n;
+
+          for(int j=1;j<=n;++j)
+          {
+            cin>>s;
+            a[j] = 0;
+             for(int i=0;i<10;++i)
+             if(s[i]=='+') a[j]+=p[i];
+          }
+          sort(a+1,a+n+1);
+           b[1] = a[1];
+           c[1] = 1;
+           kol = 1;
+            for(int j=2;j<=n;++j){
+                if(a[j] > a[j-1])
+                    b[++kol] = a[j],c[kol] = 0;
+                ++c[kol];
+            }
+
+            for(int j=1;j<=kol;++j)
+            {
+                int maskp = b[j];
+                --c[j];
+                for(int mask=0;mask<=1024;++mask)
+                    dp1[mask^maskp] = (dp1[mask ^ maskp]+dp[mask]) % md;
+                   for(int mask=0;mask<=1024;++mask)
+                   dp[mask]=(dp[mask] + dp1[mask]) % md,dp1[mask]=0;
+                if(c[j] & 1){
+                         --c[j];
+                  for(int mask=0;mask<=1024;++mask)
+                    dp1[mask^maskp] = (dp1[mask ^ maskp]+dp[mask]) % md;
+                   for(int mask=0;mask<=1024;++mask)
+                   dp[mask]=(dp[mask] + dp1[mask]) % md,dp1[mask]=0;
+                }
+
+                for(int mask=0;mask<=1024;++mask)
+               dp1[mask]=(dp1[mask]+dp[mask] *
+                          ((p[c[j]] - 1 + md) % md)) % md;
+                for(int mask=0;mask<=1024;++mask)
+                    dp[mask]=(dp[mask] + dp1[mask])
+                    % md,dp1[mask]=0;
+            }
+               cout<<dp[1023]<<endl;
+          }
+
+    return 0;
+  }

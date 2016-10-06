@@ -1,0 +1,153 @@
+#include <bits/stdc++.h>
+
+#ifdef getchar
+#undef getchar
+#endif
+#define getchar() (*_pinp?*_pinp++:(_inp[fread(_pinp=_inp, 1, 4096, stdin)]='\0', *_pinp++))
+char _inp[4097], *_pinp=_inp;
+#define scan(x) do{while((x=getchar())<'0'); for(x-='0'; '0'<=(_=getchar()); x=(x<<3)+(x<<1)+_-'0');}while(0)
+char _;
+
+using namespace std;
+
+struct edge
+{
+    int v, c;
+};
+
+int N, L, R, D;
+vector<edge> adj[100001];
+int sz[100001], SZ;
+int ans;
+bool bad[100001];
+int mini[51];
+vector<pair<int, int>> updates;
+
+void dfs(int u, int p)
+{
+    sz[u]=1;
+    for(auto& it: adj[u])
+    {
+        int v=it.v;
+        if(v==p || bad[v])
+            continue;
+        dfs(v, u);
+        sz[u]+=sz[v];
+    }
+}
+
+void dfs2(int u, int p, int d, int l)
+{
+    if(l>50)
+        return;
+    updates.push_back(make_pair(l, d));
+    for(int i=max(l, L); i<=min(R, SZ); i++)
+        ans|=mini[i-l]+d<0;
+    if(ans)
+        return;
+    for(auto& it: adj[u])
+    {
+        int v=it.v;
+        if(v==p || bad[v])
+            continue;
+        int c=it.c;
+        dfs2(v, u, d+(c<=D?-1:1), l+1);
+    }
+}
+
+void solve(int u)
+{
+    dfs(u, u);
+    SZ=sz[u];
+    while(1)
+    {
+        int v=-1;
+        for(auto& it: adj[u]) if(!bad[it.v] && (v==-1 || sz[it.v]>sz[v]))
+            v=it.v;
+        if(v==-1 || sz[v]*2<=sz[u])
+            break;
+        sz[u]-=sz[v];
+        sz[v]+=sz[u];
+        u=v;
+    }
+    mini[0]=0;
+    for(int i=1; i<=min(50, SZ); i++)
+        mini[i]=0x3f3f3f3f;
+    for(auto& it: adj[u])
+    {
+        int v=it.v;
+        if(bad[v])
+            continue;
+        int c=it.c;
+        updates.clear();
+        dfs2(v, u, (c<=D?-1:1), 1);
+        if(ans)
+            return;
+        for(auto& it2: updates)
+            mini[it2.first]=min(mini[it2.first], it2.second);
+    }
+    bad[u]=true;
+    for(auto& it: adj[u])
+    {
+        int v=it.v;
+        if(bad[v])
+            continue;
+        solve(v);
+        if(ans)
+            return;
+    }
+}
+
+void _main()
+{
+    scan(N);
+    scan(L);
+    scan(R);
+    for(int i=1; i<=N; i++)
+        adj[i].clear();
+    vector<int> w;
+    int a, b, c;
+    for(int i=1; i<N; i++)
+    {
+        scan(a);
+        scan(b);
+        scan(c);
+        adj[a].push_back((edge){b, c});
+        adj[b].push_back((edge){a, c});
+        w.push_back(c);
+    }
+    if(L==1)
+    {
+        printf("%d\n", w[0]);
+        return;
+    }
+    sort(w.begin(), w.end());
+    w.resize(unique(w.begin(), w.end())-w.begin());
+    int lo=0, mid, hi=w.size();
+    while(lo<hi)
+    {
+        mid=(lo+hi)/2;
+        D=w[mid];
+        for(int i=1; i<=N; i++)
+            bad[i]=false;
+        ans=0;
+        solve(1);
+        if(ans)
+            hi=mid;
+        else
+            lo=mid+1;
+    }
+    if(lo==(int)w.size())
+        printf("-1\n");
+    else
+        printf("%d\n", w[lo]);
+}
+
+int main()
+{
+    int TEST;
+    scan(TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

@@ -1,0 +1,41 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
+
+#define Nx (int)1e5+5
+using namespace std;
+
+int n,m,ans[Nx][10],a[Nx],x,sol;
+char c[Nx];
+
+int main()
+{
+	//freopen("in.txt","r",stdin);
+	//freopen("out.txt","w",stdout);
+	memset(ans,0,sizeof(ans));
+	scanf("%d%d",&n,&m);
+	scanf("%s",&c);
+	a[0]=c[0]-'0';
+	for(int j=0; j<10; j++)
+			ans[0][j]=0;
+	ans[0][a[0]]++;
+	for(int i=1; i<n; i++)
+	{
+		a[i]=c[i]-'0';
+		for(int j=0; j<10; j++)
+			ans[i][j]=ans[i-1][j];
+		ans[i][a[i]]++;
+	}
+	for(int i=0; i<m; i++)
+	{
+		scanf("%d",&x); x--;
+		sol = 0;
+		for(int j=0;j<a[x]; j++)
+			sol += (a[x] - j)*ans[x][j];
+		for(int j=a[x]+1; j<10; j++)
+			sol += (j-a[x])*ans[x][j];
+		printf("%d\n",sol);
+	}
+	return 0;
+}

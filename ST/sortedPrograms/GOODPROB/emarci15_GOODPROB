@@ -1,0 +1,27 @@
+#include <iostream>
+
+using namespace std;
+
+int n;
+long long a[1000];
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(NULL);
+    cin >> n;
+    for(int i=0; i<n; i++) cin >> a[i];
+
+    long long sol(0ll);
+    for(int i=0; i<n; i++) {
+        long long m(a[i]);
+        for(int j=i+1; j<n; j++) {
+            m = max(m,a[j]);
+            sol += (((a[i]&a[j])==a[i]) || ((a[i]&a[j])==a[j]))*m;
+        }
+    }
+
+    cout << sol << endl;
+
+    return 0;
+}

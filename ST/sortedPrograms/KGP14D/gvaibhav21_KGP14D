@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 110
+#define M 150000
+int dp[N][M];
+
+vector<pair<int,int> > v;
+int dur[N],train[N];
+int main()
+{
+	int t,i,j,k;
+	sd(t);
+	for(int tt=1;tt<=t;tt++)
+	{
+		int n;
+		sd(n);
+		for(i=0;i<N;++i)
+			for(j=0;j<M;++j)
+				dp[i][j]=N;
+		dp[0][0]=0;
+		v.clear();
+		v.PB(MP(-N,-N));
+		for(i=0;i<n;++i)
+			sd(dur[i]);
+		for(i=0;i<n;++i)
+		{
+			sd(train[i]);
+			if(train[i]>0)
+			{
+				train[i]-=30;
+				v.PB(MP(train[i],dur[i]));
+			}
+		}
+		sort(v.begin(),v.end());
+
+		for(i=1;i< v.size();++i)
+		{
+			for(j=0;j<M;++j)
+			{
+				dp[i][j]=1+dp[i-1][j];
+				if(j>v[i].F || j<v[i].S)	continue;
+				dp[i][j]=min(dp[i][j],dp[i-1][j-v[i].S]);
+			}
+		}
+		int ans=N;
+		for(i=0;i<M;++i)
+			ans=min(ans,dp[(int)v.size()-1][i]);
+		printf("Case %d: %d\n",tt,ans);
+	}
+}

@@ -1,0 +1,241 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define present(t, x) (t.find(x) != t.end())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+#define bit(n, i) (((n) >> (i)) & 1)
+#define bitcount(n) __builtin_popcountll(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = acos((ld) -1);
+const ld EPS = 1e-9;
+inline ll gcd(ll a, ll b) {ll r; while (b) {r = a % b; a = b; b = r;} return a;}
+inline ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+inline ll fpow(ll n, ll k, int p = MOD) {ll r = 1; for (; k; k >>= 1) {if (k & 1) r = r * n % p; n = n * n % p;} return r;}
+template<class T> inline int chkmin(T& a, const T& val) {return a > val ? a = val, 1 : 0;}
+template<class T> inline int chkmax(T& a, const T& val) {return a < val ? a = val, 1 : 0;}
+inline ll isqrt(ll k) {ll r = sqrt(k) + 1; while (r * r > k) r--; return r;}
+inline ll icbrt(ll k) {ll r = cbrt(k) + 1; while (r * r * r > k) r--; return r;}
+inline void addmod(int& a, int val, int p = MOD) {if ((a = (a + val)) >= p) a -= p;}
+inline void submod(int& a, int val, int p = MOD) {if ((a = (a - val)) < 0) a += p;}
+inline int mult(int a, int b, int p = MOD) {return (ll) a * b % p;}
+inline int inv(int a, int p = MOD) {return fpow(a, p - 2, p);}
+ 
+struct Node {
+	int val, key, size;
+	Node* c[2];
+	void resize() {
+		size = (c[0] ? c[0]->size : 0) + 1 + (c[1] ? c[1]->size : 0);
+	}
+} mem[40000010], *nil;
+ 
+int randkey() {
+	static int seed = 0;
+	seed = (seed * 1001 + 100621) % 999983;
+	return seed;
+}
+ 
+Node* alloc(int val, Node* l = nil, Node* r = nil, int key = randkey()) {
+	static int cur = 0;
+	Node* res = mem + (cur++);
+	res->key = key;
+	res->val = val;
+	res->c[0] = l;
+	res->c[1] = r;
+	res->resize();
+	return res;
+}
+ 
+void init() {
+	nil = alloc(0, 0, 0);
+	nil->size = 0, nil->key = ~0U >> 1;
+}
+ 
+int find(Node* root, int val) {
+	if (root == nil) return 0;
+	if (root->val > val) return find(root->c[0], val);
+	if (root->val < val) return root->c[0]->size + 1 + find(root->c[1], val);
+	if (root->val = val) return root->c[0]->size + 1;
+}
+ 
+struct PersistentTreap {
+	Node* root;
+	PersistentTreap() {
+		root = nil;
+	}
+	Node* splitL(Node* a, int size) {
+		if (a == nil || !size) return nil;
+		if (a->c[0]->size >= size) return splitL(a->c[0], size);
+		if (a->c[0]->size + 1 >= size) return alloc(a->val, a->c[0], nil, a->key);
+		return alloc(a->val, a->c[0], splitL(a->c[1], size - a->c[0]->size - 1), a->key);
+	}
+	Node* splitLval(Node* a, int val) {
+		if (a == nil) return nil;
+		if (a->val >= val) return splitLval(a->c[0], val);
+		return alloc(a->val, a->c[0], splitLval(a->c[1], val), a->key);
+	}
+	Node* splitR(Node* a, int size) {
+		if (a == nil || !size) return nil;
+		if (a->c[1]->size >= size) return splitR(a->c[1], size);
+		if (a->c[1]->size + 1 >= size) return alloc(a->val, nil, a->c[1], a->key);
+		return alloc(a->val, splitR(a->c[0], size - a->c[1]->size - 1), a->c[1], a->key);
+	}
+	Node* splitRval(Node* a, int val) {
+		if (a == nil) return nil;
+		if (a->val <= val) return splitRval(a->c[1], val);
+		return alloc(a->val, splitRval(a->c[0], val), a->c[1], a->key);
+	}
+	Node* merge(Node* a, Node* b) {
+		if (a == nil) return b;
+		if (b == nil) return a;
+		if (a->key > b->key) return alloc(a->val, a->c[0], merge(a->c[1], b), a->key);
+		return root = alloc(b->val, merge(a, b->c[0]), b->c[1], b->key);
+	}
+	int findpos(int val) {
+		return find(root, val);
+	}
+	Node* insert(int val, int p) {
+		int l = root->size;
+		return root = merge(merge(splitL(root, p), alloc(val, nil, nil)), splitR(root, l - p));
+	}
+	Node* insert(int val) {
+		return root = merge(merge(splitLval(root, val), alloc(val, nil, nil)), splitRval(root, val));
+	}
+	Node* remove(int x, int y) {
+		int l = root->size;
+		return merge(splitL(root, x - 1), splitR(root, l - y));
+	}
+	void trace(Node* root) {
+		if (root == nil) {
+			return;
+		}
+		trace(root->c[0]);
+		cout<<root->val<<" ";
+		trace(root->c[1]);
+	}
+	void trace() {
+		trace(root);
+	}
+};
+ 
+const int maxn = 100010;
+const int logn = 20;
+int n, q;
+int a[maxn];
+int b[maxn];
+int c[maxn];
+map<int, int> dc;
+int rb[maxn];
+vii st[4 * maxn];
+Node* node[logn][maxn];
+ 
+void build(int p, int L, int R, int lev) {
+	if (L == R) {
+		st[p].pb(mp(a[L], L));
+	}
+	else {
+		build(p << 1, L, L + R >> 1, lev + 1);
+		build((p << 1) + 1, (L + R >> 1) + 1, R, lev + 1);
+		int M = L + R >> 1;
+		int cur1 = 0, cur2 = 0;
+		while (cur1 < M - L + 1 || cur2 < R - M) {
+			if (cur1 == M - L + 1) {
+				st[p].pb(st[(p << 1) + 1][cur2++]);
+			}
+			else if (cur2 == R - M) {
+				st[p].pb(st[p << 1][cur1++]);
+			}
+			else if (st[p << 1][cur1] < st[(p << 1) + 1][cur2]) {
+				st[p].pb(st[p << 1][cur1++]);
+			}
+			else {
+				st[p].pb(st[(p << 1) + 1][cur2++]);
+			}
+		}
+	}
+	PersistentTreap ptreap;
+	FOR(i, 0, R - L + 1) {
+		if (b[st[p][i].se] < n) {
+			ptreap.insert(b[st[p][i].se]);
+		}
+		node[lev][L + i] = ptreap.root;
+	}
+}
+ 
+int query(int p, int l, int r, int L, int R, int lev, int k) {
+	if (l > R || r < L) return 0;
+	if (l <= L && r >= R) {
+		int z = upper_bound(all(st[p]), mp(k, INF)) - st[p].begin();
+		int res = z;
+		if (z--) {
+			res -= find(node[lev][L + z], r);
+		}
+		return res;
+	}
+	return query(p << 1, l, r, L, L + R >> 1, lev + 1, k) + query((p << 1) + 1, l, r, (L + R >> 1) + 1, R, lev + 1, k);
+}
+ 
+void solve() {
+	init();
+	scanf("%d%d", &n, &q);
+	FOR(i, 0, n) scanf("%d", a + i), dc[a[i]];
+	int z = 0; FORall(it, dc) it->se = z, rb[z++] = it->fi;
+	FOR(i, 0, n) a[i] = dc[a[i]];
+	fill_n(c, n, n);
+	FORd(i, n, 0) {
+		b[i] = c[a[i]];
+		c[a[i]] = i;
+	}
+	build(1, 0, n - 1, 0);
+	int ans = 0;
+	while (q-- > 0) {
+		int a, b, c, d, k; scanf("%d%d%d%d%d", &a, &b, &c, &d, &k);
+		int l = mult(a, max(0, ans), n);
+		addmod(l, b, n);
+		int r = mult(c, max(0, ans), n);
+		addmod(r, d, n);
+		if (l > r) swap(l, r);
+		int lo = 0, hi = z - 1;
+		while (lo < hi) {
+			int mi = lo + hi >> 1;
+			if (query(1, l, r, 0, n - 1, 0, mi) < k) lo = mi + 1; else hi = mi;
+		}
+		if (query(1, l, r, 0, n - 1, 0, lo) == k) {
+			printf("%d\n", ans = rb[lo]);
+		}
+		else {
+			printf("%d\n", ans = -1);
+		}
+	}
+}
+ 
+int main() {
+//	ios_base::sync_with_stdio(0); cin.tie(0);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

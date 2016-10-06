@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, k, mod;
+int d[105][105];
+
+int binpow(int a, int b) {
+    int res = 1;
+	while(b) {
+		if (b & 1)
+			res = 1ll * res * a % mod;
+		a = 1ll * a * a % mod;
+		b >>= 1;
+	}
+	return res;
+}
+
+int c[500][500];
+
+int D(int n, int k) {
+    if (d[n][k] != -1)
+    	return d[n][k];
+	if (n < k)
+		return d[n][k] = 0;
+	if (n == 1)
+		return d[n][k] = 1;
+	if (k == 1) {
+		d[n][k] = binpow(2, n * (n - 1) / 2);
+		if (d[n][k] < 0)
+			d[n][k] += mod;
+		for (int i = 2; i <= n; i++) {
+			d[n][k] -= D(n, i);
+			if (d[n][k] < 0)
+				d[n][k] += mod;
+		}
+		return d[n][k];
+	}
+	d[n][k] = 0;
+	for (int last = 1; last < n; last++)
+		d[n][k] = (d[n][k] + 1ll * D(n - last, k - 1) * D(last, 1) % mod * c[n - 1][last - 1] % mod) % mod;
+	return d[n][k];
+}
+
+void solve() {
+	cin >> n >> k >> mod;
+	for (int i = 0; i <= 200; i++) {
+		c[i][0] = c[i][i] = 1;
+		for (int j = 1; j < i; j++)
+			c[i][j] = (c[i - 1][j - 1] + c[i - 1][j]) % mod;
+	}
+	memset(d, -1, sizeof d);
+	int res = D(n, k);
+	if (k == 1)
+		res--;
+	if (res < 0)
+		res += mod;
+	cout << res << endl;
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	int t;
+	cin >> t;
+	while(t--)
+		solve();
+	return 0;
+}

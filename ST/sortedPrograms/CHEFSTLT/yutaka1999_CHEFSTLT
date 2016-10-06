@@ -1,0 +1,37 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <queue>
+#include <stack>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <cmath>
+#define SIZE 105
+
+using namespace std;
+
+char A[SIZE],B[SIZE];
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%s",&A);
+		scanf("%s",&B);
+		assert(strlen(A)==strlen(B));
+		int n=strlen(A);
+		int a=0,b=0;
+		for(int i=0;i<n;i++)
+		{
+			if(A[i]=='?'||B[i]=='?') b++;
+			else if(A[i]!=B[i]) a++;
+		}
+		printf("%d %d\n",a,a+b);
+	}
+	return 0;
+}

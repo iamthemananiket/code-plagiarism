@@ -1,0 +1,187 @@
+#include <iostream>
+#include <unordered_map>
+#define ll long long
+#define mp make_pair
+using namespace std;
+ 
+// seg tree + lca(using dp) + dfs
+ 
+ll u,v,w,n,q;
+ 
+unordered_map<int,ll> adj[100005];
+pair<int,int> edge[100005];
+int par[100005],L[100005],st[100005],en[100005],pos[100005];
+ll dis[100005],tree[560000];
+ 
+void build(int node,int a,int b)
+{
+if(a>b)return;
+ 
+if(a==b)
+{
+tree[node]=dis[a];
+return;
+}
+ 
+build(node*2+1,a,(a+b)/2);
+build(node*2+2,(a+b)/2 +1,b);
+ 
+}
+ 
+void update(int node,int a,int b,int i,int j,ll val)
+{
+	if(a>b || a>j || b<i)return;
+	
+	
+	if(a>=i && b<=j)
+	{
+		tree[node]+=val;
+		return;
+	}
+	
+	update(node*2+1,a,(a+b)/2,i,j,val);
+	update(node*2+2,(a+b)/2 +1,b,i,j,val);
+}
+ 
+void query(int node,int a,int b,int i,ll &ret)
+{
+	if(a>i || b<i)return;
+	
+	if(a==b)
+	{
+		ret+=tree[node];
+		return;
+	}
+	ret+=tree[node];
+	query(node*2+1,a,(a+b)/2,i,ret);
+	query(node*2+2,(a+b)/2 +1,b,i,ret);
+	
+}
+ 
+ int index=0;
+int dfs(int i,int p,int lev,ll d)
+{
+	int ret=index;
+	dis[index]=d;
+	pos[i]=index;
+	st[i]=index++;
+ 
+par[i]=p; L[i]=lev;
+ 
+for(unordered_map<int,ll>::iterator it=adj[i].begin();it!=adj[i].end();++it)
+{
+	if(it->first==p)continue;
+	
+	ret=dfs(it->first,i,lev+1,d+it->second);
+	
+}
+	en[i]=ret;
+	return ret;
+}
+ 
+int P[100005][40];
+void pro()
+  {
+      int i, j;
+   
+  //we initialize every element in P with -1
+      for (i = 1; i <= n; i++)
+          for (j = 0; 1 << j < n; j++)
+              P[i][j] = -1;
+   
+  //the first ancestor of every node i is p[i]
+      for (i = 1; i <=n; i++)
+          P[i][0] = par[i];
+   
+  //bottom up dynamic programing
+      for (j = 1; 1 << j < n; j++)
+         for (i = 1; i <=n; i++)
+             if (P[i][j - 1] != -1)
+                 P[i][j] = P[P[i][j - 1]][j - 1];
+  }
+  
+  int lcquery(int p, int q)
+  {
+      int tmp, log, i;
+   
+  //if p is situated on a higher level than q then we swap them
+      if (L[p] < L[q])
+          tmp = p, p = q, q = tmp;
+  
+  //we compute the value of [log(L[p)]
+      for (log = 1; 1 << log <= L[p]; log++);
+      log--;
+   
+  //we find the ancestor of node p situated on the same level
+  //with q using the values in P
+      for (i = log; i >= 0; i--)
+          if (L[p] - (1 << i) >= L[q])
+              p = P[p][i];
+   
+      if (p == q)
+          return p;
+   
+  //we compute LCA(p, q) using the values in P
+      for (i = log; i >= 0; i--)
+          if (P[p][i] != -1 && P[p][i] != P[q][i])
+              p = P[p][i], q = P[q][i];
+   
+      return par[p];
+  }
+ 
+int main() {
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cin>>n;
+	for(int i=1;i<=n-1;i++)
+	{
+		cin>>u>>v>>w;
+		adj[u][v]=w;
+		adj[v][u]=w;
+		
+		edge[i]=mp(u,v);
+		
+	}
+	
+	
+	dfs(1,0,0,0);
+	//cout<<dis[5]<<" ";
+	pro();
+	build(0,0,n-1);
+	
+	
+	cin>>q;
+	ll a,b,c;
+	
+	while(q--)
+	{
+		cin>>a>>b>>c;
+		
+		if(a==1)
+		{
+			
+		if(edge[b].first==par[edge[b].second])
+		{
+			
+			update(0,0,n-1,st[edge[b].second],en[edge[b].second],c-adj[edge[b].first][edge[b].second]);
+		}
+		else
+		{
+			update(0,0,n-1,st[edge[b].first],en[edge[b].first],c-adj[edge[b].first][edge[b].second]);
+		}
+		
+		adj[edge[b].first][edge[b].second]=c;
+			adj[edge[b].second][edge[b].first]=c;
+		}
+		
+		else
+		{
+			
+			ll las=0,l2=0;
+			int lca=lcquery(b,c);
+			query(0,0,n-1,pos[b],las); query(0,0,n-1,pos[c],las);  query(0,0,n-1,pos[lca],l2);
+			cout<<las-2*l2<<"\n";
+		}
+	}
+	return 0;
+}   

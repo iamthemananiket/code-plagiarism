@@ -1,0 +1,302 @@
+#include <bits/stdc++.h>
+/*#include <boost/multiprecision/cpp_int.hpp> */
+#define ll long long
+#define ld long double
+#define pb push_back
+#define mp make_pair
+#define mod 100003
+#define gc getchar_unlocked
+#define pp pair<int,int>
+#define bigint boost::multiprecision::cpp_int
+#define inf 1000000000000000000
+#define finp ios_base::sync_with_stdio(0);cin.tie(0);
+#define bc __builtin_popcount
+#define afor(i,a,b) for(int i=a;i<=b;++i)
+#define bfor(i,a,b) for(int i=a;i>=b;--i)
+#define vi vector<int>
+#define vll vector<ll>
+#define MAXN 320005
+using namespace std;
+const int N=65536;
+
+//FFT code from damians's solution to COUNTARI http://www.codechef.com/viewsolution/1513287
+
+struct base
+{
+  long double real;
+  long double imag;
+  base(long double _r, long double _i)
+  {
+    real=_r;
+    imag=_i;
+  }
+  base() {}
+};
+ 
+inline base multiply(const base &left, const base &right)
+{
+  base res;
+  res.real = left.real * right.real - left.imag * right.imag;
+  res.imag = left.real * right.imag + left.imag * right.real;
+  return res;
+}
+ 
+void FFT(base a[], int n, bool invert)
+{
+  for(int i = 1, j = 0; i < n; i++)
+  {
+    int bit = n >> 1;
+    for (; j >= bit; bit >>= 1)
+      j -= bit;
+    j += bit;
+    if (i < j)
+      swap(a[i], a[j]);
+  }
+  for(int len=2; len<=n; len<<=1)
+  {
+    long double ang = 2 * M_PI / len * (invert ? -1 : 1);
+    long double cs = cos(ang);
+    long double sn = sin(ang);
+    for (int i = 0; i < n; i += len)
+    {
+      int hlen = len >> 1;
+      long double wreal = 1;
+      long double wimag = 0;
+      base u;
+      base* pa1 = a + i;
+      base* pa2 = a + i + hlen;
+      for (int j=0; j<hlen; ++j) 
+      {
+        base &a1 = *pa1++;
+        base &a2 = *pa2++;
+        u = a1;
+        long double vreal = a2.real * wreal - a2.imag * wimag;
+        long double vimag = a2.real * wimag + a2.imag * wreal;
+        a1.real += vreal;
+        a1.imag += vimag;
+        a2.real = u.real - vreal;
+        a2.imag = u.imag - vimag;
+        long double wreal2 = wreal;
+        wreal = wreal * cs - wimag * sn;
+        wimag = wreal2 * sn + wimag * cs;
+      }
+    }
+  }
+  if (invert)
+    for (int i= n; i >= 0; --i)
+      a[i].real /= n;
+}
+
+ll t,n,k;
+
+ll ways[N+2];
+ll dp[6*N+2];
+
+
+ll w[10]={1,13,67,175,256};
+
+
+ll fact[100005];
+ll invf[100005];
+
+
+void poly(vll &v1, vll &v2)
+{
+ 
+  static base a[MAXN],b[MAXN],c[MAXN];
+  int n2 = max(v1.size(), v2.size()) * 2;
+  //assert(n2<=MAXN);
+  n2=min(n2,N);
+  for(int i = 0; i < n2; i++)
+  {
+    a[i] = base(0,0);
+    b[i] = base(0,0);
+  }
+    for(int i = 0; i < v1.size(); i++)
+    a[i] = base(v1[i], 0);
+    for(int i = 0; i < v2.size(); i++)
+    b[i] = base(v2[i],0);
+  FFT(a, n2, 0);
+  FFT(b, n2, 0);
+    for(int i = 0; i < n2; i++)
+    c[i] = multiply(a[i],b[i]);
+    
+    FFT(c, n2, 1);
+  v1.resize(n2);
+
+  for(int i = 0; i < n2; i++)
+  {
+    v1[i] = ((ll)floorl(c[i].real + 0.5L))%mod;
+   
+  }
+}
+
+vll ans[N+5];
+void dnc(int i,int j)
+{
+  if(i>j)return;
+  if(i==j)
+  {
+      ans[i].clear();
+    ans[i].pb(1LL);
+    ans[i].pb(ways[i]);
+    return;
+  }
+
+  int mid= (i+j)/2;
+
+  dnc(i,mid);
+  dnc(mid+1,j);
+
+  poly(ans[i],ans[mid+1]);
+
+  vll().swap(ans[mid+1]);
+}
+
+
+ll fp(ll a,ll b)
+{
+  if(b==0)return 1;
+  if(b==1)return a%mod;
+
+  ll res=fp(a,b/2);
+  res=(res*res)%mod;
+
+  if(b%2)res=(res*a)%mod;
+  return res;
+}
+
+
+
+ll calc(ll x,ll y)
+{
+  if(x<y)return 0LL;
+  if(y==0 || y==x)return 1LL;
+
+  ll ret= fact[x];
+  ret*=invf[y];
+  if(ret>=mod)ret%=mod;
+  ret*=invf[x-y];
+  if(ret>=mod)ret%=mod;
+
+  return ret;
+}
+ll lucas(ll x,ll y)
+{
+  if(x<y)return 0LL;
+  if(y==0 || y==x)return 1LL;
+
+  ll ret=1;
+  while(x && y)
+  {
+    ret*=calc(x%mod,y%mod);
+    if(ret>=mod)ret%=mod;
+    x/=mod;
+    y/=mod;
+  }
+  if(x<y)ret=0LL;
+  return ret;
+}
+
+void pre()
+{
+ fact[0]=invf[0]=1;
+
+  afor(i,1,mod-1)
+  {
+    fact[i]=(fact[i-1]*i)%mod;
+    invf[i]=fp(fact[i],mod-2);
+  }
+  
+  dp[18]=1;
+  int r=0;
+  afor(i,19,6*N)
+  {
+    if(i%6)
+    {
+      dp[i]=(dp[i-1]*2) + mod - lucas(i-1,r);
+      if(dp[i]>=mod)dp[i]%=mod;
+    }
+    else
+    {
+      r++;
+      dp[i]=(dp[i-1]*2) + lucas(i-1,r);
+      if(dp[i]>=mod)dp[i]%=mod;
+    }
+  }
+
+  ways[0]=1;
+  ways[1]=9;
+
+ 
+  afor(i,2,N)
+  {
+    ways[i]=w[4]*fp(2,6*i - 12);
+    ways[i]%=mod;
+
+    if(i>=5)
+    {
+      ways[i]+=mod- (dp[6*i - 12]*w[4])%mod;
+      ways[i]%=mod;
+    }
+    
+    afor(j,i-4,i-1)
+    {
+      if(j<0)continue;
+      ways[i]+=mod - (lucas(6*i - 12,j)*w[i-j-1])%mod;
+      ways[i]%=mod;
+    }
+
+  }
+}
+
+ll fans[15];
+
+int main()
+{
+    
+  finp;
+  pre();
+ 
+
+  cin>>t;
+  
+  ll kcase[12];
+  vector<pp> cases;
+  
+  afor(i,1,t)
+  {
+    cin>>n>>k;
+    cases.pb({n,i});
+    kcase[i]=k;
+  }
+  
+  sort(cases.begin(),cases.end());
+  
+  int lpos=0;
+  int curr=1;
+  ans[0]={1};
+  
+  for(auto x:cases)
+  {
+      dnc(curr,x.first);
+  if(curr<=x.first)
+    {
+        poly(ans[lpos],ans[curr]);
+      vll().swap(ans[curr]);
+    }
+      curr=x.first+1;
+      
+      fans[x.second]=0LL;
+      afor(j,kcase[x.second],min(x.first,(int)ans[lpos].size() - 1))
+      {
+          fans[x.second]+=ans[lpos][j];
+          fans[x.second]%=mod;
+      }
+  }
+  
+  
+  afor(i,1,t)cout<<fans[i]<<"\n";
+  
+return 0;
+}

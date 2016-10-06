@@ -1,0 +1,76 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+char buf[100010];
+
+const Int MO = 1000000007;
+const int L = 105;
+
+int N;
+int M[20];
+int A[20][110];
+
+int is[110];
+Int dp[1030];
+
+int main() {
+	
+	
+	for (int TC = atoi(gets(buf)); TC--; ) {
+		N = atoi(gets(buf));
+		for (int i = 0; i < N; ++i) {
+			istringstream iss(gets(buf));
+			for (M[i] = 0; iss >> A[i][M[i]]; ++M[i]);
+		}
+		fill(is, is + L, 0);
+		for (int i = 0; i < N; ++i) {
+			for (int j = 0; j < M[i]; ++j) {
+				is[A[i][j]] |= 1 << i;
+			}
+		}
+		fill(dp, dp + (1 << N), 0);
+		dp[0] = 1;
+		for (int l = 0; l <= L; ++l) for (int p = 1 << N; p--; ) {
+			for (int i = 0; i < N; ++i) if (!(p & 1 << i)) if (is[l] & 1 << i) {
+				(dp[p | 1 << i] += dp[p]) %= MO;
+			}
+		}
+		Int ans = dp[(1 << N) - 1];
+		ans = (ans % MO + MO) % MO;
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}
+

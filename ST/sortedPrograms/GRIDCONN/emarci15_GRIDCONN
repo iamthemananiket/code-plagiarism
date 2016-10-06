@@ -1,0 +1,174 @@
+#include <cstdio>
+
+#define mod 1000000007
+
+using namespace std;
+
+int T;
+
+int n;
+char s[301];
+
+int same[300][300];
+bool isame[600][600][9];
+
+int l0s[600];
+int l9s[600];
+
+bool nextok[300][300];
+bool okafter[300][300];
+bool cntchg[300][300];
+
+int psol[300][2];
+int psolv;
+
+int log2(int x) {
+    int ret = 0;
+    for(int i=0; i<31; i++) {
+        if((1<<i) & x) {
+            ret = i;
+        }
+    }
+    return ret;
+}
+
+bool sEqual(int x, int y) {
+    if((x>=n) || (x<0)) return 1;
+
+    return (s[x] == y);
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("\n%s",s);
+        for(n=0; s[n] != '\0'; n++) {}
+
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<n; j++) {
+                cntchg[i][j] = 0;
+            }
+        }
+
+        int lg2n = log2(n);
+
+        for(int k=0; k<=lg2n; k++) {
+            for(int i=0; i<2*n; i++) {
+                for(int j=0; j<2*n; j++) {
+                    isame[i][j][k] = 1;
+                }
+            }
+        }
+
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<n; j++) {
+                isame[i][j][0] = (s[i]==s[j]);
+            }
+        }
+
+        for(int k=1; k<=lg2n; k++) {
+            for(int i=0; i<n; i++) {
+                for(int j=0; j<n; j++) {
+                    isame[i][j][k] = isame[i][j][k-1]&&isame[i+(1<<(k-1))][j+(1<<(k-1))][k-1];
+                    //printf("isame[%d][%d][%d] = %d && %d\n",i,j,k,isame[i][j][k-1],isame[i+(1<<(k-1))][j+(1<<(k-1))][k-1]);
+                }
+            }
+        }
+
+        for(int i=n-1; i>=0; i--) {
+            for(int j=n-1; j>=0; j--) {
+                int k;
+                for(k=0; (isame[i][j][k]); k++){}
+                if(--k < 0) {
+                    same[i][j] = 0;
+                    continue;
+                }
+                if(((i+(1<<k)) >= n) || ((j+(1<<k)) >= n)) {
+                    same[i][j] = 1000;
+                } else {
+                    same[i][j] = (1<<k) + same[i+(1<<k)][j+(1<<k)];
+                }
+            }
+        }
+
+        l0s[0] = 1000*(s[0] == '0');
+        l9s[0] = 1000*(s[0] == '9');
+        for(int i=1; i<2*n; i++) {
+            l0s[i] = (sEqual(i,'0'))*(l0s[i-1]+1);
+            l9s[i] = (sEqual(i,'9'))*(l9s[i-1]+1);
+        }
+
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<n; j++) {
+                if(i+j+1 >= n) {
+                    nextok[i][j] = 1;
+                    continue;
+                }
+                if(l9s[i+j] > j) {
+                    nextok[i][j] = ((l0s[i+j+2+j] > j) && (sEqual(i+j+1,'1')));
+                    cntchg[i][j] = 1;
+                    continue;
+                }
+
+                nextok[i][j] = ((l0s[i+j+1+j] >= l9s[i+j]) && (same[i][i+j+1] >= j-l9s[i+j])
+                                            && (sEqual(i+j+1+j-l9s[i+j],s[i+j-l9s[i+j]]+1)));
+        //printf("nextok[%d][%d] = ((%d >= %d) && (%d >= %d) && (%d))\n",
+        //  i,j,l0s[i+j+1+j],l9s[i+j],same[i][i+j+1],j-l9s[i+j],sEqual(i+j+1+j-l9s[i+j],s[i+j-l9s[i+j]]+1));
+            }
+        }
+
+        for(int i=n-1; i>=0; i--) {
+            for(int j=0; j<n; j++) {
+                if(cntchg[i][j]) {
+                    okafter[i][j] = nextok[i][j] && ((i+j+1 >=n) || (okafter[i+j+1][j+1]));
+                } else {
+                    okafter[i][j] = nextok[i][j] && ((i+j+1 >= n) || (okafter[i+j+1][j]));
+                }
+            }
+        }
+
+        psolv = 0;
+        for(int j=0; !psolv; j++) {
+            for(int i=0; i<=j; i++) {
+                if(s[i] == '0') continue;
+                if((okafter[i][j]) && (i+j < n) && ((!i)
+                  || ((l9s[i-1] >= l0s[i+j]) && (same[0][j+1]+j+1-i >= j-l9s[i-1])
+                        && ((l0s[i+j]>=i) || (sEqual(i-(l0s[i+j]+1),s[i+j-l0s[i+j]]-1))))
+                  )){
+                    psol[psolv][0] = i;
+                    psol[psolv++][1] = j;
+                }
+            }
+        }
+
+        int minv = psol[0][0];
+
+        for(int i=1; i<psolv; i++) {
+            if(s[psol[i][0]+same[minv][psol[i][0]]] < s[minv+same[minv][psol[i][0]]]) minv = psol[i][0];
+        }
+
+        int minj = psol[0][1];
+
+        long long pos = 1;
+
+        long long pplus = 9;
+        for(int i=0; i<minj; i++) {
+            pos = (pos + ((pplus*(1ll+i))%mod)) % mod;
+
+            pplus = (pplus * 10) % mod;
+        }
+
+        pplus = 1;
+        for(int i=minv+minj; i>minv; i--) {
+            pos = (pos + ((((pplus * (s[i]-'0')) % mod)*(1ll+minj)) % mod)) % mod;
+            pplus = (pplus * 10) % mod;
+        }
+        pos = (pos + ((((pplus * (s[minv]-'1')) % mod)*(1ll+minj)) % mod)) % mod;
+
+        pos = (pos+mod-minv) % mod;
+
+        printf("%lld\n",pos);
+    }
+
+    return 0;
+}

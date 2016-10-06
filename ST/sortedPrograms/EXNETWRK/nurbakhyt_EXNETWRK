@@ -1,0 +1,156 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define pp pop_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-6;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, m;
+vector < pair < int, int > > q;
+
+bool u[50][50];
+bool used[50];
+int timer, tin[50], fup[50];
+bool ok, ok2;
+ 
+void dfs (int v, int p = -1) {
+	used[v] = true;
+	tin[v] = fup[v] = timer++;
+	int children = 0;
+	for (int i=1; i<=n; ++i) {
+	    if (!u[v][i])
+	    	continue;
+		int to = i;
+		if (to == p)  continue;
+		if (used[to])
+			fup[v] = min (fup[v], tin[to]);
+		else {
+			dfs (to, v);
+			fup[v] = min (fup[v], fup[to]);
+			if (fup[to] >= tin[v] && p != -1) {
+				ok = 1;
+			}
+			if (fup[to] > tin[v])
+				ok2 = 1;
+			++children;
+		}
+	}
+	if (p == -1 && children > 1)
+		ok = 1;
+}
+
+bool check() {
+	timer = 0;
+	memset(used, 0, sizeof used);
+	ok = ok2 = 0;
+	dfs(1);
+	if (ok || ok2)
+		return 0;
+	for (int i = 1; i <= n; i++)
+		if (!used[i])
+			return 0;
+	for (int i = 0; i < sz(q); i++) {
+		if (u[q[i].f][q[i].s]) {
+			u[q[i].f][q[i].s] = u[q[i].s][q[i].f] = 0;			
+			ok = ok2 = 0;
+			timer = 0;
+			memset(used, 0, sizeof used);
+			dfs(1);
+			u[q[i].f][q[i].s] = u[q[i].s][q[i].f] = 1;
+			if (!ok)
+				return 0;
+		}
+	}
+	return 1;
+}	
+
+bool Find;
+
+void rec(int v, int cnt) {
+    if (Find)
+    	return;
+	if (cnt == m) {
+		int shit = 0;
+		for (int i = 0; i < sz(q); i++) {
+			if (u[q[i].f][q[i].s] || u[q[i].s][q[i].f])
+				shit++;
+		}
+		if (shit != cnt) {
+			assert(0);
+		}
+	    if (check()) {
+	    	for (int i = 0; i < v; i++) {
+	    		if (u[q[i].f][q[i].s] || u[q[i].s][q[i].f])
+	    			cout << q[i].f << ' ' << q[i].s << endl;
+	    	}
+	    	Find = 1;
+	    	return;
+	    }
+		return;
+	}
+	if (v == sz(q))
+		return;
+	u[q[v].f][q[v].s] = u[q[v].s][q[v].f] = 1;
+	rec(v + 1, cnt + 1);
+	u[q[v].f][q[v].s] = u[q[v].s][q[v].f] = 0;
+	if (Find)
+		return;
+	u[q[v].f][q[v].s] = u[q[v].s][q[v].f] = 0;
+	rec(v + 1, cnt);
+	if (Find)
+		return;
+}
+
+void solve() {
+	cin >> n >> m;
+	if (n <= 4) {
+		if ((n != 4 && n != 3) || (m != n)) {
+			cout << "-1 -1\n";
+			return;
+		}
+
+		for (int i = 1; i <= n; i++) {
+			cout << i << ' ' << (i + 1 <= n ? i + 1 : 1) << endl;
+		}	
+		return;
+	}
+	Find = 0;
+	q.clear();
+	for (int i = 1; i <= n; i++)
+		for (int j = i + 1; j <= n; j++) {
+			q.pb(mp(i, j));
+		}
+	memset(u, 0, sizeof u);
+	rec(0, 0);
+	if (!Find)
+		cout << "-1 -1\n";
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	freopen(fname"out","w",stdout);
+	#endif
+	int t;
+	cin >> t;
+	while(t--)
+		solve();	
+	return 0;
+}

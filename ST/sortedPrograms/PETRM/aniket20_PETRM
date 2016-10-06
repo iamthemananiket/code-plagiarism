@@ -1,0 +1,109 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+ll sum[maxs],sum1[maxs],sum3[maxs],A[maxs];
+vector<ll>adj[maxs];
+ll mark[maxs],val[maxs],small[maxs];
+ll dp[1ll<17];
+
+ll fun(ll mask){
+	if(mask==((1ll<<17)-1)){
+		return 0;
+	}
+	if(dp[mask]!=-1){
+		return dp[mask];
+	}
+	ll sz=0,ret=-llmax;
+	for(ll i=0;i<=16;i++){
+		if(mask&(1ll<<i)){
+			sz+=adj[i].size();
+		}	
+	}
+	sz++;
+	for(ll i=0;i<=16;i++){
+		if(mask&(1ll<<i)){
+			continue;
+		}
+		ll temp=sum[i]*sz*sz+sum1[i]*sz+sum3[i];
+		ret=max(ret,temp+fun(mask | (1ll<<i)));
+	}
+	dp[mask]=ret;
+	return ret;
+}
+
+int main()
+{
+	ll n,i,pos,j,marks;
+	sc("%lld",&n);
+	for(i=0;i<n;i++){
+		sc("%lld %lld",&pos,&marks);
+		A[pos]=marks;
+	}
+	for(i=2;i<=n;i++){
+		if(mark[i]==0){
+			val[i]=1;
+			for(j=2*i;j<=n;j+=i){
+				if(mark[j]==0){
+					small[j]=i;
+				}
+				mark[j]=1;
+			}
+		}
+	}
+	for(i=3;i<=n;i++){
+		if(val[i]==0){
+			val[i]=val[i/small[i]]+1;
+		}
+	}
+	for(i=1;i<=n;i++){
+	//	cout<<val[i]<<" ";
+		adj[val[i]].pb(A[i]);
+	}
+	for(i=0;i<=16;i++){
+		sort(adj[i].begin(),adj[i].end());
+		for(j=0;j<adj[i].size();j++){
+			sum[i]+=adj[i][j];
+		}
+		for(j=1;j<adj[i].size();j++){
+			sum1[i]+=(2*j)*adj[i][j];
+		}
+		for(j=1;j<adj[i].size();j++){
+			sum3[i]+=(adj[i][j]*j*j);
+		}
+	}
+	for(i=0;i<(1ll<<17);i++){
+		dp[i]=-1;
+	}
+	ll ans=fun(0);
+	pr("%lld\n",ans);
+	return 0;
+}

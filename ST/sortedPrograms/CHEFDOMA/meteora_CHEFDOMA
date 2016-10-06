@@ -1,0 +1,189 @@
+#include <algorithm>
+#include <iostream>
+#include <cassert>
+#include <cstdio>
+#include <vector>
+#include <cstring>
+
+#define TMAX ((1<<22)+10)
+#define NMAX 500010
+
+using namespace std;
+
+typedef long long lli;
+
+class segtree{
+
+	lli sum[TMAX];
+	lli psum[TMAX];
+	lli inc[TMAX];
+
+	inline int left(int x){ return (x+1)*2-1; }
+	inline int right(int x){ return (x+1)*2; }
+
+	inline void upd(int node, int s, int e, int k){
+		sum[node] += 1LL*k*(e-s+1);
+		psum[node] += (1LL*(e-s+1)*(e+s))/2*k;
+		inc[node] += k;
+	}
+
+
+
+	void update(int node, int s, int e, int i, int j, int vl){
+		if(s > j || e < i) return ;
+
+		if(s >= i && e <= j){
+			upd(node,s,e,vl);
+			return;
+		}
+
+		int l,r,m;
+		l = left(node);
+		r = right(node);
+		m = (s+e)/2;
+
+
+		if(inc[node]){
+			upd(l,s,m,inc[node]);
+			upd(r,m+1,e,inc[node]);
+			inc[node] = 0;
+		}
+
+		update(l,s,m,i,j,vl);
+		update(r,m+1,e,i,j,vl);
+		sum[node] = sum[l]+sum[r];
+		psum[node] = psum[l]+psum[r];
+	}
+
+	lli query(int node, int s, int e, int i, int j, int k){
+		if(s > j || e < i) return 0;
+
+		if(s >= i && e <= j){
+			return sum[node]*k-psum[node];
+		}
+
+		int l,r,m;
+		l = left(node);
+		r = right(node);
+		m = (s+e)/2;
+
+		if(inc[node]){
+			upd(l,s,m,inc[node]);
+			upd(r,m+1,e,inc[node]);
+			inc[node] = 0;
+		}
+
+		return  query(l,s,m,i,j,k) + query(r,m+1,e,i,j,k);
+	}
+
+	int N;
+
+public:
+
+	void init(int n){
+		memset(inc,0,sizeof(inc));
+		memset(sum,0,sizeof(sum));
+		memset(psum,0,sizeof(psum));
+		N = n;
+	}
+
+	lli query(int i, int j){
+		i += N, j += N;
+		return query(0,0,3*N,i,j,(j-i)+1);
+	}
+
+	void update (int i, int j ,int k){
+		i += N, j += N;
+		update(0,0,3*N,i,j,k);
+	}
+};
+
+
+segtree T;
+
+int N;
+int idx[NMAX];
+int pref[NMAX];
+
+int A[NMAX];
+int M;
+
+
+vector<int> occ[NMAX];
+
+pair<int,int> C[NMAX];
+int compr(){
+
+	int i;
+
+	for(i =0 ; i < N; ++i) C[i] = make_pair(A[i],i);
+
+	sort(C,C+N);
+
+	int pr = 0;
+	for(i =0 ; i < N; ++i){
+		if(i && C[i].first != C[i-1].first) ++pr;
+		A[C[i].second] = pr;
+	}
+
+	for(i = 0; i < N; ++i){
+		occ[A[i]].push_back(i);
+	}
+
+	return ++pr;
+}
+
+lli compute(int vl){
+	int i;
+
+	M = 0;
+
+
+	//idx[0] = -1, idx[M] = N
+
+	idx[M++] = -1;
+
+	for(i = 0; i < occ[vl].size(); ++i){
+		idx[M++] = occ[vl][i];
+	}
+	idx[M] = N;
+
+	for(i = 0; i < M; ++i){
+		pref[i] = i*2-idx[i];
+	}
+
+	lli ct =0;
+	for(i = 0; i < M; ++i){
+		ct += T.query(-N,pref[i]-1) ;
+
+		ct -= T.query(-N,pref[i]-(idx[i+1]-idx[i])-1);
+		T.update(pref[i]-(idx[i+1]-idx[i]-1),pref[i],1);
+	}
+
+	for(i = M-1; i >= 0; --i){
+		T.update(pref[i]-(idx[i+1]-idx[i]-1),pref[i],-1);
+	}
+
+	return ct;
+}
+
+int main(){
+	int i;
+	scanf("%d",&N);
+
+	for(i = 0; i < N; ++i) scanf("%d",&A[i]);
+
+	int vals = compr();
+	T.init(N);
+
+	lli sl = 0;
+	for(i = 0; i < vals; ++i){
+		sl += compute(i);
+	}
+
+	printf("%lld\n",sl);
+
+	return 0;
+
+
+}

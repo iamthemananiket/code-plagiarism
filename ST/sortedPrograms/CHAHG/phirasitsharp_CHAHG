@@ -1,0 +1,159 @@
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <vector>
+
+const int N = 100010;
+const int inf = -1u / 2;
+
+std::vector< std::pair< int, int > > events;
+std::vector< std::pair< int, int > > ans;
+
+int equal[ N ];
+
+int64_t H[ N ], M[ N ];
+int n;
+
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	int test;
+	std::cin >> test;
+	while ( test-- ) {
+
+		int n;
+		std::cin >> n;
+
+		for ( int i = 0 ; i < n ; ++i ) {
+			std::cin >> H[ i ] >> M[ i ];
+		}
+
+		events.clear();
+		ans.clear();
+
+		for ( int i = 0 ; i+1 < n ; ++i ) {
+
+			if ( M[ i ] == M[ i+1 ] ) {
+				continue;
+			}
+
+			int t = [] ( int a, int b ) -> int {
+				if ( M[ a ] > M[ b ] ) {
+					std::swap( a, b );
+				}
+
+				if ( H[ a ] < H[ b ] ) {
+					return 0;
+				}
+
+				// t[a] + m[a] * t < t[b] + m[b] * t
+				// t[a] - t[b] < ( m[b] - m[a] ) * t
+				// t > ( t[a] - t[b] ) / ( m[b] - m[a] )
+				return ( H[a] - H[b] ) / ( M[b] - M[a] ) + 1;
+			} ( i, i+1 );
+
+			if ( t > 0 ) {
+				events.push_back( { t, i } );
+			}
+			if ( t > 0 ) {
+				events.push_back( { t - 1, i } );
+			}
+		}
+
+		int inc = 0, dec = 0;
+		for ( int i = 0 ; i+1 < n ; ++i ) {
+			if ( H[ i ] == H[ i+1 ] ) {
+				equal[ i ] = 1;
+				continue;
+			} else {
+				equal[ i ] = 0;
+			}
+			if ( i % 2 == 0 ) {
+				( H[ i ] < H[ i+1 ] ? inc : dec )++;
+			} else {
+				( H[ i ] < H[ i+1 ] ? dec : inc )++;
+			}
+		}
+
+		std::sort( events.begin(), events.end() );
+
+		int lst = ( inc == n-1 or dec == n-1 ) ? 0 : -1;
+
+		for ( int i = 0, j = 0 ; i < events.size() ; ++i ) {
+			while ( j < events.size() and events[i].first == events[j].first ) {
+
+				int64_t t = events[j].first;
+				int idx = events[j++].second;
+
+				const int64_t h1 = H[ idx ] + t * M[ idx ];
+				const int64_t h2 = H[ idx+1 ] + t * M[ idx+1 ];
+
+				assert( M[ idx ] != M[ idx+1 ] );
+				if ( M[ idx ] > M[ idx + 1 ] ) {
+
+					assert( H[ idx ] <= H[ idx+1 ] );
+
+					if ( !equal[idx] ) {
+						( idx % 2 == 0 ? inc : dec )--;
+					}
+
+					if ( h1 != h2 ) {
+						if( h1 < h2 ) {
+							( idx % 2 == 0 ? inc : dec )++;
+						} else {
+							( idx % 2 == 0 ? dec : inc )++;							
+						}
+					}
+				} else {
+
+					assert( H[ idx ] >= H[ idx+1 ] );
+
+					if ( !equal[ idx ] ) {
+						( idx % 2 == 0 ? dec : inc )--;
+					}
+
+					if ( h1 != h2 ) {
+						if( h1 < h2 ) {
+							( idx % 2 == 0 ? inc : dec )++;
+						} else {
+							( idx % 2 == 0 ? dec : inc )++;							
+						}
+					}
+				}
+
+				equal[ idx ] = ( h1 == h2 );
+			}
+
+			if ( inc == n-1 or dec == n-1 ) {
+				if ( lst == -1 ) {
+					lst = events[i].first;
+				}
+			} else {
+				if ( lst != -1 ) {
+					ans.push_back( { lst, events[i].first - 1 } );
+				}
+				lst = -1;
+			}
+
+			i = j - 1;
+		}
+
+		if ( lst != -1 ) {
+			ans.push_back( { lst, inf } );
+		}
+
+		std::cout << ans.size() << "\n";
+		for ( const auto pair : ans ) {
+			std::cout << pair.first << " ";
+			if ( pair.second == inf ) {
+				std::cout << "Inf\n";
+			} else {
+				std::cout << pair.second << "\n";
+			}
+		}
+	}
+
+	return 0;
+}

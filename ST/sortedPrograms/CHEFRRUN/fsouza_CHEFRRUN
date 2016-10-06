@@ -1,0 +1,65 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+int main() {
+  int nt;
+  scanf("%d", &nt);
+  for (int t = 0; t < nt; ++t) {
+    int n;
+    scanf("%d", &n);
+    vector<int> skip(n);
+    for (int i = 0; i < n; ++i)
+      scanf("%d", &skip[i]);
+    vector<int> next(n);
+    for (int i = 0; i < n; ++i)
+      next[i] = (i + skip[i] + 1) % n;
+    vector<int> mark(n, 0);
+    stack<int> st;
+    int result = 0;
+    for (int i = 0; i < n; ++i)
+      if (!mark[i]) {
+	int v;
+	for (v = i; !mark[v]; v = next[v]) {
+	  mark[v] = 1;
+	  st.push(v);
+	}
+	if (mark[v] == 1) {
+	  while (st.top() != v) {
+	    ++result;
+	    mark[st.top()] = 2;
+	    st.pop();
+	  }
+	  ++result;
+	  mark[st.top()] = 2;
+	  st.pop();
+	}
+	while (!st.empty()) {
+	  mark[st.top()] = 2;
+	  st.pop();
+	}
+      }
+    printf("%d\n", result);
+  }
+
+  return 0;
+}

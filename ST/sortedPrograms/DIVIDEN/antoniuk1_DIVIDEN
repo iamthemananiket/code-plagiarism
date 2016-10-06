@@ -1,0 +1,266 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <math.h>
+#include <cassert>
+#include <memory.h>
+#include <algorithm>
+#include <deque>
+#include <set>
+#include <map>
+
+using namespace std;
+
+typedef pair<double, double> point;
+#define x first
+#define y second
+
+const double eps = 1e-9;
+
+bool clockwise(point a, point b, point c) {
+    return (b.x - a.x) * (c.y - a.y) < (b.y - a.y) * (c.x - a.x);
+}
+
+double abs(point a) {
+    return sqrt(a.x * a.x + a.y * a.y);
+}
+
+double angle(point a, point b) {
+    double val = a.x * b.x + a.y * b.y;
+    val /= abs(a);
+    val /= abs(b);
+    return acos(val);
+}
+
+double angle(point a, point b, point c) { // between b and c
+    b.x -= a.x;
+    b.y -= a.y;
+    
+    c.x -= a.x;
+    c.y -= a.y;
+    
+    return angle(b, c);
+}
+
+double radToDeg(double a) {
+    return 180. * a / M_PI;
+}
+
+double degToRad(double a) {
+    return M_PI * a / 180.;
+}
+
+pair<point,point> intersectCircleWithLine(point c, double r, point a, point b) {
+    a.x -= c.x;
+    a.y -= c.y;
+    b.x -= c.x;
+    b.y -= c.y;
+    
+    double A = a.y - b.y;
+    double B = b.x - a.x;
+    double C = a.x * b.y - b.x * a.y;
+    
+    double x0 = -A * C / (A*A + B*B);
+    double y0 = -B * C / (A*A + B*B);
+    
+    double d = r*r - C*C / (A*A + B*B);
+    double mult = sqrt (d / (A*A + B*B));
+    
+    point ra, rb;
+    ra.x = x0 + B * mult + c.x;
+    rb.x = x0 - B * mult + c.x;
+    ra.y = y0 - A * mult + c.y;
+    rb.y = y0 + A * mult + c.y;
+    
+    return make_pair(ra, rb);
+}
+
+double dist(point a, point b) {
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+pair<point,point> intersectTwoCircles(point c, double r, point c2, double r2) {
+    c2.x -= c.x;
+    c2.y -= c.y;
+    
+    double A = -2 * c2.x;
+    double B = -2 * c2.y;
+    double C = c2.x * c2.x + c2.y * c2.y + r * r - r2 * r2;
+    
+    double x0 = -A * C / (A*A + B*B);
+    double y0 = -B * C / (A*A + B*B);
+    
+    double d = r*r - C*C / (A*A + B*B);
+    double mult = sqrt (d / (A*A + B*B));
+    
+    point ra, rb;
+    ra.x = x0 + B * mult + c.x;
+    rb.x = x0 - B * mult + c.x;
+    ra.y = y0 - A * mult + c.y;
+    rb.y = y0 + A * mult + c.y;
+    
+    return make_pair(ra, rb);
+}
+
+void printCircle(point c, point r1, point r2) {
+    cout << "Circle ";
+    cout.precision(10);
+    cout << fixed << c.x << " " << c.y << " " << r1.x << " " << r1.y << " " << r2.x << " " << r2.y << "\n";
+}
+
+void printLine(point p1, point p2) {
+    cout << "Line ";
+    cout.precision(10);
+    cout << fixed << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << "\n";
+}
+
+
+point divideByTwo(point c, point p1, point p2) {
+    printCircle(p1, p1, p2);
+    printCircle(p2, p1, p2);
+    
+    pair<point, point> r = intersectTwoCircles(p1, dist(p1,p2), p2, dist(p1,p2));
+    
+    printLine(r.first, r.second);
+    
+    r = intersectCircleWithLine(c, dist(c, p1), r.first, r.second);
+    
+    
+    if (clockwise(c, p1, r.first))
+        return r.first;
+    else
+        return r.second;
+}
+
+point sub(point a, point b, point X, point Y, point C) {
+    
+    printCircle(b, X, Y);
+    pair<point,point> r = intersectTwoCircles(b, dist(X, Y), C, dist(C, a));
+    
+    if (dist(a, r.first) < dist(a, r.second))
+        return r.first;
+    return r.second;
+}
+
+point P1, P2, C;
+int n;
+
+void findThreeDegrees(point & p9, point & p10) {
+    
+    point P3;
+    pair<point,point> H = intersectCircleWithLine(C, dist(P1, C), C, P1);
+    if (dist(P1, H.first) < eps)
+        P3 = H.second;
+    else
+        P3 = H.first;
+    
+    point p4 = divideByTwo(C, P1, P3);
+    point p7;
+    printCircle(p4, p4, C);
+    printCircle(C, p4, C);
+    pair<point, point> r = intersectTwoCircles(C, dist(p4, C), p4, dist(p4, C));
+    
+    printLine(r.first, r.second);
+    
+    p7.x = (p4.x + C.x) / 2.;
+    p7.y = (p4.y + C.y) / 2.;
+    
+    printLine(p7, P1);
+    
+    printCircle(p7, p7, C);
+    
+    r = intersectCircleWithLine(p7, dist(p7, C), p7, P1);
+    
+    point p8;
+    if (dist(P1, r.first) < dist(P1, r.second))
+        p8 = r.first;
+    else
+        p8 = r.second;
+    
+    
+    printCircle(P1, P1, p8);
+    printCircle(P1, P1, C);
+    
+    
+    r = intersectTwoCircles(P1, dist(P1, p8), C, dist(P1, C));
+    if (clockwise(C, P1, r.first))
+        p9 = r.first;
+    else
+        p9 = r.second;
+    
+    r = intersectTwoCircles(P1, dist(P1, C), C, dist(P1, C));
+    if (clockwise(C, P1, r.first))
+        p10 = r.first;
+    else
+        p10 = r.second;
+    
+    p10 = divideByTwo(C, p9, p10);
+    p10 = divideByTwo(C, p9, p10);
+    p10 = divideByTwo(C, p9, p10);
+}
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    point p2;
+    cin >> C.x >> C.y >> P1.x >> P1.y >> p2.x >> p2.y;
+    
+    n = radToDeg(angle(C, P1, p2) + eps) + eps;
+    if (!clockwise(C, P1, p2))
+        n = 360 - n;
+    
+    if (n % 3 == 0) {
+        cout << "NO\n";
+        return 0;
+    }
+    
+    cout << "YES\n";
+    printLine(C, P1);
+    printLine(C, p2);
+    printLine(P1, p2);
+    
+    pair<point,point> r = intersectCircleWithLine(C, dist(C, P1), p2, C);
+    if (clockwise(C, P1, p2) == clockwise(C, P1, r.first))
+        P2 = r.first;
+    else
+        P2 = r.second;
+    
+    
+    printCircle(C, C, P1);
+    printLine(P1, P2);
+    
+    point p9, p10;
+    findThreeDegrees(p9, p10);
+    
+    int N = n;
+    while (N > 3) {
+        P2 = sub(P1, P2, p9, p10, C);
+        N -= 3;
+    }
+    
+    if (N == 2)
+        P2 = divideByTwo(C, P1, P2);
+    
+    vector<point> ans;
+    point p = P1;
+    for(int i = 0; i < n-1; ++i) {
+        
+        printCircle(p, P1, P2);
+        point pp = p;
+        
+        pair<point, point> r = intersectTwoCircles(p, dist(P1, P2), C, dist(C, P1));
+        
+        if (clockwise(C, p, r.first))
+            p = r.first;
+        else
+            p = r.second;
+        
+        ans.push_back(p);
+    }
+    
+    cout << "Answer\n";
+    for(int i = 0; i < ans.size(); ++i)
+        cout << fixed << ans[i].x << " " << ans[i].y << "\n";
+    
+    return 0;
+}

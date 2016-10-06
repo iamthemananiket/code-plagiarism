@@ -1,0 +1,137 @@
+/* @nazarbek.altybay */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <queue>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+
+#define pii pair<int, int>
+
+#define pb push_back
+#define mp make_pair
+
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+
+const int INF = (int) 1e9 + 7;
+const int MAXN = (int) 2e6 + 7;
+
+const int dx[] = {-1, 0, 1, 0};
+const int dy[] = {0, 1, 0, -1};
+
+int n, m;
+int queries;
+
+char type[MAXN];
+
+int x[MAXN];
+int y[MAXN];
+
+int was[MAXN];
+int a[MAXN];
+
+int u[MAXN];
+int v[MAXN];
+
+int dead[MAXN];
+
+ll sum[MAXN];
+ll ans[MAXN];
+
+int dsu[MAXN];
+
+multiset<ll> all;
+  
+int answer[MAXN];
+
+int get(int x) {
+  if (dsu[x] == x) return x;
+  return dsu[x] = get(dsu[x]);
+}
+
+void join(int x, int y) {
+  x = get(x);
+  y = get(y);
+  if (x == y) return;
+  all.erase(all.find(sum[x]));
+  all.erase(all.find(sum[y]));
+  sum[x] += sum[y];
+  all.insert(sum[x]);
+  dsu[y] = x;
+}
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  scanf("%d%d%d", &n, &m, &queries);
+  for (int i = 1; i <= n; i++) {
+    scanf("%d", &a[i]);
+  }
+  for (int i = 1; i <= m; i++) {
+    scanf("%d%d", &u[i], &v[i]);
+  }
+  for (int i = 1; i <= queries; i++) {
+    scanf("\n%c ", &type[i]);
+    if (type[i] == 'P') {
+      scanf("%d%d", &x[i], &y[i]);
+      was[i] = a[x[i]];
+      a[x[i]] = y[i];
+    } else {
+      scanf("%d", &x[i]);
+      dead[x[i]]++;
+    }
+    //cout << type[i] << ' ' << x[i] << ' ' << y[i] << endl;
+  }
+  for (int i = 1; i <= n; i++) {
+    dsu[i] = i;
+    sum[i] = a[i];
+    all.insert(sum[i]);
+  }
+  for (int i = 1; i <= m; i++) {
+    if (!dead[i]) join(u[i], v[i]);
+  }
+  for (int i = queries; i > 0; i--) {
+    ans[i] = *all.rbegin();
+    if (type[i] == 'P') {
+      int cur = a[x[i]];
+      int old = was[i];
+      int pos = get(x[i]);
+      all.erase(all.find(sum[pos]));
+      sum[pos] -= cur;
+      sum[pos] += old;
+      all.insert(sum[pos]);
+      a[x[i]] = old;
+    } else {
+      dead[x[i]]--;
+      if (dead[x[i]] == 0) {
+        join(u[x[i]], v[x[i]]);
+      }
+    }
+  }
+  for (int i = 1; i <= queries; i++)
+    printf("%lld\n", ans[i]);
+  return 0;
+}

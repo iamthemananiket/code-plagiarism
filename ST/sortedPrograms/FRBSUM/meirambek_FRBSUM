@@ -1,0 +1,109 @@
+#include <iostream>
+#include <map>
+#include <cstring>
+#include <fstream>
+#include <cstdio>
+#include <math.h>
+#include <queue>
+#include <stack>
+#include <set>
+#include <string>
+#include <utility>
+#include <cstdlib>
+#include <cassert>
+#include <algorithm>        
+#include <ctime>
+#include <vector>
+using namespace std;
+#define fname ""
+#define ull unsigned long long
+#define INF 1000000000
+#define ll long long
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+const int N = 100500;
+
+void _merge(vector <int>&a, vector <int>&b, vector <int>&c) {
+	int l = 0, r = 0;
+	while (l < a.size() || r < b.size()) {
+		if (l < a.size() && r < b.size()) {
+			if (a[l] < b[r]) c.pb(a[l++]);
+			else c.pb(b[r++]);
+		}
+		else {
+			if (l < a.size()) c.pb(a[l++]);
+			else c.pb(b[r++]);
+		}
+	}
+}
+int nn = 1;
+vector <int> t[4 * N], sum[4 * N];
+
+int a[N], sz = 0;
+
+void calc(int l, int r, int v = 1, int tl = 1, int tr = nn) {
+	if (l > tr || tl > r) return;
+	if (l <= tl && tr <= r) {
+		a[++sz] = v;
+		return;
+	}
+	int mid = (tl + tr) >> 1;
+	calc(l, r, v + v, tl, mid);
+	calc(l, r, v + v + 1, mid + 1, tr);
+}
+
+int n, m, l, r, x;
+int main () {
+	#ifndef ONLINE_JUDGE
+    freopen ("in", "r", stdin);
+    freopen ("out", "w", stdout);
+    #endif
+
+    scanf ("%d", &n);
+
+    while (nn < n) nn += nn;
+
+    for (int i = 1; i <= n; ++ i) {
+    	scanf ("%d", &x);
+    	t[i + nn - 1].pb(x);
+    }
+
+    for (int i = nn - 1; i > 0; -- i) _merge(t[i + i], t[i + i + 1], t[i]);
+
+    for (int i = 1; i < nn + nn; ++ i) {
+    	if (t[i].size()) {
+    		sum[i].pb(t[i][0]);
+    		for (int j = 1; j < t[i].size(); ++ j) sum[i].pb(sum[i][sum[i].size() - 1] + t[i][j]);
+    	}
+    }
+
+    scanf ("%d", &m);
+
+    int p1 = 0, p2 = 0, ret = 0, j;
+	int ans = 0, last = 0;
+    for (int i = 1; i <= m; ++ i) {
+    	scanf ("%d%d", &l, &r);
+    	sz = ans = last = 0;
+    	calc(l, r);
+    	while (1) {
+    		int tot = 0, ss = 0;
+    		for (j = 1; j <= sz; ++ j) {
+			    p1 = lower_bound(t[a[j]].begin(), t[a[j]].end(), last) - t[a[j]].begin();
+			    p2 = upper_bound(t[a[j]].begin(), t[a[j]].end(), ans + 1) - t[a[j]].begin();
+			    ret = 0;
+			    if (p2) ret += sum[a[j]][p2 - 1];
+				if (p1) ret -= sum[a[j]][p1 - 1];
+				tot += p2 - p1;
+				ss += ret;
+    		}
+    		if (tot == 0) break;
+    		last = ans + 2;
+			ans += ss;
+    	}
+    	printf("%d\n", ans + 1);
+    }
+
+	return 0;
+}

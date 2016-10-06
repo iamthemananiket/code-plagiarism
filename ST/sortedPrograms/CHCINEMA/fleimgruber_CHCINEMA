@@ -1,0 +1,167 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+int n,m;
+ll z,l,r,b;
+
+bool f(ll x)
+{
+	ll tz=0,tl=0,tr=0,tb=0;
+	if (x>z)
+	{
+		x-=z;
+		tz=z;
+		if (x>l)
+		{
+			x-=l;
+			tl=l;
+			if (x>r)
+			{
+				x-=r;
+				tr=r;
+				tb=x;
+			}
+			else
+				tr=x;
+		}
+		else
+			tl=x;
+	}
+	else
+		tz=x;
+	tl+=tr;
+	tr=0;
+	//end each row using B
+	if (tb>=n)
+		tb-=n;
+	else
+	{
+		int left=n-tb;
+		tb=0;
+		if (left>=tl)
+		{
+			left-=tl;
+			tl=0;
+			tz=max(0LL,tz-left);
+		}
+		else
+			tl-=left;
+	}
+	if (m==1)
+		return tz+tl+tb==0;
+	//m-1 > 0
+	ll need=0;
+	if (tb)
+	{
+		//create suffix using BXBX...BX
+		//where X=Z|E
+		//each of cost 2 -> rows have size m-1 now
+		//full row takes floor((m-1)/2) B's
+		int per=(m-1)/2;
+		if (per)
+		{
+			ll rows=tb/per;
+			tb-=rows*per;
+			need+=rows;
+			//place z as possible
+			tz=max(0LL,tz-rows*per);
+			//parity case
+			if ((m-1)&1)
+			{
+				if (rows>=tl)
+				{
+					rows-=tl;
+					tl=0;
+					tz=max(0LL,tz-rows);
+				}
+				else
+					tl-=rows;					
+			}
+		}
+		else
+			return false; //now way to place remaining Bs
+		if (tb) //fill row partial
+		{
+			need++;
+			int left=(m-1)-2*tb;
+			tz=max(0LL,tz-tb);
+			tb=0;
+			if (left>=tl)
+			{
+				left-=tl;
+				tl=0;
+				tz=max(0LL,tz-left);
+			}
+			else
+				tl-=left;
+		}
+	}
+	//use Zs+Ls left
+	need+=(tl+tz+(m-1)-1)/(m-1);
+	return need<=n;
+}
+
+int naive(int n, int _m, int z, int l, int r, int b, bool u)
+{
+	if (z<0||l<0||r<0||b<0)
+		return -1;
+	if (_m==0)
+		return naive(n-1,m,z,l,r,b,false);
+	if (n==0)
+		return 0;
+	if (!u)
+		return max(naive(n,_m-1,z-1,l,r,b,false)+1
+			,max(naive(n,_m-1,z,l-1,r,b,false)+1
+			,max(naive(n,_m-1,z,l,r-1,b,true)+1
+			,naive(n,_m-1,z,l,r,b-1,true)+1)));
+	return max(naive(n,_m-1,z,l,r,b,false)
+		,max(naive(n,_m-1,z-1,l,r,b,false)+1
+		,naive(n,_m-1,z,l,r-1,b,true)+1));
+}
+
+int main()
+{
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d %d %lld %lld %lld %lld",&n,&m,&z,&l,&r,&b);
+		ll lo=0,hi=min(n*1LL*m,z+l+r+b),mid;
+		while (lo<hi)
+		{
+			mid=(lo+hi+1)/2;
+			if (f(mid))
+				lo=mid;
+			else
+				hi=mid-1;
+		}
+		#ifndef LOCAL
+			printf("%lld\n",lo);
+		#else
+			int is=naive(n,m,z,l,r,b,false);
+			if (is!=lo)
+			{
+				printf("wrong (%lld vs %d)! %d %d %lld %lld %lld %lld\n",lo,is,n,m,z,l,r,b); 
+				return 1;
+			}
+			if (!(tc%1000))
+				printf("%d\n",tc);
+		#endif
+	}
+	return 0;
+}

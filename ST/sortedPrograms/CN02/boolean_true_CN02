@@ -1,0 +1,38 @@
+#include<bits/stdc++.h>
+#define MOD 1000000007
+using namespace std;
+long long int prec(long long int n)
+{
+    long long int ans=1;
+    ans*=n;
+    ans%=MOD;
+    ans*=n-1;
+    ans%=MOD;
+    ans*=n-2;
+    ans%=MOD;
+    ans*=n-3;
+    ans%=MOD;
+    ans*=n-4;
+    ans%=MOD;
+    ans*=n-5;
+    ans%=MOD;
+    ans*=301388891;
+    ans%=MOD;
+    return ans;
+}
+int main()
+{
+   int test=1;
+   //scanf("%d",&test);
+   while(test--)
+   {
+      long long int n;
+      scanf("%lld",&n);
+      if(n<13)
+         printf("0\n");
+      else
+         printf("%lld\n",prec((n-1)/2));
+   }
+   return 0;
+}
+  

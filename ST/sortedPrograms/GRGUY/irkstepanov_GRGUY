@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+
+#define mp std::make_pair
+#define pb push_back
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int) (a).size()
+
+int max(int a, int b)
+{
+    return (a > b ? a : b);
+}
+
+int min(int a, int b)
+{
+    return (a < b ? a : b);
+}
+
+typedef long long ll;
+typedef long double ld;
+typedef std::vector <int> vi;
+
+const int nmax = 200500;
+const int inf = 1000000000;
+
+int main()
+{
+
+    int tt;
+    scanf("%d\n", &tt);
+
+    while (tt--)
+    {
+        char a[nmax], b[nmax];
+        gets(a);
+        gets(b);
+        int n;
+        for (n = 0; a[n]; n++) ;
+        std::vector <int> x(n, inf), y(n, inf);
+        if (a[0] == '.') x[0] = 0;
+        if (b[0] == '.') y[0] = 0;
+        for (int i = 0; i < n - 1; i++)
+        {
+            if (x[i] != inf)
+            {
+                if (a[i + 1] == '.') x[i + 1] = min(x[i + 1], x[i]);
+                if (b[i + 1] == '.') y[i + 1] = min(y[i + 1], x[i] + 1);
+            }
+            if (y[i] != inf)
+            {
+                if (b[i + 1] == '.') y[i + 1] = min(y[i + 1], y[i]);
+                if (a[i + 1] == '.') x[i + 1] = min(x[i + 1], y[i] + 1);
+            }
+        }
+        int ans = min(x.back(), y.back());
+        printf(ans != inf ? "Yes\n" : "No\n");
+        if (ans != inf) printf("%d\n", ans);
+    }
+
+}

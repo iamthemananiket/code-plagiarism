@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int N = 5e6 + 6, M = sqrt(N) + 3;
+bitset< N > bs;
+
+int gcd(int a, int b) {
+  if(a == 0) return b;
+  return gcd(b % a, a);
+}
+
+int main() {
+  vector< int > ah;
+  bs.reset();
+  set< int > s;
+  for(int i = 1; i<M; i++)
+    for(int j = i+1; j<M; j+=2) if(gcd(i, j) == 1) {
+      int now = i*i + j*j;
+      for(int k = now; k<N; k+= now)
+        bs[k] = 1;
+    }
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    int n;
+    scanf("%d", &n);
+    puts(bs[n] ? "YES" : "NO");
+  }
+  return 0;
+}

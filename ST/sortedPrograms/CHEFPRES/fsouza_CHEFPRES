@@ -1,0 +1,106 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <cstring>
+#include <queue>
+#include <utility>
+
+#define MAXN 10000
+#define MAXK 100
+
+using namespace std;
+
+struct anst {
+  int mind, node;
+  bool operator < (const anst &other) const {
+    if (mind != other.mind)
+      return mind < other.mind;
+    return node > other.node;
+  }
+  bool operator != (const anst &other) const {
+    return mind != other.mind || node != other.node;
+  }
+};
+
+vector<int> adj[MAXN];
+int dist[MAXN], sell[MAXN];
+int ans[MAXN][MAXK];
+
+void dfs(int v, int p, int d) {
+  dist[v] = d;
+  for (int v2: adj[v])
+    if (v2 != p)
+      dfs(v2, v, d+1);
+}
+
+anst best[MAXN];
+
+void solve(int n, int p, int b) {
+  priority_queue<pair<anst, int> > pq;
+
+  for (int i = 0; i < n; i++) {
+    if (sell[i] == p) {
+      best[i] = (anst){dist[i], i};
+      pq.push(make_pair(best[i], i));
+    } else
+      best[i] = (anst){-1, -1};
+
+    ans[i][p] = -1;
+  }
+
+  while (!pq.empty()) {
+    pair<anst, int> ansv = pq.top(); pq.pop();
+    anst a = ansv.first;
+    int v = ansv.second;
+
+    if (best[v] != a) continue;
+
+    ans[v][p] = a.node + 1;
+
+    for (int v2: adj[v]) {
+      anst cand = {min(dist[v2], a.mind), a.node};
+      if (best[v2] < cand) {
+	pq.push(make_pair(best[v2] = cand, v2));
+      }
+    }
+  }
+}
+
+int main() {
+  int n, k;
+
+  scanf("%d %d", &n, &k);
+
+  int b;
+  scanf("%d", &b); b--;
+
+  for (int i = 0; i < n-1; i++) {
+    int a, b;
+    scanf("%d %d", &a, &b);
+    a--, b--;
+    adj[a].push_back(b);
+    adj[b].push_back(a);
+  }
+
+  for (int i = 0; i < n; i++) scanf("%d", &sell[i]), sell[i]--;
+  
+  dfs(b, -1, 0);
+
+  for (int p = 0; p < k; p++)
+    solve(n, p, b);
+
+  int nq;
+  
+  scanf("%d", &nq);
+
+  for (int q = 0; q < nq; q++) {
+    int a, p;
+    scanf("%d %d", &a, &p); a--, p--;
+    printf("%d\n", ans[a][p]);
+  }
+  
+  return 0;
+}

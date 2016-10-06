@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 100005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pair<int,int>,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+double power(double a,int b){
+	double t=1.0;
+	while(b>0){
+		if(b&1){
+			t=t*a;
+		}
+		a=a*a;
+		b>>=1;
+	}
+	return t;
+}
+
+double gpsum(double a,double r,int n){
+	double ret=a;
+	ret*=(1-power(r,n));
+	ret/=(double)(1-r);
+	return ret;
+}
+int main()
+{
+	int t,i,j,m;
+	double tot0,tot1;
+	double tot,p;
+	sc("%d",&t);
+	while(t--){
+		tot=1000000000.0;
+		sc("%d %lf",&m,&p);
+		tot0=gpsum(1,-p,m);
+		tot1=gpsum(p,-p,m-1);
+		tot0=tot0*tot;
+		tot1=tot1*tot;
+		pr("%.7lf %.7lf\n",tot0,tot1);
+	}
+	return 0;
+}

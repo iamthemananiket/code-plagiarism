@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while(T-- > 0){
+    int N;
+    cin >> N;
+    vector<pair<int,int>> ord;//(points, idx)
+    for(int i=0,c;i<N;++i){
+      cin>>c;
+      vector<int>cnt(6,0);
+      int score=c;
+      while(c-->0){
+        int ty;
+        cin>>ty;
+        ++cnt[--ty];
+      }
+      sort(cnt.begin(), cnt.end());
+      int low=cnt[0];
+      score+=4*low;
+      for(int& x:cnt)
+        x-=low;
+      low=cnt[1];
+      score+=2*low;
+      for(int& x:cnt)
+        x-=low;
+      low=cnt[2];
+      score+=low;
+      ord.push_back({score,i});
+    }
+    sort(ord.rbegin(),ord.rend());
+    if(N==1||ord[0].first!=ord[1].first) {
+      if(ord[0].second==0) cout<<"chef\n";
+      else cout<<(ord[0].second+1)<<endl;
+    }
+    else
+      cout<<"tie\n";    
+  }
+  return 0;
+}

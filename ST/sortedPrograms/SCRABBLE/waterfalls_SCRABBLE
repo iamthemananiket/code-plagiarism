@@ -1,0 +1,163 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace makepath {
+	int N,M;
+
+	int p[100013];
+	bool visited[1000013];
+	void reset() { for (int i=0;i<100013;i++) p[i] = i, visited[i] = 0; }
+	int find(int x) { return p[x]==x ? x : p[x]=find(p[x]); }
+	void merge(int a, int b) { p[find(a)] = find(b); }
+
+	vector<int> adj[100013];
+	void addedge(int a, int b) {
+		if (find(a)==find(b)) return;
+		adj[a].push_back(b); adj[b].push_back(a);
+		merge(a,b);
+	}
+
+	vector<int> path;
+	bool dfs(int x, int s) {
+		path.push_back(x);
+		visited[x] = 1;
+		if (x==s) return 1;
+		for (int i: adj[x]) if (!visited[i] && dfs(i,s)) return 1;
+		path.pop_back();
+		return 0;
+	}
+
+	vector<int> dist;
+	void dfs2(int x, int d) {
+		dist[x] = d;
+		for (int i: adj[x]) if (!dist[i]) dfs2(i,d+1);
+	}
+	void getdist(int s) {
+		dist = vector<int>(N+1);
+		dfs2(s,1);
+	}
+
+	vector<int> make() {
+		getdist(1);
+		int high = 1;
+		for (int i=1;i<=N;i++) if (dist[i]>dist[high]) high = i;
+		getdist(high);
+		int high2 = 1;
+		for (int i=1;i<=N;i++) if (dist[i]>dist[high2]) high2 = i;
+		dfs(high,high2);
+		return path;
+	}
+}
+
+clock_t start;
+
+int D;
+char buff[100013];
+vector<string> dict;
+vector<bool> done;
+bool bad[26];
+vector<char> goaway;// = {'K','J','X','Q','Z','V','W','Y'};
+
+int charv[26] = {1,3,3,2,1,2,2,4,1,8,5,1,3,1,1,3,10,6,1,1,1,4,4,8,4,10};
+
+bool bysize(string a, string b) { return a.size()<b.size(); }
+
+int val[100013];
+char cur[100013];
+
+vector<int> path;
+
+int on = 0;
+string s;
+
+void reads() {
+	scanf(" %s",&buff);
+	s = string(buff);
+	sort(s.begin(),s.end());
+	reverse(s.begin(),s.end());
+	while (s.size()>0 && s.back()=='_') s.pop_back();
+}
+
+bool check(string t) {
+	vector<int> has(26);
+	for (char c: s) has[c-'A']+=1;
+	vector<int> left = has;
+	int need = 0;
+	for (char c: t) {
+		if (left[c-'A']) left[c-'A']-=1;
+		else need+=1;
+	}
+	if (need>4) return 0;
+	int best = 0;
+	int where = 0;
+	for (int i=0;i<path.size();i++) {
+		if (i+t.size()>path.size()) break;
+		left = has;
+		int use = 0;
+		int ok = 1;
+		for (int j=0;j<t.size();j++) {
+			if (cur[path[i+j]]=='.') left[t[j]-'A']-=1, use+=1;
+			else if (cur[path[i+j]]=='_' || cur[path[i+j]]==t[j]) continue;
+			else ok = 0;
+		}
+		for (int j=0;j<26;j++) if (left[j]<0) ok = 0;
+		if (!ok || !use) continue;
+		int curval = 0;
+		for (int j=0;j<t.size();j++) curval+=val[path[i+j]]*charv[t[j]];
+		if (curval>best) best = curval, where = i;
+	}
+	if (best==0) return 0;
+	int i = where;
+	int use = 0;
+	for (int j=0;j<t.size();j++) use+=(cur[path[i+j]]=='.');
+	printf("%d\n",use);
+	for (int j=0;j<t.size();j++) {
+		if (cur[path[i+j]]=='.') printf("%d %c\n",path[i+j],t[j]);
+		cur[path[i+j]] = t[j];
+	}
+	printf("%d\n",t.size());
+	for (int j=0;j<t.size();j++) printf("%d ",path[i+j]);
+	printf("\n");
+	printf("%s\n",t.c_str());
+	fflush(stdout);
+	reads();
+	return 1;
+}
+
+int main() {
+	start = clock();
+	for (char c: goaway) bad[c-'A'] = 1;
+	makepath::reset();
+	scanf("%d",&D);
+	for (int d=0;d<D;d++) {
+		scanf(" %s",&buff);
+		string w(buff);
+		bool ok = 1;
+		for (char c: w) if (bad[c-'A']) ok = 0;
+		//if (w.size()>5) ok = 0;
+		if (!ok) continue;
+		dict.push_back(w);
+		done.push_back(0);
+	}
+	sort(dict.begin(),dict.end(),bysize);
+	scanf("%d%d",&makepath::N,&makepath::M);
+	for (int i=1;i<=makepath::N;i++) scanf("%d",&val[i]);
+	scanf(" %s",&buff);
+	for (int i=1;i<=makepath::N;i++) cur[i] = buff[i-1];
+	for (int i=0;i<makepath::M;i++) {
+		int a,b;
+		scanf("%d%d",&a,&b);
+		makepath::addedge(a,b);
+	}
+	path = makepath::make();reverse(path.begin(),path.end());
+	reads();
+	while ((double) (clock()-start)/CLOCKS_PER_SEC<9.5) {
+		if (!done[on] && check(dict[on])) done[on] = 1;
+		on+=1;
+		if (on>=dict.size() || rand()%1000==0) on = 0;
+	}
+	printf("-1\n");
+	fflush(stdout);
+
+	return 0;
+}

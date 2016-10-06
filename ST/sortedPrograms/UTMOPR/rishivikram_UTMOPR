@@ -1,0 +1,86 @@
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include <string.h>
+using namespace std;
+const double pi=acos(-1.0);
+const double eps=1e-11;
+#define maxx(a,b) (a)>(b)?(a):(b)
+#define minn(a,b) (a)<(b)?(a):(b)
+#define ll long long int
+#define sc(x) scanf("%d",&x)
+#define scl(x) scanf("%lld",&x)
+#define printl(x) printf("%lld\n",x)
+#define print(x) printf("%d\n",x)
+#define printd(x) printf("%lf\n",x)
+#define prints(x) printf("%s\n",x);
+#define DEBUG(x) cout<<"Value of "<<#x<<" is "<<x<<endl;
+#define pc putchar
+#define mp(A,B) make_pair(A,B)
+#define pb(X) push_back(X)
+#define INF 1000000000
+#define MOD 1000000007
+#define SET(x,y) memset(x,y,sizeof(x));
+int main()
+{
+	ll t,n,k,i,sum,ans,x;
+	scl(t);
+	while(t--)
+	{
+		sum=0;
+		scl(n);scl(k);
+		for(i=0;i<n;i++)
+		{
+			scl(x);
+			sum+=x;
+		}
+		ans=sum*(1<<(k-1));
+		ans+=(1<<(k-1));
+		if(k==1)
+		{
+			if((sum+1)%2==0)
+				printf("even\n");
+			else
+				printf("odd\n");
+		}
+		else
+			printf("even\n");
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

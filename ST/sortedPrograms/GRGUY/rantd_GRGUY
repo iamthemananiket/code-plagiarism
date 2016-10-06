@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest;
+	string l[2];
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> l[0] >> l[1];
+		int ret = 1000000, n = l[0].size();
+		
+		repu(it, 0, 2) {
+			if (l[it][0] == '.') {
+				int tmp = 0, cur = it;
+				bool ok = true;
+				repu(i, 1, n) {
+					if (l[cur][i] != '.') {
+						if (l[1 - cur][i] != '.') {
+							ok = false; break;
+						}
+						else {
+							tmp++; cur = 1 - cur;
+						}
+					}
+				}
+				if (ok) amin(ret, tmp);
+			}
+		}
+		
+		if (ret == 1000000) printf("No\n");
+		else printf("Yes\n%d\n", ret);
+	}
+	
+	return 0;
+}

@@ -1,0 +1,50 @@
+#include <iostream>
+using namespace std;
+
+#define  ei  else if
+#define  ft  first
+#define  sd  second
+
+const int MX = (1<<30) ;
+const int MN = -(1<<30) ;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+        
+        int  t, n, i, pL, pR, ptr, ptl, pbr, pbl ;
+        pair<int,int>  tmp, L, R, tr, tl, br, bl  ;
+        
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> n ;
+                
+                L = { MX, 0 } ;
+                R = { MN, 0 } ;
+                tr = { MN, MN } ;
+                tl = { MX, MN } ;
+                br = { MN, MX } ;
+                bl = { MX, MX } ;
+                
+                for( i = 1 ;  i <= n ;  i++ )
+                {
+                        cin >> tmp.ft >> tmp.sd ;
+                        if( R.ft < tmp.ft )  R = tmp,  pR = i ;
+                        if( L.ft > tmp.ft )  L = tmp,  pL = i ;
+                        if( tr.sd < tmp.sd || ( tr.sd==tmp.sd && tr.ft<tmp.ft ) )  tr = tmp,  ptr = i ;
+                        if( tl.sd < tmp.sd || ( tl.sd==tmp.sd && tl.ft>tmp.ft ) )  tl = tmp,  ptl = i ;
+                        if( br.sd > tmp.sd || ( br.sd==tmp.sd && br.ft<tmp.ft ) )  br = tmp,  pbr = i ;
+                        if( bl.sd > tmp.sd || ( bl.sd==tmp.sd && bl.ft>tmp.ft ) )  bl = tmp,  pbl = i ;
+                }
+                
+                if( R.ft == tr.ft )  cout << "1\n" << ptr << " SW\n" ;
+                ei( R.ft == br.ft )  cout << "1\n" << pbr << " NW\n" ;
+                ei( L.ft == tl.ft )  cout << "1\n" << ptl << " SE\n" ;
+                ei( L.ft == bl.ft )  cout << "1\n" << pbl << " NE\n" ;
+                ei( L.sd > R.sd )  cout << "2\n" << pL << " SE\n" << pR << " NW\n" ;
+                else                    cout << "2\n" << pL << " NE\n" << pR << " SW\n" ;
+        }
+        
+        return 0;
+} 

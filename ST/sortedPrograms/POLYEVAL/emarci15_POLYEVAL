@@ -1,0 +1,31 @@
+#include <iostream>
+
+#define mod 786433
+
+using namespace std;
+
+int n,q;
+long long a[1001];
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin >> n;
+    if(n>1000) return 100;
+    for(int i=0; i<=n; i++) cin >> a[i];
+
+    for(cin >> q; q--;) {
+        long long x; cin >> x;
+        long long sol(0ll);
+        long long po(1ll);
+        for(int i=0; i<=n; i++) {
+            sol = (sol + ((a[i]*po)%mod))%mod;
+
+            po = (po * x) % mod;
+        }
+
+        cout << sol << endl;
+    }
+
+    return 0;
+}

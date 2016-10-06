@@ -1,0 +1,133 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MOD 1000000007
+
+int n,l;
+
+/*int f(int mask, int k, int p)
+{
+	if (p>l)
+		return 0;
+	if (k==0)
+		return good[mask];
+	if (dp[mask][k-1][p-1]!=-1)
+		return dp[mask][k-1][p-1];
+	return dp[mask][k-1][p-1]
+		=(f(mask,k,p+1)+f(mask|(1<<(p-1)),k-1,p))%MOD;
+}*/
+
+int gcd[30][30];
+
+bool dp[1<<26],gdp[1<<26];
+
+bool good(int mask)
+{
+	if (mask==1)
+		return true;
+	if (gdp[mask>>1])
+		return dp[mask>>1];
+	gdp[mask>>1]=true;
+	int v=0;
+	for (int i=27-1; i>0; i--)
+		if (mask&(1<<i))
+		{
+			v=i;
+			break;
+		}
+	for (int i=v-1; i>0; i--)
+		if (mask&(1<<i))
+			if (!(mask&(1<<(gcd[v+1][i+1]-1))))
+				return dp[mask>>1]=false;
+	return dp[mask>>1]=good(mask^(1<<v));
+}
+
+int bino[30][30];
+int ways(int k, int v)
+{
+	if (k==0)
+		return v==0;
+	if (v==0)
+		return 0;
+	if (bino[k][v]!=-1)
+		return bino[k][v];
+	int ans=0;
+	for (int x=1; x<=k; x++)
+	{
+		ans+=ways(k-x,v-1);
+		if (ans>=MOD)
+			ans-=MOD;
+	}
+	return bino[k][v]=ans;
+}
+
+int solve(int got, int k)
+{
+	int ans=0;
+	//don't need to add 1
+	for (int take=(1<<(l-1))-1; take>=0; take--)
+	{
+		int cnt=__builtin_popcount(take);
+		if (cnt>k)
+			continue;
+		if (good(got|(take<<1)))
+		{
+			if (cnt)
+			{
+				ans+=ways(k,cnt);
+				if (ans>=MOD)
+					ans-=MOD;
+			}
+			if (cnt<k) //we could add 1
+			{
+				ans+=ways(k,cnt+1);
+				if (ans>=MOD)
+					ans-=MOD;
+			}
+		}
+	}
+	return ans;
+}
+
+int main()
+{
+	for (int i=1; i<30; i++)
+		for (int j=1; j<30; j++)
+		{
+			gcd[i][j]=__gcd(i,j);
+			bino[i][j]=-1;
+		}
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		int k;
+		scanf("%d %d %d",&n,&k,&l);
+		int got=0;
+		for (int i=1; i<=n; i++)
+		{
+			int a;
+			scanf("%d",&a);
+			got|=(1<<(a-1));
+		}
+		//the problem statement tells us
+		//that (got&1)==1 ! (Y)
+		printf("%d\n",solve(got,k));
+	}
+	return 0;
+}

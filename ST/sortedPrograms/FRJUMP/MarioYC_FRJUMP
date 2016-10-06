@@ -1,0 +1,95 @@
+#include <cstdio>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+
+#define MAXN 100000
+#define MOD 1000000007
+const double eps = 1e-8;
+
+long long mod_pow(long long a, int b){
+    long long ret = 1;
+
+    while(b){
+        if(b & 1){
+            ret *= a;
+            if(ret > MOD) ret %= MOD;
+        }
+        a *= a;
+        if(a > MOD) a %= MOD;
+        b >>= 1;
+    }
+
+    return ret;
+}
+
+double slog[MAXN + 1],logf0;
+long long prod[MAXN + 1];
+vector<int> vr_for_pos[MAXN + 1];
+int F[MAXN];
+
+int main(){
+    int N,Q;
+
+    scanf("%d",&N);
+
+    for(int i = 1;i <= N;++i){
+        slog[i] = 0;
+        prod[i] = 1;
+    }
+    for(int i = 1;i <= N;++i){
+        for(int j = i;j < N;j += i)
+            vr_for_pos[j].push_back(i);
+    }
+    for(int i = 0,f;i < N;++i){
+        scanf("%d",&f);
+        F[i] = f;
+        if(i != 0){
+            for(int r : vr_for_pos[i]){
+                slog[r] += log10(f);
+                prod[r] = (prod[r] * f) % MOD;
+            }
+        }
+    }
+    logf0 = log10(F[0]);
+
+    scanf("%d",&Q);
+
+    int op,p,f,R;
+
+    while(Q--){
+        scanf("%d",&op);
+
+        if(op == 1){
+            scanf("%d %d",&p,&f);
+            --p;
+
+            if(p == 0){
+                F[0] = f;
+                logf0 = log10(f);
+            }else{
+                double log_prevf = log10(F[p]);
+                double log_f = log10(f);
+                int inv_prevf = mod_pow(F[p],MOD - 2);
+                for(int r : vr_for_pos[p]){
+                    slog[r] += log_f - log_prevf;
+                    prod[r] *= f;
+                    if(prod[r] > MOD) prod[r] %= MOD;
+                    prod[r] *= inv_prevf;
+                    if(prod[r] > MOD) prod[r] %= MOD;
+                }
+                F[p] = f;
+            }
+        }else{
+            scanf("%d",&R);
+            double log_ans = slog[R] + logf0;
+            log_ans += eps;
+            log_ans -= floor(log_ans);
+            int ans = prod[R] * F[0] % MOD;
+            printf("%d %d\n",(int)floor(pow(10,log_ans)),ans);//(int)floor(pow(10,slog[R] - floor(slog[R]))),prod[R]);
+        }
+    }
+
+    return 0;
+}

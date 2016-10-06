@@ -1,0 +1,88 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+int INF = INT_MAX / 3;
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+ll extgcd(ll a, ll b, ll& x, ll& y) {
+	if (b == 0) {
+		x = (a >= 0) ? 1 : -1;
+		y = 0;
+		return abs(a);
+	}
+	else {
+		ll res = extgcd(b, a % b, y, x);
+		y -= (a / b) * x;
+		return res;
+	}
+}
+
+ll mod_inverse(ll a, ll m) {
+	ll x, y;
+	extgcd(a, m, x, y);
+	return (m + x % m) % m;
+}
+
+ll C(ll n, ll k, vector<ll>& f, vector<ll>& fi) {
+	return f[n] * fi[k] % MOD * fi[n - k] % MOD;
+}
+
+int main() {
+	vector<ll> f(100001), fi(100001);
+	f[0] = fi[0] = 1;
+	for (int i = 1; i <= 100000; i++) {
+		f[i] = f[i - 1] * i % MOD;
+		fi[i] = mod_inverse(f[i], MOD);
+	}
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		int one = 0;
+		map<ll, int> m;
+		for (int i = 0; i < N; i++) {
+			ll A; scanf("%lld", &A);
+			if (A == 1) one++;
+			else m[A]++;
+		}
+		if (one == N) {
+			cout << N % 2 << endl;
+			continue;
+		}
+		int sum = 0;
+		for (int k = 0; k <= one; k += 2)
+			sum = (sum + C(N - k - 1, one - k, f, fi)) % MOD;
+		sum = sum * f[N - one] % MOD;
+		for (auto it = m.begin(); it != m.end(); it++) {
+			int k = it->second;
+			sum = sum * fi[k] % MOD;
+		}
+		cout << sum << endl;
+	}
+}

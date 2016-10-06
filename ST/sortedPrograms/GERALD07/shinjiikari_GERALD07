@@ -1,0 +1,223 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FIll(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 200010
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline int input(void)
+{
+	char t;
+	int x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+    while(t>=48 && t<=57)
+    {
+        x=(x<<3)+(x<<1)+t-48;
+        t=getchar();
+    }
+	if(neg)
+		x=-x;
+	return x;
+}
+
+inline void output(int x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int blck,q,vis[N],cnt[N],n,m,sets,out[N],ans;
+vector <pii> E;
+vector <int> G[N];
+
+typedef struct query
+{
+	int l;
+	int r;
+	int idx;
+	bool operator <(const query rhs) const
+	{
+		if (l/blck!=rhs.l/blck) return l/blck<rhs.l/blck;
+		else return r<rhs.r;
+	}
+} query;
+
+query Q[N];
+
+int p[N],ranker[N];
+
+inline void create(int x)
+{
+	p[x]=x;
+	ranker[x]=1;
+}
+
+inline int findset(int x)
+{
+	if (x != p[x]) p[x] = findset(p[x]);
+	return p[x];
+}
+
+inline void merge(int x,int y)
+{
+	int px=findset(x),py=findset(y);
+	if(px==py) return;
+	sets--;
+	if(ranker[px]>ranker[py])
+	{
+		p[py]=px;
+		ranker[px]=ranker[px]+ranker[py];
+	}
+	else
+	{
+		p[px]=py;
+		ranker[py]=ranker[py]+ranker[px];
+	}
+}
+
+inline void dfs(int v)
+{
+	vis[v]=1;
+	int w,len=G[v].size();
+	REP(i,len)
+	{
+		w=G[v][i];
+		if (!vis[w]) dfs(w);
+	}
+}
+
+inline void solve()
+{
+	sort(Q,Q+q);
+	int l=0,r,x,dis,comp,a,b;
+	vector <int> v;
+	ans=0;
+	FIll(cnt,0);
+	FIll(vis,0);
+	REP(i,q)
+	{
+		//assert(v.size()==0);
+		//v.clear();
+		x=Q[i].l/blck;
+		sets=n;
+		REP(j,n) create(j);
+		r=min((x+1)*blck,m)-1;
+		while(i<q&&Q[i].l/blck==x)
+		{
+			while(r<Q[i].r)
+			{
+				merge(E[r+1].X,E[r+1].Y);
+				r++;
+			}
+			dis=0;
+			comp=0;
+			REPP(j,Q[i].l,min(Q[i].r+1,(x+1)*blck))
+			{
+				a=findset(E[j].X);
+				b=findset(E[j].Y);
+				if (a==b) continue; 
+				G[a].pb(b);
+				G[b].pb(a);
+				if (cnt[a]==0)
+				{
+					dis++;
+					v.pb(a);
+					cnt[a]=1;
+				}
+				if (cnt[b]==0)
+				{
+					dis++;
+					v.pb(b);
+					cnt[b]=1;
+				}
+			}
+			REP(j,v.size())
+			{
+				if (!vis[v[j]])
+				{
+					dfs(v[j]);
+					comp++;
+				}
+			}
+			//output(sets);
+			//output(comp);
+			//output(dis);
+			ans=sets+comp-dis;
+			REP(j,v.size())
+			{
+				G[v[j]].clear();
+				cnt[v[j]]=0;
+				vis[v[j]]=0;
+			}
+			v.clear();
+			out[Q[i].idx]=ans;
+			i++;
+		}
+		i--;
+	}
+}
+
+int main()
+{
+	int l,r,x,t;
+	t=input();
+	while(t--)
+	{
+		n=input();
+		m=input();
+		q=input();
+		REP(i,m)
+		{
+			l=input();
+			r=input();
+			l--;
+			r--;
+			E.pb(mp(l,r));
+		}
+		blck=sqrt(q);
+		REP(i,q)
+		{
+			l=input();
+			r=input();
+			Q[i].l=l-1;
+			Q[i].r=r-1;
+			Q[i].idx=i;
+		}
+		solve();
+		REP(i,q) output(out[i]);
+		E.clear();
+	}
+return 0;
+}

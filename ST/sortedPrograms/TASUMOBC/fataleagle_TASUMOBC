@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int S[100];
+int pos;
+long long dp[100][2];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        long long N;
+        scanf("%lld", &N);
+        pos=0;
+        while(N)
+        {
+            S[pos++]=N%3;
+            N/=3;
+        }
+        dp[0][0]=S[0]+1-(S[0]==2);
+        dp[0][1]=S[0]==2;
+        for(int i=1; i<pos; i++)
+        {
+            if(S[i]==0)
+            {
+                dp[i][0]=dp[i-1][0];
+                dp[i][1]=dp[i-1][1];
+            }
+            if(S[i]==1)
+            {
+                dp[i][0]=dp[i-1][0]*2;
+                dp[i][1]=dp[i-1][1]*2;
+            }
+            if(S[i]==2)
+            {
+                dp[i][0]=dp[i-1][0]*2;
+                dp[i][1]=dp[i-1][1]*2;
+                dp[i][1]+=dp[i-1][0];
+                dp[i][0]+=dp[i-1][1];
+            }
+        }
+        printf("%lld\n", (dp[pos-1][0]+dp[pos-1][1]*2LL)%1000000007);
+    }
+    return 0;
+}

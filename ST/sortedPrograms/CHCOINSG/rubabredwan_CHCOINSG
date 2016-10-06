@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(ll i=0;i<n;i++)
+#define REPN(i, n)	for(ll i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+#define ALL(i)		i.begin(), i.end()
+
+#define MAX			1000050
+#define pb			insert
+#define cl 			clear
+
+using namespace std;
+
+typedef long long ll;
+
+char A[MAX], B[MAX];
+int n, X[MAX], Y[MAX];
+
+set<int>ZO, OZ, OO, ZZ;
+
+int main(){
+	int tc, n;
+	scanf("%d", &tc);
+	while(tc--){
+		scanf("%d", &n);
+		if(n % 6) printf("Chef\n");
+		else printf("Misha\n");
+	}
+	return 0;
+}

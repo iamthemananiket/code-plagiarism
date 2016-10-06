@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define repu(i, a, b) for (int i = (a); i < (b); ++i)
+#define repd(i, a, b) for (int i = (a); i > (b); --i)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define all(a) a.begin(), a.end()
+#define uni(a) a.erase(unique(all(a)), a.end())
+#define count_bits(x) __builtin_popcount(x)
+#define count_bitsll(x) __builtin_popcountll(x)
+#define least_bits(x) __builtin_ffs(x)
+#define least_bitsll(x) __builtin_ffsll(x)
+#define most_bits(x) 32 - __builtin_clz(x)
+#define most_bitsll(x) 64 - __builtin_clz(x)
+
+vector<string> split(const string &s, char c) {
+	vector<string> v;
+	stringstream ss(s);
+	string x;
+	while (getline(ss, x, c)) v.push_back(x);
+	return v;
+}
+
+#define error(args...) { vector<string> _v = split(#args, ','); err(_v.begin(), args); }
+
+void err(vector<string>::iterator it) {}
+
+template<typename T, typename... Args>
+void err(vector<string>::iterator it, T a, Args... args) {
+	cerr << it -> substr((*it)[0] == ' ', it -> length()) << " = " << a << '\n';
+	err(++it, args...);
+}
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T, class U> inline T tmin(T a, U b) {return (a < b) ? a : b;}
+template<class T, class U> inline T tmax(T a, U b) {return (a > b) ? a : b;}
+template<class T, class U> inline void amax(T &a, U b) {if (b > a) a = b;}
+template<class T, class U> inline void amin(T &a, U b) {if (b < a) a = b;}
+template<class T> inline T tabs(T a) {return (a > 0) ? a : -a;}
+template<class T> T gcd(T a, T b) {while (b != 0) {T c = a; a = b; b = c % b;} return a;}
+
+const int N = 70005;
+int n, m;
+int d[N], deg[N], cnt;
+vector<int> G[N];
+
+void dfs(int v) {
+	d[v] = ++cnt;
+	repu(i, 0, G[v].size()) {
+		int u = G[v][i];
+		if (d[u] == 0) {
+			dfs(u);
+		}
+	}
+}
+
+bool is_planar() {
+	return true;
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest, u, v;
+	
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n >> m;
+		fill(deg, deg + n + 1, 0);
+		repu(i, 1, n + 1) G[i].clear();
+		repu(i, 0, m) {
+			cin >> u >> v;
+			G[u].push_back(v);
+			G[v].push_back(u);
+			deg[u]++; deg[v]++;
+		}
+		
+		int x = 0;
+		if (n == 2) x = 1;
+		if (n < 3) {
+			if (m != x) printf("0\n");
+			else printf("1\n");
+			continue;
+		}
+		
+		int mini = n;
+		repu(i, 1, n + 1) amin(mini, deg[i]);
+		
+		if (mini < 2 || mini > 5 || m != 3 * n - 6) {
+			printf("0\n"); continue;
+		}
+		
+		fill(d, d + n + 1, 0);
+		cnt = 0;
+		dfs(1);
+		
+		if (cnt != n) {
+			printf("0\n"); continue;
+		}
+		
+		printf("%d\n", is_planar());
+	}
+	
+	return 0;
+}

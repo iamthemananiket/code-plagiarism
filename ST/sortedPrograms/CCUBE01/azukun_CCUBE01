@@ -1,0 +1,16 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+#if _DEBUG
+    freopen("input.txt", "r", stdin);
+#endif
+    
+	int a[] = {0, 51, 145, 212, 262, 363, 472, 583, 682, 790, 891, 978};
+	std::reverse(a, a + 12);
+	for (int i = 0; i < 11; i++)
+		printf("%c", a[i] - a[i + 1]);
+
+    return 0;
+}

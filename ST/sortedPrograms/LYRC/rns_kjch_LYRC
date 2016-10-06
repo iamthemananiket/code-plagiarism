@@ -1,0 +1,111 @@
+#include <cstdio>
+#include <cstring>
+#include <queue>
+#include <memory.h>
+
+using namespace std;
+
+#define N 2500100
+#define SIGMA 63
+int ans[501];
+struct Aho_Corasick_Trie {
+
+	struct Node {
+		int next[SIGMA];
+		int link, cnt;
+	} node[N];
+
+	int tot, gas;
+
+	int newnode() {
+		node[tot].link = 0;
+		node[tot].cnt = 0;
+		memset(node[tot].next, 0, sizeof(int) * SIGMA);
+		return tot ++;
+	}
+
+	void init() {
+		gas = tot = 0;
+		newnode();
+	}
+
+	inline int idx(char c) {
+		if('0' <= c && c <= '9') return c - '0';
+		if('a' <= c && c <= 'z') return c - 'a' + 10;
+		if('A' <= c && c <= 'Z') return c - 'A' + 36;
+		return 62;
+	}
+
+	#define v node[u].next[c]
+	#define f node[node[u].link].next[c]
+
+	int insert(char *s) {
+		int u = 0, len = strlen(s);
+		for (int i = 0; i < len; i ++) {
+			int c = idx(s[i]);
+			if (!v) v = newnode();
+			u = v;
+		}
+		return u;
+	}
+
+    int Q[N], mm;
+
+	void get_link() {
+		//build Aho-Corasick reTRIEval : Advanced Method
+		int u = 0;
+		int h = 0, t = 0;
+		for (int c = 0; c < SIGMA; c ++) if (v) Q[t ++] = v;
+		while (h < t) {
+			u = Q[h ++];
+			for (int c = 0; c < SIGMA; c ++) {
+				if (v) {
+					Q[t ++] = v;
+					node[v].link = f;
+				} else v = f;
+			}
+		}
+		mm = t;
+	}
+
+	void find(char *T) {
+		int len = strlen(T);
+		int u = 0;
+		for (int i = 0; i < len; i ++) {
+			int c = idx(T[i]);
+			u = v;
+			node[u].cnt ++;
+		}
+	}
+
+	void work() {
+		while(mm --) {
+			int u = Q[mm];
+			node[node[u].link].cnt += node[u].cnt;
+		}
+	}
+
+	#undef v
+	#undef f
+} ACT;
+
+int W, nm[501], n;
+char s[501][5002], tmp[50002];
+
+int main() {
+	scanf("%d\n", &W);
+	ACT.init();
+	for(int i = 1; i <= W; i ++) {
+		gets(s[i]);
+		nm[i] = ACT.insert(s[i]);
+	}
+	ACT.get_link();
+	scanf("%d\n", &n);
+	for(int i = 0; i < n; i ++) {
+		gets(tmp);
+		ACT.find(tmp);
+	}
+	ACT.work();
+	for(int i = 1; i <= W; i ++) printf("%d\n", ACT.node[nm[i]].cnt);
+	return 0;
+}

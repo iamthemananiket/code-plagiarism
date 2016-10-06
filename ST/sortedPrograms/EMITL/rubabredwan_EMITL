@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+
+#define READ(x)		freopen(x,"r",stdin)
+#define WRITE(x)	freopen(z,"w",stdout)
+
+#define REP(i,n)	for(int i=0;i<n;i++)
+#define REPN(i,n)	for(int i=1;i<=n;i++)
+#define FOR(i,a,b)	for(int i=a;i<b;i++)
+#define SET(i,n)	memset(i,n,sizeof(i))
+
+#define MAX			2000050
+#define INF			INT_MAX
+#define in			insert
+#define pb			push_back
+#define cl			clear
+#define sz			size
+#define xx 			first
+#define yy	 		second
+
+using namespace std;
+
+typedef long long int 	ll;
+typedef vector<int>		vi;
+typedef pair<ll,ll>		pii;
+typedef double			db;
+
+//template ends here
+
+int main()
+{
+	int tc, n, m;
+	string str;
+	scanf("%d", &tc);
+	while(tc--){
+		cin >> str;
+		map<char, int>mp;
+		REP(i, str.size()){
+			mp[str[i]]++;
+		}
+		bool flag = false;
+		if(mp['L'] >= 2 && mp['T'] >= 2  && mp['I'] >= 2 && mp['M'] >= 2 && mp['E'] >= 2) flag = true;
+		if(flag && str.size() > 9) cout << "YES\n";
+		else if(str.size() > 9) cout << "NO\n";
+		else{
+			if(str.size() == 9) if(mp['L'] >= 2 && mp['T'] >= 2  && mp['I'] >= 2 && mp['M'] >= 2 && mp['E'] >= 1) flag = true;
+			else flag = false;
+			if(flag) cout << "YES\n";
+			else cout << "NO\n";
+		}
+	}
+	return 0;
+}

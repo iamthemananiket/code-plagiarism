@@ -1,0 +1,37 @@
+#include <cstdio>
+
+int main() {
+  int t;
+  scanf("%d", &t);
+  while(t--) {
+    int n, m;
+    scanf("%d%d", &n, &m);
+    bool found = false;
+    if(n == m) {
+      for(int i = 0;i < n;i++) {
+        printf("%d %d\n", i+1, (i+1) % n + 1);
+      }
+      found = true;
+    }
+    for(int a = 4;a <= n and a <= m and !found;a++) {
+      int k = n - a;
+      if(2 * k + a != m) continue;
+      found = true;
+      for(int i = 0;i < a;i++) {
+        printf("%d %d\n", i+1, (i+1) % a + 1);
+      }
+      for(int i = a+1;i <= n;i++) {
+        printf("%d %d\n", 1, i);
+        printf("%d %d\n", 3, i);
+      }
+    }
+    if(!found) printf("-1 -1\n");
+  }
+  return 0;
+}
+/*
+n, m
+a >= 4
+k <= n - a
+2 * k + a == m 
+*/

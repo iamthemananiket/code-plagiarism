@@ -1,0 +1,161 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define p 1000000001
+using namespace std;
+struct vert
+{
+	ll a;
+	ll b;
+	ll c;
+};
+int mark[500001];
+class cmp1
+{
+public:
+	bool operator()(vert & v1,vert & v2)
+	{
+		if(v2.a-v2.b<v1.a-v1.b)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
+class cmp2
+{
+public:
+	bool operator()(vert & v1,vert & v2)
+	{
+		if(v2.a-v2.b>v1.a-v1.b)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
+class cmp3
+{
+public:
+	bool operator()(vert & v1,vert & v2)
+	{
+		if(v2.b+v2.a<v1.b+v1.a)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
+class cmp4
+{
+public:
+	bool operator()(vert & v1,vert & v2)
+	{
+		if(v2.b+v2.a>v1.b+v1.a)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
+priority_queue<vert,vector<vert>,cmp1>q1;
+priority_queue<vert,vector<vert>,cmp2>q2;
+priority_queue<vert,vector<vert>,cmp3>q3;
+priority_queue<vert,vector<vert>,cmp4>q4;
+int main()
+{
+	char str;
+	ll ans=0,k;
+	ll n,max1,i,j,x,y,cn=0;
+	vert te,te2;
+	vert v1,v2,v3,v4;
+	scanf("%lld",&n);
+	scanf("%c",&str);
+	for(i=0;i<n;i++)
+	{
+		scanf("%c",&str);
+		if(str=='+')
+		{
+			scanf("%lld %lld",&x,&y);
+			te.a=(x^ans);
+			te.b=(y^ans);
+			te.c=cn;
+			q1.push(te);
+			q2.push(te);
+			q3.push(te);
+			q4.push(te);
+		//	cout<<te.a<<" "<<te.b<<" "<<-1<<endl;
+			mark[cn]=1;
+			cn++;
+		}
+		else if(str=='-')
+		{
+			scanf("%lld",&k);
+			k=(k^ans);
+			mark[k-1]=0;
+		}
+		else if(str=='?')
+		{
+			scanf("%lld %lld",&x,&y);
+			te.a=(x^ans);
+			te.b=(y^ans);
+			max1=-1;
+			te2=q1.top();
+			while(mark[te2.c]==0)
+			{
+				q1.pop();
+				te2=q1.top();
+			}
+			if((abs(te.a-te2.a)+abs(te.b-te2.b))>max1)
+			{
+				max1=(abs(te.a-te2.a)+abs(te.b-te2.b));
+			}
+			te2=q2.top();
+			while(mark[te2.c]==0)
+			{
+				q2.pop();
+				te2=q2.top();
+			}
+			if((abs(te.a-te2.a)+abs(te.b-te2.b))>max1)
+			{
+				max1=(abs(te.a-te2.a)+abs(te.b-te2.b));
+			}
+			te2=q3.top();
+			while(mark[te2.c]==0)
+			{
+				q3.pop();
+				te2=q3.top();
+			}
+			if((abs(te.a-te2.a)+abs(te.b-te2.b))>max1)
+			{
+				max1=(abs(te.a-te2.a)+abs(te.b-te2.b));
+			}
+			te2=q4.top();
+			while(mark[te2.c]==0)
+			{
+				q4.pop();
+				te2=q4.top();
+			}
+			if((abs(te.a-te2.a)+abs(te.b-te2.b))>max1)
+			{
+				max1=(abs(te.a-te2.a)+abs(te.b-te2.b));
+			}
+			printf("%lld\n",max1);
+		//	cout<<pos<<" "<<v.size()<<endl;
+			ans=max1;
+		}
+		scanf("%c",&str);
+	}
+	return 0;
+}

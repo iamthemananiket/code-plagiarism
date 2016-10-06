@@ -1,0 +1,64 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+int INF = INT_MAX / 2;
+double EPS = 1e-10;
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N; cin >> N;
+		vector<ll> A(N), B(N);
+		for (int i = 0; i < N; i++)
+			scanf("%lld", &A[i]);
+		for (int i = 0; i < N; i++)
+			scanf("%lld", &B[i]);
+		vector<ll_ll> BA(N);
+		for (int i = 0; i < N; i++)
+			BA[i] = ll_ll(B[i], A[i]);
+		sort(BA.begin(), BA.end());
+		for (int i = 0; i < N; i++) {
+			A[i] = BA[i].second;
+			B[i] = BA[i].first;
+		}
+		vector<ll> dp(N + 1, LLONG_MIN / 2);
+		dp[0] = 0;
+		for (int i = N - 1; i >= 0; i--) {
+			vector<ll> _dp = dp;
+			for (int j = 0; j < N; j++)
+				_dp[j + 1] = max(_dp[j + 1], dp[j] + A[i] + j * B[i]);
+			dp = _dp;
+		}
+		for (int j = 1; j <= N; j++)
+			cout << dp[j] << (j + 1 <= N ? ' ' : '\n');
+	}
+}

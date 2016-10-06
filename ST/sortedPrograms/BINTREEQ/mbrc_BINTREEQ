@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%.12Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+const int maxn = 1e5 + 7;
+const ll md = 1e9 + 7;
+
+ll n;
+
+string tobin(ll n) {
+	string s = "";
+	while (n > 0) {
+		s += " ";
+		s[s.size()-1] = '0'+(n%2);
+		n/=2;
+	}
+	reverse(s.begin(),s.end());
+	return s;
+}
+
+ll toint(string s) {
+	ll n = 0;
+	for (char c : s) {
+		n*=2; n += c-'0';
+	}
+	return n;
+}
+
+ll getmax(ll n, string suf) {
+	ll l = 0, r = n;
+	return (n - toint(suf))>>suf.size();
+}
+
+int main() {
+	int q; s(q);
+	while (q--) {
+		ll N,M; sl(n); sl(N); sl(M);
+		string s = " " + tobin(N), t = " " + tobin(M);
+		//cout<<s<<" "<<t<<endl;
+		int j = 0;
+		while (j+1 < s.size() && j+1 < t.size() && s[j+1] == t[j+1]) j++;
+		string a = "", b = "";
+		repe(i,j+1,s.size()) { a += s.substr(i,1); }
+		repe(i,j+1,t.size()) { b += t.substr(i,1); }
+		//cout<<a<<" "<<b<<endl;
+		ll S = getmax(n,a), E = getmax(n,b);
+		prl(min(S,E)); endc;
+	}
+}

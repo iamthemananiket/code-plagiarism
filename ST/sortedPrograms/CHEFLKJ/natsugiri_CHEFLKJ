@@ -1,0 +1,124 @@
+#include<map>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+
+template<class T>
+struct Fenwick : vector<T> {
+    typedef vector<T> S;
+    int N;
+    Fenwick(int N_=0): S(N_), N(N_) {}
+    void add(int i, T x) {
+	for (; i<N; i|=i+1) S::operator[](i) += x;
+    }
+    inline T sum(int r) {
+	T s = 0;
+	for (; r; r&=r-1) s += S::operator[](r-1);
+	return s;
+    }
+    T sum(int l, int r) {
+	return sum(r) - sum(l);
+    }
+    int lower_bound(T x) { // argmin_i x <= sum(0,i)
+	int i = 1, j = 0;
+	T s = T();
+	while (i<N) i<<=1;
+	for (; i; i>>=1) {
+	    if (i+j <= N && s + S::operator[](i+j-1) < x) {
+		s += S::operator[](i+j-1);
+		j += i;
+	    }
+	}
+	return j;
+    }
+};
+ const int MAGIC = 400;
+// const int MAGIC = 3;
+int N, Q;
+int A[100111];
+map<int, Fenwick<int> > mp;
+map<int, int> C;
+
+void update(int x, int y) {
+    if (mp.count(A[x])) {
+	mp[A[x]].add(x, -1);
+    }
+    C[A[x]]--;
+    A[x] = y;
+    C[y]++;
+    if (mp.count(y)) {
+	mp[y].add(x, 1);
+    } else if (C[y] >= MAGIC) {
+	Fenwick<int> F(N);
+	REP (i, N) if (A[i] == y) F.add(i, 1);
+	mp[y] = F;
+    }
+}
+
+int main() {
+    scanf("%d%d", &N, &Q);
+    REP (i, N) scanf("%d", A+i);
+    REP (i, N) {
+	C[A[i]]++;
+    }
+    EACH (e, C) if (e->second >= MAGIC) {
+	Fenwick<int> F(N);
+	REP (i, N) if (A[i] == e->first) F.add(i, 1);
+	mp[e->first] = F;
+    }
+
+    REP ($, Q) {
+	int op, x, y;
+	scanf("%d%d%d", &op, &x, &y);
+	x--;
+	if (op == 1) {
+	    if (A[x] != y) {
+		update(x, y);
+	    }
+	} else {
+	    bool yes = false;
+	    if (y-x >= 2 * MAGIC) {
+		REP (i, 20) {
+		    int p = rand() % (y-x) + x;
+		    if (mp.count(A[p]) && mp[A[p]].sum(x, y) * 2 > y-x) {
+			yes = true;
+			break;
+		    }
+		}
+	    } else {
+		int last = 0;
+		int cnt = 0;
+		for (int i=x; i<y; i++) {
+		    if (cnt == 0) last = A[i];
+		    if (A[i] == last) cnt++;
+		    else cnt--;
+		}
+		cnt = 0;
+		for (int i=x; i<y; i++) {
+		    if (A[i] == last) cnt++;
+		    else cnt--;
+		}
+		if (cnt > 0) yes = true;
+	    }
+	    puts(yes? "Yes": "No");
+	}
+    }
+
+    return 0;
+}
+

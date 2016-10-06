@@ -1,0 +1,40 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+
+#define mod 1000000009
+using namespace std;
+
+long long int n,k, a[100001], ma, mi;
+
+int main()
+{
+//	freopen("in.txt","r",stdin);
+//	freopen("out.txt","w",stdout);
+	scanf("%lld%lld",&n,&k);
+	scanf("%lld",&a[0]);
+	ma = mi = a[0];
+	for(int i=1; i<n; i++)
+	{
+		scanf("%lld",&a[i]);
+		ma = max(ma,a[i]);
+		mi = min(mi,a[i]);
+	}
+	mi *= (k>0);
+	if(k % 2)
+	{
+		printf("%lld",ma-a[0]);
+		for(int i=1; i<n; i++)
+			printf(" %lld",ma-a[i]);
+		printf("\n");
+	}
+	else
+	{
+		printf("%lld",a[0]-mi);
+		for(int i=1; i<n; i++)
+			printf(" %lld",a[i]-mi);
+		printf("\n");
+	}
+	return 0;
+}

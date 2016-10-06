@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz(a) int((a).size())
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define fname "."
+#define pi pair < int, int >
+#define pp pop_back
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)1e5 + 123;
+const double eps = 1e-9;
+const int mod = (int)1e9 + 7;
+
+#define long double double
+
+using namespace std;
+
+int n;
+int st, a[MAX_N];
+vector < int > g[MAX_N];
+
+int ans[MAX_N];
+double lg[MAX_N];
+
+int binpow(int a, int b) {
+	int res = 1;
+	while(b) {
+		if (b & 1)
+			res = 1ll * res * a % mod;
+		b >>= 1;
+		a = 1ll * a * a % mod;
+	}
+	return res;
+}
+
+void upd(int id, int val) {
+	if (n <= 10) {
+		a[id] = val;
+		return;
+	}
+	if (id == 1) {
+		st = val;
+		return;
+	}
+	id--;
+	int h = binpow(a[id], mod - 2);
+	for (auto i : g[id]) {
+		ans[i] = ans[i] * 1ll * h % mod;
+		ans[i] = 1ll * ans[i] * val % mod;
+		lg[i] -= log10(1.0 * a[id]);
+		lg[i] += log10(1.0 * val);
+	}
+	a[id] = val;
+}
+
+bool more(double a, double b) {
+	if (a - b > eps)
+		return 1;
+	return fabs(a - b) < eps;
+}
+
+pi get_slow(int x) {
+	ll now = 1;
+	for (int i = 1; i <= n; i += x)
+		now *= a[i];
+	int ans = now % mod;
+	while(now > 9)
+		now /= 10;
+	return mp(now, ans);
+}
+
+pi get(int x) {
+	if (n <= 10) {
+		return get_slow(x);
+	}
+	int val = ans[x] * 1ll * st % mod;
+	double h = lg[x] + log10(1.0 * st);
+	h -= floor(h);
+	for (int i = 9; i > 0; i--)
+		if (more(h, log10(1.0 * i)))
+			return mp(i, val);
+	assert(0);
+	return mp(-1, -1);
+}
+
+int main() {
+	#ifdef Nick
+	freopen(fname"in","r",stdin);
+	#endif
+	scanf("%d", &n);
+	n--;
+	scanf("%d", &st);
+	for (int i = 1; i <= n; i++)
+		scanf("%d", &a[i]);
+	for (int i = 1; i <= n; i++)
+		for (int j = i; j <= n; j += i)
+			g[j].pb(i);
+	for (int i = 1; i <= n + 1; i++)
+		ans[i] = 1, lg[i] = 0.0;
+	for (int i = 1; i <= n; i++)
+		for (auto j : g[i]) {
+			ans[j] = 1ll * ans[j] * a[i] % mod;
+			lg[j] += log10(1.0 * a[i]);
+		}
+	if (n + 1 <= 10) {
+		for (int i = n + 1; i > 1; i--)
+			a[i] = a[i - 1];
+		a[1] = st;
+		n++;
+	}
+	int query;
+	scanf("%d", &query);
+	for (int i = 1, tp, x, y; i <= query; i++) {
+		scanf("%d", &tp);
+		if (tp == 1) {
+			scanf("%d%d", &x, &y);
+			upd(x, y);
+		}
+		else {
+			scanf("%d", &x);
+			pi now = get(x);
+			printf("%d %d\n", now.f, now.s);
+		}
+	}		
+	return 0;
+}

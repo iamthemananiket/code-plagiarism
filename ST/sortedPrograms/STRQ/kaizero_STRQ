@@ -1,0 +1,43 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+char p[1010000];
+int Num[256], Num2[4][4];
+long long Sum[1010000][16];
+int C[1010000][4];
+int main(){
+	int i, j, c, m, b, e, c1, c2, k;
+	char p1[30];
+	scanf("%s", p + 1);
+	Num['c'] = 0, Num['h'] = 1, Num['e'] = 2, Num['f'] = 3;
+	for (i = 1; p[i]; i++){
+		for (j = 0; j < 4; j++)C[i][j] = C[i - 1][j];
+		b = Num[p[i]];
+		C[i][b]++;
+		for (j = 0; j < 4; j++){
+			for (k = 0; k < 4; k++){
+				if (j != k){
+					Sum[i][j * 4 + k] = Sum[i - 1][j * 4 + k];
+					if (k == b)Sum[i][j * 4 + k] += C[i][j];
+				}
+			}
+		}
+	}
+	scanf("%d", &m);
+	gets(p1);
+	while (m--){
+		gets(p1);
+		c1 = Num[p1[0]], c2 = Num[p1[2]];
+		b = e = 0;
+		for (i = 4; p1[i] != ' '; i++){
+			b *= 10;
+			b += p1[i] - '0';
+		}
+		for (i = i + 1; p1[i]; i++){
+			e *= 10;
+			e += p1[i] - '0';
+		}
+		c = c1 * 4 + c2;
+		printf("%lld\n", Sum[e][c] - Sum[b - 1][c] - (long long)C[b - 1][c1] * (C[e][c2] - C[b - 1][c2]));
+	}
+}

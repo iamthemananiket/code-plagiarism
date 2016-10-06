@@ -1,0 +1,55 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+using namespace std ;
+
+typedef long long ll ;
+
+const ll MX = 1000000000000000000LL ;
+
+#define  all(X)  X.begin(), X.end()
+#define  UB  upper_bound
+#define  LB  lower_bound
+
+inline bool valid( ll x, ll y )
+{
+        long double xx = x ;
+        long double yy = y ;
+        if( xx*yy <= MX )
+                return 1 ;
+        return 0;
+}
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        ll  t, v, L, R ;
+        vector<ll>  two, three, vals ;
+
+        for( v=2; v<=MX; v*=2 )
+                two.push_back(v) ;
+
+        for( v=3; v<=MX; v*=3 )
+                three.push_back(v);
+
+        vals = two ;
+        vals.push_back(1);
+
+        for( auto &x: two )
+                for( auto &y: three )
+                        if( valid(x,y) )
+                                vals.push_back(x*y);
+
+        sort( all(vals) );
+
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> L >> R ;
+                cout << UB( all(vals), R ) - LB( all(vals), L ) << endl ;
+        }
+
+        return 0;
+} 

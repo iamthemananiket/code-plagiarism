@@ -1,0 +1,96 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+
+struct C {
+  bool operator()(const pii &p, const pii &q) const {
+    int d1 = p.first + p.second;
+    int d2 = q.first + q.second;
+    if (d1 == d2) return p > q;
+    return d1 > d2;
+  }
+};
+
+const int MAX_Q = 510000;
+int xs[MAX_Q], ys[MAX_Q];
+
+
+int main() {
+  int Q;
+  set<pii, C> s1, s2, s3, s4;
+  scanf("%d", &Q);
+  int ans = 0;
+  int m = 0;
+  for (int i = 0; i < Q; i++) {
+    char c;
+    scanf(" %c", &c);
+    if (c == '+') {
+      int x, y;
+      scanf("%d%d", &x, &y);
+      x ^= ans;
+      y ^= ans;
+      xs[m] = x;
+      ys[m] = y;
+      m++;
+      s1.insert(pii(x, y));
+      s2.insert(pii(-x, y));
+      s3.insert(pii(-x, -y));
+      s4.insert(pii(x, -y));
+    } else if (c == '-') {
+      int v;
+      scanf("%d", &v);
+      v ^= ans;
+      v--;
+      int x = xs[v], y = ys[v];
+      s1.erase(pii(x, y));
+      s2.erase(pii(-x, y));
+      s3.erase(pii(-x, -y));
+      s4.erase(pii(x, -y));
+    }
+    else if (c == '?') {
+      int x, y;
+      scanf("%d%d", &x, &y);
+      x ^= ans;
+      y ^= ans;
+      int t = 0;
+      auto p1 = *s1.begin();
+      auto p2 = *s2.begin();
+      auto p3 = *s3.begin();
+      auto p4 = *s4.begin();
+      t = max(t, abs(p1.first - x) + abs(p1.second - y));
+      t = max(t, abs(-p2.first - x) + abs(p2.second - y));
+      t = max(t, abs(-p3.first - x) + abs(-p3.second - y));
+      t = max(t, abs(p4.first - x) + abs(-p4.second - y));
+      printf("%d\n", t);
+      ans = t;
+    }
+  }
+}

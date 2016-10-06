@@ -1,0 +1,63 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <complex>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <unordered_set>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+ll f(int N, vector<int>& a, vector<int>& b) {
+	sort(a.begin(), a.end());
+	sort(b.begin(), b.end());
+	a.erase(unique(a.begin(), a.end()), a.end());
+	b.erase(unique(b.begin(), b.end()), b.end());
+	ll sum = 0;
+	for (int i = 0; i < a.size(); i++)
+		sum += N - abs(a[i]);
+	for (int i = 0; i < b.size(); i++)
+		sum += N - abs(b[i]);
+	for (int i = 0; i < a.size(); i++)
+		sum -= upper_bound(b.begin(), b.end(), (N - 1 - abs(a[i]))) - lower_bound(b.begin(), b.end(), -(N - 1 - abs(a[i])));
+	return sum;
+}
+
+int main() {
+	int T; cin >> T;
+	while (T--) {
+		int N, K; cin >> N >> K;
+		vector<vector<int> > a(2), b(2);
+		while (K--) {
+			int x, y; scanf("%d%d", &x, &y);
+			x--; y--;
+			a[(x + y) % 2].push_back(x + y - N + 1);
+			b[(x + y) % 2].push_back(x - y);
+		}
+		cout << (ll)N * N - f(N, a[0], b[0]) - f(N, a[1], b[1]) << endl;
+	}
+}

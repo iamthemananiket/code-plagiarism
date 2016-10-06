@@ -1,0 +1,44 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <unordered_map>
+
+using namespace std;
+
+int f(int p, int l, int r) {
+    if (l > r) return 0;
+    if (p+1 > r) return 0;
+    l = max(l, p+1);
+    return r-l+1;
+}
+
+int main() {
+    //freopen("input.txt", "r", stdin); freopen("output.txt", "w", stdout);
+    ios::sync_with_stdio(0);
+    int t;
+    cin >> t;
+    while (t --> 0) {
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        long long ans = 0;
+        for(int i = a; i <= b; ++i)
+            ans += f(i, c, d);
+        cout << ans << "\n";
+    }
+    return 0;
+}

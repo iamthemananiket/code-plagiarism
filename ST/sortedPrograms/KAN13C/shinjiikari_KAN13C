@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+#define mod 1000000007
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define sz(a) int((a).size())
+#define	debug(ccc)	cout << #ccc << " = " << ccc << endl;
+typedef long double ld;
+
+int m,i,F[4000001];
+char s[4000001];
+
+void build()
+{
+	int m=strlen(s),i,j;
+	F[0]=-1;
+	for(i=1;i<m;i++)
+	{
+		j=F[i-1];
+		while(1)
+		{
+			if(s[j+1]==s[i])
+			{
+				F[i]=j+1;
+				break;
+			}
+			if (j==-1)
+			{
+				F[i]=-1;
+				break;
+			}
+			j=F[j];
+		}
+	}
+}
+
+/*
+void Knuth_Morris_Pratt(char text[],char pattern[])
+{
+	int m=strlen(pattern),n=strlen(text),i,j;
+	int F[m+1];
+	build_failure_function(pattern[], F[]); 
+	i = 0;
+	j = 0;
+	for( ; ; )
+	{
+		if (j==n) break;
+		if (text[j] == pattern[i])
+		{
+	  		i++;
+	  		j++;
+	  		if (i == m) 
+		}
+		else if(i > 0) i = F[i];
+		else j++;
+	}
+}
+*/
+
+int main()
+{
+scanf("%s",s);
+m=strlen(s);
+while(strcmp(s,"End"))
+{
+	build();
+	for(i=0;i<m;i++) printf("%d ",F[i]+1);
+	putchar('\n');
+	scanf("%s",s);
+	m=strlen(s);
+}
+return 0;
+}

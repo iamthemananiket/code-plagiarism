@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+int main()
+{
+   int test;
+   scanf("%d",&test);
+   while(test--)
+   {
+      int R,C;
+      ll ans=INT_MIN;
+      scanf("%d",&R);
+      C=R;
+      ll input[R][C];
+      for(int i=0;i<R;i++)
+         for(int j=0;j<C;j++)
+            scanf("%lld",&input[i][j]);
+      for(int i=0;i<C;i++)
+      {
+         ll dp[10001]={0};
+         for(int j=i;j<C;j++)
+         {
+            for(int k=0;k<R;k++)
+               dp[k]^=input[k][j];
+            ll temp[R];
+            temp[0]=dp[0];
+            for(int l=1;l<R;l++)
+               temp[l]=temp[l-1]^dp[l];
+            ll maxm=INT_MIN;
+            for(int l=0;l<R;l++)
+            for(int q=l;q<R;q++)
+            {
+                if(l==0)
+                    maxm=max(maxm,temp[q]);
+                else
+                    maxm=max(maxm,temp[q]^temp[l-1]);
+            }
+            ans=max(ans,maxm);
+         }
+      }
+      printf("%lld\n",ans);
+   }
+   return 0;
+}
+

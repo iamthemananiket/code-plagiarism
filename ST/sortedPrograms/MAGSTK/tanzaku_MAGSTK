@@ -1,0 +1,35 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 105;
+
+int T;
+int n;
+pair<pair<int,int>,int> xs[MAX];
+int ans[MAX];
+
+int main() {
+	scanf("%d", &T);
+	while(T--) {
+		scanf("%d", &n);
+		for(int i = 0; i < n; i++) {
+			scanf("%d%d", &xs[i].first.first, &xs[i].first.second);
+			xs[i].second = i;
+		}
+		sort(xs, xs + n);
+		for(int i = n - 1; i >= 0; i--) {
+			int r = xs[i].first.first + xs[i].first.second;
+			int j = i + 1;
+			for(; j < n && xs[j].first.first < r; j++) {
+				r = max(r, xs[j].first.first + xs[j].first.second);
+			}
+			ans[xs[i].second] = j - i;
+		}
+		for(int i = 0; i < n; i++) {
+			printf("%d%c", ans[i], i==n-1?'\n':' ');
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool good[1<<10];
+bool pgood[1<<10];
+
+int main()
+{
+    int T, N, K;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%d", &N, &K);
+        int a;
+        memset(pgood, 0, sizeof pgood);
+        memset(good, 0, sizeof good);
+        pgood[0]=true;
+        while(N--)
+        {
+            scanf("%d", &a);
+            for(int i=0; i<(1<<10); i++)
+                if(pgood[i])
+                    good[i]=good[i^a]=true;
+            swap(good, pgood);
+        }
+        int ans=0;
+        for(int i=0; i<(1<<10); i++)
+            if(pgood[i])
+                ans=max(ans, i^K);
+        printf("%d\n", ans);
+    }
+    return 0;
+}

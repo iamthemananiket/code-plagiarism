@@ -1,0 +1,190 @@
+#include <stdio.h>
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define pdd pair<double,double>
+#define FILL(a,x) memset(a,x,sizeof(a))
+#define	foreach( gg,ii ) for( typeof(gg.begin()) ii=gg.begin();ii!=gg.end();ii++)
+#define	mp make_pair
+#define	pb push_back
+#define	X first
+#define	Y second
+#define sz(a) int((a).size())
+#define N 100010
+#define MAX 30
+#define mod 1000000007
+#define REP(i,a) for(int i=0;i<a;++i)
+#define REPP(i,a,b) for(int i=a;i<b;++i)
+#define all(a) a.begin(),a.end()
+const ll INF = 1e18+1;
+
+inline ll input(void)
+{
+	char t;
+	ll x=0;
+	int neg=0;
+	t=getchar();
+	while((t<48 || t>57) && t!='-')
+		t=getchar();
+	if(t=='-')
+		{neg=1; t=getchar();}
+	while(t>=48 && t<=57)
+	{
+		x=(x<<3)+(x<<1)+t-48;
+		t=getchar();
+	}
+	if (neg) x=-x;
+	return x;
+}
+
+inline void output(ll x)
+{
+	char a[20];
+	int i=0,j;
+	a[0]='0';
+	if (x<0) {putchar('-'); x=-x;}
+	if (x==0) putchar('0');
+	while(x)
+	{
+		a[i++]=x%10+48;
+		x/=10;
+	}
+	for(j=i-1;j>=0;j--)
+	{
+		putchar(a[j]);
+	}
+	putchar('\n');
+}
+
+int pairs[8][2],neigh[N][2],vis[N],flag,par[N];
+ll ans,m,n,fac[N];
+
+inline int dfs(int v)
+{
+	if (v==0) return 0;
+	vis[v]=1;
+	int ans=0,w=neigh[v][0],u=neigh[v][1];
+	// output(u);
+	// output(w);
+	//output(ans);
+	if (!vis[u])
+	{
+		if (u!=0)
+		{
+			par[u]=v;
+			ans+=dfs(u);
+		}
+	}
+	else if (u!=par[v]) {flag=1;}
+	if (!vis[w])
+	{
+		if (w!=0)
+		{
+			par[w]=v;
+			ans+=dfs(w);
+		}
+	}
+	else if (w!=par[v]) {flag=1;}
+	//output(ans);
+	return (ans+1);
+}
+
+inline void make(int mask)
+{
+	int comp,j,num=0,sz=0,tmp=mask;
+	REP(i,m)
+	{
+		neigh[pairs[i][0]][0]=0;
+		neigh[pairs[i][0]][1]=0;
+		neigh[pairs[i][1]][0]=0;
+		neigh[pairs[i][1]][1]=0;
+		vis[pairs[i][0]]=0;
+		vis[pairs[i][1]]=0;
+	}
+	REP(i,m)
+	{
+		j=mask%3;
+		mask/=3;
+		if (j==1)
+		{
+			if (neigh[pairs[i][0]][1]!=0) return;
+			if (neigh[pairs[i][1]][0]!=0) return;
+			neigh[pairs[i][0]][1]=pairs[i][1];
+			neigh[pairs[i][1]][0]=pairs[i][0];
+		}
+		if (j==2)
+		{
+			if (neigh[pairs[i][0]][0]!=0) return;
+			if (neigh[pairs[i][1]][1]!=0) return;
+			neigh[pairs[i][1]][1]=pairs[i][0];
+			neigh[pairs[i][0]][0]=pairs[i][1];			
+		}
+		if (j!=0) sz++;
+	}
+	comp=0;
+	mask=tmp;
+	// output(neigh[1][0]);
+	// output(neigh[1][1]);
+	// output(neigh[2][0]);
+	// output(neigh[2][1]);
+	//printf("SAFE\n");
+	flag=0;
+	REP(i,m)
+	{
+		j=mask%3;
+		mask/=3;
+		if (j!=0)
+		{
+			if (!vis[pairs[i][0]])
+			{
+				num+=dfs(pairs[i][0]);
+				comp++;
+				//printf("First is ");
+				//output(num);
+			}
+			if (!vis[pairs[i][1]])
+			{
+				num+=dfs(pairs[i][1]);
+				comp++;
+				//printf("Second is ");
+				//output(num);
+			}
+			if (flag) return;
+		}
+	}
+	if (sz%2==0) ans+=fac[n-num+comp];
+	else ans=(ans-fac[n-num+comp]+mod);
+	if (ans>=mod) ans%=mod;
+	//output(num);
+	//output(comp);
+	//printf("At mask %d is ",tmp); output(ans);
+	//char c = getchar();
+}
+
+int main()
+{
+	ll t,x;
+	fac[0]=1;
+	REP(i,N-1) fac[i+1]=((i+1)*fac[i])%mod;
+	t=input();
+	while(t--)
+	{
+		FILL(neigh,0);
+		FILL(vis,0);
+		n=input();
+		m=input();
+		x=1;
+		REP(i,m)
+		{
+			pairs[i][0]=input();
+			pairs[i][1]=input();
+			x*=3;
+		}
+		ans=0;
+		REP(i,x) make(i);
+		output(ans);
+	}
+return 0;
+}

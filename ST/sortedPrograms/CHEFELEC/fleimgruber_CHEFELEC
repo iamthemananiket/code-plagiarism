@@ -1,0 +1,77 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 100005
+#define INF 123456789
+
+int n,x[MAX_N];
+bool power[MAX_N];
+
+typedef pair<int,pint> trint;
+priority_queue<trint,vector<trint>,greater<trint> > heap;
+
+void add(int a, int b)
+{
+	if (power[a]==power[b])
+		return;
+	if (a==0||b==n+1)
+		return;
+	heap.push(mp(x[b]-x[a],mp(a,b)));
+}
+
+int main()
+{
+	char s[MAX_N];
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d",&n);
+		scanf("%s",s+1);
+		int got=0;
+		for (int i=1; i<=n; i++)
+		{
+			power[i]=s[i]=='1';
+			got+=power[i];
+		}
+		for (int i=1; i<=n; i++)
+			scanf("%d",x+i);
+		while (!heap.empty())
+			heap.pop();
+		for (int i=1; i<n; i++)
+			add(i,i+1);
+		int ans=0;
+		while (got!=n)
+		{
+			int d=heap.top().fi;
+			int a=heap.top().se.fi,
+				b=heap.top().se.se;
+			heap.pop();
+			if (power[a]==power[b])
+				continue;
+			power[a]=power[b]=true;
+			got++;
+			ans+=d;
+			add(a-1,a);
+			add(b,b+1);
+		}
+		printf("%d\n",ans);
+	}
+	return 0;
+}

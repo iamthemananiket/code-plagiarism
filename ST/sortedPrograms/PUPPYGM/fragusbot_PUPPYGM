@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int dp[12345][2];
+
+int go(int n, int turn) {
+  if (n == 1) {
+    return 0;
+  }
+  if (dp[n][turn] != -1) {
+    return dp[n][turn];
+  }
+  int res = 0;
+  for (int i = 1; i < n; ++i) {
+    if (go(i, 1 - turn) == 0 && go(n - i, 1 - turn) == 0) {
+      res = 1;
+    }
+  }
+  return dp[n][turn] = res;
+}
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  memset(dp, -1, sizeof dp);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int a, b;
+    scanf("%d %d", &a, &b);
+    puts(go(a, 0) || go(b, 0) ? "Tuzik" : "Vanka");
+  }
+  return 0;
+}

@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long LL;
+
+const int Nmax = 1e5 + 2;
+
+int human[Nmax], H;
+int dino[Nmax], D;
+int A[Nmax];
+int T, N;
+
+int main()
+{
+    cin >> T;
+
+    while ( T-- )
+    {
+        cin >> N;
+
+        H = 0, D = 0;
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            cin >> A[i];
+
+            if ( A[i] < 0 )
+                dino[ ++D ] = i;
+
+            if ( A[i] > 0 )
+                human[ ++H ] = i;
+
+            A[i] = abs( A[i] );
+        }
+
+        LL cost = 0;
+        int ind = 1;
+
+        for ( int i = 1; i <= D; ++i )
+        {
+            while ( A[ dino[i] ] > 0 )
+            {
+                if ( A[ dino[i] ] >= A[ human[ind] ] )
+                {
+                    cost += 1LL * ( A[ human[ind] ] * 1LL * abs( dino[i] - human[ind] ) );
+                    A[ dino[i] ] -= A[ human[ind] ];
+                    ind++;
+                }
+                else
+                {
+                    cost += 1LL * ( A[ dino[i] ]* 1LL * abs( dino[i] - human[ind] ) );
+                    A[ human[ind] ] -= A[ dino[i] ];
+                    A[ dino[i] ] = 0;
+                }
+            }
+        }
+
+        cout << cost << "\n";
+    }
+
+    return 0;
+}

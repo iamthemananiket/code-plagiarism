@@ -1,0 +1,195 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+const int N=50000+5;
+ 
+struct Ans
+{
+	int ft,lst,g;
+	Ans(int _ft=0,int _lst=0,int _g=0):ft(_ft),lst(_lst),g(_g){}
+};
+struct Edge{int to,nxt;}e[N<<1];
+struct Tree{int ft,lst,g,tag;}tr[N*4];
+int n,m,tope,hd[N],a[N],b[N];
+int q[N],dep[N],fa[N],top[N],dfn[N],sz[N];
+ 
+inline void rd(int& x)
+{
+	char ch;
+	for (;!isdigit(ch=getchar()););
+	for (x=ch-48;isdigit(ch=getchar());x=x*10+ch-48);
+}
+ 
+inline char rd(void)
+{
+	char ch;
+	while (isspace(ch=getchar()));
+	return ch;
+}
+ 
+inline void add(int x,int y)
+{
+	e[++tope].to=y;e[tope].nxt=hd[x];hd[x]=tope;
+	e[++tope].to=x;e[tope].nxt=hd[y];hd[y]=tope;
+}
+ 
+inline Ans merge(Ans a,Ans b)
+{
+	return Ans(a.ft,b.lst,__gcd(__gcd(a.g,b.g),abs(b.ft-a.lst)));
+}
+ 
+inline void pushdown(int x,int l,int r)
+{
+	if (tr[x].tag)
+	{
+		int ch=x<<1;
+		tr[ch].ft+=tr[x].tag;
+		tr[ch].lst+=tr[x].tag;
+		tr[ch].tag+=tr[x].tag;
+		++ch;
+		tr[ch].ft+=tr[x].tag;
+		tr[ch].lst+=tr[x].tag;
+		tr[ch].tag+=tr[x].tag;
+		tr[x].tag=0;
+	}
+}
+ 
+inline void build(int x,int l,int r)
+{
+	if (l==r)
+	{
+		tr[x].ft=tr[x].lst=b[l];
+		return;
+	}
+	int m=(l+r)>>1,ch=x<<1;
+	build(ch,l,m);build(ch+1,m+1,r);
+	tr[x].ft=tr[ch].ft;
+	tr[x].lst=tr[ch+1].lst;
+	tr[x].g=__gcd(__gcd(tr[ch].g,tr[ch+1].g),abs(tr[x].ft-tr[x].lst));
+}
+ 
+inline void build(void)
+{
+	int l,r,now,p,ch;
+	for (dep[q[l=r=1]=1]=1;l<=r;++l)
+		for (p=hd[now=q[l]];p;p=e[p].nxt)
+			if (!dep[ch=e[p].to]) dep[q[++r]=ch]=dep[now]+1,fa[ch]=now;
+	for (int i=n;i;--i)
+	{
+		sz[now=q[i]]=1;
+		for (p=hd[now];p;p=e[p].nxt)
+			if (dep[ch=e[p].to]>dep[now]) sz[now]+=sz[ch];
+	}
+	dfn[1]=top[1]=1;
+	for (int i=1,mx,t;i<=n;++i)
+	{
+		now=q[i];mx=0;
+		b[dfn[now]]=a[now];
+		for (p=hd[now];p;p=e[p].nxt)
+			if (dep[ch=e[p].to]>dep[now] && sz[ch]>sz[mx]) mx=ch;
+		if (!mx) continue;
+		dfn[mx]=dfn[now]+1;top[mx]=top[now];
+		t=dfn[now]+sz[mx];
+		for (p=hd[now];p;p=e[p].nxt)
+			if (dep[ch=e[p].to]>dep[now] && ch!=mx)
+				dfn[ch]=t+1,t+=sz[ch],top[ch]=ch;
+	}
+	build(1,1,n);
+}
+ 
+inline int query(int x,int l,int r,int le,int ri)
+{
+	if (l==le && ri==r) return __gcd(tr[x].ft,tr[x].g);
+	int m=(l+r)>>1,ch=x<<1;
+	pushdown(x,l,r);
+	if (ri<=m) return query(ch,l,m,le,ri);
+	if (le>m) return query(ch+1,m+1,r,le,ri);
+	return __gcd(query(ch,l,m,le,m),query(ch+1,m+1,r,m+1,ri));
+}
+ 
+inline int query(int x,int y)
+{
+	int rt=0;
+	int t;
+	while (1)
+	{
+		if (top[x]==top[y])
+		{
+			if (dep[x]<dep[y]) t=query(1,1,n,dfn[x],dfn[y]);
+			else t=query(1,1,n,dfn[y],dfn[x]);
+			rt=__gcd(rt,t);
+			break;
+		}
+		if (dep[top[x]]>dep[top[y]])
+		{
+			t=query(1,1,n,dfn[top[x]],dfn[x]);
+			rt=__gcd(rt,t);
+			x=fa[top[x]];
+		}else{
+			t=query(1,1,n,dfn[top[y]],dfn[y]);
+			rt=__gcd(rt,t);
+			y=fa[top[y]];
+		}
+	}
+	return abs(rt);
+}
+ 
+inline void modify(int x,int l,int r,int le,int ri,int w)
+{
+	if (l==le && ri==r)
+	{
+		tr[x].ft+=w;
+		tr[x].lst+=w;
+		tr[x].tag+=w;
+		return;
+	}
+	int m=(l+r)>>1,ch=x<<1;
+	pushdown(x,l,r);
+	if (ri<=m) modify(ch,l,m,le,ri,w);else
+	if (le>m) modify(ch+1,m+1,r,le,ri,w);else
+	modify(ch,l,m,le,m,w),modify(ch+1,m+1,r,m+1,ri,w);
+	tr[x].ft=tr[ch].ft;
+	tr[x].lst=tr[ch+1].lst;
+	tr[x].g=__gcd(__gcd(tr[ch].g,tr[ch+1].g),abs(tr[ch+1].ft-tr[ch].lst));
+}
+ 
+inline void modify(int x,int y,int w)
+{
+	while (1)
+	{
+		if (top[x]==top[y])
+		{
+			if (dep[x]<dep[y]) modify(1,1,n,dfn[x],dfn[y],w);
+			else modify(1,1,n,dfn[y],dfn[x],w);
+			break;
+		}
+		if (dep[top[x]]>dep[top[y]])
+		{
+			modify(1,1,n,dfn[top[x]],dfn[x],w);
+			x=fa[top[x]];
+		}else{
+			modify(1,1,n,dfn[top[y]],dfn[y],w);
+			y=fa[top[y]];
+		}
+	}
+}
+ 
+int main()
+{
+	rd(n);
+	for (int i=1,x,y;i<n;++i)
+		rd(x),rd(y),add(x+1,y+1);
+	for (int i=1;i<=n;++i) rd(a[i]);
+	build();
+	rd(m);
+	for (int i=1,x,y,w;i<=m;++i)
+		if (rd()=='F')
+		{
+			rd(x);rd(y);
+			printf("%d\n",query(x+1,y+1));
+		}else{
+			rd(x);rd(y);rd(w);
+			if (w) modify(x+1,y+1,w);
+		}
+	return 0;
+} 

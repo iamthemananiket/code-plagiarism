@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n)	for(int i=0;i<n;i++)
+#define repn(i, n)	for(int i=1;i<=n;i++)
+#define set(i, n)	memset(i, n, sizeof(i))
+
+#define mx			100050
+#define pb			push_back
+#define mod			1000000007
+
+using namespace std;
+
+typedef long long ll;
+
+int n, m;
+vector<int>edge[mx], cost[mx];
+int vis[mx];
+
+int bfs(int st){
+	queue<int>q;
+	q.push(st);
+	vis[st] = 0;
+	while(!q.empty()){
+		int u = q.front();
+		q.pop();
+		rep(i, edge[u].size()){
+			int v = edge[u][i], c = cost[u][i];
+			if(vis[v] == -1){
+				vis[v] = vis[u] ^ c;
+				q.push(v);
+			}
+			else if((vis[u] ^ c) != vis[v]){
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+void init(){
+	rep(i, mx){
+		edge[i].clear();
+		cost[i].clear();
+		vis[i] = -1;
+	}
+}
+
+int main(){
+	int x, y, c;
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		init();
+		scanf("%d %d", &n, &m);
+		rep(i, n-1){
+			scanf("%d %d", &x, &y);
+		}
+		rep(i, m){
+			scanf("%d %d %d", &x, &y, &c);
+			edge[x].pb(y);
+			edge[y].pb(x);
+			cost[x].pb(c);
+			cost[y].pb(c);
+		}
+		ll ret = 1;
+		repn(i, n){
+			if(vis[i] == -1){
+				int f = bfs(i);
+				if(f) ret = (ret * min(ll(i), 2LL)) % mod;
+				else ret = 0;
+			}
+		}
+		printf("%lld\n", ret);
+	}
+	return 0;
+}

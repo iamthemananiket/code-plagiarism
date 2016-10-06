@@ -1,0 +1,97 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+int main() {
+	int N; int M; long long D;
+	while(~scanf("%d%d%lld", &N, &M, &D)) {
+		vector<vi> A(M, vi(N * 2));
+		rep(i, N) rep(j, M * 2)
+			scanf("%d", &A[j / 2][i * 2 + j % 2]);
+		typedef long double Num;
+		Num minusinf = log(Num());
+		vector<vector<pair<Num, int> > > dp(M + 1, vector<pair<Num, int> >(N * 2, mp(minusinf, -1)));
+		rep(j, N)
+			dp[0][j * 2].first = 0;
+		rep(i, M) {
+			rep(j, N * 2) {
+				Num x = dp[i][j].first;
+				if(x == minusinf) continue;
+				amax(dp[i + 1][j], mp(x, j));
+				if(j - 2 >= 0)
+					amax(dp[i + 1][j - 2], mp(x, j));
+				if(j + 2 < N * 2)
+					amax(dp[i + 1][j + 2], mp(x, j));
+				Num a = log(Num(A[i][j]));
+				if(j % 2 == 0) a = -a;
+				amax(dp[i + 1][j ^ 1], mp(x + a, j));
+			}
+		}
+		int curj = -1; Num curx = minusinf;
+		rep(j, N) {
+			Num x = dp[M][j * 2].first;
+			if(curx < x) {
+				curj = j * 2;
+				curx = x;
+			}
+		}
+		vector<Num> mults;
+		for(int i = M; i >= 0; -- i) {
+			int nj = dp[i][curj].second;
+			if(nj == (curj ^ 1)) {
+				int a = A[i - 1][nj];
+				if(nj % 2 == 1) {
+					mults.push_back(a);
+				} else {
+					mults.push_back(Num(1) / a);
+				}
+			}
+			curj = nj;
+		}
+		reverse(all(mults));
+		Num ans = Num(D);
+		rep(i, mults.size()) {
+			ans *= mults[i];
+			if(ans > 1e18)
+				break;
+		}
+		if(ans > 1e18)
+			puts("Quintillionnaire");
+		else
+			printf("%.10f\n", (double)ans);
+	}
+	return 0;
+}

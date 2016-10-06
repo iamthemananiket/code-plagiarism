@@ -1,0 +1,36 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+int T;
+
+int n;
+int k;
+int a[1000];
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&k);
+
+        int minv = (1ll<<31)-1;
+        for(int i=0; i<n; i++) {
+            scanf("%d",&a[i]);
+            for(int j=0; j<i; j++) {
+                minv = min(abs(a[i]+a[j]-k),minv);
+            }
+        }
+        int minnum = 0;
+
+        for(int i=0; i<n; i++) {
+            for(int j=0; j<i; j++) {
+                minnum += (abs(a[i]+a[j]-k)==minv);
+            }
+        }
+
+        printf("%d %d\n",minv,minnum);
+    }
+
+    return 0;
+}

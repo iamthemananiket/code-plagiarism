@@ -1,0 +1,43 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+int q;
+unsigned int s, A, B, st;
+long long sum;
+pair <unsigned int, pair <int, bool>> a[10000100];
+
+int main ()
+{
+	int i, j, t;
+	scanf ("%d%u%u%u", &q, &s, &A, &B);
+	st = s;
+	for (i = 1; i <= q; i ++)
+	{
+		if (s & 1)
+			a[i] = {(s >> 1), {i, 1}}; ///v[(s >> 1)] = true;
+		else
+			a[i] = {(s >> 1), {i, 0}}; ///v[(s >> 1)] = false;
+		s = s * A + B;		
+	}
+	sort (a + 1, a + q + 1);
+	for (i = 1; i <= q; i ++)
+	{
+		t = -1;
+		for (j = i; a[j].first == a[i].first && j <= q; j ++)
+			t = a[j].second.second;
+		while (t == -1);
+		sum += (long long) (t * a[i].first);
+		i = j - 1;
+	}
+	printf ("%lld\n", sum);
+	return 0;
+}

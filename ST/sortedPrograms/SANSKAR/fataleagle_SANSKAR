@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+long long target;
+
+bool solve(vector<long long> A)
+{
+    if(A.empty())
+        return true;
+    sort(A.begin(), A.end());
+    long long want=target-A.back();
+    if(want<0)
+        return false;
+    A.pop_back();
+    reverse(A.begin(), A.end());
+    int N=A.size();
+    for(int i=0; i<(1<<N); i++)
+    {
+        long long sum=0;
+        for(int j=0; j<N; j++)
+            if((i>>j)&1)
+                sum+=A[j];
+        if(sum==want)
+        {
+            vector<long long> B;
+            for(int j=0; j<N; j++)
+                if(!((i>>j)&1))
+                    B.push_back(A[j]);
+            if(solve(B))
+                return true;
+        }
+    }
+    return false;
+}
+
+int main()
+{
+    int T, N, K;
+    cin>>T;
+    while(T--)
+    {
+        cin>>N>>K;
+        vector<long long> A;
+        long long sum=0;
+        for(int i=0; i<N; i++)
+        {
+            long long a;
+            cin>>a;
+            if(a!=0)
+            {
+                sum+=a;
+                A.push_back(a);
+            }
+        }
+        target=sum/K;
+        if(K<=N && sum%K==0 && solve(A))
+            cout<<"yes\n";
+        else
+            cout<<"no\n";
+    }
+    return 0;
+}

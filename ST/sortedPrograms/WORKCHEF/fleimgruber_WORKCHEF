@@ -1,0 +1,119 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+const int magic=2520; //lcm(2,3, .. 8, 9)
+
+int goal[21],mod[(magic-1)*10+9];
+char time[21][512][magic];
+ll dp[21][512][magic];
+ll pre[3][19][512][magic];
+
+
+int k,qtime;
+bool same;
+int qidx;
+ll f(int d, bool s, int mask, int r)
+{
+	if (s)
+		return pre[qidx][d][mask][r];
+	if (time[d][mask][r]==qtime)
+		return dp[d][mask][r];
+	time[d][mask][r]=qtime;
+	ll &ans=dp[d][mask][r];
+	if (d==0)
+	{
+		int cnt=0;
+		for (int i=1; i<=9; i++)
+			cnt+=(mask&(1<<(i-1)))&&((r%i)==0);
+		return ans=cnt>=k;
+	}
+	int b=9;
+	if (!s)
+		b=goal[d];
+	ans=f(d-1,s||(0<goal[d]),mask,mod[(r*10)]); //0
+	for (int i=1; i<=b; i++)
+		ans+=f(d-1,s||(i<goal[d]),mask|(1<<(i-1)),
+				mod[(r*10+i)]);
+	return ans;
+}
+
+ll solve(ll u)
+{
+	if (u==0)
+		return 0;
+	int ptr=1;
+	for (;u;u/=10)
+		goal[ptr++]=u%10;
+	ptr--;
+	qtime++;
+	return f(ptr,0,0,0);
+}
+
+int whatever(int mask, int r)
+{
+	int cnt=0;
+	for (int i=1; i<=9; i++)
+		cnt+=(mask&(1<<(i-1)))&&((r%i)==0);
+	return cnt;
+}
+
+int tc,ks[3];
+ll ls[3],rs[3];
+void uranus()
+{
+	for (int d=0; d<=18; d++)
+		for (int mask=0; mask<=511; mask++)
+			for (int r=0; r<magic; r++)
+				if (d==0)
+				{
+					int cnt=whatever(mask,r);
+					for (int i=0; i<tc; i++)
+						pre[i][d][mask][r]=cnt>=ks[i];
+				}
+				else
+				{
+					for (int j=0; j<tc; j++)
+					{
+						ll &ans=pre[j][d][mask][r];
+						ans=pre[j][d-1][mask][mod[r*10]]; //0
+						for (int i=1; i<=9; i++)
+							ans+=pre[j][d-1][mask|(1<<(i-1))][mod[r*10+i]];
+					}
+				}
+}
+
+int main()
+{
+	for (int i=(magic-1)*10+9; i>=0; i--)
+		mod[i]=i%magic;
+
+	scanf("%d",&tc);
+	for (int i=0; i<tc; i++)
+		scanf("%lld %lld %d",ls+i,rs+i,ks+i);
+
+	uranus();
+
+	for (qidx=0; qidx<tc; qidx++)
+	{
+		k=ks[qidx];
+		ll ans=solve(rs[qidx]);
+		ans-=solve(ls[qidx]-1);
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

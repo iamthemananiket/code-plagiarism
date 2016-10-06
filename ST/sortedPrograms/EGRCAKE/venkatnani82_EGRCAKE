@@ -1,0 +1,21 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d",&test);
+	while (test--){
+		int n, m;
+		cin>>n>>m;
+		if(m == 0){
+			if(n == 1) cout<<"Yes\n";
+			else cout<<"No 1\n";
+		}	    
+		else{
+			int x = n / __gcd(n, m);
+			if(x < n) {
+				cout<<"No"<<" "<<x<<endl;
+			}
+			else cout<<"Yes\n";
+		}
+	}	
+}

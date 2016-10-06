@@ -1,0 +1,22 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+
+int main()
+{
+	int t;
+	scanf("%d",&t);
+	while(t--)
+	{
+		float b,a;
+		scanf("%f %f",&a,&b);
+	//	float ans=a*b;
+		if(a>=1000)
+		printf("%.6f\n",a*b*0.9);
+		else
+		 printf("%.6f\n",a*b);
+	//	  ans=a*b*0.9;
+	//	printf("%.6f\n",ans);
+	}
+}

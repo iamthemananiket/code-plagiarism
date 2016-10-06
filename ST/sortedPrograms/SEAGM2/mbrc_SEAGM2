@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+ld p[20][MAXN];
+ld w[20];
+
+void solve() {
+	int n,m; s(n); s(m);
+	ld q = 1.0;
+	rep(i,1,n) {
+		w[i] = 1.0;
+		rep(j,1,m) {
+			scanf("%Lf",&p[i][j]);
+			w[i] *= p[i][j];
+		}
+		q -= w[i];
+	}
+	ld p = w[1];
+	ld ans = p;
+	ld term = p; ld eps = 1.0e-18;
+	while (true) {
+		term *= q;
+		if (term < eps) break;
+		ans += term;
+	}
+	printf("%.6Lf\n",ans);
+
+}
+	
+
+int main() {
+	int t; s(t);
+	while (t--) solve();
+	return 0;
+}

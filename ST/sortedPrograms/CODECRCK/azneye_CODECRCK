@@ -1,0 +1,71 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = int(1e9) + 7;
+
+void solve(int test_num) {
+  const double X = sqrt(2), Y = sqrt(3);
+  //a_{n+2} + b_{n+2} = 16(a_n + b_n)
+  ll I, K, S;
+  double a_i, b_i, res;
+  cin >> I >> K >> S >> a_i >> b_i;
+  if (I == K) {
+    res = (a_i + b_i) / pow(2.0, S);
+  } else if (K > I) {
+    if ((K - I) & 1) {
+      const double a = X * (a_i + b_i) - X * Y * (a_i - b_i);
+      const double b = X * (a_i - b_i) + X * Y * (a_i + b_i);
+      a_i = a;
+      b_i = b;
+      ++I;
+    }
+    const double e = 2 * (K - I) - S;
+    res = (a_i + b_i) * pow(2.0, e);
+  } else {
+    const double e = -S - ((I - K + 1) / 2 * 4);
+    res = (a_i + b_i) * pow(2.0, e);
+    if ((I - K) & 1) {
+      const double neg = (a_i - b_i) * pow(2.0, e);
+      const double a = X * res - X * Y * neg;
+      const double b = X * neg + X * Y * res;
+      res = a + b;
+    }
+  }
+  cout << fixed << setprecision(3) << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen("chefshop.inp","r",stdin)
+#define OUTPUT freopen("chefshop.out","w",stdout)
+#define FOR(i,l,r) for(auto i=l;i<=r;i++)
+#define REP(i,l,r) for(auto i=l;i<r;i++)
+#define FORD(i,l,r) for(auto i=l;i>=r;i--)
+#define REPD(i,l,r) for(auto i=l;i>r;i--)
+#define ENDL printf("\n")
+#define debug 1
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=1e9;
+const int MOD=1e9+7;
+const int N=15;
+
+int n,a[N],h[1<<N],f[1<<N];
+vector <int> use;
+void prepare(){
+    int m;
+    scanf("%d",&n);
+    REP(i,0,n) scanf("%d",a+i);
+    sort(a,a+n,greater<int>());
+    memset(h,0,sizeof(h));
+    scanf("%d",&m);
+    while (m--){
+        int m1,x,idx=0;
+        scanf("%d",&m1);
+        while (m1--){
+            scanf("%d",&x);
+            idx+=1<<(--x);
+        }
+        h[idx]=1;
+    }
+    use.clear();
+    REP(i,0,1<<n) if (h[i]){
+        for(auto j:use) if (!(i&j)) h[i|j]=0;
+        use.push_back(i);
+    }
+}
+int solve(){
+    memset(f,0,sizeof(f));
+    REP(i,0,1<<n)
+        for(auto j:use) if (!(i&j)){
+            int idx=i|j;
+            f[idx]=max(f[idx],f[i]+a[__builtin_popcount(idx)-1]);
+        }
+    int ans=0;
+    REP(i,0,n) ans+=a[i];
+    return ans-*max_element(f,f+(1<<n));
+}
+int main(){
+    int test;
+    scanf("%d",&test);
+    while (test--){
+        prepare();
+        cout<<solve()<<'\n';
+    }
+}

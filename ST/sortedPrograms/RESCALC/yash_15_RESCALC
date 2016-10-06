@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int ans[1003];
+int scr[]={0,0,0,0,1,2,4};
+int cnt[6];
+int main(){
+	int t,n,m,c,i,j,mx;
+	cin >> t;
+	while(t--){
+		mx=0;
+		cin >> n;
+		for(i=0;i<n;i++){
+			memset(cnt,0,sizeof cnt);
+			scanf("%d",&m);
+			ans[i]=m;
+			while(m--){
+				scanf("%d",&c);
+				cnt[c-1]++;
+			}
+			while(1){
+				sort(cnt,cnt+6,greater<int>());
+				if(cnt[5]>0)
+					for(ans[i]+=4,j=0;j<6;j++)
+						cnt[j]--;
+				else if(cnt[4]>0)
+					for(ans[i]+=2,j=0;j<5;j++)
+						cnt[j]--;
+				else if(cnt[3]>0)
+					for(ans[i]+=1,j=0;j<4;j++)
+						cnt[j]--;
+				else
+					break;
+			}
+			mx=max(mx,ans[i]);
+		}
+		int cnt=0,ind=-1;
+		for(i=0;i<n;i++)
+			if(ans[i]==mx)
+				cnt++,ind=i;
+		if(cnt>1)
+			puts("tie");
+		else if(ind==0)
+			puts("chef");
+		else
+			printf("%d\n",ind+1);
+	}
+}

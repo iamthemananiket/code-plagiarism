@@ -1,0 +1,93 @@
+/*
+ * 
+ * File:   TESSER.cpp
+ * Author: Andy Y.F. Huang
+ * Created on Nov 13, 2013, 11:27:52 AM
+ */
+
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <climits>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <complex>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+
+namespace TESSER {
+int h[111000], d[111000], b[111000];
+int pre[111000];
+char str[111000];
+
+int signum(int x) {
+  return (x > 0) - (x < 0);
+}
+
+void solve(int test_num) {
+  int N;
+  scanf("%d", &N);
+  for (int i = 0; i < N; i++)
+    scanf("%d", h + i);
+  scanf("%s", str);
+  const int M = strlen(str);
+  N--;
+  for (int i = 0; i < N; i++)
+    d[i] = signum(h[i + 1] - h[i]);
+  pre[0] = -1;
+  for (int i = 0, j = -1; i < M; i++) {
+    b[i] = str[i] == 'G' ? 1 : str[i] == 'L' ? -1 : 0;
+    while (~j && b[i] != b[j])
+      j = pre[j];
+    pre[i + 1] = ++j;
+  }
+  for (int i = 0, j = 0; i < N; i++) {
+    while (~j && d[i] != b[j])
+      j = pre[j];
+    if (++j == M) {
+      puts("YES");
+      return;
+    }
+  }
+  puts("NO");
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("azn.txt", "w", stderr);
+#endif
+  int tests;
+  scanf("%d", &tests);
+  for (int i = 1; i <= tests; i++)
+    solve(i);
+}
+}
+
+int main() {
+  TESSER::solve();
+  return 0;
+}

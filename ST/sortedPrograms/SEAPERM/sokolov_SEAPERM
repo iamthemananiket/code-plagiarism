@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+#define Int long long
+
+int nextInt() {
+	int n;
+	scanf("%d", &n);
+	return n;
+}
+
+#define N 2005
+int p[N], sum[N], res[N];
+Int minV;
+pair<int,int> a[N];
+
+int f(int i, int s, int r) {
+	int l = i;
+	int res = sum[i]-sum[i-1];
+	while (l <= r) {
+		int m = (l+r) / 2;
+		if (sum[m]-sum[i-1] <= s) {
+			res = sum[m]-sum[i-1];
+			l = m+1;
+		} else {
+			r = m-1;
+		}
+	}
+	return max(s-res, 0);
+}
+
+void check(int n, int s) {
+	for (int i = 1; i <= n; i++) {
+		sum[i] = sum[i-1] + a[p[i]].first;
+	}
+	Int cnt = 0;
+	for (int i = 1; i <= n; i++) {
+		cnt += f(i, s, n);
+	}
+	if (cnt < minV) {
+		minV = cnt;
+		for (int i = 1; i <= n; i++) {
+			res[i] = p[i];
+		}
+	}
+}
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; tt++) {
+		int n = nextInt();
+		int k = nextInt();
+		int s = nextInt();
+		for (int i = 1; i <= n; i++) {
+			a[i] = make_pair(nextInt(), i);
+			p[i] = i;
+		}
+		minV = (int) (1e9);
+		minV *= minV;
+		check(n, s);
+		for (int i = 1; i <= 750; i++) {
+			random_shuffle(p+1, p+n+1);
+			check(n, s);
+		}
+		for (int i = n; i >= 1; i--) {
+			p[n-i+1] = i;
+		}
+		check(n, s);
+		sort(a+1, a+n+1);
+		for (int i = n; i >= 1; i--) {
+			p[n-i+1] = a[i].second;
+		}
+		check(n, s);
+		for (int i = 1; i <= n; i++) {
+			if (i == n) {
+				printf("%d\n", res[n]);
+			} else {
+				printf("%d ", res[i]);
+			}
+		}
+	}
+	return 0;
+}

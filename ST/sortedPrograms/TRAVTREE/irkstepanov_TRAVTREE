@@ -1,0 +1,189 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+
+#define forn(i, n) for (int (i) = 0; (i) < n; ++(i))
+#define ford(i, n) for (int (i) = (n) - 1; (i) >= 0; --(i))
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ld, ld> pll;
+
+const int rmax = 19;
+
+vector<vector<int> > g;
+vector<vector<int> > parent;
+vector<int> t_in, t_out, euler;
+int timer = 0;
+int n;
+
+void dfs(int v, int p)
+{
+    parent[v][0] = p;
+    t_in[v] = timer++;
+    euler.pb(v);
+    for (int to : g[v]) {
+        if (to != p) {
+            dfs(to, v);
+        }
+    }
+    t_out[v] = timer++;
+    euler.pb(v);
+}
+
+bool ancestor(int u, int v)
+{
+    return t_in[u] <= t_in[v] && t_out[u] >= t_out[v];
+}
+
+int lca(int u, int v)
+{
+    if (ancestor(u, v)) {
+        return u;
+    }
+    for (int r = rmax - 1; r >= 0; --r) {
+        if (!ancestor(parent[u][r], v)) {
+            u = parent[u][r];
+        }
+    }
+    return parent[u][0];
+}
+
+vector<int> fenwick;
+
+void update(int pos, int val)
+{
+    for (; pos < 2 * n; pos = (pos | (pos + 1))) {
+        fenwick[pos] += val;
+    }
+}
+
+int get(int pos)
+{
+    int ans = 0;
+    for (; pos >= 0; pos = (pos & (pos + 1)) - 1) {
+        ans += fenwick[pos];
+    }
+    return ans;
+}
+
+int pre(int u, int w)
+{
+    for (int r = rmax - 1; r >= 0; --r) {
+        if (!ancestor(parent[u][r], w)) {
+            u = parent[u][r];
+        }
+    }
+    return u;
+}
+
+struct path
+{
+    int u, v, w;
+};
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //ofstream cout("output.txt");
+
+    //freopen("input", "r", stdin);
+
+    ios_base::sync_with_stdio(false);
+
+    cin >> n;
+    g.resize(n);
+    parent.resize(n);
+    t_in.resize(n);
+    t_out.resize(n);
+    forn(i, n) {
+        parent[i].resize(rmax);
+    }
+
+    forn(i, n - 1) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        g[u].pb(v);
+        g[v].pb(u);
+    }
+
+    dfs(0, 0);
+
+    for (int r = 1; r < rmax; ++r) {
+        forn(i, n) {
+            int t = parent[i][r - 1];
+            parent[i][r] = parent[t][r - 1];
+        }
+    }
+
+    vector<int> cnt(n);
+    fenwick.resize(2 * n);
+
+    int q;
+    cin >> q;
+    vector<int> ans(q);
+    vector<path> paths(q);
+    forn(i, q) {
+        cin >> paths[i].u >> paths[i].v;
+        --paths[i].u, --paths[i].v;
+        paths[i].w = lca(paths[i].u, paths[i].v);
+    }
+
+    forn(i, q) {
+        ans[i] += get(t_in[paths[i].u]) - get(t_in[paths[i].w]);
+        ans[i] += get(t_in[paths[i].v]) - get(t_in[paths[i].w]);
+        update(t_in[paths[i].w], 1);
+        update(t_out[paths[i].w], -1);
+    }
+    /*vector<int> magic(n);
+    forn(i, q) {
+        ans[i] += magic[paths[i].w];
+        int x = paths[i].u;
+        while (x != paths[i].w) {
+            ++magic[x];
+            x = parent[x][0];
+        }
+        x = paths[i].v;
+        while (x != paths[i].w) {
+            ++magic[x];
+            x = parent[x][0];
+        }
+    }*/
+    fenwick.assign(2 * n, 0);
+    forn(i, q) {
+        //cout << ans[i] << " ";
+        ans[i] += get(t_in[paths[i].w]) - get(t_out[paths[i].w]);
+        //cout << ans[i] << "\n";
+        if (paths[i].u != paths[i].w) {
+            int x = paths[i].u, y = pre(paths[i].u, paths[i].w);
+            update(t_in[y], 1);
+            if (t_in[x] + 1 < 2 * n) {
+                update(t_in[x] + 1, -1);
+            }
+        }
+        if (paths[i].v != paths[i].w) {
+            int x = paths[i].v, y = pre(paths[i].v, paths[i].w);
+            update(t_in[y], 1);
+            if (t_in[x] + 1 < 2 * n) {
+                update(t_in[x] + 1, -1);
+            }
+        }
+    }
+
+    forn(i, q) {
+        ans[i] += cnt[paths[i].w];
+        ++cnt[paths[i].w];
+    }
+
+    forn(i, q) {
+        cout << ans[i] << "\n";
+    }
+
+}

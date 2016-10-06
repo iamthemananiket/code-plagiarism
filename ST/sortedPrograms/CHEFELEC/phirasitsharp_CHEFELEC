@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+
+std::vector<int> x;
+std::string str;
+
+int main() { 
+
+	std::ios::sync_with_stdio( false );
+
+	int test_num;
+	std::cin >> test_num;
+
+	for ( int i = 0 ; i < test_num ; i++ ) {
+
+		int n;
+		std::cin >> n;
+		std::cin >> str;
+
+		x.resize( n );
+		for ( int &val : x ) {
+			std::cin >> val;
+		}
+
+		long long ans = 0ll;
+		int lst = -1;
+		for ( int i = 0 ; i < n ; i++ ) {
+			if ( str[i] == '1' ) {
+				if ( lst == -1 ) {
+					ans += x[i] - x[0];
+				} else {
+					long long val = x[i] - x[lst+1];
+					for ( int j = lst+1 ; j < i ; j++ ) {
+						long long val1 = x[j] - x[lst]; 
+						long long val2 = x[i] - x[j+1];
+						val = std::min( val, val1 + val2 );
+					}
+					ans += val;
+				}
+				lst = i;
+			}
+		}
+
+		ans += x[n-1] - x[lst];
+		std::cout << ans << std::endl;
+	}
+	return 0;
+}

@@ -1,0 +1,140 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+map< vector<int>, int> M;
+int mc =0;
+
+void fill(vector<int> v) {
+	if(M.find(v) != M.end()) return;
+	M[v] =mc++;
+	for(int i =0; i < (int)v.size(); i++) for(int j =i+1; j < (int)v.size(); j++) {
+		vector<int> w;
+		for(int k =0; k < (int)v.size(); k++) if(i != k && j != k) w.push_back(v[k]);
+		w.push_back(v[i]+v[j]);
+		sort(begin(w),end(w));
+		fill(w);}
+	for(int i =0; i < (int)v.size(); i++) for(int j =1; j < v[i]; j++) {
+		vector<int> w;
+		for(int k =0; k < (int)v.size(); k++) if(i != k) w.push_back(v[k]);
+		w.push_back(j);
+		w.push_back(v[i]-j);
+		sort(begin(w),end(w));
+		fill(w);}
+	}
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	int T;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		int N;
+		cin >> N;
+		vector<int> P0(N);
+		for(int i =0; i < N; i++) {cin >> P0[i]; P0[i]--;}
+		vector<int> cyc,vis(N,0);
+		for(int i =0; i < N; i++) if(vis[i] == 0) {
+			int c =0, x =i;
+			while(vis[x] == 0) {
+				vis[x] =1;
+				x =P0[x];
+				c++;}
+			cyc.push_back(c);}
+		sort(begin(cyc),end(cyc));
+		M.clear();
+		mc =0;
+		fill(cyc);
+		vector< vector<dbl> > P(mc,vector<dbl>(mc,0));
+		vector< vector<dbl> > Pp(mc,vector<dbl>(mc,0));
+		vector<dbl> val(mc,1);
+		vector<int> cycs(N,1);
+		val[M[cycs]] =0;
+		for(int i =0; i < mc; i++) P[i][i] =1;
+		ALL_THE(M,it) if(it->ff != cycs) {
+			// it -> jt
+			vector<int> v =it->ff;
+			for(int i =0; i < (int)v.size(); i++) for(int j =i+1; j < (int)v.size(); j++) {
+				vector<int> w;
+				for(int k =0; k < (int)v.size(); k++) if(i != k && j != k) w.push_back(v[k]);
+				w.push_back(v[i]+v[j]);
+				sort(begin(w),end(w));
+				Pp[it->ss][M[w]] +=v[i]*v[j];
+				P[it->ss][M[w]] -=2.0*v[i]*v[j]/N/(N-1);}
+			for(int i =0; i < (int)v.size(); i++) for(int j =1; 2*j <= v[i]; j++) {
+				vector<int> w;
+				for(int k =0; k < (int)v.size(); k++) if(i != k) w.push_back(v[k]);
+				w.push_back(j);
+				w.push_back(v[i]-j);
+				sort(begin(w),end(w));
+				int p =v[i];
+				if(2*j == v[i]) p =j;
+				P[it->ss][M[w]] -=2.0*p/N/(N-1);
+				Pp[it->ss][M[w]] +=p;
+				}
+			}
+//		for(int i =0; i < mc; i++) for(int j =0; j < mc; j++) cout << Pp[i][j] << ((j == mc-1)?"\n":" ");
+
+		vector<int> ord(mc);
+		for(int i =0; i < mc; i++) ord[i] =i;
+		int a =0;
+		// P[i][j]*ans[j] = v[i]
+		for(int i =0; i < mc; i++) {
+			int x =-1;
+			for(int j =a; j < mc; j++) if(abs(P[j][i]) > soclose) {
+				x =j;
+				break;}
+			if(x == -1) continue;
+			swap(ord[a],ord[x]);
+			swap(val[a],val[x]);
+			swap(P[a],P[x]);
+			dbl d =P[a][i];
+			for(int j =0; j < mc; j++) P[a][j] /=d;
+			val[a] /=d;
+			for(int j =0; j < mc; j++) if(j != a && abs(P[j][i]) > soclose) {
+				dbl d2 =P[j][i];
+				for(int k =0; k < mc; k++) P[j][k] -=d2*P[a][k];
+				val[j] -=d2*val[a];}
+			a++;}
+
+		for(int i =0; i < mc; i++) if(M[cyc] == ord[i]) cout << val[i] << "\n";
+		}
+	return 0;}
+
+// look at my code
+// my code is amazing

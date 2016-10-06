@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define SET(a,b) fill(a.begin(),a.end(),b)
+#define ll long long int
+#define DEBUG(x) cout<<">> : "<<#x<<" : "<<x<<"   "
+#define unordered_map map
+ 
+inline bool EQ(double a, double b) { return fabs(a - b) < 1e-9; }
+ 
+int main() {
+	int t;
+	scanf("%d",&t);
+	while(t--) {
+		ll n,m;
+		ll z,i,l,r,b;
+		scanf("%lld%lld%lld%lld%lld%lld",&n,&m,&z,&l,&r,&b);
+		ll ans=0;
+		if(!(m&1)) {
+			if(l>=n)
+				ans=n,l-=n;
+			else if(l+r>=n)
+				ans=n,r-=n-l,l=0;
+			else if(l+r+z>=n)
+				ans=n,z-=n-l-r,l=0,r=0;
+			else
+				ans=l+r+z,z=0,r=0,l=0;
+			m--;
+		}
+		ll zCap=0;
+		ll bCap=0;
+		ll comb=l+r;
+		if(comb>=n*(m-1)) {
+			ans+=n*(m-1);
+			comb-=n*(m-1);
+			ans+=min(n,comb);
+			if(min(n,comb)==comb)
+				ans+=min(b+z,n-comb);
+		}
+		else {
+			if(comb&1)
+				b++,comb--;
+			ll val=comb/(m-1);
+			ans+=comb;
+			bCap+=val;
+			comb-=val*(m-1);
+			n-=val;
+			ll BB;
+			if(comb!=0) {
+				BB=(m-comb)/2+1;
+				bCap+=BB;
+				zCap+=m-comb-BB;
+				n--;
+			}
+			bCap+=n*(m/2+1);
+			zCap+=n*(m-m/2-1);
+			BB=min(bCap,b);
+			ans+=BB;
+			if(BB==b)
+				zCap+=bCap-b;
+			ll ZZ=min(z,zCap);
+			ans+=ZZ;
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}  

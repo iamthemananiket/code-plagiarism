@@ -1,0 +1,150 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef double dd;
+const int MAX = 64;
+const int MAXN = 10;
+dd pre[MAXN+1][MAX][MAX];
+vector<vector<int>> all[MAXN+1];
+
+void gauss(dd mat[MAX][MAX], int N) {
+/*cerr << endl;
+  for(int r=0;r<N;++r,cerr<<endl)
+    for(int c=0;c<=N;++c)
+      cerr << mat[r][c] << ' ';
+  */for(int k=0;k<N;++k) {
+    int piv = k;
+    for(int r=k+1;r<N;++r)
+      if(abs(mat[r][k]) > abs(mat[piv][k]))
+        piv = r;
+    for(int c=0;c<=N;++c)
+      swap(mat[k][c], mat[piv][c]);
+    const dd val=mat[k][k];
+    for(int c=0;c<=N;++c)
+      mat[k][c] /= val;
+    for(int r=0;r<N;++r) {
+      if(r!=k) {
+        const dd f = mat[r][k];
+        for(int c=0;c<=N;++c) {
+          mat[r][c] -= f * mat[k][c];
+        }
+      }
+    }
+  }
+  /*
+  cerr << endl;
+  for(int r=0;r<N;++r,cerr<<endl)
+    for(int c=0;c<=N;++c)
+      cerr << mat[r][c] << ' ';
+*/}
+
+vector<int> get_cyc(const vector<int>& perm) {
+  static bool vis[MAXN];
+  const int N = perm.size();
+  memset(vis,false,sizeof(vis));
+  vector<int> now;
+  /*
+        cerr << "perm2: ";
+      for(int p:perm)
+        cerr << p << " ";
+      cerr << endl;*/
+  for(int i=0;i<N;++i) {
+    if(vis[i]) continue;
+    int cnt = 0;
+    for(int at=i;!vis[at];at=perm[at]){
+      ++cnt;
+      vis[at] = true;
+    }
+    now.push_back(cnt);
+  }
+  sort(now.begin(), now.end());
+  return now;
+}
+
+void gen_parts(int tar, int pred, vector<int>& now, vector<vector<int>>& all) {
+  if (tar == 0) {
+    all.push_back(now);
+    return;
+  }
+  for(int x=pred;x<=tar;++x){
+    now.push_back(x);
+    gen_parts(tar-x,x,now,all);
+    now.erase(--now.end());
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  memset(pre, 0, sizeof(pre));
+  int part_cnt[MAXN+1];
+  for(int N = 1; N <= MAXN; ++N) {
+    vector<int> now;
+    vector<vector<int>> parts;
+    gen_parts(N, 1, now, parts);
+    const int M = parts.size();
+    //cerr << M << endl;
+    const dd den = N*(N-1)/2;
+    part_cnt[N] = M;
+    vector<int> perm;
+    sort(parts.begin(), parts.end());
+    all[N] = parts;
+    for(int i = 0; i < M; ++i) {
+      int sum = 0;
+      perm.clear();
+      for(int x : parts[i]) {
+        for(int j=1;j<x;++j){
+          perm.push_back(sum+j);
+        }
+        perm.push_back(sum);
+        sum += x;
+      }
+      /*
+      cerr << "perm: ";
+      for(int p:perm)
+        cerr << p << " ";
+      cerr << endl;*/
+      if((int)parts[i].size() == N) {
+        pre[N][i][i] = 1;
+        continue;
+      }
+      pre[N][i][i] = -1;
+      pre[N][i][M] = -1;
+      for(int a=0;a<N;++a){
+        for(int b=a+1;b<N;++b) {
+          swap(perm[a],perm[b]);
+          const auto& cyc = get_cyc(perm);
+          /*
+          cerr << "cyc ";
+          for(int c:cyc)
+            cerr << c << " ";
+          cerr << endl;*/
+          swap(perm[a],perm[b]);
+          const auto idx = lower_bound(parts.begin(), parts.end(), cyc) - parts.begin();
+          assert(parts[idx] == cyc);
+          //if (idx != i)
+            pre[N][i][idx] += 1.0 / den;
+        }
+      }
+    }
+    gauss(pre[N], M);
+  }
+  int T;
+  cin >> T;
+  for(int tt=0;tt<T;++tt) {
+    int N;
+    cin >> N;
+    vector<int> perm(N);
+    for(int& p : perm) {
+      cin >> p;
+      --p;
+    }
+    const auto& cyc = get_cyc(perm);
+    const int idx = lower_bound(all[N].begin(), all[N].end(), cyc) - all[N].begin();
+    assert(all[N][idx] == cyc);
+    cout << fixed << setprecision(7) << pre[N][idx][part_cnt[N]] << endl;
+  }
+  return 0;
+}

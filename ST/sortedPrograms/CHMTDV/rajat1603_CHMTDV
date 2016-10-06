@@ -1,0 +1,140 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 505;
+const long long inf = 1e15;
+int n , p;
+int arr[N][N];
+int row[N];
+int col[N];
+int belrow[N];
+long long sum[N][N];
+long long ans;
+int tmp[N];
+int tmp1[N];
+long long cursum[N];
+long long check(long long val , bool copy){
+    for(int i = 1 ; i <= p ; ++i){
+        cursum[i] = 0;
+    }
+    vector < int > tmp;
+    tmp.clear();
+    long long mx = -1;
+    for(int i = 1 ; i <= n ; ++i){
+        bool rekt = 0;
+        for(int j = 1 ; j <= p ; ++j){
+            if(sum[j][i] + cursum[j] > val){
+                rekt = 1;
+                break;
+            }
+        }
+        if(rekt){
+            tmp.emplace_back(i - 1);
+            for(int j = 1 ; j <= p ; ++j){
+                mx = max(mx , cursum[j]);
+                cursum[j] = 0;
+            }
+        }
+        for(int j = 1 ; j <= p ; ++j){
+            cursum[j] += sum[j][i];
+        }
+    }
+    for(int j = 1 ; j <= p ; ++j){
+        mx = max(mx , cursum[j]);
+    }
+    if(tmp.size() >= p){
+        return 0;
+    }
+    if(copy){
+        ans = mx;
+        for(int i = 1 ; i < p ; ++i){
+            row[i] = tmp1[i];
+        }
+        while(tmp.size() < p - 1){
+            tmp.emplace_back(n - 1);
+        }
+        for(int i = p - 2 ; i >= 1 ; --i){
+            while(tmp[i] <= tmp[i - 1]){
+                --tmp[i - 1];
+            }
+        }
+        for(int i = 0 ; i < p - 1 ; ++i){
+            col[i + 1] = tmp[i];
+        }
+    }
+    return mx;
+}
+int main(){
+    clock_t timer = clock();
+    scanf("%d %d" , &n , &p);
+    for(int i = 1 ; i <= n ; ++i){
+        for(int j = 1 ; j <= n ; ++j){
+            scanf("%d" , &arr[i][j]);
+        }
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        tmp[i] = i;
+    }
+    int rekt = 0;
+    ans = inf;
+    while(1.0 * (clock() - timer) / CLOCKS_PER_SEC < 1.97){
+        random_shuffle(tmp + 1 , tmp + n);
+        for(int i = 1 ; i < p ; ++i){
+            tmp1[i] = tmp[i];
+        }
+        sort(tmp1 + 1 , tmp1 + p);
+        tmp1[0] = 0;
+        tmp1[p] = n;
+        for(int i = 1 ; i <= p ; ++i){
+            for(int j = tmp1[i - 1] + 1 ; j <= tmp1[i] ; ++j){
+                belrow[j] = i;
+            }
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            for(int j = 1 ; j <= n ; ++j){
+                sum[i][j] = 0;
+            }
+        }
+        for(int i = 1 ; i <= n ; ++i){
+            for(int j = 1 ; j <= n ; ++j){
+                sum[belrow[i]][j] += arr[i][j];
+            }
+        }
+        if(rekt > 1){
+            while(1.0 * (clock() - timer) / CLOCKS_PER_SEC < 1.98){
+                long long tmp = check(ans - 1 , 1);
+                if(!tmp){
+                    break;
+                }
+            }
+        }
+        else{
+            long long l = 0;
+            for(int i = 1 ; i <= p ; ++i){
+                for(int j = 1 ; j <= n ; ++j){
+                    l = max(l , sum[i][j]);
+                }
+            }
+            long long r = ans - 1;
+            if(!check(r , 0)){
+                continue;
+            }
+            while(l < r){
+                long long mid = l + r >> 1;
+                long long tmp = check(mid , 1);
+                if(tmp){
+                    r = tmp;
+                }
+                else{
+                    l = mid + 1;
+                }
+            }
+            ++rekt;
+        }
+    }
+    for(int i = 1 ; i < p ; ++i){
+        printf("%d%c" , row[i] , " \n"[i == p - 1]);
+    }
+    for(int i = 1 ; i < p ; ++i){
+        printf("%d%c" , col[i] , " \n"[i == p - 1]);
+    }
+}  

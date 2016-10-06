@@ -1,0 +1,26 @@
+#include <iostream>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+        
+        long long n,k,q,x,y,ans;
+        
+        cin >> n >> k ;
+        for( cin>>q; q--; )
+        {
+                cin >> x >> y ;
+                ans = 0 ;
+                while( x != y )
+                {
+                        if( x > y )  x = ( x+k-2 ) / k ;
+                        else  y = ( y+k-2 ) / k ;
+                        ans++;
+                }
+                cout << ans << endl ;
+        }
+        
+	return 0;
+}

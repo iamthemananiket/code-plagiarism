@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+vector<int> V;
+
+int main() {
+	V = *new vector<int>();
+	repe(j,1,100060) {
+		stringstream s; s<<j; string k = s.str();
+		string l = k; reverse(l.begin(),l.end()); //cout<<k<<" "<<l<<endl;
+		if (k==l) {
+			V.pb(j);
+			//cout<<j<<endl;
+		}
+	}
+	int t; s(t);
+	while (t--) {
+		int l,r; s(l); s(r);
+		ll ans = 0;
+		repe(j,0,V.size()) {
+			if ((l <= V[j]) and (V[j] <= r)) {
+				ans += V[j];
+			}
+		}
+		prl(ans); endc;
+	}
+}

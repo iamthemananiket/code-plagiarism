@@ -1,0 +1,98 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <time.h>
+#include <memory.h>
+#include <algorithm>
+#include <queue>
+#include <set>
+#include <string>
+
+using namespace std;
+
+set<int> S, S2, S3;
+char s[1000];
+size_t len;
+const int MAX_L = 4;
+
+int getHash() {
+    int hash = 0;
+    len = strlen(s);
+    for(int i = 0; i < len; ++i)
+        hash = 37 * hash + (s[i] - 'a');
+    return hash;
+}
+
+int getHash2() {
+    int hash = 0;
+    len = strlen(s);
+    for(int i = 0; i < len; ++i)
+        hash = 31 * hash + (s[i] - 'a');
+    return hash;
+}
+
+int getHash3() {
+    int hash = 0;
+    len = strlen(s);
+    for(int i = 0; i < len; ++i)
+        hash = 151 * hash + (s[i] - 'a');
+    return hash;
+}
+
+void tryChange() {
+    
+    if (S.find(getHash()) != S.end() &&
+        S2.find(getHash2()) != S2.end() &&
+        S3.find(getHash3()) != S3.end() ) {
+        return;
+    }
+    
+    for(int i = 0; i < len; ++i)
+        for(int j = i+1; j < len; ++j) {
+            swap(s[i], s[j]);
+            if (S.find(getHash()) != S.end() &&
+                S2.find(getHash2()) != S2.end() &&
+                S3.find(getHash3()) != S3.end() ) {
+                return;
+            }
+            swap(s[i], s[j]);
+        }
+    
+   /* char tmp;
+    for(int i = 0; i < len; ++i) {
+        for(char ch = 'a'; ch <= 'z'; ++ch) {
+            tmp = s[i];
+            s[i] = ch;
+            if (S.find(getHash()) != S.end() &&
+                S2.find(getHash2()) != S2.end() &&
+                S3.find(getHash3()) != S3.end() ) {
+                return;
+            }
+            
+            s[i] = tmp;
+        }
+    }
+    */
+}
+
+int main() {
+    int t;
+    scanf("%d", &t);
+    
+    while(t --> 0) {
+        scanf("%s", s);
+        len = strlen(s);
+        if (len <= MAX_L) {
+            S.insert(getHash());
+            S2.insert(getHash2());
+            S3.insert(getHash3());
+        }
+    }
+    while(scanf("%s", s) != EOF) {
+        len = strlen(s);
+        if (len <= MAX_L)
+            tryChange();
+        printf("%s ", s);
+    }
+    return 0;
+}

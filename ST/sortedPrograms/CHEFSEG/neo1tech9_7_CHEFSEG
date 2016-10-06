@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+int t;
+long double X, K;
+int main(){
+	std::ios_base::sync_with_stdio(false);
+	cin.tie(0);
+	cin >> t;
+	while(t--){
+		cin >> X >> K;
+		long double lg = (int)(log(K)/log(2.0));
+		long double num = X * (1.0 + (2.0)*(K - pow((long double)2.0,lg)));
+		long double den = pow((long double)2.0, lg + 1.0);
+		cout << fixed << setprecision(7) << num/den << '\n';
+	}
+	return 0;
+}

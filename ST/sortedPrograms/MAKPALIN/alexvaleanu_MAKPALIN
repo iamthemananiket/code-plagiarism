@@ -1,0 +1,231 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class Palindrome_Substrings
+{
+public:
+
+    string S;
+    vector<int> P;
+
+    Palindrome_Substrings() {
+    }
+
+    Palindrome_Substrings(const string &str)
+    {
+        S.push_back('@');
+        S.push_back('$');
+
+        for (size_t i = 0; i < str.size(); ++i)
+        {
+            S.push_back(str[i]);
+            S.push_back('$');
+        }
+
+        S.push_back('#');
+
+        this->computeManacher();
+    }
+
+    void computeManacher()
+    {
+        const int N = S.size();
+        P = vector<int>(N, 0);
+
+        int indexOfLongestPalindrome = 0, rightEndOfLongestPalindrome = 0;
+
+        for (int i = 1; i <= N - 1; ++i)
+        {
+            if (rightEndOfLongestPalindrome > i)
+                P[i] = min(P[2 * indexOfLongestPalindrome - i], rightEndOfLongestPalindrome - i);
+            else
+                P[i] = 0;
+
+            while (S[i - P[i] - 1] == S[i + P[i] + 1])
+                P[i]++;
+
+            if (P[i] + i > rightEndOfLongestPalindrome)
+            {
+                rightEndOfLongestPalindrome = P[i] + i;
+                indexOfLongestPalindrome = i;
+            }
+        }
+    }
+
+    bool isPalindrome(int i, int j) const
+    {
+        int l = j - i + 1;
+
+        if (l % 2 == 1) ///is odd
+        {
+            int pos = 2 * (i + l / 2);
+            int lgPal = 2 * (P[pos] / 2) + 1;
+
+            return (lgPal >= l);
+        }
+        else
+        {
+            int pos = 2 * (i + l / 2) - 1;
+            int lgPal = 2 * (P[pos] / 2);
+
+            return (lgPal >= l);
+        }
+    }
+};
+
+#define u64 long long
+
+const u64 Base = 137;
+const int MAX_N = 1e5 + 2;
+
+const int MOD = 1e9 + 9;
+
+u64 h1[MAX_N];
+u64 hrev[MAX_N];
+
+int simplePal(const string &str, int i, int j)
+{
+    while (i < j)
+    {
+        if (str[i] != str[j])
+            return 0;
+
+        i++;
+        j--;
+    }
+
+    return 1;
+}
+
+int tryBack(const string &str)
+{
+    string a = str;
+    a.push_back(str[0]);
+
+    return simplePal(a, 0, a.size() - 1);
+}
+
+int tryFront(const string &str)
+{
+    int n = str.size();
+    string b;
+    b.push_back(str[n - 1]);
+
+    string a = b + str;
+
+    return simplePal(a, 0, a.size() - 1);
+}
+
+void calc_hashes(const string &str)
+{
+    for (int i = 0; i < MAX_N; ++i)
+    {
+        h1[i] = 0;
+        hrev[i] = 0;
+    }
+
+    u64 code = 0;
+
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        h1[i] = (code * Base + str[i]) % MOD;
+        code = h1[i];
+    }
+
+    code = 0;
+
+    string a = str;
+    reverse(a.begin(), a.end());
+
+    for (size_t i = 0; i < a.size(); ++i)
+    {
+        hrev[i] = (code * Base + a[i]) % MOD;
+        code = hrev[i];
+    }
+}
+
+int check(int nr)
+{
+    assert(nr > 0);
+
+    return (h1[nr - 1] == hrev[nr - 1]);
+}
+
+int solve(const string &str)
+{
+    const int N = str.size();
+
+    int j = N - 1;
+    int sum = 0;
+
+    calc_hashes(str);
+
+    Palindrome_Substrings PS(str);
+
+    for (int i = 0; i < N - 1; ++i)
+    {
+        j--;
+        assert(j >= 0);
+
+        if (i == j)
+        {
+            if (check(i + 1))
+                sum += 1;
+        }
+        else if (i < j)
+        {
+            if (PS.isPalindrome(i + 1 + 1, j - 1 + 1) && check(i + 1))
+                sum += 1;
+        }
+        else
+            break;
+    }
+
+    string s = str;
+    reverse(s.begin(), s.end());
+    j = N - 1;
+
+    calc_hashes(s);
+    Palindrome_Substrings PS2(s);
+
+    for (int i = 0; i < N - 1; ++i)
+    {
+        j--;
+        assert(j >= 0);
+
+        if (i == j)
+        {
+        }
+        else if (i < j)
+        {
+            if (PS2.isPalindrome(i + 1 + 1, j - 1 + 1) && check(i + 1))
+                sum += 1;
+        }
+        else
+            break;
+    }
+
+    return sum;
+}
+
+int main()
+{
+    ///ifstream cin("data.in");
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        string str;
+        cin >> str;
+
+        int sol = tryFront(str) + tryBack(str);
+        sol += solve(str);
+
+        cout << sol << "\n";
+    }
+
+    return 0;
+}

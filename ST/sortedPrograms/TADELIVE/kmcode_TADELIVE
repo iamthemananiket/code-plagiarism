@@ -1,0 +1,78 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+int n;
+int x;
+int y;
+#define MAX 100001
+long long int a[MAX];
+long long int b[MAX];
+int use[MAX];
+vector <pair<long long int, pair<int, int> > > v;
+int u[2];
+int main(){
+	scanf("%d", &n);
+	scanf("%d%d", &x, &y);
+	long long int sum = 0;
+	for (int i = 0; i < n; i++){
+		scanf("%lld", &a[i]);
+		sum += a[i];
+	}
+	u[0] = x;
+	u[1] = y;
+	long long int zz = x + y;
+	long long int ans = 0;
+	int iii = 0;
+	for (int i = 0; i < n; i++){
+		scanf("%lld", &b[i]);
+		sum += b[i];
+		if (a[i] == b[i]){
+			iii++;
+			zz--;
+			zz--;
+			ans += a[i];
+			continue;		
+		}
+		v.push_back(make_pair(a[i], make_pair(i, 0)));
+		v.push_back(make_pair(b[i], make_pair(i, 1)));
+	}
+	sort(v.begin(), v.end());
+	for (int i = v.size() - 1; zz != 0&& i >= 0; i--){
+		if (use[v[i].second.first]){
+			continue;
+		}
+		if (u[v[i].second.second] == 0){
+			continue;
+		}
+		use[v[i].second.first] = true;
+		ans += v[i].first;
+		u[v[i].second.second]--;
+		zz--;
+
+	}
+	printf("%lld\n", ans);
+	return 0;
+}

@@ -1,0 +1,227 @@
+/* @nazarbek.altybay */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+#include <complex>
+
+#define pii pair<int, int>
+
+#define pb push_back
+#define mp make_pair
+
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int INF = (int) 1e9 + 7;
+const int MAXN = (int) 2e6 + 7;
+
+typedef vector<ll> big;
+
+ll base = 1977326743ll * 1977326743ll;
+int number = 7;
+int block = 22;
+
+inline void input(big &a) {
+  a.clear();
+  char s[MAXN];
+  scanf("%s\n", &s);
+  int len = strlen(s);
+  reverse(s, s + len);
+  for (int i = 0; i < len; i += block) {
+    ll cur = 0, p = 1;
+    for (int j = i; j < min(i + block, len); j++) {
+      cur += (s[j] - '0') * p;
+      p *= number;
+    }
+    a.pb(cur);
+  }
+}
+
+inline bool operator <(const big& a, const big& b) {
+  if (a.size() != b.size())
+    return a.size() < b.size();
+  for (int i = a.size() - 1; i >= 0; i--) {
+    if (a[i] != b[i]) 
+      return a[i] < b[i];
+  }
+  return false;
+}
+
+vector<int> buffer;
+int last;
+
+void leadingZeroes(int x) {
+  for (int p = 1; p < base; p *= number) {
+    if (x < p) buffer.pb(0);
+  }
+}
+
+void out7(int x) {
+  vector<int> digits;
+  while (x) {
+    digits.pb(x % 7);
+    x /= 7;
+  }
+  while (digits.size() < block) digits.pb(0);
+  reverse(digits.begin(), digits.end());
+  for (auto it : digits) cout << it;
+}
+
+void print(big a) {
+  out7(a.back());cout<<' ';
+  for (int i = (int)a.size() - 2; i >= 0; i--) {
+    out7(a[i]);
+    cout<<' ';
+  }
+  cout << endl;
+}
+
+inline void output(const big &a) {
+  buffer.clear();
+  for (int i = 0; i < a.size(); i++) {
+    ll x = a[i];
+    int ss = 0;
+    while (x) {
+      buffer.pb(x % 7);
+      x /= 7;
+      ss++;
+    }
+    for (int cc = 0; cc < block - ss; cc++)
+      buffer.pb(0);
+    if (buffer.size() > last)
+      break;
+  }
+  while (buffer.size() > last) buffer.pop_back();
+  reverse(buffer.begin(), buffer.end());
+  int sz = buffer.size();
+  bool zero = 1;
+  for (int i = max(0, sz - last); i < sz; i++) {
+    if (buffer[i]) zero = 0;
+    if (!zero)
+      printf("%d", buffer[i]);
+  }
+  if (zero) printf("0");
+}
+
+inline void add(big &a, const big &b) {
+  ll carry = 0;
+  for (int i = 0; i < max(a.size(), b.size()) || carry; i++) {
+    if (i == a.size())
+      a.pb(0);
+    a[i] += (i < b.size() ? b[i] : 0) + carry;
+    carry = (a[i] >= base);
+    if (carry) a[i] -= base;
+  }
+  while (a.size() > 1 && !a.back()) 
+    a.pop_back();
+}
+
+inline void sub(big &a, const big &b) {
+  ll carry = 0;
+  for (size_t i=0; i<b.size() || carry; ++i) {
+    a[i] -= carry + (i < b.size() ? b[i] : 0);
+    carry = a[i] < 0;
+    if (carry)  a[i] += base;
+  }
+  while (a.size() > 1 && a.back() == 0)
+    a.pop_back();
+}
+
+inline big mult(big a, ll b) {
+  big res;
+  while (b) {
+    if (b & 1) add(res, a);
+    b >>= 1;
+    add(a, a);
+  }
+  return res;
+}
+
+inline void divide(big &a, const int &b) {
+  ll carry = 0;
+  for (int i = a.size() - 1; i >= 0; i--) {
+    ll cur = (1ll * carry * base + a[i]);
+    a[i] = cur / b;
+    carry = cur % b;
+  }
+  while (a.size() > 1 && !a.back()) a.pop_back();
+}
+
+inline void levelUp(big &a) {
+  a.pb(0);
+  for (int i = a.size() - 1; i > 0; i--)
+    a[i] = a[i - 1];
+  while (a.size() > 1 && !a.back())
+    a.pop_back();
+}
+
+big solve(big a, big b) {
+  big res, curvalue;
+  res.resize(a.size());
+  for (int i = a.size() - 1; i >= 0; i--) {
+    levelUp(curvalue);
+    curvalue[0] = a[i];
+    ll x = 0;
+    ll l = 0, r = base;
+    while (l <= r) {
+      ll mid = (l + r) >> 1ll;
+      if (b.size() + 1 < curvalue.size() || (b.size() <= curvalue.size() && !(curvalue < mult(b, mid)))) { // cur <= value
+        x = mid;
+        l = mid + 1;
+      } else {
+        r = mid - 1;
+      }
+    }
+    res[i] = x;
+    sub(curvalue, mult(b, x));
+  }
+  while (res.size() > 1 && !res.back()) res.pop_back();
+  return res;
+}
+
+int main() {
+  #ifdef LOCAL
+    freopen("in", "r", stdin);
+  #endif
+
+  int cases;
+  scanf("%d\n", &cases);
+  while (cases--) {
+    big a, b;
+    input(a);
+    input(b);
+    scanf("%d\n", &last);
+    big c = solve(a, b);
+    output(c);
+    puts("");
+  }
+
+
+  return 0;
+}

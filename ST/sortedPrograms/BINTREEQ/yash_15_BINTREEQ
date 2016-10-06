@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+ll c0,cn,n;
+
+ll f(ll x, vector<int> &v){
+	for(int i=v.size()-1;i>=0;i--)
+		x+=x+v[i];
+	return x;
+}
+
+ll bin(ll c2, vector<int> &v){
+	ll lt=(1<<(c0+cn-c2-1))-1, rt = (1<<(c0+cn-c2)), mid;
+	//cout<<"  "<<lt<<" "<<rt<<" :: ";
+	while(rt-lt>1){
+		mid=lt+(rt-lt)/2;
+		if(f(mid,v)>n)
+			rt=mid;
+		else
+			lt=mid;
+	}
+	//cout<<lt<<"\n";
+	return lt;
+}
+
+ll c1,c2;
+vector<int> m1,m2;
+
+void lca(ll a, ll b, ll n){
+	c1=c2=cn=0;
+	m1.clear();
+	m2.clear();
+	ll lvl=1,lft=1;
+	for(;!cn;lvl++,lft+=lft){
+		if(lft<=a && a<lft+lft)
+			c1=lvl;	
+		if(lft<=b && b<lft+lft)
+			c2=lvl;
+		if(lft<=n && n<lft+lft)
+			cn=lvl;
+	}
+	ll l1=c1,l2=c2,a1=a,b1=b;
+	while(l1>l2){
+		m1.push_back(a1%2);
+		a1>>=1;
+		l1--;
+	}
+	while(l1<l2){
+		m2.push_back(b1%2);
+		b1>>=1;
+		l2--;
+	}
+	while(a1!=b1){
+		m1.push_back(a1&1);
+		m2.push_back(b1&1);
+		a1>>=1;
+		b1>>=1;
+		l1--;
+	}
+	c0=l1;
+//	cout<<"  "<<c0<<" "<<c1<<" "<<c2<<" "<<cn<<"\n";
+}
+
+int main() {
+	int tt;
+	ll  u,v;
+	cin >>tt;
+	while(tt--) {
+		scanf("%lld%lld%lld",&n,&u,&v);
+		lca(u,v,n);
+		printf("%lld\n",min(bin(c1,m1),bin(c2,m2)));
+	}
+	return 0;
+}

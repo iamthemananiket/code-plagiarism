@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+
+typedef long long ll;
+const int PW = 1 << 17;
+const int MAX = 1<<20;
+vector<int> divs[MAX];
+bool sieve[MAX];
+int tree[2*PW], idx[PW],arr[PW];
+int dsu[PW];
+
+void update(int pos, int val) {
+  tree[pos+=PW]=val;
+  for(int i=pos>>1;i>0;i>>=1)
+    tree[i]=max(tree[i+i],tree[i+i+1]);
+}
+
+int ask(int l, int r) {
+  int res=0;
+  for(l+=PW,r+=PW+1;l<r;l>>=1,r>>=1){
+    if(l&1)res=max(res,tree[l++]);
+    if(r&1)res=max(res,tree[--r]);
+  }
+  return res;
+}
+
+int findset(int x) {
+  return dsu[x]==x?x:dsu[x]=findset(dsu[x]);
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  memset(sieve,false,sizeof(sieve));
+  for(int p=2;p<MAX;++p){
+    if(!sieve[p]){
+      for(int x=p;x<MAX;x+=p){
+        sieve[x]=true;
+        int t=x;
+        while(t%p==0){
+          t/=p;
+          divs[x].push_back(p);
+        }
+      }
+    }
+  }
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N, M;
+    cin >> N >> M;
+    memset(tree,0,sizeof(tree));
+    for(int i=1;i<=N;++i){
+      cin>>arr[i];
+      idx[i]=0;
+      if(arr[i]==1)update(i,1);
+      else update(i,divs[arr[i]].front());
+    }
+    for(int i=1;i<=N;++i){
+      dsu[i]=i;
+    }
+    dsu[N+1]=N+1;
+    while(M-->0){
+      int ty,l,r;
+      cin>>ty>>l>>r;
+      if(ty==0){
+        for(int i=findset(l);i<=r;i=findset(i+1)) {
+          if(++idx[i]>=(int)divs[arr[i]].size()) {
+            //cerr << i << " is one\n";
+            dsu[i]=findset(i+1);
+            update(i, 1);
+          } else {
+            //cerr << i << " " << divs[arr[i]][idx[i]] << endl;
+            update(i, divs[arr[i]][idx[i]]);
+          }
+        }
+      } else {
+        const int res = ask(l,r);
+        cout<<res<<' ';
+      }
+    }
+    cout<<endl;
+  }
+  return 0;
+}

@@ -1,0 +1,108 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int N = 120;
+
+using namespace std;
+
+int tests,n;
+int ar[N];
+int dp[N][N];
+
+int main(){
+//	freopen("path2.in","r",stdin);
+//	freopen("path2.out","w",stdout);
+	//freopen("F:/in.txt","r",stdin);
+	//freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>tests;
+	for (;tests;--tests)
+	{
+		cin>>n;
+		for (int i=1;i<=n;i++)
+			cin>>ar[i];
+		
+		for (int i=1;i<=n;i++)
+			for (int j=i;j<=n;j++)
+				dp[i][j]=1e9;
+		
+		for (int span=0;span<n;span++)
+		{
+			for (int i=1;i+span<=n;i++)
+			{
+				int l,r;
+				l=i;
+				r=i+span;
+				int cnt_smaller,cnt_larger;
+				cnt_smaller=cnt_larger=0;
+				
+				for (int q=1;q<=n;q++)
+				{
+					if (q>=l&&q<=r)
+						continue;
+					if (ar[q]<ar[l])
+						++cnt_smaller;
+					if (ar[q]>ar[l])
+						++cnt_larger;
+				}
+				dp[l][r]=min(dp[l][r],dp[l+1][r]+min(cnt_smaller,cnt_larger));
+				cnt_smaller=cnt_larger=0;
+				
+				for (int q=1;q<=n;q++)
+				{
+					if (q>=l&&q<=r)
+						continue;
+					if (ar[q]<ar[r])
+						++cnt_smaller;
+					if (ar[q]>ar[r])
+						++cnt_larger;
+				}
+				dp[l][r]=min(dp[l][r],dp[l][r-1]+min(cnt_smaller,cnt_larger));
+			}
+		}
+		/*
+		for (int i=1;i<=n;i++)
+		{
+			for (int j=1;j<=n;j++)
+				cout<<dp[i][j]<<" ";
+			cout<<endl;
+		}
+		*/
+		cout<<dp[1][n]<<endl;
+	}
+	
+	return 0;
+}

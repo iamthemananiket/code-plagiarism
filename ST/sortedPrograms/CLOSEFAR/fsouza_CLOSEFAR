@@ -1,0 +1,251 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+struct MoTreePath {
+  int n;
+  vector<vector<int>> adj;
+  vector<pair<int, int>> queries;
+  vector<pair<int, int>> walk;
+  vector<int> middle;
+
+  MoTreePath(const vector<vector<int>> &adj,
+             const vector<pair<int, int>> &queries)
+    : n(adj.size()), adj(adj), queries(queries), middle(n) {}
+
+  void presolve() {
+    walk.clear();
+    dfs(0, -1);
+    for (int q = 0; q < (int)queries.size(); ++q) {
+      int l = middle[queries[q].first];
+      int r = middle[queries[q].second];
+      if (l > r) swap(l, r);
+      queries[q] = make_pair(l, r);
+    }
+  }
+
+  template<typename AdderT, typename EraserT, typename QueryCBT>
+  void solve(AdderT &adder, EraserT &eraser, QueryCBT &querycb, double m = 1.) {
+    const int block = max(1.0, m*sqrt(walk.size()));
+    vector<int> qids(queries.size());
+    iota(qids.begin(), qids.end(), 0);
+    sort(qids.begin(), qids.end(),
+         [&](int a, int b) {
+           pair<int, int> &qa = queries[a], &qb = queries[b];
+           if (qa.first / block != qb.first / block)
+             return qa.first < qb.first;
+           return qa.second < qb.second;
+         });
+
+    vector<vector<int>> count(2, vector<int>(n, 0));
+
+    auto change = [&](pair<int, int> vkind, int delta) {
+      int v, kind;
+      tie(v, kind) = vkind;
+      bool counted_before = count[0][v] + count[1][v] > 0 && count[0][v] != 2;
+      count[kind][v] += delta;
+      bool counted_after = count[0][v] + count[1][v] > 0 && count[0][v] != 2;
+      if (counted_after && !counted_before) adder(v);
+      if (!counted_after && counted_before) eraser(v);
+    };
+
+    int l = 0, r = -1;
+    for (int qid : qids) {
+      int newl, newr;
+      tie(newl, newr) = queries[qid];
+      while (r < newr) change(walk[++r], +1);
+      while (l > newl) change(walk[--l], +1);
+      while (r > newr) change(walk[r--], -1);
+      while (l < newl) change(walk[l++], -1);
+      querycb(qid);
+    }
+  }
+
+  int estimate_cost(double m = 1.) {
+    const int block = max(1.0, m*sqrt(walk.size()));
+    static vector<int> qids;
+    if (qids.size() != queries.size()) {
+      qids.resize(queries.size());
+      iota(qids.begin(), qids.end(), 0);
+    }
+    sort(qids.begin(), qids.end(),
+         [&](int a, int b) {
+           pair<int, int> &qa = queries[a], &qb = queries[b];
+           if (qa.first / block != qb.first / block)
+             return qa.first < qb.first;
+           return qa.second < qb.second;
+         });
+
+    int result = 0;
+    int l = 0, r = -1;
+    for (int qid : qids) {
+      int newl, newr;
+      tie(newl, newr) = queries[qid];
+      result += abs(newl - l);
+      result += abs(newr - r);
+      l = newl;
+      r = newr;
+    }
+
+    return result;
+  }
+
+private:
+  void dfs(int v, int p) {
+    walk.push_back(make_pair(v, 0));
+    middle[v] = -1;
+    for (int u : adj[v])
+      if (u != p) {
+        dfs(u, v);
+        middle[v] = walk.size();
+        walk.push_back(make_pair(v, 1));
+      }
+    if (middle[v] == -1) {
+      middle[v] = walk.size();
+      walk.push_back(make_pair(v, 1));
+    }
+    walk.push_back(make_pair(v, 0));
+  }
+};
+
+struct segtree {
+  int n;
+  vector<int> values;
+  struct node_t {
+    int nactive = 0;
+    int leftmost = INT_MAX, rightmost = INT_MIN;
+    int mindiff = INT_MAX;
+    node_t(int vid = -1) {
+      if (vid != -1) {
+        nactive = 1;
+        leftmost = rightmost = vid;
+      }
+    }
+    node_t(const node_t &left, const node_t &right, const segtree &seg) {
+      nactive = left.nactive + right.nactive;
+      leftmost = left.nactive > 0 ? left.leftmost : right.leftmost;
+      rightmost = right.nactive > 0 ? right.rightmost : left.rightmost;
+      mindiff = min(left.mindiff, right.mindiff);
+      if (left.nactive > 0 && right.nactive > 0) {
+        mindiff = min(mindiff,
+                      seg.values[right.leftmost] - seg.values[left.rightmost]);
+      }
+    }
+  };
+  vector<node_t> tree;
+  segtree(const vector<int> &values)
+    : n(values.size()), values(values), tree(4*n) {}
+  void update(int pos, bool active) { update(pos, active, 0, 0, n-1); }
+  void update(int pos, bool active, int v, int l, int r) {
+    if (l == r) {
+      tree[v] = node_t(active ? l : -1);
+    } else {
+      int m = l+(r-l)/2;
+      if (pos <= m) update(pos, active, 2*v+1, l, m);
+      else update(pos, active, 2*v+2, m+1, r);
+      tree[v] = node_t(tree[2*v+1], tree[2*v+2], *this);
+    }
+  }
+};
+
+int main() {
+  int n;
+  scanf("%d", &n);
+  vector<int> values(n);
+  for (int i = 0; i < n; ++i)
+    scanf("%d", &values[i]);
+  vector<vector<int>> adj(n);
+  for (int i = 0; i < n-1; ++i) {
+    int a, b;
+    scanf("%d %d", &a, &b), --a, --b;
+    adj[a].push_back(b);
+    adj[b].push_back(a);
+  }
+  int nq;
+  scanf("%d", &nq);
+  vector<tuple<char, int, int>> queries(nq);
+  vector<pair<int, int>> queriesab(nq);
+  for (int q = 0; q < nq; ++q) {
+    char kind;
+    int a, b;
+    scanf(" %c %d %d", &kind, &a, &b), --a, --b;
+    queries[q] = make_tuple(kind, a, b);
+    queriesab[q] = make_pair(a, b);
+  }
+
+  vector<int> sortedvalues = values;
+  sort(sortedvalues.begin(), sortedvalues.end());
+  vector<int> valueid(n);
+  for (int i = 0; i < n; ++i) {
+    valueid[i] = lower_bound(sortedvalues.begin(), sortedvalues.end(),
+                             values[i]) - sortedvalues.begin();
+  }
+  segtree seg(sortedvalues);
+
+  auto adder = [&](int node) {
+    seg.update(valueid[node], true);
+  };
+
+  auto eraser = [&](int node) {
+    seg.update(valueid[node], false);
+  };
+
+  vector<int> result(nq);
+  auto querycb = [&](int qid) {
+    if (get<0>(queries[qid]) == 'F') {
+      result[qid] = sortedvalues[seg.tree[0].rightmost] -
+        sortedvalues[seg.tree[0].leftmost];
+    } else {
+      result[qid] = seg.tree[0].mindiff;
+    }
+  };
+
+  MoTreePath mtp(adj, queriesab);
+  mtp.presolve();
+
+  pair<int, double> bestm(INT_MAX, 1.0);
+  {
+    double left = 0.05, right = 20;
+    for (int pos = 0; pos <= 10; ++pos) {
+      double m = left + pos*(right-left)/10;
+      int v = mtp.estimate_cost(m);
+      bestm = min(bestm, make_pair(v, m));
+    }
+    for (int rep = 0; rep < 10; ++rep) {
+      double m0 = left + (right-left)/3;
+      double m1 = right - (right-left)/3;
+      int v0 = mtp.estimate_cost(m0), v1 = mtp.estimate_cost(m1);
+      bestm = min(bestm, make_pair(v0, m0));
+      bestm = min(bestm, make_pair(v1, m1));
+      if (v0 < v1) right = m1;
+      else left = m0;
+    }
+  }
+
+  mtp.solve(adder, eraser, querycb, bestm.second);
+
+  for (int q = 0; q < nq; ++q)
+    printf("%d\n", result[q]);
+
+  return 0;
+}

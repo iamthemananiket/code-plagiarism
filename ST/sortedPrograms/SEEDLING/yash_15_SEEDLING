@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define mod 1000000007
+#define pii pair<int,int>
+
+int cur[101][20004],nxt[101][20004];
+//stack< pii > stk,s1,s2;
+
+struct Stack {
+	pii val[2000006];
+	int Top;
+	Stack() {	Top = -1;}
+	void push(pii z)	{	val[++Top]=z;	}
+	void pop()			{	Top--;			}
+	bool empty()		{	return Top==-1;	}
+	pii top()			{	return val[Top];}
+}stk,s1,s2;
+
+int main() {
+	int t;
+	int n,s,ar,pr,a,b,c;
+	scanf("%d",&t);
+	while(t--) {
+		scanf("%d%d",&n,&s);
+		cur[0][10000]=1;
+		stk.push(make_pair(0,0));
+		while(n--){
+			scanf("%d%d%d",&a,&b,&c);
+			b=min(c-b,10001);
+			while(!stk.empty()) {
+				ar=stk.top().first;
+				pr=stk.top().second;
+				s1.push(stk.top());
+				stk.pop();
+				for(int i=ar,j=pr;i<=s;i+=a,j+=b) {
+					j=min(j,10001);
+					if(!nxt[i][j+10000])
+						s2.push(make_pair(i,j));
+					nxt[i][j+10000]+=cur[ar][pr+10000];
+					if(nxt[i][j+10000]>=mod)	nxt[i][j+10000]-=mod;
+				}
+			}
+			while(!s1.empty()) {
+				cur[s1.top().first][s1.top().second]=0;
+				s1.pop();
+			}
+			while(!s2.empty()) {
+				ar=s2.top().first;
+				pr=s2.top().second+10000;
+				cur[ar][pr]=nxt[ar][pr];
+				nxt[ar][pr]=0;
+				stk.push(s2.top());
+				s2.pop();
+			}
+		}
+		int ans=0;
+		while(!stk.empty()) {
+			ar=stk.top().first;
+			pr=stk.top().second;
+			stk.pop();
+			if(pr>0)
+				ans+=cur[ar][pr+10000];
+			if(ans>=mod)	ans-=mod;
+		}
+		printf("%d\n",ans);
+	}
+}

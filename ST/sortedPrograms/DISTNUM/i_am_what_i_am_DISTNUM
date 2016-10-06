@@ -1,0 +1,216 @@
+#include<bits/stdc++.h>
+using namespace std;
+int a[1000006];
+vector<vector<int> > queries;
+int n,q;
+int tempArray[1000006];
+long long v[1000006],v2[1000006];
+long long MOD=1e9+7;
+
+void onlyOne()
+{
+	for(int i=0;i<q;i++)
+	 {//cout<<"query "<<i+1<<endl;
+	 	 	int szOld=0;
+	 	 	for(int j=queries[i][1]-1;j<=queries[i][2]-1;j++)
+	 	 		tempArray[szOld++]=a[j];
+	 	 	sort(tempArray,tempArray+szOld);
+	 	 	int sz=0;
+	 	 	
+			v[sz]=tempArray[0];
+	 	 	v2[sz++]=tempArray[0];
+	 	 	
+			for(int j=1;j<szOld;j++)
+			 if(tempArray[j-1]!=tempArray[j])
+				{
+				 v[sz]=tempArray[j];
+				 v2[sz++]=tempArray[j];
+			    }
+		/*	cout<<"size "<<sz<<endl;
+		    for(int i=0;i<sz;i++)
+			  cout<<v[i]<<" ";
+			 cout<<endl; 
+		*/	long long cf=v[0];
+			for(int j=1;j<sz;j++)
+			 {
+			 	long long temp=(cf*v[j])%MOD;
+			 	
+				cf=(cf+v[j])%MOD;
+			 	v[j]=temp;
+			 }
+			long long ans=0;
+			cf=v[1];
+			for(int j=2;j<sz;j++)
+			 {
+			 	long long temp=(cf*v2[j])%MOD;
+				cf=(cf+v[j])%MOD;
+			 	ans=(ans+temp)%MOD;
+			 }
+		//	cout<<ans<<endl;
+		printf("%lld\n",ans);	
+		  }
+
+}
+
+void onlyFive()
+{int x,y;
+	for(int i=0;i<q;i++)
+	 {//cout<<"query "<<i+1<<endl;
+	 	x=queries[i][1]-1;
+		 	y=queries[i][2]-1;
+		 	int sz=0;
+		 	
+		//	set<int> s;
+		 	for(int j=x;j<=y;j++)
+		 		tempArray[sz++]=a[j];
+		 	sort(tempArray,tempArray+sz);
+			int ans=1;
+			for(int j=1;j<sz;j++)
+			 if(tempArray[j-1]!=tempArray[j])
+			   ans++;
+		 //	  s.insert(a[j]);
+		 	printf("%d\n",ans);
+		 //	cout<<s.size()<<endl;
+		 }
+	
+}
+
+void eval()
+{
+	int x,y;
+	for(int i=0;i<q;i++)
+	 {//cout<<"query "<<i+1<<endl;
+	 	int type=queries[i][0];
+	 	if(type==1)
+	 	 {
+	 	 	int szOld=0;
+		 	
+		 
+	 	 //	set<int> s;
+	 	 	for(int j=queries[i][1]-1;j<=queries[i][2]-1;j++)
+	 	 		tempArray[szOld++]=a[j];
+	 	 	sort(tempArray,tempArray+szOld);
+	 	 	int sz=0;
+	 	 	
+			v[sz]=tempArray[0];
+	 	 	v2[sz++]=tempArray[0];
+	 	 	
+			for(int j=1;j<szOld;j++)
+			 if(tempArray[j-1]!=tempArray[j])
+				{
+				 v[sz]=tempArray[j];
+				 v2[sz++]=tempArray[j];
+			    }
+		/*	cout<<"size "<<sz<<endl;
+		    for(int i=0;i<sz;i++)
+			  cout<<v[i]<<" ";
+			 cout<<endl; 
+		*/	long long cf=v[0];
+			for(int j=1;j<sz;j++)
+			 {
+			 	long long temp=(cf*v[j])%MOD;
+			 	
+				cf=(cf+v[j])%MOD;
+			 	v[j]=temp;
+			 }
+			long long ans=0;
+			cf=v[1];
+			for(int j=2;j<sz;j++)
+			 {
+			 	long long temp=(cf*v2[j])%MOD;
+				cf=(cf+v[j])%MOD;
+			 	ans=(ans+temp)%MOD;
+			 }
+		//	cout<<ans<<endl;
+		printf("%lld\n",ans);	
+		  }
+		else if(type==2)
+		 {
+		 	x=queries[i][1];
+		 	y=queries[i][2];
+		 	a[x-1]=y;
+		 }
+		else if(type==3)
+		 {
+		 	x=queries[i][1]-1;
+		 	for(int j=x;j<n-1;j++)
+		 	 {
+		 	 	a[j]=a[j+1];
+			 }
+			n--;
+		 }
+		else if(type==4)
+		 {
+		 	x=queries[i][1];
+		 	for(int j=n-1;j>=x;j--)
+		 	 {
+		 	 	a[j+1]=a[j];
+			 }
+			n++;
+			a[x]=queries[i][2];
+		 }
+		else
+		 {
+		 	x=queries[i][1]-1;
+		 	y=queries[i][2]-1;
+		 	int sz=0;
+		 	
+		//	set<int> s;
+		 	for(int j=x;j<=y;j++)
+		 		tempArray[sz++]=a[j];
+		 	sort(tempArray,tempArray+sz);
+			int ans=1;
+			for(int j=1;j<sz;j++)
+			 if(tempArray[j-1]!=tempArray[j])
+			   ans++;
+		 //	  s.insert(a[j]);
+		 	printf("%d\n",ans);
+		 //	cout<<s.size()<<endl;
+		 }
+	 }
+}
+
+int main()
+{
+	//freopen("in.txt","r",stdin);
+	//cin>>n>>q;
+	scanf("%d%d",&n,&q);
+	for(int i=0;i<n;i++)
+	 {
+	 //	cin>>a[i];
+	 	scanf("%d",&a[i]);
+	 }
+	queries.resize(q);
+	int type,x,y,one=0,five=0;
+	for(int i=0;i<q;i++)
+	 {
+	 	//cin>>type;
+	 	scanf("%d",&type);
+		if(type==1)
+	 	  one++;
+	 	else if(type==5)
+	 	  five++;
+	 	vector<int> temp;
+	 	temp.push_back(type);
+	 	if(type==3)
+	 	 {
+	 	 	//cin>>x;
+	 	 	scanf("%d",&x);
+	 	 	temp.push_back(x);
+		  }
+		else
+		 {
+		 	//cin>>x>>y;
+		 	scanf("%d%d",&x,&y);
+	 	 	temp.push_back(x);
+	 	 	temp.push_back(y);
+		 }
+		queries[i]=temp;
+	 }
+	if(one==q)
+	  onlyOne();
+	else if(five==q)
+	  onlyFive();
+	else if(one+five!=0)
+		eval();
+}

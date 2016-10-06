@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+// iostream is too mainstream
+#include <cstdio>
+// bitch please
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <cmath>
+#include <iomanip>
+#include <time.h>
+#define dibs reserve
+#define OVER9000 1234567890
+#define ALL_THE(CAKE,LIE) for(auto LIE =CAKE.begin(); LIE != CAKE.end(); LIE++)
+#define tisic 47
+#define soclose 1e-8
+#define chocolate win
+// so much chocolate
+#define patkan 9
+#define ff first
+#define ss second
+#define abs(x) ((x < 0)?-(x):x)
+#define uint unsigned int
+#define dbl long double
+#define pi 3.14159265358979323846
+using namespace std;
+// mylittledoge
+
+#ifdef DONLINE_JUDGE
+	// palindromic tree is better than splay tree!
+	#define lld I64d
+#endif
+
+int gcd(int x, int y) {
+	if(x > y) swap(x,y);
+	return (x == 0)?y:gcd(y%x,x);
+	}
+
+int main() {
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	cout << fixed << setprecision(10);
+	vector<int> clos[27];
+	clos[0].push_back(1);
+	vector< vector<int> > gcdv(30,vector<int>(30,0));
+	for(int i =1; i <= 27; i++) for(int j =1; j <= 27; j++) gcdv[i][j] =gcd(i,j);
+	for(int i =1; i < 27; i++) {
+		vector<int> v =clos[i-1];
+		ALL_THE(clos[i-1],it) {
+			int x =*it+(1<<i);
+			for(int j =i; j >= 1; j--) if((x>>(j-1))&1) x |=1<<(gcdv[i+1][j]-1);
+			v.push_back(x);}
+		sort(begin(v),end(v));
+		if(i > 22) clos[i].dibs(2000000);
+		for(int j =0; j < (int)v.size(); j++) if(j == 0 || v[j] != v[j-1]) clos[i].push_back(v[j]);
+//		cout << clos[i].size() << endl;
+		}
+	long long mod =1000000007;
+	vector< vector<long long> > poc(30,vector<long long>(30,0));
+	poc[0][0] =1;
+	for(int i =1; i < 30; i++) for(int j =0; j < 30; j++)
+		for(int k =0; k <= j; k++) {
+			poc[i][j] +=poc[i-1][j-k];
+			if(poc[i][j] >= mod) poc[i][j] -=mod;}
+	vector<int> popc(1<<15,0);
+	for(int i =0; i < (1<<15); i++) for(int j =0; j < 15; j++) if((i>>j)&1) popc[i] =popc[i-(1<<j)]+1;
+	int T;
+	cin >> T;
+	for(int t =0; t < T; t++) {
+		int N,K,L;
+		cin >> N >> K >> L;
+		int b =0;
+		for(int i =0; i < N; i++) {
+			int a;
+			cin >> a;
+			b |=1<<(a-1);}
+		long long ans =0;
+		vector<int> pp(30,0);
+		ALL_THE(clos[L-1],it) if(((*it)&b) == b) 
+			pp[popc[(*it)&((1<<15)-1)]+popc[(*it)>>15]]++;
+		int p0 =0;
+		for(int i =0; i < 30; i++) if((b>>i)&1) p0++;
+		for(int i =p0; i < 30; i++) if(K-(i-p0) >= 0) 
+			ans =(ans+poc[i][K-(i-p0)]*pp[i])%mod;
+		if(ans < 0) ans +=mod;
+		cout << ans << "\n";}
+	return 0;}
+
+// look at my code
+// my code is amazing

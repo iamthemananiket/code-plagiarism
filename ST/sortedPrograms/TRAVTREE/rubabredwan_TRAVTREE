@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(int i=0;i<n;i++)
+#define REPN(i, n)	for(int i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+
+#define MAX			200050
+#define pb			push_back
+
+using namespace std;
+
+int n, q, BIT[2][MAX], cnt[MAX];
+vector<int>edge[MAX]; 
+int P[MAX][20], par[MAX], level[MAX], in[MAX], out[MAX]; 
+int t = 0;
+
+void dfs(int at, int past, int l){
+	level[at] = l;
+	par[at] = past;
+	in[at] = ++t;
+	REP(i, edge[at].size()){
+		int u = edge[at][i];
+		if(u == past) continue;
+		dfs(u, at, l+1);
+	}
+	out[at] = t;
+}
+
+int get(int a, int b){
+	if(level[a] < level[b]) swap(a, b);
+	for(int i=19;i>=0;i--){
+		if(level[a] - (1 << i) >= level[b]){
+			a = P[a][i];
+		}
+	}
+	if(a == b) return a;
+	for(int i=19;i>=0;i--){
+		if(P[a][i] != P[b][i]){
+			a = P[a][i];
+			b = P[b][i];
+		}
+	}
+	return par[a];
+}
+
+void init(){
+	dfs(1, 0, 1);
+	REPN(i, n) P[i][0] = par[i];
+	for(int j=1;(1<<j)<=n;j++){
+		REPN(i, n){
+			P[i][j] = P[ P[i][j-1] ][ j-1 ];
+		}
+	}
+}
+
+void update(int x, int val, int p){
+	while(x <= n){
+		BIT[p][x] += val;
+		x += x & -x;
+	}
+}
+
+int query(int x, int p){
+	int ret = 0;
+	while(x){
+		ret += BIT[p][x];
+		x -= x & -x;
+	}
+	return ret;
+}
+
+int getSub(int at){
+	return cnt[at] + query(out[at], 0) - query(in[at] - 1, 0);
+}
+
+int getPath(int x, int y, int lc){
+	int r1 = query(in[x], 1);
+	int r2 = query(in[y], 1);
+	int r3 = query(in[lc], 1) * 2;
+	return r1 + r2 - r3;
+}
+
+void addSub(int at){
+	update(in[at], 1, 1);
+	update(out[at] + 1, -1, 1);
+}
+
+void addPath(int x, int y, int lc){
+	if(y == lc) swap(x, y);
+	if(x == lc){
+		update(in[y], 1, 0);
+		if(par[x]){
+			update(in[ par[lc]], -1, 0);
+		}
+	}
+	else{
+		cnt[lc]++;
+		update(in[ lc ], -2, 0);
+		update(in[ x ], 1, 0);
+		update(in[ y ], 1, 0);
+	}
+}
+
+void solve(int x, int y){
+	int lc = get(x, y);
+	int ret = getSub(lc) + getPath(x, y, lc);
+	addSub(lc);
+	addPath(x, y, lc);
+	printf("%d\n", ret);
+}
+
+int main(){
+	int x, y;
+	scanf("%d", &n);
+	REP(i, n-1){
+		scanf("%d %d", &x, &y);
+		edge[x].pb(y);
+		edge[y].pb(x);
+	}
+	init();
+	scanf("%d", &q);
+	while(q--){
+		scanf("%d %d", &x, &y);
+		solve(x, y);
+//		cout << "**************\n";
+	}
+	return 0;
+}

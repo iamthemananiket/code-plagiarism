@@ -1,0 +1,98 @@
+#include "bits/stdc++.h"
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+static const int INF = 0x3f3f3f3f; static const long long INFL = 0x3f3f3f3f3f3f3f3fLL;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> static void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> static void amax(T &x, U y) { if(x < y) x = y; }
+
+template<int MOD>
+struct ModInt {
+	static const int Mod = MOD;
+	unsigned x;
+	ModInt() : x(0) {}
+	ModInt(signed sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	ModInt(signed long long sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	int get() const { return (int)x; }
+
+	ModInt &operator+=(ModInt that) { if((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator-=(ModInt that) { if((x += MOD - that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % MOD; return *this; }
+
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+	ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+};
+typedef ModInt<1000000007> mint;
+
+void searchall(int A, const string &S, string &cur, int &naivecnt) {
+	if(S.size() == cur.size()) {
+		string rev(cur.rbegin(), cur.rend());
+		string revS(S.rbegin(), S.rend());
+		if(S < cur && revS < rev) {
+			++ naivecnt;
+		}
+		return;
+	}
+	rep(a, A) {
+		cur += char('A' + a);
+		if(S.substr(0,cur.size()) <= cur) {
+			searchall(A, S, cur, naivecnt);
+		}
+		cur.pop_back();
+	}
+}
+
+int main() {
+	char S[100001];
+	const int A = 26;
+	while(~scanf("%s", S)) {
+		int n = (int)strlen(S);
+		int m = (n + 1) / 2;
+		auto make = [](int a, int b, int c, int d) {
+			return a << 3 | b << 2 | c << 1 | d << 0;
+		};
+		vector<mint> dp, ndp(1 << 4);
+		ndp[make(0, 0, 0, 0)] = 1;
+		vi digits;
+		rep(i, m) {
+			dp.swap(ndp);
+			ndp.assign(1 << 4, mint());
+			int SdL = S[i] - 'A', SdR = S[n - 1 - i] - 'A';
+			digits = { 0, SdL, SdL + 1, SdR, SdR + 1, A };
+			sort(digits.begin(), digits.end());
+			digits.erase(unique(digits.begin(), digits.end()), digits.end());
+			rep(gtLf, 2) rep(gtLb, 2) rep(gtRf, 2) rep(gtRb, 2) {
+				mint x = dp[make(gtLf, gtLb, gtRf, gtRb)];
+				if(x.x == 0) continue;
+				rep(dLi, digits.size() - 1) rep(dRi, digits.size() - 1) {
+					int dL = digits[dLi], dR = digits[dRi];
+					int mulL = digits[dLi + 1] - dL, mulR = digits[dRi + 1] - dR;
+					if(i == n - 1 - i) {
+						if(dL != dR) continue;
+						mulR = 1;
+					}
+					if(gtLf == 0 && SdL > dL) continue;
+					int ngtLf = gtLf || (SdL < dL);
+					int ngtLb = SdL < dL ? 1 : SdL > dL ? 0 : gtLb;
+					if(gtRf == 0 && SdR > dR) continue;
+					int ngtRf = gtRf || (SdR < dR);
+					int ngtRb = SdR < dR ? 1 : SdR > dR ? 0 : gtRb;
+					ndp[make(ngtLf, ngtLb, ngtRf, ngtRb)] += x * (mulL * mulR);
+				}
+			}
+		}
+		mint ans;
+		rep(gtLf, 2) rep(gtLb, 2) rep(gtRf, 2) rep(gtRb, 2) {
+			mint x = ndp[make(gtLf, gtLb, gtRf, gtRb)];
+			if(x.x == 0) continue;
+			if(gtLf == 0 && gtRb == 0) continue;
+			if(gtRf == 0 && gtLb == 0) continue;
+			ans += x;
+		}
+		printf("%d\n", ans.get());
+	}
+	return 0;
+}

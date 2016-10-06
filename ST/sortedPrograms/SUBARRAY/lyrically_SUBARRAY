@@ -1,0 +1,91 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <cstdint>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, const pair<T1, T2> &a) { return os << "(" << a.first << ", " << a.second << ")"; };
+template <typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template <typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template <typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int INF = 1001001001001001001LL;
+
+int N;
+char S[1000010];
+Int A[1000010];
+Int ASum[1000010];
+
+int ssLen;
+int ss[1000010];
+
+Int mns[1000010];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		scanf("%s", S);
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		partial_sum(A, A + N, ASum + 1);
+		
+		Int ans = 0;
+		ssLen = 0;
+		int mxLen = -1;
+		for (int i = 0; ; ++i) {
+// cout<<i<<endl;
+// cout<<"  mns : ";pv(mns,mns+mxLen+1);
+			if (mxLen < ssLen) {
+				mxLen = ssLen;
+				mns[mxLen] = INF;
+			} else {
+				chmax(ans, ASum[i] - mns[ssLen]);
+			}
+			chmin(mns[ssLen], ASum[i]);
+			if (i == N) {
+				break;
+			}
+			switch (S[i]) {
+				case '[': ss[ssLen++] = 0; break;
+				case '{': ss[ssLen++] = 1; break;
+				case '<': ss[ssLen++] = 2; break;
+				case '(': ss[ssLen++] = 3; break;
+				case ']': if (ssLen > 0 && ss[ssLen - 1] == 0) { --mxLen; --ssLen; } else { mxLen = -1; ssLen = 0; } break;
+				case '}': if (ssLen > 0 && ss[ssLen - 1] == 1) { --mxLen; --ssLen; } else { mxLen = -1; ssLen = 0; } break;
+				case '>': if (ssLen > 0 && ss[ssLen - 1] == 2) { --mxLen; --ssLen; } else { mxLen = -1; ssLen = 0; } break;
+				case ')': if (ssLen > 0 && ss[ssLen - 1] == 3) { --mxLen; --ssLen; } else { mxLen = -1; ssLen = 0; } break;
+				default: assert(false);
+			}
+		}
+		printf("%lld\n", ans);
+	}
+	
+	return 0;
+}

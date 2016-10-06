@@ -1,0 +1,64 @@
+///test my skill
+#include<bits/stdc++.h>
+
+#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+//#define int ll
+#define mkp make_pair
+#define pb push_back
+#define f first
+#define s second
+#define endl '\n'
+#define sqr(a) (a)*(a)
+#define all(a) a.begin() ,a.end()
+#define readln scanf("\n");
+#define writeln printf("\n");
+
+using namespace std;
+
+const int N = 2e5 + 121;
+ll a[N],b[N];
+
+ int main()
+ {
+    fast;
+
+     #ifndef ONLINE_JUDGE
+     freopen("input.txt","r",stdin);
+     freopen("output.txt","w",stdout);
+    #endif
+
+    int t;
+     cin>>t;
+      while(t--)
+      {
+          int n,m,k;
+          cin>>n>>m>>k;
+          m+=k;
+          for(int i=1;i<=n;++i) cin>>a[i];
+          ll sum = 0;
+          for(int i=1;i<=n;++i)
+          {
+              ll x;
+              cin>>x;
+              a[i]-=x;
+              sum+=a[i];
+          }
+          sort(a+1,a+n+1);
+          for(int i=1;i<=m;++i) cin>>b[i];
+          sort(b+1,b+m+1);
+          int r=m;
+           for(int i=n;i>0;--i)
+           {
+               while(b[r]>a[i]) --r;
+               if(!r) break;
+                sum-=b[r];
+                --r;
+           }
+            cout<<sum<<endl;
+      }
+
+
+ }

@@ -1,0 +1,359 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <fstream>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <deque>
+#include <ctime>
+#include <cassert>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+#define fname ""
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define inf 1000000000
+#define INF 1000000000000000000ll
+#define ull unsigned long long
+#define F first
+#define S second
+const int N = 200500;
+const int mod = inf + 9;
+int n;
+
+vector <pair<int, char> > a[N];
+vector <int> divisors[N];
+int up[20][N];
+int in[N], out[N], timer = 0;
+int lvl[N];
+ull val[N], valRev[N], p[N], pw = 997;
+ull add1[4 * N], add2[4 * N];
+
+ll Nval[N], NvalRev[N], Np[N], Npw = 31;
+ll Nadd1[4 * N], Nadd2[4 * N];
+
+int path[N], k = 0;
+int L[N], R[N];
+int nn = 1;
+
+char letter[N];
+
+void dfs(int v, int par = 0) {
+	in[v] = ++timer;
+	up[0][v] = par;
+	path[++k] = v;
+	L[v] = k;
+	for (int i = 1; i <= 17; ++ i) {
+		up[i][v] = up[i - 1][up[i - 1][v]];
+	}
+	for (int i = 0; i < (int)a[v].size(); ++ i) {
+		int to = a[v][i].F;
+		char nxt = a[v][i].S;
+		if (to != par) {
+//			cout << "in dfs -> " << v << " -> " << to << endl; 
+			lvl[to] = lvl[v] + 1;
+			val[to] = val[v] + nxt * p[lvl[v]];
+//			cout << "calculate : " << to << endl;
+//			cout << "value = " << val[v] << " and addition -> " << nxt * p[n - lvl[to]];
+			valRev[to] = valRev[v] + nxt * p[n - lvl[to]];
+			Nval[to] = (Nval[v] + nxt * Np[lvl[v]]) % mod;
+			NvalRev[to] = (NvalRev[v] + nxt * Np[n - lvl[to]]) % mod;
+			letter[to] = nxt;
+			dfs(to, v);
+		}
+	}
+	R[v] = k;
+	out[v] = ++timer;
+}
+
+bool upper(int x, int y) {
+	return (in[x] <= in[y] && out[x] >= out[y]);
+}
+
+int lca(int x, int y) {
+	if (upper(x, y)) return x;
+	if (upper(y, x)) return y;
+	for (int i = 17; i >= 0; -- i) {
+		if (up[i][x] && !upper(up[i][x], y)) x = up[i][x];
+	}
+	return up[0][x];
+}
+
+void update(int l, int r, ull x1, ull x2, int v = 1, int tl = 1, int tr = nn) {
+	if (l > r || l > tr || tl > r) return;
+	if (l <= tl && tr <= r) {
+		add1[v] += x1;
+		add2[v] += x2;
+		return;
+	}
+	int mid = (tl + tr) >> 1;
+	update(l, r, x1, x2, v + v, tl, mid);
+	update(l, r, x1, x2, v + v + 1, mid + 1, tr);
+}
+
+void Nupdate(int l, int r, ll x1, ll x2, int v = 1, int tl = 1, int tr = nn) {
+	if (l > r || l > tr || tl > r) return;
+	if (l <= tl && tr <= r) {
+		Nadd1[v] += x1;
+		Nadd2[v] += x2;
+		if (Nadd1[v] >= mod) Nadd1[v] -= mod;
+		if (Nadd2[v] >= mod) Nadd2[v] -= mod;
+		return;
+	}
+	int mid = (tl + tr) >> 1;
+	Nupdate(l, r, x1, x2, v + v, tl, mid);
+	Nupdate(l, r, x1, x2, v + v + 1, mid + 1, tr);
+}
+
+
+ull get1(int id, int v = 1, int tl = 1, int tr = nn) {
+	ull ret = add1[v];
+	if (tl == tr) {
+		return ret;
+	}
+	int mid = (tl + tr) >> 1;
+	if (id <= mid) return ret + get1(id, v + v, tl, mid);
+	else return ret + get1(id, v + v + 1, mid + 1, tr);
+}
+ull get2(int id, int v = 1, int tl = 1, int tr = nn) {
+	ull ret = add2[v];
+	if (tl == tr) {
+		return ret;
+	}
+	int mid = (tl + tr) >> 1;
+	if (id <= mid) return ret + get2(id, v + v, tl, mid);
+	else return ret + get2(id, v + v + 1, mid + 1, tr);
+}
+
+ll Nget1(int id, int v = 1, int tl = 1, int tr = nn) {
+	ll ret = Nadd1[v];
+	if (tl == tr) {
+		return ret;
+	}
+	int mid = (tl + tr) >> 1;
+	if (id <= mid) ret += Nget1(id, v + v, tl, mid);
+	else ret += Nget1(id, v + v + 1, mid + 1, tr);
+	if (ret >= mod) ret -= mod;
+	return ret;
+}
+ll Nget2(int id, int v = 1, int tl = 1, int tr = nn) {
+	ll ret = Nadd2[v];
+	if (tl == tr) {
+		return ret;
+	}
+	int mid = (tl + tr) >> 1;
+	if (id <= mid) ret += Nget2(id, v + v, tl, mid);
+	else ret +=  Nget2(id, v + v + 1, mid + 1, tr);
+	if (ret >= mod) ret -= mod;
+	return ret;
+}
+
+pair <ull, int> GetHash(int x, int y, int v) {
+	ull part1 = get2(L[x]) - get2(L[v]);
+	int s1 = n - lvl[x];
+	int sz1 = lvl[x] - lvl[v];
+
+	ull part2 = get1(L[y]) - get1(L[v]);
+	int s2 = lvl[v];
+	int sz2 = lvl[y] - lvl[v];
+
+	if (s2 - 1 > s1 + sz1 - 1) {
+		int need = s2 - (s1 + sz1 - 1) - 1;
+		return mp(part1 * p[need] + part2, s1 + need);
+	}
+	int need = (s1 + sz1 - 1) - s2 + 1;
+	return mp(part1 + part2 * p[need], s1);
+}
+
+
+pair <ll, int> NGetHash(int x, int y, int v) {
+	ll part1 = (Nget2(L[x]) - Nget2(L[v])) % mod;
+	int s1 = n - lvl[x];
+	int sz1 = lvl[x] - lvl[v];
+
+	ll part2 = (get1(L[y]) - get1(L[v]) + mod) % mod;
+	int s2 = lvl[v];
+	int sz2 = lvl[y] - lvl[v];
+
+	if (s2 - 1 > s1 + sz1 - 1) {
+		int need = s2 - (s1 + sz1 - 1) - 1;
+		return mp((part1 * Np[need] + part2) % mod, s1 + need);
+	}
+	int need = (s1 + sz1 - 1) - s2 + 1;
+	return mp((part1 + part2 * Np[need]) % mod, s1);
+}
+
+int jump(int x, int len) {
+	int start = x;
+	for (int i = 17; i >= 0; -- i) {
+		if (up[i][x] && lvl[start] - lvl[up[i][x]] <= len) x = up[i][x];
+	}
+	return x;
+}
+
+bool Check(int x, int y, int v, int len) {
+//	cout << "check -> " << x << " " << y << " " << v << " len : " << len << endl;
+	int sz1 = lvl[x] - lvl[v];
+	int sz2 = lvl[y] - lvl[v];
+
+//	cout << sz1 << " " << sz2 << endl;
+
+	pair <ull, int> FirstInPath, SecondInPath;
+	pair <ll, int> Nf, Ns;
+
+	if (sz1 >= len) {
+//		cout << "inner first -> " << jump(x, len) << " " << y << " " << v << endl;
+		FirstInPath = GetHash(jump(x, len), y, v);
+		Nf = NGetHash(jump(x, len), y, v);
+	}
+	else {
+		int vertex = jump(y, sz2 - (len - sz1));
+		FirstInPath = GetHash(vertex, y, vertex);
+		Nf = NGetHash(vertex, y, vertex);
+	}
+
+	if (sz2 >= len) {
+		SecondInPath = GetHash(x, jump(y, len), v);
+		Ns = NGetHash(x, jump(y, len), v);
+	}
+	else {
+		int vertex = jump(x, sz1 - (len - sz2));
+//		cout << "second one -> " << x << " " << vertex << " " << vertex << endl;
+		SecondInPath = GetHash(x, vertex, vertex);
+		Ns = NGetHash(x, vertex, vertex);
+	}
+	return (FirstInPath.F * p[SecondInPath.S] == SecondInPath.F * p[FirstInPath.S] && (Nf.F * Np[Ns.S]) % mod == (Ns.F * Np[Nf.S]) % mod);
+}
+
+int Calc(int x, int y) {
+	int v = lca(x, y);
+	int len = lvl[x] + lvl[y] - 2 * lvl[v];
+	int ret = len;
+
+//	cout << x << " " << y << " -> " << v << endl;
+//	cout << "len -> " << len << endl;
+
+//	cout << Check(x, y, v, 1);
+//	exit(0);
+
+	for (int i = 0; i < (int)divisors[len].size() - 1; ++ i) {
+		if (Check(x, y, v, divisors[len][i])) {
+			ret = divisors[len][i];
+			break;
+		}
+	}
+	return ret;
+}
+
+void Change(int x, int y, char ch) {
+	if (!upper(x, y)) swap(x, y);
+	update(L[y], R[y], (ull)(ch - letter[y]) * p[lvl[x]], (ull)(ch - letter[y]) * p[n - lvl[y]]);
+
+	int now = ch - letter[y];
+	if (now < 0) now += mod;
+
+	Nupdate(L[y], R[y], Np[lvl[x]] * now, Np[n - lvl[y]] * now);
+	letter[y] = ch;
+}
+
+void solve() {
+	scanf("%d\n", &n);
+	nn = 1;
+	while(nn < n) nn <<= 1;
+	for (int i = 1; i < nn * 2; ++ i) add1[i] = add2[i] = 0, Nadd1[i] = Nadd2[i] = 0;
+	k = 0;
+	timer = 0;
+	for (int i = 1; i <= n; ++ i) {
+		for (int j = 0; j <= 17; ++ j) up[j][i] = 0;
+		a[i].clear();
+	}
+
+	for (int i = 1; i < n; ++ i) {
+		int x, y;
+		char z;
+		scanf("%d %d %c\n", &x, &y, &z);
+		a[x].pb(mp(y, z));
+		a[y].pb(mp(x, z));
+//		cout << x << " " << y << " " << z << endl;
+	}
+//	return; 
+	dfs(1);
+	for (int i = 1; i <= n; ++ i) {
+		update(L[i], L[i], val[i], valRev[i]);
+		Nupdate(L[i], L[i], Nval[i], NvalRev[i]);
+//		cout << i << " -> " << val[i] << endl;
+	}
+/*
+	for (int i = 1; i <= n; ++ i) {
+		cout << path[i] << " ";
+	}
+	cout << endl;
+	for (int i = 1; i <= n; ++ i) {
+		cout << i << " > " << L[i] << " " << R[i] << endl;
+	}
+*/
+
+/*
+	pair <ull, int> now = GetHash(3, 2, 2);
+	cout << now.F << " " << now.S << endl;
+	return;
+
+*/
+/*
+	3 2 2
+	2 1 1
+*/
+
+	int m;
+	scanf("%d", &m);
+
+//	cout << m << endl;
+	while(m--) {
+		int type, x, y;
+		scanf("%d%d%d", &type, &x, &y);
+		if (type == 1) {
+//			cout << "zapros : " << x << " " << y << endl;
+			printf("%d\n", Calc(x, y));
+		}
+		else {
+			char ch;
+			scanf(" %c", &ch);
+			Change(x, y, ch);
+		}
+	}
+}
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen(fname"in", "r", stdin);
+	freopen(fname"out", "w", stdout);
+	#endif
+
+	for (int i = 1; i <= 100000; ++ i) {
+		for (int j = i; j <= 100000; j += i) divisors[j].pb(i);
+	}
+
+	p[0] = 1;	
+	for (int i = 1; i <= 200000; ++ i) p[i] = p[i - 1] * pw;
+
+	int test;
+
+	scanf("%d", &test);
+
+	while(test--) {
+		solve();
+	}
+
+	return 0;
+}
+

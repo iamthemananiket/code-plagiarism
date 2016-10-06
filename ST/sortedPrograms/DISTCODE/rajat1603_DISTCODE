@@ -1,0 +1,19 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t;
+string str;
+set < string > s;
+int main(){
+    cin >> t;
+    while(t--){
+        cin >> str;
+        s.clear();
+        for(int i = 1 ; i < str.size() ; ++i){
+            string temp = "";
+            temp += str[i - 1];
+            temp += str[i];
+            s.insert(temp);
+        }
+        cout << s.size() << endl;
+    }
+}

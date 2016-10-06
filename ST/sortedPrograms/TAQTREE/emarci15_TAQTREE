@@ -1,0 +1,60 @@
+#include <iostream>
+
+using namespace std;
+
+int n;
+
+int elso[1000];
+int hova[2000];
+int kov[2000];
+int w[1000];
+
+int q;
+int x,y;
+
+int tav(int k, int v, int anc) {
+    if(k==v) return 0;
+
+    for(int i=elso[k]; i>=0; i=kov[i]) {
+        if(hova[i] == anc) continue;
+        int ret = tav(hova[i],v,k);
+        if(ret >= 0) return ret+w[i%1000];
+    }
+
+    return -1;
+}
+
+int main()
+{
+    cin >> n;
+
+    for(int i=0; i<n; i++) {
+        elso[i] = -1;
+    }
+
+    for(int i=0; i<n-1; i++) {
+        cin >> hova[i] >> hova[i+1000] >> w[i];
+        hova[i]--; hova[i+1000]--;
+
+        kov[i] = elso[hova[i+1000]];
+        elso[hova[i+1000]] = i;
+
+        kov[i+1000] = elso[hova[i]];
+        elso[hova[i]] = i+1000;
+    }
+
+    for(cin >> q; q--;) {
+        cin >> x;
+        if(x == 1) {
+            cin >> x >> y;
+            x--;
+            w[x] = y;
+        } else {
+            cin >> x >> y;
+            x--; y--;
+            cout << tav(x,y,-1) << endl;
+        }
+    }
+
+    return 0;
+}

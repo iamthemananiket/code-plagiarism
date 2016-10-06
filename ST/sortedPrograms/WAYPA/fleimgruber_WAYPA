@@ -1,0 +1,94 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 105
+#define MAGIC1 31
+#define MAGIC2 1000000009
+
+int n,ans,dist[MAX_N],hash[2][MAX_N],mpow[MAX_N];
+bool vis[MAX_N];
+vector<pint> adjl[MAX_N];
+
+int bfs(int s)
+{
+	for (int i=1; i<=n; i++)
+		vis[i]=false;
+	vis[s]=true;
+	dist[s]=hash[0][s]=hash[1][s]=0;
+	queue<int> q;
+	q.push(s);
+	int best=0;
+	while (!q.empty())
+	{
+		int a=q.front();
+		q.pop();
+		for (int i=0; i<sz(adjl[a]); i++)
+		{
+			int g=adjl[a][i].fi,h=adjl[a][i].se;
+			if (vis[g])
+				continue;
+			vis[g]=true;
+			dist[g]=dist[a]+1;
+			hash[0][g]=(hash[0][a]*1LL*MAGIC1+h)%MAGIC2;
+			hash[1][g]=(hash[1][a]+mpow[dist[a]]*1LL*h)%MAGIC2;
+			if (hash[0][g]==hash[1][g])
+				best=dist[g];
+			q.push(g);
+		}
+	}
+	return best;
+}
+
+void dfs(int i, int p=0)
+{
+	ans=max(ans,bfs(i)+1);
+	for (int j=0; j<sz(adjl[i]); j++)
+	{
+		int g=adjl[i][j].fi;
+		if (g==p)
+			continue;
+		dfs(g,i);
+	}
+}
+
+int main()
+{
+	mpow[0]=1;
+	for (int i=1; i<MAX_N; i++)
+		mpow[i]=(mpow[i-1]*1LL*MAGIC1)%MAGIC2;
+	int tc;
+	scanf("%d",&tc);
+	while (tc--)
+	{
+		scanf("%d",&n);
+		for (int i=1; i<=n; i++)
+			adjl[i].clear();
+		for (int i=1; i<n; i++)
+		{
+			int a,b,c;
+			scanf("%d %d %d",&a,&b,&c);
+			adjl[a].pb(mp(b,c));
+			adjl[b].pb(mp(a,c));
+		}
+		ans=0;
+		dfs(1);
+		printf("%d\n",ans);
+	}
+	return 0;
+}

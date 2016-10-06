@@ -1,0 +1,80 @@
+# include <cstdio>
+# include <cstring>
+# include <queue>
+
+using namespace std;
+
+const int MAX_N = 1e3 + 10;
+const int MAX_M = 1e6 + 10;
+
+int n, m;
+
+int a[MAX_M], b[MAX_M];
+
+bool mat[MAX_N][MAX_N];
+
+int side[MAX_N];
+
+bool solve ()
+{
+    int i, crr, j;
+    queue <int> q;
+    scanf ("%d%d", &n, &m);
+    memset (side, -1, (n + 1) * sizeof (int));
+    for (i = 0; i < m; i ++)
+    {
+        scanf ("%d%d", &a[i], &b[i]);
+        mat[a[i]][b[i]] = mat[b[i]][a[i]] = 1;
+    }
+
+    for (j = 1; j <= n; j ++)
+    {
+        if (side[j] != -1)
+            continue;
+        side[j] = 0;
+        q.push (j);
+        while (!q.empty ())
+        {
+            crr = q.front ();
+            q.pop ();
+            for (i = 1; i <= n; i ++)
+            {
+                if (i == crr)
+                    continue;
+                if (!mat[crr][i])
+                {
+                    if (side[i] == -1)
+                    {
+                        side[i] = side[crr] ^ 1;
+                        q.push (i);
+                    }
+                    if (side[i] == side[crr])
+                        return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void clean ()
+{
+    int i;
+    for (i = 0; i < m; i ++)
+        mat[a[i]][b[i]] = mat[b[i]][a[i]] = 0;
+}
+
+int main ()
+{
+    int t;
+    scanf ("%d", &t);
+    while (t --)
+    {
+        if (solve ())
+            printf ("YES\n");
+        else
+            printf ("NO\n");
+        clean ();
+    }
+    return 0;
+}

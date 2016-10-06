@@ -1,0 +1,39 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		string s;
+		cin>>s;
+		long long countEven[26]={0};
+		long long countOdd[26]={0};
+		for(int i=0;i<s.length();i++){
+			if(i%2==0){
+				countEven[s[i]-'a']++;
+			}
+			else{
+				countOdd[s[i]-'a']++;
+			}
+		}
+		long long extraAdd=0;
+		/*for(int i=0;i<26;i++){
+			if(countEven[i]==1){
+				extraAdd++;
+			}
+			if(countOdd[i]==1){
+				extraAdd++;
+			}
+		//	cout<<countEven[i]<<" "<<countOdd[i]<<"\n";
+		}*/
+		long long ss=0;
+	
+		for(int i=0;i<26;i++){
+			//cout<<"ADDING FOR "<<(char)(i+'a')<<((countEven[i])*(countEven[i]-1))/2<<" "<<((countOdd[i])*(countOdd[i]-1))/2<<"\n";
+			ss+=((countEven[i])*(countEven[i]-1))/2;
+			ss+=((countOdd[i])*(countOdd[i]-1))/2;
+		}
+		cout<<ss+s.length()<<"\n";
+		
+	}
+}

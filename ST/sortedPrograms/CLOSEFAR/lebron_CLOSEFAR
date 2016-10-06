@@ -1,0 +1,175 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+ 
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+ 
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1234567891
+#define bsize 350
+ 
+using namespace std;
+ 
+const int INF = 1e9;
+const int N = 200000;
+ 
+int n, ar[N];
+vector<pair<int, int> > V;
+int whr[N];
+ 
+int tests;
+vector<int> g[N];
+int used[N], dep[N], par[N];
+ 
+void trace(int v)
+{
+	used[v] = 1;
+	for (int i = 0; i < g[v].size(); i++)
+	{
+		int to = g[v][i];
+		if (used[to])
+			continue;
+		dep[to] = dep[v] + 1;
+		par[to] = v;
+		trace(to);
+	}
+}
+ 
+int have[N];
+ 
+void trace_path(int a, int b)
+{
+	while (a != b)
+	{
+		if (dep[a] > dep[b])
+		{
+			have[whr[a]] = 1;
+			a = par[a];
+		}
+		else
+		{
+			have[whr[b]] = 1;
+			b = par[b];
+		}
+	}
+	have[whr[a]] = 1;
+}
+ 
+int min_val;
+int max_val;
+ 
+void trace_path2(int a, int b)
+{
+	while (a != b)
+	{
+		if (dep[a] > dep[b])
+		{
+			min_val = min(min_val, ar[a]);
+			max_val = max(max_val, ar[a]);
+			a = par[a];
+		}
+		else
+		{
+			min_val = min(min_val, ar[b]);
+			max_val = max(max_val, ar[b]);
+			b = par[b];
+		}
+	}
+	min_val = min(min_val, ar[a]);
+	max_val = max(max_val, ar[a]);
+}
+ 
+ 
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/in.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+ 
+	cin >> n;
+	for (int i = 1; i <= n; i++)
+	{
+		cin >> ar[i];
+		V.push_back(make_pair(ar[i], i));
+	}
+ 
+	sort(V.begin(), V.end());
+ 
+	for (int i = 0; i < V.size(); i++)
+	{
+		whr[V[i].second] = i;
+	}
+ 
+	for (int i = 1; i < n; i++)
+	{
+		int a, b;
+		cin >> a >> b;
+		g[a].push_back(b);
+		g[b].push_back(a);
+	}
+ 
+	trace(1);
+ 
+	cin >> tests;
+	for (; tests; --tests)
+	{
+		string tp;
+		int a, b;
+		cin >> tp;
+		cin >> a >> b;
+		if (tp == "C")
+		{
+			trace_path(a, b);
+			int best = 2e9;
+			int last_have = -1e9;
+			for (int i = 0; i < n; i++)
+			{
+				if (have[i])
+				{
+					best = min(best, V[i].first - last_have);
+					have[i] = 0;
+					last_have = V[i].first;
+				}
+			}
+			cout << best << endl;
+		}
+		else
+		{
+			min_val = 1e9;
+			max_val = -1e9;
+			trace_path2(a, b);
+			cout << max_val - min_val << endl;
+		}
+	}
+ 
+	cin.get(); cin.get();
+	return 0;
+} 

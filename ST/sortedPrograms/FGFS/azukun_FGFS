@@ -1,0 +1,48 @@
+     #include<stdio.h>
+    #include<algorithm>
+    #include<vector>
+    using namespace std;
+    typedef long long ll;
+    pair<ll,pair<ll,ll> > abc[100000];
+    int main()
+    {
+    ll test,n,k,a,b,c,prev,end,count;
+    scanf("%lld",&test);
+    while(test--)
+    {
+    scanf("%lld%lld",&n,&k);
+    if (n == 0)
+    {
+printf("0\n");
+continue;
+    }
+    for(int i=0;i<n;i++)
+    {
+    scanf("%lld%lld%lld",&a,&b,&c);
+    abc[i]=make_pair(c,make_pair(b,a));
+    }
+    count=1;
+    sort(abc,abc + n);
+    prev=abc[0].first;
+    end=abc[0].second.first;
+    for(int i=1;i<n;i++)
+    {
+    if(abc[i].first==prev)
+    {
+    if(abc[i].second.second>=end)
+    {
+    count++;
+    end=abc[i].second.first;
+    }
+    }
+    else
+    {
+    prev=abc[i].first;
+    end=abc[i].second.first;
+    count++;
+    }
+    }
+    printf("%lld\n",count);
+    }
+    return 0;
+    } 

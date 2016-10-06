@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+const int MOD=1000000007;
+int N;
+int A[101];
+int dp[101][101];
+int dp2[101][101];
+ 
+int solve(int l, int r);
+ 
+int sumsolve(int l, int r)
+{
+    if(l>=r)
+        return 1;
+    int& ret=dp2[l][r];
+    if(ret!=-1)
+        return ret;
+    ret=1;
+    for(int i=l; i<=r; i++)
+        for(int j=i+1; j<=r; j++)
+            ret=(ret+solve(i, j))%MOD;
+    return ret;
+}
+ 
+int solve(int l, int r)
+{
+    int& ret=dp[l][r];
+    if(ret!=-1)
+        return ret;
+    ret=0;
+    if(A[l]>0 || A[r]<0)
+        return ret;
+    if(-A[l]==A[r])
+    {
+        ret++;
+        for(int i=l+1; i<r; i++)
+            for(int j=i+1; j<r; j++)
+                ret=(ret+solve(i, j))%MOD;
+    }
+    for(int i=l+1; i<r; i++)
+        for(int j=i+1; j<r; j++)
+            if(-A[l]==A[i] && -A[j]==A[r])
+                ret=(ret+1LL*solve(l, i)*sumsolve(i+1, j-1)%MOD*solve(j, r)%MOD)%MOD;
+    return ret;
+}
+ 
+int main()
+{
+    memset(dp, -1, sizeof dp);
+    memset(dp2, -1, sizeof dp2);
+    scanf("%d", &N);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    int ans=1;
+    for(int i=1; i<=N; i++)
+        for(int j=i+1; j<=N; j++)
+            ans=(ans+solve(i, j))%MOD;
+    printf("%d\n", ans);
+    return 0;
+}
+ 

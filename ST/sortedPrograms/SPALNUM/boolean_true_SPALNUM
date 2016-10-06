@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+char str1[200009];
+char str2[200009];
+ll arr[200009];
+bool ispalin(int n)
+{
+    char bit[30];
+    int cnt=0;
+    while(n!=0)
+    {
+        bit[cnt++]=n%10;
+        n/=10;
+    }
+    for(int i=0;i<cnt;i++)
+    {
+        if(bit[i]!=bit[cnt-i-1])
+            return false;
+    }
+    return true;
+}
+void pre()
+{
+    arr[0]=0;
+    for(int i=1;i<=100009;i++)
+    {
+        if(ispalin(i))
+        {
+            arr[i]=arr[i-1]+i;
+        }
+        else
+            arr[i]=arr[i-1];
+    }
+}
+int main()
+{
+    pre();
+    int test;
+    scanf("%d",&test);
+    while(test--)
+    {
+        int a,b,c,n;
+        scanf("%d%d",&a,&b);
+        ll ans=arr[b];
+        ans-=arr[a-1];
+        printf("%lld\n",ans);
+    }
+    return 0;
+}

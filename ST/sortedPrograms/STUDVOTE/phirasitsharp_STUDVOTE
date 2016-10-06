@@ -1,0 +1,35 @@
+#include <iostream>
+#include <vector>
+
+int main( void ) {
+
+	std::ios::sync_with_stdio( false );
+
+	int test;
+	std::cin >> test;
+	while( test-- ) {
+
+		int n, k;
+		std::cin >> n >> k;
+
+		std::vector< int > cnt( n+1, 0 );
+		for ( int i = 1 ; i <= n ; ++i ) {
+			int val;
+			std::cin >> val;
+			if ( val != i ) {
+				cnt[ val ]++;
+			} else {
+				cnt[ i ] = - 1e9;
+			}
+		}
+
+		int ans = 0;
+		for ( int i = 1 ; i <= n ; ++i ) {
+			ans += ( cnt[i] >= k );
+		}
+
+		std::cout << ans << std::endl;
+	}
+
+	return 0;
+}

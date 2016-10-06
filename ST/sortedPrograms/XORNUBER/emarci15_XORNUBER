@@ -1,0 +1,30 @@
+#include <iostream>
+
+using namespace std;
+
+int T;
+int n;
+
+int main()
+{
+    for(cin >> T; T--;) {
+        cin >> n;
+
+        if(n==1) {
+            cout << "2" << endl;
+            continue;
+        }
+
+        int j;
+        for(j=0; (j<31) && ((1<<j)!=(n+1)); j++);
+
+        if(j==31) {
+            cout << -1 << endl;
+            continue;
+        }
+
+        cout << (((1<<(j-1))-1)) << endl;
+    }
+
+    return 0;
+}

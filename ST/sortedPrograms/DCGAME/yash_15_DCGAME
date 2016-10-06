@@ -1,0 +1,110 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define read(x) scanf("%d",&(x))
+#define ll long long
+int   r[1000006];
+int arr[1000006];
+int pos[1000006];
+
+int  mv[4000006]={0},n,beg;
+
+int val1[1000006],top=0;
+ ll fre1[1000006],cur,ans;
+int  val[1000006];
+ ll  fre[1000006];
+
+int query(int v, int pos=1, int lpos=0, int rpos=beg-1)
+{
+    if(mv[pos]<v)
+        return mv[pos];
+    if(lpos>=v)
+        return 0;    
+	return max(query(v,pos+pos,lpos,(lpos+rpos)/2),query(v,1+pos+pos,1+(lpos+rpos)/2,rpos));
+}
+
+void update(int v, int pos)
+{
+    while(pos)
+    {
+        if(mv[pos]>=v)
+            break;
+        mv[pos]=v;
+        pos/=2;
+    }
+}
+
+bool comp(int a, int b)
+{
+	return arr[a]>=arr[b];
+}
+
+int main()
+{
+    int m,l,v,ans;
+    char ch,pl;
+    read(n);read(m);
+    r[0]=n+1;
+    for(beg=1;beg<=n;beg<<=1);
+    for(int i=1;i<=n;i++)
+    {
+		scanf("%d",arr+i);
+		pos[i]=i;
+	}
+	sort(pos+1,pos+n+1,comp);
+	val[0]=val1[0]=-1;
+	fre[0]=fre1[0]=0;
+    for(int i=1;i<=n;i++)
+    {
+        v=pos[i];
+        l=query(v);
+		cur=(v-l)*1ll*(r[l]-v);
+		if(val1[top]==arr[v])
+			fre1[top]+=cur;
+		else
+		{
+			top++;
+			val1[top]=arr[v];
+			fre1[top]=cur;
+		}
+        r[v]=r[l];
+        r[l]=v;
+        update(v,v+beg);
+    }
+    for(int i=1;i<=top;i++)
+	{
+		val[i]=val1[top+1-i];
+		fre[i]=fre1[top+1-i];
+    }
+    
+    for(int i=1;i<=top;i++)
+		fre[i]+=fre[i-1];
+	while(m--)
+	{
+		scanf(" %c %d %c",&ch,&v,&pl);
+		if(ch=='=')
+		{
+			l=distance(val,lower_bound(val+1,val+top+1,v));
+			if(val[l]==v)
+				ans=fre[l]-fre[l-1];
+			else
+				ans=0;
+		}
+		else if(ch=='<')
+		{
+			l=distance(val,lower_bound(val+1,val+top+1,v));
+			ans=fre[l-1];
+		}
+		else
+		{
+			l=distance(val,lower_bound(val+1,val+top+1,v+1));
+			ans=fre[top]-fre[l-1];
+		}
+		//cout<<"\n"<<ans<<" ";
+		if(ans%2==0)
+			printf("%c",(pl=='C'?'D':'C'));
+		else
+			printf("%c",pl);
+	}
+	
+    return 0;
+}

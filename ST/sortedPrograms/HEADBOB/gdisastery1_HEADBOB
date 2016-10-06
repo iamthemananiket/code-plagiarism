@@ -1,0 +1,48 @@
+//Program: a
+//Author: gary
+//Date: 26/10/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAX_N = ;
+
+int T, N;
+
+char S[1111];
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d%s", &N, S);
+    int ind = 0, non = 0;
+    for(int i = 0; i < N; i++){
+      if(S[i] == 'I') ind = 1;
+      if(S[i] == 'Y') non = 1;
+    }
+    if(!ind && !non)
+      puts("NOT SURE");
+    else if(ind)
+      puts("INDIAN");
+    else if(non)
+      puts("NOT INDIAN");
+  }
+  return 0;
+}

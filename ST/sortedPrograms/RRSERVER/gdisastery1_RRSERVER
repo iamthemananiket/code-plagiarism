@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+const int INF = 1e9;
+const int MAX_N = 20;
+
+int N, M;
+int E[MAX_N];
+int dp[1 << MAX_N];
+
+int check_min(int& a, int b){
+  if(a > b){
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+int bcount[1 << MAX_N];
+
+int main(){
+  int u, v;
+  scanf("%d%d", &N, &M);
+  for(int i = 0; i < M; i++){
+    scanf("%d%d", &u, &v); u--, v--;
+    E[u] |= (1 << v);
+    E[v] |= (1 << u);
+  }
+  for(int i = 0; i < (1 << MAX_N); i++)
+    bcount[i] = __builtin_popcount(i);
+  
+  fill(dp, dp + (1 << MAX_N), INF);
+  dp[0] = 0;
+  for(int mask = 0; mask < (1 << N); mask++){ // chosen guys
+    int sum = 0;
+    for(int j = 0; j < N; j++){
+      if((mask >> j) & 1) {
+	sum += bcount[E[j]] - bcount[mask & E[j]];
+      }
+    }
+    for(int j = 0; j < N; j++){
+      if(((mask >> j) & 1) == 0){
+	check_min(dp[mask | (1 << j)], dp[mask] + sum);
+      }
+    }
+  }
+  printf("%d\n", dp[(1 << N) - 1]);
+  return 0;
+}

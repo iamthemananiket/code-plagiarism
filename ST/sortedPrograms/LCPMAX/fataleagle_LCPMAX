@@ -1,0 +1,232 @@
+#include <bits/stdc++.h>
+
+#define X HASH_X
+
+const int HASH_MAXN=200000;
+const int X=129;
+const int MOD1=1000000009;
+const int MOD2=1000000021;
+int P1[HASH_MAXN];
+int P2[HASH_MAXN];
+
+int powmod(int a, int b, int m)
+{
+    int ret=1;
+    for(; b>0; b/=2)
+    {
+        if(b&1)
+            ret=1LL*ret*a%m;
+        a=1LL*a*a%m;
+    }
+    return ret;
+}
+
+struct Hash
+{
+    int len, val0, val1;
+    Hash():
+        len(0),
+        val0(0),
+        val1(0)
+    {
+        //
+    }
+    Hash(int val):
+        len(1),
+        val0(val),
+        val1(val)
+    {
+        //
+    }
+    void divideBy(int x)
+    {
+        val0=1LL*val0*powmod(x, MOD1-2, MOD1)%MOD1;
+        val1=1LL*val1*powmod(x, MOD2-2, MOD2)%MOD2;
+    }
+    void multiplyBy(int x)
+    {
+        val0=1LL*val0*x%MOD1;
+        val1=1LL*val1*x%MOD2;
+    }
+    Hash operator+ (const Hash& other) const
+    {
+        Hash ret;
+        ret.len=len+other.len;
+        ret.val0=(other.val0+1LL*P1[other.len]*val0)%MOD1;
+        ret.val1=(other.val1+1LL*P2[other.len]*val1)%MOD2;
+        return ret;
+    }
+    Hash operator- (const Hash& other) const
+    {
+        Hash ret;
+        ret.len=len-other.len;
+        ret.val0=val0-1LL*P1[len-other.len]*other.val0%MOD1;
+        if(ret.val0<0)
+            ret.val0+=MOD1;
+        ret.val1=val1-1LL*P2[len-other.len]*other.val1%MOD2;
+        if(ret.val1<0)
+            ret.val1+=MOD2;
+        return ret;
+    }
+    bool operator< (const Hash& other) const
+    {
+        if(len!=other.len)
+            return len<other.len;
+        if(val0!=other.val0)
+            return val0<other.val0;
+        return val1<other.val1;
+    }
+    bool operator== (const Hash& other) const
+    {
+        return len==other.len && val0==other.val0 && val1==other.val1;
+    }
+    bool operator!= (const Hash& other) const
+    {
+        return !(*this==other);
+    }
+};
+
+void init_hash()
+{
+    P1[0]=1;
+    for(int i=1; i<HASH_MAXN; i++)
+        P1[i]=1LL*P1[i-1]*X%MOD1;
+    P2[0]=1;
+    for(int i=1; i<HASH_MAXN; i++)
+        P2[i]=1LL*P2[i-1]*X%MOD2;
+}
+
+static int _hash_initialized=(init_hash(), 0);
+
+#undef X
+
+using namespace std;
+
+int N, Q;
+char S[125001];
+char T[125001];
+int occS[125001][10];
+int occT[125001][10];
+int P[10];
+int used[10];
+Hash HS[125001][10];
+Hash HT[125001][10];
+
+void _main()
+{
+    scanf("%d%d", &N, &Q);
+    scanf("%s%s", S, T);
+    memset(used, 0, sizeof used);
+    for(int i=0; i<10; i++)
+        occS[N][i]=N;
+    for(int i=N-1; i>=0; i--)
+    {
+        for(int j=0; j<10; j++)
+            occS[i][j]=occS[i+1][j];
+        occS[i][S[i]-'a']=i;
+    }
+    for(int i=0; i<10; i++)
+        occT[N][i]=N;
+    for(int i=N-1; i>=0; i--)
+    {
+        for(int j=0; j<10; j++)
+            occT[i][j]=occT[i+1][j];
+        occT[i][T[i]-'a']=i;
+    }
+    for(int i=0; i<N; i++)
+    {
+        for(int j=0; j<10; j++)
+        {
+            if(i>0)
+                HS[i][j]=HS[i-1][j]+Hash(0);
+            else
+                HS[i][j]=Hash(0);
+        }
+        if(i>0)
+            HS[i][S[i]-'a']=HS[i-1][S[i]-'a']+Hash(1);
+        else
+            HS[i][S[i]-'a']=Hash(1);
+    }
+    for(int i=0; i<N; i++)
+    {
+        for(int j=0; j<10; j++)
+        {
+            if(i>0)
+                HT[i][j]=HT[i-1][j]+Hash(0);
+            else
+                HT[i][j]=Hash(0);
+        }
+        if(i>0)
+            HT[i][T[i]-'a']=HT[i-1][T[i]-'a']+Hash(T[i]-'a'+1);
+        else
+            HT[i][T[i]-'a']=Hash(T[i]-'a'+1);
+    }
+    while(Q--)
+    {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        x--, y--;
+        memset(P, -1, sizeof P);
+        memset(used, 0, sizeof used);
+        vector<pair<int, int>> s, t;
+        for(int i=0; i<10; i++)
+        {
+            s.push_back({occS[x][i], i});
+            t.push_back({occT[y][i], i});
+        }
+        sort(s.begin(), s.end());
+        sort(t.begin(), t.end());
+        for(int i=0; i<10; i++)
+            P[s[i].second]=t[i].second, used[i]=true;
+        int lo=1, mid, hi=N-max(x, y);
+        while(lo<hi)
+        {
+            mid=(lo+hi+1)/2;
+            bool ok=true;
+            for(int i=0; i<10; i++)
+            {
+                Hash g=HS[x+mid-1][i]-(x==0?Hash():HS[x-1][i]);
+                Hash h=HT[y+mid-1][P[i]]-(y==0?Hash():HT[y-1][P[i]]);
+                g.multiplyBy(P[i]+1);
+                if(g!=h)
+                {
+                    ok=false;
+                    break;
+                }
+            }
+            if(ok)
+                lo=mid;
+            else
+                hi=mid-1;
+        }
+        printf("%d ", lo);
+        for(int i=0; i<10; i++)
+        {
+            Hash h=HS[x+lo-1][i]-(x==0?Hash():HS[x-1][i]);
+            if(h.val0==0 && h.val1==0)
+            {
+                used[P[i]]=false;
+                P[i]=-1;
+            }
+        }
+        int ptr=0;
+        for(int i=0; i<10; i++) if(P[i]==-1)
+        {
+            while(used[ptr])
+                ptr++;
+            P[i]=ptr++;
+        }
+        for(int i=0; i<10; i++)
+            printf("%c", 'a'+P[i]);
+        printf("\n");
+    }
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    for(int i=0; i<T; i++)
+        _main();
+    return 0;
+}

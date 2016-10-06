@@ -1,0 +1,82 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+const int N = 100005;
+const long long INF = (1LL << 60LL);
+
+int n, m, q;
+int depth[N];
+vector < int > adj[N];
+long long tree[N * 4], dp[N * 4];
+multiset < long long > val[N];
+vector < pair < int, int > > tickets[N];
+
+inline void dfs(int u){
+    for(int v : adj[u]){
+        depth[v] = depth[u] + 1;
+        dfs(v);
+    }
+}
+
+inline void update(int node, int l, int r, int pos, long long value, int type){
+    if(l == r){
+        if(type) val[l].insert(value);
+        else val[l].erase(val[l].find(value));
+        tree[node] = *(val[l].begin());
+        return;
+    }
+    int mid = (l + r) >> 1;
+    if(mid >= pos) update(node * 2, l, mid, pos, value, type);
+    else update(node * 2 + 1, mid + 1, r, pos, value, type);
+    tree[node] = min(tree[node * 2], tree[node * 2 + 1]);
+}
+
+
+inline long long query(int node, int l, int r, int qs, int qe){
+    if(l > qe || r < qs) return INF;
+    if(l >= qs && r <= qe) return tree[node];
+    int mid = (l + r) >> 1;
+    return min(query(node * 2, l, mid, qs, qe), query(node * 2 + 1, mid + 1, r, qs, qe));
+}
+
+inline void solve(int u){
+    dp[u] = INF;
+    for(auto pairs : tickets[u]){
+        int k = pairs.first;
+        int w = pairs.second;
+        dp[u] = min(dp[u], query(1, 1, n, depth[u] - k, depth[u]) + 1LL * w);
+    }
+    update(1, 1, n, depth[u], dp[u], 1);
+    for(int v : adj[u]){
+        solve(v);
+    }
+    update(1, 1, n, depth[u], dp[u], 0);
+}
+
+int main(){
+    ios :: sync_with_stdio(false);
+    cin >> n >> m;
+    for(int i = 1; i < n; i++){
+        int u, v; cin >> u >> v;
+        adj[v].push_back(u);
+    }
+    for(int i = 1; i <= m; i++){
+        int v, k, w; cin >> v >> k >> w;
+        tickets[v].push_back(make_pair(k, w));
+    }
+    depth[1] = 1;
+    dfs(1); dp[1] = 0; val[1].insert(0);
+    for(int i = 2; i <= n; i++) val[i].insert(INF);
+    for(int i = 1; i <= n * 4; i++){
+        tree[i] = INF;
+    }
+    update(1, 1, n, depth[1], dp[1], 1);
+    for(int child : adj[1]){
+        solve(child);
+    }
+    cin >> q;
+    while(q--){
+        int h; cin >> h;
+        cout << dp[h] << '\n';
+    }
+}

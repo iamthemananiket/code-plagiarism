@@ -1,0 +1,54 @@
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+
+using namespace std;
+
+char s[55];
+
+int main() {
+  // freopen("in", "r", stdin); freopen("out", "w", stdout);
+  int tt;
+  scanf("%d", &tt);
+  while (tt--) {
+    int n;
+    scanf("%d", &n);
+    scanf("%s", s);
+    string ans = "";
+    for (int i = 0; i < n; ++i) {
+      ans += s[i];
+    }
+    for (int i = 0; i < n; ++i) {
+      for (int j = 0; j <= n; ++j) {
+        if (j == i) {
+          continue;
+        }
+        string cur = "";
+        for (int k = 0; k <= n; ++k) {
+          if (k == i) {
+            continue;
+          }
+          if (k == j) {
+            cur += s[i];
+          }
+          if (k < n) {
+            cur += s[k];
+          }
+        }
+        if (cur < ans) {
+          ans = cur;
+        }
+      }
+    }
+    printf("%s\n", ans.c_str());
+  }
+  return 0;
+}

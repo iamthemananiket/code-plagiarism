@@ -1,0 +1,74 @@
+/* @nazarbek.altybay */
+
+#include <cstring>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <cassert>
+#include <queue>
+
+#define pii pair<int, int>
+
+#define pb push_back
+#define mp make_pair
+
+#define f first
+#define s second
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+const double EPS = 1e-9;
+const double PI = acos(-1);
+
+const int INF = (int) 1e9 + 7;
+const int MAXN = (int) 2e6 + 7;
+
+int cases;
+int n;
+int a[55];
+
+int main() {
+  #ifdef LOCAL
+  freopen("in", "r", stdin);
+  #endif
+
+  scanf("%d", &cases);
+  while (cases--) {
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) {
+      scanf("%d", &a[i]);
+    }
+    int ans = 0;
+    for (int l = 1; l <= n; l++) {
+      ll sum = 0, prod = 1;
+      for (int r = l; r <= n; r++) {
+        sum += a[r];
+        prod = min(100000000000ll, prod * a[r]);
+        if (sum == prod) {
+          ++ans;
+        }
+      }
+    }
+    printf("%d\n", ans);
+  }
+
+  return 0;
+}

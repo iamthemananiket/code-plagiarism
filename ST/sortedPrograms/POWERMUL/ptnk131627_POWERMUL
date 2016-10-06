@@ -1,0 +1,101 @@
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <deque>
+#include <vector>
+#include <queue>
+#include <map>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen(".inp","r",stdin)
+#define OUTPUT freopen(".out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=1e5;
+
+int t[N+10]={0},ans[N],n,m,q,mod,v,test;
+ll c[N<<1],h[N];
+vector <int> base;
+void prepare(){
+    FOR(i,2,N) if (t[i]==0){
+        base.push_back(i);
+        for(int j=i;j<=N;j+=i) t[j]=i;
+    }
+}
+ll power(ll x,ll y){
+    if (y==0) return 1;
+    if (y==1) return x;
+    ll tmp=power(x,y/2);
+    if (y%2) return (((tmp*tmp)%mod)*x)%mod;
+    return (tmp*tmp)%mod;
+}
+void build(int node,int L,int R){
+    c[node]=1;
+    if (L==R) {
+        h[base[L]]=0;
+        return;
+    }
+    build(node<<1,L,(L+R)/2);
+    build(node*2+1,(L+R)/2+1,R);
+}
+void update(int node,int L,int R,int M){
+    if (base[L]>M||base[R]<M) return;
+    if (base[L]==M&&L==R){
+        c[node]=power(M,h[M]);
+        return;
+    }
+    update(node*2,L,(L+R)/2,M);
+    update(node*2+1,(L+R)/2+1,R,M);
+    c[node]=(c[node*2]*c[node*2+1])%mod;
+}
+void solve(){
+    FOR(i,1,n/2){
+        int tmp=n-i+1;
+        while (tmp>1){
+            int v=t[tmp],re=0;
+            while (tmp%v==0) tmp/=v,re++;
+            h[v]+=re*(n-i+1);
+            update(1,0,m,v);
+        }
+        tmp=i;
+        while (tmp>1){
+            int v=t[tmp],re=0;
+            while (tmp%v==0) tmp/=v,re++;
+            h[v]-=re*i;
+            update(1,0,m,v);
+        }
+        ans[i]=ans[n-i]=c[1];
+    }
+}
+int main(){
+    prepare();
+    scanf("%d",&test);
+    int tmp1=base.size();
+    //cout<<tmp<<'\n';
+    while (test--){
+        scanf("%d%d%d",&n,&mod,&q);
+        m=min((lower_bound(base.begin(),base.end(),n)-base.begin()),tmp1-1);
+        //cout<<m<<'\n';
+        build(1,0,m);
+        solve();
+        FOR(i,1,q){
+            scanf("%d",&v);
+            printf("%d\n",ans[v]);
+        }
+    }
+}

@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+vector < unsigned long long > F;
+int t;
+long long n;
+int main(){
+	F.resize(10000,0);
+	F[0] = 0;
+	F[1] = 1;
+	for(int i = 2; i <= 1000; ++i){
+		F[i] = F[i - 1] + F[i - 2];
+		if(F[i] > 10000000000)
+			break;
+	}
+	sort(F.begin(),F.end());
+	cin >> t;
+	while(t--){
+		cin >> n;
+		if(binary_search(F.begin(), F.end(), n))
+			cout << "is fibo\n";
+		else cout << "not fibo\n";
+	}
+    return 0;
+}

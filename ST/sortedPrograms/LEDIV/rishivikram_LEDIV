@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define minn(a,b) (a)<(b)?(a):(b)
+#define sc(x) scanf("%lld",&x)
+long long int gcd(long long int a, long long int b)
+{
+	if(b==0)
+		return a;
+	else
+		return gcd(b,a%b);
+}
+int main()
+{
+	long long int t,x,n,hcf,i,ans,flag,mini;
+	sc(t);
+	while(t--)
+	{
+		sc(n);sc(x);
+		hcf=x;
+		for(i=1;i<n;i++)
+		{
+			sc(x);
+		//	mini=minn(mini,x);
+			hcf=gcd(hcf,x);
+		}
+		ans=-1;
+		for(i=2;i<=floor(sqrt(hcf));i++)
+		{
+			if(hcf%i==0)
+			{
+				ans=i;
+				break;
+			}
+		}
+		if((i==floor(sqrt(hcf))+1)&&hcf>1)
+			printf("%lld\n",hcf);
+		else
+			printf("%lld\n",ans);
+	}
+	return 0;
+}

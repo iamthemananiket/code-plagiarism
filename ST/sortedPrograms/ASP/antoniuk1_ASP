@@ -1,0 +1,60 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+
+//#include <boost/geometry.hpp>
+//#include <boost/geometry/geometries/point_xy.hpp>
+//#include <boost/geometry/geometries/polygon.hpp>
+//#include <boost/foreach.hpp>
+
+using namespace std;
+
+int x[1111111];
+
+int main() {
+    ios::sync_with_stdio(0);
+    int t;
+    scanf("%d", &t);
+    while (t --> 0) {
+        int n;
+        scanf("%d", &n);
+        for(int i = 1; i <= n; ++i)
+            scanf("%d", x+i);
+        
+        bool good = 1;
+        bool prev = 0;
+        for(int i = 2; i <= n; ++i) {
+            if (x[i-1] > x[i]) {
+                if (prev) {
+                    good = 0;
+                    break;
+                }
+                x[i] = x[i-1];
+                prev = 1;
+            }
+            else
+                prev = 0;
+        }
+        
+        if (good)
+            printf("YES\n");
+        else
+            printf("NO\n");
+    }
+    return 0;
+}

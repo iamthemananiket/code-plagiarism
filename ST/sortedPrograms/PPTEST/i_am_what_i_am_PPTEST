@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	/*#ifndef ONLINE_JUDGE
+	freopen("in.txt","r",stdin);
+//	freopen("out.txt","w",stdout);
+	#endif
+	*/
+	int t;
+	cin>>t;
+	for(int te=1;te<=t;te++)
+	{
+		//cout<<"Case #"<<te<<": ";
+		int n,W;
+		cin>>n>>W;
+		vector<int> val(n);
+		vector<int> wt(n);
+		int x,y,z;
+		for(int i=0;i<n;i++)
+		{
+			cin>>x>>y>>z;
+			x*=y;
+			val[i]=x;
+			wt[i]=z;
+		}
+
+		map<int,int> mp;
+		mp[0]=0;
+		for(int i=0;i<n;i++)
+		 {
+		 	map<int,int> temp;
+		 
+		 	for(map<int,int>::iterator it=mp.begin();it!=mp.end();it++)
+		 	{
+		 		if(it->first+wt[i]<=W)
+		 			temp[it->first+wt[i]]=val[i]+it->second; 			
+			}
+			for(map<int,int>::iterator it=temp.begin();it!=temp.end();it++)
+			{
+				if(mp.find(it->first)==mp.end() || mp[it->first]<it->second)
+				  mp[it->first]=it->second;
+			}
+		 }
+		 
+		 int maxVal=0;
+		for(map<int,int>::iterator it=mp.begin();it!=mp.end();it++)
+		 	{
+		 		if(it->second>maxVal)
+		 			maxVal=it->second;
+			}
+		cout<<maxVal<<endl;
+	}
+	
+	
+	
+}

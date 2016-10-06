@@ -1,0 +1,117 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+int Prime[10100000];
+int pos[5010100];
+int cprime[5010100];
+int detected[1000100];
+#define prime(i) ((Prime[i>>5])&(1<<(i&(31))))
+#define assign(j) (Prime[j>>5]|=(1<<(j&(31))))
+#define LIMIT 1000100
+#define SLIMIT 1010
+#define ll unsigned long long
+int i,j,m,n,t,x,k,l,h;
+unsigned total;
+void sieve()
+{
+pos[0]=0;
+assign(1);
+pos[1]=2;
+pos[2]=3;
+cprime[2]=1;
+cprime[3]=1;
+for(k=2,l=3,i=5;i<=SLIMIT;k++,i=3*k-(k&1)-1)
+if(prime(k)==0)
+{
+pos[l++]=i;
+cprime[i]=1;
+for(j=i*i,h=((j+2)/3);j<=LIMIT;h+=(k&1)?(h&1?((k<<2)-3):((k<<1)-1)):(h&1?((k<<1)-1):((k<<2)-1)),j=3*h-(h&1)-1)
+assign(h);
+}
+i=3*k-(k&1)-1;
+for(;i<=LIMIT;k++,i=3*k-(k&1)-1)
+if(prime(k)==0)
+{
+pos[l++]=i;
+cprime[i]=1;
+}
+total=l;
+}
+int witness(ll a,ll t,ll u,ll n)
+{
+    ll res=1;
+    while(u)
+    {
+        if(u&1)res=(a*res)%n;
+        a=(a*a)%n;u>>=1;
+    }
+    if(res==1)return 1;
+    for(int i=1;i<=t;i++)
+    {
+        if(res==n-1)return 1;res=(res*res)%n;
+    }
+    return 0;
+}
+int Miller(ll n)
+{
+    ll t=0,k=n-1,u,i;
+    while(k%2==0)
+    {
+        k>>=1;t++;
+    }
+    u=k;
+
+    ll p[]={2,7,61},l=3;
+    for(i=0;i<l;i++)
+    {
+        if(n!=p[i])if(witness(p[i],t,u,n)==0)return 0;
+    }
+    return 1;
+}
+int main()
+{
+    sieve();
+    int t;
+    scanf("%d",&t);
+    while(t--)
+    {
+
+        ll a,b;
+        scanf("%lld%lld",&a,&b);
+
+        ll ans = 0;
+
+        int visited[b-a+2];
+        memset(visited,0,sizeof(visited));
+        int stop=(int)sqrtl(b);
+        int init=a;
+
+        for(int i=1;pos[i]<=stop;i++)
+        {
+            for(int j=(init%pos[i]==0)?init:(init+pos[i]-init%pos[i]);j<=b;j+=pos[i])
+                if(j>=a)
+                    visited[j-init+1]=1;
+            if(pos[i]>=a)visited[pos[i]-init+1]=0;
+            ll tmp = pos[i];
+            tmp = tmp*tmp;
+            int cnt=2;
+            while(tmp <= b)
+            {
+                if(cprime[cnt+1] && tmp>=a)
+                {
+                    ans++;
+                }
+                cnt++;
+                if(tmp/pos[i] > b)break;
+                tmp = tmp*pos[i];
+            }
+
+        }
+
+
+        for(int i=a;i<=b;i++)if(visited[i-a+1]==0)ans++;
+
+        printf("%lld\n", ans);
+
+    }
+}

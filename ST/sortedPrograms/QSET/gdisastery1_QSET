@@ -1,0 +1,117 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+
+int N, Q;
+int A[MAX_N];
+
+const int FULL = 3;
+const int LEFT = 0; // not touching the right, but touching the left
+const int RIGHT = 1; // not touching the left, but touchign the right
+const int MID = 2; // neither touching the left nor the right, but nonempty
+ll T[MAX_N * 4][4][3];
+
+int p[3][3] = {
+  // T[n][*] = T[n*2][**] * T[n*2+1][***]
+  {FULL, FULL, FULL},
+  {RIGHT, RIGHT, FULL},
+  {LEFT, FULL, LEFT}
+};
+
+
+void multiply(ll a[4][3], ll b[4][3], ll c[4][3]){
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 3; j++)
+      a[i][j] = 0;
+  // Singles
+  for(int j = 0; j < 3; j++){
+    a[MID][j] += b[MID][j] + c[MID][j];
+    a[MID][j] += b[RIGHT][j] + c[LEFT][j];
+    a[LEFT][j] += b[LEFT][j] + b[FULL][j];
+    a[RIGHT][j] += c[RIGHT][j] + c[FULL][j];
+  }
+  // Together
+  for(int j = 0; j < 3; j++)
+    for(int k = 0; k < 3; k++)
+      a[MID][(j + k) % 3] += b[RIGHT][j] * c[LEFT][k];
+  for(int i = 0; i < 3; i++)
+    for(int j = 0; j < 3; j++)
+      for(int k = 0; k < 3; k++)
+	a[p[i][0]][(j + k) % 3] += b[p[i][1]][j] * c[p[i][2]][k];
+}
+
+void st_update(int n, int L, int R, int p, int x){
+  if(L == R) {
+    memset(T[n], 0, sizeof T[n]);
+    T[n][FULL][x % 3] = 1;
+  } else {
+    if(p <= (L + R) / 2)  st_update(n * 2, L, (L + R) / 2, p, x);
+    else st_update(n * 2 + 1, (L + R) / 2 + 1, R, p, x);
+
+    multiply(T[n], T[n * 2], T[n * 2 + 1]);
+    /*
+    printf("L=%d R=%d\n", L, R);
+    for(int i = 0; i < 4; i++, puts(""))
+      for(int j = 0; j < 3; j++)
+	printf("%lld ", T[n][i][j]);
+    puts("*******************");
+    */
+  }
+}
+// store the result in tab
+ll tab[4][3], tmp[4][3];
+void st_query(int n, int L, int R, int i, int j){
+  if(j < L || R < i) return;
+  if(i <= L && R <= j) {
+    memcpy(tmp, tab, sizeof tab);
+    multiply(tab, tmp, T[n]);
+  } else {
+    st_query(n * 2, L, (L + R) / 2, i, j);
+    st_query(n * 2 + 1, (L + R) / 2 + 1, R, i, j);
+  }
+}
+
+void update(int i, int x){  st_update(1, 0, N - 1, i, x); }
+ll query(int i, int j){
+  memset(tab, 0, sizeof tab);
+  st_query(1, 0, N - 1, i, j);
+  ll res = 0;
+  for(int k = 0; k < 4; k++)
+    res += tab[k][0];
+  return res;
+}
+
+int main(){
+  int t, x, y;
+  scanf("%d%d", &N, &Q);
+  for(int i = 0; i < N; i++){
+    scanf("%1d", &x);
+
+    update(i, x);
+  }
+  while(Q--){
+    scanf("%d%d%d", &t, &x, &y);
+    if(t == 1) update(x - 1, y);
+    if(t == 2) printf("%lld\n", query(x - 1, y - 1));
+  }
+  return 0;
+}

@@ -1,0 +1,23 @@
+//gowatgowit
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+
+int t,n[10001], nmax=0;
+long long fib[1100011]={0};
+int main()
+{
+	scanf("%d",&t);
+	for(int i=0; i<t; i++)
+	{
+		scanf("%d",&n[i]);
+		nmax = max(nmax,n[i]);
+	}
+	fib[0] = fib[1] = 1;
+	for(int i=2; i<=nmax; i++)
+		fib[i] = (fib[i-1]+fib[i-2]) % 1000000007;
+	for(int i=0; i<t; i++)
+		printf("%lld\n", fib[n[i]]);
+	return 0;
+}

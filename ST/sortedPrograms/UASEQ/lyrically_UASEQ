@@ -1,0 +1,86 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int INF = 1001001001001001001LL;
+
+int N, K;
+Int A[100010];
+
+pair<Int,Int> ans;
+
+void doIt(int i, int j) {
+	if ((A[j] - A[i]) % (j - i) != 0) {
+		return;
+	}
+	const Int d = (A[j] - A[i]) / (j - i);
+	const Int a = A[i] - i * d;
+	int cnt = 0;
+	for (int k = 0; k < N; ++k) {
+		if (A[k] != a + k * d) {
+			++cnt;
+		}
+	}
+	if (cnt <= K) {
+		chmin(ans, mp(a, d));
+	}
+}
+
+int main() {
+	
+	
+	for (; ~scanf("%d%d", &N, &K); ) {
+		for (int i = 0; i < N; ++i) {
+			A[i] = in();
+		}
+		ans = mp(INF, INF);
+		if (N >= (K + 1) * 2) {
+			for (int i = 0; i < (K + 1) * 2; i += 2) {
+				doIt(i, i + 1);
+			}
+		} else {
+			for (int i = 0; i < N; ++i) for (int j = i + 1; j < N; ++j) {
+				doIt(i, j);
+			}
+		}
+		for (int i = 0; i < N; ++i) {
+			if (i > 0) {
+				printf(" ");
+			}
+			printf("%lld", ans.first + i * ans.second);
+		}
+		puts("");
+	}
+	
+	return 0;
+}

@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef double dd;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  cin >> T;
+  while(T-- > 0) {
+    int N, K;
+    cin >> N >> K;
+    vector<int> arr(N);
+    for(int& a : arr)
+      cin >> a;
+    map<int,int> cnt;
+    for(int& a : arr)
+      ++cnt[--a];
+    int res=0;
+    for(const auto& e : cnt)
+      if (e.second >= K && arr[e.first] != e.first)
+        ++res;
+    cout << res << endl;
+  }
+  return 0;
+}

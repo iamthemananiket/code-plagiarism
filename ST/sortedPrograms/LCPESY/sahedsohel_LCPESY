@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+    int t,i,l,s;
+    cin>>t;
+    char c[10009];
+    int a[63],b[63];
+    while(t--)
+    {
+        for(i=0;i<63;i++)
+        {
+            a[i]=0;
+            b[i]=0;
+        }
+        cin>>c;
+        l=strlen(c);
+        for(i=0;i<l;i++)
+        {
+            if(c[i]>='a'&&c[i]<='z')
+            {
+                a[c[i]-'a'+26]++;
+            }
+            else if(c[i]>='A'&&c[i]<='Z')
+            {
+                a[c[i]-'A']++;
+            }
+            else
+                a[c[i]-'0'+52]++;
+        }
+
+        cin>>c;
+        l=strlen(c);
+        for(i=0;i<l;i++)
+        {
+            if(c[i]>='a'&&c[i]<='z')
+            {
+                b[c[i]-'a'+26]++;
+            }
+            else if(c[i]>='A'&&c[i]<='Z')
+            {
+                b[c[i]-'A']++;
+            }
+            else
+                b[c[i]-'0'+52]++;
+        }
+        s=0;
+        for(i=0;i<63;i++)
+        {
+            s+=min(a[i],b[i]);
+        }
+        cout<<s<<endl;
+    }
+    return 0;
+}

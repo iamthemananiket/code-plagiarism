@@ -1,0 +1,134 @@
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+#define all(a) (a).begin(),(a).end()
+#define pb push_back
+#define sz(a) ((int)(a).size())
+#define mp make_pair
+#define fi first
+#define se second
+
+typedef pair<int,int> pint;
+typedef long long ll;
+typedef vector<int> vi;
+
+
+#define MAX_N 35005
+#define LOG_N 17
+
+
+int n,a[MAX_N],depth[MAX_N];
+vi adjl[MAX_N];
+
+int p[MAX_N][LOG_N];
+int jlo[MAX_N][LOG_N];
+int jhi[MAX_N][LOG_N];
+
+void dfs(int i)
+{
+	jlo[i][0]=min(a[i],a[p[i][0]]);
+	jhi[i][0]=max(a[i],a[p[i][0]]);
+	for (int j=1; j<LOG_N; j++)
+	{
+		p[i][j]=p[p[i][j-1]][j-1];
+		jlo[i][j]=min(jlo[i][j-1],jlo[p[i][j-1]][j-1]);
+		jhi[i][j]=max(jhi[i][j-1],jhi[p[i][j-1]][j-1]);
+	}
+	for (int j=0; j<sz(adjl[i]); j++)
+	{
+		int g=adjl[i][j];
+		if (p[i][0]==g)
+			continue;
+		p[g][0]=i;
+		depth[g]=depth[i]+1;
+		dfs(g);
+	}
+}
+
+int lo,hi;
+int lca(int a, int b)
+{
+	if (depth[a]<depth[b])
+		swap(a,b);
+	lo=1000000000,hi=0;
+	for (int i=LOG_N-1; i>=0; i--)
+		if (depth[p[a][i]]>=depth[b])
+		{
+			lo=min(lo,jlo[a][i]);
+			hi=max(hi,jhi[a][i]);
+			a=p[a][i];
+		}
+	if (a==b)
+		return a;
+	for (int i=LOG_N-1; i>=0; i--)
+		if (p[a][i]!=p[b][i])
+		{
+			lo=min(lo,min(jlo[a][i],jlo[b][i]));
+			hi=max(hi,max(jhi[a][i],jhi[b][i]));
+			a=p[a][i];
+			b=p[b][i];
+		}
+	lo=min(lo,min(jlo[a][0],jlo[b][0]));
+	hi=max(hi,max(jhi[a][0],jhi[b][0]));
+	return p[a][0];
+}
+
+int main()
+{
+	scanf("%d",&n);
+	for (int i=1; i<=n; i++)
+		scanf("%d",a+i);
+	for (int i=1; i<n; i++)
+	{
+		int u,v;
+		scanf("%d %d",&u,&v);
+		adjl[u].pb(v);
+		adjl[v].pb(u);
+	}
+	depth[0]=-1;
+	dfs(1);
+
+	int q;
+	char s[3];
+	scanf("%d",&q);
+	while (q--)
+	{
+		int x,y;
+		scanf("%s %d %d",s,&x,&y);
+		if (s[0]=='C')
+		{
+			static map<pint,int> know;
+			if (x>y)
+				swap(x,y);
+			pint state=mp(x,y);
+			if (know.find(state)!=know.end())
+			{
+				printf("%d\n",know[state]);
+				continue;
+			}
+			int l=lca(x,y);
+			vi v;
+			v.pb(a[l]);
+			for (; x!=l; x=p[x][0])
+				v.pb(a[x]);
+			for (; y!=l; y=p[y][0])
+				v.pb(a[y]);
+			sort(all(v));
+			int ans=1000000000;
+			for (int i=0; i+1<sz(v); i++)
+				ans=min(ans,v[i+1]-v[i]);
+			know[state]=ans;
+			printf("%d\n",ans);
+		}
+		else
+		{
+			lca(x,y);
+			printf("%d\n",hi-lo);
+		}
+	}
+	return 0;
+}

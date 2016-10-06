@@ -1,0 +1,147 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 500005;
+int p[N];
+vector<int> G[N];
+
+struct UF {
+    vector<int> par, rk;
+    vector<ll> sub;
+    set<pair<ll, int>> st;
+
+    UF(int n) {
+        par.resize(n + 1), rk.assign(n + 1, 0), sub.resize(n + 1);
+        for (int i = 1; i <= n; ++i) {
+            par[i] = i;
+            sub[i] = p[i];
+            st.insert({(ll) p[i], i});
+        }
+    }
+    
+    int find(int x) {
+        if (x != par[x]) par[x] = find(par[x]);
+        return par[x];
+    }
+    
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+    
+    bool unite(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y) return false;
+        if (rk[x] < rk[y]) {
+            st.erase({sub[y], y});
+            st.erase({sub[x], x});
+            par[x] = y, sub[y] += sub[x];
+            st.insert({sub[y], y});
+        }
+        else {
+            st.erase({sub[y], y});
+            st.erase({sub[x], x});
+            par[y] = x, sub[x] += sub[y];
+            st.insert({sub[x], x});
+            if (rk[x] == rk[y]) rk[x]++;
+        }
+        return true;
+    }
+
+    int count(int x) {
+        x = find(x);
+        return sub[x];
+    }
+
+    void update(int x, int add) {
+        x = find(x);
+        st.erase({sub[x], x});
+        sub[x] += add;
+        st.insert({sub[x], x});
+    }
+
+    ll max() {
+        return (*st.rbegin()).first;
+    }
+};
+
+struct Q {
+    int id, d, x;
+};
+
+int main(int argc, char *argv[]) {
+    ios_base::sync_with_stdio(false);
+    
+    int n, m, q, d, x, y;
+    char c;
+
+    cin >> n >> m >> q;
+    REPU(i, 1, n + 1) {
+        cin >> p[i];
+        G[i].push_back(p[i]);
+    }
+    vector<pair<int, int>> eds;
+    REPU(i, 0, m) {
+        cin >> x >> y;
+        eds.push_back({x, y});
+    }
+    vector<Q> qs;
+    vector<bool> vis(m, false);
+    REPU(i, 0, q) {
+        cin >> c;
+        if (c == 'D') {
+            cin >> d;
+            d--;
+            qs.push_back({0, d, 0});
+            vis[d] = true;
+        }
+        else {
+            cin >> d >> x;
+            G[d].push_back(x);
+            p[d] = x;
+            qs.push_back({1, d, x});
+        }
+    }
+
+    UF uf(n);
+    REPU(i, 0, m) if (!vis[i]) {
+        uf.unite(eds[i].first, eds[i].second);
+    }
+
+    vector<ll> ret;
+    ret.push_back(uf.max());
+
+    REPD(i, q - 1, 0) {
+        if (qs[i].id) {
+            int pre = G[qs[i].d].back();
+            G[qs[i].d].pop_back();
+            int cur = G[qs[i].d].back();
+            uf.update(qs[i].d, cur - pre);
+        }
+        else {
+            int ind = qs[i].d;
+            uf.unite(eds[ind].first, eds[ind].second);
+        }
+        ret.push_back(uf.max());
+    }
+
+    reverse(ALL(ret));
+    for (ll v : ret) printf("%lld\n", v);
+    
+    return 0;
+}

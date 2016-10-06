@@ -1,0 +1,43 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <queue>
+#include <functional>
+#include <set>
+#include <cmath>
+#define SIZE 105
+
+using namespace std;
+typedef long long int ll;
+typedef pair <int,int> P;
+
+char str[SIZE];
+
+int main()
+{
+	int T;
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%s",&str);
+		int n=strlen(str);
+		bool up=false;
+		if(str[0]!=str[1])
+		{
+			bool ok=true;
+			for(int i=0;i<n;i++)
+			{
+				if(str[i]!=str[i%2])
+				{
+					ok=false;
+				}
+			}
+			up=ok;
+		}
+		if(up) puts("YES");
+		else puts("NO");
+	}
+	return 0;
+}

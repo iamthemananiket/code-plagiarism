@@ -1,0 +1,126 @@
+#include <iostream>
+#include <vector>
+
+const int N = 1e5 + 10;
+const long long inf = 1ll << 60;
+
+class SegNode {
+public:
+	int a, b;
+	long long min;
+	SegNode *left, *right;
+	SegNode( int _a, int _b) :
+		a( _a ), b( _b ),
+		min( 0 ),
+		left( nullptr ), right( nullptr )
+		{}
+};
+
+SegNode* head = nullptr;
+
+std::vector< std::pair< int, long long > > tickets[ N ];
+std::vector< int > child[ N ];
+int n, m, q;
+
+long long opt[ N ];
+
+void dfs( int u, int height );
+
+SegNode* init( int a, int b );
+void update( SegNode* root, int idx, long long value );
+long long query( SegNode* root, int a, int b );
+
+int main( void ) {
+	
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	std::cin >> n >> m;
+	for ( int i = 0 ; i + 1 < n ; ++i ) {
+		int u, v;
+		std::cin >> u >> v;
+		child[ v ].emplace_back( u );
+	}
+
+	for ( int i = 0 ; i < m ; ++i ) {
+		int v, k;
+		long long w;
+		std::cin >> v >> k >> w;
+		tickets[ v ].emplace_back( k, w );
+	}
+
+	head = init( 0, n-1 );
+	dfs( 1, 0 );
+
+	std::cin >> q;
+	for ( int i = 0 ; i < q ; ++i ) {
+		int u;
+		std::cin >> u;
+		std::cout << opt[ u ] << "\n";
+	}
+
+	return 0;
+}
+
+void dfs( int u, int height ) {
+
+	if ( height == 0 ) {
+		opt[ u ] = 0ll;
+	} else {
+		opt[ u ] = inf;
+		for ( const auto tck : tickets[ u ] ) {
+			const int k = tck.first;
+			const long long w = tck.second;
+			opt[ u ] = std::min( 
+				opt[ u ], 
+				w + query( 
+					head, 
+					std::max( 0, height - k ), 
+					height - 1
+				)
+			);
+		}
+	}
+
+	update( head, height, opt[ u ] );
+
+	for ( int v : child[ u ] ) {
+		dfs( v, height + 1 );
+	}
+}
+
+SegNode* init( int a, int b ) {
+	SegNode* root = new SegNode( a, b );
+	if ( a < b ) {
+		const int mid = ( a + b ) / 2;
+		root->left = init( a, mid );
+		root->right = init( mid + 1, b );
+	}
+	return root;
+}
+
+void update( SegNode* root, int idx, long long value ) {
+	if ( root->a >= root->b ) {
+		root->min = value;
+		return;
+	}
+	const int mid = ( root->a + root->b ) / 2;
+	update( idx <= mid ? root->left : root->right, idx, value );
+	root->min = std::min(
+		root->left->min,
+		root->right->min
+	);
+}
+
+long long query( SegNode* root, int a, int b ) {
+	if ( root->b < a or b < root->a ) {
+		return inf;
+	}
+	if ( a <= root->a and root->b <= b ) {
+		return root->min;
+	}
+	return std::min(
+		query( root->left, a, b ),
+		query( root->right, a, b )
+	);
+}

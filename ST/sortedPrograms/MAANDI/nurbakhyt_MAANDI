@@ -1,0 +1,76 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <algorithm>
+#include <fstream>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
+#include <string>
+#include <ctime>
+#include <queue>
+#include <stack>
+#include <vector>
+#include <map>
+#include <set>
+#include <deque>
+#define ll long long
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define sz size()
+#define INF 1000*1000*1000
+#define _USE_MATH_DEFINES
+#define fname ""
+const int  MAXN=1000*1000;
+const double eps=1e-6;
+
+using namespace std;
+int t,n,i,j,ans,h;
+bool k;
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen(fname".in","r",stdin);
+	freopen(fname".out","w",stdout);
+	#endif
+	cin>>t;
+	for(i=0;i<t;i++)
+	{
+		cin>>n;
+		ans=0;
+		for(j=1;j*j<=n;j++)
+		{	
+			if(n%j==0)
+			{
+				k=0;
+				h=j;
+				while(h>0)
+				{
+					if(h%10==4||h%10==7)
+					{
+						k=1;
+						break;
+					}
+					h/=10;
+				}
+				if(k==1)ans++;	
+				k=0;
+				h=n/j;
+				while(h>0)
+				{
+					if(h%10==4||h%10==7)
+					{
+						k=1;
+						break;
+					}
+					h/=10;
+				}
+				if(k==1)ans++;	
+			}
+		}
+		cout<<ans<<endl;
+	}
+	return 0;
+}

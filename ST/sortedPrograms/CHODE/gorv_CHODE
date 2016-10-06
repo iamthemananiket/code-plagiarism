@@ -1,0 +1,73 @@
+#include<iostream>
+#include<cstring>
+#include<ctype.h>
+#include<stdlib.h>
+#include<stdio.h>
+using namespace std;
+struct mycharacter
+{
+char ch;
+int freq;
+};
+inline int compare(const void *a,const void *b)
+{
+if(((struct mycharacter *)a)->freq-((struct mycharacter *)b)->freq)
+return ((struct mycharacter *)a)->freq-((struct mycharacter *)b)->freq;
+else
+return ((struct mycharacter *)a)->ch-((struct mycharacter *)b)->ch;
+}
+
+
+int main(){
+	char tt[1100];
+	cin.getline(tt,1100);
+	  int t = atoi(tt);
+	while(t--){
+		char arr[27];
+		cin.getline (arr,27);
+		char tocomp[150010];
+		cin.getline (tocomp,150010);
+		int len=strlen(tocomp);
+		struct mycharacter temp[300];	
+		for(int i=0;i<=25;i++)
+		{
+		temp[i].ch=97+i;
+		temp[i].freq=0;
+		}
+		
+		 for(int i=0;i<len;i++)
+         {
+			if(isupper(tocomp[i])||islower(tocomp[i]))
+				{
+					if(islower(tocomp[i]))
+					temp[tocomp[i]-97].freq++;
+					else
+					temp[tocomp[i]-65].freq++;
+				}
+				else
+				continue;
+				
+		}
+		 qsort(temp,26,sizeof(struct mycharacter),compare);
+		  //for(int i=0;i<=25;i++)
+		//	cout<<arr1[i].ch<<" "<<arr1[i].freq<<endl;
+		  
+		  int solution[26];
+		  
+		  for(int i=0;i<=25;i++)
+			solution[temp[i].ch-97]=i;
+			
+		 for(int i=0;i<=len-1;i++)
+		 {
+			if(islower(tocomp[i]))
+				cout<<arr[solution[tocomp[i]-97]];
+			else if(isupper(tocomp[i]))
+				cout<<char(toupper(arr[solution[tocomp[i]-65]]));
+			else
+			cout<<tocomp[i];
+		}
+		
+		cout<<"\n";
+			
+	}
+}

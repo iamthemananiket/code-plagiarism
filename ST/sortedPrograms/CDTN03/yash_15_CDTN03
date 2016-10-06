@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int g[1003][1003];
+int n,m;
+stack<int> sx,sy;
+int dx[]={-1,1,0,0};
+int dy[]={0,0,-1,1};
+int dfs(int x, int y){
+	int xx, yy,i,sz=1;
+	sx.push(x);
+	sy.push(y);
+	g[x][y]=0;
+	while(!sx.empty()){
+		x=sx.top();
+		y=sy.top();
+		sx.pop();
+		sy.pop();
+		for(i=0;i<4;i++){
+			xx=x+dx[i];
+			yy=y+dy[i];
+			if(xx<1 || xx>n || yy<1 || yy>m)
+				continue;
+			if(g[xx][yy]){
+				sz++;
+				g[xx][yy]=0;
+				sx.push(xx);
+				sy.push(yy);
+			}
+		}
+	}
+	return sz;
+}
+
+int main(){
+	int q,i,j,val,ans=0,x,y;
+	cin >> n >> m >> q;
+	for(i=0;i<n;i++)
+		for(j=0;j<m;j++){
+			scanf("%d",&val);
+			g[i+1][j+1]=val;
+			ans+=val;
+		}
+	while(q--){
+		scanf("%d%d",&x,&y);
+		if(g[x][y])
+			ans-=dfs(x,y);
+		printf("%d\n",ans);
+	}
+	
+}

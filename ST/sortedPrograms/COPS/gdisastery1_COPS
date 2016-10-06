@@ -1,0 +1,52 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAXN = ;
+
+int main()
+{
+    int T, N, x, y, j;
+    const int M = 100;
+    static int a[M + 1];
+
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%d%d", &N, &x, &y);
+        for(int i = 1; i <= M; i++)
+            a[i] = 1;
+
+        for(int i = 0; i < N; i++)
+        {
+            scanf("%d", &j);
+            for(int k = max(1, j - x * y); k <= min(M, j + x * y); k++)
+                a[k] = 0;
+        }
+
+        printf("%d\n", (int) count(a, a + M + 1, 1));
+
+    }
+
+    return 0;
+}

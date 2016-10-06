@@ -1,0 +1,102 @@
+//Program: acm14am2
+//Author: gary
+//Date: 28/10/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+int T, Q, N;
+vector<int> E[MAX_N];
+
+int qt[MAX_N], qu[MAX_N];
+int p[MAX_N];
+int dfsnum;
+int L[MAX_N], R[MAX_N];
+int col[MAX_N];
+
+int ft[2][MAX_N];
+int query(int x, int i){
+  int s = 0;
+  for(; i > 0; i -= i & -i)
+    s += ft[x][i];
+  return s;
+}
+int query(int x, int i, int j){
+  return query(x, j) - query(x, i - 1);
+}
+
+void update(int x, int i, int val){
+  for(; i < MAX_N; i += i & -i)
+    ft[x][i] += val;
+}
+
+void init(){ memset(ft, 0, sizeof ft); }
+
+void dfs(int u){
+  L[u] = ++dfsnum;
+  for(int v: E[u]){
+    if(v != p[u]){
+      col[v] = 1 - col[u];
+      dfs(v);
+    }
+  }
+  R[u] = dfsnum;
+}
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d", &Q);
+    N = 1;
+    for(int i = 0; i < Q; i++)
+      scanf("%d%d", qt + i, qu + i);
+    for(int i = 0; i < Q; i++){
+      if(qt[i] == 0){
+	E[qu[i]].pb(N);
+	p[N] = qu[i];
+	N ++;
+      }
+    }
+    dfsnum = 0;
+    dfs(0);
+    
+    // for(int i = 0; i < N; i++) printf("i = %d L = %d R = %d col = %d\n", i, L[i], R[i], col[i]);
+    init();
+    update(col[0], L[0], 1);
+    int n = 1;
+    for(int i = 0; i < Q; i++){
+      if(qt[i] == 1){
+	ll res = 0;
+	for(int k = 0; k < 2; k++){
+	  ll a = query(k, L[qu[i]], R[qu[i]]);
+	  res += a * (a - 1) / 2;
+	}
+	printf("%lld\n", res);
+      } else {
+	update(col[n], L[n], 1);
+	n ++;
+      }
+    }
+    for(int i = 0; i < N; i++)
+      E[i].clear();
+  }
+  return 0;
+}

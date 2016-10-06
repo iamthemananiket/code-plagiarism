@@ -1,0 +1,124 @@
+/*********************************************************************\
+   |--\        ---       /\        |-----------| -----   /-------|    |
+   |   \        |       /  \       |               |    /             |
+   |    \       |      /    \      |               |   |              |
+   |     \      |     /      \     |               |   |----|         |
+   |      \     |    / ------ \    |-------|       |        |-----|   |
+   |       \    |   /          \   |               |              |   |
+   |        \   |  /            \  |               |              /   |
+  ---        -------            ------           ----- |---------/    |
+                                                                      |
+    codeforces = nfssdq  ||  topcoder = nafis007                      |
+    mail = nafis_sadique@yahoo.com || nfssdq@gmail.com                |
+    IIT,Jahangirnagar University(41)                                  |
+                                                                      |
+**********************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define xx         first
+#define yy         second
+#define pb         push_back
+#define mp         make_pair
+#define LL         long long
+#define inf        INT_MAX/3
+#define mod        1000000007ll
+#define PI         acos(-1.0)
+#define linf       (1ll<<60)-1
+#define FOR(I,A,B) for(int I = (A); I < (B); ++I)
+#define REP(I,N)   FOR(I,0,N)
+#define ALL(A)     ((A).begin(), (A).end())
+#define set0(ar)   memset(ar,0,sizeof ar)
+#define vsort(v)   sort(v.begin(),v.end())
+#define setinf(ar) memset(ar,126,sizeof ar)
+
+//cout << fixed << setprecision(20) << p << endl;
+
+template <class T> inline T bigmod(T p,T e,T M){
+    LL ret = 1;
+    for(; e > 0; e >>= 1){
+        if(e & 1) ret = (ret * p) % M;
+        p = (p * p) % M;
+    } return (T)ret;
+}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}
+
+
+int ar[5];
+string S1, S2;
+int fl = 0;
+vector < int > vc;
+void go(int c){
+    if(c == vc.size()){
+        int f1 = 0;
+        for(int i = 0; i < S2.size(); i++){
+            if(S2[i] == 'x'){
+                int f = 0;
+                if(S1[i] == 'a' && S1[i+1] == 'a') f = 0;
+                else if(S1[i] == 'a' && S1[i+1] == 'b') f = 1;
+                else if(S1[i] == 'b' && S1[i+1] == 'a') f = 2;
+                else if(S1[i] == 'b' && S1[i+1] == 'b') f = 3;
+                ar[f]--;
+                i++;
+                continue;
+            }
+            if(S1[i] != S2[i]) f1 = 1;
+        }
+        REP(i, 4) if(ar[i] < 0) f1++;
+        if(f1 == 0) fl = 1;
+        for(int i = 0; i < S2.size(); i++){
+            if(S2[i] == 'x'){
+                int f = 0;
+                if(S1[i] == 'a' && S1[i+1] == 'a') f = 0;
+                else if(S1[i] == 'a' && S1[i+1] == 'b') f = 1;
+                else if(S1[i] == 'b' && S1[i+1] == 'a') f = 2;
+                else if(S1[i] == 'b' && S1[i+1] == 'b') f = 3;
+                ar[f]++;
+                i++;
+            }
+        }
+        return;
+    }
+
+    ar[0]--;
+    S1[vc[c]] = 'a'; S1[vc[c]+1] = 'a';
+    go(c + 1);
+    ar[0]++;
+
+    ar[1]--;
+    S1[vc[c]] = 'a'; S1[vc[c]+1] = 'b';
+    go(c + 1);
+    ar[1]++;
+
+    ar[2]--;
+    S1[vc[c]] = 'b'; S1[vc[c]+1] = 'a';
+    go(c + 1);
+    ar[2]++;
+
+    ar[3]--;
+    S1[vc[c]] = 'b'; S1[vc[c]+1] = 'b';
+    go(c + 1);
+    ar[3]++;
+}
+
+int main(){
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    int T; cin >> T;
+    while(T--){
+        cin >> S1 >> S2;
+        REP(i, 4) cin >> ar[i];
+        vc.clear();
+        for(int i = 0; i < S1.size(); i++){
+            if(S1[i] == 'x'){
+                vc.pb(i);
+                i++;
+            }
+        }
+
+        fl = 0; go(0);
+        if(fl) cout << "Yes" << endl;
+        else cout << "No" << endl;
+    }
+}

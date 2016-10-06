@@ -1,0 +1,64 @@
+#include <cstdio>
+#include <algorithm>
+
+using namespace std;
+
+struct Trea {
+    Trea* ch[2];
+    Trea() {
+        ch[0] = ch[1] = 0;
+    }
+};
+
+void insert(Trea* &tr, int x, int k) {
+    if(tr == NULL) tr = new Trea();
+
+    if(k<0) return;
+    insert(tr->ch[1&(x>>k)], x, k-1);
+}
+
+int maxv(Trea* &tr, int x, int k, int b) {
+    if(((1ll<<(k+1))-1) < b) return b;
+    if(k<0) return 0;
+
+    if(tr->ch[!(1&(x>>k))] == NULL) {
+        return maxv(tr->ch[(1&(x>>k))],x,k-1,b);
+    } else return maxv(tr->ch[!(1&(x>>k))],x,k-1,b-(1<<k)) + (1<<k);
+}
+
+Trea* root;
+
+int n;
+int a[400000];
+int lmax[400000];
+int rmax[400000];
+
+int main()
+{
+    scanf("%d",&n);
+    for(int i=0; i<n; i++) scanf("%d",&a[i]);
+
+    int xs(0);
+    for(int i=0; i<n; i++) {
+        insert(root,xs,30);
+        xs ^= a[i];
+        lmax[i] = maxv(root,xs,30,i==0?0:lmax[i-1]);
+        //if(0<i) lmax[i] = max(lmax[i],lmax[i-1]);
+    }
+
+    root = NULL;
+    xs = 0;
+    for(int i=n-1; i>=0; i--) {
+        insert(root,xs,30);
+        xs ^= a[i];
+        rmax[i] = maxv(root,xs,30,i==n-1?0:rmax[i+1]);
+        //if(i<n-1) rmax[i] = max(rmax[i],rmax[i+1]);
+    }
+
+    int s(0);
+    for(int i=1; i<n; i++) s = max(s,lmax[i-1]+rmax[i]);
+
+    printf("%d\n",s);
+
+    return 0;
+}

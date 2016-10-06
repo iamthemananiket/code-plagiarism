@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll,int> ii;
+
+#define X first
+#define Y second
+
+const int N=16;
+const ll inf=1e16;
+
+int n,m,m1;
+ll k;
+int w[N][N];
+vector <ii> st,en;
+vector <ii> imp;
+bool comp(ii a,ii b){
+    if (a.X==b.X) return a.Y>b.Y;
+    return a.X<b.X;
+}
+void prepare(){
+    cin>>n>>m>>k;
+    for(int i=0;i<m;i++)
+        for(int j=0;j<n;j++) cin>>w[i][j];
+    m1=m/2;
+    for(int i=0;i<(1<<(m1*4));i++){
+        ll sum=0,cur=i;
+        for(int j=0;j<m1;j++,cur/=16){
+            int x=cur&15;
+            if (x>=n) {
+                sum=-1;
+                break;
+            }
+            sum+=w[m1-j-1][x];
+        }
+        if (sum!=-1) st.push_back(ii(sum,i));
+    }
+    for(int i=0;i<(1<<(4*(m-m1)));i++){
+        ll sum=0,cur=i;
+        for(int j=0;j<m-m1;j++,cur/=16){
+            int x=cur&15;
+            if (x>=n) {
+                sum=-1;
+                break;
+            }
+            sum+=w[m-j-1][x];
+        }
+//        cout<<i<<" "<<sum<<'\n';
+        if (sum!=-1) en.push_back(ii(sum,i));
+    }
+    sort(st.begin(),st.end());
+    sort(en.begin(),en.end());
+//    for(auto i:st) cout<<i.X<<" "<<i.Y<<'\n';
+//    cout<<"\n";
+//    for(auto i:en) cout<<i.X<<" "<<i.Y<<'\n';
+}
+ll cal(ll mid){
+    ll ans=0;
+    for(int i=0,j=en.size();i<st.size();i++){
+        while (j>0&&en[j-1].X+st[i].X>=mid) j--;
+        ans+=en.size()-j;
+    }
+//    cout<<mid<<" "<<ans<<'\n';
+    return ans;
+}
+string solve(){
+    ll L=0,R=inf;
+    while (L<=R){
+        ll mid=(L+R)/2;
+        if (cal(mid)>=k) L=mid+1;
+        else R=mid-1;
+    }
+    k-=cal(L);
+//    cout<<R<<'\n';
+    for(int i=0,j=en.size(),len=0;i<st.size();i++){
+        if (i&&st[i].X!=st[i-1].X) len=0;
+        while (j>0&&en[j-1].X+st[i].X>=R) j--;
+        if (en[j].X+st[i].X==R){
+//                cout<<i<<" "<<j<<'\n';
+            while (j+len<en.size()&&en[j+len].X==en[j].X) len++;
+            imp.push_back(ii(st[i].Y,len));
+        }
+    }
+    sort(imp.begin(),imp.end());
+    for(auto i:imp) if (k>i.Y) k-=i.Y;
+    else{
+        string ans;
+        ll cost=0;
+        for(auto j:st) if (j.Y==i.X) cost=j.X;
+        int p1=i.X,p2=0;
+        for(auto j:en) if (cost+j.X==R){
+            if (k==1) p2=j.Y;
+            k--;
+        }
+        for(int i=0;i<(m-m1);i++,p2/=16) ans.push_back('a'+(p2%16));
+        for(int i=0;i<m1;i++,p1/=16) ans.push_back('a'+(p1%16));
+        reverse(ans.begin(),ans.end());
+        return ans;
+    }
+    exit(-1);
+}
+int main(){
+    prepare();
+    cout<<solve();
+}

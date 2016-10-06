@@ -1,0 +1,56 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<queue>
+#include<cstdio>
+#include<cstdlib>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 111;
+
+int a[maxn], cnt[maxn];
+
+inline void solve()
+{
+	int n, k;
+	cin >> n >> k;
+	for (int i = 1; i <= n; i++)
+	{
+		cin >> a[i];
+		cnt[i] = 0;
+	}
+	for (int i = 1; i <= n; i++)
+		cnt[a[i]]++;
+	int ans = 0;
+	for (int i = 1; i <= n; i++)
+		if (cnt[i] >= k && a[i] != i)
+			ans++;
+	cout << ans << endl;
+}
+
+int main()
+{
+//	freopen (fname".in", "r", stdin);
+//	freopen (fname".out", "w", stdout);
+	int T;
+	cin >> T;
+	while (T--)
+		solve();
+	return 0;
+}

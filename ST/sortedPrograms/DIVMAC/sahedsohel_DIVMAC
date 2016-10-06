@@ -1,0 +1,187 @@
+/***************************************
+    codeforces = topcoder = sahedsohel
+    IIT,Jahangirnagar University(42)
+****************************************/
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ll long long int
+#define ull unsigned long long int
+#define inf (INT_MAX/10)
+#define linf (LLONG_MAX/10LL)
+#define sc(a) scanf("%d",&a)
+#define sc2(a,b) scanf("%d%d",&a,&b)
+#define sc3(a,b,c) scanf("%d%d%d",&a,&b,&c)
+#define sc4(a,b,c,d) scanf("%d%d%d%d",&a,&b,&c,&d)
+#define fl(c,i,n) for(i=c;i<n;i++)
+#define f(i,n) for(i=0;i<n;i++)
+#define mem(a) memset(a,0,sizeof(a))
+#define memn(a) memset(a,-1,sizeof(a))
+#define pb push_back
+#define aov(a) a.begin(),a.end()
+#define mpr make_pair
+#define PI (2.0*acos(0.0)) //#define PI acos(-1.0)
+#define xx first
+#define yy second
+#define mxv(a) *max_element(aov(a))
+#define mnv(a) *min_element(aov(a))
+#define LB(a,x) (lower_bound(aov(a),x)-a.begin())
+#define UB(a,x) (upper_bound(aov(a),x)-a.begin())
+#define to_c_string(a) a.c_str()
+#define strtoint(c) atoi(&c[0])
+#define pll pair< ll , ll >
+#define pii pair< int , int >
+#define pid pair< int , double >
+#define pcs(a) printf("Case %d: ", a)
+#define nl puts("")
+#define endl '\n'
+#define dbg(x) cout<<#x<<" : "<<x<<endl
+
+template <class T> inline T bigmod(T p,T e,T M){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p) % M;p = (p * p) % M;}return (T)ret;}
+template <class T> inline T gcd(T a,T b){if(b==0)return a;return gcd(b,a%b);}
+template <class T> inline T modinverse(T a,T M){return bigmod(a,M-2,M);}   // M is prime}
+template <class T> inline T bpow(T p,T e){ll ret = 1;for(; e > 0; e >>= 1){if(e & 1) ret = (ret * p);p = (p * p);}return (T)ret;}
+
+int toInt(string s){int sm;stringstream ss(s);ss>>sm;return sm;}
+int toLlint(string s){long long int sm;stringstream ss(s);ss>>sm;return sm;}
+
+
+///int mnth[]={-1,31,28,31,30,31,30,31,31,30,31,30,31};  //Not Leap Year
+///int dx[]={2,1,-1,-2,-2,-1,1,2};int dy[]={1,2,2,1,-1,-2,-2,-1};//Knight Direction
+///int dx[]={-1,+1,0,1,0,-1}; // Hexagonal Direction   **
+///int dy[]={-1,+1,1,0,-1,0}; //                       *#*
+///                                                     **
+///const double eps=1e-9;
+///int dx[]={0,1,0,-1};int dy[]={1,0,-1,0}; //4 Direction
+
+/*****************************************************************/
+/// ////////////////////   GET SET GO    ////////////////////// ///
+/*****************************************************************/
+
+
+#define intx(i,j,k,l) ((a[i]*b[j]-b[i]*a[j])*(a[k]-a[l])-(a[i]-a[j])*(a[k]*b[l]-b[k]*a[l]))/((a[i]-a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]-a[l]))
+#define inty(i,j,k,l) ((a[i]*b[j]-b[i]*a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]*b[l]-b[k]*a[l]))/((a[i]-a[j])*(b[k]-b[l])-(b[i]-b[j])*(a[k]-a[l]))
+#define dst(u,v,x,y) sqrt((x*1.0-u*1.0)*(x*1.0-u*1.0)+(y*1.0-v*1.0)*(y*1.0-v*1.0))
+#define area(p1,p2,p3) (p1.xx*p2.yy+p2.xx*p3.yy+p3.xx*p1.yy-p1.yy*p2.xx-p2.yy*p3.xx-p3.yy*p1.xx)
+#define sq(a) ((a)*(a))
+int ts,kk=1;
+
+#define M 100005
+#define MD 10000
+#define MX 100005
+
+int p[1015],sz;
+bool bl[1015];
+
+void sv()
+{
+    p[0]=2;
+    sz=1;
+    int i,j;
+    for(i=3;i<1015;i+=2)
+    {
+        if(!bl[i])
+        {
+            p[sz++]=i;
+            for(j=i*i;j<1015;j+=i+i)bl[j]=1;
+        }
+    }
+    for(;i<1015;i+=2)if(!bl[i])p[sz++]=i;
+}
+
+int n,m;
+vector< int >v[M];
+int id[M];
+int tr[M*4];
+
+void bld(int i,int s,int e)
+{
+    if(s==e)
+    {
+        sc(e);
+        v[s].clear();
+
+        int j;
+        for(j=0;p[j]*p[j]<=e;j++)
+        {
+            while(e%p[j]==0)
+            {
+                e/=p[j];
+                v[s].pb(p[j]);
+            }
+        }
+        if(e>1)v[s].pb(e);
+
+        v[s].pb(1);
+        id[s]=1;
+        tr[i]=v[s][0];
+        return ;
+    }
+    bld(i*2+1,s,(s+e)>>1);
+    bld(i*2+2,((s+e)>>1)+1,e);
+    tr[i]=max(tr[i*2+1],tr[i*2+2]);
+}
+
+void updt(int i,int s,int e,int &st,int &ed)
+{
+    if(tr[i]==1)return ;
+    if(s==e)
+    {
+        tr[i]=v[s][ id[s]++ ];
+        return ;
+    }
+    int lt,rt,md;
+    md=(s+e)>>1;
+    lt=(i<<1)+1;
+    rt=lt+1;
+
+    if(ed<=md)updt(lt,s,md,st,ed);
+    else if(md<st)updt(rt,md+1,e,st,ed);
+    else
+    {
+        updt(lt,s,md,st,ed);
+        updt(rt,md+1,e,st,ed);
+    }
+    tr[i]=max(tr[lt],tr[rt]);
+}
+
+int qry(int i,int s,int e,int &st,int &ed)
+{
+    if(tr[i]==1)return tr[i];
+    if(st<=s&&e<=ed)return tr[i];
+    int lt,rt,md;
+    md=(s+e)>>1;
+    lt=(i<<1)+1;
+    rt=lt+1;
+    if(ed<=md)return qry(lt,s,md,st,ed);
+    else if(md<st)return qry(rt,md+1,e,st,ed);
+    return max(qry(lt,s,md,st,ed)
+            ,qry(rt,md+1,e,st,ed));
+}
+
+int main()
+{
+    int t,i,j,k;
+    sv();
+//    cout<<sz<<" "<<p[sz-1]<<endl;
+
+    sc(ts);
+    while(ts--)
+    {
+        sc2(n,m);
+        bld(0,1,n);
+        bool g=0;
+        while(m--)
+        {
+            sc3(t,j,k);
+            if(j>k)swap(j,k);
+            if(t==0)updt(0,1,n,j,k);
+            else if(g)
+                printf(" %d",qry(0,1,n,j,k));
+            else printf("%d",qry(0,1,n,j,k)),g=1;
+        }
+        nl;
+    }
+
+    return 0;
+}

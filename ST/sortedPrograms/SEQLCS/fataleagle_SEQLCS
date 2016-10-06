@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MOD=1000000007;
+int N, K, L;
+int A[17];
+int dp[17][1<<16];
+int len[17];
+int len2[17];
+
+void addmod(int& x, int v)
+{
+    x+=v;
+    if(x>=MOD)
+        x-=MOD;
+}
+
+void unpack(int mask)
+{
+    for(int i=0; i<N; i++)
+    {
+        if(i>0)
+            len[i]=len[i-1];
+        else
+            len[i]=0;
+        len[i]+=(mask>>i)&1;
+    }
+}
+
+int pack()
+{
+    int ret=len2[0];
+    for(int i=1; i<N; i++)
+        ret|=(len2[i]-len2[i-1])<<i;
+    return ret;
+}
+
+void _main()
+{
+    scanf("%d%d%d", &N, &K, &L);
+    for(int i=1; i<=N; i++)
+        scanf("%d", A+i);
+    memset(dp, 0, sizeof dp);
+    dp[0][0]=1;
+    for(int pos=0; pos<N; pos++) for(int mask=0; mask<(1<<N); mask++) if(dp[pos][mask])
+    {
+        unpack(mask);
+        for(int i=1; i<=K; i++)
+        {
+            for(int j=0; j<N; j++)
+            {
+                int pre=0;
+                if(j>0)
+                    pre=len[j-1], len2[j]=len2[j-1];
+                else
+                    len2[j]=0;
+                len2[j]=max(max(len[j], len2[j]), pre+(A[j+1]==i));
+            }
+            addmod(dp[pos+1][pack()], dp[pos][mask]);
+        }
+    }
+    int ans=0;
+    for(int i=0; i<(1<<N); i++) if(__builtin_popcount(i)==L)
+        addmod(ans, dp[N][i]);
+    printf("%d\n", ans);
+}
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

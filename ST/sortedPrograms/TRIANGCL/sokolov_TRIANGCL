@@ -1,0 +1,66 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <assert.h>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-6;
+const int INF = 2e9;
+
+int dist(int x1, int y1, int x2, int y2) {
+	return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+}
+
+int main() {
+	//freopen("input.txt", "rt", stdin);
+	//freopen("output.txt", "wt", stdout);
+	int id;
+	scanf("%d", &id);
+	int t;
+	scanf("%d", &t);
+	while (t--) {
+		int x1, y1, x2, y2, x3, y3;
+		scanf("%d %d %d %d %d %d", &x1, &y1, &x2, &y2, &x3, &y3);
+		int a = dist(x1, y1, x2, y2);
+		int b = dist(x1, y1, x3, y3);
+		int c = dist(x2, y2, x3, y3);
+		if (a == b || a == c || b == c) {
+			printf("Isosceles ");
+		} else {
+			printf("Scalene ");
+		}
+		if (id == 2) {
+			if (a == b + c || b == a + c || c == a + b) {
+				printf("right ");
+			} else if (a > b + c || b > a + c || c > a + b) {
+				printf("obtuse ");
+			} else {
+				printf("acute ");
+			}
+		}
+		printf(" triangle\n");
+	}
+	return 0;
+}

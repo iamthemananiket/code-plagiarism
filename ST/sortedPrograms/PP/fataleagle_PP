@@ -1,0 +1,204 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int HASH_MAXN=1000001;
+const int X=129;
+const int MOD1=1000000009;
+const int MOD2=1000000021;
+int P1[HASH_MAXN];
+int P2[HASH_MAXN];
+
+struct Hash
+{
+    int len, val0, val1;
+    Hash():
+        len(0),
+        val0(0),
+        val1(0)
+    {
+        //
+    }
+    Hash(int val):
+        len(1),
+        val0(val),
+        val1(val)
+    {
+        //
+    }
+    Hash operator+ (const Hash& other) const
+    {
+        Hash ret;
+        ret.len=len+other.len;
+        ret.val0=(other.val0+1LL*P1[other.len]*val0)%MOD1;
+        ret.val1=(other.val1+1LL*P2[other.len]*val1)%MOD2;
+        return ret;
+    }
+    Hash operator- (const Hash& other) const
+    {
+        Hash ret;
+        ret.len=len-other.len;
+        ret.val0=val0-1LL*P1[len-other.len]*other.val0%MOD1;
+        if(ret.val0<0)
+            ret.val0+=MOD1;
+        ret.val1=val1-1LL*P2[len-other.len]*other.val1%MOD2;
+        if(ret.val1<0)
+            ret.val1+=MOD2;
+        return ret;
+    }
+    bool operator< (const Hash& other) const
+    {
+        if(len!=other.len)
+            return len<other.len;
+        if(val0!=other.val0)
+            return val0<other.val0;
+        return val1<other.val1;
+    }
+    bool operator== (const Hash& other) const
+    {
+        return len==other.len && val0==other.val0 && val1==other.val1;
+    }
+    bool operator!= (const Hash& other) const
+    {
+        return !(*this==other);
+    }
+};
+
+void init_hash()
+{
+    P1[0]=1;
+    for(int i=1; i<HASH_MAXN; i++)
+        P1[i]=1LL*P1[i-1]*X%MOD1;
+    P2[0]=1;
+    for(int i=1; i<HASH_MAXN; i++)
+        P2[i]=1LL*P2[i-1]*X%MOD2;
+}
+
+static int _hash_initialized=(init_hash(), 0);
+
+int N;
+char S[1000001];
+Hash L[1000001];
+Hash R[1000001];
+map<Hash, int> cnt;
+string SS[1000001];
+
+void _main()
+{
+    cnt.clear();
+    scanf("%d", &N);
+    long long ans=0;
+    for(int i=0; i<N; i++)
+        cin>>SS[i];
+    sort(SS, SS+N, [](const string& s, const string& t) {
+        return s.length()<t.length();
+    });
+    for(int i=0; i<N; i++)
+    {
+        strcpy(S, SS[i].c_str());
+        int M=strlen(S);
+        Hash h;
+        for(int j=0; j<M; j++)
+        {
+            h=h+Hash(S[j]);
+            L[j]=h;
+        }
+        h=Hash();
+        for(int j=M-1; j>=0; j--)
+        {
+            h=h+Hash(S[j]);
+            R[j]=h;
+        }
+        for(int j=0; j<M; j++)
+        {
+            Hash p, q;
+            if(j>0)
+                p=L[j-1];
+            q=R[j];
+            int l=M-j;
+            if(j-l>=0 && (L[M-1]-p)==(R[j-l]-q))
+            {
+                if(j-l==0)
+                    h=Hash();
+                else
+                    h=L[j-l-1];
+                ans+=cnt[h];
+            }
+            p=q=Hash();
+            if(j>0)
+                p=L[j-1];
+            if(j+1<M)
+                q=R[j+1];
+            if(j-l+1>=0 && (L[M-1]-p)==(R[j-l+1]-q))
+            {
+                if(j-l+1==0)
+                    h=Hash();
+                else
+                    h=L[j-l];
+                ans+=cnt[h];
+            }
+        }
+        ans+=cnt[L[M-1]];
+        cnt[R[0]]++;
+    }
+    cnt.clear();
+    for(int i=0; i<N; i++)
+    {
+        strcpy(S, SS[i].c_str());
+        int M=strlen(S);
+        reverse(S, S+M);
+        Hash h;
+        for(int j=0; j<M; j++)
+        {
+            h=h+Hash(S[j]);
+            L[j]=h;
+        }
+        h=Hash();
+        for(int j=M-1; j>=0; j--)
+        {
+            h=h+Hash(S[j]);
+            R[j]=h;
+        }
+        for(int j=0; j<M; j++)
+        {
+            Hash p, q;
+            if(j>0)
+                p=L[j-1];
+            q=R[j];
+            int l=M-j;
+            if(j-l>=0 && (L[M-1]-p)==(R[j-l]-q))
+            {
+                if(j-l==0)
+                    h=Hash();
+                else
+                    h=L[j-l-1];
+                ans+=cnt[h];
+            }
+            p=q=Hash();
+            if(j>0)
+                p=L[j-1];
+            if(j+1<M)
+                q=R[j+1];
+            if(j-l+1>=0 && (L[M-1]-p)==(R[j-l+1]-q))
+            {
+                if(j-l+1==0)
+                    h=Hash();
+                else
+                    h=L[j-l];
+                ans+=cnt[h];
+            }
+        }
+        ans+=cnt[L[M-1]];
+        cnt[R[0]]++;
+    }
+    printf("%lld\n", ans);
+}
+
+int main()
+{
+    int TEST;
+    scanf("%d", &TEST);
+    while(TEST--)
+        _main();
+    return 0;
+}

@@ -1,0 +1,184 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+#define sc(x) scanf("%d",&x)
+#define sc2(x,y) scanf("%d%d",&x,&y)
+#define sc3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define scl(x) scanf("%lld",&x)
+#define scl2(x,y) scanf("%lld%lld",&x,&y)
+#define scl3(x,y,z) scanf("%lld%lld%lld",&x,&y,&z)
+#define scstr(x) scanf("%s",x)
+#define pd(x) printf("%d",x)
+#define pstr(x) printf("%s",x)
+#define newl() printf("\n")
+#define fl(i,n) for (i=0;i<n;i++)
+#define fle(i,n) for (i=1;i<=n;i++)
+#define fla(i,a,n) for (i=a;i<n;i++)
+#define mem(a,i) memset(a,i,sizeof(a))
+#define fi first
+#define se second
+typedef pair<int,int> pii;
+typedef pair<int,pair<int,int> > piii ;
+typedef pair<ll,ll> pll;
+typedef pair<ll,int> pli;
+#define gcd __gcd
+#define wl(n) while (n--)
+#define debug(x) cout<<"debug->"<<#x<<"::"<<x<<endl
+#define debug2(x,y) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\n"
+#define debug3(x,y,z) cout<<#x<<" :: "<<x<<"\t"<<#y<<" :: "<<y<<"\t"<<#z<<" :: "<<z<<"\n"
+#define tr(container, it)  for(typeof(container.begin()) it = container.begin(); it != container.end(); it++) 
+#define all(v) v.begin(),v.end()
+const double eps=0.000000000000001 ;
+#define MOD 1000000007
+typedef long double LF;
+typedef double lF;
+//-------------
+#define inf 9999999
+int n,m,k,s;
+vector<int>gr[10010];
+bool ap[10010];
+int disc[10010]={0},low[10010]={0},tim=0;
+int w[10010];
+void ardfs(int c,int p)
+{
+	//printf("got to :%d, p:%d\n",c,p);
+	int i,z=gr[c].size(),cl=0,v;
+	disc[c]=++tim;
+	low[c]=disc[c];
+	for (i=0;i<z;i++)
+	{
+		v=gr[c][i];
+		//printf("\t\t%d is a child of %d\n",v,c);
+		if( disc[v]==0 )
+		{
+			cl++;
+			ardfs(v,c);
+			low[c]=min(low[c],low[v]);
+			if (disc[c]==1&&cl>1)
+				ap[c]=true;
+			if (disc[c]!=1&&low[v]>=disc[c]) //  if the child has no backege to any of the ancestor in the dfs tree
+				ap[c]=true;
+		}
+		else if (v!=p)
+		{
+			low[c]=min(low[c],disc[v]);
+		}
+	}
+	//printf("\tdisc of %d is %d and low :%d\n",c,disc[c],low[c]);
+	
+}
+int dist[10010];
+void reset(int n)
+{
+	int i;
+	for(i=0;i<=n;i++)
+	{
+		ap[i]=false;
+		disc[i]=low[i]=0;
+		gr[i].clear();
+	}
+	tim=0;
+	for (i=1;i<=n;i++)
+		dist[i]=inf;
+}
+// --- 
+void bfs()
+{
+	dist[s]=0;
+	queue<int>q;
+	q.push(s);
+	while (!q.empty())
+	{
+		int i,z;
+		int c=q.front();
+		q.pop();
+		z=gr[c].size();
+		for (i=0;i<z;i++)
+		{
+			if (dist[c]+1<dist[gr[c][i]])
+			{
+				dist[gr[c][i]]=1+dist[c];
+				q.push(gr[c][i]);
+			}
+		}
+	}
+
+}
+bool isdon[10010];
+int main()
+{
+	sc3(n,m,k);
+	reset(n);
+	bfs();
+	sc(s);
+	int i;
+	for (i=1;i<=n;i++)
+		sc(w[i]);
+	for (i=0;i<m;i++)
+	{
+		int x,y;
+		sc2(x,y);
+		gr[x].pb(y);
+		gr[y].pb(x);
+	}
+	ardfs(1,0);
+	vector<pii>v;
+	for (i=1;i<=n&&k>0;i++)
+	{
+		if (ap[i])
+		{
+			v.pb(mp(dist[i],i));
+		}
+	}	
+	sort(v.begin(),v.end());
+	for (i=0;i<v.size()&&k>0;i++)
+	{
+		printf("%d ",v[i].se);
+		isdon[v[i].se]=true;
+		k--;
+	}
+	if (k==0)
+	{
+		return 0;
+	}
+	v.clear();
+	for (i=1;i<=n&&k>0;i++)
+	{
+		if (!ap[i])
+			v.pb(mp(dist[i],i));
+	}
+	sort(v.begin(),v.end());
+	int z=v.size()/2;
+	for (i=0;i<v.size();i++)
+	{
+		int ind=z-i;
+		if (ind>=0&&!isdon[v[ind].se]&&k>0)
+		{	
+			printf("%d ",v[ind].se);
+			isdon[v[ind].se]=true;
+			k--;
+		}
+		ind=z+i;
+		if (ind<v.size()&&!isdon[v[ind].se]&&k>0)
+		{
+			printf("%d ",v[ind].se);
+			isdon[v[ind].se]=true;
+			k--;
+		}
+	}
+	for (i=1;i<=n&&k>0;i++)
+	{
+		if (!isdon[i])
+		{
+			isdon[i]=true;
+			printf("%d ",i);
+		}
+	}
+	return 0;
+
+}

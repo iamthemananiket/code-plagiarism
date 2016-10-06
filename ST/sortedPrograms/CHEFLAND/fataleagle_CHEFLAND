@@ -1,0 +1,126 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, M;
+vector<int> adj[100001];
+vector<int> adj2[100001];
+int depth[100001];
+int P[100001][17];
+int seen[100001], now;
+vector<pair<int, int>> extra;
+int cover[100001];
+int ans;
+
+void dfs(int u, int p)
+{
+    seen[u]=++now;
+    for(auto& v: adj[u]) if(v!=p)
+    {
+        if(!seen[v])
+        {
+            dfs(v, u);
+            adj2[u].push_back(v);
+            adj2[v].push_back(u);
+        }
+        else if(seen[v]<seen[u])
+            extra.push_back({u, v});
+    }
+}
+
+void dfs2(int u, int p)
+{
+    P[u][0]=p;
+    for(int i=1; i<17; i++)
+        P[u][i]=P[P[u][i-1]][i-1];
+    for(auto& v: adj2[u]) if(v!=p)
+    {
+        depth[v]=depth[u]+1;
+        dfs2(v, u);
+    }
+}
+
+int lca(int u, int v)
+{
+    if(depth[u]<depth[v])
+        swap(u, v);
+    for(int i=16; i>=0; i--) if(depth[P[u][i]]>=depth[v])
+        u=P[u][i];
+    if(u==v)
+        return u;
+    for(int i=16; i>=0; i--) if(P[u][i]!=P[v][i])
+        u=P[u][i], v=P[v][i];
+    return P[u][0];
+}
+
+void dfs3(int u, int p)
+{
+    for(auto& v: adj2[u]) if(v!=p)
+    {
+        dfs3(v, u);
+        cover[u]+=cover[v];
+    }
+}
+
+vector<int> res[100001];
+
+int dfs4(int u, int p)
+{
+    int c=!cover[u];
+    res[u].push_back(0);
+    res[u].push_back(0);
+    for(auto& v: adj2[u]) if(v!=p)
+        res[u].push_back(dfs4(v, u));
+    sort(res[u].rbegin(), res[u].rend());
+    ans=max(ans, res[u][0]+res[u][1]);
+    return res[u][0]+c;
+}
+
+int main()
+{
+    scanf("%d%d", &N, &M);
+    assert(1<=N && N<=100000);
+    assert(0<=M && M<=200000);
+    set<pair<int, int>> edges;
+    int a, b;
+    for(int i=0; i<M; i++)
+    {
+        scanf("%d%d", &a, &b);
+        assert(1<=a && a<=N);
+        assert(1<=b && b<=N);
+        assert(a!=b);
+        if(a>b)
+            swap(a, b);
+        if(edges.count({a, b}))
+            extra.push_back({a, b});
+        else
+        {
+            assert(!edges.count({b, a}));
+            edges.insert({a, b});
+            adj[a].push_back(b);
+            adj[b].push_back(a);
+        }
+    }
+    dfs(1, 1);
+    for(int i=1; i<=N; i++)
+        assert(seen[i]);
+    dfs2(1, 1);
+    for(int i=0; i<(int)extra.size(); i++)
+    {
+        int u=extra[i].first;
+        int v=extra[i].second;
+        int w=lca(u, v);
+        cover[u]++;
+        cover[v]++;
+        cover[w]-=2;
+    }
+    dfs3(1, 1);
+    dfs4(1, 1);
+    for(int i=2; i<=N; i++)
+        ans+=!!cover[i];
+    if(ans==N-1)
+        printf("YES\n");
+    else
+        printf("NO\n");
+    return 0;
+}

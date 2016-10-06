@@ -1,0 +1,112 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define pb push_back
+#define ll long long
+double areaOfPolygon(vector< pair<long long int,long long int> > v) 
+{ 
+  long long int i;
+  double area = 0;        
+  long long int j = v.size()-1; 
+
+  for (i=0; i<v.size(); i++)
+    { area += (v[j].first+v[i].first) * (v[j].second-v[i].second); 
+      j = i;  
+	}
+  return area/2;
+}
+long long int gcd(long long int a, long long int b)
+{
+	if(b==0)
+		return a;
+	else
+		return gcd(b,a%b);
+}
+int main()
+{
+	long long int flag,t,t1,t2,T1,T2,num,den,g,sz;
+	cin>>t;
+	double ar,ans;
+	while(t--)
+	{
+		flag=0;
+		cin>>T1>>T2>>t1>>t2;
+		set< pair<ll int,ll int> > m;
+		vector< pair<long long int,long long int> > v;
+		m.insert(pair<ll int,ll int>(0,0));
+		v.pb(pair<ll int,ll int>(0,0));
+		sz=m.size();
+		if(t2>=0&&t2<=T1)
+		{
+			m.insert(pair<ll int,ll int>(t2,0));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(t2,0));
+			sz=m.size();
+		}	
+		else
+		{
+			m.insert(pair<ll int,ll int>(T1,0));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(T1,0));
+			sz=m.size();
+		}
+		if(T1-t2>=0&&T1-t2<=T2)
+		{
+			m.insert(pair<ll int,ll int>(T1,T1-t2));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(T1,T1-t2));
+			sz=m.size();
+		}
+		if(T2+t2>=0&&T2+t2<=T1)
+		{
+			m.insert(pair<ll int,ll int>(T2+t2,T2));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(T2+t2,T2));
+			sz=m.size();
+			flag=1;
+		}
+		if(T1+t1>=0&&T1+t1<=T2)
+		{
+			m.insert(pair<ll int,ll int>(T1,T1+t1));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(T1,T1+t1));
+			sz=m.size();
+			flag=1;
+		}
+		if(flag!=1)
+		{
+			m.insert(pair<ll int,ll int>(T1,T2));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(T1,T2));
+			sz=m.size();
+		}
+		if(T2-t1>=0&&T2-t1<=T1)
+		{
+			m.insert(pair<ll int,ll int>(T2-t1,T2));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(T2-t1,T2));
+			sz=m.size();
+		}
+		if(t1>=0&&t1<=T2)
+		{
+			m.insert(pair<ll int,ll int>(0,t1));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(0,t1));
+			sz=m.size();
+		}
+		else
+		{
+			m.insert(pair<ll int,ll int>(0,T2));
+			if(sz!=m.size())
+				v.pb(pair<ll int,ll int>(0,T2));
+			sz=m.size();
+		}
+		ar=areaOfPolygon(v);
+		if(ar<0)
+			ar*=-1;
+		den=T1*T2;
+		ans=ar/((double)den);
+		printf("%lf\n",ans);
+	}
+	return 0;
+}
+		

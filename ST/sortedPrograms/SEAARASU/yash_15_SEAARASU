@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int t,n,ans,i,a;
+    cin>>t;
+    while(t--)
+    {
+        cin>>n;
+        ans=0;
+        for(i=0;i<n;i++)
+        {
+            scanf("%d",&a);
+            if(!i)
+                ans=a;
+            else
+                ans=__gcd(ans,a);
+        }
+        cout<<ans*1ll*n<<"\n";
+    }
+	// your code goes here
+	return 0;
+}

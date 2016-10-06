@@ -1,0 +1,37 @@
+#include <stdio.h>
+
+int arr[20][20];
+int n, cnt = 0;
+
+void move(int x, int y) {
+	if(cnt >= n) {
+		return;
+	}
+	cnt++;
+	printf("%d %d\n", x, y);
+}
+int main() {
+	scanf("%d", &n);
+	for(int i = 8;i >= 1;i--) {
+		for(int j = 1;j <= 9;j++) {
+			move(j, i);
+			if(j < 9) {
+				move(0, 0);
+			}
+		}
+		int l = 9 - i;
+		for(int j = l * 9 - 1;j >= 0;j--) {
+			for(int k = 0;k < j;k++) {
+				move(k / l + 1, k % l + i + 1);
+				if(k < j-1) {
+					move(0, 0);
+				}
+			}
+			if(j == 0) {
+				move(0, 0);
+			}
+			move(j / l + 1, j % l + i + 1);
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 1e5;
+
+long long phi[MAX_N + 1];
+long long sum[MAX_N + 1];
+
+void build_phi()
+{
+    for (int i = 1; i <= MAX_N; ++i)
+        phi[i] = i;
+
+    for (int i = 2; i <= MAX_N; ++i)
+        if (phi[i] == i)
+            for (int j = i; j <= MAX_N; j += i)
+            {
+                phi[j] *= (i - 1);
+                phi[j] /= i;
+            }
+
+    for (int i = 1; i <= MAX_N; ++i)
+        sum[i] = sum[i - 1] + phi[i];
+}
+
+long long solve(long long n)
+{
+    if (n <= 100000LL)
+        return sum[n];
+
+    long long ans = n * (n + 1) / 2;
+
+    for (int d = 2; d <= n; ++d)
+        ans -= solve(n / d);
+
+    return ans;
+}
+
+int main()
+{
+    ///ifstream cin("data.in");
+
+    int T, N, D;
+
+    cin >> T;
+
+    build_phi();
+
+    while (T--)
+    {
+        cin >> N >> D;
+        cout << solve(N / D) << "\n";
+    }
+
+    return 0;
+}

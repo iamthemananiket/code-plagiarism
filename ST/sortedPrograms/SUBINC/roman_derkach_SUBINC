@@ -1,0 +1,31 @@
+#include<bits/stdc++.h>
+ using namespace std;
+ int main()
+{
+
+    ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
+    //freopen("input.txt","r",stdin); freopen("output.txt","w",stdout);
+
+    int tests;
+    cin>>tests;
+     while(tests--)
+     {
+         int n,x;
+         cin>>n;
+         cin>>x;
+        long long ans=1,l=1;
+         --n;
+          while(n--)
+          {
+              int y;
+              cin>>y;
+              if(y<x) l=1; else ++l;
+              ans+=l;
+              x=y;
+          }
+          cout<<ans<<endl;
+     }
+
+    return 0;
+
+  }

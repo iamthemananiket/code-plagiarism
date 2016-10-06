@@ -1,0 +1,85 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = int(1e9) + 7;
+
+void solve(int test_num) {
+  int R, C;
+  cin >> R >> C;
+  vector<string> grid(R);
+  for (int r = 0; r < R; ++r) {
+    cin >> grid[r];
+  }
+  queue<pair<int, int>> que;
+  vector<vector<bool>> was(R, vector<bool>(C, false));
+  int path_size;
+  double res = 1.0;
+  for (int rr = 0; rr < R; ++rr) {
+    for (int cc = 0; cc < C; ++cc) {
+      if (was[rr][cc] || grid[rr][cc] == '#') {
+        continue;
+      }
+      que.emplace(make_pair(rr, cc));
+      was[rr][cc] = true;
+      int cnt = 0;
+      while (!que.empty()) {
+        const int r = que.front().first;
+        const int c = que.front().second;
+        que.pop();
+        cnt++;
+        for (int d = 0; d < 4; ++d) {
+          static const int DR[4] = { 0, 1, 0, -1 };
+          static const int DC[4] = { 1, 0, -1, 0 };
+          const int nr = r + DR[d], nc = c + DC[d];
+          if (nr < 0 || nr >= R || nc < 0 || nc >= C || was[nr][nc] || grid[nr][nc] != 'o') {
+            continue;
+          }
+          was[nr][nc] = true;
+          que.emplace(make_pair(nr, nc));
+        }
+      }
+      if (rr + cc == 0) {
+        path_size = cnt;
+      } else {
+        res += 1.0 * cnt / (cnt + path_size);
+      }
+    }
+  }
+  cout << fixed << setprecision(7) << res << endl;
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

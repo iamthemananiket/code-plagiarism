@@ -1,0 +1,116 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-7
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 100031;
+
+int tests;
+long long ans1, ans2;
+long long r, k;
+
+bool good(long long a, long long b)
+{
+	return (sqrt(a*a + b*b) > r - k*0.01);
+}
+
+long long Rand()
+{
+	long long res = 1;
+	for (int i = 0; i < 5; i++)
+	{
+		res = res * 1024 + rand() % 1024;
+	}
+	return res;
+}
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/input.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+
+	long double val = 1e5;
+	val -= 0.01;
+	//cout << fixed<<val*val << endl;
+	
+	cin >> tests;
+	for (; tests; --tests)
+	{
+		ans1 = ans2 = -1;
+
+		cin >> r >> k;
+		if (r < 20000)
+		{
+			for (int i = 1; i < r; i++)
+			{
+				long double here = sqrtl(r*r - 1ll*i*i);
+				long long val2 = here + eps;
+				if (good(val2, i))
+				{
+					ans1 = i,
+						ans2 = val2;
+					break;
+				}
+			}
+		}
+		else
+		{
+			for (int iter = 1; iter <= 100000; iter++)
+			{
+				int i = Rand() % (r - 1) + 1; 
+				long double here = sqrtl(r*r - 1ll * i*i);
+				long long val2 = here + eps;
+				if (good(val2, i))
+				{
+					ans1 = i,
+						ans2 = val2;
+					break;
+				}
+			}
+		}
+		if (ans1 < 0)
+			cout << -1 << endl;
+		else
+			cout << ans1 << " "<<ans2 << endl;
+	}
+	
+	cin.get(); cin.get();
+	return 0;
+}

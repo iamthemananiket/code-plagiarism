@@ -1,0 +1,181 @@
+#include<bits/stdc++.h>
+#define N 200010
+#define M 40000010
+#define ig 276601605
+#define mod 1000000009
+using namespace std;
+int top[N],dad[N],lc[M],rc[M],A[M],B[M],C[M],D[M],cs[N],wz[N],en[N],root[N],t,u,dfn[N];
+int head[N],ne[N],v[N],l,sz[N],ln,np,sum[M],g1[N],g2[N],g3[N],g4[N],n,m,i,x,y,ans;
+char s[5];
+void add(int x,int y){v[++l]=y;ne[l]=head[x];head[x]=l;}
+int lca(int x,int y)
+{
+	for(;top[x]!=top[y];x=dad[top[x]])
+		if(cs[top[x]]<cs[top[y]])swap(x,y);
+	return cs[x]>cs[y]?y:x;
+}
+void dfs(int x)
+{
+	cs[x]=cs[dad[x]]+1;sz[x]=1;
+	for(int i=head[x];i;i=ne[i])
+		if(v[i]!=dad[x])dad[v[i]]=x,dfs(v[i]),sz[x]+=sz[v[i]];
+}
+void slpf(int x)
+{
+	int mx=0;wz[x]=++ln;dfn[ln]=x;
+	for(int i=head[x];i;i=ne[i])
+		if(v[i]!=dad[x]&&sz[v[i]]>sz[mx])mx=v[i];
+	if(mx)top[mx]=top[x],slpf(mx);
+	for(int i=head[x];i;i=ne[i])
+		if(v[i]!=dad[x]&&v[i]!=mx)top[v[i]]=v[i],slpf(v[i]);
+	en[x]=ln;
+}
+void newp(int &cur,int cur1)
+{
+	cur=++np;
+	lc[cur]=lc[cur1];
+	rc[cur]=rc[cur1];
+	A[cur]=A[cur1];
+	B[cur]=B[cur1];
+	C[cur]=C[cur1];
+	D[cur]=D[cur1];
+	sum[cur]=sum[cur1];
+}
+void add1(int l,int r,int L,int R,int u,int &cur,int cur1)
+{
+	newp(cur,cur1);
+	//printf("!%d %d %d %d %d\n",l,r,u,sum[cur],cur);
+	if(L<=l&&R>=r)
+	{
+		A[cur]+=g1[u+R-r];
+		if(A[cur]>=mod)A[cur]-=mod;
+		B[cur]+=g2[u+R-r];
+		if(B[cur]>=mod)B[cur]-=mod;
+		sum[cur]=(sum[cur]+1ll*g1[u+R-r]*g3[r-l]-1ll*g2[u+R-r]*g4[r-l])%mod;
+		if(sum[cur]<0)sum[cur]+=mod;
+		return;
+	}
+	int mid=(l+r)>>1;
+	if(L<=mid)add1(l,mid,L,R,u,lc[cur],lc[cur1]);
+	if(R>mid)add1(mid+1,r,L,R,u,rc[cur],rc[cur1]);
+	sum[cur]=(sum[lc[cur]]+sum[rc[cur]]+1ll*(A[cur]+C[cur])*g3[r-l]-1ll*(B[cur]+D[cur])*g4[r-l])%mod;
+	if(sum[cur]<0)sum[cur]+=mod;
+}
+void add2(int l,int r,int L,int R,int u,int &cur,int cur1)
+{
+	newp(cur,cur1);
+	//printf("~%d %d %d %d %d\n",l,r,u,sum[cur],cur);
+	if(L<=l&&R>=r)
+	{
+		C[cur]+=g1[u+l-L];
+		if(C[cur]>=mod)C[cur]-=mod;
+		D[cur]+=g2[u+l-L];
+		if(D[cur]>=mod)D[cur]-=mod;
+		sum[cur]=(sum[cur]+1ll*g1[u+l-L]*g3[r-l]-1ll*g2[u+l-L]*g4[r-l])%mod;
+		if(sum[cur]<0)sum[cur]+=mod;
+		return;
+	}
+	int mid=(l+r)>>1;
+	if(L<=mid)add2(l,mid,L,R,u,lc[cur],lc[cur1]);
+	if(R>mid)add2(mid+1,r,L,R,u,rc[cur],rc[cur1]);
+	sum[cur]=(sum[lc[cur]]+sum[rc[cur]]+1ll*(A[cur]+C[cur])*g3[r-l]-1ll*(B[cur]+D[cur])*g4[r-l])%mod;
+	if(sum[cur]<0)sum[cur]+=mod;
+}
+int query(int l,int r,int L,int R,int cur)
+{
+	//printf("%d %d %d %d %d %d %d %d %d %d\n",cur,l,r,L,R,sum[cur],A[cur],B[cur],C[cur],D[cur]);
+	if(L<=l&&R>=r)return sum[cur];
+	int mid=(l+r)>>1,ans=0;
+	if(L<=mid)ans+=query(l,mid,L,min(mid,R),lc[cur]);
+	if(R>mid)ans+=query(mid+1,r,max(mid+1,L),R,rc[cur]);
+	ans=(ans+1ll*C[cur]*g3[R-l]-1ll*D[cur]*g4[R-l])%mod;
+	if(L!=l)ans=(ans-1ll*C[cur]*g3[L-l-1]+1ll*D[cur]*g4[L-l-1])%mod;
+	ans=(ans+1ll*A[cur]*g3[r-L]-1ll*B[cur]*g4[r-L])%mod;
+	if(R!=r)ans=(ans-1ll*A[cur]*g3[r-R-1]+1ll*B[cur]*g4[r-R-1])%mod;
+	if(ans<0)ans+=mod;return ans;
+}
+int main()
+{
+	scanf("%d%d",&n,&m);
+	g1[0]=g2[0]=g3[0]=g4[0]=1;
+	for(i=1;i<=n;i++)
+	{
+		g1[i]=g1[i-1]*691504013ll%mod;
+		g2[i]=g2[i-1]*308495997ll%mod;
+		g3[i]=g3[i-1]+g1[i];
+		if(g3[i]>=mod)g3[i]-=mod;
+		g4[i]=g4[i-1]+g2[i];
+		if(g4[i]>=mod)g4[i]-=mod;
+	}
+	//printf("%d %d\n",g1[2],g2[2]);
+	for(i=1;i<n;i++)
+	{
+		scanf("%d%d",&x,&y);
+		add(x,y);add(y,x);
+	}
+	dfs(1);
+	top[1]=1;
+	slpf(1);
+	//for(i=1;i<=n;i++)printf("%d,%d\n",wz[i],top[i]);
+	for(i=1;i<=m;i++)
+	{
+		scanf("%s%d",s,&x);x^=ans;
+		root[i]=root[i-1];
+		if(s[0]=='A')
+		{
+			scanf("%d",&y);
+			t=lca(x,y);u=1;
+			for(;top[x]!=top[t];x=dad[top[x]])
+			{
+				add1(1,n,wz[top[x]],wz[x],u,root[i],root[i]);
+				u+=cs[x]-cs[top[x]]+1;
+			}
+			add1(1,n,wz[t],wz[x],u,root[i],root[i]);
+			u+=cs[x]+cs[y]-cs[t]*2+1;
+			for(;top[y]!=top[t];y=dad[top[y]])
+			{
+				u-=cs[y]-cs[top[y]]+1;
+				add2(1,n,wz[top[y]],wz[y],u,root[i],root[i]);
+			}
+			u-=cs[y]-cs[t];
+			if(y!=t)add2(1,n,wz[t]+1,wz[y],u,root[i],root[i]);
+		}else
+		if(s[0]=='R')root[i]=root[x];else 
+		if(s[1]=='S')
+		{
+			scanf("%d",&y);
+			if(x==y){printf("%d\n",ans=1ll*sum[root[i]]*ig%mod);continue;}
+			for(;cs[top[x]]>cs[y]+1;x=dad[top[x]]);
+			if(cs[x]>cs[y])x=dfn[wz[x]-(cs[x]-cs[y])+1];
+			if(cs[x]<=cs[y]||dad[x]!=y)printf("%d\n",ans=1ll*query(1,n,wz[y],en[y],root[i])*ig%mod);
+			else printf("%d\n",ans=1ll*(sum[root[i]]-query(1,n,wz[x],en[x],root[i])+mod)*ig%mod);
+		}else
+		{
+			scanf("%d",&y);ans=0;
+			for(;top[x]!=top[y];x=dad[top[x]])
+			{
+				if(cs[top[x]]<cs[top[y]])swap(x,y);
+				ans+=query(1,n,wz[top[x]],wz[x],root[i]);
+				if(ans>=mod)ans-=mod;
+			}
+			if(cs[x]>cs[y])swap(x,y);
+			printf("%d\n",ans=1ll*(ans+query(1,n,wz[x],wz[y],root[i]))*ig%mod);
+		}
+	}
+}
+/*
+7 7
+1 2
+1 3
+2 4
+3 5
+2 6
+5 7
+A 6 7
+QC 5 3
+QC 5 3
+A 6 7
+QC 5 3
+QC 5 6
+QS 2 1
+*/

@@ -1,0 +1,90 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> val;
+
+const int MAX_N = 13;
+const int MAX_M = 78;
+const int INF = 1 << 28;
+
+int n, m, k;
+int a[MAX_M];
+int d[1 << MAX_N][2];
+
+int main() {
+  int T;
+  scanf("%d", &T);
+  while (T--) {
+    scanf("%d%d%d", &n, &m, &k);
+    for (int i = 0; i < m; i++) {
+      int u, v;
+      scanf("%d%d", &u, &v);
+      u--, v--;
+      a[i] = (1 << u) | (1 << v);
+    }
+    memset(d, -1, sizeof(d));
+    queue<val> q;
+    q.push(val((1 << n) - 1, 0));
+    d[(1 << n) - 1][0] = 0;
+    while (!q.empty()) {
+      int S, pos;
+      tie(S, pos) = q.front();
+      q.pop();
+      if (S == (1 << n) - 1 && pos == 1) break;
+      int T = S ^ ((1 << n) - 1);
+      bool ok = true;
+      for (int i = 0; i < m; i++) {
+        if ((T & a[i]) == a[i]) {
+          ok = false;
+          break;
+        }
+      }
+      if (!ok) continue;
+      if (d[T][1 - pos] == -1) {
+        d[T][1 - pos] = d[S][pos] + 1;
+        q.push(val(T, 1 - pos));
+      }
+      if (__builtin_popcount(S) <= k
+          && d[(1 << n) - 1][1 - pos] == -1) {
+        d[(1 << n) - 1][1 - pos] = d[S][pos] + 1;
+        q.push(val((1 << n) - 1, 1 - pos));
+      }
+      int U = S;
+      while ((U = (U - 1) & S)) {
+        if (__builtin_popcount(U) <= k
+            && d[T | U][1 - pos] == -1) {
+          d[T | U][1 - pos] = d[S][pos] + 1;
+          q.push(val(T | U, 1 - pos));
+        }
+      }
+    }
+    printf("%d\n", d[(1 << n) - 1][1]);
+  }
+}

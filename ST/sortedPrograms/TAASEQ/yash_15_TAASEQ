@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+int a[100005];
+bool ap(int x, int y, int k){
+	int z=a[x],d=a[x+1]-a[x];
+	for(int i=x;i<y;i++){
+		if(a[i]!=z)
+			return false;
+		z+=d;
+	}
+	return true;
+}
+int ap2(int x, int y, int rem){
+	int z=a[x],d=a[x+1]-a[x],ans=-1;
+	for(int i=x;i<y;i++){
+		if(a[i]!=z){
+			if(!rem)
+				return -1;
+			rem=0;
+			ans=a[i];
+		}
+		else
+			z+=d;
+	}
+	return ans;
+}
+
+int main(){
+	int t;
+	int n,i,ans;
+	cin >> t;
+	while(t--){
+		cin >> n;
+		for(i=0;i<n;i++)
+			scanf("%d",a+i);
+		ans=-1;
+		if(ap(0,n,n))
+			ans=min(a[0],a[n-1]);
+
+		if(ap(1,n,n-1))
+			ans=((ans==-1)?a[0]:min(ans,a[0]));
+		swap(a[0],a[1]);
+		if(ap(1,n,n-1))
+			ans=((ans==-1)?a[0]:min(ans,a[0]));
+		swap(a[0],a[1]);
+		if(n>=3){
+		swap(a[1],a[2]);
+		swap(a[1],a[0]);
+		if(ap(1,n,n-1))
+			ans=((ans==-1)?a[0]:min(ans,a[0]));
+		swap(a[0],a[1]);
+		swap(a[1],a[2]);
+		}
+		if(n>=4){
+		if(ap2(0,n,1)>=0)
+			ans=((ans==-1)?ap2(0,n,1):min(ans,ap2(0,n,1)));
+		}				
+		cout<<ans<<"\n";
+	}
+}

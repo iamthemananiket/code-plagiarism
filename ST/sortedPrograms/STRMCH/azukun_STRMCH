@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define long long long
+int rint() {int ret;scanf("%d", &ret);return ret;}
+
+char a[1000001];
+int main()
+{
+#if _DEBUG
+    freopen("input.txt", "r", stdin);
+#endif
+
+	int n = rint();
+	scanf("%s", a);
+	int m = rint();
+
+	vector<int> z (n);
+	for (int i = 1, l = 0, r = 0; i<n; ++i) 
+	{
+		if (i <= r)
+			z[i] = min (r-i+1, z[i-l]);
+		while (i+z[i] < n && a[z[i]] == a[i+z[i]])
+			++z[i];
+		if (i+z[i]-1 > r)
+			l = i,  r = i+z[i]-1;
+	}
+
+	int lo = 0, hi = n;
+	while (lo < hi)
+	{
+		int mid = (lo + hi + 1) / 2;
+		int c = 1;
+		for (int i = 1; c < m && i + mid <= n; i++)
+			if (z[i] >= mid)
+				c++;
+		if (c < m)
+			hi = mid - 1;
+		else
+			lo = mid;
+	}
+
+	printf("%d\n", lo);
+	for (int i = 0; i < lo; i++)
+		printf("%c", a[i]);
+	puts("");
+	
+    return 0;
+}

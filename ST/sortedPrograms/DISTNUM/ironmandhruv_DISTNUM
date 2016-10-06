@@ -1,0 +1,125 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define ll long long int
+#define NN 100005
+#define pb push_back
+#define mp make_pair
+#define INF (((ll)1000000000) * ((ll)1000000000))
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define MOD 1000000007
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i=0;i<N;i++)
+#define frep(i,a,b) for(int i=a;i<=b;i++)
+#define pii pair<int,int>
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcount(x)
+#define print(A,j,k) for(int ii=j;ii<=k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+
+vector<pair<int,pii > >V;
+int block[NN],A[NN],ans[200001];
+unordered_map<int,int> cnt;
+int answer=0,querycount;
+pii query[200001];
+
+void decompose(int n) {
+	int sz=sqrt(n),j;
+	int current=0;
+	for(int i=0;i<n;) {
+		for(j=i;j<min(n,i+sz);j++) {
+			block[j]=current;
+		}
+		i=j;
+		current++;
+	}
+}
+
+void add(int index) {
+	cnt[A[index]]++;
+	if(cnt[A[index]]==1)
+		answer++;
+}
+
+void remove(int index) {
+	cnt[A[index]]--;
+	if(cnt[A[index]]==0)
+		answer--;
+}
+
+
+void output() {
+	sort(all(V));
+	int left=0,right=0;
+	rep(i,V.size()) {
+		int index=V[i].ss.ss;
+		int qleft=query[index].ff;
+		int qright=query[index].ss;
+		//cout<<"answering "<<qleft<<" "<<qright<<"\n";
+		//print(A,0,4);
+
+		while(left<qleft) {
+			remove(left);
+			left++;
+		}
+		while(left>qleft) {
+			left--;
+			add(left);		
+		}
+
+		while(right<=qright) {
+			add(right);
+			right++;
+		}
+		while(right>qright+1) {
+			right--;
+			remove(right);
+		}
+		ans[index]=answer;
+	}
+	rep(i,querycount)
+		cout<<ans[i]<<"\n";
+	V.clear();
+	cnt.clear();
+	answer=0;
+}
+
+int main(int argc, char const *argv[])
+{
+	//fast;
+
+	int n,q;
+	cin>>n>>q;
+	rep(i,n)
+		cin>>A[i];
+	decompose(n);
+
+	int l,r,type,x,y;
+	V.clear();
+	querycount=0;
+	rep(i,q) {
+		cin>>type;
+		if(type==5) {
+			cin>>l>>r;
+			l--;r--;
+			query[querycount]=mp(l,r);
+			V.pb(mp(block[l],mp(r,querycount)));
+			querycount++;
+		}
+		else if(type==2) {
+			output();
+			querycount=0;
+			cin>>x>>y;
+			x--;
+			A[x]=y;
+		}
+	}
+	output();
+	
+	return 0;
+}

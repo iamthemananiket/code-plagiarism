@@ -1,0 +1,88 @@
+#include<bits/stdc++.h>
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c<'0'||c>'9'){
+        c=getchar_unlocked();
+    }
+    while(c>='0'&&c<='9'){
+        x=(x<<1)+(x<<3)+c-'0';
+        c=getchar_unlocked();
+    }
+    return x;
+}
+vector<int> v[10001];//adj list
+bool visited[10001]={0};
+int product[10001];
+struct data{
+    int val[101];
+};
+data ans[10001];
+data mini(data a,data b){
+    data temp;
+    for(int i=1;i<=100;i++){
+        if(a.val[i]==0||b.val[i]==0){
+            temp.val[i]=max(a.val[i],b.val[i]);
+        }
+        else
+            temp.val[i]=min(a.val[i],b.val[i]);
+    }
+    return temp;
+}
+data dfs(int node){
+    visited[node]=1;
+    int x=v[node].size();
+    for(int i=0;i<x;i++){
+        if(!visited[v[node][i]])
+            ans[node]=mini(ans[node],dfs(v[node][i]));
+    }
+    if(node<ans[node].val[product[node]]||ans[node].val[product[node]]==0){
+        ans[node].val[product[node]]=node;
+    }
+    return ans[node];
+}
+void bfs(int node,int parent){//actually bfs
+    visited[node]=1;
+    if(parent==0){
+        for(int i=0;i<v[node].size();i++){
+            bfs(v[node][i],node);
+        }
+    }
+    for(int i=1;i<=100;i++){
+        if(ans[node].val[i]==0){
+            ans[node].val[i]=ans[parent].val[i];
+        }
+    }
+    int x=v[node].size();
+    for(int i=0;i<x;i++){
+        if(!visited[v[node][i]])
+           bfs(v[node][i],node);
+    }
+}
+int main(){
+    int n=scan(),k=scan();
+    int b=scan();//capital
+    for(int i=1;i<n;i++){
+        int x=scan(),y=scan();
+        v[x].push_back(y);
+        v[y].push_back(x);
+    }
+    for(int i=1;i<=n;i++){
+        int x=scan();
+        product[i]=x;
+    }
+    dfs(b);
+    memset(visited,0,sizeof(visited));
+    bfs(b,0);
+    int q=scan();
+    while(q--){
+        int x=scan(),y=scan();
+        if(ans[x].val[y]==0){
+            printf("-1\n");
+        }
+        else{
+            printf("%d\n",ans[x].val[y]);
+        }
+    }
+} 

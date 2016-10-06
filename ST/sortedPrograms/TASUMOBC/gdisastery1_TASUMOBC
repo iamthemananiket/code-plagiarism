@@ -1,0 +1,66 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAX_N = ;
+const int mod = 1e9 + 7;
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  if(n == -1)
+    return mpow(a, mod - 2);
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+int T;
+ll N;
+
+int main(){
+  scanf("%d", &T);
+  // OEIS A051638
+  while(T--){
+    scanf("%lld", &N);
+    int r = 0, s = 0;
+    while(N > 0){
+      if(N % 3 == 1) r++;
+      if(N % 3 == 2) s++;
+      N /= 3;
+    }
+    // printf("r=%d s=%d\n", r, s);
+    int ans = mpow(2, r - 1);
+    ans = mul(ans, (mod + mpow(3, s + 1) - 1) % mod);
+    printf("%d\n", ans);
+  }
+  return 0;
+}

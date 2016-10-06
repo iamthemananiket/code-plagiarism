@@ -1,0 +1,27 @@
+// iafir
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+     
+using namespace std;
+     
+int t,n,v,w;
+
+int main()
+{
+    scanf("%d",&t);
+    for(int i=0 ; i<t; i++)
+    {
+    	
+    	scanf("%d",&n);
+    	v = 0;
+    	for(int j = 0; j<n; j++)
+    	{
+    		scanf("%d",&w);
+    		v = max(v,w+j);
+    	}
+    	printf("%d\n",v);
+    }
+    return 0;
+}
+

@@ -1,0 +1,490 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+#define norm asdfasdgasdgsd
+
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 350
+
+using namespace std;
+
+const int INF = 1e9;
+const int N = 100931;
+
+int n, queries;
+long long x[N], y[N], R[N];
+long long x1[N], y1[N], x2[N], y2[N];
+vector<pair<int, int> > clist[N];
+
+vector<int> circles_list[N];
+
+vector<pair<pair<long long,long long >, pair<long long, long long> > > QLIST;
+
+double ANS[N];
+double DU[N];
+double UD[N];
+int maxr;
+
+long long get_dist2(long long x1, long long y1, long long x2, long long y2)
+{
+	return (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1);
+}
+
+int find_circle_contains(int X, int Y)
+{
+	for (int ii = X - maxr+1; ii < X + maxr; ii++)
+	{
+		if (ii < 0)
+			continue;
+		int l, r;
+		if (clist[ii].size() < 50)
+		{
+			l = 0;
+			r = clist[ii].size();
+		}
+		else
+		{
+			l = lower_bound(clist[ii].begin(), clist[ii].end(), make_pair(Y - 50, -1)) - clist[ii].begin();
+			r = upper_bound(clist[ii].begin(), clist[ii].end(), make_pair(Y + 55, 1)) - clist[ii].begin();
+		}
+		for (int j = l; j < r; j++)
+		{
+			int id = clist[ii][j].second;
+			if (get_dist2(x[id], y[id], X, Y) < R[id] * R[id])
+				return id;
+		}
+	}
+	return -1;
+}
+
+double CUT(double R, double H)
+{
+	H = R - H;
+
+	if (H >= R)
+		return 0;
+
+	//cout << R << " " << H << endl;
+	double ANG = acos(H / R);
+	double H2 = sqrt(R*R - H*H);
+	double WHOLE = ANG*R*R;
+	double TRI = H2*H;
+	// << "%" << R << " " << H << " " << TRI << " " << WHOLE <<" "<<ANG<< endl;
+	return WHOLE - TRI;
+}
+
+double cross_du(int X, int Y)
+{
+	return DU[Y];
+
+}
+
+double cross_ud(int X, int Y)
+{
+	return UD[Y];
+}
+
+double cross_lr(int X,int Y)
+{
+	double res = 0;
+	for (int i = 1; i <= n; i++)
+	{
+		if (x[i] <= X&&y[i]<=Y)
+		{
+			res += CUT(R[i], R[i] - (X - x[i]));
+		}
+	}
+	return res;
+}
+
+double cross_rl(int X,int Y)
+{
+	double res = 0;
+	for (int i = 1; i <= n; i++)
+	{
+		if (x[i] > X&&y[i]<=Y)
+		{
+			res += CUT(R[i], R[i] - (x[i] - X));
+		}
+	}
+	return res;
+}
+
+struct pt
+{
+	double x;
+	double y;
+};
+
+double get_dist(pt a, pt b)
+{
+	return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+}
+
+double get_ang(pt a, pt b)
+{
+	return atan2(b.y - a.y, b.x - a.x);
+}
+
+double solve_circle_angle(pt center,pt a,pt b)
+{
+	double ang1 = get_ang(center, a);
+	double ang2 = get_ang(center, b);
+	while (ang2 < ang1)
+		ang2 += 2 * M_PI;
+	double R = get_dist(center, a);
+	return (ang2 - ang1)*R*R / 2;
+}
+
+double solve_tri(pt A,pt B,pt C)
+{
+	double a = get_dist(A, B);
+	double b = get_dist(B, C);
+	double c = get_dist(A, C);
+	double p = a + b + c;
+	p /= 2;
+	return sqrt(p*(p - a)*(p - b)*(p - c));
+}
+
+vector<pt> solve_intersections(double X, double Y, double R)
+{
+	vector<pt> ret;
+	double RR = sqrt(R*R - Y*Y);
+	pt res1;
+	res1.y = 0;
+	res1.x = X - RR;
+	ret.push_back(res1);
+	RR = sqrt(R*R - X*X);
+	pt res2;
+	res2.x = 0;
+	res2.y = Y - RR;
+	ret.push_back(res2);
+	return ret;
+}
+
+double true_intersect(int id, int X, int Y,int flag=0)
+{
+	if (flag == 0)
+	{
+		X = x[id] - X;
+		Y = y[id] - Y;
+	}
+//	cout << id << "%" << X << " " << Y << endl;
+
+	pt center;
+	center.x = X;
+	center.y = Y;
+	pt angle;
+	angle.x = 0;
+	angle.y = 0;
+
+	if (X < 0 && Y < 0)
+	{
+		vector<pt> V = solve_intersections(X, Y, R[id]);
+		return solve_tri(V[0], center, angle) + solve_tri(V[1], center, angle) + solve_circle_angle(center, V[0], V[1]);
+	}
+
+	if (X < 0 && Y >= 0)
+	{
+		return CUT(R[id], R[id]-Y) - true_intersect(id,-X, Y,1);
+	}
+	
+	if (X >= 0 && Y < 0)
+	{
+		return CUT(R[id], R[id]-X) - true_intersect(id, X, -Y,1);
+	}
+
+	if (X >= 0 && Y >= 0)
+	{
+		vector<pt> V = solve_intersections(X, Y, R[id]);
+		return solve_circle_angle(center, V[0], V[1]) - solve_tri(center, angle, V[0]) - solve_tri(center, angle, V[1]);
+	}
+}
+
+void update(double&A, int cid, int X, int Y)
+{
+	if (cid == -1)
+		return;
+	if (x[cid] <= X&&y[cid]<=Y)
+	{
+		A += CUT(R[cid], R[cid] - (X - x[cid]));
+	}
+	else if (x[cid]>X&&y[cid]<=Y)
+		A -= CUT(R[cid], R[cid] - (x[cid] - X));
+	
+	if (y[cid] <= Y&&x[cid]<=X)
+	{
+		A += CUT(R[cid], R[cid] - (Y - y[cid]));
+	}
+	else if (y[cid]>Y&&x[cid]<=X)
+		A -= CUT(R[cid], R[cid] - (y[cid] - Y));
+
+	if (x[cid]<=X&&y[cid]<=Y)
+		A -= R[cid] * R[cid] * M_PI;
+	A += true_intersect(cid, X, Y);
+}
+
+bool good_point(double X, double Y)
+{
+	for (int i = 1; i <= n; i++)
+	{
+		double here = sqrt((X - x[i])*(X - x[i]) + (Y - y[i])*(Y - y[i]));
+		if (here <= R[i])
+			return true;
+	}
+	return false;
+}
+
+double BRUTE(int id)
+{
+	double res = 0;
+
+	for (double tx = x1[id]; tx < x2[id]; tx += 1e-3)
+	{
+		for (double ty = y1[id]; ty < y2[id]; ty += 1e-3)
+		{
+			if (good_point(tx, ty))
+				res += 1e-6;
+		}
+	}
+	return res;
+}
+
+long long t[N * 2];
+
+void add(int i, int delta)
+{
+	for (; i < N; i = (i | (i + 1)))
+		t[i] += delta;
+}
+
+long long sum(long long r)
+{
+	long long res = 0;
+	for (; r >= 0; r = (r&(r + 1)) - 1)
+		res += t[r];
+	return res;
+}
+
+long long sum(int l, int r)
+{
+	return sum(r) - sum(l - 1);
+}
+
+
+double count_inside(int X, int Y)
+{
+	double res = 0;
+	res = sum(Y);
+	return res*M_PI;
+}
+
+int main(){
+	//freopen("fabro.in","r",stdin);
+	//freopen("fabro.out","w",stdout);
+	//freopen("F:/in.txt", "r", stdin);
+	//freopen("F:/output.txt", "w", stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin >> n >> queries;
+	for (int i = 1; i <= n; i++)
+	{
+		cin >> x[i] >> y[i] >> R[i];
+		maxr = max(R[i], maxr+0ll);
+
+		circles_list[x[i]].push_back(i);
+		clist[x[i]].push_back(make_pair(y[i], i));
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		sort(clist[i].begin(), clist[i].end());
+	}
+
+	for (int i = 1; i <= queries; i++)
+	{
+		cin >> x1[i] >> y1[i] >> x2[i] >> y2[i];
+		//cout << x1[i] << "^" << y1[i] << " " << x2[i] << " " << y2[i] << endl;
+		QLIST.push_back(make_pair(make_pair(x1[i], y1[i]), make_pair(i, 1)));
+		QLIST.push_back(make_pair(make_pair(x1[i], y2[i]), make_pair(i, -1)));
+		QLIST.push_back(make_pair(make_pair(x2[i], y1[i]), make_pair(i, -1)));
+		QLIST.push_back(make_pair(make_pair(x2[i], y2[i]), make_pair(i, 1)));
+	}
+	
+	//cout << true_intersect(1, 5, 5) << endl;
+
+	/*for (int i = 0; i < QLIST.size(); i++)
+	{
+		cout << QLIST[i].first.first << "%" << QLIST[i].first.second << " " << QLIST[i].second.first << " " << QLIST[i].second.second << endl;
+	}
+	*/
+	sort(QLIST.begin(), QLIST.end());
+	
+	int covered_x = -1;
+
+	for (int it = 0; it < QLIST.size(); it++)
+	{
+		int id = QLIST[it].second.first;
+		int cur_x = QLIST[it].first.first;
+		int cur_y = QLIST[it].first.second;
+
+		while (covered_x < cur_x)
+		{
+			++covered_x;
+			for (int j = 0; j < circles_list[covered_x].size(); j++)
+			{
+				int circle_id = circles_list[covered_x][j];
+				add(y[circle_id], R[circle_id] * R[circle_id]);
+				
+				//du
+				for (int jj = 0; jj < R[circle_id]; jj++)
+				{
+					DU[y[circle_id] + jj] += CUT(R[circle_id], R[circle_id] - jj);
+				}
+				//ud
+				for (int jj = 1; jj < R[circle_id]; jj++)
+				{
+					if (jj>y[circle_id])
+						break;
+					UD[y[circle_id] - jj] += CUT(R[circle_id], R[circle_id] - jj);
+				}
+
+			}
+		}
+
+		//cout << "%" << id << " " << cur_x << " " << cur_y << endl;
+		
+		double A = count_inside(cur_x, cur_y);
+
+		A -= cross_du(cur_x,cur_y);
+		//A -= cross_lr(cur_x,cur_y);
+		A += cross_ud(cur_x,cur_y);
+		//A += cross_rl(cur_x,cur_y);
+
+		int cid = find_circle_contains(cur_x, cur_y);
+		update(A, cid, cur_x, cur_y);
+	//	cout << id << " " << A << " "<<cur_x<<" "<<cur_y<<endl;
+		
+		ANS[id] += A*QLIST[it].second.second;
+	}
+	
+	//cout << ANS[1] << endl;
+
+	// transpose
+
+	for (int i = 0; i < N; i++)
+	{
+		t[i] = 0;
+		UD[i] = DU[i] = 0;
+	}
+
+	for (int i = 1; i <= n; i++)
+	{
+		swap(x[i], y[i]);
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		circles_list[i].clear();
+	}
+
+	for (int i = 1; i <= n; i++)
+	{
+		circles_list[x[i]].push_back(i);
+	}
+
+	for (int i = 0; i < QLIST.size(); i++)
+	{
+		swap(QLIST[i].first.first, QLIST[i].first.second);
+	//	swap(QLIST[i].second.first, QLIST[i].second.second);
+	}
+
+	sort(QLIST.begin(), QLIST.end());
+
+	covered_x = -1;
+
+	for (int it = 0; it < QLIST.size(); it++)
+	{
+		int id = QLIST[it].second.first;
+		int cur_x = QLIST[it].first.first;
+		int cur_y = QLIST[it].first.second;
+
+		while (covered_x < cur_x)
+		{
+			++covered_x;
+			for (int j = 0; j < circles_list[covered_x].size(); j++)
+			{
+				int circle_id = circles_list[covered_x][j];
+				add(y[circle_id], R[circle_id] * R[circle_id]);
+
+				//du
+				for (int jj = 0; jj < R[circle_id]; jj++)
+				{
+					DU[y[circle_id] + jj] += CUT(R[circle_id], R[circle_id] - jj);
+				}
+				//ud
+				for (int jj = 1; jj < R[circle_id]; jj++)
+				{
+					if (jj>y[circle_id])
+						break;
+					UD[y[circle_id] - jj] += CUT(R[circle_id], R[circle_id] - jj);
+				}
+
+			}
+		}
+
+		//cout << "%" << id << " " << cur_x << " " << cur_y << endl;
+
+		double A = 0;
+
+		A -= cross_du(cur_x, cur_y);
+		//A -= cross_lr(cur_x, cur_y);
+		A += cross_ud(cur_x, cur_y);
+		//A += cross_rl(cur_x, cur_y);
+
+		//int cid = find_circle_contains(cur_x, cur_y);
+		//update(A, cid, cur_x, cur_y);
+		//	cout << id << " " << A << " "<<cur_x<<" "<<cur_y<<endl;
+
+		ANS[id] += A*QLIST[it].second.second;
+	}
+
+	cout.precision(12);
+
+	for (int i = 1; i <= queries; i++)
+	{
+		cout << fixed << ANS[i] << endl;
+	//	cout << fixed << BRUTE(i) << endl;
+	}
+	cin.get(); cin.get();
+	return 0;
+}

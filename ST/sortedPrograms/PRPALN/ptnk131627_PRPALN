@@ -1,0 +1,49 @@
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <deque>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+#define X first
+#define Y second
+#define INPUT freopen(".inp","r",stdin)
+#define OUTPUT freopen(".out","w",stdout)
+#define FOR(i,l,r) for(int i=l;i<=r;i++)
+#define REP(i,l,r) for(int i=l;i<r;i++)
+#define FORD(i,l,r) for(int i=l;i>=r;i--)
+#define REPD(i,l,r) for(int i=l;i>r;i--)
+#define ENDL printf("\n")
+
+typedef long long ll;
+typedef pair<int,int> ii;
+
+const int inf=2e9;
+const int MOD=1e9+7;
+const int N=0;
+
+int test;
+string s;
+int main(){
+    cin>>test;
+    while (test--){
+        cin>>s;
+        int n=s.length();
+        bool use=false,okay=true;
+        for(int L=0,R=n-1;L<R;L++,R--){
+            if (s[L]!=s[R]){
+                bool t1=true,t2=true;
+                for(int l=L+1,r=R;l<r;l++,r--) if (s[l]!=s[r]) t1=false;
+                for(int l=L,r=R-1;l<r;l++,r--) if (s[l]!=s[r]) t2=false;
+                okay=(t1||t2);
+                break;
+            }
+        }
+        cout<<(okay?"YES\n":"NO\n");
+    }
+}

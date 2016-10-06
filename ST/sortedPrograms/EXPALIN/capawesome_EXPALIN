@@ -1,0 +1,74 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 5e5 + 100;
+
+int n;
+char c[MAX_N];
+
+char curr[64];
+int pos;
+
+int dp[64][64];
+int ans;
+
+void solve ()
+{
+	int i, w;
+	bool is;
+	
+	for (i = 1; i <= pos; i ++)
+		dp[i][i] = 1;
+	for (w = 1; w < pos; w ++)
+	{
+		for (i = 1; i + w <= pos; i ++)
+		{
+			is = (i + 1 > i + w - 1 || dp[i + 1][i + w - 1]);
+			dp[i][i + w] = (is && curr[i] == curr[i + w]);
+		}
+	}
+	for (i = 2; i <= pos; i ++)
+		ans += dp[1][i];
+	for (i = 1; i <= pos; i ++)
+		for (w = i; w <= pos; w ++)
+			dp[i][w] = 0;
+}
+
+int main ()
+{
+	int t, i, j;
+	long long nxt;
+	scanf ("%d", &t);
+	while (t --)
+	{
+		ans = 0;
+		///scanf ("%d", &n);
+		scanf ("%s", c + 1);
+		n = strlen (c + 1);
+		///printf ("%d\n", n);
+		for (i = 1; i <= n; i ++)
+		{
+			ans ++;
+			for (j = 2; i * j <= n; j ++)
+			{
+				///printf ("-- %d %d\n", i, j);
+				curr[1] = c[i]; 
+				pos = 1;
+				for (nxt = i * j; nxt <= n; nxt *= j)
+					curr[++ pos] = c[nxt];
+				solve ();
+			}
+		}
+		printf ("%d\n", ans);
+	}
+	return 0;
+}

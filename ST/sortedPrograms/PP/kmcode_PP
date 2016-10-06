@@ -1,0 +1,230 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+#define MAX 1000004
+char buf[MAX];
+int t;
+int n;
+vector<string> v;
+vector<string> rv;
+struct st {
+	st *linkk[26];
+	int countt;
+	st() {
+		countt = 0;
+		for (int i = 0;i < 26;i+=2) {
+			linkk[i] = NULL;
+			linkk[i + 1] = NULL;
+		}
+	}
+};
+class Trie {
+public:
+	st linkk[6000000];
+	int siz;
+	st *neww() {
+		siz++;
+		return &linkk[siz];
+	}
+	st *root;
+	Trie() {
+		siz = 0;
+		root = neww();
+	}
+	void insert(string &a) {
+		st *b = root;
+		for (int i = 0;i < a.size();i++) {
+			short int nex = a[i] - 'a';
+			if (b->linkk[nex] == NULL) {
+				b->linkk[nex] = neww();
+			}
+			b = b->linkk[nex];
+		}
+		b->countt++;
+	}
+	void clear() {
+		root = NULL;
+		for (int i = 0;i < siz;i++) {
+			linkk[i] = st();
+		}
+		siz = 0;
+		root = neww();
+	}
+	st *find(string &s) {
+		st *b = root;
+		for (int i = 0;i < s.size();i++) {
+			short int nex = s[i] - 'a';
+			if (b->linkk[nex]) {
+				b = b->linkk[nex];
+			}
+			else {
+				return NULL;
+			}
+		}
+		return b;
+	}
+};
+Trie s;
+Trie r;
+unsigned long long int MOD = 1000000007LL;
+unsigned long long int ha[MAX];
+unsigned long long int rha[MAX];
+unsigned long long int k[MAX];
+int length;
+void compute_hash(string &s) {
+	for (int i = 0;i < s.size();i++) {
+		ha[i] = k[i] * (unsigned long long int)(s[i] - 'a');
+		if (i) {
+			ha[i] += ha[i - 1];
+		}
+	}
+	rha[s.size()] = 0;
+	for (int i = s.size() - 1;i >= 0;i--) {
+		rha[i] = k[s.size() - i - 1] * (unsigned long long int)(s[i] - 'a');
+		rha[i] += rha[i + 1];
+	}
+	length = s.size();
+}
+unsigned long long int HASH(int i, int j) {
+	unsigned long long int r = ha[j];
+	if (i) { r -= ha[i - 1]; }
+	r *= k[MAX - 1 - j];
+	return r;
+}
+unsigned long long int REV_HASH(int i, int j) {
+	unsigned long long int r = rha[i];
+	r -= rha[j + 1];
+	r *= k[MAX - 1 - (length - i - 1)];
+	return r;
+}
+bool is_paline_drome(int i, int j) {
+	int len = j - i + 1;
+	if (len % 2) {
+		len /= 2;
+		unsigned long long int A = HASH(i, i + len - 1);
+		unsigned long long int B = REV_HASH(i + len + 1, j);
+		return A == B;
+	}
+	else {
+		len /= 2;
+		unsigned long long int A = HASH(i, i + len - 1);
+		unsigned long long int B = REV_HASH(i + len, j);
+		return A == B;
+	}
+}
+int main() {
+	k[0] = 1LL;
+	for (int i = 1;i < MAX;i++) {
+		k[i] = k[i - 1];
+		k[i] *= MOD;
+	}
+/*	while (1) {
+		string s;
+		cin >> s;
+		compute_hash(s);
+		for (int i = 0;i < s.size();i++) {
+			for (int j = i;j < s.size();j++) {
+				if (is_paline_drome(i, j)) {
+					cout << "YES " << s.substr(i, j - i + 1) << endl;
+				}
+				else {
+					cout << "NO " << s.substr(i, j - i + 1) << endl;
+				}
+			}
+		}
+	}*/
+	cin >> t;
+	while (t--) {
+		long long int ans = 0;
+		v.clear();
+		rv.clear();
+		scanf("%d", &n);
+		for (int i = 0;i < n;i++) {
+			scanf("%s", buf);
+			v.push_back(buf);
+			rv.push_back(buf);
+			reverse(rv.back().begin(), rv.back().end());
+		}
+		s.clear();
+		r.clear();
+		for (int i = 0;i < n;i++) {
+			s.insert(v[i]);
+			r.insert(rv[i]);
+		}
+		for (int i = 0;i < n;i++) {
+			st *ss = s.find(rv[i]);
+			if (ss) {
+				ans +=(long long int)( ss->countt);
+			}
+			if (rv[i] == v[i]) {
+				ans--;
+			}
+		}
+		for (int i = 0;i < n;i++) {
+			compute_hash(v[i]);
+			st *b = r.root;
+			for (int j = 0;j < v[i].size();j++) {
+				b = b->linkk[v[i][j]-'a'];
+				if (b == NULL) {
+					break;
+				}
+				if (j + 1 == v[i].size()) {
+					break;
+				}
+				if (b->countt == 0) {
+					continue;
+				}
+				if (is_paline_drome(j + 1, v[i].size() - 1)) {
+					ans += (long long int)(b->countt);
+				}
+			}
+		}
+		for (int i = 0;i < n;i++) {
+			compute_hash(rv[i]);
+			st *b = s.root;
+			for (int j = 0;j < rv[i].size();j++) {
+				b = b->linkk[rv[i][j]-'a'];
+				if (b == NULL) {
+					break;
+				}
+				if (j + 1 == rv[i].size()) {
+					break;
+				}
+				if (b->countt == 0) {
+					continue;
+				}
+				if (is_paline_drome(j + 1, rv[i].size() - 1)) {
+					ans += (long long int)(b->countt);
+				}
+			}
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}
+//https://www.codechef.com/COOK63/problems/PP

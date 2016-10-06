@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+vector<pair<int, int> > valid; 
+vector<pair<int, int> > g[100010]; 
+long long dp[100010][501];
+bool visited[100010];
+long long ans = 0;
+long long cnt[501];
+int n, m, x, y, z;
+inline void dfs(int root) {
+	visited[root] = true;
+	int child, weight;
+	for (int i = 0; i < (int)g[root].size(); i++) {
+		child = g[root][i].first, weight = g[root][i].second;
+		if(visited[child]) continue;
+		dfs(child);
+		for (int j = 0; j < m; j++) cnt[j] = 0;
+		for (int j = 0; j < m; j++) cnt[(j * weight) % m] += dp[child][j];
+		cnt[weight]++;
+		for (int j = 0; j < (int)valid.size(); j++) ans += dp[root][valid[j].first] * cnt[valid[j].second];
+		for (int j = 0; j < m; j++) dp[root][j] += cnt[j];
+	}
+	ans += dp[root][0];
+}
+int main(){
+	cin>>n>>m;
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < m; j++) {
+			if((i * j) % m == 0) valid.push_back(make_pair(i, j));
+		}
+	}
+	for (int i = 0; i < n - 1; i++) {
+		scanf("%d %d %d", &x, &y, &z);
+		g[x - 1].push_back(make_pair(y - 1, z % m));
+		g[y - 1].push_back(make_pair(x - 1, z % m));
+	}
+	dfs(0);
+	cout<<ans<<endl;
+}

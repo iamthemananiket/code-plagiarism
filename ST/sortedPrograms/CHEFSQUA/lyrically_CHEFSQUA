@@ -1,0 +1,98 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef unsigned uint;
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int,int> pint;
+#define mp make_pair
+
+template<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template<typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template<typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+int N;
+int X[2010], Y[2010];
+set<pint> XYs;
+
+bool check1() {
+	return (N >= 1);
+}
+
+bool check2() {
+	return (N >= 2);
+}
+
+bool check3() {
+	for (int i = 0; i < N; ++i) for (int j = 0; j < N; ++j) if (j != i) {
+		const int x3 = X[i] - (Y[j] - Y[i]);
+		const int y3 = Y[i] + (X[j] - X[i]);
+		if (XYs.count(mp(x3, y3))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool check4() {
+	for (int i = 0; i < N; ++i) for (int j = 0; j < N; ++j) if (j != i) {
+		const int x3 = X[i] - (Y[j] - Y[i]);
+		const int y3 = Y[i] + (X[j] - X[i]);
+		const int x2 = X[i] + (X[j] - X[i]) - (Y[j] - Y[i]);
+		const int y2 = Y[i] + (Y[j] - Y[i]) + (X[j] - X[i]);
+		if (XYs.count(mp(x3, y3)) && XYs.count(mp(x2, y2))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int main() {
+	
+	
+	for (; ~scanf("%d", &N); ) {
+		for (int i = 0; i < N; ++i) {
+			X[i] = in();
+			Y[i] = in();
+		}
+		XYs.clear();
+		for (int i = 0; i < N; ++i) {
+			if (!XYs.emplace(X[i], Y[i]).second) {
+				swap(X[i], X[N - 1]);
+				swap(Y[i], Y[N - 1]);
+				--i;
+				--N;
+			}
+		}
+		int ans = 4;
+		if (check1()) --ans;
+		if (check2()) --ans;
+		if (check3()) --ans;
+		if (check4()) --ans;
+		printf("%d\n", ans);
+	}
+	
+	return 0;
+}
+

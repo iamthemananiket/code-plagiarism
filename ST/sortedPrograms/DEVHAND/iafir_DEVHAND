@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector< char *> v;
+int n, k, t;
+
+bool cek(char* a, char * p) {
+	int na = strlen(a), np = strlen(p);
+	np = min(na, np);
+	for(int i = 0; i<np; i++) {
+		if(a[i] != p[i])
+			return true;
+	}
+	return false;
+}
+
+void gen(char * b, int m) {
+	for(int i = 0; i<k; i++) {
+		b[m] = 'a' + i;
+		char *c = new char[n];
+		strcpy(c, b);
+		v.push_back(c);
+
+		if(m < n-1)
+			gen(b, m+1);
+		b[m] = '\0';
+	}
+}
+
+int main() {
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d", &n, &k);
+		char b[n+2];
+		memset(b, 0, sizeof b);
+		v.clear();
+		gen(b, 0);
+		int count = 0;
+	    for(int i = 0; i<v.size(); i++)
+	    for(int j = 0; j<v.size(); j++)
+	    for(int k = 0; k<v.size(); k++)
+	    	if(cek(v[i], v[j]) && cek(v[i], v[k]) && cek(v[k], v[j]))
+	    		count++;
+	    cout << count << endl;
+	}
+	return 0;
+}

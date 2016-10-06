@@ -1,0 +1,107 @@
+/*
+*/
+
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>  
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+#include <assert.h>
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+
+#define eps 1e-8
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 512
+
+const int N = 101131;
+
+using namespace std;
+
+long long tests,n,m,z,l,r,b;
+long long rem,up,can2,ans;
+
+int main(){
+	//freopen("beavers.in","r",stdin);
+	//freopen("beavers.out","w",stdout);
+//	freopen("F:/in.txt","r",stdin);
+//	freopen("F:/output.txt","w",stdout);
+	ios_base::sync_with_stdio(0);
+	//cin.tie(0);
+	
+	cin>>tests;
+	for (;tests;--tests)
+	{
+		cin>>n>>m>>z>>l>>r>>b;
+		if (z+l+r>=n*m)
+		{
+			cout<<n*m<<endl;
+			continue;
+		}
+		
+		if (m==1)
+		{
+			cout<<min(n,z+l+r+b)<<endl;
+			continue;
+		}
+		
+		if (b==0)
+		{
+			cout<<min(l+r+z,n*m)<<endl;
+			continue;
+		}
+		
+		rem=n*m-l-r;
+		
+		long long L,R;
+		L=0;
+		R=n;
+		while (L<R)
+		{
+			long long mid=L+R+1;
+			mid/=2;
+			up=m-(m%2==0);
+			long long can_put=mid*up+m*(n-mid);
+			if (can_put>=rem)
+				L=mid;
+			else
+				R=mid-1;
+		}
+		
+		if (L>rem)
+			L=rem;
+		if (L%2==1&&rem%2==0)
+			--L;
+		
+//		cout<<"@"<<L<<endl;
+		
+		can2=(rem-L)/2+L;
+		can2=min(can2,b);
+//		cout<<"@"<<can2<<endl;
+		ans=l+r+can2;
+		ans+=z;
+		if (ans>n*m)
+			ans=n*m;
+		cout<<ans<<endl;
+	}
+	
+	return 0;
+}

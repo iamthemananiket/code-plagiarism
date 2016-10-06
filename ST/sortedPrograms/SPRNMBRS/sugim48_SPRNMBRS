@@ -1,0 +1,48 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+int INF = INT_MAX / 2;
+double EPS = 1e-10;
+
+int main() {
+	vector<ll> v;
+	v.push_back(1);
+	for (ll x = 2; x <= 1000000000000000000LL; x *= 2)
+		for (ll y = x; y <= 1000000000000000000LL; y *= 3)
+			v.push_back(y);
+	sort(v.begin(), v.end());
+	int T; cin >> T;
+	while (T--) {
+		ll L, R; cin >> L >> R;
+		cout << upper_bound(v.begin(), v.end(), R) - lower_bound(v.begin(), v.end(), L) << endl;
+	}
+}

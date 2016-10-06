@@ -1,0 +1,49 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <bitset>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define travel(x) for(edge *p=fir[x]; p; p=p->n)
+#define all(x) (x).begin,(x).end
+#define pb push_back
+#define fi first
+#define se second
+#define l(x) Left[x]
+#define r(x) Right[x]
+#define lowbit(x) (x&-x)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int,int> Pii;
+typedef long double ld;
+typedef unsigned long long ull;
+
+inline int read()
+{
+    int x=0; bool f=0; char ch=getchar();
+    while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+    while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+    return f?-x:x;
+}
+
+char s[5009];
+bool b[59];
+
+int main()
+{
+	scanf("%s", s); int l=strlen(s);
+	rep(i, 0, l-1) b[s[i]-'a']=1;
+	int n=read(); while (n--)
+	{
+		scanf("%s", s); l=strlen(s);
+		bool fg=true;
+		rep(i, 0, l-1) if (!b[s[i]-'a']) fg=false;
+		puts(fg?"Yes":"No");
+	}
+    return 0;
+}

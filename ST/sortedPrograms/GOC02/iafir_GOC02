@@ -1,0 +1,42 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+int t,n,k,x[55],y[55],yy,z;
+
+int main()
+{
+	scanf("%d",&t);
+	while(t--)
+	{
+		scanf("%d",&n);
+		memset(x,0,sizeof(x));
+		memset(y,0,sizeof(y));
+		yy=0;
+		for(int i=0; i<n; i++)
+		{
+			scanf("%d",&z);
+			k=yy;
+			while(k>0)
+			{
+				if(y[k]+i+1==z)
+				{
+					x[k]++;
+					break;
+				}
+				k--;
+			}
+			if(!k)
+			{
+				yy++;
+				x[yy]++;
+				y[yy]=z-i-1;
+			}
+		}
+		k=0;
+		for(int i=1; i<=yy; i++)
+			k = max(k,x[i]);
+		printf("%d\n",n-k);
+	}
+	return 0;
+}

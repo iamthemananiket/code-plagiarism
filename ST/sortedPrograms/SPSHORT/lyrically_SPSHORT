@@ -1,0 +1,119 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <utility>
+#include <numeric>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <cstdint>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+typedef long long Int;
+typedef vector<int> vint;
+typedef pair<int, int> pint;
+#define mp make_pair
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, const pair<T1, T2> &a) { return os << "(" << a.first << ", " << a.second << ")"; };
+template <typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << " "; cout << endl; }
+template <typename T> void chmin(T &t, const T &f) { if (t > f) t = f; }
+template <typename T> void chmax(T &t, const T &f) { if (t < f) t = f; }
+int in() { int x; scanf("%d", &x); return x; }
+
+const Int INF = 1001001001001001001LL;
+
+int N, M;
+vector<vector<pair<Int, int>>> G;
+int S, T;
+
+int deg[100010];
+vector<vector<vector<Int>>> dist;
+int ks[100010][2];
+
+int main() {
+	
+	
+	for (int TC = in(); TC--; ) {
+		N = in();
+		M = in();
+		G.assign(N, vector<pair<Int, int>>());
+		for (int i = 0; i < M; ++i) {
+			const int u = in() - 1;
+			const int v = in() - 1;
+			const int c = in();
+			G[u].emplace_back(c, v);
+			G[v].emplace_back(c, u);
+		}
+		S = in() - 1;
+		T = in() - 1;
+		dist.assign(N, vector<vector<Int>>());
+		for (int u = 0; u < N; ++u) {
+			sort(G[u].begin(), G[u].end());
+			deg[u] = G[u].size();
+			dist[u].assign(deg[u], vector<Int>(2, INF));
+			ks[u][0] = 0;
+			ks[u][1] = deg[u] - 1;
+		}
+		typedef pair<Int, pair<pint, int>> node;
+		priority_queue<node, vector<node>, greater<node>> q;
+		for (int j = 0; j < deg[S]; ++j) {
+			dist[S][j][0] = G[S][j].first;
+			q.emplace(G[S][j].first, mp(mp(S, j), 0));
+		}
+		for (; !q.empty(); ) {
+			const Int c = q.top().first;
+			const int u = q.top().second.first.first;
+			const int j = q.top().second.first.second;
+			const int s = q.top().second.second;
+			q.pop();
+			const int v = G[u][j].second;
+			if (v == T) {
+				printf("%lld\n", c);
+				goto found;
+			}
+			if (dist[u][j][s] == c) {
+// cout<<c<<"  "<<u<<" "<<j<<" "<<s<<endl;
+				switch (s) {
+					case 0: {
+						//	decrease
+						for (int &k = ks[v][0]; k < deg[v] && G[v][k].first < G[u][j].first; ++k) {
+							const Int cc = c + G[v][k].first;
+							if (dist[v][k][1] > cc) {
+								dist[v][k][1] = cc;
+								q.emplace(cc, mp(mp(v, k), 1));
+							}
+						}
+					} break;
+					case 1: {
+						//	increase
+						for (int &k = ks[v][1]; k >= 0 && G[v][k].first > G[u][j].first; --k) {
+							const Int cc = c + G[v][k].first;
+							if (dist[v][k][0] > cc) {
+								dist[v][k][0] = cc;
+								q.emplace(cc, mp(mp(v, k), 0));
+							}
+						}
+					} break;
+					default: assert(false);
+				}
+			}
+		}
+		puts("No Solution");
+	found:;
+	}
+	
+	return 0;
+}

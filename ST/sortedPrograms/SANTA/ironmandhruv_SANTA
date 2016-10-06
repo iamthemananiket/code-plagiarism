@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define ll long long int
+#define pb push_back
+#define mp make_pair
+#define INF (ll)(1e18)
+#define inf 0x7fffffff
+#define inff 100000
+#define ff first
+#define ss second
+#define sz(x) ((int) (x).size())
+#define fast cin.sync_with_stdio(0);cin.tie(0)
+#define rep(i,N) for(int i = 0;i < N;i++)
+#define frep(i,a,b) for(int i = a;i <= b;i++)
+#define pii pair<int , int>
+#define pll pair<ll , ll>
+#define vii vector<int>
+#define vpii vector< pii >
+#define fill(A,v) memset(A,v,sizeof(A))
+#define setbits(x) __builtin_popcountll(x)
+#define print(A,j,k) for(int ii=j;ii<k;ii++)cout<<A[ii]<<" ";cout<<"\n"
+#define all(x) (x).begin(), (x).end()
+#define gcd __gcd
+#define SQRT 350
+#define CASES int t;cin>>t;while(t--)
+#define FILE freopen("inp.txt" , "r" , stdin);
+#define ld long double
+
+const int MOD = 1e9 + 7;
+const int N = 1e6 + 5;
+
+int tree[26][4 * N];
+
+void update(int bit , int node , int l , int r , int index , int val) {
+	if (l > r || l > index || r < index)
+		return;
+
+	if (l == r && r == index) {
+		tree[bit][node] += val;
+		return;
+	}
+
+	int mid = (l + r) / 2;
+	update(bit , 2 * node , l , mid , index , val);
+	update(bit , 2 * node + 1 , mid + 1 , r , index , val);
+	tree[bit][node] = tree[bit][2 * node] + tree[bit][2 * node + 1];
+}
+
+
+int query(int bit , int node , int l , int r , int ql , int qr) {
+	
+	if (l > r || ql > qr || l > qr || r < ql)
+		return 0;
+
+	if (l >= ql && r <= qr)
+		return tree[bit][node];
+
+	int mid = (l + r) / 2;
+	int a = query(bit , 2 * node , l , mid , ql , qr);
+	int b = query(bit , 2 * node + 1 , mid + 1 , r , ql , qr);
+	return a + b;
+
+}
+
+int main(int argc, char const *argv[])
+{
+	fast;
+
+	int q;
+	cin >> q;
+
+	int n = 1e6;
+
+	while (q--) {
+		
+		int a;
+		int m , x , p;
+		char ch;
+		cin >> a >> m >> x >> ch;
+		p = ch - 'a';
+		
+		if (a == 1) {
+			update(p , 1 , 0 , n , m , x);
+		}
+		else {
+			cout << query(p , 1 , 0 , n , m , x) << '\n';
+		}
+	}
+
+	return 0;
+}

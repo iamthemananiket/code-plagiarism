@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N;
+pair<int, int> A[5000];
+long long dp[5001];
+long long ndp[5001];
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d", &N);
+        for(int i=0; i<N; i++)
+            scanf("%d", &A[i].second);
+        for(int i=0; i<N; i++)
+            scanf("%d", &A[i].first);
+        sort(A, A+N);
+        reverse(A, A+N);
+        for(int i=1; i<=N; i++)
+            dp[i]=ndp[i]=-0x3f3f3f3f3f3f3f3fLL;
+        dp[0]=ndp[0]=0;
+        for(int i=0; i<N; i++)
+        {
+            for(int j=1; j<=N; j++)
+                ndp[j]=max(ndp[j], dp[j-1]+1LL*(j-1)*A[i].first+A[i].second);
+            for(int j=1; j<=N; j++)
+                dp[j]=ndp[j];
+        }
+        for(int i=1; i<=N; i++)
+            printf("%lld%c", dp[i], " \n"[i==N]);
+    }
+    return 0;
+}

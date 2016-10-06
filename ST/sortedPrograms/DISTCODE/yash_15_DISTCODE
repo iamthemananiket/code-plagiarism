@@ -1,0 +1,19 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+bool a[26][26];
+char str[10004];
+int main() {
+	int t;
+	cin >>t;
+	while(t--) {
+		scanf("%s",str);
+		memset(a,0,sizeof a);
+		int ans=0;
+		for(int i=1;str[i];i++) {
+			ans+=((a[str[i-1]-'A'][str[i]-'A']==0)?1:0);
+			a[str[i-1]-'A'][str[i]-'A']=1;
+		}
+		cout << ans<<"\n";
+	}
+}

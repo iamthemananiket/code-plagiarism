@@ -1,0 +1,190 @@
+/*
+*/
+ 
+//#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+#include <ctime> 
+
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-9
+#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 256
+ 
+using namespace std;
+
+int tests,n,m,a,b;
+vector<int> g[1<<20];
+int used[1<<20],label[1<<20];
+int bst,bp;
+vector<int>order;
+set<pair<int, int> > edges;
+int er;
+vector<int> nei;
+priority_queue<pair<int, int> > S;
+pair<int, int> it;
+
+void dfs(int v)
+{
+	used[v]=1;
+	for (int i=0;i<g[v].size();i++)
+	{
+		int to=g[v][i];
+		if (used[to])continue;
+		dfs(to);
+	}
+}
+
+int main(){
+//freopen("newlines.in","r",stdin);
+//freopen("newlines.out","w",stdout);
+//freopen("F:/in.txt","r",stdin);
+//freopen("F:/output.txt","w",stdout);
+//ios_base::sync_with_stdio(0);
+//cin.tie(0);
+
+cin>>tests;
+for (;tests;--tests)
+{
+	cin>>n>>m;
+	
+	for (int i=1;i<=n;i++)
+	 g[i].clear();
+	
+	edges.clear();
+	
+	for (int i=1;i<=m;i++)
+	{
+		scanf("%d",&a);
+		scanf("%d",&b);
+		//cin>>a>>b;
+		edges.insert(make_pair(a,b));
+		edges.insert(make_pair(b,a));
+		g[a].push_back(b);
+		g[b].push_back(a);
+	}
+	
+	order.clear();
+	for (int i=1;i<=n;i++)
+	 used[i]=label[i]=0;
+	
+	dfs(1);
+	
+	er=0;
+	for (int i=1;i<=n;i++)
+		if (used[i]==0&&n>5)
+		 	er=1;
+	
+	for (int i=1;i<=n;i++)
+	 if (g[i].size()==1)
+	 	er=1;
+	 	
+	for (int i=1;i<=n;i++)
+	 used[i]=0;
+	 
+	if (n>5&&m!=n*3-6)
+		er=1;
+		
+	while (S.size())S.pop();
+	
+	if (er==0)
+	for (int i=1;i<=n;i++)
+		S.push(make_pair(label[i],i));
+	
+	for (int iter=1;iter<=n;iter++)
+	{
+		if (er)break;
+		it=S.top();
+		bp=it.second;
+		S.pop();
+		if (label[bp]!=it.first)continue;
+		used[bp]=iter;
+		order.push_back(bp);
+		for (int i=0;i<g[bp].size();i++)
+		{
+			int to=g[bp][i];
+			if (used[to])continue;
+			//S.erase(make_pair(label[to],to));
+			label[to]++;
+			S.push(make_pair(label[to],to));
+		}
+	}
+	
+	for (int i=1;i<=n;i++)
+	 used[i]=0;
+	 
+	 reverse(order.begin(),order.end());
+	
+	for(int i=0;i<n;i++)
+	{
+		if (er)break;
+		int vert=order[i];
+	//	cout<<vert<<"%"<<er<<endl;
+		nei.clear();
+		used[vert]=1;
+		for (int j=0;j<g[vert].size();j++)
+		{
+			int to=g[vert][j];
+			if (used[to])continue;
+			nei.push_back(to);
+		}
+		
+		if (nei.size()>3)er=1;
+		
+		for (int j=0;j<nei.size()&&er==0;j++)
+		 	for (int q=j+1;q<nei.size();q++)
+		 	{
+		 		int v1=nei[j];
+		 		int v2=nei[q];
+		 		if (edges.find(make_pair(v1,v2))==edges.end()){er=1;break;}
+		 	}
+	}
+	
+	if (n==2&&m==1)
+	{
+		cout<<1<<"\n";
+		continue;
+	}
+	if (n==1&&m==0)
+	{
+		cout<<1<<endl;
+		continue;
+	}
+	
+	if (n==2&&m==0)
+	{
+		cout<<0<<endl;
+		continue;
+	}
+	
+//	cout<<er<<endl;
+	
+	if (er==0&&m==3*n-6)
+		cout<<1<<"\n";
+	else cout<<0<<"\n";
+	/*
+	for (int i=1;i<=n;i++)
+	 cout<<i<<" "<<used[i]<<endl;*/
+}
+//cin.get();cin.get();
+return 0;}       

@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define mod 1000000007
+#define N 2
+
+int i,j,k;
+int tmp[N][N];
+
+void mult(int a[N][N],int b[N][N]){
+	for(i=0;i<N;i++)
+		for(j=0;j<N;j++)
+			tmp[i][j]=(a[i][0]*1ll*b[0][j]+a[i][1]*1ll*b[1][j])%mod;
+	for(i=0;i<N;i++)
+		for(j=0;j<N;j++)
+			a[i][j]=tmp[i][j];
+	
+}
+
+void exp(int a[N][N], int b[N][N], int pwr){
+	b[0][0]=b[1][1]=1;
+	b[0][1]=b[1][0]=0;
+	while(pwr){
+		if(pwr&1)
+			mult(b,a);
+		mult(a,a);
+		pwr>>=1;
+	}
+}
+
+int fib(int n){
+	if(n<3)
+		return 1;
+	int a[N][N]={1,1,1,0},b[N][N];
+	exp(a,b,n-2);
+	return (b[0][0]+b[0][1])%mod;
+}
+
+int tree[4*100005];
+int beg;
+
+void build(int n){
+	int x,y,i;
+	for(beg=1;beg<n;beg<<=1);
+	for(i=0;i<n;i++){
+		scanf("%d%d",&x,&y);
+		tree[beg+i]=fib(__gcd(x,y));
+	}
+	for(i=n;i<beg;i++)
+		tree[beg+i]=0;
+	for(i=beg-1;i;i--)
+		tree[i]=max(tree[i<<1],tree[1+(i<<1)]);
+}
+
+void update(int pos, int val){
+	tree[pos]=val;
+	for(pos>>=1;pos;pos>>=1)
+		if(tree[pos]!=max(tree[pos<<1],tree[1+(pos<<1)]))
+			tree[pos]=max(tree[pos<<1],tree[1+(pos<<1)]);
+		else
+			return;
+}
+
+int query(int l ,int r, int idx=1, int lt=beg, int rt=beg+beg-1){
+	if(l<=lt && r>=rt)
+		return tree[idx];
+	else if(l>rt || r<lt)
+		return 0;
+
+	int mid=(lt+rt)/2;
+	return max(query(l,r,idx<<1,lt,mid),query(l,r,1+(idx<<1),mid+1,rt));
+}
+
+int main(){
+	int n,q,v,p,x,y;
+	scanf("%d",&n);
+
+	build(n);
+	scanf("%d",&q);
+	while(q--){
+		scanf("%d",&v);
+		switch(v){
+			case 0: scanf("%d%d%d",&p,&x,&y);
+					update(p+beg-1,fib(__gcd(x,y)));	
+					break;
+			case 1: scanf("%d%d",&x,&y);
+					printf("%d ",query(x+beg-1,y+beg-1));
+					break;
+		}
+	}
+}

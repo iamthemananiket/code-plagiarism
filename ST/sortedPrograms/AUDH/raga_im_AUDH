@@ -1,0 +1,74 @@
+#include <cmath>
+#include <cstdio>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int MAX =1000005;
+# define lli long long
+bool v[MAX];
+int len, sp[MAX];
+
+void Sieve(){
+	for (int i = 2; i < MAX; i += 2)	sp[i] = 2;//even numbers have smallest prime factor 2
+	for (lli i = 3; i < MAX; i += 2){
+		if (!v[i]){
+			sp[i] = i;
+			for (lli j = i; (j*i) < MAX; j += 2){
+				if (!v[j*i])	v[j*i] = true, sp[j*i] = i;
+			}
+		}
+	}
+}
+int cp[MAX];
+int main()
+{
+	for(int i=1;i<MAX;i++)
+		sp[i]=1;
+	int p;
+	Sieve();
+  for(int i=1;i<=1000000;i++)
+  	cp[i]=-1;
+
+	int t,a,b,a1,b1;
+	int k=0;
+	scanf("%d",&t);
+	while(t--){
+		scanf("%d %d",&a,&b);
+		k++;
+		a1=a;
+		if(sp[a]==a){
+			a1=a-1;
+			a=1;
+		}
+		
+		while(a>1){
+            p=sp[a];
+            //cout<<p<< " "<<a1<<endl;
+             while (a % p == 0)
+                a /= p;
+            a1-= a1/ p;
+		}
+		b1=b;
+		if(sp[b]==b){
+			b1=b-1;
+			b=1;
+		}
+		while(b>1){
+            p=sp[b];
+           // cout<<p<< " "<<b1<<endl;
+             while (b % p == 0)
+                b /= p;
+            b1-= b1/ p;
+		}
+		//cout<<a1<<" "<<b1<<endl;
+		if(a1>b1)
+		{
+			printf("Case %d: Shibli took it\n",k);
+		}
+		else
+			printf("Case %d: Swapnil lost it\n",k);
+
+	}
+
+}

@@ -1,0 +1,103 @@
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include <string.h>
+#include<assert.h>
+using namespace std;
+const double pi=acos(-1.0);
+const double eps=1e-11;
+#define maxx(a,b) (a)>(b)?(a):(b)
+#define minn(a,b) (a)<(b)?(a):(b)
+#define ll long long int
+#define sc(x) scanf("%d",&x)
+#define scl(x) scanf("%lld",&x)
+#define printl(x) printf("%lld\n",x)
+#define print(x) printf("%d\n",x)
+#define printd(x) printf("%lf\n",x)
+#define prints(x) printf("%s\n",x);
+#define DEBUG(x) cout<<"Value of "<<#x<<" is "<<x<<endl;
+#define pc putchar
+#define mp(A,B) make_pair(A,B)
+#define pb(X) push_back(X)
+#define INF 1000000000
+#define MOD 1000000007
+#define SET(x,y) memset(x,y,sizeof(x))
+bool ar[31624];
+bool ans[100003];
+vector<ll> primes;
+void sieve()
+{
+	ll i,j;
+	primes.pb(2);
+	for(j=4;j<=31623;j+=2)
+		ar[j]=false;	
+	
+	for(i=3;i<=31623;i+=2)
+	{
+		if(ar[i])
+		{
+			primes.pb(i);
+			for(j=2*i;j<=31623;j+=i)
+				ar[j]=false;	
+		}
+	}
+}
+int main()
+{
+	SET(ar,true);
+	ll t,m,n,i,j,sq,p,k;
+	scl(t);
+	ar[0]=ar[1]=false;
+	sieve();
+	while(t--)
+	{
+		SET(ans,true);
+		scl(m);scl(n);
+		sq=(ll)sqrt((double)n);
+		for(i=0;(i<primes.size())&&(primes[i]<=sq);i++)
+		{
+			p=primes[i];
+			k=p*(m/p)+p-m;
+			for(;k<=n-m;k+=p)
+			{
+				ans[k]=false;
+			}
+			if(!(m%p))
+				ans[0]=false;
+		}
+		for(i=0;i<=n-m;i++)
+		{
+			if(i+m<31624)
+			{
+				if(ar[i+m])
+					printl(i+m);
+			}
+			else
+			{
+				if(ans[i])
+					printl(i+m);
+			}
+		}
+		pc('\n');
+	}			
+	return 0;
+}

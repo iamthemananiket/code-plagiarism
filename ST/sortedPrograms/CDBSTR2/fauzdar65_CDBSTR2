@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define pb push_back
+#define mp make_pair
+#define mod 1000000007
+#define gc getchar_unlocked
+#define pp pair<int,int>
+using namespace std;
+
+int dp[2005][2005],t;
+
+int mini(int a,int b,int c)
+{
+    int ret=min(a,b);
+    ret=min(ret,c);
+    return ret;
+}
+
+int main() {
+    cin>>t;
+    string a,b;
+    while(t--)
+    {
+        cin>>a>>b;
+        for(int i=0;i<=2000;i++){ dp[0][i]=i; dp[i][0]=i; }
+        int m=a.length(); int n=b.length();
+        for(int i=1;i<=n;i++)
+        {
+            for(int j=1;j<=m;j++)
+            {
+               int v1,v2,v3;
+               
+               if(b[i-1]==a[j-1])v1=dp[i-1][j-1]; else v1=1+dp[i-1][j-1];
+               v2=dp[i][j-1]+1;
+               v3=dp[i-1][j]+1;
+               
+               dp[i][j]=mini(v1,v2,v3);
+            }
+        }
+        
+        
+        cout<<dp[n][m]<<"\n";
+        
+        
+    }
+
+	return 0; 
+}

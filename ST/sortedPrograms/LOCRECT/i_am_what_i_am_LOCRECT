@@ -1,0 +1,25 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void eval()
+{
+	int l1,w1,l2,w2;
+	
+	cin>>l1>>w1>>l2>>w2;
+	
+	long long mn = l1*w1+l2*w2 - min(l1,l2)*min(w1,w2);
+	
+	long long mx = l1*w1+l2*w2 ;
+	cout<<mn<<" "<<mx<<endl;
+	
+}
+
+int main()
+{
+	int t;
+	cin>>t;
+	while(t--)
+	 {
+	 	eval();
+	 }
+}

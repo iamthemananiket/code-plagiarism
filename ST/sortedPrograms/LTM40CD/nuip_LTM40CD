@@ -1,0 +1,93 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<stack>
+#include<queue>
+#include<cmath>
+#include<algorithm>
+#include<functional>
+#include<list>
+#include<deque>
+#include<bitset>
+#include<set>
+#include<map>
+#include<unordered_map>
+#include<cstring>
+#include<sstream>
+#include<complex>
+#include<iomanip>
+#include<numeric>
+#include<cassert>
+#define X first
+#define Y second
+#define pb push_back
+#define rep(X,Y) for (int (X) = 0;(X) < (Y);++(X))
+#define reps(X,S,Y) for (int (X) = S;(X) < (Y);++(X))
+#define rrep(X,Y) for (int (X) = (Y)-1;(X) >=0;--(X))
+#define repe(X,Y) for ((X) = 0;(X) < (Y);++(X))
+#define peat(X,Y) for (;(X) < (Y);++(X))
+#define all(X) (X).begin(),(X).end()
+#define rall(X) (X).rbegin(),(X).rend()
+#define eb emplace_back
+#define UNIQUE(X) (X).erase(unique(all(X)),(X).end())
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+template<class T> using vv=vector<vector<T>>;
+template<class T> ostream& operator<<(ostream &os, const vector<T> &t) {
+os<<"{"; rep(i,t.size()) {os<<t[i]<<",";} os<<"}"<<endl; return os;}
+template<class S, class T> ostream& operator<<(ostream &os, const pair<S,T> &t) { return os<<"("<<t.first<<","<<t.second<<")";}
+template<class T> inline bool MX(T &l,const T &r){return l<r?l=r,1:0;}
+template<class T> inline bool MN(T &l,const T &r){return l>r?l=r,1:0;}
+const ll MOD=1e9+7;
+
+typedef pair<pll,ll> plll;
+
+int fun(int a,int b,int c,int r){
+  ll s=a+b+c;
+  ll rhs=s*(s-2*a)*(s-2*b)*(s-2*c);
+  ll lhs=4ll*r*r*s*s;
+  //cout<<s<<pll(lhs,rhs)<<endl;
+  return (lhs>rhs?-1:lhs==rhs?0:1);
+}
+
+const int UB=7000;
+const double EPS=1e-9;
+
+int main(){
+  ios_base::sync_with_stdio(false);
+  cout<<fixed<<setprecision(10);
+  //rep(i,3) cout<<fun(4+i,12,13,2)<<endl; return 0;
+  int r;
+  cin>>r;
+  vector<plll> re;
+  vector<double> deg(UB);
+  reps(i,1,UB) deg[i]=atan2(i,2*r);
+  reps(x,1,UB) reps(y,1,x+1){
+    double ang=M_PI-deg[x]-deg[y];
+    double zz;
+    if(M_PI/2-ang < EPS) continue;
+    if((zz=tan(ang)*r*2)<0.9) break;
+    ll z_=zz;
+    //cout<<x<<","<<y<<","<<zz<<endl;
+    reps(z,max(0ll,z_-1),z_+2){
+      ll a=x+y,b=y+z,c=x+z;
+      if(a%2 || b%2 || c%2) continue;
+      if(fun(a/2,b/2,c/2,r)==0){
+	if(a>b) swap(a,b);
+	if(a>c) swap(a,c);
+	if(b>c) swap(b,c);
+	re.eb(pii(a/2,b/2),c/2);
+      }
+    }
+  }
+  sort(all(re));
+  UNIQUE(re);
+  cout<<re.size()<<endl;
+  for(const plll &p:re) cout<<p.X.X<<" "<<p.X.Y<<" "<<p.Y<<"\n";
+  return 0;
+}

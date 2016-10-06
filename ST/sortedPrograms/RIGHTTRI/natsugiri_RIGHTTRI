@@ -1,0 +1,57 @@
+#include<cmath>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...)  fprintf(stderr, s)
+
+template<class T> inline void amin(T &x, const T &y) { if (y<x) x=y; }
+template<class T> inline void amax(T &x, const T &y) { if (x<y) x=y; }
+
+double EPS = 1e-8;
+
+void MAIN() {
+    LL HH, SS;
+    scanf("%lld%lld", &HH, &SS);
+    if (HH * HH < 4 * SS) {
+	puts("-1");
+    } else {
+	double H, S;
+	H = HH; S = SS;
+
+	double hi = H / sqrt(2);
+	double lo = 0;
+	REP (i, 100) {
+	    double a = (lo + hi) / 2;
+	    double b = sqrt(max(0.0, H * H - a * a));
+	    if (a * b * 0.5 > S) hi = a;
+	    else lo = a;
+	}
+
+	{
+	    double a = (lo + hi) / 2;
+	    double b = sqrt(max(0.0, H * H - a * a));
+	    if (a > b) swap(a, b);
+	    printf("%.6f %.6f %.6f\n", a, b, H);
+	}
+    }
+}
+
+int main() {
+    int tt;
+    scanf("%d", &tt);
+    REP (i, tt) MAIN();
+
+
+    return 0;
+}
+

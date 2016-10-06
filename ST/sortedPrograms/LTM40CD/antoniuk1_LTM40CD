@@ -1,0 +1,108 @@
+//#include "testlib.h"
+//#include <spoj.h>
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <math.h>
+#include <assert.h>
+#include <time.h>
+#include <memory.h>
+#include <set>
+#include <numeric>
+#include <map>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <unordered_map>
+
+using namespace std;
+
+#define	TwoPi  6.28318530717958648
+const double eps=1e-14;
+
+int Cubic(double *x,double a,double b,double c) {	// solve cubic equation x^3 + a*x^2 + b*x + c
+    double a2 = a*a;
+    double q  = (a2 - 3*b)/9;
+    double r  = (a*(2*a2-9*b) + 27*c)/54;
+    double r2 = r*r;
+    double q3 = q*q*q;
+    double A,B;
+    if(r2<q3) {
+        double t=r/sqrt(q3);
+        if( t<-1) t=-1;
+        if( t> 1) t= 1;
+        t=acos(t);
+        a/=3; q=-2*sqrt(q);
+        x[0]=q*cos(t/3)-a;
+        x[1]=q*cos((t+TwoPi)/3)-a;
+        x[2]=q*cos((t-TwoPi)/3)-a;
+        return(3);
+    } else {
+        A =-pow(fabs(r)+sqrt(r2-q3),1./3);
+        if( r<0 ) A=-A;
+        B = A==0? 0 : B=q/A;
+        
+        a/=3;
+        x[0] =(A+B)-a;
+        x[1] =-0.5*(A+B)-a;
+        x[2] = 0.5*sqrt(3.)*(A-B);
+        if(fabs(x[2])<eps) { x[2]=x[1]; return(2); }
+        return(1);
+    }
+}
+
+long long r;
+int mx = 200;
+vector<pair<long long, pair<long long, long long> > > res;
+
+void good(long long a, long long b, long long c) {
+    if (a > b) swap(a, b);
+    if (b > c) swap(b, c);
+    if (a > b) swap(a, b);
+    
+    double p = (a + b + c) / 2.0;
+    if (fabs((p-a) * (p-b) * (p-c) - p * r) < 1e-5 && a + b > c && a + c > b && b + c > a)
+        res.push_back({a, {b, c}});
+}
+
+void check(long long a, long long b, double C) {
+    for(double cc = -1000.0; cc <= 1000.0; ++cc) {
+        long long c = (long long)(C + cc);
+        if (c > 0)
+            good(a, b, c);
+    }
+}
+
+int main() {
+    //freopen("input.txt", "r", stdin); freopen("output.txt", "w", stdout);
+    ios::sync_with_stdio(0);
+    cin >> r; r *= r;
+    for(int a = 1; a <= mx; ++a)
+        for(int b = a+1; b <= mx; ++b) {
+            long long x = a + b;
+            long long y = a * b;
+            
+            double A = 3 * x;
+            double B = 4 * r - x * x - 12 * y;
+            double C = 4 * r * x - 3 * x * x * x - 4 * x * y;
+            
+            double *res = new double[3];
+            int rr = Cubic(res, A, B, C);
+            if (rr == 3) {
+                check(a, b, res[0]);
+                check(a, b, res[1]);
+                check(a, b, res[2]);
+            } else {
+                check(a, b, res[0]);
+            }
+        }
+    sort(res.begin(), res.end());
+    res.resize(unique(res.begin(), res.end()) - res.begin());
+    cout << res.size() << "\n";
+    for(auto x : res)
+        cout << x.first << " " << x.second.first << " " << x.second.second << "\n";
+    return 0;
+}

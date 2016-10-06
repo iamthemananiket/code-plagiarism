@@ -1,0 +1,27 @@
+#include "bits/stdc++.h"
+using namespace std;
+char str[30];
+int mask;
+int n;
+int tmp;
+int main(){
+    scanf("%s" , str);
+    mask = 0;
+    for(int i = 0 ; i < strlen(str) ; ++i){
+        mask |= 1 << (str[i] - 'a');
+    }
+    scanf("%d" , &n);
+    while(n--){
+        scanf("%s" , str);
+        tmp = 0;
+        for(int j = 0 ; j < strlen(str) ; ++j){
+            tmp |= 1 << (str[j] - 'a');
+        }
+        if((tmp & mask) == tmp){
+            printf("Yes\n");
+        }
+        else{
+            printf("No\n");
+        }
+    }
+}

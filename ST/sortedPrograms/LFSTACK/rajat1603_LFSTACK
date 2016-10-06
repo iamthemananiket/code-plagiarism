@@ -1,0 +1,88 @@
+#include "bits/stdc++.h"
+using namespace std;
+int t;
+int n;
+vector < int > a;
+vector < vector < int > > b;
+vector < int > arr;
+int sum;
+bool ok;
+int pos;
+vector < int > tmp;
+void bfs(){
+    queue < pair < int , vector < int > > > q;
+    while(!q.empty()){
+        q.pop();
+    }
+    q.push({pos , tmp});
+    while(!q.empty()){
+        int pos = q.front().first;
+        if(pos >= arr.size()){
+            ok = 1;
+            break;
+        }
+        vector < int > tmp = q.front().second;
+        q.pop();
+        for(int i = 0 ; i < n ; ++i){
+            if(tmp[i] >= 1){
+                if(b[i][tmp[i] - 1] == arr[pos]){
+                    ++pos;
+                    --tmp[i];
+                    q.push({pos , tmp});
+                    --pos;
+                    ++tmp[i];
+                }
+            }
+        }
+    }
+}
+void brute(){
+    if(pos >= arr.size()){
+        ok = 1;
+    }
+    if(ok){
+        return;
+    }
+    for(int i = 0 ; i < n ; ++i){
+        if(tmp[i] >= 1){
+            if(b[i][tmp[i] - 1] == arr[pos]){
+                ++pos;
+                --tmp[i];
+                brute();
+                --pos;
+                ++tmp[i];
+            }
+        }
+    }
+}
+int main(){
+    scanf("%d" , &t);
+    while(t--){
+        scanf("%d" , &n);
+        a.resize(n);
+        b.resize(n);
+        sum = 0;
+        for(int i = 0 ; i < n ; ++i){
+            scanf("%d" , &a[i]);
+            b[i].resize(a[i]);
+            for(int j = 0 ; j < a[i] ; ++j){
+                scanf("%d" , &b[i][j]);
+            }
+            sum += a[i];
+        }
+        arr.resize(sum);
+        for(int i = 0 ; i < sum ; ++i){
+            scanf("%d" , &arr[i]);
+        }
+        ok = 0;
+        pos = 0;
+        tmp = a;
+        if(n <= 1){
+            bfs();
+        }
+        else{
+            brute();
+        }
+        printf(ok ? "Yes\n" : "No\n");
+    }
+}

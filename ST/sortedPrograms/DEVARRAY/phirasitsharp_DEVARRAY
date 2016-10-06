@@ -1,0 +1,32 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int n, q;
+
+int main ( void ) {
+
+	ios::sync_with_stdio( false );
+
+	cin >> n >> q;
+	int mn, mx;
+	for ( int i = 0 ; i < n ; i++ ) {
+		int val;
+		cin >> val;
+		if ( i == 0 ) {
+			mn = mx = val;
+		} else {
+			mn = min ( mn, val );
+			mx = max ( mx, val );
+		}
+	}
+
+	for ( int i = 0 ; i < q ; i++ ) {
+		int val;
+		cin >> val;
+		cout << ( mn <= val and val <= mx ? "Yes" : "No" ) << "\n";
+	}
+
+	return 0;
+}

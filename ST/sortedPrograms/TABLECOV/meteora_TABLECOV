@@ -1,0 +1,54 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cassert>
+#include <cstdio>
+
+using namespace std;
+
+
+int dp[1010][1010];
+int A[1010][1010];
+int N,M;
+
+int colmx[1010];
+
+int compute(){
+
+	int i,j,mx=0;
+
+	memset(dp,0,sizeof(dp));
+	memset(colmx,0,sizeof(colmx));
+
+	int cur;
+	for(i = 0; i < M; ++i){
+		cur = 0;
+		for(j = N-1; j >= 0;--j){
+			dp[i][j] = A[i][j] + cur;
+			cur = max(cur,colmx[j]);
+			mx = max(mx,dp[i][j]);
+		}
+		for(j = 0; j < N; ++j) colmx[j] = max(colmx[j],dp[i][j]);
+	}
+
+	return mx;
+}
+
+int main(){
+	int t;
+		int i,j;
+	scanf("%d",&t);
+
+	while(t--){
+		scanf("%d%d",&M,&N);
+		for(i = 0; i < M;++i){
+			for(j = 0; j < N; ++j){
+				scanf("%d",&A[i][j]);
+			}
+		}
+
+		printf("%d\n",compute());
+	}
+
+	return 0;
+}

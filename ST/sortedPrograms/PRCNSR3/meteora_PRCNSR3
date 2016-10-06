@@ -1,0 +1,141 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cassert>
+#include <vector>
+#define NMAX 10010
+
+using namespace std;
+
+int tree[NMAX];
+const int mod = (1e9)+7;
+
+int N;
+void upd(int x, int vl){
+	for(;x < N; x+=(x&-x)){
+		tree[x] += vl;
+		tree[x] %= mod;
+		if(!x) break;
+	}
+}
+int query(int x){
+	int sum = 0;
+
+	for(; x >= 0; x -= (x&-x)){
+		sum += tree[x];
+		sum %= mod;
+		if(!x) break;
+	}
+	return sum;
+}
+
+int Q;
+
+struct mat{
+	int ar[2][2];
+};
+
+mat mul(mat &a, mat &b){
+	mat c;
+	int i,j,k;
+	for(i = 0; i < 2; ++i){
+		for(j = 0;  j < 2; ++j){
+			c.ar[i][j] = 0;
+			for(k = 0; k < 2; ++k){
+				c.ar[i][j] += (1LL*a.ar[i][k]*b.ar[k][j])%100000;
+				c.ar[i][j] %= 100000;
+			}
+		}
+	}
+
+	return c;
+}
+
+
+mat eye;
+mat exp(mat &m, int k){
+	if(!k) return eye;
+
+	mat tm;
+
+	tm = exp(m,k/2);
+	tm = mul(tm,tm);
+	if(k&1) tm = mul(tm,m);
+
+	return tm;
+}
+
+mat mm;
+
+int ways(int m){
+	if(m&1) return 0;
+	m /= 2;
+	mat t = exp(mm,m);
+	return (t.ar[1][1]);
+}
+
+vector<int> adj[NMAX];
+
+int en[NMAX];
+int st[NMAX];
+int cur;
+
+void dfs(int v, int p){
+	int i,u;
+	st[v] = cur++;
+	for(i =0 ; i < adj[v].size(); ++i){
+		u = adj[v][i];
+		if(u == p) continue;
+		dfs(u,v);
+	}
+	en[v] = cur-1;
+}
+
+int sum(int i, int j){
+	int ss = query(j)-query(i-1);
+	if(ss < 0) ss +=  mod;
+	return ss;
+}
+
+int main(){
+
+	int m,k,i;
+
+	eye.ar[0][0] = 1;
+	eye.ar[0][1] = 0;
+	eye.ar[1][0] = 0;
+	eye.ar[1][1] = 1;
+
+	 mm.ar[0][1] = mm.ar[1][1] = mm.ar[1][0] = 1;
+	 mm.ar[0][0] = 0;
+
+	scanf("%d%d",&N,&Q);
+
+
+	for(i =0 ; i < N-1; ++i){
+		scanf("%d%d",&m,&k);
+		--m,--k;
+		adj[m].push_back(k);
+		adj[k].push_back(m);
+	}
+
+	for(i =0 ; i < N; ++i) upd(i,1);
+
+	dfs(0,-1);
+	int t;
+	while(Q--){
+		scanf("%d%d",&t,&i);
+		--i;
+
+		if(!t){
+			scanf("%d",&m);
+			k = ways(m);
+			upd(st[i],(1LL*k*m)%mod);
+			continue;
+		}
+		printf("%d\n",sum(st[i],en[i]));
+	}
+
+	return 0;
+}

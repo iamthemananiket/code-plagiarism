@@ -1,0 +1,168 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstring>
+#include <cctype>
+#include <cassert>
+#include <limits>
+#include <functional>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define rer(i,l,u) for(int (i)=(int)(l);(i)<=(int)(u);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#if defined(_MSC_VER) || __cplusplus > 199711L
+#define aut(r,v) auto r = (v)
+#else
+#define aut(r,v) __typeof(v) r = (v)
+#endif
+#define each(it,o) for(aut(it, (o).begin()); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+using namespace std;
+typedef vector<int> vi; typedef pair<int, int> pii; typedef vector<pair<int, int> > vpii; typedef long long ll;
+template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
+template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
+
+template<int MOD>
+struct ModInt {
+	static const int Mod = MOD;
+	unsigned x;
+	ModInt() : x(0) {}
+	ModInt(signed sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	ModInt(signed long long sig) { int sigt = sig % MOD; if(sigt < 0) sigt += MOD; x = sigt; }
+	int get() const { return (int)x; }
+
+	ModInt &operator+=(ModInt that) { if((x += that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator-=(ModInt that) { if((x += MOD - that.x) >= MOD) x -= MOD; return *this; }
+	ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % MOD; return *this; }
+
+	ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+	ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+	ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+};
+typedef ModInt<1000000007> mint;
+
+vector<int> t_parent;
+vi t_ord;
+vector<int> t_left, t_right;
+
+void tree_eulertour(const vector<vi> &g, int root) {
+	int n = g.size();
+	t_parent.assign(n, -1);
+	t_ord.clear();
+	t_left.assign(n, -1);
+	t_right.assign(n, -1);
+
+	vector<int> stk; stk.push_back(root);
+	while(!stk.empty()) {
+		int i = stk.back(); stk.pop_back();
+		if(i < 0) {
+			i = -i - 1;
+			t_right[i] = t_ord.size();
+			continue;
+		}
+		t_left[i] = t_ord.size();
+		t_ord.push_back(i);
+		stk.push_back(-(i + 1));
+		for(int j = (int)g[i].size() - 1; j >= 0; j --) {
+			int c = g[i][j];
+			if(t_parent[c] == -1 && c != root)
+				stk.push_back(c);
+			else
+				t_parent[i] = c;
+		}
+	}
+}
+
+struct FenwickTree {
+	typedef mint T;
+	vector<T> v;
+	void init(int n) { v.assign(n, 0); }
+	void add(int i, T x) {
+		for(; i < (int)v.size(); i |= i + 1) v[i] += x;
+	}
+	T sum(int i) const {	//[0, i)
+		T r = 0;
+		for(-- i; i >= 0; i = (i & (i + 1)) - 1) r += v[i];
+		return r;
+	}
+	T sum(int left, int right) const {	//[left, right)
+		return sum(right) - sum(left);
+	}
+};
+
+int main() {
+	int N; int M;
+	while(~scanf("%d%d", &N, &M)) {
+		vector<vi> g(N);
+		reu(i, 1, N) {
+			int p;
+			scanf("%d", &p), -- p;
+			g[i].push_back(p);
+			g[p].push_back(i);
+		}
+		tree_eulertour(g, 0);
+		vi depth(N);
+		for(int ix = 1; ix < (int)t_ord.size(); ++ ix) {
+			int i = t_ord[ix], p = t_parent[i];
+			depth[i] = depth[p] + 1;
+		}
+
+		const int MaxK = 100011;
+		vector<mint> coefs[2];
+		rep(k, 2) coefs[k].resize(MaxK);
+		coefs[0][0] = 1; coefs[1][0] = 0;
+		coefs[0][1] = 0; coefs[1][1] = 1;
+		rep(k, 2) reu(i, 2, MaxK)
+			coefs[k][i] = coefs[k][i - 1] + coefs[k][i - 2];
+
+		vector<mint> negfib[2];
+		rep(k, 2) negfib[k].resize(MaxK);
+		negfib[0][0] = 1; negfib[1][0] = 1;
+		negfib[0][1] = 0; negfib[1][1] = 1;
+		rep(k, 2) reu(i, 2, MaxK)
+			negfib[k][i] = negfib[k][i - 2] - negfib[k][i - 1];
+
+		FenwickTree fts[2];
+		rep(k, 2)
+			fts[k].init(N + 1);
+
+		for(int ii = 0; ii < M; ++ ii) {
+			char ty[10];
+			scanf("%s", ty);
+			if(*ty == 'U') {
+				int X; int K;
+				scanf("%d%d", &X, &K), -- X;
+				int d = K - 1 - depth[X], L = t_left[X], R = t_right[X];
+				rep(k, 2) {
+					mint t = d <= 0 ? negfib[k][-d] : coefs[k][d + 2];
+					fts[k].add(L, t);
+					fts[k].add(R, mint() - t);
+				}
+			} else if(*ty == 'Q') {
+				int X;
+				scanf("%d", &X), -- X;
+				int d = depth[X], pos = t_left[X];
+				mint ans;
+				rep(k, 2) {
+					mint t = fts[k].sum(pos + 1);
+					ans += t * coefs[k][d];
+				}
+				printf("%d\n", ans.get());
+			} else abort();
+		}
+	}
+	return 0;
+}

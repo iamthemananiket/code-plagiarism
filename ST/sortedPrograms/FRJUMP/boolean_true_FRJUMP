@@ -1,0 +1,193 @@
+#include<bits/stdc++.h>
+#define N 100009
+#define MOD 1000000007
+using namespace std;
+typedef long long int ll;
+typedef long double lld;
+ll prod[N];
+lld fir[N];
+ll arr[N];
+void pre(int n)
+{
+    prod[0]=arr[1];
+    lld tm=arr[1];
+    while(tm>=10)
+        tm/=10;
+    fir[0]=tm;
+    for(int j=1;j<=n;j++)
+    {
+        ll pro=1;
+        lld f=1.0;
+        for(int i=1;i<=n;i+=j)
+        {
+            pro=pro*arr[i];
+            pro%=MOD;
+            lld tmp=arr[i];
+            while(tmp>=10)
+                tmp/=10;
+            f*=tmp;
+            if(f>=10)
+                f/=10;
+        }
+        prod[j]=pro;
+        fir[j]=f;
+    }
+}
+ll mod_expo(ll a,ll b)
+{
+    ll ans=1;
+    a%=MOD;
+    while(b>0)
+    {
+        if(b&1)
+            ans=(ans*a)%MOD;
+        b=b>>1;
+        a=(a*a)%MOD;
+    }
+    return ans;
+}
+void update(int p,ll f)
+{
+    ll inv=mod_expo(arr[p],MOD-2);
+    lld ar=arr[p];
+    lld tmp=f;
+    while(tmp>=10)
+        tmp/=10;
+    while(ar>=10)
+        ar/=10;
+    p--;
+    for(int i=1;i*i<=p;i++)
+    {
+        if(p%i==0)
+        {
+            prod[i]*=inv;
+            prod[i]%=MOD;
+            prod[i]*=f;
+            prod[i]%=MOD;
+            if(fir[i]>=ar)
+                fir[i]/=ar;
+            else
+            {
+                fir[i]*=10;
+                fir[i]/=ar;
+            }
+            fir[i]*=tmp;
+            if(fir[i]>=10)
+                fir[i]/=10;
+            if(i*i!=p)
+            {
+                prod[p/i]*=inv;
+                prod[p/i]%=MOD;
+                prod[p/i]*=f;
+                prod[p/i]%=MOD;
+                if(fir[p/i]>=ar)
+                    fir[p/i]/=ar;
+                else
+                {
+                    fir[p/i]*=10;
+                    fir[p/i]/=ar;
+                }
+                fir[p/i]*=tmp;
+                if(fir[p/i]>=10)
+                    fir[p/i]/=10;
+            }
+        }
+    }
+}
+void handle(int n)
+{
+    int q;
+    cin>>q;
+    while(q--)
+    {
+        int ch;
+        scanf("%d",&ch);
+        if(ch==1)
+        {
+            int p;
+            ll f;
+            scanf("%d%lld",&p,&f);
+            arr[p]=f;
+        }
+        else
+        {
+            int r;
+            scanf("%d",&r);
+            ll pr=1;
+            int i=1;
+            while(i<=n)
+            {
+                pr*=arr[i];
+                i+=r;
+            }
+            lld tm=pr;
+            while(tm>=10)
+                tm/=10;
+            printf("%lld %lld\n",(ll)tm,pr%MOD);
+        }
+    }
+}
+int main()
+{
+    bool flag=true;
+    int n;
+    scanf("%d",&n);
+    if(n>10)
+        flag=false;
+    for(int i=1;i<=n;i++)
+    {
+        scanf("%lld",&arr[i]);
+        if(arr[i]>10)
+            flag=false;
+    }
+    if(flag)
+    {
+        handle(n);
+        return 0;
+    }
+    pre(n);
+    int q;
+    scanf("%d",&q);
+    while(q--)
+    {
+        int ch;
+        scanf("%d",&ch);
+        if(ch==1)
+        {
+            int p;
+            ll f;
+            scanf("%d%lld",&p,&f);
+            update(p,f);
+            arr[p]=f;
+        }
+        else
+        {
+            int r;
+            scanf("%d",&r);
+            r%=n;
+            ll pr=prod[r];
+            pr*=mod_expo(prod[0],MOD-2);
+            pr%=MOD;
+            pr*=arr[1];
+            pr%=MOD;
+            lld fr=fir[r];
+            lld tmp=prod[0];
+            lld ar=arr[1];
+            while(tmp>=10)
+                tmp/=10;
+            while(ar>=10)
+                ar/=10;
+            if(fr>=tmp)
+                fr/=tmp;
+            else
+            {
+                fr*=10;
+                fr/=tmp;
+            }
+            fr*=ar;
+            if(fr>=10)
+                fr/=10;
+            printf("%lld %lld\n",(ll)fr,pr);
+        }
+    }
+}

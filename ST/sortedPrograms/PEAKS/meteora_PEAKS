@@ -1,0 +1,71 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cassert>
+#include <cstdio>
+
+using namespace std;
+
+
+int mem[210][210][12][12][3];
+
+//less,greater,border
+
+const int mod = 1e9+9;
+
+int A[210];
+int N;
+
+inline int add(int a, int b){
+	int c = a+b;
+	return c < mod ? c : c-mod;
+}
+
+int dp(int i, int p, int a, int b, int t){
+	if(a < 0 || b < 0) return 0;
+	if(i >= N){
+		if(a || b || p==N) return 0;
+		if(t < 2) return 0;
+		return 1;
+	}
+
+	int &val = mem[i][p][a][b][t];
+	if(val >= 0) return val;
+
+	val = dp(i+1,p,a,b,t);
+
+	if(p == N){
+		val = add(val,dp(i+1,i,a,b,2));
+		val = add(val,dp(i+1,i,a,b,1));
+		val = add(val,dp(i+1,i,a,b,0));
+		return val;
+	}
+
+
+	if(t == 2 || (A[i]<A[p]) != t){
+		return val;
+	}
+
+	val = add(val,dp(i+1,i,a,b,2));
+	if(t == 1){
+		val = add(val,dp(i+1,i,a-1,b,0));
+		val = add(val,dp(i+1,i,a,b,1));
+		return val;
+	}
+	val = add(val,dp(i+1,i,a,b-1,1));
+	val = add(val,dp(i+1,i,a,b,0));
+	return val;
+}
+
+int main(){
+	int i,t,a,b;
+	scanf("%d",&t);
+
+	while(t--){
+		scanf("%d%d%d",&N,&a,&b);
+		for(i = 0; i < N; ++i) scanf("%d",&A[i]);
+		memset(mem,-1,sizeof(mem));
+		printf("%d\n",dp(0,N,a,b,2));
+	}
+	return 0;
+}

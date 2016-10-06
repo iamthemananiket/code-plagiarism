@@ -1,0 +1,87 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+
+#define rep(i, l, r) for(int i=l; i<=r; i++)
+#define dow(i, l, r) for(int i=l; i>=r; i--)
+#define clr(x, c) memset(x, c, sizeof(x))
+#define pb push_back
+#define all(x) (x).begin(),(x).end()
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+inline int read()
+{
+	int x=0; bool f=false; char ch=getchar();
+	while (ch<'0' || '9'<ch) f|=ch=='-', ch=getchar();
+	while ('0'<=ch && ch<='9') x=x*10+ch-'0', ch=getchar();
+	return f?-x:x;
+}
+
+#define maxn 200009
+#define eps 1e-8
+
+int n, x[maxn], y[maxn];
+struct node{int x1,y1,x2,y2; ld a;} k[maxn], q[maxn], g[maxn]; int L, R, tot; bool fg;
+struct P{ld x,y;} p[maxn];
+
+inline bool Right(node a, P b){return (b.y-a.y1)*(a.x2-a.x1)-(b.x-a.x1)*(a.y2-a.y1)<0;}
+
+inline P cross(node a, node b)
+{
+	ld a1=a.y2-a.y1, b1=a.x1-a.x2, c1=1LL*a.x2*a.y1-1LL*a.x1*a.y2;
+	ld a2=b.y2-b.y1, b2=b.x1-b.x2, c2=1LL*b.x2*b.y1-1LL*b.x1*b.y2;
+	//printf("%.10Lf\n", fabs(fabs(a.a-b.a)-atan2(0,-1)));
+	if (fabs(fabs(a.a-b.a)-atan2(0,-1))<eps) fg=true;
+	return (P){(b1*c2-b2*c1)/(a1*b2-a2*b1),(a1*c2-a2*c1)/(b1*a2-b2*a1)};
+}
+
+bool cmp(node a, node b) {return a.a>b.a;}
+
+int main()
+{
+	int t=read(); while (t--)
+	{
+		n=read(); fg=false;
+		rep(i, 1, n) x[i]=read(), y[i]=read();
+		x[n+1]=x[1], y[n+1]=y[1];
+		rep(i, 1, n) k[i]=(node){x[i],y[i],x[i+1],y[i+1],atan2(y[i+1]-y[i],x[i+1]-x[i])};
+		sort(k+1, k+1+n, cmp);
+		
+		g[tot=1]=k[1]; rep(i, 2, n) 
+			if (k[i-1].a-k[i].a>eps) g[++tot]=k[i];
+			else if (Right(g[tot],(P){(ld)k[i].x1,(ld)k[i].y1})) g[tot]=k[i];
+			
+		L=1, R=0, q[++R]=g[1], q[++R]=g[2];
+		rep(i, 3, tot)
+		{
+			while (L<R && !Right(g[i],cross(q[R],q[R-1]))) R--;
+			while (L<R && !Right(g[i],cross(q[L],q[L+1]))) L++;
+			q[++R]=g[i];
+		}
+		while (L<R && !Right(q[L],cross(q[R],q[R-1]))) R--;
+		while (L<R && !Right(q[R],cross(q[L],q[L+1]))) L++;
+		
+		if (R-L+1<3 || fg) puts("0.000000"); else
+		{
+			q[R+1]=q[L];
+			rep(i, L, R) p[i]=cross(q[i], q[i+1]);
+			p[R+1]=p[L];
+			ld A=0; rep(i, L, R) A+=p[i].x*p[i+1].y-p[i].y*p[i+1].x;
+			if (A<0) A=-A;
+			printf("%.20Lf\n", A/(ld)800000000000000LL);
+		}
+		/* if (R-L+1<3) puts("0.00"); else
+		{
+			q[R+1]=q[L];
+			rep(i, L, R) p[i]=cross(q[i], q[i+1]);
+			p[R+1]=p[L];
+			ld A=0; rep(i, L, R) A+=p[i].x*p[i+1].y-p[i].y*p[i+1].x;
+			if (A<0) A=-A;
+			printf("%.2Lf\n", A/2);
+		} */
+	}
+	return 0;
+}

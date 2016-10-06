@@ -1,0 +1,197 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const long long MAX_N = 100000 + 3;
+
+pair<long long,long long> catcher[MAX_N];
+long long xs[MAX_N], ys[MAX_N];
+long long sumXs[MAX_N], sumYs[MAX_N];
+
+long long N, M;
+long long solutionX, solutionY;
+
+long long binSearch1(long long A[], long long key)
+{
+    long long l = 1, r = N;
+    long long found = N + 1;
+
+    while (l <= r)
+    {
+        long long m = (l + r) / 2;
+
+        if (A[m] > key)
+        {
+            found = m;
+            r = m - 1;
+        }
+        else
+            l = m + 1;
+    }
+
+    return found;
+}
+
+long long getSum(long long sum[], long long x, long long y)
+{
+    if (x > y)
+        return 0;
+
+    if (x == 0)
+        return sum[y];
+
+    return sum[y] - sum[x - 1];
+}
+
+void rightMove(long long &x, long long &y) ///y++
+{
+    y++;
+
+    long long p = binSearch1(ys, y);
+
+    solutionY = 0;
+    solutionY += getSum(sumYs, p, N) - 1LL * (N - p + 1) * y;
+    solutionY += 1LL * (p - 1) * y - getSum(sumYs, 1, p - 1);
+}
+
+void leftMove(long long &x, long long &y) ///y--
+{
+    y--;
+
+    long long p = binSearch1(ys, y);
+
+    solutionY = 0;
+    solutionY += getSum(sumYs, p, N) - 1LL * (N - p + 1) * y;
+    solutionY += 1LL * (p - 1) * y - getSum(sumYs, 1, p - 1);
+}
+
+void upMove(long long &x, long long &y) ///x++
+{
+    x++;
+
+    long long p = binSearch1(xs, x);
+
+  ///  cout << p << endl;
+
+    solutionX = 0;
+    solutionX += getSum(sumXs, p, N) - 1LL * (N - p + 1) * x;
+    solutionX += 1LL * (p - 1) * x - getSum(sumXs, 1, p - 1);
+}
+
+void downMove(long long &x, long long &y) ///x--
+{
+    x--;
+
+    long long p = binSearch1(xs, x);
+
+    solutionX = 0;
+    solutionX += getSum(sumXs, p, N) - 1LL * (N - p + 1) * x;
+    solutionX += 1LL * (p - 1) * x - getSum(sumXs, 1, p - 1);
+}
+
+long long brute(long long &x, long long &y)
+{
+    long long sum = 0;
+
+    for (long long i = 1; i <= N; ++i)
+    {
+        sum += abs(catcher[i].first - x);
+        sum += abs(catcher[i].second - y);
+    }
+
+    return sum;
+}
+
+int main()
+{
+
+    #ifndef ONLINE_JUDGE
+        ifstream cin("data.in");
+    #endif // ONLINE_JUDGE
+
+    ios_base::sync_with_stdio(false);
+
+    cin >> N >> M;
+
+    for (long long i = 1; i <= N; ++i)
+    {
+        cin >> catcher[i].first >> catcher[i].second;
+
+        catcher[i].first += 2000000;
+        catcher[i].second += 2000000;
+
+        xs[i] = catcher[i].first;
+        ys[i] = catcher[i].second;
+    }
+
+    sort(xs + 1, xs + N + 1);
+    sort(ys + 1, ys + N + 1);
+
+    for (long long i = 1; i <= N; ++i)
+    {
+        sumXs[i] = sumXs[i - 1] + xs[i];
+        sumYs[i] = sumYs[i - 1] + ys[i];
+    }
+
+    string S;
+    cin >> S;
+
+    long long x = 2000000, y = 2000000;
+    solutionX = solutionY = 0;
+
+    for (long long i = 1; i <= N; ++i)
+    {
+        solutionX += abs(x - catcher[i].first);
+        solutionY += abs(y - catcher[i].second);
+    }
+
+   // cout << solutionX << " " << solutionY << endl;
+
+    for (char c : S)
+    {
+        if (c == 'U')
+        {
+            rightMove(x, y); ///y++
+        }
+        else if (c == 'D')
+        {
+            leftMove(x, y); ///y--
+        }
+        else if (c == 'L')
+        {
+            downMove(x, y); ///x--
+        }
+        else
+        {
+            assert(c == 'R');
+            upMove(x, y); ///x++
+        }
+
+        cout << solutionX + solutionY << "\n";
+    }
+
+    return 0;
+}
+
+/**
+long long binSearch2(long long A[], long long key)
+{
+    long long l = 1, r = N;
+    long long found = 0;
+
+    while (l <= r)
+    {
+        long long m = (l + r) / 2;
+
+        if (A[m] < key)
+        {
+            found = m;
+            l = m + 1;
+        }
+        else
+            r = m - 1;
+    }
+
+    return found;
+}
+**/

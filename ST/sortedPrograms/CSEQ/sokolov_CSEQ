@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <vector>
+#include <utility>
+#include <algorithm>
+using namespace std;
+ 
+#define MAXN 100
+const int MOD = 1e6 + 3;
+ 
+int N, L, R, dp[MAXN + 3][MAXN + 3];
+int sum[MAXN + 3];
+vector<int> p;
+ 
+int rec(int last, int len)
+{
+    if (last < L || last > R) {
+        return 0;
+    }
+ 
+    if (len == 0) {
+        // for (int i = 0; i < (int)p.size(); i++) {
+            // printf("%d ", p[i]);
+        // }
+        // printf("\n");
+        return 1;
+    }
+ 
+    int ret = 0;
+    for (int k = last; k <= R; k++) {
+        // p.push_back(k);
+        ret += rec(k, len - 1);
+        // p.pop_back();
+    }
+    return ret;
+}
+ 
+int main(int argc, char * argv[])
+{
+#ifdef Home
+    freopen("inp.txt", "rb", stdin);
+#endif
+ 
+    int T;
+    scanf("%d", &T);
+    while (T--) {
+        memset(dp, 0, sizeof(dp));
+        scanf("%d %d %d", &N, &L, &R);
+       
+        for (int len = 0; len <= N; len++) {
+            for (int last = L; last <= R; last++) {
+                if (len == 0) {
+                    dp[last][len] = 1;
+                } else {
+                    int S = MOD - (last - 1 >= L ? sum[last - 1] : 0) + sum[R];
+                    S %= MOD;
+                    dp[last][len] = S;
+                }
+            }
+            for (int last = L; last <= R; last++) {
+                sum[last] = ((last - 1 >= L ? sum[last - 1] : 0) + dp[last][len]) % MOD;
+            }
+        }
+ 
+        int ans = 0;
+        for (int n = 1; n <= N; n++) {
+            for (int first = L; first <= R; first++) {
+                ans = (ans + dp[first][n - 1]) % MOD;
+                //ans = (ans + rec(first, n - 1)) % MOD;
+            }
+        }
+        printf("%d\n", ans);
+    }
+ 
+    return 0;
+}

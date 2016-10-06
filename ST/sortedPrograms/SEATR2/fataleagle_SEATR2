@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MOD=1000000007;
+
+int N, M;
+vector<int> adj[501];
+int dp[501][20001];
+int mx[501][20001];
+
+void addmod(int& x, int v)
+{
+    x+=v;
+    if(x>=MOD)
+        x-=MOD;
+}
+
+void dfs(int u, int p)
+{
+    int ch=0;
+    for(auto& v: adj[u]) if(v!=p)
+    {
+        ch++;
+        dfs(v, u);
+        for(int i=1; i<=M; i++)
+            for(int j=i; j<=M; j+=i)
+                addmod(mx[v][j], dp[v][i]);
+    }
+    if(ch==0)
+    {
+        dp[u][1]=1;
+        for(int i=2; i<=M; i++)
+            dp[u][i]=0;
+        return;
+    }
+    for(auto& v: adj[u]) if(v!=p)
+        for(int i=1; i<=M; i++)
+            addmod(mx[v][i], mx[v][i-1]);
+    for(int i=1; i<=M; i++)
+    {
+        int res=1;
+        for(auto& v: adj[u]) if(v!=p)
+            res=1LL*res*mx[v][i]%MOD;
+        dp[u][i]=res;
+    }
+    for(int i=M; i>=1; i--)
+        addmod(dp[u][i], MOD-dp[u][i-1]);
+}
+
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while(T--)
+    {
+        memset(mx, 0, sizeof mx);
+        scanf("%d%d", &N, &M);
+        for(int i=1; i<=N; i++)
+            adj[i].clear();
+        int a, b;
+        for(int i=0; i<N-1; i++)
+        {
+            scanf("%d%d", &a, &b);
+            adj[a].push_back(b);
+            adj[b].push_back(a);
+        }
+        dfs(1, 1);
+        int ans=0;
+        for(int i=1; i<=M; i++)
+            ans=(ans+1LL*M/i*dp[1][i])%MOD;
+        printf("%d\n", ans);
+    }
+    return 0;
+}

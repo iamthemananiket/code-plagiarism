@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MOD=1000000007;
+int N, K;
+char A[1002];
+char B[1002];
+int nxtA[26][1002];
+int nxtB[26][1002];
+int dp[1002][1002];
+int lcs[1002][1002];
+
+void add(int& x, int v)
+{
+    x+=v;
+    if(x>=MOD)
+        x=MOD;
+}
+
+int main()
+{
+    scanf("%d%d", &N, &K);
+    scanf("%s", A+1);
+    scanf("%s", B+1);
+    memset(nxtA, -1, sizeof nxtA);
+    memset(nxtB, -1, sizeof nxtB);
+    for(int i=1; i<=N; i++)
+        nxtA[A[i]-'a'][i]=i;
+    for(int i=1; i<=N; i++)
+        nxtB[B[i]-'a'][i]=i;
+    for(int i=0; i<26; i++)
+    {
+        for(int j=N-1; j>=1; j--)
+        {
+            if(nxtA[i][j]==-1)
+                nxtA[i][j]=nxtA[i][j+1];
+            if(nxtB[i][j]==-1)
+                nxtB[i][j]=nxtB[i][j+1];
+        }
+    }
+    for(int i=N; i>=1; i--)
+    {
+        for(int j=N; j>=1; j--)
+        {
+            if(A[i]==B[j])
+                lcs[i][j]=1+lcs[i+1][j+1];
+            else
+                lcs[i][j]=max(lcs[i+1][j], lcs[i][j+1]);
+        }
+    }
+    for(int i=N+1; i>=1; i--)
+    {
+        for(int j=N+1; j>=1; j--)
+        {
+            if(lcs[i][j]==0)
+                dp[i][j]=1;
+            else
+            {
+                for(int k=0; k<26; k++)
+                {
+                    int pa=nxtA[k][i], pb=nxtB[k][j];
+                    if(pa!=-1 && pb!=-1 && lcs[i][j]==lcs[pa+1][pb+1]+1)
+                        add(dp[i][j], dp[pa+1][pb+1]);
+                }
+            }
+        }
+    }
+    if(K>dp[1][1])
+        printf("-1\n");
+    else
+    {
+        K--;
+        string ans;
+        int sa=1, sb=1;
+        for(int t=0; t<lcs[1][1]; t++)
+        {
+            for(int i=0; i<26; i++)
+            {
+                int na=nxtA[i][sa];
+                int nb=nxtB[i][sb];
+                if(lcs[na+1][nb+1]+1==lcs[sa][sb])
+                {
+                    if(K<dp[na+1][nb+1])
+                    {
+                        ans+=i+'a';
+                        sa=na+1;
+                        sb=nb+1;
+                        break;
+                    }
+                    else
+                        K-=dp[na+1][nb+1];
+                }
+            }
+        }
+        printf("%s\n", ans.c_str());
+    }
+    return 0;
+}

@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+#define pb push_back
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    char c = getchar_unlocked();
+    int x = 0;
+    while(c < '0' || c > '9'){
+        c = getchar_unlocked();
+    }
+    while(c >= '0' && c <= '9'){
+        x = (x<<1) + (x<<3) + c - '0';
+        c = getchar_unlocked();
+    }
+    return x;
+}
+const int N = 100001;
+int t;
+char arr[N];
+int cnt[26]={0};
+int main(){
+    t = scan();
+    while(t--){
+        scanf("%s",arr);
+        memset(cnt,0,sizeof(int)*26);
+        int n = strlen(arr);
+        int mx = (n+1)/2;
+        bool b = 0;
+        for(int i = 0 ; i < n ; ++i){
+            cnt[arr[i] - 'a'] ++;
+            if(cnt[arr[i] - 'a'] > mx){
+                b = 1;
+            }
+        }
+        if(b){
+            printf("-1\n");
+        }
+        else{
+            priority_queue<pair < int , int > > pq;
+            for(int i = 0 ; i < 26 ; ++i){
+                if(cnt[i]){
+                    pq.push(mp(cnt[i] , i));
+                }
+            }
+            printf("%c",pq.top().second + 'a');
+            int last = pq.top().second;
+            cnt[last] --;
+            pq.pop();
+            for(int i = 1 ; i < n ; ++i){
+                int ch = pq.top().second;
+                pq.pop();
+                printf("%c",ch + 'a');
+                cnt[ch]--;
+                if(cnt[last]){
+                    pq.push(mp(cnt[last],last));
+                }
+                last = ch;
+            }
+            printf("\n");
+        }
+    }
+}

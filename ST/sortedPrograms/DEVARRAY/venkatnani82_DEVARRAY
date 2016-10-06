@@ -1,0 +1,17 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+    int n, q, x;
+    int maxi = 0, mini = 2e9;
+    cin >> n>> q;
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &x);
+        maxi = max(maxi, x);
+        mini = min(mini, x);
+    }
+    while(q--) {
+        scanf("%d", &x);
+        if(x >= mini && x <= maxi) printf("Yes\n");
+        else printf("No\n");
+    }
+}

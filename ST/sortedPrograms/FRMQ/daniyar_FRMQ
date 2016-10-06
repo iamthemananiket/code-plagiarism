@@ -1,0 +1,76 @@
+//g++ -std=c++0x your_file.cpp -o your_program
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#include<math.h>
+#include<vector>
+#include<cstring>
+#include<cstdio>
+#include<cstdlib>
+#include<queue>
+#include<map>
+#include<set>
+#define fname ""
+#define mp make_pair
+#define F first
+#define pb push_back
+#define S second
+#define ub upper_bound
+#define lb lower_bound
+#define inf 2000000000
+#define INF 2000000000000000000ll
+using namespace std;
+
+const int maxn = 101010;
+
+int t[20][maxn];
+
+int deg[maxn];
+
+inline int get(int l, int r)
+{
+	if (l <= r)
+		return max(t[deg[r - l + 1]][l], t[deg[r - l + 1]][r - (1 << deg[r - l + 1]) + 1]);
+	else
+		return max(t[deg[l - r + 1]][r], t[deg[l - r + 1]][l - (1 << deg[l - r + 1]) + 1]);
+}
+
+int main()
+{
+	#ifndef ONLINE_JUDGE
+	freopen (fname".in", "r", stdin);
+	freopen (fname".out", "w", stdout);
+	#endif
+	int n;
+	cin >> n;
+	for (int i = 0; i < n; i++)
+		scanf("%d", &t[0][i]);
+	for (int l = 1; l <= 17; l++)
+		for (int i = 0; i + (1 << l) - 1 < n; i++)
+			t[l][i] = max(t[l - 1][i], t[l - 1][i + (1 << (l - 1))]);
+	deg[1] = 0;
+	for (int i = 2; i <= n; i++)
+	{
+		deg[i] = deg[i - 1];
+		if ((1 << (deg[i] + 1)) == i)
+			deg[i]++;
+	}
+	int m, x, y, x2, y2;
+	long long ans = 0;
+	cin >> m >> x >> y;
+	x2 = (7 % (n - 1));
+	y2 = (11 % n);
+	for (int i = 1; i <= m; i++)
+	{
+		ans += get(x, y);
+		x += x2;
+		y += y2;
+		if (x >= n - 1)
+			x -= n - 1;
+		if (y >= n)
+			y -= n;
+	}
+	cout << ans;
+	return 0;
+}

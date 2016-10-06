@@ -1,0 +1,65 @@
+/*
+*
+* File: stuff.cpp
+* Author: Andy Y.F. Huang (azneye)
+* Created on Aug 23, 2014, 11:50:25 PM
+*/
+ 
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+ll dp[111][111];
+int val[111];
+ 
+ll rec(int l, int r) {
+if (r < l)
+return 1;
+ll& res = dp[l][r];
+if (~res)
+return res;
+res = rec(l + 1, r); //don't match first
+for (int i = l + 1; i <= r; i++)
+if (val[l] < 0 && -val[l] == val[i])
+res += rec(l + 1, i - 1) * rec(i + 1, r) % MOD;
+res %= MOD;
+return res;
+}
+ 
+void solve(int test_num) {
+int N;
+cin >> N;
+for (int i = 0; i < N; i++)
+cin >> val[i];
+memset(dp, -1, sizeof(dp));
+const ll res = rec(0, N - 1);
+cout << res << endl;
+}
+ 
+void solve() {
+#ifdef AZN
+freopen("input.txt", "r", stdin);
+freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+double start_t = clock();
+#endif
+ios::sync_with_stdio(false);
+cin.tie(NULL);
+int T = 1;
+//cin >> T;
+for (int t = 1; t <= T; t++)
+solve(t);
+#ifdef AZN
+pln("Took:", (clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+ 
+int main() {
+stuff::solve();
+return 0;
+}
+ 

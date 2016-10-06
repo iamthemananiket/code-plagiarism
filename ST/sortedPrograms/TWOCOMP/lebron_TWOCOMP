@@ -1,0 +1,214 @@
+/*
+*/
+ 
+#pragma comment(linker, "/STACK:16777216")
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <complex>
+#include <math.h>
+#include <set>
+#include <vector>
+#include <map>
+#include <queue>
+#include <stdio.h>
+#include <stack>
+#include <algorithm>
+#include <list>
+#include <ctime>
+#include <memory.h>
+ 
+#define y0 sdkfaslhagaklsldk
+#define y1 aasdfasdfasdf
+#define yn askfhwqriuperikldjk
+#define j1 assdgsdgasghsf
+#define tm sdfjahlfasfh
+#define lr asgasgash
+ 
+#define eps 1e-11
+//#define M_PI 3.141592653589793
+#define bs 1000000007
+#define bsize 256
+ 
+using namespace std;
+ 
+vector<long> g[200000],s[200000];
+set<long> sett[200000];
+long ps[200000];
+vector<long> del;
+set<long>::iterator it;
+long m1,m2;
+long c[2000][2000],f[2000][2000];
+long n,a,b;
+long cc;
+long q[20000],d[200000],ss,t,ptr[200000];
+long tcost;
+long ov[3000];
+ 
+void merg(long a,long b)
+{
+ if (a>b)swap(a,b);
+ if (a>=m1||b<m1)return;
+// cout<<a<<" %"<<b<<endl;
+ c[a+1][b+1]=1e9;
+}
+ 
+void solve(long v,long p)
+{
+ long max1,v1;
+ max1=v1=-1;
+ for (int i=0;i<g[v].size();i++)
+ {
+  long to=g[v][i];
+  if (to==p)continue;
+  solve(to,v);
+  long c=sett[ps[to]].size();
+  if (c>max1)max1=c,v1=to;
+ }
+// cout<<v<<"   "<<max1<<endl;
+ if (max1==-1)//no sns
+ {
+  ps[v]=v;
+  for (int i=0;i<s[v].size();i++)
+   if (ov[s[v][i]]==0)sett[v].insert(s[v][i]);
+  
+  for (int i=0;i<s[v].size();i++)
+   for (int j=i+1;j<s[v].size();j++)
+    merg(s[v][i],s[v][j]);
+    
+  return;
+ }
+ del.clear();
+ ps[v]=ps[v1];
+ for (int i=0;i<g[v].size();i++)
+ {
+  long to=g[v][i];
+  if (to==p||to==v1)continue;
+  for (it=sett[ps[to]].begin();it!=sett[ps[to]].end();++it)// merg
+    if (sett[ps[v]].find(*it)!=sett[ps[v]].end())
+     del.push_back(*it);
+  for (it=sett[ps[to]].begin();it!=sett[ps[to]].end();++it)
+   sett[ps[v]].insert(*it);
+ }
+ 
+ for (int i=0;i<s[v].size();i++)
+  if (sett[ps[v]].find(s[v][i])!=sett[ps[v]].end())// a|b = lca(a,b)
+   del.push_back(s[v][i]);
+ 
+ for (int i=0;i<s[v].size();i++) 
+  sett[ps[v]].insert(s[v][i]);
+ 
+ for (int i=0;i<s[v].size();i++)
+  if (ov[s[v][i]]==1&&(i==0||s[v][i]!=s[v][i-1]))del.push_back(s[v][i]);
+  
+ for (it=sett[ps[v]].begin();it!=sett[ps[v]].end();it++)
+  for (int i=0;i<del.size();i++)
+  {
+   merg(del[i],(*it));
+  }
+ for (int i=0;i<del.size();i++)
+  sett[ps[v]].erase(del[i]);
+ /*for (it=sett[ps[v]].begin();it!=sett[ps[v]].end();++it)
+  cout<<(*it)<<"  ";
+  cout<<"%%%"<<v<<endl;
+  */
+}
+ 
+bool bfs()
+{
+ long qh,qt;
+ q[0]=ss;
+ qt=1,qh=0;
+ for (int i=0;i<=1500;i++)
+  d[i]=-1;
+  d[ss]=0;
+ while (qh<qt)
+ {
+  long v=q[qh];++qh;
+  for (int to=0;to<1500;to++)
+   if (d[to]==-1&&f[v][to]<c[v][to])
+   {
+    q[qt]=to;++qt;
+    d[to]=d[v]+1;
+   }
+ }
+ return d[t]!=-1;
+}
+ 
+long dfs(long v,long flow)
+{
+ if (flow==0||v==t)return flow;
+ for (long &to=ptr[v];to<1500;to++)
+ {
+  if (d[to]!=d[v]+1)continue;
+  long pushed=dfs(to,min(flow,c[v][to]-f[v][to]));
+  if (pushed==0)continue;
+  f[v][to]+=pushed;
+  f[to][v]-=pushed;
+  return pushed;
+ }
+ return 0;
+}
+ 
+long dinic()
+{
+ long flow=0;
+ while (true)
+ {
+  if (!bfs())break;
+  for (int i=0;i<1500;i++)ptr[i]=0;
+  while (true)
+  {
+   long pushed=dfs(ss,1e9);
+   if(pushed==0)break;
+   flow+=pushed;
+  }
+ }
+ return flow; 
+}
+ 
+int main(){
+//freopen("trade.in","r",stdin);
+//freopen("trade.out","w",stdout);
+//freopen("C:/input.txt","r",stdin);
+//freopen("C:/output.txt","w",stdout);
+ios_base::sync_with_stdio(0);
+//cin.tie(0);
+ 
+cin>>n>>m1>>m2;
+for (int i=1;i<n;i++)
+{
+ cin>>a>>b;
+ g[a].push_back(b);
+ g[b].push_back(a);
+}
+ 
+for (int i=0;i<m1;i++)
+{
+ cin>>a>>b;
+ s[a].push_back(i);
+ s[b].push_back(i);
+ if (a==b)ov[i]=1;
+ cin>>a;
+ c[0][i+1]=a;
+ tcost+=a;
+}
+ 
+for (int i=0;i<m2;i++)
+{
+ cin>>a>>b;
+ if (a==b)ov[i+m1]=1;
+ s[a].push_back(i+m1);
+ s[b].push_back(i+m1);
+ cin>>a;
+ tcost+=a;
+ c[i+m1+1][m1+m2+1]=a;
+}
+ 
+solve(1,-1);
+ss=0;
+t=m1+m2+1;
+cout<<tcost-dinic()<<endl;
+ 
+cin.get();cin.get();
+return 0;}

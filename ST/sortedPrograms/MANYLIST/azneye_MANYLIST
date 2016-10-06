@@ -1,0 +1,120 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+struct Add {
+  int l, r, id;
+
+  bool operator<(const Add& o) const {
+    return l < o.l;
+  }
+};
+typedef long long ll;
+const int MAX = 255000;
+int type[MAX], arg1[MAX], arg2[MAX], arg3[MAX];
+vector<Add> adds[MAX];
+vector<pair<int, int>> quest[MAX];
+int bit[MAX];
+
+void add(int l, int r) {
+  for (int i = l; i < MAX; i += i & -i) {
+    ++bit[i];
+  }
+  for (int i = r + 1; i < MAX; i += i & -i) {
+    --bit[i];
+  }
+}
+
+int get(int pos) {
+  int res = 0;
+  for (int i = pos; i > 0; i -= i & -i) {
+    res += bit[i];
+  }
+  return res;
+}
+
+void solve(int test_num) {
+  int N, Q;
+  cin >> N >> Q;
+  for (int q = 0; q < Q; ++q) {
+    cin >> type[q] >> arg1[q];
+    if (type[q] == 0) {
+      cin >> arg2[q] >> arg3[q];
+      adds[arg3[q]].push_back( { arg1[q], arg2[q], q });
+    }
+  }
+  for (int x = 1; x <= N; ++x) {
+    static priority_queue<pair<int, int>> pq; //(-end, time)
+    static set<int> cur;
+    sort(adds[x].begin(), adds[x].end());
+    int pred = 1;
+    for (const auto& add : adds[x]) {
+      while (!pq.empty() && -pq.top().first < add.l) {
+        quest[*cur.begin()].push_back( { pred, -pq.top().first });
+        cur.erase(pq.top().second);
+        pred = -pq.top().first + 1;
+        pq.pop();
+      }
+      if (!cur.empty()) {
+        quest[*cur.begin()].push_back( { pred, add.l - 1 });
+      }
+      pred = add.l;
+      pq.push( { -add.r, add.id });
+      cur.insert(add.id);
+    }
+    while (!pq.empty()) {
+      quest[*cur.begin()].push_back( { pred, -pq.top().first });
+      cur.erase(pq.top().second);
+      pred = -pq.top().first + 1;
+      pq.pop();
+    }
+  }
+  memset(bit, 0, sizeof(bit));
+  for (int q = 0; q < Q; ++q) {
+    if (type[q] == 0) {
+      for (const auto& seg : quest[q]) {
+        //pln(seg);
+        if (seg.first <= seg.second) {
+          add(seg.first, seg.second);
+        }
+      }
+    } else {
+      const int res = get(arg1[q]);
+      cout << res << endl;
+    }
+  }
+}
+
+void solve() {
+#ifdef AZN
+//make_case();
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << fixed << setprecision(3) << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

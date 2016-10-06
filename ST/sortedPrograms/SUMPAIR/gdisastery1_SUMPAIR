@@ -1,0 +1,55 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAXN = 1e5 + 10;
+
+int T, N, D;
+int A[MAXN];
+ll F[MAXN];
+
+int main()
+{
+    scanf("%d", &T);
+    while(T--)
+    {
+        scanf("%d%d", &N, &D);
+        for(int i = 0; i < N; i++)
+            scanf("%d", A + i);
+        sort(A, A + N);
+
+        for(int i = 2; i <= N; i++)
+        {
+            F[i] = F[i - 1];
+            if(i >= 2 && A[i-1]-A[i-2] < D)
+                F[i] = max(F[i], F[i-2] + A[i-1] + A[i-2]);
+        }
+
+//        for(int i = 1; i <= N; i++)
+//            printf("%d ", F[i]); puts("");
+
+        printf("%lld\n", F[N]);
+    }
+
+    return 0;
+}

@@ -1,0 +1,149 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+// Numeric Constants
+#define N 1000000007
+#define maxs 200005
+#define mins 1005
+#define eps 0.000000000001
+#define imax 2000000200
+#define llmax 1000000002000000000ll
+#define pi 3.141592653589793
+
+// Others
+#define ll long long
+#define pb push_back
+#define gc getchar_unlocked
+#define iosbase ios_base::sync_with_stdio(false)
+#define pii pair<int,int>
+#define pll pair<ll,ll>
+#define ppi pair<pii,int>
+#define ppl pair<pll,ll>
+#define vi vector<int>
+#define sc scanf
+#define pr printf
+#define lld I64d
+#define F first
+#define S second
+#define siter set<int>::iterator
+#define p_pq priority_queue
+#define ub upper_bound
+#define lb lower_bound
+
+int sz,n;
+set<int>st;
+ll ans,temp;
+int cnt[1000005],a[50005];
+ll ans1[50005];
+ppi quer[50005];
+
+bool comp(ppi p1,ppi p2){
+	int b1=p1.F.F/sz,b2=p2.F.F/sz;
+	if(b1<b2){
+		return true;
+	}
+	else if(b1>b2){
+		return false;
+	}
+	return p1.F.S<p2.F.S;
+}
+
+void add(int ind){
+	cnt[a[ind]]++;
+	if(cnt[a[ind]]==1){
+		if(st.size()!=0){
+			siter it=st.upper_bound(a[ind]);
+			siter it1=it,it2=it;
+			if(it!=st.end()){
+				temp=(*it)-a[ind];
+				ans+=(ll)temp*temp;
+			}
+			if(it!=st.begin()){
+				it--;
+				temp=a[ind]-(*it);
+				ans+=(ll)temp*temp;
+			}
+			if(it1!=st.end() && it2!=st.begin()){
+				temp=(*it1)-(*it);
+				ans-=(ll)temp*temp;
+			}
+		}
+		st.insert(a[ind]);
+	//	cout<<ans<<" "<<" -1 "<<ind<<endl;
+	}
+}
+
+void remove(int ind){
+	cnt[a[ind]]--;
+	int fl=0;
+	if(cnt[a[ind]]==0){
+		siter it=st.lower_bound(a[ind]);
+		siter it1=it;
+		if(it!=st.begin()){
+			it--;
+			temp=a[ind]-(*it);
+			ans-=(ll)temp*temp;
+			fl++;
+		}
+		it1++;
+		if(it1!=st.end()){
+			temp=(*it1)-a[ind];
+			ans-=(ll)temp*temp;
+			fl++;
+		}
+		if(fl==2){
+			temp=(*it1)-(*it);
+			ans+=temp*temp;
+		}
+		st.erase(a[ind]);
+	//	cout<<ans<<" "<<" -2 "<<ind<<endl;
+	}
+}
+
+int main()
+{
+	int m,i,currR,currL;
+	sc("%d",&n);
+	sz=sqrt(n);
+	for(i=0;i<n;i++){
+		sc("%d",&a[i]);
+	}
+	sc("%d",&m);
+	for(i=0;i<m;i++){
+		sc("%d %d",&quer[i].F.F,&quer[i].F.S);
+		quer[i].F.F-=1;
+		quer[i].F.S-=1;
+		quer[i].S=i;
+	}
+	sort(quer,quer+m,comp);
+	ans=0;
+	add(0);
+	currL=0;
+	currR=0;
+	for(i=0;i<m;i++){
+		int l=quer[i].F.F;
+		int r=quer[i].F.S;
+		while(currL<l){
+			remove(currL);
+			currL++;
+		}
+		while(currL>l){
+			currL--;
+			add(currL);
+		}
+		while(currR<r){
+			currR++;
+			add(currR);
+		}
+		while(currR>r){
+			remove(currR);
+			currR--;
+		}
+		//cout<<l<<" "<<r<<" "<<currL<<" "<<currR<<" "<<quer[i].S<<endl;
+		ans1[quer[i].S]=ans;
+	}
+	for(i=0;i<m;i++){
+		pr("%lld\n",ans1[i]);
+	}
+	return 0;
+}

@@ -1,0 +1,199 @@
+#include <cstdio>
+#include <vector>
+
+using namespace std;
+
+int intervconstructcall;
+
+struct interv {
+    int l,r;
+    long long o[3];
+    long long e[3];
+    long long b[3];
+    long long c[3];
+    interv* left;
+    interv* right;
+    interv* par;
+    interv() {
+        intervconstructcall++;
+        l = 0;
+        r = -1;
+        o[0] = 0;
+        o[1] = 0;
+        o[2] = 0;
+        b[0] = 0;
+        b[1] = 0;
+        b[2] = 0;
+        e[0] = 0;
+        e[1] = 0;
+        e[2] = 0;
+        c[0] = 0;
+        c[1] = 0;
+        c[2] = 0;
+        left = NULL;
+        right = NULL;
+        par = NULL;
+    }
+};
+
+int n,m;
+
+int a[100000];
+interv* interb[100000];
+interv* root;
+
+int c,d,x,y,t;
+
+int recalccall;
+
+void recalc(interv* inter,bool goup) {
+    recalccall++;
+    if(inter == NULL) return;
+    for(int i=0; i<3; i++) {
+        inter->o[i] = 0;
+        inter->b[i] = 0;
+        inter->e[i] = 0;
+        inter->c[i] = 0;
+    }
+    if(inter->left == NULL) {
+        inter->o[a[inter->l]%3] = 1;
+        inter->b[a[inter->l]%3] = 1;
+        inter->e[a[inter->l]%3] = 1;
+        inter->c[a[inter->l]%3] = 1;
+    } else {
+        for(int i=0; i<3; i++) {
+            inter->b[i] += inter->left->b[i];
+            inter->e[i] += inter->right->e[i];
+            inter->c[i] += inter->left->c[i] + inter->right->c[i];
+            for(int j=0; j<3; j++) {
+                inter->o[(i+j)%3] += inter->left->o[i] * inter->right->o[j];
+                inter->c[(i+j)%3] += inter->left->e[i] * inter->right->b[j];
+                inter->b[(i+j)%3] += inter->left->o[i] * inter->right->b[j];
+                inter->e[(i+j)%3] += inter->left->e[i] * inter->right->o[j];
+            }
+        }
+    }
+    if(goup) recalc(inter->par,goup);
+}
+
+int recalcallcall;
+
+void recalcall(interv* inter) {
+    recalcallcall++;
+    if(inter == NULL) return;
+    recalcall(inter->left);
+    recalcall(inter->right);
+    recalc(inter,0);
+}
+
+int buildcall;
+
+interv* build(int l, int r) {
+    buildcall++;
+    interv* inter = new interv();
+    inter->l = l; inter->r = r;
+    if(l != r) {
+        inter->left = build(l,(l+r)/2);
+        inter->right = build(((l+r)/2)+1,r);
+        inter->left->par = inter;
+        inter->right->par = inter;
+    } else {
+        interb[l] = inter;
+    }
+    return inter;
+}
+
+int nullretvectorcall;
+
+void nullretvector(long long ret[4][3]) {
+    nullretvectorcall++;
+    for(int i=0; i<4; i++) {
+        for(int j=0; j<3; j++) {
+            ret[i][j] = 0;
+        }
+    }
+}
+
+int calccall;
+
+void calc(interv* inter, int l, int r,long long ret[4][3]) {
+    calccall++;
+    //printf("cerr << calc(inter(%d,%d),%d,%d)\n",inter->l,inter->r,l,r);
+    if((inter->l >= l) && (inter->r <= r)) {
+        for(int i=0; i<3; i++) {
+            ret[0][i] = inter->o[i];
+            ret[1][i] = inter->b[i];
+            ret[2][i] = inter->e[i];
+            ret[3][i] = inter->c[i];
+        }
+        return;
+    }
+
+    if((r < inter->l) || (l > inter->r)) {
+        nullretvector(ret);
+        return;
+    }
+
+    long long lret[4][3];
+    calc(inter->left,l,r,lret);
+    long long rret[4][3];
+    calc(inter->right,l,r,rret);
+
+    for(int i=0; i<4; i++) {
+        for(int j=0; j<3; j++) {
+            ret[i][j] = 0;
+        }
+    }
+
+    for(int i=0; i<3; i++) {
+        ret[1][i] += lret[1][i];
+        ret[2][i] += rret[2][i];
+        ret[3][i] += lret[3][i] + rret[3][i];
+        for(int j=0; j<3; j++) {
+            ret[0][(i+j)%3] += lret[0][i] * rret[0][j];
+            ret[3][(i+j)%3] += lret[2][i] * rret[1][j];
+            ret[1][(i+j)%3] += lret[0][i] * rret[1][j];
+            ret[2][(i+j)%3] += lret[2][i] * rret[0][j];
+        }
+    }
+}
+
+int main()
+{
+    scanf("%d%d",&n,&m);
+    root = build(0,n-1);
+
+    scanf("\n");
+    for(int i=0; i<n; i++) {
+        char cc;
+        scanf("%c",&cc);
+        a[i] = cc-'0';
+    }
+    recalcall(root);
+
+    for(int i=0; i<m; i++) {
+        scanf("%d",&t);
+        if(t-1) {
+            scanf("%d%d",&c,&d);
+            c--; d--;
+            long long ret[4][3];
+            calc(root,c,d,ret);
+            printf("%lld\n",ret[3][0]);
+        } else {
+            scanf("%d%d",&x,&y);
+            x--;
+            a[x] = y;
+            recalc(interb[x],1);
+        }
+    }
+
+    /*printf("///////////////////////////////////////\n");
+    printf("interv constructor: %d\n",intervconstructcall);
+    printf("recalc(): %d\n",recalccall);
+    printf("recalcall(): %d\n",recalcallcall);
+    printf("build(): %d\n",buildcall);
+    printf("nullretvector(): %d\n",nullretvectorcall);
+    printf("calc(): %d\n",calccall);*/
+
+    return 0;
+}

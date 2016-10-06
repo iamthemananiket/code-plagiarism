@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define mod 1000000007
+#define mp make_pair
+using namespace std;
+
+int en[2005];
+
+struct node
+{
+	int count;
+	node *left, *right;
+
+	node(int count, node *left, node *right):
+		count(count), left(left), right(right) {}
+
+	node* insert(int l, int r, int w);
+};
+
+node *null = new node(0, NULL, NULL); 
+
+node * node::insert(int l, int r, int w)
+{
+	
+	if(l>r || l>w || r<w)return this;
+	
+	if(l == r)
+		{
+			return new node(this->count+1, null, null);
+		}
+	if(l <= w && w <= r)
+	{
+		
+
+		int m = (l+r)>>1;
+		
+		if(this->left==NULL)this->left=new node(0,NULL,NULL);
+		if(this->right==NULL)this->right=new node(0,NULL,NULL);
+
+		return new node(this->count+1, this->left->insert(l, m, w), this->right->insert(m+1, r, w));
+	}
+	
+	return this;
+}
+
+int query(node *a,int l, int r, int k)
+{
+	if(a==NULL || l>r || l>k || r<k)return 0;
+	
+	if(l == r)
+	{
+		return a->count;
+	}
+
+	int m = (l+r)>>1;
+	
+	int rt=0;
+	if(a->right!=NULL)rt=a->right->count;
+	
+	if(m >= k)
+		return query(a->left,l, m, k)+ rt;
+
+	return query(a->right,m+1, r, k);
+}
+
+
+node *root[2005];
+
+
+
+
+int t,n;
+
+int main() {
+	ios_base::sync_with_stdio(false);
+	
+	cin>>t;
+	
+	while(t--)
+	{
+		
+		cin>>n;
+		
+		for(int i=0;i<=2001;i++)en[i]=-1;
+		
+		int v1,v2;
+		
+		for(int i=0;i<n;i++)
+		{
+			cin>>v1>>v2;
+			
+			en[v2]=max(en[v2],v1);
+		}
+		
+		int ans[2005]={0};
+		
+		root[0]=new node(0,NULL,NULL);
+		if(en[0]>=0){ ans[0]=1; root[0]->insert(0,2000,0);}
+		
+		for(int i=1;i<=2000;i++)
+		{
+			if(en[i]==-1)root[i]=root[i-1];
+			else
+			{
+				root[i]=root[i-1]->insert(0,2000,en[i]);
+			}
+		}
+		
+		//cout<<ans<<" ";
+		
+		for(int i=1;i<=2000;i++)
+		{
+			if(en[i]==-1 || query(root[i-1],0,2000,en[i])>0)
+			{
+				ans[i]=ans[i-1];
+				
+			}
+			else
+			{
+				if(en[i]>0)ans[i]=1+ans[en[i]-1];
+				else ans[i]=1;
+				
+			}
+		}
+		
+		cout<<ans[2000]<<"\n";
+	}
+	
+	return 0;
+}

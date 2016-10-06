@@ -1,0 +1,213 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+ll gcd(ll a, ll b) {ll r; while (b != 0) {r = a % b; a = b; b = r;} return a;}
+ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+#define EPS 1e-9
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = 2 * acos((ld) 0);
+ 
+const int maxn = 100010;
+const ll prim = 13;
+int n;
+vii adj[maxn];
+int del[maxn];
+int p[maxn];
+int child[maxn];
+int prv[maxn];
+int lev[maxn];
+int HASH1[maxn];
+int HASH2[maxn];
+int pw[maxn];
+int rp[maxn];
+unordered_map<int, int> tb[2][maxn];
+vii vh[2];
+ 
+int dmax;
+int lmax, imax;
+int size[maxn];
+void dfs(int u, int p) {
+	if (lmax < lev[u]) {
+		lmax = lev[u];
+		imax = u;
+	}
+	size[u] = 1;
+	for (int i = 0; i < adj[u].size(); i++) {
+		int v = adj[u][i].fi;
+		if (v != p && !del[v]) {
+			lev[v] = lev[u] + 1;
+			dfs(v, u);
+			size[u] += size[v];
+		}
+	}
+}
+int findcenter(int u) {
+	int p = -1; dfs(u, -1);
+	int cap = size[u] >> 1;
+	while (1) {
+		bool found = false;
+		for (int i = 0; i < adj[u].size(); i++) {
+			int v = adj[u][i].fi;
+			if (v != p && size[v] > cap && !del[v]) {
+				found = true;
+				p = u; u = v;
+				break;
+			}
+		}
+		if (!found) return u;
+	}
+}
+int diameter(int u) {
+	lmax = 0; imax = u; lev[u] = 0; dfs(u, - 1);
+	lmax = 0; lev[imax] = 0; dfs(imax, -1);
+	return lmax;
+}
+ 
+int exp(int n, int k, int mod) {
+	if (!k) return 1;
+	if (k & 1) return 1LL * n * exp(n, k - 1, mod) % mod;
+	int t = exp(n, k >> 1, mod);
+	return 1LL * t * t % mod;
+}
+ 
+void clear() {
+	FOR(i, 0, 2) {
+		FOR(j, 0, dmax + 1) tb[i][j].clear();
+		vh[i].clear();
+	}
+	dmax = 0;
+}
+ 
+int go(int u, int m, int k, int dad) {
+	if (k > m) return 0;
+	if (m <= 2 * k) {
+		while (lev[prv[u]] < 2 * k - m) prv[u] = child[prv[u]];
+		if (HASH1[prv[u]] == HASH2[prv[u]]) {
+			dmax = max(dmax, m - k);
+			int r = 1LL * (HASH2[u] - HASH2[prv[u]] + MOD) * rp[2 * k - m] % MOD;
+			if (tb[1][m - k][r]) return 1;
+			if (m == 2 * k && tb[0][m - k][r]) {
+				return 1;
+			}
+			vh[0].pb(mp(m - k, r));
+		}
+	}
+	else {
+		dmax = max(dmax, k);
+		if (tb[0][k][HASH2[u]]) return 1;
+		vh[1].pb(mp(k, HASH2[u]));
+	}
+	FOR(i, 0, sz(adj[u])) {
+		int v = adj[u][i].fi;
+		int c = adj[u][i].se;
+		if (v != dad && !del[v]) {
+			p[v] = u; child[u] = v; lev[v] = lev[u] + 1;
+			HASH1[v] = (prim * HASH1[u] + c) % MOD;
+			HASH2[v] = (HASH2[u] + 1LL * pw[k] * c) % MOD;
+			prv[v] = prv[u];
+			if (go(v, m, k + 1, u)) return 1;
+		}
+	}
+	return 0;
+}
+ 
+int work(int u, int m) {
+	clear();
+	int r = findcenter(u);
+	p[r] = prv[r] = r;
+	lev[r] = HASH1[r] = HASH2[r] = 0;
+	tb[1][0][0] = 1;
+	FOR(i, 0, sz(adj[r])) {
+		int v = adj[r][i].fi;
+		int c = adj[r][i].se;
+		if (!del[v]) {
+			p[v] = prv[v] = r; child[r] = v; lev[v] = lev[r] + 1;
+			HASH1[v] = HASH2[v] = c;
+			if (go(v, m, 1, r)) return 1;
+			FOR(j, 0, 2) {
+				while (sz(vh[j])) {
+					pi p = vh[j].back();
+					tb[j][p.fi][p.se] = 1;
+					vh[j].pop_back();
+				}
+			}
+		}
+	}
+	del[r] = 1;
+	FOR(i, 0, sz(adj[r])) {
+		int v = adj[r][i].fi;
+		if (!del[v]) {
+			if (diameter(v) < m) continue;
+			if (work(v, m)) return 1;
+		}
+	}
+	return 0;
+}
+ 
+void solve() {
+	pw[0] = 1; FOR(i, 1, maxn) pw[i] = pw[i - 1] * prim % MOD;
+	ll rev = exp(prim, MOD - 2, MOD);
+	rp[0] = 1; FOR(i, 1, maxn) rp[i] = rp[i - 1] * rev % MOD;
+	int T; scanf("%d", &T);
+	while (T--) {
+		scanf("%d", &n);
+		FOR(i, 0, n) adj[i].clear();
+		FOR(i, 0, n - 1) {
+			int u, v, c; scanf("%d%d%d", &u, &v, &c); u--; v--;
+			adj[u].pb(mp(v, c)); adj[v].pb(mp(u, c));
+		}
+		FOR(i, 0, n) del[i] = 0;
+		int ans = 1, d = diameter(0);
+		int l = 0, r = d / 2;
+		while (l < r) {
+			int m = (l + r + 1) >> 1;
+			FOR(i, 0, n) del[i] = 0;
+			if (work(0, 2 * m)) l = m; else r = m - 1;
+		}
+		FOR(i, 0, n) del[i] = 0;
+		if (work(0, 2 * l)) ans = max(ans, 2 * l + 1);
+		l = 0, r = (d - 1) / 2;
+		while (l < r) {
+			if (2 * r + 2 < ans) break;
+			int m = (l + r + 1) >> 1;
+			FOR(i, 0, n) del[i] = 0;
+			if (work(0, 2 * m + 1)) l = m; else r = m - 1;
+		}
+		FOR(i, 0, n) del[i] = 0;
+		if (work(0, 2 * l + 1)) ans = max(ans, 2 * l + 2);
+		printf("%d\n", ans);
+	}
+}
+ 
+int main() {
+	//ios_base::sync_with_stdio(0); cin.tie(NULL);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

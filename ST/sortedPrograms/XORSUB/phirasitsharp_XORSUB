@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+#define N 2010
+#define K 10
+
+int dp[N][N];
+int arr[N];
+int n, k;
+int t;
+
+int main() {
+    scanf("%d", &t);
+    while(t--) {
+        scanf("%d%d", &n, &k);
+        for(int i = 1;i <= n;i++) {
+            scanf("%d", &arr[i]);
+        }
+        for(int i = 0;i <= n;i++) {
+            for(int j = 0;j < N;j++) {
+                dp[i][j] = 0;
+            }
+        }
+        dp[0][k] = 1;
+        for(int i = 1;i <= n;i++) {
+            for(int j = 0;j < N;j++) {
+                if(dp[i-1][j]) {
+                    dp[i][j] = 1;
+                    dp[i][j ^ arr[i]] = 1;
+                }
+            }
+        }
+        int mx = 0;
+        for(int i = 0;i < N;i++) {
+            if(dp[n][i]) {
+                mx = i;
+            }
+        }
+        printf("%d\n", mx);
+    }
+    return 0;
+}

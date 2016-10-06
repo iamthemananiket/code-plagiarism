@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define pi pair<int,int>
+#define F first
+#define S second
+#define MAXN 100005
+#define MOD 1000000007
+
+ll a[MAXN],b[MAXN];
+int fac[MAXN];
+// fac[i]=i if prime
+
+
+void f(int n) {
+	fac[1]=1;fac[2]=2;
+	for(int i=3,j=0;i<=n;i+=2)
+		if(!fac[i])
+			for(j=i;j<n;j+=i+i)
+				fac[j]=i;
+}
+
+ll g(int n) {
+	while(!(n&1))
+		n>>=1;
+	if(n==1)
+		return 1;
+	int k=fac[n];
+	ll val=1,sum=1;
+	while(n%k==0) {
+		n/=k;
+		val*=k;
+		sum+=val;
+	}
+	return sum*a[n];
+}
+
+int main()
+{
+	ll sum,ans;
+	int tt,n,i,l,r;
+	f(100000);
+	cin >>tt;
+	for(i=1;i<=100000;i++){
+		a[i]=g(i);
+		b[i]=a[i]+b[i-1];
+	}
+	while(tt--) {
+		cin >> l >> r;
+		printf("%lld\n",b[r]-b[l-1]);
+	}
+	return 0;
+}

@@ -1,0 +1,109 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 99991;
+const int PER = 33330; //fib[i] = fib[i % PER]
+const int SQRT5 = 10104;
+const int SQRT5_inv = 22019;
+const int HALF = 49996;
+const int PHI = (1LL + SQRT5) * HALF % MOD;
+const int PSI = (1LL - SQRT5 + MOD) * HALF % MOD;
+ll phi[PER], psi[PER];
+ll phi_inv[PER], psi_inv[PER];
+int arr[55555];
+ll x[55555], y[55555];
+
+ll fpow(ll b, int e) {
+  ll res = 1;
+  for (; e > 0; e >>= 1) {
+    if (e & 1)
+      res = res * b % MOD;
+    b = b * b % MOD;
+  }
+  return res;
+}
+
+void solve(int test_num) {
+  int N, K;
+  scanf("%d %d", &N, &K);
+  for (int i = 0; i < N; i++)
+    scanf("%d", arr + i);
+//  N = 50000;
+//  K = 30000;
+//  for (int i = 0; i < N; i++)
+//    arr[i] = rand() + 1;
+  for (int i = 0; i < N; i++)
+    arr[i] %= PER;
+  phi[0] = 1;
+  psi[0] = 1;
+  for (int i = 1; i < PER; i++) {
+    phi[i] = phi[i - 1] * PHI % MOD;
+    psi[i] = psi[i - 1] * PSI % MOD;
+  }
+  phi_inv[PER - 1] = fpow(phi[PER - 1], MOD - 2);
+  psi_inv[PER - 1] = fpow(psi[PER - 1], MOD - 2);
+  for (int i = PER - 2; i >= 0; i--) {
+    phi_inv[i] = phi_inv[i + 1] * PHI % MOD;
+    psi_inv[i] = psi_inv[i + 1] * PSI % MOD;
+  }
+  memset(x, 0, sizeof(x));
+  memset(y, 0, sizeof(y));
+  if (K < N - K) {
+    x[0] = y[0] = 1;
+    for (int i = 0; i < N; i++) {
+      const ll v1 = phi[arr[i]], v2 = psi[arr[i]];
+      for (int k = min(K - 1, i); k >= 0; k--) {
+        x[k + 1] = (x[k + 1] + x[k] * v1) % MOD;
+        y[k + 1] = (y[k + 1] + y[k] * v2) % MOD;
+      }
+    }
+  } else {
+    const int sum = accumulate(arr, arr + N, 0LL) % PER;
+    x[N] = phi[sum];
+    y[N] = psi[sum];
+    for (int i = 0; i < N; i++) {
+      const ll v1 = phi_inv[arr[i]], v2 = psi_inv[arr[i]];
+      for (int k = max(K + 1, N - i); k <= N; k++) {
+        x[k - 1] = (x[k - 1] + x[k] * v1) % MOD;
+        y[k - 1] = (y[k - 1] + y[k] * v2) % MOD;
+      }
+    }
+  }
+  const ll res = (x[K] - y[K] + MOD) * SQRT5_inv % MOD;
+  printf("%d\n", (int) res);
+}
+
+void solve() {
+#ifdef AZN
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+//scanf("%d", &T);
+//cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

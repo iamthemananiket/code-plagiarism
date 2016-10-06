@@ -1,0 +1,144 @@
+#include <cstdio>
+#include <cstring>
+#include <cassert>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 50005;
+
+// Shifting property (http://www.archimedes-lab.org/nombredormachine.html)
+// F(m+n) = F(m) * F(n+1) + F(m-1) * F(n)
+const int mod = 99991;
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+const int MM = 2;
+
+void matmul(int A[MM][MM], int B[MM][MM], int C[MM][MM]){
+  static int T[MM][MM];
+  for(int i = 0; i < MM; i++){
+    for(int j = 0; j < MM; j++){
+      T[i][j] = 0;
+      for(int k = 0; k < MM; k++)
+	madd(T[i][j], mul(A[i][k], B[k][j]));
+    }
+  }
+  for(int i = 0; i < MM; i++) for(int j = 0; j < MM; j++) C[i][j] = T[i][j];
+}
+
+map<int, int> cached;
+
+int f(int n){
+  if(n <= 1) return max(0, (int) n);
+  if(cached.find(n) != cached.end())
+    return cached[n];
+  int mm = n;
+  // 1 1 2 3 ...
+  n -= 2;
+  int res[2][2] = {
+    {1, 0},
+    {0, 1}
+  };
+  
+  int fib[2][2] = {
+    {1, 1},
+    {1, 0}
+  };
+  
+  while(n > 0){
+    if(n & 1)  matmul(res, fib, res);
+    matmul(fib, fib, fib);
+    n >>= 1;
+  }
+
+  madd(res[0][0], res[0][1]);
+  
+  return cached[mm] = res[0][0];
+}
+
+
+int dp[2][MAX_N];
+
+int main(){
+  int N, K;
+  static int s[MAX_N];  
+  scanf("%d%d", &N, &K);
+  for(int i = 0; i < N; i++){
+    scanf("%d", s + i);
+  }
+  if(0 && N <= 20){
+    int res = 0;
+    for(int mask = 0; mask < (1 << N); mask++){
+      ll r = 0;
+      int c = K;
+      for(int i = 0; i < N; i++)
+	if((mask >> i) & 1)
+	  r += s[i], c--;
+      if(c == 0) madd(res, f(r));
+    }
+    printf("%d\n", res);
+  } else {
+    assert(K <= 25000);
+    // F(m+n) = F(m) * F(n+1) + F(m-1) * F(n)
+    
+    // (F(m1) + F(m2) + ... ) => F(m1 + m) + F(m2 + m) + ...
+    // (F(m1) + F(m2) + ...) * F(m + 1) + (F(m1 - 1) + F(m2 - 1) + ... ) * F(m)
+    
+    // Needed (F(m1+(m-1)) + F(m2+(m-1)) + ... + )
+    // (F(m1) + F(m2) + ...) * F(m) + (F(m1 - 1) + F(m2 - 1) + ...) * F(m - 1)
+    
+    dp[1][0] = 1;
+    // a1
+    // a2' a1'
+    // a3'' a2'' a1''
+    for(int i = 0; i < N; i++){
+      int f0 = f(s[i] - 1);
+      int f1 = f(s[i]);
+      int f2 = (f0 + f1) % mod;
+      for(int j = i + 1; j >= 1; j--){
+	madd(dp[0][j], mul(dp[0][j - 1], f2));
+	madd(dp[0][j], mul(dp[1][j - 1], f1));
+	madd(dp[1][j], mul(dp[0][j - 1], f1));
+	madd(dp[1][j], mul(dp[1][j - 1], f0));
+      }
+    }
+    
+    printf("%d\n", dp[0][K]);
+  }
+
+  return 0;
+}

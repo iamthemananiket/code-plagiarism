@@ -1,0 +1,1196 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int (i)=0;(i)<(int)(n);++(i))
+#define reu(i,l,u) for(int (i)=(int)(l);(i)<(int)(u);++(i))
+#define each(it,o) for(auto it= (o).begin(); it != (o).end(); ++ it)
+#define all(o) (o).begin(), (o).end()
+#define mp(x,y) make_pair((x),(y))
+#define mset(m,v) memset(m,v,sizeof(m))
+#define INF 0x3f3f3f3f
+#define INFL 0x3f3f3f3f3f3f3f3fLL
+#define inrep int t;cin>>t; while(t--)
+#include "unistd.h"
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> pii;
+typedef vector<pii > vpii;
+typedef long long ll;
+typedef vector<ll> vll;
+typedef pair<ll,ll> pll;
+typedef vector<pll > vpll;
+typedef vector<string> vs;
+typedef long double ld;
+
+template<typename T> ostream& operator<< ( ostream &o,vector<T> v ) {
+    if ( v.size() >0 )
+        o<<v[0];
+    for ( unsigned   i=1; i<v.size(); i++ )
+        o<<" "<<v[i];
+    return o<<endl;
+}
+template<typename U,typename V> ostream& operator<< ( ostream &o,pair<U,V> p ) {
+    return o<<"("<<p.first<<", "<<p.second<<") ";
+}
+template<typename T> istream& operator>> ( istream &in,vector<T> &v ) {
+
+    for ( unsigned   i=0; i<v.size(); i++ )
+        in>>v[i];
+    return in;
+}
+const int MOD=1000000009;
+const int TWOINV= ( MOD+1 ) /2;
+
+int modPow ( ll b, ll e ) {
+    ll r=1;
+    while ( e ) {
+        if ( e&1 ) r=r*b%MOD;
+        b=b*b%MOD;
+        e>>=1;
+    }
+    return r;
+}
+int modInv ( int x ) {
+    return modPow ( x, MOD-2 );
+}
+
+void disp ( const vector<vector<bool>> &used ) {
+    cout<<endl;
+    rep ( j,20 ) {
+        rep ( i,20 ) cout<<used[i][j]<<" ";
+        cout<<endl;
+    }
+
+}
+
+struct SolveBF {
+    const int n;
+    const vi &f0, &a ;
+    const vpii &p;
+    SolveBF ( const vi &ff, const vi&aa, const vpii &pp ) :n ( pp.size() ), f0 ( ff ),a ( aa ),p ( pp ) {
+        initv();
+    }
+    void initv() {
+        rep ( i,4 ) vals[i]=f0[i];
+        reu ( i,4,201 ) {
+            ll su=0;
+            rep ( j,4 ) {
+                su+= ( ll ) a[j]*vals[i-j-1]%MOD;
+            }
+
+            vals[i]=su%MOD;
+        }
+    }
+    static bool compQ ( const pii& p1, const pii&p2 ) {
+        return p1.first*p2.second<p2.first*p1.second;
+    }
+    int run() {
+        vector<vector<bool>> used ( 202,vector<bool> ( 202 ) );
+        rep ( i,n ) used[p[i].first+100][p[i].second]=1;
+        vector<pair<pii,pii>> lines;
+        int lastx, lasty;
+        tie ( lastx,lasty ) =p[0];
+        reu ( i,1,n ) {
+            assert ( abs ( lastx ) <101 );
+            int x,y;
+            tie ( x,y ) =p[i];
+            if ( x==lastx ) reu ( i,min ( y,lasty ),max ( y,lasty ) ) used[x+100][i]=1;
+            else {
+                if ( x<lastx )
+                    lines.push_back ( mp ( mp ( x,lastx ),mp ( y,lasty ) ) );
+                else
+                    lines.push_back ( mp ( mp ( lastx,x ),mp ( lasty,y ) ) );
+            }
+            swap ( x,lastx );
+            swap ( y,lasty );
+        }
+
+        int x,y;
+        tie ( x,y ) =p[0];
+        if ( x==lastx ) reu ( i,min ( y,lasty ),max ( y,lasty ) ) used[x+100][i]=1;
+        else {
+            if ( x<lastx )
+                lines.push_back ( mp ( mp ( x,lastx ),mp ( y,lasty ) ) );
+            else
+                lines.push_back ( mp ( mp ( lastx,x ),mp ( lasty,y ) ) );
+        }
+        rep ( k,202 ) {
+            int x=k-100;
+            vpii vals;
+            rep ( ll,lines.size() ) {
+                int x1,x2,y2,y1;
+                tie ( x1,x2 ) =lines[ll].first;
+                if ( x<x1 ||x>=x2 ) continue;
+                tie ( y1,y2 ) =lines[ll].second;
+                int n=y1* ( x2-x1 ) + ( y2-y1 ) * ( x-x1 );
+                int d=x2-x1;
+                vals.push_back ( mp ( n,d ) );
+            }
+            sort ( all ( vals ),compQ );
+            int nl=0;
+            rep ( j,202 ) {
+                bool l=0;
+                while ( nl<int ( vals.size() ) &&vals[nl].first<=vals[nl].second*j ) {
+                    if ( vals[nl].first==vals[nl].second*j ) l=1;
+                    nl++;
+
+
+                }
+                if ( l || ( nl&1 ) ) used[k][j]=1;
+            }
+        }
+        ll su=0;
+        rep ( i,202 ) rep ( j,202 ) {
+            if ( used[i][j] && ( ( i+j ) %2==0 ) ) {
+                su+=getVal ( j );
+            }
+        }
+        return su%MOD;
+
+    }
+    vi vals =vi ( 201 );
+    int getVal ( int i ) {
+        return vals[i];
+    }
+
+
+};
+
+pii operator- ( const pii&p1, const pii&p2 ) {
+    return mp ( p1.first-p2.first,p1.second-p2.second );
+}
+ll cross ( const pii &a, const pii&b ) {
+    return ( ll ) a.first*b.second- ( ll ) a.second*b.first;
+}
+
+bool ccw ( const pii &a, const pii&b, const pii &c ) {
+    return cross ( a-b,a-c ) >0;
+}
+vector<vi> matMult ( const vector<vi> &A, const vector<vi> &B ) {
+    int n=A.size();
+    int m=A[0].size();
+    int k=B[0].size();
+//     assert ( m== ( int ) B.size() );
+    vector<vi> C ( n,vi ( k ) );
+    rep ( i,n ) {
+        rep ( j,k ) {
+            ll su=0;
+            rep ( l,m ) {
+                su+= ( ll ) A[i][l]*B[l][j];
+                if ( su>=MOD ) su%=MOD;
+            }
+            C[i][j]=su%MOD;
+        }
+
+    }
+    return C;
+}
+
+vi mVMult ( const vector<vi> &A,const vi &w ) {
+//     vector<ll> v ( all ( w ) );
+    const int n=A.size();
+    vi res ( n );
+    rep ( i,n ) {
+        ll r=0;
+        rep ( j,n ) {
+            r=r+ ( ll ) A[i][j]*w[j];
+            if ( r>=MOD ) r%=MOD;
+
+        }
+        res[i]=r%MOD;
+    }
+    return res;
+
+}
+vector<vi> idMat ( int n ) {
+    vector<vi> res ( n,vi ( n ) );
+    rep ( i,n ) res[i][i]=1;
+    return res;
+}
+// vector<vi> sumPot ( const vector<vi> base, int k ) {
+//     int n=base.size();
+// //     assert ( n>0 );
+//     if ( n<=0 ) exit ( 0 );
+//     vector<vi> M2 ( 2*n,vi ( 2*n ) );
+//     rep ( i,n ) rep ( j,n ) {
+//         M2[i][j]=base[i][j];
+//     }
+//     rep ( i,n ) {
+//         M2[n+i][i]=M2[i+n][i+n]=1;
+//     }
+//     k++;
+//     vector<vi> res=idMat ( 2*n );
+//     while ( k ) {
+//
+//         if ( k&1 ) res=matMult ( res,M2 );
+//         M2=matMult ( M2,M2 );
+//         k>>=1;
+//     }
+//     vector<vi> r ( n,vi ( n ) );
+//     rep ( i,n ) rep ( j,n ) r[i][j]=res[i+n][j];
+//
+//     return r;
+//
+// }
+vector<vi> sumPot ( const vector<vi> base, int k ) {
+    int n=base.size();
+//     assert ( n>0 );
+    k++;
+    vector<vi> A ( base ),B ( idMat ( n ) );
+    vector<vi> res(n,vi(n));
+    while ( k ) {
+
+        if ( k&1 ) {
+            res=matMult ( res,A );
+            rep ( i,n ) rep ( j,n ) {
+                res[i][j]+=B[i][j];
+                if ( res[i][j]>=MOD ) res[i][j]-=MOD;
+            }
+        }
+        vector<vi> C=matMult ( A,B );
+        rep ( i,n ) rep ( j,n ) {
+            B[i][j]+=C[i][j];
+            if ( B[i][j]>=MOD ) B[i][j]-=MOD;
+        }
+        A=matMult ( A,A );
+        k>>=1;
+    }
+   return res;
+
+}
+int mutInv ( int a0, int b0 ) {
+    long long a=a0,b=b0, u = 1, v = 0;
+    while ( b ) {
+        long long t = a / b;
+        a -= t * b;
+        swap ( a, b );
+        u -= t * v;
+        swap ( u, v );
+    }
+    while ( u<0 ) u+=b0;
+    return u;
+//     return mp ( u, v );
+}
+
+pii computeLower ( int p, int q ) {
+    int g=__gcd ( p,q );
+    p/=g;
+    q/=g;
+    int p2=p,q2=q;
+    q2 =mutInv ( p,q );
+    p2=mutInv ( q,p );
+    p2=p-p2;
+    return mp ( p2,q2 );
+}
+struct IntegrTriangle {
+    const int d;
+//     const vi &a;
+    vector<vector<vi>> mats;
+    vector<vi> Id;
+    static  void addiP ( vi &a, const vi &b ) {
+        assert ( b.size() >=a.size() );
+        rep ( i,a.size() ) {
+            a[i]+=b[i];
+            if ( a[i]>=MOD ) a[i]-=MOD;
+        }
+    }
+    static vi mult ( int a, const vi &b ) {
+        vi r ( b.size() );
+        rep ( i,b.size() ) {
+            r[i]= ( ll ) a*b[i]%MOD;
+        }
+        return r;
+    }
+    IntegrTriangle ( const vi &a ) :d ( a.size() ),mats ( 33 ) {
+        mats[0]=mats[1]=vector<vi> ( d+2,vi ( d+2 ) );
+        rep ( i,d+2 ) mats[0][i][i]=1;
+        Id=mats[0];
+        rep ( i,d ) mats[1][0][i]=mats[1][d][i]=a[i];
+        reu ( i,1,d ) mats[1][i][i-1]=1;
+//         mats[1][d][0]=1;
+        mats[1][d][d+1]=mats[1][d+1][d]=1;
+
+        reu ( i,2,33 ) {
+            mats[i]=matMult ( mats[i-1],mats[i-1] );
+        }
+    }
+
+    vector<vi> getMpow ( ll n ) {
+        assert ( n>=0 );
+        vector<vi>res=mats[0];
+        int i=0;
+        while ( n ) {
+            i++;
+            if ( i==33 ) {
+                cout<<n<<" "<<i<<endl;
+                sleep ( 10 );
+                assert ( 0 );
+            };
+            if ( n&1 ) res=matMult ( res,mats[i] );
+            n>>=1;
+        }
+        return res;
+    }
+    vi getSumO ( int n ) {
+        return n&1? getMpow ( n ) [d]:getMpow ( n ) [d+1];
+    }
+    vi getSumE ( int n ) {
+        return n&1? getMpow ( n ) [d+1]:getMpow ( n ) [d];
+    }
+    vi getF ( int n ) {
+        return getMpow ( n ) [0];
+    }
+
+    typedef  pair<vi,vi> pvi;
+    vector<vi> R1;
+    vector<vi> R2;
+    pvi computeSu2 ( int x, int q,int p, const pvi &vp, const pvi &vr ) {
+
+        int l=x/q;
+        int r=x%q;
+        maxr=max ( maxr,l );
+        vi suE ( d );
+        vi suO ( d );
+        assert ( p>0 );
+        assert ( x>=0 );
+        vector<vi> R=Id;
+        bool swpT= ( p+q ) &1;
+        bool oddT=0;
+        bool swpB= ( q&1 );
+        bool oddB=1;
+        reu ( i,0,l ) {
+            int q1=q&1?q/2+!oddB:q/2;
+            int q2=q-q1;
+            const vi &oddR= ( ( i*p ) &1?R[d]:R[d+1] );
+            const vi &evenR= ( ( i*p ) &1?R[d+1]:R[d] );
+            addiP ( suE,mult ( q1 ,evenR ) );
+            addiP ( suE,mult ( q2 ,oddR ) );
+            addiP ( suO,mult ( q2 ,evenR ) );
+            addiP ( suO,mult ( q1 ,oddR ) );
+
+//             cout<<"after base1: "<<suE<<suO;
+            if ( oddT ) {
+                rep ( j,d ) {
+                    addiP ( suE,mult ( vp.second[j],R[j] ) );
+                    addiP ( suO,mult ( vp.first[j],R[j] ) );
+                }
+            } else {
+                rep ( j,d ) {
+                    addiP ( suO,mult ( vp.second[j],R[j] ) );
+                    addiP ( suE,mult ( vp.first[j],R[j] ) );
+                }
+
+            }
+
+
+            R=matMult ( R,R1 );
+            oddT^=swpT;
+            oddB^=swpB;
+//             cout<<"su after "<<i<<"/"<<l<<": "<<suE<<suO;
+        }
+//         vector<vi> R=getMpow ( l*p );
+//         addiP ( su,mult ( r,R[d] ) );
+//         addiP ( su,mult ( r,R[d+1] ) );
+//         cout<<"su after remaing rect: "<<su<<endl;
+//         rep ( j,d ) addiP ( su,mult ( vr[j],R[j] ) );
+        int r1=r&1?r/2+!oddB:r/2;
+        int r2=r-r1;
+        const vi &oddR= ( ( l*p ) &1?R[d]:R[d+1] );
+        const vi &evenR= ( ( l*p ) &1?R[d+1]:R[d] );
+        addiP ( suE,mult ( r1 ,evenR ) );
+        addiP ( suE,mult ( r2 ,oddR ) );
+        addiP ( suO,mult ( r2 ,evenR ) );
+        addiP ( suO,mult ( r1 ,oddR ) );
+
+//  cout<<"after base1: "<<R[d]<<su<<endl;
+        if ( oddT ) {
+            rep ( j,d ) {
+                addiP ( suE,mult ( vr.second[j],R[j] ) );
+                addiP ( suO,mult ( vr.first[j],R[j] ) );
+            }
+        } else {
+            rep ( j,d ) {
+                addiP ( suO,mult ( vr.second[j],R[j] ) );
+                addiP ( suE,mult ( vr.first[j],R[j] ) );
+            }
+
+        }
+//         cout<<"final: "<<suE<<suO;
+        return mp ( suE,suO );
+    }
+    pvi computeSu ( int x, int q,int p, const pvi &vp, const pvi &vr ) {
+//         cout<<"comp "<<x<<", "<<mp ( p,q ) <<endl;
+//         cout<<"tris: "<<vp;
+        int l=x/q;
+        int r=x%q;
+        if ( l<=30 ) return computeSu2 ( x,q,p,vp,vr );
+        maxr=max ( maxr,l );
+        vi suE ( d );
+        vi suO ( d );
+        assert ( p>0 );
+        assert ( x>=0 );
+//         vector<vi> R=Id;
+        bool swpT= ( p+q ) &1;
+        bool swpB= ( q&1 );
+        bool oddTx=0;
+        bool oddBx=1;
+
+
+//         reu ( i,0,l ) {
+        if ( l>0 ) {
+            vector<vi> ePower=sumPot ( R2, ( l-1 ) /2 );
+            vector<vi> &R=ePower;
+            int q1=q&1?q/2+!oddBx:q/2;
+            int q2=q-q1;
+            const vi &oddR=R[d+1]; // ( ( i*p ) &1?R[d]:R[d+1] );
+            const vi &evenR=R[d]; // ( ( i*p ) &1?R[d+1]:R[d] );
+            addiP ( suE,mult ( q1 ,evenR ) );
+            addiP ( suE,mult ( q2 ,oddR ) );
+            addiP ( suO,mult ( q2 ,evenR ) );
+            addiP ( suO,mult ( q1 ,oddR ) );
+
+//             cout<<"after base1: "<<suE<<suO;
+            if ( oddTx ) {
+                rep ( j,d ) {
+                    addiP ( suE,mult ( vp.second[j],R[j] ) );
+                    addiP ( suO,mult ( vp.first[j],R[j] ) );
+                }
+            } else {
+                rep ( j,d ) {
+                    addiP ( suO,mult ( vp.second[j],R[j] ) );
+                    addiP ( suE,mult ( vp.first[j],R[j] ) );
+                }
+
+            }
+//             R=matMult ( R,R1 );
+            oddTx^=swpT;
+            oddBx^=swpB;
+//             cout<<"su after "<<i<<"/"<<l<<": "<<suE<<suO;
+        }
+        if ( l>1 ) {
+            vector<vi> oPower=matMult ( R1,sumPot ( R2, ( l-2 ) /2 ) );
+            vector<vi> &R=oPower;
+            int q1=q&1?q/2+!oddBx:q/2;
+            int q2=q-q1;
+            const vi &oddR= ( p  &1?R[d]:R[d+1] );
+            const vi &evenR=p &1?R[d+1]:R[d] ;
+            addiP ( suE,mult ( q1 ,evenR ) );
+            addiP ( suE,mult ( q2 ,oddR ) );
+            addiP ( suO,mult ( q2 ,evenR ) );
+            addiP ( suO,mult ( q1 ,oddR ) );
+
+//             cout<<"after base1: "<<suE<<suO;
+            if ( oddTx ) {
+                rep ( j,d ) {
+                    addiP ( suE,mult ( vp.second[j],R[j] ) );
+                    addiP ( suO,mult ( vp.first[j],R[j] ) );
+                }
+            } else {
+                rep ( j,d ) {
+                    addiP ( suO,mult ( vp.second[j],R[j] ) );
+                    addiP ( suE,mult ( vp.first[j],R[j] ) );
+                }
+
+            }
+//             R=matMult ( R,R1 );
+            oddTx^=swpT;
+            oddBx^=swpB;
+
+
+        }
+//         vector<vi> R=getMpow ( l*p );
+//         addiP ( su,mult ( r,R[d] ) );
+//         addiP ( su,mult ( r,R[d+1] ) );
+//         cout<<"su after remaing rect: "<<su<<endl;
+//         rep ( j,d ) addiP ( su,mult ( vr[j],R[j] ) );
+
+
+        vector<vi> Rf=getMpow ( l*p );
+        bool oddB2=1;
+        if ( swpB ) oddB2=oddB2^ ( l&1 );
+        bool oddT2=0;
+        if ( swpT ) oddT2=oddT2^ ( l&1 );
+        int r1=r&1?r/2+!oddB2:r/2;
+        int r2=r-r1;
+        const vi &oddR= ( ( l*p ) &1?Rf[d]:Rf[d+1] );
+        const vi &evenR= ( ( l*p ) &1?Rf[d+1]:Rf[d] );
+        addiP ( suE,mult ( r1 ,evenR ) );
+        addiP ( suE,mult ( r2 ,oddR ) );
+        addiP ( suO,mult ( r2 ,evenR ) );
+        addiP ( suO,mult ( r1 ,oddR ) );
+
+//  cout<<"after base1: "<<R[d]<<su<<endl;
+        if ( oddT2 ) {
+            rep ( j,d ) {
+                addiP ( suE,mult ( vr.second[j],Rf[j] ) );
+                addiP ( suO,mult ( vr.first[j],Rf[j] ) );
+            }
+        } else {
+            rep ( j,d ) {
+                addiP ( suO,mult ( vr.second[j],Rf[j] ) );
+                addiP ( suE,mult ( vr.first[j],Rf[j] ) );
+            }
+
+        }
+//         cout<<"final: "<<suE<<suO;
+        return mp ( suE,suO );
+    }
+    int maxr=0;
+    vector<pvi> evalRek ( int p, int q, const vi &vals, bool inclB ) {
+//         cout<<mp ( p,q ) <<"("<<inclB<<")"<<", "<<vals;
+        assert ( __gcd ( p,q ) ==1 );
+
+        if ( p==1 || q==1 ) {
+            R1=getMpow ( p );
+            R2=matMult ( R1,R1 );
+//             R2=getMpow ( 2LL*p );
+            vector<pvi> res;
+
+            vi vpE=getSumE ( p-1+inclB );
+            vi vpO=getSumO ( p-1+inclB );
+            if ( q&1 )
+                swap ( vpE,vpO );
+            vpE.resize ( d );
+            vpO.resize ( d );
+//             vi vp=vpE;
+//             vp.pop_back();
+//             vp.pop_back();
+//             addiP ( vp,vpO );
+            vi vrE=vi ( d );
+            vi vrO=vrE;
+            map<int,int> fnd;
+            rep ( i,vals.size() ) {
+                if ( fnd.count ( vals[i] ) ) {
+                    res.push_back ( res[fnd[vals[i]]] );
+                    continue;
+                }
+
+                pvi su=computeSu ( vals[i],q,p,mp ( vpE,vpO ),mp ( vrE,vrO ) );
+                fnd[vals[i]]=res.size();
+                res.push_back ( su );
+            }
+            return res;
+        }
+
+        int p2,q2;
+        tie ( p2,q2 ) =computeLower ( p,q );
+        bool upper=0;
+        if ( p-p2<p2 ) {
+            p2=p-p2;
+            q2=q-q2;
+            upper=1;
+        }
+//         cout<<"maxr: "<<q/q2<<endl;
+//         maxr=max ( maxr,q/q2 );
+        vi nvals= {q};
+        for ( int x: vals ) {
+            nvals.push_back ( x%q );
+        }
+
+        vector<pvi> resR=evalRek ( p2,q2,nvals,!upper );
+//         cout<<"returned "<<resR<<endl;
+        pvi tp=resR[0];
+        vi pv=getF ( p );
+        if ( inclB &&!upper ) {
+            if ( ( p+q ) &1 )
+                addiP ( tp.second,pv );
+            else addiP ( tp.first,pv );
+        }
+        if ( !inclB &&upper ) {
+            if ( ( p+q ) &1 )
+                addiP ( tp.second,mult ( MOD-1,pv ) );
+            else  addiP ( tp.first,mult ( MOD-1,pv ) );
+        }
+        R1=getMpow ( p );
+        R2=matMult ( R1,R1 );
+        vector<pvi> res;
+        map<int,int> fnd;
+        reu ( i,1,resR.size() ) {
+            int x=vals[i-1];
+
+            if ( !x ) {
+                res.push_back ( mp ( vi ( d ),vi ( d ) ) );
+                continue;
+            }
+            if ( fnd.count ( x ) ) {
+                res.push_back ( res[fnd[x]] );
+                continue;
+            }
+            pvi su=computeSu ( x,q,p,tp,resR[i] );
+            fnd[x]=res.size();
+            res.push_back ( su );
+        }
+        return res;
+
+    }
+    int eval ( int p, int q, int n,const vi &f0,bool inclB ) {
+        int g=__gcd ( p,q );
+        p/=g;
+        q/=g;
+        assert ( d==int ( f0.size() ) );
+        vector<pvi> res=evalRek ( p,q, {n} ,inclB );
+        ll su=0;
+        ll suO=0;
+        rep ( i,d ) {
+            su+= ( ll ) res[0].first[i]*f0[i]%MOD;
+            suO+= ( ll ) res[0].second[i]*f0[i]%MOD;
+        }
+//         cout<<"Result: "<<mp ( su%MOD,suO%MOD ) <<endl;
+        return su%MOD;
+    }
+
+};
+int compBF ( int p, int q, int n,vi a, vi f0, bool inclB ) {
+    vector<vi> M ( a.size(),vi ( a.size() ) );
+    M[0]=a;
+    reu ( i,1,a.size() ) M[i][i-1]=1;
+    int su=0;
+    ll suO=0;
+    reu ( i,1,n+1 ) {
+        int h= ( p*i ) /q;
+        if ( ( p*i ) %q==0 &&!inclB ) h--;
+        vi f=f0;
+        f=mVMult ( M,f );
+        reu ( j,1,h+1 ) {
+            if ( ( ( i+j ) &1 ) ==0 )
+                su= ( su+f[0] ) %MOD;
+            else suO+=f[0];
+            f=mVMult ( M,f );
+//             f= ( ll ) a*f%MOD;
+
+        }
+    }
+    cout<<"BF: "<<mp ( su%MOD, suO%MOD ) <<endl;
+    return su;
+}
+int testI() {
+    bool TESTEQ=1;
+    int MAX=1000;
+    int maxr=0;
+    double mmaxr=0;
+    int ntc=6000;
+    int D=4;
+    rep ( i,ntc ) {
+
+        int n=rand() %MAX;
+
+        int q=rand() %MAX+1;
+//         int q=9999;
+//         int p=10000;
+        int p=rand() %MAX+1; //q+1;
+        while ( ( ll ) n*p/q>MAX ) p=rand() %MAX+1;
+        vi coeff ( D );
+        rep ( i,D ) coeff[i]=rand() %MAX;
+        bool incB=rand() %2;
+        vi f0 ( D );
+        rep ( i,D ) f0[i]=rand() %MAX;
+        IntegrTriangle it ( coeff );
+        int r=it.eval ( p,q,n,f0,incB );
+
+        cout<<i<<": "<<mp ( p,q ) <<" "<<n<<" "<<coeff<<endl;
+        cout<<r<<endl;
+        maxr=max ( maxr,it.maxr );
+        mmaxr+=it.maxr;
+        if ( TESTEQ ) {
+            int r2=compBF ( p,q,n,coeff,f0,incB );
+            cout<<r2<<endl;
+            assert ( r==r2 );
+        }
+    }
+    cout<<mmaxr/ntc<<endl;
+    cout<<maxr<<endl;
+    return 0;
+}
+struct Solve {
+    const int n;
+    const vi &f0, &a ;
+    vi f,s0;
+    vi df;
+    const vpii &p;
+    vector<vector<vi>> vmats =vector<vector<vi>> ( 32 );
+    vector<vector<vi>> smats=vector<vector<vi>> ( 32 );
+
+
+    void initMats() {
+        vmats[0]=idMat ( 4 );
+        vmats[1]=vector<vi> ( 4, vi ( 4 ) );
+        vmats[1][0]=a;
+        vmats[1][1][0]=1;
+        vmats[1][2][1]=1;
+        vmats[1][3][2]=1;
+        reu ( i,2,32 ) {
+            vmats[i]=matMult ( vmats[i-1],vmats[i-1] );
+        }
+        smats[0]=idMat ( 6 );
+        smats[1]=vector<vi> ( 6,vi ( 6 ) );
+        rep ( i,4 ) rep ( j,4 ) smats[1][i][j]=vmats[1][i][j];
+        rep ( i,4 ) smats[1][4][i]=a[i];
+        smats[1][4][5]=1;
+        smats[1][5][4]=1;
+        reu ( i,2,32 ) {
+            smats[i]=matMult ( smats[i-1],smats[i-1] );
+        }
+        s0= {f[0],f[1],f[2],f[3],f[0],0};
+//         s02= {f0[3],f0[2],f0[1],f0[0], ( f0[1]+f0[3] ) %MOD, ( f0[2]+f0[0] ) %MOD};
+//         smallSE= {0,f0[0],f0[0], ( f0[2]+f0[0] ) %MOD, ( f0[2]+f0[0] ) %MOD};
+//         smallSO= {0,0,f0[1],f0[1], ( f0[1]+f0[3] ) %MOD};
+    }
+    IntegrTriangle it;
+    Solve ( const vi &ff, const vi&aa, const vpii &pp ) :n ( pp.size() ), f0 ( ff ),a ( aa ),p ( pp ) , it ( a ) {
+//         f2=f0;
+//         reverse ( all ( f2 ) );
+
+
+//         assert ( a[3]>0 );
+        f=vi ( 4 );
+        if ( a[3]>0 ) {
+            f[0]=f0[0];
+            f[1]= ( f0[3]- ( ll ) a[0]*f0[2]- ( ll ) a[1]*f0[1]- ( ll ) a[2]*f0[0] ) %MOD*modInv ( a[3] ) %MOD;
+            f[2]= ( f0[2]- ( ll ) a[0]*f0[1]- ( ll ) a[1]*f0[0]- ( ll ) a[2]*f[1] ) %MOD*modInv ( a[3] ) %MOD;
+            f[3]= ( f0[1]- ( ll ) a[0]*f0[0]- ( ll ) a[1]*f[1]- ( ll ) a[2]*f[2] ) %MOD*modInv ( a[3] ) %MOD;
+
+        } else {
+            if ( a[2]>0 ) {
+                int ff0= ( f0[3]- ( ll ) a[0]*f0[2]- ( ll ) a[1]*f0[1] ) %MOD*modInv ( a[2] ) %MOD;
+                if ( ff0<0 ) ff0+=MOD;
+                df.push_back ( ( f0[0]-ff0 ) %MOD );
+                f[0]=ff0;
+                f[1]= ( f0[2]- ( ll ) a[0]*f0[1]- ( ll ) a[1]*f[0] ) %MOD*modInv ( a[2] ) %MOD;
+                f[2]= ( f0[1]- ( ll ) a[0]*f[0]- ( ll ) a[1]*f[1] ) %MOD*modInv ( a[2] ) %MOD;
+//                 f[3]= ( f[0]- ( ll ) a[0]*f[1]- ( ll ) a[1]*f[2] ) %MOD*modInv ( a[2] ) %MOD;
+            } else {
+                if ( a[1]>0 ) {
+                    int ff1= ( f0[3]- ( ll ) a[0]*f0[2] ) %MOD*modInv ( a[1] ) %MOD;
+                    if ( ff1<0 ) ff1+=MOD;
+                    int ff0= ( f0[2]- ( ll ) a[0]*ff1 ) %MOD*modInv ( a[1] ) %MOD;
+                    if ( ff0<0 ) ff0+=MOD;
+                    df= {f0[0]-ff0,f0[1]-ff1};
+                    f[0]=ff0;
+                    f[1]= ( ff1- ( ll ) a[0]*ff0 ) %MOD*modInv ( a[1] ) %MOD;
+                } else {
+                    if ( a[0]>0 ) {
+                        ll mi=modInv ( a[0] );
+                        int ff2=f0[3]*mi%MOD;
+                        int ff1=ff2*mi%MOD;
+                        int ff0=ff1*mi%MOD;
+                        df= {f0[0]-ff0,f0[1]-ff1,f0[2]-ff2};
+                        f[0]=ff0;
+                    } else {
+                        df=f0;
+                    }
+//                     assert ( 0 );
+                }
+            }
+
+        }
+        rep ( i,4 ) if ( f[i]<0 ) f[i]+=MOD;
+        rep ( i,df.size() ) if ( df[i]<0 ) df[i]+=MOD;
+
+//          cout<<f<<df<<f0<<endl;
+
+        initMats();
+
+
+    }
+
+    int correct ( int d, int y0, int y1, bool inclB ) {
+        if ( d<2 ) return 0;
+        bool odd0=y0&1;
+        bool odd1=y1&1;
+        ll su=0;
+        if ( y0==y1 ) {
+
+            rep ( i,min ( int ( df.size() ),y0+inclB ) ) {
+//                 cout<<"cirrecting rect"<<endl;
+//                 d--;
+                su+= ( ll ) ( d-1 ) /2*df[i]%MOD;
+                if ( ( i&1 ) !=odd0 && ( ( d-1 ) &1 ) ) {
+//                     cout<<"+"<<df[i]<<endl;
+                    su+=df[i];
+                }
+
+//                 su+= ( ll ) df[i]* ( d-1 );
+            }
+        } else {
+            rep ( i,df.size() ) {
+                if ( i<=y0 ) {
+
+                    su+= ( ll ) ( d-1 ) /2*df[i]%MOD;
+                    if ( ( i&1 ) !=odd0 && ( ( d-1 ) &1 ) ) {
+                        su+=df[i];
+                    }
+
+
+                } else {
+
+                    ll dy= ( ll ) ( i-y0 ) *d;
+                    int x0= ( dy ) / ( y1-y0 ) +1;
+                    if ( dy% ( y1-y0 ) ==0 &&inclB ) x0--;
+                    if ( d-x0<0 ) continue;
+//                     cout<<"add "<<i<<" "<<d-x0<<" "<<endl;
+                    su+= ( ll ) df[i]* ( ( d-x0 ) /2 );
+//                     cout<<df<<endl;
+                    if ( ( ( d-x0 ) &1 ) && ( ( i&1 ) !=odd1 ) ) {
+//                         cout<<"++"<<df[i]<<endl;
+                        su+=df[i];
+                    }
+                }
+            }
+        }
+        su%=MOD;
+// //         if ( su )
+//             su=MOD-su;
+//         cout<<"correcting by "<<su<<endl;
+        return su;
+
+    }
+    int integrRect ( int d, int h, bool inclB, bool odd0 ) {
+        if ( inclB ) h++;
+        d--;
+        if ( ! ( d&1 ) ) {
+            return ( ll ) d/2* ( getSum0 ( h,0 ) +getSum0 ( h,1 ) ) %MOD;
+
+        } else {
+            return ( ( ll ) ( d/2+odd0 ) *getSum0 ( h,0 ) + ( ll ) ( d/2+!odd0 ) *getSum0 ( h,1 ) ) %MOD;
+
+        }
+
+
+    }
+    int interUT ( int d, int y0, int h,bool inclB ) {
+        return 0;
+    }
+    int integrInt ( int d, int y0, int y1, bool inclB ) {
+        ll su=0;
+        if ( y1==y0 ) {
+            su= integrRect ( d,y0,inclB, y0&1 );
+
+//             if ( su<0 ) su+=MOD;
+        } else if ( 1 ) {
+            su= integrRect ( d,y0,1, y0&1 );
+            vi fy0=pMul ( vmats,f,y0 );
+            int su2=it.eval ( y1-y0,d,d-1,fy0,inclB );
+            su=su+su2;
+            if ( su>=MOD ) su-=MOD;
+        } else {
+
+
+            bool odd=! ( y0&1 );
+            reu ( i,1,d ) {
+                int dh= ( y1-y0 ) *i;
+                int h= y0+ ( dh ) /d;
+                if ( dh%d==0 &&!inclB ) h--;
+                su+=getSum0 ( h+1,odd );
+                odd=!odd;
+            }
+        }
+        su%=MOD;
+        su+=correct ( d,y0,y1,inclB );
+        if ( su>=MOD ) su-=MOD;
+        return su;
+    }
+
+    int integr0 ( int d, int y0, int y1, bool inclB ) {
+        ll su=integrInt ( d,min ( y0,y1 ),max ( y0,y1 ),inclB );
+        su+=integrB ( y0,inclB );
+        su+=integrB ( y1,inclB );
+        return su%MOD;
+    }
+    int integrB ( int h,bool inclB ) {
+        int st=h&1;
+        if ( inclB ) h++;
+        return ( ll ) getSum ( h,st ) *TWOINV%MOD;
+
+    }
+
+    int integr ( int x1,int x2, int y1, int y2 ) {
+        if ( x1==x2 ) return integrVBF ( y1, y2 );
+        int d=x2-x1;
+
+        if ( d<0 ) {
+            return integr0 ( -d,y1,y2,1 );
+        }
+        return MOD-integr0 ( d,y1,y2,0 );
+
+    }
+
+
+    int prv ( int i ) {
+        return i?i-1:n-1;
+    }
+    int nxt ( int i ) {
+        return i==n-1?0:i+1;
+    }
+    int run() {
+        ll su=0;
+        vector<bool> vert ( n );
+        reu ( i,1,n ) {
+            if ( p[i-1].first==p[i].first ) vert[i-1]=1;
+            su+=integr ( p[i-1].first,p[i].first, p[i-1].second,p[i].second );
+        }
+        if ( p.back().first==p[0].first ) vert.back() =1;
+        su+=integr ( p.back().first,p[0].first, p.back().second, p[0].second );
+        su%=MOD;
+        if ( su<0 ) su+=MOD;
+        reu ( i,0,n ) {
+            if ( !vert[prv ( i )] &&!vert[i] ) {
+                if ( p[prv ( i )].first<p[i].first &&p[i].first>p[nxt ( i )].first ) {
+                    if ( ccw ( p[prv ( i )],p[i],p[nxt ( i )] ) ) {
+                        su= ( su+ ( ll ) TWOINV*getVal ( p[i].second ) ) %MOD;
+                    } else {
+                        su= ( su+MOD- ( ll ) TWOINV*getVal ( p[i].second ) %MOD ) %MOD;
+                    }
+                } else if ( p[prv ( i )].first>p[i].first &&p[i].first<p[nxt ( i )].first ) {
+                    if ( ccw ( p[prv ( i )],p[i],p[nxt ( i )] ) ) {
+                        su= ( su+ ( ll ) TWOINV*getVal ( p[i].second ) ) %MOD;
+                    } else {
+                        su= ( su+MOD- ( ll ) TWOINV*getVal ( p[i].second ) %MOD ) %MOD;
+                    }
+                }
+            } else {
+                if ( vert[prv ( i )] ) {
+                    if ( p[prv ( i )].second>p[i].second &&p[i].first<p[nxt ( i )].first ) //dr
+                        su= ( su+ ( ll ) TWOINV*getVal ( p[i].second ) ) %MOD;
+                    else if ( p[prv ( i )].second<p[i].second &&p[i].first>p[nxt ( i )].first ) //ul
+                        su= ( su+ ( ll ) TWOINV*getVal ( p[i].second ) ) %MOD;
+
+                } else {
+                    if ( p[prv ( i )].first<p[i].first &&p[i].second<p[nxt ( i )].second ) //ru
+                        su= ( su+ ( ll ) TWOINV*getVal ( p[i].second ) ) %MOD;
+                    else if ( p[prv ( i )].first>p[i].first &&p[i].second>p[nxt ( i )].second ) //ld
+                        su= ( su+ ( ll ) TWOINV*getVal ( p[i].second ) ) %MOD;
+                }
+
+            }
+        }
+
+        return su%MOD;
+
+    }
+//     vi vals =vi ( 201 );
+    static vi pMul ( const vector<vector<vi>> &mats, const vi &x0, int i ) {
+        vi res=x0;
+        int k=1;
+        while ( i ) {
+            if ( i&1 ) res=mVMult ( mats[k],res );
+            k++;
+            i>>=1;
+        }
+        return res;
+    }
+//     vi sumsE;
+//     vi sumsO;
+//     vi vals;
+//     void initv() {
+//         sumsE=vi ( 20200 );
+//         sumsO=vi ( 20200 );
+//         vals=vi ( 20200 );
+//         rep ( i,4 ) vals[i]=f0[i];
+//         reu ( i,4,20200 ) {
+//             ll su=0;
+//             rep ( j,4 ) {
+//                 su+= ( ll ) a[j]*vals[i-j-1]%MOD;
+//             }
+//
+//             vals[i]=su%MOD;
+//         }
+//         reu ( i,1,20200 ) {
+//             sumsE[i]=sumsE[i-1];
+//             if ( i&1 ) sumsE[i]+=vals[i-1];
+//             if ( sumsE[i]>=MOD ) sumsE[i]-=MOD;
+//         }
+//         reu ( i,1,20200 ) {
+//             sumsO[i]=sumsO[i-1];
+//             if ( ! ( i&1 ) ) sumsO[i]+=vals[i-1];
+//             if ( sumsO[i]>=MOD ) sumsO[i]-=MOD;
+//
+//         }
+//     }
+//     int getSum2 ( int i, bool odd ) {
+//         if ( i<=4 ) {
+//             if ( odd ) return smallSO[i];
+//             else return smallSE[i];
+//         }
+//         i--;
+//         if ( ( i&1 ) !=odd ) i--;
+//         i-=3;
+//         vi res=pMul ( smats,s02,i );
+//         return res[4];
+//     }
+
+//     int getVal2 ( int i ) {
+//         if ( i<4 ) return f0[i];
+//         i-=3;
+//         vi res=pMul ( vmats,f2,i );
+//         return res[0];
+//     }
+
+
+    int getSum0 ( int i, bool odd ) {
+        i--;
+        if ( ( i&1 ) !=odd ) i--;
+        if ( i<0 ) return 0;
+        vi res=pMul ( smats,s0,i );
+        return res[4];
+
+    }
+    int getSum ( int i, bool odd ) {
+
+        int res=getSum0 ( i,odd );
+        for ( int j=odd; j<min ( int ( df.size() ),i ); j+=2 ) {
+            res+=df[j];
+            if ( res>=MOD ) res-=MOD;
+        }
+        return res;
+
+    }
+    int getVal0 ( int i ) {
+        return pMul ( vmats,f,i ) [0];
+    }
+    int getVal ( int i ) {
+
+        int res=getVal0 ( i );
+        if ( i<int ( df.size() ) ) res= ( res+df[i] ) %MOD;
+        return res;
+    }
+    int integrVBF ( int y1, int y2 ) {
+        ll su=0;
+        if ( y2<y1 ) swap ( y1,y2 );
+        bool odd=y1&1;
+        su=MOD+getSum ( y2,odd )-getSum ( y1+2,odd );
+        if ( su>=MOD ) su-=MOD;
+        return su%MOD*TWOINV%MOD;
+    }
+
+//     int integrBF ( int d, int y0, int y1, bool inclB ) {
+//         ll su=0;
+//         bool odd=! ( y0&1 );
+//         reu ( i,1,d ) {
+//             int dh= ( y1-y0 ) *i;
+//             int h= ( y0*d+dh ) /d;
+//             if ( dh%d==0 &&!inclB ) h--;
+//             su+=getSum ( h+1,odd );
+//             odd=!odd;
+//         }
+//         su%=MOD;
+//         for ( int h:vi ( {y0,y1} ) ) {
+//             ll su2=0;
+//             int st=h&1;
+//             if ( !inclB ) h--;
+//             su2=getSum ( h+1,st );
+//             su= ( su+ su2%MOD*TWOINV ) %MOD;
+//
+//         }
+//         return su;
+//     }
+//     void checSum() {
+//         int m=rand() %1000;
+//         bool odd=rand() %2;
+//         ll su1=0;
+//         for ( int i=odd; i<m; i+=2 ) su1+=getVal ( i );
+//         su1%=MOD;
+//         if ( su1!=getSum ( m,odd ) ) {
+// //             cout<<smallS;
+//             cout<<m<<" "<<odd<<" "<<su1<<" "<<getSum ( m,odd ) <<endl;
+//             assert ( 0 );
+//         }
+
+//     }
+};
+int test2() {
+    vi f ( {0,1,2,3} ),a ( {1,2,3,4} );
+
+
+
+
+    rep ( i,2000 ) {
+        rep ( i,4 ) {
+            f[i]=rand() %MOD;
+            a[i]=rand() %MOD;
+
+        }
+        if ( a==vi ( {0,0,0,0} ) ) continue;
+//         cout<<f<<a<<endl;
+        vpii p ( 3 );
+        p[0]=mp ( 0,0 );
+        const int MX=500000000;
+        int x1=rand() %MX+MX;
+        int y1=rand() %x1;
+        int y2=rand() %MX+MX;
+        int x2=rand() %y2;
+        p[1]=mp ( x1,y1 );
+        p[2]=mp ( x2,y2 );
+        vpii p2 ( 3 );
+        rep ( i,3 ) {
+            int x,y;
+            tie ( x,y ) =p[i];
+            p2[i]=mp ( x-y,x+y );
+        }
+
+        cout<<i<<" "<<p<<p2<<endl;
+
+
+//         SolveBF s1 ( f,a,p2 );
+        Solve s2 ( f,a,p2 );
+//         int r1=s1.run();
+        int r2=s2.run();
+//        break;
+
+//         cout<<r1<<" "<<r2<<endl;
+//         assert ( r1==r2 );
+    }
+    return 0;
+
+}
+
+
+int main() {
+//     return testI();
+//     return test2();
+    ios_base::sync_with_stdio ( false );
+//     int cnt=0;
+    inrep {
+        int n;
+        cin>>n;
+//         cnt+=n;
+//         if(cnt>2000)break;
+        vi f ( 4 ),a ( 4 );
+        cin>>a>>f;
+        vpii p ( n );
+//         bool big=0;
+        rep ( i,n ) {
+            int x,y;
+
+            cin>>x>>y;
+            p[i]=mp ( x-y,x+y );
+        }
+        vpii p2;
+        bool vert=0;
+        int lstx=p[0].first;
+        p2.push_back ( p[0] );
+        reu ( i,1,n ) {
+            if ( p[i].first==lstx ) {
+                if ( vert ) {
+                    continue;
+                }
+                vert=1;
+            } else vert=0;
+            lstx=p[i].first;
+            p2.push_back ( p[i] );
+
+        }
+        if ( vert &&lstx==p[0].first ) {
+
+            p2.pop_back();
+        }
+
+//         if ( big ) {
+//             cout<<"big\n"<<endl;
+//             continue;
+//         }
+        Solve s ( f,a,p2 );
+        int res= s.run();
+        cout<<res<<'\n';
+    }
+}
+
+

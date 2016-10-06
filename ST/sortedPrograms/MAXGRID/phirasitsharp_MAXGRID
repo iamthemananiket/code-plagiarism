@@ -1,0 +1,127 @@
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <vector>
+
+class Gem {
+public:
+	int x, y;
+	int64_t cost;
+	Gem( void ) {
+		std::cin >> x >> y >> cost;
+	}
+	bool operator< ( const Gem& gem ) const {
+		if ( x != gem.x ) {
+			return x < gem.x;
+		}
+		return y < gem.y;
+	}
+};
+
+class SegTree {
+public:
+	const int left, right;
+	int64_t max, value;
+	SegTree *leftPtr, *rightPtr;
+	SegTree( int _left, int _right ) :
+		left( _left ), right( _right ),
+		max( 0ll ), value( 0ll ),
+		leftPtr( nullptr ), rightPtr( nullptr ) {}
+};
+
+const int N = 1e5 + 10;
+
+std::vector< Gem > gems;
+
+SegTree *head;
+
+void reset( SegTree* node );
+void update( SegTree* node, int left, int right, int64_t value );
+int64_t check( int l );
+
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+	std::cin.tie( 0 );
+
+	int n, l;
+	std::cin >> n >> l;
+	for ( int i = 0 ; i < n ; ++i ) {
+		gems.emplace_back( Gem() );
+	}
+
+	std::sort( gems.begin(), gems.end() );
+
+	std::function< SegTree*( int, int ) > initTree = [ &initTree ] ( int left, int right ) -> SegTree* {
+		SegTree* root = new SegTree( left, right );
+		if ( left < right ) {
+			int mid = ( left + right ) / 2;
+			root->leftPtr = initTree( left, mid );
+			root->rightPtr = initTree( mid + 1, right );
+		}
+		return root;
+	};
+
+	head = initTree( 0, N-1 );
+
+	int64_t ans = check( l );
+
+	int idx = [ ans ] ( int lo, int hi ) -> int {
+		while ( lo < hi ) {
+			int mid = ( lo + hi ) / 2;
+			if ( check( mid ) < ans ) {
+				lo = mid + 1;
+			} else {
+				hi = mid;
+			}
+		}
+		return lo;
+	} ( 0, l );
+
+	std::cout << ans << " " << idx << std::endl;
+
+	return 0;
+}
+
+void reset( SegTree* node ) {
+	if ( node == nullptr ) return;
+	node->max = node->value = 0;
+	reset( node->leftPtr );
+	reset( node->rightPtr );
+}
+
+void update( SegTree* node, int left, int right, int64_t value ) {
+	if ( right < node->left or node->right < left ) {
+		return;
+	}
+	if ( left <= node->left and node->right <= right ) {
+		node->max += value;
+		node->value += value;
+		return;
+	}
+
+	update( node->leftPtr, left, right, value );
+	update( node->rightPtr, left, right, value );
+
+	node->max = node->value + std::max( node->leftPtr->max, node->rightPtr->max );
+}
+int64_t check( int l ) {
+
+	int64_t max = 0ll;
+	reset( head );
+
+	for ( int i = 0, j = 0 ; i < gems.size() ; ++i ) {
+
+		while ( gems[ j ].x < gems[ i ].x - l + 1 ) {
+			const int idx = gems[ j ].y;
+			update( head, idx, std::min( idx + l - 1, N-1 ), -gems[ j++ ].cost );
+		}
+
+		const int idx = gems[ i ].y;
+		update( head, idx, std::min( idx + l - 1, N-1 ), gems[ i ].cost );
+
+		max = std::max( max, head->max );
+	}
+
+	return max;
+}

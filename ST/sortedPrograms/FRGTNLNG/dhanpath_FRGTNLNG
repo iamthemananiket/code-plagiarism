@@ -1,0 +1,50 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+using namespace std ;
+
+typedef long long ll ;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        ll  t, n, m, i ;
+        string s;
+        vector<string> q;
+
+        for( cin >> t ;  t-- ; )
+        {
+                cin >> n >> m ;
+
+                q.clear();
+                q.resize(n);
+
+                set<string> st;
+
+                for( i=0; i<n; i++ )
+                        cin >> q[i] ;
+
+                while( m-- )
+                {
+                        for( cin >> n ;  n-- ;  )
+                        {
+                                cin >> s ;
+                                st.insert(s);
+                        }
+                }
+
+                for( auto &z: q )
+                {
+                        if( st.find(z) != st.end() )
+                                cout << "YES " ;
+                        else    cout << "NO " ;
+                }
+
+                cout << endl ;
+        }
+
+        return 0;
+} 

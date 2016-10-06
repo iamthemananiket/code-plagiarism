@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define long long long
+int rint() {int ret;scanf("%d", &ret);return ret;}
+
+int cnt[1000001];
+int main()
+{
+#if _DEBUG
+    freopen("input.txt", "r", stdin);
+#endif
+
+	memset(cnt, 0, sizeof cnt);
+	int n = rint();
+	for (int i = 0; i < n; i++)
+		cnt[rint()]++;
+	long ans = 1LL * n * (n - 1) / 2;
+	for (int i = 1; i < 1000001; i++)
+		ans -= 1LL * cnt[i] * (cnt[i] - 1) / 2;
+	printf("%lld\n", ans);
+
+    return 0;
+}

@@ -1,0 +1,66 @@
+#define _USE_MATH_DEFINES
+#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <cfloat>
+#include <climits>
+#include <cstring>
+#include <cmath>
+#include <map>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <time.h>
+#include <vector>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> i_i;
+typedef pair<ll, int> ll_i;
+typedef pair<double, int> d_i;
+typedef pair<ll, ll> ll_ll;
+typedef pair<double, double> d_d;
+struct edge { int u, v; ll w; };
+
+ll MOD = 1000000007;
+ll _MOD = 1000000009;
+double EPS = 1e-10;
+
+int f(char c) {
+	if (c == 'c') return 0;
+	if (c == 'h') return 1;
+	if (c == 'e') return 2;
+	if (c == 'f') return 3;
+}
+
+ll a[1000001][4], sum[1000001][4][4];
+
+int main() {
+	string P; cin >> P;
+	int n = P.length();
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < 4; j++)
+			a[i + 1][j] = a[i][j];
+		int j = f(P[i]);
+		a[i + 1][j]++;
+	}
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < 4; j++)
+			for (int k = 0; k < 4; k++)
+				sum[i + 1][j][k] = sum[i][j][k];
+		int k = f(P[i]);
+		for (int j = 0; j < 4; j++)
+			sum[i + 1][j][k] += a[i + 1][j];
+	}
+	int Q; cin >> Q;
+	while (Q--) {
+		char c, d; int S, E;
+		scanf("%*c%c %c%d%d", &c, &d, &S, &E);
+		int j = f(c), k = f(d);
+		printf("%lld\n", sum[E][j][k] - sum[S - 1][j][k] - (a[E][k] - a[S - 1][k]) * a[S - 1][j]);
+	}
+}

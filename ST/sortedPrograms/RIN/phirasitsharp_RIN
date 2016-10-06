@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <vector>
+
+#define N 110
+
+using namespace std;
+
+vector<int> adj[N], inv_adj[N];
+
+int dp[N][N];
+int M[N][N], pass[N];
+int n, m, k;
+
+void dfs(int u) {
+	if(pass[u]) {
+		return;
+	}
+	pass[u] = 1;
+    for(int i = 1;i <= m;i++) {
+        dp[u][i] = M[u][i];
+    }
+    for(int i = 0;i < adj[u].size();i++) {
+        int v = adj[u][i];
+        dfs(v);
+        int mx = -1;
+        for(int j = m;j > 0;j--) {
+        	if(mx == -1 || dp[u][j] == -1) {
+        		dp[u][j] = -1;
+        	}else {
+        		dp[u][j] = mx + dp[u][j];
+        	}
+            if(dp[v][j] > mx) {
+                mx = dp[v][j];
+            }
+        }
+    }
+    for(int j = m-1;j > 0;j--) {
+    	if(dp[u][j+1] > dp[u][j]) {
+    		dp[u][j] = dp[u][j+1];
+    	}
+    }
+}
+int main() {
+    scanf("%d%d%d", &n, &m, &k);
+    for(int i = 1;i <= n;i++) {
+        for(int j = 1;j <= m;j++) {
+            scanf("%d", &M[i][j]);
+        }
+        pass[i] = 0;
+    }
+    for(int i = 0;i < k;i++) {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        adj[a].push_back(b);
+        inv_adj[b].push_back(a);
+    }
+    int ans = 0;
+    for(int i = 1;i <= n;i++) {
+        if(!pass[i] && inv_adj[i].size() == 0) {
+            dfs(i); 
+            int mx = -1;
+            for(int j = 1;j <= m;j++) {
+                if(dp[i][j] > mx) {
+                    mx = dp[i][j];
+                }
+            }
+            if(mx != -1) {
+                ans += mx;
+            }
+        }
+    }
+    printf("%.2lf\n", (double) ans / n);
+    return 0;
+}

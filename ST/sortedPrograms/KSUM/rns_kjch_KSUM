@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define M 100001
+typedef pair<int, int> pii;
+typedef pair<ll, pii> piii;
+int a[M];
+int n, k;
+map<pii, int> mp;
+int main(){
+  scanf("%d %d", &n, &k);
+  priority_queue<piii> q;
+  ll allsum = 0;
+  for(int i = 0; i < n; i++){
+    scanf("%d", a + i);
+    allsum += a[i];
+  }
+  q.push(piii(allsum, pii(0, n - 1)));
+  scanf("%d", &k);
+  while(k){
+    piii top = q.top();
+    q.pop();
+    ll sum = top.first;
+    int l = top.second.first;
+    int r = top.second.second;
+    if(mp.count(pii(l, r))) continue;
+    k--;
+    mp[pii(l, r)] = 1;
+    printf("%lld%c", sum, " \n"[k==0]);
+
+    q.push(piii(sum - a[l], pii(l + 1, r)));
+    q.push(piii(sum - a[r], pii(l, r - 1)));
+  }
+}

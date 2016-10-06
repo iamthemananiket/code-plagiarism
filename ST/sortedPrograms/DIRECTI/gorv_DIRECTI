@@ -1,0 +1,28 @@
+#include<iostream>
+using namespace std;
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		int n;
+		cin>>n;
+		string direction[n];
+		string place[n];
+		string on;
+		string road;
+		for(int i=0;i<n;i++)
+		{
+			cin>>direction[i];
+			getline(cin,place[i]);
+		}
+		for(int i=0;i<n;i++){
+			if(i==0)
+			cout<<"Begin";
+			else if(direction[n-i]=="Left")
+			cout<<"Right";
+			else
+			cout<<"Left";
+			cout<<place[n-1-i]<<"\n";
+		}
+	}
+}

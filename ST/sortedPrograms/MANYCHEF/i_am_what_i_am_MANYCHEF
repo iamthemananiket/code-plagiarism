@@ -1,0 +1,68 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void eval()
+{
+	string s;
+	cin>>s;
+	int sz=s.size();
+	string chef="CHEF";
+	vector<int> dp(sz+1);
+	for(int i=sz-1;i>=0;i--)
+	 {
+		int j;
+	 	for(j=0;j<4 && i+j<sz;j++)
+	 	 {
+	 	 	if(s[i+j]=='?' || s[i+j]==chef[j])
+	 	 	  ;
+	 	 	else
+	 	 	  break;
+		 }
+		if(j==4)
+		  dp[i]=1+dp[i+4];
+		else
+		 dp[i]=dp[i+1];
+	 }
+	int mx=0,st=-1;
+	for(int i=0;i<sz;i++)
+	  {
+	  	if(dp[i]>=mx)
+	  	 {
+	  	 	mx=dp[i];
+	  	 	st=i;
+		 }
+	  }
+	vector<int> positions(dp[0]+1);
+	for(int i=0;i<sz;i++)
+	 {
+	 	positions[dp[i]]=i;
+	 }
+		
+	for(int i=1;i<=dp[0];i++)
+	 {
+	 	int pos=positions[i];
+	 	for(int j=0;j<4;j++)
+	 	  s[pos+j]=chef[j];
+	 }
+	for(int i=0;i<sz;i++)
+	 {
+	 	if(s[i]=='?')
+	 	 cout<<"A";
+	 	else
+	 	 cout<<s[i];
+	 }
+	 cout<<endl;
+	
+	
+}
+
+int main()
+{
+//	freopen("in.txt","r",stdin);
+	int t;
+	cin>>t;
+	while(t--)
+	{
+		eval();
+	}
+}

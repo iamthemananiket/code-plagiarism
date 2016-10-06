@@ -1,0 +1,30 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        long long  t, n, m, z, l, r, b, mxb, lrb ;
+
+        for( cin >> t ;  t-- ;  )
+        {
+                cin >> n >> m >> z >> l >> r >> b ;
+
+                if( l+r >= n*m )
+                {
+                        cout << n*m << endl ;
+                        continue ;
+                }
+
+                mxb = min( min( b, n*m-l-r ), ((m+1)/2)*n );
+                if( l+r+2*mxb <= n*(m+1) )  lrb = l+r+mxb ;
+                else  lrb = l + r + (n*(m+1)-l-r)/2 ;
+
+                cout <<  lrb + min( z, n*m-lrb )  << endl ;
+        }
+
+        return 0;
+} 

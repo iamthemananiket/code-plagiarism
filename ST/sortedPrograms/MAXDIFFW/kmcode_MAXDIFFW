@@ -1,0 +1,384 @@
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<cctype>
+#include<cstdlib>
+#include<algorithm>
+#include<bitset>
+#include<vector>
+#include<list>
+#include<deque>
+#include<queue>
+#include<map>
+#include<set>
+#include<stack>
+#include<cmath>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
+#include<ctime>
+#include<complex>
+#include<functional>
+#include<climits>
+#include<cassert>
+#include<iterator>
+using namespace std;
+unsigned int randxor()
+{
+	static unsigned int x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+	unsigned int t;
+	t = (x ^ (x << 11)); x = y; y = z; z = w; return(w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+}
+#define MAX 52
+int a[MAX][MAX];
+int countt[MAX];
+int n;
+int cur = 0;
+int SCORE = -1LL;
+vector<pair<int, int> > vv;
+/*greedy*/
+long long int ag[MAX];
+int aind[MAX];
+bool cmp(int &a, int &b){
+	return ag[a] < ag[b];
+}
+int A[MAX][MAX];
+void AG_GREEDY(){
+	sort(aind, aind + n, cmp);
+	int CR = cur;
+	vector<pair<int, int> > V;
+	V.clear();
+	long long int CHEF = 0;
+	long long int ME = 0;
+	while (1){
+		bool update = false;
+		for (int i = 0; i < n; i++){
+			if (A[CR][aind[i]] == -1){
+				continue;
+			}
+			int r = 0;
+			int ii = 0;
+			ii = aind[i];
+			r = A[CR][aind[i]];
+			A[CR][aind[i]] = -1;
+			V.push_back(make_pair(CR, ii));
+			CR = ii;
+			ME += r;
+			update = true;
+			break;
+		}
+		if (update == false){
+			break;
+		}
+		update = false;
+		int r = 0;
+		int ii = -1;
+		for (int i = 0; i < n; i++){
+			if (r <= A[CR][i]){
+				r = A[CR][i];
+				ii = i;
+			}
+		}
+		if (ii == -1){
+			break;
+		}
+		A[CR][ii] = -1;
+		CHEF += r;
+		CR = ii;
+	}
+	long long int SA = ME - CHEF; 
+	if (SCORE < SA){
+		SCORE = SA;
+		vv = V;
+	}
+}
+/**/
+void insert_turn(int b, int c){
+	a[b][c] = -1;
+	A[b][c] = -1;
+	countt[b]--;
+	cur = c;
+}
+int maxx(int b){
+	int r = 0;
+	for (int i = 0; i < n; i++){
+		r = max(r, a[b][i]);
+	}
+	return r;
+}
+bool Max = false;
+int ge_sc = 0;
+vector<pair<int, int> > k;
+int not_maxx(int b){
+	vector<long long int> v;
+	v.clear();
+	for (int i = 0; i < n; i++){
+		if (a[b][i] == -1){
+			continue;
+		}
+		v.push_back(a[b][i]);
+	}
+	if (v.size() == 0){
+		return 0;
+	}
+	sort(v.begin(), v.end());
+	reverse(v.begin(), v.end());
+	int mint = min((int)v.size(), 3);
+	return (v[randxor() % mint] + v[randxor() % mint]) >> 1;
+}
+int not_maxx2(int b){
+	double countt = 0;
+	double r = 0.0;
+	for (int i = 0; i < n; i++){
+		if (a[b][i] == -1){
+			continue;
+		}
+		countt += 1.0;
+		double sum = 0.0;
+		for (int j = 0; j < n; j++){
+			if (a[i][j] == -1){
+				continue;
+			}
+			sum = max(sum, (double)(a[i][j]));
+		}
+		sum -= (double)(a[b][i]);
+		r += sum;
+	}
+	r /= countt;
+	return (int)(ceil(r));
+}
+long long int turn_score(){
+	vector<pair<long long int, int> > v;  //next_m
+	v.clear();
+	for (int i = 0; i < n; i++){
+		if (a[cur][i] == -1){
+			continue;
+		}
+		if (Max){
+			v.push_back(make_pair(a[cur][i] - maxx(i), i));
+		}
+		else{
+			v.push_back(make_pair(a[cur][i]/* - not_maxx(i)*/, i));
+		}
+	}
+	sort(v.begin(), v.end());
+	reverse(v.begin(), v.end());
+	int a = cur;
+	int vv = v[0].second;
+	return v[0].first;
+}
+int sta = 0;
+#define OVERFLOW 100002
+void output(){
+	int aa, bb;
+	for (int i = 0; i < vv.size(); i++){
+		printf("%d %d\n", vv[i].first + 1, vv[i].second + 1);
+	}
+	fflush(stdout);
+	exit(0);
+}
+int max_chef(int b){
+	if (countt[b] == 0){
+		return -1;
+	}
+	long long int r = 0;
+	int ind = -1;
+	for (int i = 0; i < n; i++){
+		if (a[b][i] == -1){
+			continue;
+		}
+		if (r <= a[b][i]){
+			r = a[b][i];
+			ind = i;
+		}
+	}
+	return ind;
+}
+void compare(){
+	if (SCORE <= ge_sc){
+		SCORE = ge_sc;
+		vv = k;
+	}
+}
+double LIMIT = 0.97*(double)(CLOCKS_PER_SEC);
+int DCOUNT = 0;
+int simulate(int b){  //from i
+	int sa = 0;
+	int ind = max_chef(b);
+	sa += a[b][ind];
+	int tmp = a[b][ind];
+	a[b][ind] = -1;
+	countt[b]--;
+	int ne = ind;
+	int ind2 = max_chef(ne);
+	sa -= a[ne][ind2];
+	countt[b]++;
+	a[b][ind] = tmp;
+	return sa;
+}
+int COUNTCLOCK = 0;
+int lim = 1000;
+inline void dfs(int b){
+	COUNTCLOCK++;
+	if (COUNTCLOCK == lim){
+		double tim = clock();
+		if (tim> LIMIT){
+			output();
+		}
+		if (tim > 0.85){
+			lim = 5;
+		}
+		COUNTCLOCK = 0;
+	}
+	vector<pair<pair<int, int>, int> > v;  //next_m
+	v.clear();
+	if (countt[b] == 0){
+		compare();
+		return;
+	}
+	int SEED = randxor() % 7;
+	for (int i = 0; i < n; i++){
+		if (a[b][i] == -1){
+			continue;
+		}
+		//int i0=b
+		if (SEED == 0){
+			int i1 = i; int tmp1 = a[b][i1]; a[b][i1] = -1;
+			int i2 = max_chef(i1); int tmp2 = a[i1][i2]; a[i1][i2] = -1;
+			int i3 = max_chef(i2); int tmp3 = a[i2][i3]; a[i2][i3] = -1;
+			int i4 = max_chef(i3); int tmp4 = a[i3][i4]; a[i3][i4] = -1;
+			v.push_back(make_pair(make_pair(tmp1 + tmp3 - tmp2 - tmp4, tmp1 - tmp2), i));
+			a[i3][i4] = tmp4;
+			a[i2][i3] = tmp3;
+			a[i1][i2] = tmp2;
+			a[b][i1] = tmp1;
+		}
+		else{
+			int val = a[b][i] - maxx(i);
+			v.push_back(make_pair(make_pair(val, val), i));
+		}
+	}
+	sort(v.begin(), v.end());
+	reverse(v.begin(), v.end());
+	while ((v[0].first.first - v.back().first.first)>1){
+		v.pop_back();
+	}
+	for (int i = 0; i <v.size(); i++){
+		int tmp = a[b][v[i].second];
+		countt[b]--;
+		a[b][v[i].second] = -1;
+		k.push_back(make_pair(b, v[i].second));
+		ge_sc += v[i].first.second;
+		int ne = max_chef(v[i].second);
+		if (ne == -1){
+			compare();
+		}
+		else{
+			int tmp1 = a[v[i].second][ne];
+			a[v[i].second][ne] = -1;
+			countt[v[i].second]--;
+			dfs(ne);
+			countt[v[i].second]++;
+			a[v[i].second][ne] = tmp1;
+		}
+		k.pop_back();
+		ge_sc -= v[i].first.second;
+		countt[b]++;
+		a[b][v[i].second] = tmp;
+	}
+}
+void solve_max(int c){
+	dfs(c);
+	output();
+	exit(0);
+}
+void next_turn(){
+	vector<pair<int, int> > v;  //next_m
+	v.clear();
+	for (int i = 0; i < n; i++){
+		if (a[cur][i] == -1){
+			continue;
+		}
+		if (Max){
+			v.push_back(make_pair(a[cur][i] - maxx(i), i));
+		}
+		else{
+			v.push_back(make_pair(a[cur][i] - not_maxx(i) + countt[i] * 10, i));
+		}
+	}
+	sort(v.begin(), v.end());
+	reverse(v.begin(), v.end());
+	if (v.size() == 0){
+		exit(0);
+	}
+	int a1 = cur;
+	int vv = v[0].second;
+	printf("%d %d\n", a1 + 1, vv + 1);
+	fflush(stdout);
+	ge_sc += a[a1][vv];
+	insert_turn(a1, vv);
+}
+vector<long long int> K;
+int main(){
+	scanf("%d", &n);
+	int mi = 0;
+	for (int i = 0; i < n; i++){
+		aind[i] = i;
+		countt[i] = n - 1;
+		int ss = 0;
+		K.clear();
+		for (int j = 0; j < n; j++){
+			scanf("%lld", &a[i][j]);
+			K.push_back(a[i][j]);
+			if (i == j){
+				a[i][j] = -1;
+			}
+			A[i][j] = a[i][j];
+			ss += a[i][j];
+			ag[i] += a[i][j];
+		}
+		if (mi <= ss){
+			cur = i;
+			mi = ss;
+		}
+		sort(K.begin(), K.end());
+		ag[i]=K.back()+K[48]+K[47];
+	}
+	sort(aind, aind + n, cmp);
+	Max = true;
+	int p = 0;
+	bool fla = false;
+	cur = aind[n-1];
+	while (1){
+		next_turn();
+		int aa, b;
+		cin >> aa >> b;
+		aa--;
+		b--;
+		p++;
+		if (aa < 0 || b < 0){
+			break;
+		}
+		ge_sc -= a[aa][b];
+		if (Max){
+			if (maxx(aa) == a[aa][b]){
+				Max = true;
+			}
+			else{
+				Max = false;
+			}
+		}
+		insert_turn(aa, b);
+		if (p == 2 && Max){
+			fla = true;
+			//AG_GREEDY();
+			solve_max(b);
+			output();
+		}
+	}
+	if (fla == true && Max == false){
+		return 1;
+	}
+	return 0;
+}

@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+	int t;
+	cin>>t;
+	vector<long long> cf(100001);
+	
+	for(int i=1;i<=100000;i++)
+	  cf[i]=cf[i-1]+i;
+
+	while(t--) 
+	{
+		long long n,k;
+		cin>>n>>k;
+		long long p = (k*(k+1))/2;
+		if(n>p)
+		  {
+		  	cout<<-1<<endl;
+		  	continue;
+		  }
+		else if(n==p)
+		 {
+		 	cout<<0<<endl;
+		 }
+		else
+		 {
+		 	long long target = p-n;
+		 	vector<long long>::iterator it=std::lower_bound(cf.begin(),cf.end(),target);
+		 	int location=it-cf.begin();
+		 	
+		 	if(cf[location] > target)
+		 		location--;
+		 	
+//		 	cout<<location<<" ";
+		 		
+	        
+		//	 cout<<k-pos+1<<endl;
+			 cout<<location<<endl;
+		 }
+	}
+}

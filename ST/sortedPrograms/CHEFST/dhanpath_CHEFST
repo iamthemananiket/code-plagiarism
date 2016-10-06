@@ -1,0 +1,20 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        long long  t, a, b, m, mn;
+
+        for(  cin >> t ;  t-- ;  )
+        {
+                cin >> a >> b >> m ;
+                mn = min( min(a,b), m*(m+1)/2 );
+                cout << a-mn + b-mn << endl ;
+        }
+
+        return 0;
+} 

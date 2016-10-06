@@ -1,0 +1,70 @@
+# include <cstdio>
+# include <cmath>
+# include <cstring>
+# include <string>
+# include <vector>
+# include <queue>
+# include <map>
+# include <algorithm>
+# include <iostream>
+
+using namespace std;
+
+const int MAX_N = 1024;
+const int MAX_Q = 1024;
+
+int n, q;
+int a[MAX_Q], b[MAX_Q];
+int used[MAX_N][MAX_N];
+vector <int> v[MAX_N];
+
+int en;
+
+void dfs (int idx, int x, int par)
+{
+	int i, sz = v[x].size ();
+	used[idx][x] = 1;
+	if (x == en)
+	{
+		en = -1;
+		return;
+	}
+	for (i = 0; i < sz; i ++)
+	{
+		if (v[x][i] != par)
+			dfs (idx, v[x][i], x);
+		if (en == -1)
+			return;
+	}
+	used[idx][x] = 2;
+}
+
+int main ()
+{
+	int i, j, k, pp, qq, ans;
+	scanf ("%d", &n);
+	for (i = 1; i < n; i ++)
+	{
+		scanf ("%d%d", &pp, &qq);
+		v[pp].push_back (qq);
+		v[qq].push_back (pp);
+	}
+	scanf ("%d", &q);
+	for (i = 1; i <= q; i ++)
+	{
+		ans = 0;
+		scanf ("%d%d", &a[i], &b[i]);
+		en = b[i];
+		dfs (i, a[i], -1);
+		for (j = 1; j < i; j ++)
+		{
+			for (k = 1; k <= n; k ++)
+				if (used[i][k] == 1 && used[j][k] == 1)
+					break;
+			if (k <= n)
+				ans ++;
+		}
+		printf ("%d\n", ans);
+	}
+	return 0;
+}

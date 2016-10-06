@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+using namespace std;
+long long MOD=1e9+7;
+int main()
+{
+	int N;
+	cin>>N;
+	while(N)
+	{
+		int n=(1<<N)-1;
+		vector<int> a(n+1);
+		vector<int> dir(n+1,-1);
+		vector<double> p(n+1);
+		for(int i=0;i<n;i++)
+		 cin>>a[i+1];
+		for(int i=n;i>=1;i--)
+		{
+			if(i>n/2)
+			 {
+			 	dir[i]=-1;
+			 	p[i]=log(a[i]);
+			 }
+			 else
+			  {
+			  	if(p[i*2]>p[i*2+1])
+			  	  {
+			  	  	p[i]=log(a[i])+p[i*2];
+					dir[i]=0;	
+				  }
+				else
+				 {
+				 	p[i]=log(a[i])+p[i*2+1];
+				 	dir[i]=1;
+				 }
+			  }
+		}
+		long long ans=1;
+		for(int i=1;i<=n;)
+		{
+			ans=(ans*a[i])%MOD;
+			if(dir[i]==-1) break;
+			if(dir[i]==0)
+			  i*=2;
+			else
+			  i=i*2+1;
+		}
+		cout<<ans<<endl;
+		
+		
+		cin>>N;
+	}
+}

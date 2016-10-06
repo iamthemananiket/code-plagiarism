@@ -1,0 +1,16 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int t,n,i,a;
+	cin >> t;
+	string pl;
+	while(t--){
+		cin >> n >> pl;
+		for(i=0;i<n;i++)
+			scanf("%d",&a);
+		if(pl=="Dee" && n==1 && a%2==0)
+			cout<<"Dee\n";
+		else
+			cout<<"Dum\n";
+	}
+}

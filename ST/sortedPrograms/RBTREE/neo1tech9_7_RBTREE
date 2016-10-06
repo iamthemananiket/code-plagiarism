@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+int Q;
+long double X, K;
+string ss;
+int parity = 0;
+int tree_col[2];
+int main(){
+	std::ios_base::sync_with_stdio(false);
+	cin.tie(0);
+	cin >> Q;
+	while(Q--){
+	 cin >> ss;
+	 if(ss[1] == 'i'){
+		 parity ^= 1;
+		 continue;
+	 }
+	 cin >> X >> K;
+	 int l1 = log(X) / log(2.0);
+	 int l2 = log(K) / log(2.0);
+	 tree_col[0] = tree_col[1] = 0;
+	 int x = X, k = K;
+	 tree_col[(l1 + parity) % 2]++;
+	 tree_col[(l2 + parity) % 2]++;
+	 while(x != k)
+		 if(x > k){
+			 x = x/2;
+			 --l1;
+			 tree_col[(l1 + parity)%2]++;
+		 }
+		 else if(k > x){
+			 k = k/2;
+			 --l2;
+			 tree_col[(l2 + parity)%2]++;
+		 }
+	tree_col[(l1 + parity) % 2]--;
+	if(ss[1] == 'b')
+		cout << tree_col[0] << '\n';
+	else  cout << tree_col[1] << '\n';
+	}
+	return 0;
+}

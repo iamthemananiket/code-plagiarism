@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+
+int dig_sum(int x) {
+  int res = 0;
+  while (x > 0) {
+    res += x % 10;
+    x /= 10;
+  }
+  return res;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  srand(1223);
+  int N, res = 0;
+  cin >> N;
+  for(int s=1;s <= 150; ++s) {
+    const int x = N - s - dig_sum(s);
+    if (x > 0 && dig_sum(x) == s) {
+      ++res;
+    }
+  }
+  cout << res << endl;
+  return 0;
+}

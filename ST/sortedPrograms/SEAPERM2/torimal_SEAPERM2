@@ -1,0 +1,131 @@
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <bitset>
+#include <complex>
+#include <functional>
+#include <numeric>
+#include <limits>
+#include <utility>
+
+#include <array>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+
+using namespace std;
+
+typedef long long ll;
+
+int n;
+
+bool check(const vector<vector<int>> &exp, const vector<int> &b) {
+  vector<vector<int>> act;
+  for (int i = 0; i < n; i++) {
+    vector<int> c = b;
+    c.erase(remove(c.begin(), c.end(), i), c.end());
+    for (int j = 0; j < n - 1; j++) {
+      if (c[j] > i) c[j]--;
+    }
+    act.push_back(c);
+  }
+  sort(act.begin(), act.end());
+  return act == exp;
+}
+
+vector<int> solve_small(const vector<vector<int>> &a) {
+  vector<int> b(n);
+  for (int i = 0; i < n; i++) {
+    b[i] = i;
+  }
+  vector<int> ans;
+  do {
+    if (check(a, b)) {
+      return b;
+    }
+  } while (next_permutation(b.begin(), b.end()));
+  return vector<int>();
+}
+
+vector<int> solve_large(const vector<vector<int>> &a) {
+  vector<int> ct(n);
+  for (int i = 0; i < n; i++) {
+    ct[a[i][0]]++;
+  }
+  int p = max_element(ct.begin(), ct.end()) - ct.begin();
+  int first = -1;
+  if (p >= n - 3) {
+    first = p + 1;
+  } else if (p <= 1) {
+    first = p;
+  } else if (ct[p + 1] >= 2) {
+    first = p + 1;
+  } else if (ct[p - 1] >= 2) {
+    first = p;
+  } else {
+    assert(false);
+  }
+  vector<int> exp(n);
+  if (first > 0) {
+    exp[first - 1] = first;
+  }
+  exp[first] = n - 1 - first;
+  int bad = -1;
+  for (int i = 0; i < n; i++) {
+    if (ct[i] != exp[i]) {
+      assert(bad == -1);
+      bad = i;
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    if (a[i][0] == bad) {
+      vector<int> b;
+      b.push_back(first);
+      for (int j = 0; j < n - 1; j++) {
+        b.push_back(a[i][j] >= first ? a[i][j] + 1 : a[i][j]);
+      }
+      if (check(a, b)) {
+        return b;
+      }
+    }
+  }
+  return vector<int>();
+}
+
+int main() {
+  int T;
+  scanf("%d", &T);
+  while (T--) {
+    scanf("%d", &n);
+    vector<vector<int>> a(n, vector<int>(n - 1));
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n - 1; j++) {
+        scanf("%d", &a[i][j]);
+        a[i][j]--;
+      }
+    }
+    sort(a.begin(), a.end());
+    vector<int> ans;
+    if (n <= 8) {
+      ans = solve_small(a);
+    } else {
+      ans = solve_large(a);
+    }
+    assert(ans.size() == n);
+    for (int i = 0; i < n; i++) {
+      printf("%d%c", ans[i] + 1, " \n"[i == n - 1]);
+    }
+  }
+}

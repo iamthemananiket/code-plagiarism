@@ -1,0 +1,69 @@
+#include <cstdio>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <set>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <functional>
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+using namespace std;
+
+typedef struct player
+{
+	string name;
+	long v;
+} player;
+
+bool playersort(player a,player b)
+{
+	return a.v<b.v;
+}
+int main()
+{
+	int t;
+	cin>>t;
+	for (int q=1;q<=t;q++)
+	{
+		int n;
+		cin>>n;
+		vector<player> V(n+1);
+		for (int i=0;i<n;i++)
+		{
+			cin>>V[i].name>>V[i].v;
+		}
+		sort(V.begin(),V.end()-1,playersort);
+		V[n].v=-1;
+		V[n].name="";
+		int i=0;
+		string ans="Nobody wins.";
+		while (i<n)
+		{
+			//cout<<V[i].v<<" "<<V[i].name<<endl;
+			bool done=false;
+			if (i>=n)
+			{
+				break;
+			}
+			if (V[i].v==V[i+1].v)
+			{
+				while (V[i].v==V[i+1].v)
+				{
+					i++;
+				}
+				done=true;
+			}
+			if ((not done) and (V[i].v!=V[i+1].v))
+			{
+				ans=V[i].name;
+				break;
+			}
+			i++;
+		}
+		cout<<ans<<endl;
+	}
+}
+

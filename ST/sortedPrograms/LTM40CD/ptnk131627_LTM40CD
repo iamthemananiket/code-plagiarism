@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+const int N=800;
+ll sqr(ll x){return x*x;}
+
+struct side{
+    int a[3];
+    side(int x,int y,int z){
+        a[0]=x,a[1]=y,a[2]=z;
+    }
+};
+vector <side> ans;
+int main(){
+    int R;
+    cin>>R;
+    for(int A=1;A<=N;A++)
+        for(int B=A;B<=N;B++)
+            for(int C=B;C<=N;C++){
+                int P=A+B+C;
+                ll L=sqr(2*R)*P,R=1LL*(P-2*A)*(P-2*B)*(P-2*C);
+//                if (A==5&&B==12&&C==13) cout<<L<<" "<<R<<'\n';
+                if (L==R) ans.push_back(side(A,B,C));
+            }
+    cout<<ans.size()<<'\n';
+    for(auto i:ans)
+        for(int j=0;j<3;j++) cout<<i.a[j]<<" \n"[j==2];
+}

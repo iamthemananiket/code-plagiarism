@@ -1,0 +1,85 @@
+#include "bits/stdc++.h"
+using namespace std;
+const int N = 5e5 + 5;
+int n , m , q;
+int arr[N];
+int x[N];
+int y[N];
+int d[N];
+bool mark[N];
+int p[N];
+int a[N];
+int beef[N];
+int old[N];
+int parent[N];
+long long sz[N];
+char type[N];
+long long ans[N];
+multiset < long long > cur;
+int find(int node){
+    if(parent[node] == node){
+        return node;
+    }
+    return parent[node] = find(parent[node]);
+}
+void join(int a , int b){
+    int x = find(a);
+    int y = find(b);
+    if(x != y){
+        cur.erase(cur.find(sz[x]));
+        cur.erase(cur.find(sz[y]));
+        sz[x] += sz[y];
+        cur.insert(sz[x]);
+        parent[y] = x;
+    }
+}
+int main(){
+    scanf("%d %d %d" , &n , &m , &q);
+    for(int i = 1 ; i <= n ; ++i){
+        scanf("%d" , arr + i);
+        old[i] = arr[i];
+        parent[i] = i;
+    }
+    for(int i = 1 ; i <= m ; ++i){
+        scanf("%d %d" , x + i , y + i);
+        mark[i] = 1;
+    }
+    for(int i = 1 ; i <= q ; ++i){
+        type[i] = '$';
+        while(!isalpha(type[i])){
+            type[i] = getchar();
+        }
+        if(type[i] == 'D'){
+            scanf("%d" , p + i);
+            mark[p[i]] = 0;
+        }
+        else{
+            scanf("%d %d" , a + i , p + i);
+            beef[i] = old[a[i]];
+            old[a[i]] = p[i];
+        }
+    }
+    for(int i = 1 ; i <= n ; ++i){
+        sz[i] = old[i];
+        cur.insert(sz[i]);
+    }
+    for(int i = 1 ; i <= m ; ++i){
+        if(mark[i]){
+            join(x[i] , y[i]);
+        }
+    }
+    for(int i = q ; i >= 1 ; --i){
+        ans[i] = *(prev(cur.end()));
+        if(type[i] == 'D'){
+            join(x[p[i]] , y[p[i]]);
+        }
+        else{
+            cur.erase(cur.find(sz[find(a[i])]));
+            sz[find(a[i])] += beef[i] - p[i];
+            cur.insert(sz[find(a[i])]);
+        }
+    }
+    for(int i = 1 ; i <= q ; ++i){
+        printf("%lld\n" , ans[i]);
+    }
+}

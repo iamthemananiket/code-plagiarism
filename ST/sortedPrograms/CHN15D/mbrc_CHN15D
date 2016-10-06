@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb emplace_back
+#define mt make_tuple
+#define gcd __gcd
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%.12Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+typedef pair<ld,ld> line;
+
+const int maxn = 1e5 + 7;
+const ll md = 1e9 + 7;
+const int iter = 90;
+const ld inf = 2e13;
+
+int n;
+line A[maxn];
+pair<ld,int> Z[maxn];
+pair<ld,line> V[maxn];
+int bit[maxn];
+
+void upd(int x) {
+	while (x <= n) {
+		bit[x]++;
+		x += x & (-x);
+	}
+}
+
+int qry(int x) {
+	int ans = 0;
+	while (x > 0) {
+		ans += bit[x];
+		x -= x & (-x);
+	}
+	return ans;
+}
+
+ll gv(ld y) {
+	rep(i,1,n) {
+		Z[i] = mp( (y-A[i].second)/A[i].first, i );
+		bit[i] = 0;
+	}
+	sort(Z+1,Z+n+1);
+	ll inv = 0;
+	drep(i,n,1) {
+		inv += qry(Z[i].second);
+		upd(Z[i].second);
+	}
+	return inv;
+}
+
+int main() {
+	s(n); ll k; sl(k);
+	rep(i,1,n) {
+		sf(A[i].first); sf(A[i].second);
+		V[i] = mp((-inf-A[i].second)/A[i].first, A[i]);
+	}
+
+	sort(V+1,V+n+1);
+	rep(i,1,n) {
+		A[i] = V[i].second;
+	}
+
+	ld l = -inf, r = +inf;
+	rep(q,1,iter) {
+		ld mid = (l+r)/2;
+		if (gv(mid) >= k) {
+			r = mid;
+		} else {
+			l = mid;
+		}
+	}
+	prf(l); endc;
+}

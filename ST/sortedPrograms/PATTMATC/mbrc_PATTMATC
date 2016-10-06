@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+#define matches(x,y) ((x == '*') or (y == '*') or (x == y))
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+int pi[MAXN];
+vector<int> V;
+int dp[2000][2000];
+int mn[2000];
+int p[2000];
+
+void solve() {
+	string s; cin>>s; int n = s.size(); s = " " + s; string t; cin>>t; int m = t.size(); t = " " + t;
+	rep(i,1,m+1) dp[n+1][i] = 0;
+	rep(i,1,n+1) { dp[i][m+1] = 1e9; }
+	int ok = true;
+	drep(j,n,1){
+		ok &= s[j]=='*';
+		dp[j][m+1] = ok?0:1e9;
+	}
+	dp[n+1][m+1] = 0;
+	drep(i,n,1) {
+		drep(j,m,1) {
+			dp[i][j] = 1e9;
+			if (matches(s[i],t[j])) {dp[i][j] = MIN(dp[i][j], 1 + dp[i+1][j+1]);}
+			if (s[i] == '*') {dp[i][j] = MIN(dp[i][j],1 + dp[i][j+1]); dp[i][j] = MIN(dp[i][j], dp[i+1][j]); }
+			//cout<<i<<" , "<<j<<" : "<<dp[i][j]<<endl;
+		}
+	}
+	rep(j,1,m) { mn[j] = j + dp[1][j]-1; if (dp[1][j] >= 1e9) mn[j] = 1e9;} //  cout<<mn[j]<<endl; }
+	set<int> S;
+	drep(i,m,1) {
+		S.insert(MAX(i,mn[i]));
+		p[i] = *S.begin(); if (p[i] >= 1e9) p[i] = -1;
+	}
+	rep(i,1,m) {
+		if (i > 1) psp;
+		pr(p[i]);
+	}
+	endc;
+
+}		
+	
+
+
+int main() {
+	int t; s(t); while (t--) solve();		
+}

@@ -1,0 +1,80 @@
+//Program: b
+//Author: gary
+//Date: 26/10/2014
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+// const int MAX_N = ;
+const int mod = 1e9 + 9;
+
+void addto(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+const int M=60;
+
+int T;
+int K;
+ll N;
+int dp[M][9];
+int A[M];
+int solve(){
+  for(int i = 0; i < M; i++)
+    A[i] = (N >> i) & 1;
+  memset(dp, 0, sizeof dp);
+  dp[M - 1][A[M - 1]] = 1;
+  for(int i = M - 1; i >= 1; i--){
+    for(int j = 0; j < K * 2; j++){
+      for(int l = 0; l <= j && l * 2 + A[i - 1] < 2 * K; l++){
+	if(j - l > K) // this must even have <K
+	  continue;
+	addto(dp[i - 1][A[i - 1] + l * 2], dp[i][j]);
+      }
+    }
+  }
+  int res = 0;
+  for(int j = 0; j <= K; j++)
+    addto(res, dp[0][j]);
+  return res;
+}
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d%lld", &K, &N);
+    printf("%d\n", solve());
+  }
+  return 0;
+}

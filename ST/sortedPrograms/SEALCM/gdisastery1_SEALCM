@@ -1,0 +1,137 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_M = 1000;
+const int mod = 1e9 + 7;
+
+void madd(int& a, int b){
+  a += b;
+  if(a >= mod) a -= mod;
+}
+int mul(int a, int b){
+  return ((ll)a*b)%mod;
+}
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+int gcd(int a, int b){ return b == 0 ? a : gcd(b, a % b); }
+int T, N, M, L, R;
+vector<pii> pf[MAX_M + 1];
+
+int calc[MAX_M + 1][1 << 4][MAX_M + 1];
+
+int rec(int n, int d, int m){
+  if(n == 0) return m % d == 0;
+  int res = 0;
+  for(int i = 1; i <= M; i++)
+    madd(res, rec(n - 1, d, m * i / gcd(m, i)));
+  return res;
+}
+
+const int debug = 0;    
+
+int solve(){
+  int sum = 0;
+  for(int D = L; D <= R; D++){
+    int num = mpow(M, N);
+    int bad = 0;
+    for(int i = 1; i < (1 << SZ(pf[D])); i++){
+      int c = calc[D][i][M];
+      // printf("i = %d c = %d left = %d\n", i, c, M - c);
+      if(__builtin_popcount(i) % 2 == 1)
+	madd(bad, mpow(M - c, N));
+      else
+	madd(bad, mod - mpow(M - c, N));
+    }
+    madd(num, mod - bad);
+
+    if(debug){
+      int expected = rec(N, D, 1);
+      printf("D = %d expected = %d num = %d bad = %d\n", D, rec(N, D, 1), num, bad);
+      assert(expected == num);
+    }
+    madd(sum, num);
+  }
+  return sum;
+}
+
+int main(){
+  for(int i = 2; i <= MAX_M; i++){
+    if(pf[i].empty()){
+      for(int j = i; j <= MAX_M; j += i){
+	int x = j, c = 0;
+	while(x % i == 0) x /= i, c++;
+	pf[j].pb(mp(i, c));
+      }
+    }
+  }
+  
+  if(debug){
+  for(int i = 1; i <= MAX_M; i++){
+    printf("%d:", i);
+    for(int j = 0; j < SZ(pf[i]); j++){
+      printf(" (%d, %d)", pf[i][j].fi, pf[i][j].se);
+    }
+    puts("");
+  }}
+
+  for(int i = 1; i <= MAX_M; i++){
+    assert(SZ(pf[i]) <= 4);
+    for(int j = 0; j < (1 << SZ(pf[i])); j++){
+      // number of integers x, such that x <= M and one of the primes of subset j of pf[i] divides x
+      for(int k = 1; k <= MAX_M; k++){
+	calc[i][j][k] = calc[i][j][k - 1];
+	bool good = false;
+	int x = k;
+	for(int l = 0; l < SZ(pf[i]) && !good; l++){
+	  if((j >> l) & 1){
+	    bool good2 = true;
+	    for(int m = 0; m < pf[i][l].se && good2; m++){
+	      if(x % pf[i][l].fi != 0){
+		good2 = false;
+		break;
+	      }
+	      x /= pf[i][l].fi;
+	    }
+	    good |= good2;
+	  }
+	}
+	calc[i][j][k] += good;
+      }
+    }
+  }
+
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d%d%d%d", &N, &M, &L, &R);
+    printf("%d\n", solve());
+  }
+  return 0;
+}

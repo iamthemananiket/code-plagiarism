@@ -1,0 +1,65 @@
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <set>
+#include <cassert>
+#include <iostream>
+
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+
+#define eprintf(...) fprintf(stderr,__VA_ARGS__)
+
+using namespace std;
+
+template<class T> inline void umax(T &a,T b){if(a < b) a = b;}
+template<class T> inline void umin(T &a,T b){if(a > b) a = b;}
+template<class T> inline T abs(T a){return a > 0 ? a : -a;}
+
+typedef long long ll;
+typedef pair<int, int> ii;
+typedef vector<int> vi;
+typedef vector<ii> vii;
+
+const int inf = 1e9 + 143;
+const ll longinf = 1e18 + 143;
+
+inline int read(){int x;scanf(" %d",&x);return x;}
+
+int main(){
+  int t = read();
+  for (int i = 0; i < t; i++) {
+    string s;
+    cin >> s;
+    int n = s.size();
+    if (n % 2 == 0) {
+      puts(s.substr(0, n / 2) == s.substr(n / 2, n / 2)? "YES" : "NO");
+      continue;
+    }
+    if (n == 1) {
+      puts("NO");
+      continue;
+    }
+    int m = n / 2;
+    string ans = "NO";
+    for (int rot = 0; rot < 2; rot++) {
+      int L = 0;
+      while (L + m < n && s[L] == s[L + m])
+        L++;
+      int R = 0;
+      int p1 = n - 1, p2 = m - 1;
+      while (p2 >= 0 && p1 >= m && s[p1] == s[p2]) {
+        p1--;
+        p2--;
+        R++;
+      }
+      if (L + R >= m) {
+        ans = "YES";
+      }
+      reverse(all(s));
+    }
+    cout << ans << endl;
+  }
+  return 0;
+}

@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+#define rf freopen("inp.in","r",stdin)
+
+using namespace std;
+
+int A[10] , T;
+
+inline long long g( long long x ){
+	return x % 9 == 0 ? 9 : x % 9;
+}
+
+inline long long f( int a , int d , long long idx){
+	for(int i = 1 ; i <= 9 ; i++)
+		A[i] = g( a + ( i - 1 ) * 1LL * d );
+	long long res = 0;
+	for(int i = 1 ; i <= 9 ; i++)
+		res += A[i];
+	res *= idx/9;
+	int rem = idx % 9;
+	for(int i = 1 ; i <= rem ; i++) res += A[i];
+	return res;
+}
+
+int main(){
+	
+	cin.tie(0) , ios::sync_with_stdio(false);
+	cin >> T;
+	while( T-- ){
+		int a , d ;
+		long long l , r;
+		cin >> a >> d >> l >> r;
+		long long res = f( a , d , r ) - f( a , d , l - 1 );
+		cout << res << endl;
+	}
+}

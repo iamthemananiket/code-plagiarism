@@ -1,0 +1,162 @@
+/*
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+	ABHINANDAN AGARWAL
+	MNNIT ALLAHABAD
+	CSE
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+*/
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define mp make_pair
+#define pb push_back
+int fs()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (c<'0'||c>'9')
+		c=getchar_unlocked();
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return x; 
+}
+void pps(const char *s)
+{
+	int i;
+	for (i=0;s[i]!='\0';i++)
+	{
+		putchar_unlocked(s[i]);
+	}
+}
+void _ppd(int a)
+{
+	if (a==0)
+		return ;
+	_ppd(a/10);
+	putchar_unlocked(a%10+'0');
+}
+void ppd(int a) // Printing integer using utchar unlocked!
+{
+	if (a==0)
+	{
+		pc('0');
+		return;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_ppd(a);
+}
+void _pplld(ll a)
+{
+	if (a==0)
+		return ;
+	_pplld(a/10);
+	pc(a%10+'0');
+}
+void pplld(ll a)
+{
+	if (a==0)
+	{
+		pc('0');
+		return ;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_pplld(a);
+}
+int ggs(char *s) // String inputting
+{
+	int x=0;
+	char c=gc();
+	while (!('a'<=c&&c<='z')&&c!=-1) // change conditions to whatever strings can input !
+		c=gc();
+	while ('a'<=c&&c<='z')
+	{
+		s[x++]=c;
+		c=gc();
+	}
+	s[x]='\0';
+	return x;
+}
+
+int fsn()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (!('0'<=c&&c<='9'||c=='-'))
+		c=getchar_unlocked();
+	int neg=0;
+	if (c=='-'){
+		neg=1;
+		c=getchar_unlocked();
+	}
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return (neg==0?x:-x); 
+}
+//------------------------------------------------------------------------------------
+
+llu flag[(1<<26)]={0};
+
+#define ins(x) (flag[(x)>>6]|=(1LLU<<((x)&63)))
+#define del(x) (flag[(x)>>6]^=(1LLU<<((x)&63)))
+#define iss(x) (flag[(x)>>6]&(1LLU<<((x)&63)))
+
+int main()
+{
+	int q;
+	scanf("%d",&q);
+	llu s,a,b;
+	scanf("%llu%llu%llu",&s,&a,&b);
+	llu mod=(1LLU<<32);
+	llu ans=0;
+	if (s&1)
+	{
+		ins(s>>1);
+		ans+=s>>1;
+	}
+	int i;
+	for (i=2;i<=q;i++)
+	{
+		s=((a*s)%mod+b)%mod;
+		//printf("looking at %llu\n",s);
+		if (s&1)
+		{
+			if (!(iss(s>>1)))
+			{
+				//printf("inserting %llu--\n",s>>1);
+				ins(s>>1);
+				ans+=(s>>1);
+			}
+			
+		}
+		else
+		{
+			if ((iss(s>>1)))
+			{
+				//printf("Deleting %llu--\n",s>>1);
+				del(s>>1);
+				ans-=(s>>1);
+			}
+		}
+	}
+	printf("%llu\n",ans);
+	return 0;
+}

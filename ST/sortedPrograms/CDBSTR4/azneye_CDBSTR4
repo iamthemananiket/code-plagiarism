@@ -1,0 +1,64 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+
+void solve(int test_num) {
+  vector<vector<int> > res(11);
+  for (int x = 2; x <= 100000; x++) {
+    int t = x, cnt = 0;
+    for (int p = 2; p * p <= t; p++) {
+      if (t % p == 0) {
+        cnt++;
+        while (t % p == 0)
+          t /= p;
+      }
+    }
+    if (t > 1)
+      cnt++;
+    res[cnt].push_back(x);
+  }
+  int Q;
+  cin >> Q;
+  while (Q--) {
+    int L, R, K;
+    cin >> L >> R >> K;
+    const int ans = upper_bound(res[K].begin(), res[K].end(), R)
+        - lower_bound(res[K].begin(), res[K].end(), L);
+    cout << ans << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  double start_t = clock();
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  //cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

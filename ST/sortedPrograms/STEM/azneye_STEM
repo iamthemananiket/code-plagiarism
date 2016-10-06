@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+  int T;
+  cin >> T;
+  while (T-- > 0) {
+    int N;
+    cin >> N;
+    vector<string> words(N);
+    for (int i = 0; i < N; ++i) {
+      cin >> words[i];
+    }
+    string res = "";
+    for (int i = 0; i < (int) words.front().size(); ++i) {
+      for (int j = 1; j <= (int) words.front().size() - i; ++j) {
+        const string stem = words.front().substr(i, j);
+        bool ok = true;
+        for (int k = 0; k < N; ++k) {
+          if (words[k].find(stem) == string::npos) {
+            ok = false;
+          }
+        }
+        if (ok) {
+          if (stem.size() > res.size()) {
+            res = stem;
+          } else if (stem.size() == res.size()) {
+            res = min(res, stem);
+          }
+        }
+      }
+    }
+    cout << res << endl;
+  }
+  return 0;
+}

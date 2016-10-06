@@ -1,0 +1,104 @@
+#include "bits/stdc++.h"
+#define mp make_pair
+using namespace std;
+inline int scan(){
+    int x;
+    scanf("%d",&x);
+    return x;
+}
+const int N = 100001;
+int n , q;
+int x[N];
+int y[N];
+pair < int , int >  segtree[N << 2];//for x + y
+pair < int , int > segtree2[N << 2];// for x - y
+void build(int l ,int r ,int node){
+    if(l==r){
+        segtree[node] = mp(x[l] + y[r] , x[l] + y[r]);
+        segtree2[node] = mp(x[l] - y[r] , x[l] - y[r]);
+        return;
+    }
+    int mid = (l + r) >> 1;
+    int lc = node + node;
+    int rc = lc | 1;
+    build(l , mid , lc);
+    build(mid + 1 , r , rc);
+    segtree[node] = mp(min(segtree[lc].first,segtree[rc].first),max(segtree[lc].second,segtree[rc].second));
+    segtree2[node] = mp(min(segtree2[lc].first,segtree2[rc].first),max(segtree2[lc].second,segtree2[rc].second));
+}
+void update(int l , int r , int node, int idx){
+    if(l == r){
+        segtree[node] = mp(x[l] + y[r] , x[l] + y[r]);
+        segtree2[node] = mp(x[l] - y[r] , x[l] - y[r]);
+        return ;
+    }
+    int mid = (l + r) >> 1;
+    int lc = node + node;
+    int rc = lc | 1;
+    if(idx <= mid){
+        update(l , mid , lc , idx);
+    }
+    else{
+        update(mid + 1 , r , rc , idx);
+    }
+    segtree[node] = mp(min(segtree[lc].first,segtree[rc].first),max(segtree[lc].second,segtree[rc].second));
+    segtree2[node] = mp(min(segtree2[lc].first,segtree2[rc].first),max(segtree2[lc].second,segtree2[rc].second));
+}
+pair < int , int > query1(int l , int r , int node, int ql , int qr){
+    if(l > qr || r < ql){
+        return mp(INT_MAX , INT_MIN);
+    }
+    if(l >= ql && r <= qr){
+        return segtree[node];   
+    }
+    int mid = (l + r) >> 1;
+    int lc = node + node;
+    int rc = lc | 1;
+    pair < int , int > L = query1(l , mid , lc , ql , qr);
+    pair < int , int > R = query1(mid + 1 , r , rc , ql , qr);
+    return mp ( min (L.first , R.first) , max(L.second , R.second) );
+}
+pair < int , int > query2(int l , int r , int node, int ql , int qr){
+    if(l > qr || r < ql){
+        return mp(INT_MAX , INT_MIN);
+    }
+    if(l >= ql && r <= qr){
+        return segtree2[node];
+    }
+    int mid = (l + r) >> 1;
+    int lc = node + node;
+    int rc = lc | 1;
+    pair < int , int > L = query2(l , mid , lc , ql , qr);
+    pair < int , int > R = query2(mid + 1 , r , rc , ql , qr);
+    return mp ( min (L.first , R.first) , max(L.second , R.second) );
+}
+int main(){
+    n = scan();
+    for(int i = 1 ; i <= n ; ++i){
+        x[i] = scan();
+        y[i] = scan();
+    }
+    build(1,n,1);
+    q = scan();
+    while(q--){
+        char a[2];
+        scanf("%s",a);
+        if(a[0] == 'U'){
+            int i = scan() , xx = scan() , yx = scan();
+            x[i + 1] = xx;
+            y[i + 1] = yx;
+            update(1 , n , 1 , i + 1);
+        }
+        else{
+            int L = scan() + 1 , R = scan() + 1;
+            pair < int , int > temp = query1(1 , n , 1 , L  , R);
+            long long ans1 = temp.second;
+            ans1 -= temp.first;
+            temp = query2(1 , n , 1 , L , R);
+            long long ans2 = temp.second;
+            ans2 -= temp.first;
+            long long ans = max(ans1 , ans2);
+            printf("%lld\n", ans);
+        }
+    }
+}

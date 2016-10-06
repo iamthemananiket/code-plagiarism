@@ -1,0 +1,49 @@
+#include <cstdio>
+#include <vector>
+
+#define mod 1000000007
+
+using namespace std;
+
+int T;
+int n,m;
+int x,y;
+vector<int> h[500];
+
+long long dp[500][20001];
+
+void dfs(int k,int a) {
+    for(int i:h[k]) {
+        if(i==a) continue;
+        dfs(i,k);
+    }
+
+    for(int i=1; i<=m; i++) {
+        for(int j=2*i; j<=m; j+=i) dp[k][i] += dp[k][j];
+        dp[k][i] %= mod;
+    }
+
+    if(a>=0) for(int i=0; i<=m; i++) dp[a][i] = (dp[a][i] * dp[k][i]) % mod;
+}
+
+int main()
+{
+    for(scanf("%d",&T); T--;) {
+        scanf("%d%d",&n,&m);
+        for(int i=0; i<n; i++) {
+            h[i].clear();
+            fill(&dp[i][1],&dp[i][m+1],1ll);
+        }
+
+        for(int i=0; i<n-1; i++) {
+            scanf("%d%d",&x,&y); x--; y--;
+            h[x].push_back(y); h[y].push_back(x);
+        }
+
+        dfs(0,-1);
+
+        printf("%lld\n",dp[0][1]);
+    }
+
+    return 0;
+}

@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+#include <assert.h>
+ 
+using namespace std;
+ 
+typedef long long ll;
+typedef vector < long long > vll;
+typedef pair < long long, long long > pll;
+typedef pair < int, int > pii;
+typedef vector < int > vii;
+ 
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define reps(i,a,n) for(int i = a; i < n; i++)
+#define s(n) cin >> n
+#define csl ios_base::sync_with_stdio(false); cin.tie(NULL)
+#define rsz(x,n) x.clear(); x.resize(n)
+#define rrsz(x,a,n) x.clear(); x.resize(n,a)
+#define wt while(true)
+#define all(x) x.begin(),x.end()
+#define pb push_back
+#define ls(x) ((2*(x)) + 1)
+#define rs(x) ((ls(x)) + 1)
+#define md(a,b) (((a) + (b))/2)
+#define INF (1e9 + 7)
+ 
+ll t, u, v, n, k, m;
+string ss, s1, s2;
+const int N = 16;
+int adj [N];
+int dist [2][1 << N][N];
+bool visited [2][1 << N][N];
+struct Node {
+	int mask;
+	int pos;
+	int trans;
+};
+int comp (int mask) {
+	return (mask ^ ((1 << n) - 1));
+}
+bool valid (int mask) {
+	rep (i, n) {
+		if ((mask & (1 << i)) && (mask & adj[i])) return false;
+	}
+	return true;
+}
+deque < Node > Q;
+int bfs (Node src) {
+	dist[src.pos][src.mask][src.trans] = 0;
+	Q.clear();
+	Q.push_back(src);
+	Node cur, u;
+	while (!Q.empty()) {
+		cur = Q.front();
+		Q.pop_front();
+		if (visited[cur.pos][cur.mask][cur.trans]) continue;
+		visited[cur.pos][cur.mask][cur.trans] = true;
+		if (cur.pos && !cur.mask) return dist[cur.pos][cur.mask][cur.trans];
+		if(!cur.trans && !valid(cur.pos ? cur.mask : comp(cur.mask))) continue;
+		int curmask = cur.pos ? comp(cur.mask) : cur.mask;
+		if (cur.trans < k)
+		rep (i, n) {
+			if (curmask & (1 << i)) {
+				u.mask = cur.mask ^ (1 << i);
+				u.pos = cur.pos;
+				u.trans = cur.trans + 1;
+				if (dist[u.pos][u.mask][u.trans] != -1 && dist[u.pos][u.mask][u.trans] <= dist[cur.pos][cur.mask][cur.trans]) continue;
+				Q.push_front(u);
+				dist[u.pos][u.mask][u.trans] = dist[cur.pos][cur.mask][cur.trans];
+			}
+		}
+		u.mask = cur.mask;
+		u.pos = cur.pos ^ 1;
+		u.trans = 0;
+		if (dist[u.pos][u.mask][u.trans] != -1 && dist[u.pos][u.mask][u.trans] <= dist[cur.pos][cur.mask][cur.trans] + 1)
+			continue;
+		Q.push_back(u);
+		dist[u.pos][u.mask][u.trans] = dist[cur.pos][cur.mask][cur.trans] + 1;
+	}
+	return 2;
+}
+int main(){
+	csl;
+	cin >> t;
+	while (t--) {
+		cin >> n >> m >> k;
+		rep (i, n)
+			adj[i] = 0;
+		rep (i, m) {
+			cin >> u >> v;
+			--u, --v;
+			adj[u] |= (1 << v);
+			adj[v] |= (1 << u);
+		}
+		rep (i, 2)
+			rep (j, 1 << n)
+				rep (c, n + 1) {
+					dist[i][j][c] = -1;
+					visited[i][j][c] = false;
+		}
+		Node uv;
+		uv.mask = (1 << n) - 1;
+		uv.pos = 0;
+		uv.trans = 0;
+		cout << bfs(uv) << '\n';
+	}
+    return 0;
+}

@@ -1,0 +1,36 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int a[100001];
+int m[100001];
+int main(){
+       int t ;
+       scanf("%d",&t);
+       int N;
+       while(t--)
+           {
+           scanf("%d",&N);
+           for(int i = 0; i < N; i++) 
+           {
+               scanf("%d",&a[i]);
+               m[i]=0;
+           }
+           for(int i = 1; i < N ; i++)
+            {
+               if(a[i]!=a[i-1])
+                  { 
+                   m[i]=1;
+                   m[i-1]=1;
+                  }
+            }
+           int ans = 0;
+           for(int i=0;i<N;i++)ans+=m[i];
+           printf("%d\n",ans);
+
+       }
+       return 0;
+}

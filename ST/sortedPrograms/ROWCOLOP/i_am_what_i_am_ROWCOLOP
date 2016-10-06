@@ -1,0 +1,32 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+long long row[314169]={0};
+
+long long col[314169]={0};
+
+int main()
+{
+	int n,q,x,y;
+	cin>>n>>q;
+	string s;
+	while(q--)
+	 {
+	 	cin>>s>>x>>y;
+	 	if(s=="RowAdd")
+	 		{
+	 			row[x]+=y;	
+			}
+		else
+			{
+				col[x]+=y;
+			}
+	 }
+	 long long a=0,b=0;
+	for(int i=0;i<=314159;i++)
+		a=max(a, row[i]);
+	for(int i=0;i<=314159;i++)
+		b=max(b, col[i]);
+	cout<<a+b<<endl;
+		
+}

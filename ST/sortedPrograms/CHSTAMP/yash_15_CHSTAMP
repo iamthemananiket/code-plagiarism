@@ -1,0 +1,157 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define debug false	
+typedef long long ll;
+typedef pair<int,int> pi;
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define rep(i,a,b) for(i=a;i<b;i++)
+#define repb(i,a,b) for(i=a-1;i>=b;i--)
+#define zero(x) memset((x),0,sizeof (x))
+#define read(x)	scanf("%d",&x)
+#define readll(x) scanf("%lld",&x)
+
+// node : time * 2^20 + value
+// edge : val1 * 2^20 + val2 
+
+int inp[200005];
+vector<ll> e[50001];
+int cur[50001];
+
+int vis[50001],vis2[50001];
+
+class Stack{
+	int arr[50001],hd;
+public:
+	Stack()
+	{hd=0;}
+	void push(int x)
+	{arr[hd]=x;hd++;}
+	void pop()
+	{hd--;}
+	int top()
+	{return arr[hd-1];}
+	bool empty()
+	{return hd<=0;}
+};
+
+Stack s1,s2,ds;
+vector<int> g[50001];
+
+int dfs(int x)
+{
+	int ans=0,i;
+	ds.push(x);
+	while(!ds.empty())
+	{
+		x=ds.top();
+		ds.pop();
+		vis[x]=1;
+		ans=max(ans,cur[x]);
+		if(debug)
+			cerr<<" "<<x<<" "<<cur[x]<<" -> "<<ans<<"\n";
+		rep(i,0,g[x].size())
+			if(!vis[g[x][i]])
+				ds.push(g[x][i]);
+	}
+	return ans;
+}
+
+void update(int x,int val)
+{
+	if(debug)
+		cerr<<" "<<val<<" : ";
+	int i;
+	ds.push(x);
+	while(!ds.empty())
+	{
+		x=ds.top();
+		ds.pop();
+		vis[x]=2;
+		cur[x]=val;
+		if(debug)
+			cerr<<x<<" ";
+		rep(i,0,g[x].size())
+			if(vis[g[x][i]]==1)
+				ds.push(g[x][i]);
+	}
+	if(debug)
+		cerr<<'\n';
+}
+
+void solve(int t)
+{
+	if(debug)
+		cerr<<"t = "<<t<<"\n";
+	int i,v1,v2,val;
+	rep(i,0,e[t].size())
+	{
+		v1=(e[t][i]>>20);
+		v2=(e[t][i]&((1<<20)-1));
+		if(debug)
+			cerr<<"  "<<v1<<" - "<<v2<<"\n";
+		g[v1].pb(v2);
+		g[v2].pb(v1);
+		if(!vis2[v1])
+		{
+			vis2[v1]=1;
+			s2.push(v1);
+		}
+		if(!vis2[v2])
+		{
+			vis2[v2]=1;
+			s2.push(v2);
+		}
+	}
+	while(!s2.empty())
+	{
+		v1=s2.top();
+		s2.pop();
+		s1.push(v1);
+		if(vis[v1])
+			continue;
+		val=dfs(v1);
+
+		update(v1,val);
+	}
+	while(!s1.empty())
+	{
+		v1=s1.top();
+		s1.pop();
+		vis[v1]=vis2[v1]=0;
+		g[v1].clear();
+	}
+}
+
+int main()
+{
+	int tt,n,m,i,t,a,b,v1,v2;
+	ll h,ans;
+	read(tt);
+	while(tt--)
+	{
+		read(n);
+		read(m);
+		rep(i,0,n)
+			read(inp[i]);
+		rep(i,1,50001)
+		{
+			e[i].clear();
+			cur[i]=i;
+		}
+		while(m--)
+		{
+			read(t);read(a);read(b);
+			e[t].pb(((ll)a<<20)+b);
+		}
+		repb(t,50001,1)
+			if(!e[t].empty())
+				solve(t);	
+		ans=0;
+		rep(i,0,n)
+			ans+=cur[inp[i]];
+		printf("%lld\n",ans);
+	}
+}

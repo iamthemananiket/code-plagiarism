@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+const int rmax = 20;
+const ll inf = 1e18;
+
+struct ticket
+{
+    int k;
+    ll cost;
+};
+
+int n;
+
+vector<vector<int> > g;
+vector<vector<ticket> > tickets;
+vector<vector<int> > p;
+vector<vector<ll> > minn;
+vector<ll> dp;
+
+void dfs1(int v)
+{
+    for (int to : g[v]) {
+        p[to][0] = v;
+        dfs1(to);
+    }
+}
+
+ll get(int v, int k)
+{
+    ll ans = inf;
+    for (int r = rmax - 1; r >= 0; --r) {
+        if ((1 << r) <= k) {
+            ans = min(ans, minn[v][r]);
+            v = p[v][r];
+            k -= (1 << r);
+        }
+    }
+    return ans;
+}
+
+void dfs(int v, int depth)
+{
+    minn[v][0] = dp[p[v][0]];
+    for (int r = 1; r < rmax; ++r) {
+        int t = p[v][r - 1];
+        minn[v][r] = min(minn[v][r - 1], minn[t][r - 1]);
+    }
+    if (v) {
+        dp[v] = inf;
+        for (ticket& t : tickets[v]) {
+            int k = min(t.k, depth);
+            dp[v] = min(dp[v], t.cost + get(v, k));
+        }
+    }
+    for (int to : g[v]) {
+        dfs(to, depth + 1);
+    }
+}
+
+int main()
+{
+
+    //ifstream cin("input.txt");
+    //ofstream cout("output.txt");
+    //freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+
+    //ios_base::sync_with_stdio(false);
+    //cin.tie(0);
+
+    cin >> n;
+    int cnt_tickets;
+    cin >> cnt_tickets;
+
+    g.resize(n);
+
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        g[v].pb(u);
+    }
+
+    tickets.resize(n);
+    while (cnt_tickets--) {
+        int v, k;
+        ll cost;
+        cin >> v >> k >> cost;
+        --v;
+        tickets[v].pb({k, cost});
+    }
+
+    p = vector<vector<int> >(n, vector<int>(rmax));
+    minn = vector<vector<ll> >(n, vector<ll>(rmax));
+    dfs1(0);
+
+    for (int r = 1; r < rmax; ++r) {
+        for (int i = 0; i < n; ++i) {
+            int t = p[i][r - 1];
+            p[i][r] = p[t][r - 1];
+        }
+    }
+
+    dp.resize(n);
+    dfs(0, 0);
+
+    int q;
+    cin >> q;
+
+    while (q--) {
+        int v;
+        cin >> v;
+        cout << dp[v - 1] << "\n";
+    }
+
+}

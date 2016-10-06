@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+#define N 80
+using namespace std;
+int T,n,i,j,a[N][N],b[N][N],lab[N],ans,t,x,y,wz[N],tot;
+int get(int x,int y)
+{
+	int ans=0,i;
+	for(i=1;i<=n;i++)
+	{
+		if(a[x][i]&&b[lab[x]][lab[i]])ans--;
+		if(a[y][i]&&b[lab[y]][lab[i]])ans--;
+		if(a[i][x]&&b[lab[i]][lab[x]])ans--;
+		if(a[i][y]&&b[lab[i]][lab[y]])ans--;
+	}
+	swap(lab[x],lab[y]);
+	for(i=1;i<=n;i++)
+	{
+		if(a[x][i]&&b[lab[x]][lab[i]])ans++;
+		if(a[y][i]&&b[lab[y]][lab[i]])ans++;
+		if(a[i][x]&&b[lab[i]][lab[x]])ans++;
+		if(a[i][y]&&b[lab[i]][lab[y]])ans++;
+	}
+	swap(lab[x],lab[y]);
+	return ans;
+}
+int main()
+{
+	srand(2333);
+	scanf("%d",&T);
+	while(T--)
+	{
+		scanf("%d",&n);ans=0;
+		for(i=1;i<=n;i++)
+			for(j=1;j<=n;j++)
+				scanf("%d",&a[i][j]);
+		for(i=1;i<=n;i++)
+			for(j=1;j<=n;j++)
+				scanf("%d",&b[i][j]);
+		for(i=1;i<=n;i++)lab[i]=i;
+		for(int tec=1;tec<=100;tec++)
+		{
+			random_shuffle(lab+1,lab+n+1);tot=0;
+			for(i=1;i<=n;i++)
+				for(j=1;j<=n;j++)
+					if(a[i][j]&&b[lab[i]][lab[j]])tot++;
+			for(int s=1;s<=1000;s++)
+			{
+				x=rand()%n+1;y=rand()%n+1;t=get(x,y);
+				if(t>0)tot+=t,swap(lab[x],lab[y]);
+			}
+			if(tot>ans){ans=tot;for(i=1;i<=n;i++)wz[lab[i]]=i;}
+		}
+		for(i=1;i<=n;i++)printf("%d ",i);puts("");
+		for(i=1;i<=n;i++)printf("%d ",wz[i]);puts("");
+	}
+}

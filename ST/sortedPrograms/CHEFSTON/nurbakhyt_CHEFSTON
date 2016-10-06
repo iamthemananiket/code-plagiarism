@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+
+const int N = (int)1e5 + 123;
+
+using namespace std;
+
+int n, k;
+int a[N], b[N];
+long long ans;
+
+void solve() {
+     ans = 0;
+	 scanf("%d%d", &n, &k);	
+	 for (int i = 1; i <= n; i++)
+	 	scanf("%d", &a[i]);
+	 for (int i = 1; i <= n; i++)
+	 	scanf("%d", &b[i]);
+	 for (int i = 1; i <= n; i++)
+	 	ans = max(ans, 1ll * (k / a[i]) * b[i]);
+	 printf("%lld\n", ans);
+}
+
+int t;
+
+int main() {
+    scanf("%d", &t);
+    while(t--)
+    	solve();
+	return 0;
+}

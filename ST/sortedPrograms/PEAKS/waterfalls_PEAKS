@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+const int MOD = 1e9+9;
+int add(int a, int b) { return a+b-(a+b>=MOD)*MOD; }
+int sub(int a, int b) { return a-b+(a-b<0)*MOD; }
+int mult(int a, int b) { return ((ll) a*b)%MOD; }
+
+int n;
+int s[5013];
+
+class FT {
+public:
+	int ft[5013];
+	void clear() { fill(ft,ft+n+1,0); }
+	void update(int i, int v) { while (i<=n) ft[i] = add(ft[i],v), i+=i&-i; }
+	int sumto(int i) { return i>0 ? add(ft[i],sumto(i-(i&-i))) : 0; }
+	int query(int a, int b) { return sub(sumto(b),sumto(a-1)); }
+};
+
+FT dp[413];
+int solve(bool up, int tot) {
+	//printf("solve %d %d\n",up,tot);
+	//printf("%d %d\n",n,tot+1);
+	for (int i=0;i<=tot+1;i++) dp[i].clear();
+	for (int i=1;i<=n;i++) {
+		for (int j=tot+1;j>0;j--) {
+			if ((j&1)^up) {
+				dp[j].update(s[i],dp[j].query(s[i],n));
+				dp[j].update(s[i],dp[j-1].query(s[i],n));
+			} else {
+				dp[j].update(s[i],dp[j].query(1,s[i]));
+				dp[j].update(s[i],dp[j-1].query(1,s[i]));
+			}
+		}
+		dp[0].update(s[i],1);
+		/*for (int j=0;j<=tot+1;j++) {
+			for (int k=1;k<=n;k++) printf("%d ",dp[j].query(k,k));
+			printf("\n");
+		}
+		printf("after %d ans is %d\n",i,dp[tot+1].query(1,n));*/
+	}
+	int res = dp[tot+1].query(1,n);
+	//printf("%d\n",res);
+	return res;
+}
+
+int main() {
+	int T;
+	scanf("%d",&T);
+	for (int test=0;test<T;test++) {
+		int a,b;
+		scanf("%d%d%d",&n,&a,&b);
+		for (int i=1;i<=n;i++) scanf("%d",&s[i]);
+		if (abs(a-b)>1) {
+			printf("0\n");
+			continue;
+		}
+		vector<int> comp;
+		for (int i=1;i<=n;i++) comp.push_back(s[i]);
+		sort(comp.begin(),comp.end());
+		comp.erase(unique(comp.begin(),comp.end()),comp.end());
+		for (int i=1;i<=n;i++) s[i] = lower_bound(comp.begin(),comp.end(),s[i])-comp.begin()+1;
+		/*for (int i=1;i<=n;i++) printf("%d ",s[i]);
+		printf("\n");*/
+		if (a==b) {
+			if (a==0) printf("%d\n",add(n,add(solve(0,a+b),solve(1,a+b))));
+			else printf("%d\n",add(solve(0,a+b),solve(1,a+b)));
+		} else {
+			if (a>b) printf("%d\n",solve(0,a+b));
+			else printf("%d\n",solve(1,a+b));
+		}
+	}
+
+	return 0;
+}

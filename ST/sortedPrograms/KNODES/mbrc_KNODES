@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+#define rep(i,x,y) for (int i = (x); i<=(y); i++)
+#define repe(i,x,y) for (int i = (x); i < (y);i++)
+#define drep(i,x,y) for (int i = (x); i >= (y); i--)
+#define mp make_pair
+#define pb push_back
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAXN 100100
+#define LMAXN 30
+#define sf(n) scanf("%Lf",&n)
+#define prf(n) printf("%Lf",n)
+#define	s(n) scanf("%d",&n)
+#define sl(n) scanf("%lld",&n)
+#define pr(n) printf("%d",n)
+#define prl(n) printf("%lld",n)
+#define endc printf("\n")
+#define psp printf(" ")
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+typedef pair<int,int> pii;
+
+vector<int> G[MAXN];
+int pi[MAXN];
+int depth[MAXN];
+int lft[MAXN];
+int rgt[MAXN];
+int T[MAXN];
+int A[MAXN];
+int L[MAXN][LMAXN+1];
+pii P[MAXN];
+int D[MAXN];
+int t;
+
+void dfs(int x,int p,int d) {
+	depth[x] = d; pi[x] = p; t++; T[x] = t;
+	lft[x] = t; rgt[x] = t;
+	repe(j,0,G[x].size()) {
+		int y = G[x][j];
+		if (y == p) continue;
+		dfs(y,x,d+1);
+		lft[x] = MIN(lft[x],lft[y]);
+		rgt[x] = MAX(rgt[x],rgt[y]);
+	}	
+}
+
+int lca(int x,int y) {
+	if (depth[x] < depth[y]) return lca(y,x);
+	drep(j,LMAXN,0) {
+		if (L[x][j] < 0) continue;
+		if (depth[L[x][j]] >= depth[y]) {
+			x = L[x][j];
+		}
+	}
+	if (x == y) return x;
+	drep(j,LMAXN,0) {
+		if (L[x][j] < 0) continue;
+		if (L[y][j] < 0) continue;
+		if (L[x][j]!=L[y][j]) {
+			x = L[x][j]; y = L[y][j];
+		}
+	}
+	return L[x][0];
+}
+
+void solve() {
+	int n; s(n); int x,y; t = 0;
+	rep(i,1,n) G[i] = *new vector<int>();
+	rep(i,1,n-1) {
+		s(x); s(y);
+		G[x].pb(y); G[y].pb(x);
+	}
+	dfs(1,-1,1);
+	rep(i,1,n) {
+		L[i][0] = pi[i];
+	}
+	rep(j,1,LMAXN) {
+		rep(i,1,n) {
+			if (L[i][j-1] > 0) {
+				L[i][j] = L[L[i][j-1]][j-1];
+			} else {
+				L[i][j] = -1;
+			}
+		}
+	}
+	//ret(i,1,n) { pr(i); psp; pr(depth[i]); endc; }
+	int q; s(q);
+	while (q--) {
+		int K; s(K);
+		rep(i,1,K) {
+			s(A[i]);
+			P[i] = mp(depth[A[i]],A[i]);
+			D[i] = depth[A[i]];
+		}
+		sort(P+1,P+K+1);
+		int l = P[1].second;
+		rep(j,2,K) {
+			l = lca(l,P[j].second);
+		}
+		//pr(l); endc;
+		int lc = l;
+		int r = l;
+		bool ok = true;
+		rep(j,1,K) {
+			x = P[j].second;
+			//pr(x); psp; pr(l); psp; pr(r); psp; endc;
+			if ((lft[l] <= T[x]) and (T[x] <= rgt[l])) {
+				//printf("===> "); pr(l); psp; pr(lft[l]); psp; pr(rgt[l]); endc;
+				l = x;
+			} else if ((lft[r] <= T[x]) and (T[x] <= rgt[r])) {
+				//printf("===> "); pr(r); psp; pr(lft[r]); psp; pr(rgt[r]); endc;
+				//printf("Right\n");
+				r = x; 
+			} else {
+				ok = false;
+				break;
+			}
+			if ((l!=lc) and (r!=lc) and (lca(r,l)!=lc)) { ok = false; break; }
+		}
+		if (!ok) {
+			printf("No\n");
+		} else {
+			printf("Yes\n");
+		}
+		
+	}	
+
+}
+
+int main() {
+	int t; s(t); rep(i,1,t) solve();
+	return 0;
+}

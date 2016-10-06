@@ -1,0 +1,154 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector<int> vi;
+typedef pair<int,int> pi;
+typedef priority_queue<int, vi, greater<int> > pq_t;
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define rep(i,a,b) for(i=a;i<b;i++)
+#define repb(i,a,b) for(i=a-1;i>=b;i--)
+#define zero(x) memset((x),0,sizeof (x))
+#define square(x) (x)*1ll*(x)
+bool dbg = 0;
+inline void read(int &x)	{	scanf("%d",&x);		}
+inline void read(ll &x)		{	scanf("%lld",&x);	}
+
+pi q[50004];
+vector< pi > b[250];
+
+int a[50004];
+ll res[50004],ans;
+
+multiset<int> m;
+multiset<int>::iterator it,prv,nxt;
+
+void Insert(int val)
+{
+	if(m.empty())
+	{
+		m.insert(val);
+		if(dbg)	cout<<"Insert00 "<<val<<" : "<<ans<<"\n";
+		return;
+	}
+	it=m.lower_bound(val);
+	prv=it;
+	prv--;
+	if(it==m.begin())
+	{
+		ans+=square(val-*it);
+		m.insert(val);
+	}
+	else if(it==m.end())
+	{
+		ans+=square(val-*prv);
+		m.insert(prv,val);
+	}
+	else
+	{
+		ans-=square(*it - *prv);
+		ans+=square(*it - val)+square(val - *prv);
+		m.insert(prv,val);
+	}
+		if(dbg) for(it=m.begin();it!=m.end();it++)
+				 	cout<<*it<<" ";
+		if(dbg) cout<<"\nInserted "<<val<<" : "<<ans<<"\n";
+}
+
+void Delete(int val)
+{
+	it=m.lower_bound(val);
+	nxt=it;	nxt++;
+	prv=it;	prv--;
+	assert(*it==val && m.size()>2);
+	if(val==7 && ans==7 && dbg)
+		cout<<"WOW "<<*prv<<" "<<*nxt;
+	if(it==m.begin())
+		ans-=square(val - *nxt);
+	else if(nxt==m.end())
+	{
+		if(dbg && *it==7 && ans==7)
+			cout<<*prv<<" <--- \n";
+		ans-=square(val - *prv);
+	}
+	else
+	{
+		ans-=square(val - *nxt);
+		ans-=square(val - *prv);
+		ans+=square(*nxt - *prv);
+	}
+	m.erase(it);
+	if(dbg) for(it=m.begin();it!=m.end();it++)
+				cout<<*it<<" ";
+	if(dbg) cout<<"Deleted "<<val<<" : "<<ans<<"\n";
+}
+
+int main()
+{
+	int n,qc,x,y,l,r,nb,sz,i,j,cc=0;
+	read(n);
+	rep(i,0,n)
+		read(a[i]);
+
+	nb=sqrt(n);
+	sz=(n+nb-1)/nb;
+	read(qc);
+	rep(i,0,qc)
+	{
+		read(x);read(y);
+		x--,y--;
+		q[i].ff=x;
+		q[i].ss=y;
+		if(x==y)
+			res[i]=0,cc++;
+		else if(x>y)
+			assert(0);
+//		else if(x+1==y)
+//			res[i]=(a[y]-a[x])*1ll*(a[y]-a[x]);
+		else
+			b[x/sz].pb(mp(y,i));
+	}
+	rep(i,0,nb)
+	{
+		if(b[i].empty())
+			continue;
+		sort(b[i].begin(), b[i].end());
+		cc+=b[i].size();
+	if(dbg) rep(j,0,b[i].size())
+				cout<<b[i][j].ff<<" "<<b[i][j].ss<<" <- \n";
+		m.clear();
+		sz=0;
+		ans=0;
+		l=r=q[b[i][0].ss].ff;
+	if(dbg) cout<<"Starting : ["<<l<<","<<r<<") : "<<ans<<"\n";
+		rep(j,0,b[i].size())
+		{
+			x=q[b[i][j].ss].ff;
+			y=b[i][j].ff;
+		if(dbg) cout<<"Try : "<<x<<" "<<y<<"\n";
+			while(r<=y)
+			{
+				Insert(a[r]);
+				r++;
+			}
+			while(l<x)
+			{
+				Delete(a[l]);
+				l++;
+			}
+			while(l>x)
+			{
+				l--;
+				Insert(a[l]);
+			}
+		if(dbg) cout<<"Result : "<<ans<<"\n";
+			res[b[i][j].ss]=ans;
+		}
+	}
+	assert(cc==qc);
+	rep(i,0,qc)
+		printf("%lld\n",res[i]);
+}

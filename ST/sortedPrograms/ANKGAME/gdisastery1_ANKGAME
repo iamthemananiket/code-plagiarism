@@ -1,0 +1,90 @@
+//Program: ankgame
+//Author: gary
+//Date: 21/06/2015
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define sz(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int inf = 1e9;
+const int maxn = 1e5 + 10;
+const int mod = 1e9 + 7;
+void madd(int & a, int b ){
+  a += b;
+  if(a >= mod)
+    a -= mod;
+}
+
+int mul(int a, int b){
+  return 1LL * a * b % mod;
+} 
+
+int mpow(int a, int n){
+  int r = 1;
+  while(n > 0){
+    if(n & 1)
+      r = mul(r, a);
+    a = mul(a, a);
+    n >>= 1;
+  }
+  return r;
+}
+
+int T, N; 
+int f[maxn], fi[maxn];
+map<ll, int> M;
+
+int main(){
+  f[0] = fi[0] = 1;
+  for(int i = 1; i < maxn; i++){
+    f[i] = mul(f[i - 1], i);
+    fi[i] = mul(fi[i - 1], mpow(i, mod - 2));
+  }
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d", &N);
+    M.clear();
+    ll x;
+    for(int i = 0; i < N; i++){
+      scanf("%lld", &x);
+      M[x] ++;
+    }
+    int denom = 1, m = M[1], oth = 0;
+    for(const auto& it: M){
+      if(it.fi == 1) continue;
+      denom = mul(denom, fi[it.se]);
+      oth |= 1;
+    }
+    int res = 0;
+    if(!oth){
+      res = N % 2;
+    } else {
+      for(int n1 = 0; n1 <= m; n1++){
+        if(n1 % 2 == 1) continue;
+        int a = mul(f[N - n1], mul(fi[m - n1], denom));
+        madd(res, a);
+        if(n1 < m){
+          madd(res, mod - mul(f[N - n1 - 1], mul(fi[m - n1 - 1], denom)));
+        }
+      }
+    }
+    printf("%d\n", res);
+  }
+  return 0;
+}

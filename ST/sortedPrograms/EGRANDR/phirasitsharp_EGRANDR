@@ -1,0 +1,44 @@
+#include <iostream>
+
+using namespace std;
+
+int main() { 
+	
+	ios::sync_with_stdio( false );
+
+	int test_num;
+	cin >> test_num;
+
+	for ( int i = 0 ; i < test_num ; i++ ) {
+		int n;
+		cin >> n;
+
+		int err = false;
+		int found = false;
+		int sum = 0;
+
+		for ( int i = 0 ; i < n ; i++ ) {
+			int val;
+			cin >> val;
+			if ( val == 5 ) {
+				found = true;
+			}
+			if ( val == 2 ) {
+				err = true;
+			} else {
+				sum += val;
+			}
+		}
+
+		if ( not found ) {
+			err = true;
+		}
+		if ( sum < 4 * n ) {
+			err = true;
+		}
+
+		cout << ( err ? "No" : "Yes" ) << endl;
+	}
+
+	return 0;
+}

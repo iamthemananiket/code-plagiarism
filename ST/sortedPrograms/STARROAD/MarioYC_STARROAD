@@ -1,0 +1,443 @@
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+#define MAXN 100
+
+int X;
+
+struct MatrixWithPow{
+    int n;
+    int M[2 * MAXN][2 * MAXN];
+
+    MatrixWithPow(int _n){
+        n = _n;
+        memset(M,0,sizeof M);
+    }
+
+    MatrixWithPow operator * (MatrixWithPow &a){
+        MatrixWithPow ret(n);
+
+        for(int i = 0;i < n;++i){
+            for(int j = 0;j < n;++j){
+                long long aux = 0;
+
+                for(int k = 0;k < n;++k){
+                    aux += (long long)M[i][k] * a.M[k][j];
+                }
+
+                if(aux >= X) aux %= X;
+                ret.M[i][j] = aux;
+            }
+        }
+
+        return ret;
+    }
+
+    MatrixWithPow pow(long long b){
+        MatrixWithPow ret(n),aux = *this;
+
+        for(int i = 0;i < n;++i)
+            ret.M[i][i] = 1;
+
+        while(b){
+            if(b & 1) ret = ret * aux;
+            aux = aux * aux;
+            b >>= 1;
+        }
+
+        return ret;
+    }
+};
+
+int ways[MAXN][MAXN];
+
+void count_ways(int n, int ne, long long k){
+    MatrixWithPow M(2 * n);
+
+    for(int i = 0,u,v;i < ne;++i){
+        scanf("%d %d",&u,&v);
+        --u; --v;
+        ++M.M[u][v];
+        ++M.M[v][u];
+    }
+
+    for(int i = 0;i < n;++i){
+        M.M[n + i][n + i] = 1;
+
+        for(int j = 0;j < n;++j)
+            M.M[n + i][j] = M.M[i][j];
+    }
+
+    M = M.pow(k);
+
+    for(int i = 0;i < n;++i){
+        for(int j = 0;j < n;++j){
+            ways[i][j] = M.M[n + j][i];
+        }
+    }
+}
+
+const int B = 100000000;
+
+struct BigInteger{
+    vector<long long> d;
+    int sign;
+
+    BigInteger(){
+        d.reserve(800);
+        d.push_back(0);
+        sign = 1;
+    }
+
+    void clean(){
+        int n = d.size();
+        while(n > 1 && d.back() == 0){
+            d.pop_back();
+            --n;
+        }
+        // 4-5: < 5000
+        // 6: < 4000
+        // 7-10 : < 2000
+        // 11-16 : < 1000
+        //assert(n < 5000);
+    }
+
+    BigInteger(long long x){
+        d.clear();
+
+        if(x < 0){
+            sign = -1;
+            x = -x;
+        }else{
+            sign = 1;
+        }
+
+        if(x == 0) d.push_back(0);
+        else{
+            while(x != 0){
+                d.push_back(x % B);
+                x /= B;
+            }
+        }
+    }
+
+    // ignores signs
+    bool _geq(BigInteger &y){
+        if(d.size() > y.d.size()) return true;
+        if(d.size() < y.d.size()) return false;
+
+        int n = d.size();
+
+        for(int i = n - 1;i >= 0;--i){
+            if(d[i] > y.d[i]) return true;
+            if(d[i] < y.d[i]) return false;
+        }
+
+        return true;
+    }
+
+    // ignores signs
+    bool _leq(BigInteger &y){
+        if(d.size() > y.d.size()) return false;
+        if(d.size() < y.d.size()) return true;
+
+        int n = d.size();
+
+        for(int i = n - 1;i >= 0;--i){
+            if(d[i] > y.d[i]) return false;
+            if(d[i] < y.d[i]) return true;
+        }
+
+        return true;
+    }
+
+    bool operator >= (BigInteger &y){
+        if(sign == 1){
+            if(y.sign == -1) return true;
+            return _geq(y);
+        }
+
+        if(y.sign == 1) return false;
+        return _leq(y);
+    }
+
+    // ignores signs
+    BigInteger _add(BigInteger &y){
+        int n = d.size(),ny = y.d.size();
+        BigInteger ret;
+        ret.d.resize(max(n,ny) + 1,0);
+
+        for(int i = 0,c = 0;i < n || i < ny || c > 0;++i){
+            int sum = c;
+            if(i < n) sum += d[i];
+            if(i < ny) sum += y.d[i];
+            if(sum >= B){
+                sum -= B;
+                c = 1;
+            }else{
+                c = 0;
+            }
+            //assert(i < ret.d.size());
+            ret.d[i] = sum;
+        }
+
+        ret.clean();
+        //printf("_add : %d digits\n",(int)ret.d.size());
+        return ret;
+    }
+
+    // ignores signs, and >= y
+    BigInteger _sub(BigInteger &y){
+        int n = d.size(),ny = y.d.size();
+        BigInteger ret;
+        ret.d.resize(n,0);
+
+        for(int i = 0,c = 0;i < n;++i){
+            int sum = d[i] - c;
+            if(i < ny) sum -= y.d[i];
+
+            if(sum < 0){
+                sum += B;
+                c = 1;
+            }else{
+                c = 0;
+            }
+
+            ret.d[i] = sum;
+        }
+
+        ret.clean();
+        return ret;
+    }
+
+    BigInteger operator + (BigInteger &y){
+        BigInteger ret;
+        //printf("+ : %d %d\n",sign,y.sign);
+        if(sign == y.sign){
+            ret = _add(y);
+            //printf("+2 : %d digits\n",(int)_add(y).d.size());
+            if(sign == -1) ret.sign = -1;
+        }else{
+            if(_geq(y)){
+                ret = _sub(y);
+                if(sign == -1) ret.sign = -1;
+            }else{
+                ret = y._sub(*this);
+                if(sign == 1) ret.sign = -1;
+            }
+        }
+        //printf("+ : %d digits\n",(int)ret.d.size());
+        return ret;
+    }
+
+    BigInteger operator - (BigInteger y){
+        BigInteger ret;
+        if(sign != y.sign){
+            ret = _add(y);
+            if(sign == -1) ret.sign = -1;
+        }else{
+            if(_geq(y)){
+                ret = _sub(y);
+                if(sign == -1) ret.sign = -1;
+            }else{
+                ret = y._sub(*this);
+                if(sign == 1) ret.sign = -1;
+            }
+        }
+        return ret;
+    }
+
+    BigInteger operator * (BigInteger &y){
+        int n = d.size(),ny = y.d.size();
+        BigInteger ret;
+        ret.d.resize(n + ny,0);
+
+        for(int i = 0;i < n;++i){
+            for(int j = 0;j < ny;++j){
+                ret.d[i + j] += d[i] * y.d[j];
+            }
+        }
+
+        int nret = ret.d.size();
+
+        for(int i = 0;i < nret;++i){
+            if(ret.d[i] >= B){
+                if(i == nret - 1){
+                    ret.d.push_back(ret.d[i] / B);
+                    ++nret;
+                }else{
+                    ret.d[i + 1] += ret.d[i] / B;
+                }
+                ret.d[i] %= B;
+            }
+        }
+
+        ret.sign = sign * y.sign;
+
+        ret.clean();
+        return ret;
+    }
+
+    BigInteger operator / (BigInteger &y){
+        int n = d.size(),ny = y.d.size();
+        BigInteger ret;
+        ret.d.resize(n - ny + 1);
+
+        for(int i = n - ny;i >= 0;--i){
+            int lo = 0,hi = B - 1,mi;
+
+            while(lo < hi){
+                mi = lo + ((hi - lo + 1) >> 1);
+                ret.d[i] = mi;
+                BigInteger aux = ret * y;
+                if(_geq(aux)) lo = mi;
+                else hi = mi - 1;
+            }
+
+            ret.d[i] = lo;
+        }
+
+        ret.sign = sign * y.sign;
+        ret.clean();
+        return ret;
+    }
+
+    BigInteger operator % (BigInteger y){
+        BigInteger q = (*this) / y * y;
+        return (*this) - q;
+    }
+
+    bool is_zero(){
+        return d.size() == 1 && d[0] == 0;
+    }
+
+    void print(){
+        //printf("print : %d digits\n",(int)d.size());
+        int n = d.size();
+        if(sign == -1) printf("-");
+        printf("%d",(int)d[n - 1]);
+        for(int i = n - 2;i >= 0;--i){
+            printf("%08d",(int)d[i]);
+        }
+        printf("\n");
+    }
+};
+
+BigInteger gcd(BigInteger x, BigInteger y){
+    while(true){
+        BigInteger rem = x % y;
+        if(rem.is_zero()) return y;
+
+        x.d = y.d;
+        y.d = rem.d;
+    }
+}
+
+BigInteger lcm(BigInteger x, BigInteger y){
+    BigInteger g = gcd(x,y);
+    return x / g * y;
+}
+
+BigInteger det[MAXN][MAXN];
+
+BigInteger calc_determinant(int n){
+    BigInteger num;
+    vector<BigInteger> den;
+    num = 1;
+
+    for(int i = 0;i < n;++i){
+        //cout << "i = " << i << endl;
+        if(det[i][i].is_zero()){
+            bool found = false;
+
+            for(int j = i + 1;j < n && !found;++j){
+                if(!det[i][j].is_zero()){
+                    found = true;
+                    for(int k = i;k < n;++k){
+                        //det[i][k].change(det[j][k]);
+                        swap(det[i][k],det[j][k]);
+                    }
+                }
+            }
+
+            if(!found) return BigInteger(0);
+        }
+
+        num = num * det[i][i];
+        /*BigInteger g = det[i][i];
+
+        for(int k = i + 1;k < n;++k){
+            g = gcd(g,det[i][k]);
+        }
+
+        for(int k = i;k < n;++k){
+            det[i][k] = det[i][k] / g;
+        }*/
+
+        //det[i][i].inverse();
+
+        /*for(int k = i + 1;k < n;++k){
+            det[i][k] = det[i][k] * det[i][i];
+        }*/
+
+        //det[i][i] = BigFraction(1,1);
+
+        for(int j = i + 1;j < n;++j){
+            if(!det[j][i].is_zero()){
+                BigInteger l = lcm(det[i][i],det[j][i]);
+                BigInteger c1 = l / det[i][i];
+                BigInteger c2 = l / det[j][i];
+                den.push_back(c2);
+                for(int k = i + 1;k < n;++k){
+                    //det[j][k] = det[j][k] - det[i][k] * det[j][i];
+                    det[j][k] = det[j][k] * c2 - det[i][k] * c1;
+                }
+                //assert(det[j][i].is_zero());
+            }
+        }
+    }
+
+    for(auto x : den){
+        num = num / x;
+    }
+
+    return num;
+}
+
+int main(){
+    int N,M;
+    long long K;
+
+    scanf("%d %d %d %lld",&N,&M,&X,&K);
+
+    count_ways(N,M,K);
+
+    /*for(int i = 0;i < N;++i){
+        for(int j = 0;j < N;++j){
+            printf("%d ",ways[i][j]);
+        }
+        printf("\n");
+    }*/
+
+    for(int i = 1;i < N;++i){
+        long long sum = 0;
+        for(int j = 0;j < N;++j){
+            if(j != i){
+                if(j > 0) det[i - 1][j - 1] = BigInteger(-ways[i][j]);
+                sum += ways[i][j];
+            }
+        }
+        det[i - 1][i - 1] = BigInteger(sum);
+    }
+
+    BigInteger ans = calc_determinant(N - 1);
+    ans.print();
+
+    return 0;
+}

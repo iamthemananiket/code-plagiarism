@@ -1,0 +1,111 @@
+#include <cstdio>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define CNT(s, x) ( (s).find(x) != (s).end() )
+#define ALL(x) (x).begin(), (x).end()
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+#define on(x, i) (((x)>>(i))&1)
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int maxn = 1e5;
+const int bits = 30;
+const int tsize = maxn * bits + 1000000;
+
+int n, a[maxn];
+int pre[maxn], suf[maxn];
+
+int tc[tsize][2], tn, troot;
+
+void trie_insert(int mask)
+{
+    int c = troot;
+    for(int i = bits - 1; i >= 0; i--)
+    {
+        int x = on(mask, i);
+        if(tc[c][x] == 0)
+            tc[c][x] = ++tn;
+        // assert(tn < tsize);
+        c = tc[c][x];
+    }
+}
+
+int trie_query(int mask)
+{
+    int res = 0, c = troot;
+    for(int i = bits - 1; i >= 0; i--)
+    {
+        int x = on(mask, i);
+        if(tc[c][1 - x])
+        {
+            c = tc[c][1 - x];
+            res += (1 << i);
+        }
+        else
+        {
+            c = tc[c][x];
+        }
+    }
+    return res;
+}
+
+void trie_init()
+{
+    troot = tn = 0;
+    memset(tc, 0, sizeof tc);
+}
+
+void process(int* a, int* b)
+{
+    int mask = 0;
+    trie_init();
+    trie_insert(mask);
+    for(int i = 0; i < n; i++)
+    {
+        mask ^= a[i];
+        if(i > 0)
+            b[i] = b[i - 1];
+        b[i] = max(b[i], trie_query(mask));
+        trie_insert(mask);
+    }
+}
+
+int main()
+{
+    scanf("%d", &n);
+    assert(n <= maxn);
+    for(int i = 0; i < n; i++)
+        scanf("%d", a + i);
+
+    process(a, pre);
+    reverse(a, a + n);
+    process(a, suf);
+    reverse(suf, suf + n);
+
+
+//    for(int i = 0; i < n; i++) printf("%d ", a[i]); puts("");
+//    for(int i = 0; i < n; i++) printf("%d ", pre[i]); puts("");
+//    for(int i = 0; i < n; i++) printf("%d ", suf[i]); puts("");
+
+    int res = 0;
+    for(int i = 0; i < n - 1; i++)
+        res = max(res, pre[i] + suf[i + 1]);
+    printf("%d\n", res);
+    return 0;
+}

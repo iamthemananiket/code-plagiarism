@@ -1,0 +1,188 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXN = 60013;
+
+typedef long long ll;
+const int MOD = 100003;
+int add(int a, int b, int mo=MOD) {
+	int res = a+b;
+	while (res>=mo) res-=mo;
+	return res;
+}
+int sub(int a, int b, int mo=MOD) {
+	int res = a-b;
+	while (res<0) res+=mo;
+	return res;
+}
+int mult(int a, int b, int mo=MOD) { return ((ll) a*b)%mo; }
+int binpow(int x, int p, int mo=MOD) {
+	int ans = 1;
+	while (p) {
+		if(p&1) ans = mult(ans,x,mo);
+		p>>=1;
+		x = mult(x,x,mo);
+	}
+	return ans;
+}
+int inv(int x, int mo=MOD) { return binpow(x,mo-2,mo); }
+
+int pow2[6*MAXN+100];
+int fact[6*MAXN+100], invf[6*MAXN+100];
+int combo(int n, int k) {
+	if (k<0 || k>n) return 0;
+	if (n<MOD) return mult(fact[n],mult(invf[k],invf[n-k]));
+	int res = 1;
+	while (n) {
+		res*=combo(n%MOD,k%MOD);
+		n/=MOD;
+		k/=MOD;
+	}
+	return res;
+}
+
+void precalc() {
+	pow2[0] = 1;
+	for (int i=1;i<6*MAXN+100;i++) pow2[i] = mult(pow2[i-1],2);
+	fact[0] = invf[0] = 1;
+	for (int i=1;i<6*MAXN+100;i++) {
+		fact[i] = mult(i,fact[i-1]);
+		invf[i] = inv(fact[i]);
+	}
+}
+
+int can[MAXN];
+
+void findways() {
+	can[1] = 9;
+	int cur = 1;
+	int on = 0, to = 0;
+	for (int i=2;i<MAXN;i++) {
+		int seg = 6*(i-2);
+		while (on<seg) {
+			cur = mult(cur,2);
+			cur = sub(cur,combo(on,to));
+			on+=1;
+		}
+		while (to<i-1) cur = add(cur,combo(on,++to));
+		int cur2 = cur;
+		can[i] = add(can[i],cur2);
+		cur2 = sub(cur2,combo(on,i-1));
+		can[i] = add(can[i],mult(cur2,12));
+		cur2 = sub(cur2,combo(on,i-2));
+		can[i] = add(can[i],mult(cur2,54));
+		cur2 = sub(cur2,combo(on,i-3));
+		can[i] = add(can[i],mult(cur2,108));
+		cur2 = sub(cur2,combo(on,i-4));
+		can[i] = add(can[i],mult(cur2,81));
+		can[i] = sub(pow2[8+seg],can[i]);
+	}
+}
+
+typedef long double ld;
+
+const ld PI = 2*acos(0.0);
+
+typedef complex<ld> cd;
+
+inline vector<cd> fft(vector<cd>& a, int k, cd w) {
+	vector<int> rev(1<<k);
+	int high = -1;
+	for (int i=1;i<(1<<k);i++) {
+		if (!(i&(i-1))) high+=1;
+		rev[i] = rev[i^(1<<high)];
+		rev[i]|=(1<<(k-1-high));
+	}
+	vector<cd> prev(1<<k);
+	for (int i=0;i<(1<<k);i++) prev[i] = a[rev[i]];
+	vector<cd> roots(1<<k);
+	roots[0] = 1;
+	for (int i=1;i<(1<<k);i++) roots[i] = roots[i-1]*w;
+	vector<cd> next(1<<k);
+	for (int len=1;len<(1<<k);len*=2) {
+		int rstep = (1<<k)/(len*2);
+		for (int pdest=0;pdest<(1<<k);) {
+			int p1 = pdest;
+			for (int i=0;i<len;i++) {
+				cd val = roots[i*rstep]*prev[p1+len];
+				next[pdest] = prev[p1]+val;
+				next[pdest+len] = prev[p1]-val;
+				pdest+=1; p1+=1;
+			}
+			pdest+=len;
+		}
+		swap(prev,next);
+	}
+	return prev;
+}
+
+inline vector<int> multiply (vector<int>& a, vector<int> b) {
+	if (a.size()*b.size()<=1313) {
+		vector<int> res(a.size()+b.size()-1);
+		for (int i=0;i<a.size();i++) for (int j=0;j<b.size();j++) {
+			res[i+j] = add(res[i+j],mult(a[i],b[j]));
+		}
+		return res;
+	}
+	int len = a.size()+b.size()-1;
+	int k = 0;
+	while ((1<<k)<=2*max(a.size(),b.size())) k+=1;
+	vector<cd> fa(a.begin(),a.end()), fb(b.begin(),b.end());
+	fa.resize(1<<k);
+	fb.resize(1<<k);
+	ld alpha = 2*PI/(1<<k);
+	cd w = cd(cos(alpha), sin(alpha));
+	vector<cd> one = fft(fa,k,w);
+	vector<cd> two = fft(fb,k,w);
+	vector<cd> c(1<<k);
+	for (int i=0;i<(1<<k);i++) c[i] = one[i]*two[i];
+	c = fft(c,k,cd(1)/w);
+	for (cd& i: c) i/=(1<<k);
+	vector<int> res(len);
+	for (int i=0;i<len;i++) {
+		ll cur = (ll) (c[i].real()+0.5);
+		res[i] = cur%MOD;
+	}
+	return res;
+}
+
+inline vector<int> solve(int l, int r) {
+	if (l==r) return {1,can[l]};
+	vector<int> one = solve(l,(l+r)/2);
+	vector<int> two = solve((l+r)/2+1,r);
+	return multiply(one,two);
+}
+
+int N[15], K[15];
+int ans[15];
+
+bool byN(int a, int b) { return N[a]<N[b]; }
+
+int32_t main() {
+	precalc();
+	findways();
+	int T;
+	scanf("%d",&T);
+	assert(T>0 && T<=5);
+	vector<int> order;
+	for (int t=0;t<T;t++) {
+		scanf("%d%d",&N[t],&K[t]);
+		assert(N[t]>0 && N[t]<=60000);
+		assert(K[t]>0 && K[t]<=N[t]);
+		order.push_back(t);
+	}
+	sort(order.begin(),order.end(),byN);
+	vector<int> poly(1,1);
+	int last = 0;
+	for (int i: order) {
+		if (N[i]>last) poly = multiply(poly,solve(last+1,N[i]));
+		last = N[i];
+		for (int j=K[i];j<N[i]+1;j++) ans[i] = add(ans[i],poly[j]);
+	}
+	for (int t=0;t<T;t++) {
+		printf("%d\n",ans[t]);
+		assert(ans[t]>=0 && ans[t]<MOD);
+	}
+
+	return 0;
+}

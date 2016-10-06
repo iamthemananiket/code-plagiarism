@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_N = 100000 + 1;
+
+vector< pair<int,int> > G[MAX_N];
+int cost[MAX_N];
+long long solution[MAX_N];
+int N;
+
+void dfs(int node, int parent)
+{
+    cost[node] = 0;
+    solution[node] = 0;
+
+    for (auto v : G[node])
+        if (v.first != parent)
+            dfs(v.first, node);
+
+    for (auto v : G[node])
+        if (v.first != parent)
+            cost[node] = max(cost[node], cost[v.first] + v.second);
+
+    solution[node] = cost[node];
+
+    vector< pair<long long,int> > kids;
+
+    for (auto v : G[node])
+        if (v.first != parent)
+            kids.push_back({cost[v.first] + v.second, v.first});
+
+    sort(kids.begin(), kids.end());
+
+    for (int i = kids.size() - 1; i >= 0; i--)
+    {
+        for (int j = kids.size() - 1; j >= 0; j--)
+        {
+            if (kids[i].second == kids[j].second)
+                continue;
+
+            solution[node] = min(solution[node], kids[i].first + kids[j].first);
+            break;
+        }
+    }
+}
+
+int main()
+{
+    ///ifstream cin("data.in");
+    ios_base::sync_with_stdio(false);
+
+    int T;
+    cin >> T;
+
+    while (T--)
+    {
+        cin >> N;
+
+        for (int i = 1; i <= N; ++i)
+        {
+            solution[i] = cost[i] = 0;
+            G[i].clear();
+        }
+
+        for (int i = 1; i < N; ++i)
+        {
+            int a, b, c;
+            cin >> a >> b >> c;
+
+            G[a].push_back({b, c});
+            G[b].push_back({a, c});
+        }
+
+        dfs(1, 0);
+
+        for (int i = 1; i <= N; ++i)
+            cout << solution[i] << "\n";
+    }
+
+    return 0;
+}

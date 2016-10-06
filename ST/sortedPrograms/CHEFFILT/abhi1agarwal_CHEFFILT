@@ -1,0 +1,198 @@
+/*
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+	ABHINANDAN AGARWAL
+	MNNIT ALLAHABAD
+	CSE
+._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._._
+*/
+#include<bits/stdc++.h>
+using namespace std;
+#define pc putchar_unlocked
+#define gc getchar_unlocked
+typedef long long ll;
+typedef unsigned long long llu;
+#define M 1000000007
+#define mp make_pair
+#define pb push_back
+int fs()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (c<'0'||c>'9')
+		c=getchar_unlocked();
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return x; 
+}
+void pps(const char *s)
+{
+	int i;
+	for (i=0;s[i]!='\0';i++)
+	{
+		putchar_unlocked(s[i]);
+	}
+}
+void _ppd(int a)
+{
+	if (a==0)
+		return ;
+	_ppd(a/10);
+	putchar_unlocked(a%10+'0');
+}
+void ppd(int a) // Printing integer using utchar unlocked!
+{
+	if (a==0)
+	{
+		pc('0');
+		return;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_ppd(a);
+}
+void _pplld(ll a)
+{
+	if (a==0)
+		return ;
+	_pplld(a/10);
+	pc(a%10+'0');
+}
+void pplld(ll a)
+{
+	if (a==0)
+	{
+		pc('0');
+		return ;
+	}
+	if (a<0)
+	{
+		pc('-');
+		a=-a;
+	}
+	_pplld(a);
+}
+int ggs(char *s) // String inputting
+{
+	int x=0;
+	char c=gc();
+	while (!('a'<=c&&c<='z'||c=='+'||c=='-')&&c!=-1) // change conditions to whatever strings can input !
+		c=gc();
+	while ('a'<=c&&c<='z'||c=='+'||c=='-')
+	{
+		s[x++]=c;
+		c=gc();
+	}
+	s[x]='\0';
+	return x;
+}
+
+int fsn()
+{
+	int x=0;
+	char c;
+	c=getchar_unlocked();
+	while (!('0'<=c&&c<='9'||c=='-'))
+		c=getchar_unlocked();
+	int neg=0;
+	if (c=='-'){
+		neg=1;
+		c=getchar_unlocked();
+	}
+	while ('0'<=c&&c<='9')
+	{
+		x=(x<<3)+(x<<1)+c-'0';
+		c=getchar_unlocked();
+	}
+	return (neg==0?x:-x); 
+}
+//------------------------------------------------------------------------------------
+
+char s[20],s1[20];
+int conv(char *s)
+{
+	int i,ret=0;
+	for (i=0;i<10;i++)
+	{
+		ret=(ret<<1)+(s[i]=='+');
+	}
+	return ret;
+}
+static long long A[1025]={0},A_[1025]={0};
+int sto[1025]={0};
+void init0(long long *A,int n)
+{
+	int i;
+	for(i=0;i<=n;i++)
+	{
+		A[i]=0;
+	}
+}
+int powd(long long a,int b)
+{
+	if (b==0)
+		return 1;
+	ll ret=powd(a,b/2);
+	if (b&1)
+	{
+		return (((ret*ret)%M)*a)%M;
+	}
+	else
+	{
+		return (ret*ret)%M;
+	}
+}
+int main()
+{
+	int t=fs();
+	while (t--)
+	{
+		ggs(s);
+		memset(A,0,sizeof(A));
+		memset(sto,0,sizeof(sto));
+		A[0]=1; // according to conditions
+		int i,j,k,x=0,n;
+		for (i=0;i<10;i++)
+		{
+			x=(x<<1)+(s[i]=='w');
+		}
+		n=fs();
+		int ans=0,lim=(1<<10)-1;
+		for (i=0;i<n;i++)
+		{
+			ggs(s1);
+			//printf("s1 read:%s\n",s1);
+			sto[conv(s1)]++;
+		}
+		for (i=0;i<=lim;i++)
+		{	
+			if (sto[i]==0)
+				continue;
+			memset(A_,0,sizeof(A_));
+			int d=i;
+			//A_[d]++;
+			int jd;
+			for (j=0;j<=lim;j++)
+			{
+		
+				jd=(j^d);
+				A_[jd]=(A[jd]+A[j])%M;//=A[j];
+
+			}
+			for (j=0;j<=lim;j++)
+			{
+				A[j]=(powd(2,(sto[i]-1))*A_[j])%M;
+			}
+			
+		}
+		ppd(A[x]);
+		pc('\n');
+	}
+	return 0;
+}

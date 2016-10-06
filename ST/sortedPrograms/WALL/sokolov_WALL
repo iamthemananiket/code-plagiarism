@@ -1,0 +1,75 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y123
+#define y1 y1234
+#define long long long
+#define PI 3.1415926535897932384626433832795
+#define EPS 1e-9
+#define INF 2147483647
+#define N 1000
+
+
+int gcd(int a, int b) { return (!b) ? a : gcd(b, a % b); }
+int lcm(int a, int b) { return a / gcd(a,b) * b; }
+
+int nextInt() { int n; scanf("%d", &n); return n; }
+//ll nextLong() { ll n; scanf("%I64d", &n); return n; }
+
+
+int d[524288 + 1];
+long x[524288 + 1], y[524288 + 1];
+
+long s(long x1, long y1, long x2, long y2, long x3, long y3) {
+	return abs((x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1));
+}
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; ++tt) {
+		long h = nextInt();
+		long n = nextInt();
+		int m = nextInt();
+		long a = nextInt();
+		long b = nextInt();
+		int ind = nextInt();		
+		for (int i = 0; i < m; ++i) {
+			d[i] = nextInt();
+		}
+		for (int i = 1; i < n; ++i) {
+			x[i] = x[i - 1] + d[ind];
+			ind = (int) (((long)a * ind + b) % m);
+			if (i % 2 == 1) {
+				y[i] = h;
+			}
+		}
+		long res = 0;
+		for (int i = 2; i < n; i += 2) {
+			res += s(x[i - 2], y[i - 2], x[i - 1], y[i - 1], x[i], y[i]);
+		}
+		if (n % 2 == 0) {
+			res += s(x[n - 2], y[n - 2], x[n - 1], y[n - 1], x[n - 1], 0);
+		}
+		if (res % 2 == 0) {
+			printf("%lld.0\n", res / 2);
+		} else {
+			printf("%lld.5\n", res / 2);
+		}
+	}
+	return 0;
+}

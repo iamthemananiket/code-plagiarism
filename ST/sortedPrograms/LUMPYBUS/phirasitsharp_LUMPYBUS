@@ -1,0 +1,57 @@
+#include <iostream>
+#include <algorithm>
+
+std::vector< int > odd, even;
+
+bool work( int64_t o, int64_t t, int64_t p, int64_t q );
+
+int main( void ) {
+
+	std::cin.sync_with_stdio( false );
+
+	int test;
+	std::cin >> test;
+
+	while ( test-- ) {
+
+		int n;
+		int64_t p, q;
+
+		std::cin >> n >> p >> q;
+
+		odd.clear();
+		even.clear();
+		for ( int i = 0 ; i < n ; ++i ) {
+			int val;
+			std::cin >> val;
+			( val % 2 ? odd : even ).emplace_back( val );
+		}
+
+		std::sort( odd.begin(), odd.end() );
+		std::sort( even.begin(), even.end() );
+
+		int64_t cnt = 0;
+		int j = 0;
+		while ( j < odd.size() and work( j+1, cnt + odd[j] / 2, p, q ) ) {
+			cnt += odd[j++] / 2ll;
+		}
+
+		int ans = j;
+		for ( int i = 0 ; i < even.size() ; ++i ) {
+			cnt += even[i] / 2ll;
+			while ( j > 0 and !work( j, cnt, p, q ) ) {
+				cnt -= odd[ --j ] / 2ll;
+			}
+			if ( work( j, cnt, p, q ) ) {
+				ans = std::max( ans, i+1 + j );
+			}
+		}
+
+		std::cout << ans << "\n";
+	}
+}
+
+bool work( int64_t o, int64_t t, int64_t p, int64_t q ) {
+	if ( o > p ) return false;
+	return t <= q + ( p - o ) / 2ll;
+}

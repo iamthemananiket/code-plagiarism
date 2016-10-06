@@ -1,0 +1,55 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+#define SZ(x) ( (int) (x).size() )
+#define dbg(x) cerr << #x << " = " << x << endl;
+#define mp make_pair
+#define pb push_back
+#define fi first
+#define se second
+typedef long long ll;
+typedef pair<int, int> pii;
+// const int INF = 1e9;
+const int MAX_N = 1e5 + 10;
+
+int T, N, a[MAX_N], b[MAX_N];
+int p[MAX_N];
+int q[MAX_N], m;
+
+int cmp(int i, int j){ return a[i] != a[j] ? a[i] < a[j] : b[i] > b[j]; }
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    scanf("%d", &N);
+    for(int i = 0; i < N; i++){
+      scanf("%d%d", a + i, b + i);
+      p[i] = i;
+    }
+    sort(p, p + N, cmp);
+    m = 0;
+    for(int i = 0; i < N; i++){
+      while(m > 0 && b[q[m-1]] >= b[p[i]])
+	m --;
+      q[m++] = p[i];
+    }
+    int l = -1, need = 0;
+    for(int i = 0; i < m; i++){
+      if(a[q[i]] <= l)
+	continue;
+      l = b[q[i]];
+      need ++;
+    }
+    printf("%d\n", need);
+  }
+  return 0;
+}

@@ -1,0 +1,117 @@
+#pragma comment(linker, "/STACK:500000000")
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y123
+#define y1 y1234
+#define ll long long
+#define PI 3.1415926535897932384626433832795
+#define EPS 1e-9
+#define INF 2147483647
+#define N 1000
+
+
+int gcd(int a, int b) { return (!b) ? a : gcd(b, a % b); }
+int lcm(int a, int b) { return a / gcd(a,b) * b; }
+
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%I64d", &n); return n; }
+
+
+struct Edge {
+	int to, cost;
+	
+	Edge() {}
+
+	Edge(int _to, int _cost) {
+		to = _to;
+		cost = _cost;
+	}
+};
+	
+struct Node {
+	int num, d;
+
+	Node(int _num, int _d) {
+		num = _num;
+		d = _d;
+	}
+
+	bool const operator<(Node other) const {
+		if (d == other.d) {
+			return num < other.num;
+		}
+		return d < other.d;
+	}
+};
+
+char g[N + 1][N + 1];
+int d[N + 1];
+
+int main() {
+	int t = nextInt();
+	for (int tt = 0; tt < t; ++tt) {
+		int n = nextInt();
+		scanf("\n");
+		for (int i = 0; i < n; ++i) {
+			gets(g[i]);
+		}
+		int q = nextInt();
+		for (int qq = 0; qq < q; ++qq) {
+			int s = nextInt() - 1;
+			int m = nextInt();
+			for (int mm = 0; mm < m; ++mm) {
+				int v1 = nextInt() - 1;
+				int v2 = nextInt() - 1;
+				if (g[v1][v2] == '0') {
+					g[v1][v2] = '1';
+				} else {
+					g[v1][v2] = '0';
+				}
+			}
+			set<Node> a;
+			for (int i = 0; i < n; ++i) {
+				if (i == s) {
+					a.insert(Node(s, 0));
+					d[i] = 0;
+				} else {
+					a.insert(Node(i, INF));
+					d[i] = INF;
+				}
+			}
+			for (int i = 0; i < n; ++i) {
+				Node v = *a.begin();
+				a.erase(v);
+				for (int j = 0; j < n; ++j) {
+					if (g[v.num][j] == '1' && (ll)d[v.num] + 1 < d[j]) {
+						a.erase(Node(j, d[j]));
+						d[j] = d[v.num] + 1;
+						a.insert(Node(j, d[j]));
+					}
+				}
+			}
+			int res = 0;
+			for (int i = 0 ;i < n; ++i) {
+				if (d[i] != INF) {
+					res += d[i];
+				}
+			}
+			printf("%d\n", res);
+		}
+	}
+	return 0;
+}

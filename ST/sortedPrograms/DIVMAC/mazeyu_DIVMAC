@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+#define rep(i,a,b) for (int i=a;i<=b;++i)
+#define re(i,a,b) for (int i=a;i<b;++i)
+#define dep(i,a,b) for (int i=a;i>=b;--i)
+template<class T> inline void read(T&x){char c;bool fu=0;for(c=getchar();c<=32;c=getchar());if(c=='-')fu=1,c=getchar();for(x=0;c>32;c=getchar())x=x*10+c-'0';if(fu)x*=-1;}
+template<class T> inline void read(T&x,T&y){read(x);read(y);}
+template<class T> inline void read(T&x,T&y,T&z) {read(x,y);read(z);}
+using namespace std;
+typedef long long ll;
+const int N=1111111;
+int pr[N],cnt,di[N];
+bool he[N];
+void init(){
+	int LMT=1000000;
+	rep(i,2,LMT){
+		if(!he[i])pr[++cnt]=i,di[i]=i;
+		for(int j=1;j<=cnt&&pr[j]*i<=LMT;++j){
+			he[i*pr[j]]=1;
+			di[i*pr[j]]=pr[j];
+			if(i%pr[j]==0)break;
+		}
+	}
+}
+int f[N];
+int get(int x){
+	return f[x]==x?x:f[x]=get(f[x]);
+}
+int a[N];
+int main() {
+	init();di[1]=1;
+	int T;read(T);while(T--){
+		int n,m;read(n,m);rep(i,1,n+1)f[i]=i;
+		rep(i,1,n)read(a[i]);
+		rep(_,1,m){
+			int t,L,R;read(t,L,R);
+			if(t==1){
+				int res=1;
+				for(int i=get(L);i<=R;i=get(i+1)){
+					if(res<di[a[i]])res=di[a[i]];
+				}
+				printf("%d ",res);
+			}else {
+				for(int i=get(L);i<=R;i=get(i+1)){
+					a[i]/=di[a[i]];
+					if(a[i]==1)f[i]=i+1;
+				}
+			}
+		}
+		puts("");
+	}
+	return 0;
+}

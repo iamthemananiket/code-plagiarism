@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+
+#define all(a) (a).begin(), (a).end()
+#define sz(a) (int)(a).size()
+#define mp make_pair
+#define pb push_back
+ 
+using namespace std;
+
+typedef long long ll;
+
+const int nmax = 110;
+const int inf = 1e9;
+
+int n, m;
+int s[nmax][nmax];
+
+vector<vector<int> > bfs(int xs, int ys, int k)
+{
+    vector<vector<int> > d(n, vector<int>(m, inf));
+    d[xs][ys] = 0;
+    queue<int> q;
+    q.push(xs), q.push(ys);
+    while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+        int y = q.front();
+        q.pop();
+        for (int i = x - k; i <= x + k; ++i) {
+            for (int j = y - k; j <= y + k; ++j) {
+                if (abs(x - i) + abs(y - j) <= k && i >= 0 && i < n && j >= 0 && j < m && s[i][j] == 0 && d[i][j] > d[x][y] + 1) {
+                    d[i][j] = d[x][y] + 1;
+                    q.push(i);
+                    q.push(j);
+                }
+            }
+        }
+    }
+    return d;
+}
+
+int main()
+{
+ 
+    int tt;
+    scanf("%d", &tt);
+    
+    while (tt--) {
+        scanf("%d%d", &n, &m);
+        int a, b;
+        scanf("%d%d", &a, &b);
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                scanf("%d", &s[i][j]);
+            }
+        }
+        vector<vector<int> > x = bfs(0, 0, a);
+        vector<vector<int> > y = bfs(0, m - 1, b);
+        int ans = inf;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                ans = min(ans, max(x[i][j], y[i][j]));
+            }
+        }
+        if (ans == inf) {
+            ans = -1;
+        }
+        printf("%d\n", ans);
+    }
+
+}

@@ -1,0 +1,394 @@
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define ms(s, n) memset(s, n, sizeof(s))
+#define FOR(i, a, b) for (int i = (a); i < (b); i++)
+#define FORd(i, a, b) for (int i = (a) - 1; i >= (b); i--)
+#define FORall(it, a) for (__typeof((a).begin()) it = (a).begin(); it != (a).end(); it++)
+#define sz(a) int((a).size())
+#define all(a) (a).begin(), (a).end()
+#define uni(a) (a).erase(unique(all(a)), (a).end())
+#define pb push_back
+#define pf push_front
+#define mp make_pair
+#define fi first
+#define se second
+#define prec(n) fixed<<setprecision(n)
+typedef long long ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<int, int> pi;
+typedef vector<int> vi;
+typedef vector<pi> vii;
+ll gcd(ll a, ll b) {ll r; while (b != 0) {r = a % b; a = b; b = r;} return a;}
+ll lcm(ll a, ll b) {return a / gcd(a, b) * b;}
+#define EPS 1e-9
+const int MOD = (int) 1e9 + 7;
+const int INF = (int) 1e9;
+const ll LINF = (ll) 1e18;
+const ld PI = 2 * acos((ld) 0);
+ 
+const int base = (int) round(pow(7, 10));
+const int basedigit = 10;
+struct Bigint {
+	vector<int> a;
+	int sign;
+	Bigint() : sign(1) {}
+	Bigint(long long v) {
+		*this = v;
+	}
+	Bigint(const string& s) {
+		read(s);
+	}
+	void operator = (const Bigint& v) {
+		sign = v.sign;
+		a = v.a;
+	}
+	void operator = (long long v) {
+		sign = 1;
+		if (v < 0)
+			sign = -1, v = -v;
+		for (; v > 0; v = v / base)
+			a.push_back(v % base);
+	}
+	Bigint operator + (const Bigint& v) const {
+		if (sign == v.sign) {
+			Bigint res = v;
+			for (int i = 0, carry = 0; i < (int) max(a.size(), v.a.size()) || carry; ++i) {
+				if (i == (int) res.a.size()) res.a.push_back(0);
+				res.a[i] += carry + (i < (int) a.size() ? a[i] : 0);
+				carry = res.a[i] >= base;
+				if (carry) res.a[i] -= base;
+			}
+			return res;
+		}
+		return *this - (-v);
+	}
+	Bigint operator - (const Bigint& v) const {
+		if (sign == v.sign) {
+			if (abs() >= v.abs()) {
+				Bigint res = *this;
+				for (int i = 0, carry = 0; i < (int) v.a.size() || carry; ++i) {
+					res.a[i] -= carry + (i < (int) v.a.size() ? v.a[i] : 0);
+					carry = res.a[i] < 0;
+					if (carry) res.a[i] += base;
+				}
+				res.trim();
+				return res;
+			}
+			return -(v - *this);
+		}
+		return *this + (-v);
+	}
+	void operator *= (int v) {
+		if (v < 0) sign = -sign, v = -v;
+		for (int i = 0, carry = 0; i < (int) a.size() || carry; ++i) {
+			if (i == (int) a.size()) a.push_back(0);
+			long long cur = a[i] * (long long) v + carry;
+			carry = (int) (cur / base);
+			a[i] = (int) (cur % base);
+		}
+		trim();
+	}
+	Bigint operator * (int v) const {
+		Bigint res = *this;
+		res *= v;
+		return res;
+	}
+	friend pair<Bigint, Bigint> divmod(const Bigint& a1, const Bigint& b1) {
+		int norm = base / (b1.a.back() + 1);
+		Bigint a = a1.abs() * norm;
+		Bigint b = b1.abs() * norm;
+		Bigint q, r;
+		q.a.resize(a.a.size());
+		for (int i = a.a.size() - 1; i >= 0; i--) {
+			r *= base;
+			r += a.a[i];
+			int s1 = r.a.size() <= b.a.size() ? 0 : r.a[b.a.size()];
+			int s2 = r.a.size() <= b.a.size() - 1 ? 0 : r.a[b.a.size() - 1];
+			int d = ((long long) base * s1 + s2) / b.a.back();
+			r -= b * d;
+			while (r < 0)
+				r += b, --d;
+			q.a[i] = d;
+		}
+		q.sign = a1.sign * b1.sign;
+		r.sign = a1.sign;
+		q.trim();
+		r.trim();
+		return make_pair(q, r / norm);
+	}
+	Bigint operator / (const Bigint& v) const {
+		return divmod(*this, v).first;
+	}
+	Bigint operator % (const Bigint& v) const {
+		return divmod(*this, v).second;
+	}
+	void operator /= (int v) {
+		if (v < 0) sign = -sign, v = -v;
+		for (int i = (int) a.size() - 1, rem = 0; i >= 0; --i) {
+			long long cur = a[i] + rem * (long long) base;
+			a[i] = (int) (cur / v);
+			rem = (int) (cur % v);
+		}
+		trim();
+	}
+	Bigint operator / (int v) const {
+		Bigint res = *this;
+		res /= v;
+		return res;
+	}
+	int operator % (int v) const {
+		if (v < 0) v = -v;
+		int m = 0;
+		for (int i = a.size() - 1; i >= 0; --i) m = (a[i] + m * (long long) base) % v;
+		return m * sign;
+	}
+	void operator += (const Bigint& v) {
+		*this = *this + v;
+	}
+	void operator -= (const Bigint& v) {
+		*this = *this - v;
+	}
+	void operator *= (const Bigint& v) {
+		*this = *this * v;
+	}
+	void operator /= (const Bigint& v) {
+		*this = *this / v;
+	}
+	bool operator < (const Bigint& v) const {
+		if (sign != v.sign) return sign < v.sign;
+		if (a.size() != v.a.size()) return a.size() * sign < v.a.size() * v.sign;
+		for (int i = a.size() - 1; i >= 0; i--) if (a[i] != v.a[i]) return a[i] * sign < v.a[i] * sign;
+		return false;
+	}
+	bool operator > (const Bigint& v) const {
+		return v < *this;
+	}
+	bool operator <= (const Bigint& v) const {
+		return !(v < *this);
+	}
+	bool operator >= (const Bigint& v) const {
+		return !(*this < v);
+	}
+	bool operator == (const Bigint& v) const {
+		return !(*this < v) && !(v < *this);
+	}
+	bool operator != (const Bigint& v) const {
+		return *this < v || v < *this;
+	}
+	void trim() {
+		while (!a.empty() && !a.back()) a.pop_back();
+		if (a.empty()) sign = 1;
+	}
+	bool isZero() const {
+		return a.empty() || (a.size() == 1 && !a[0]);
+	}
+	Bigint operator - () const {
+		Bigint res = *this;
+		res.sign = -sign;
+		return res;
+	}
+	Bigint abs() const {
+		Bigint res = *this;
+		res.sign *= res.sign;
+		return res;
+	}
+	long long longValue() const {
+		long long res = 0;
+		for (int i = a.size() - 1; i >= 0; i--) res = res * base + a[i];
+		return res * sign;
+	}
+	friend Bigint gcd(const Bigint& a, const Bigint& b) {
+		return b.isZero() ? a : gcd(b, a % b);
+	}
+	friend Bigint lcm(const Bigint& a, const Bigint& b) {
+		return a / gcd(a, b) * b;
+	}
+	void read(const string& s) {
+		sign = 1;
+		a.clear();
+		int pos = 0;
+		while (pos < (int) s.size() && (s[pos] == '-' || s[pos] == '+')) {
+			if (s[pos] == '-') sign = -sign;
+			++pos;
+		}
+		for (int i = s.size() - 1; i >= pos; i -= basedigit) {
+			int x = 0;
+			for (int j = max(pos, i - basedigit + 1); j <= i; j++) x = x * 7 + s[j] - '0';
+			a.push_back(x);
+		}
+		trim();
+	}
+	friend istream& operator>>(istream& stream, Bigint& v) {
+		string s;
+		stream>>s;
+		v.read(s);
+		return stream;
+	}
+	friend ostream& operator<<(ostream& stream, const Bigint& v) {
+		if (v.sign == -1) stream << '-';
+		stream<<(v.a.empty() ? 0 : v.a.back());
+		for (int i = (int) v.a.size() - 2; i >= 0; --i) stream << setw(basedigit) << setfill('0') << v.a[i];
+		return stream;
+	}
+	static vector<int> convert_base(const vector<int>& a, int old_digits, int new_digits) {
+		vector<long long> p(max(old_digits, new_digits) + 1);
+		p[0] = 1;
+		for (int i = 1; i < (int) p.size(); i++) p[i] = p[i - 1] * 7;
+		vector<int> res;
+		long long cur = 0;
+		int cur_digits = 0;
+		for (int i = 0; i < (int) a.size(); i++) {
+			cur += a[i] * p[cur_digits];
+			cur_digits += old_digits;
+			while (cur_digits >= new_digits) {
+				res.push_back(int(cur % p[new_digits]));
+				cur /= p[new_digits];
+				cur_digits -= new_digits;
+			}
+		}
+		res.push_back((int) cur);
+		while (!res.empty() && !res.back()) res.pop_back();
+		return res;
+	}
+	typedef vector<long long> vll;
+	static vll karatsubaMultiply(const vll& a, const vll& b) {
+		int n = a.size();
+		vll res(n + n);
+		if (n <= 32) {
+			for (int i = 0; i < n; i++)
+				for (int j = 0; j < n; j++)
+					res[i + j] += a[i] * b[j];
+			return res;
+		}
+		int k = n >> 1;
+		vll a1(a.begin(), a.begin() + k);
+		vll a2(a.begin() + k, a.end());
+		vll b1(b.begin(), b.begin() + k);
+		vll b2(b.begin() + k, b.end());
+		vll a1b1 = karatsubaMultiply(a1, b1);
+		vll a2b2 = karatsubaMultiply(a2, b2);
+		for (int i = 0; i < k; i++) a2[i] += a1[i];
+		for (int i = 0; i < k; i++) b2[i] += b1[i];
+		vll r = karatsubaMultiply(a2, b2);
+		for (int i = 0; i < (int) a1b1.size(); i++) r[i] -= a1b1[i];
+		for (int i = 0; i < (int) a2b2.size(); i++) r[i] -= a2b2[i];
+		for (int i = 0; i < (int) r.size(); i++) res[i + k] += r[i];
+		for (int i = 0; i < (int) a1b1.size(); i++) res[i] += a1b1[i];
+		for (int i = 0; i < (int) a2b2.size(); i++) res[i + n] += a2b2[i];
+		return res;
+	}
+	Bigint operator * (const Bigint& v) const {
+		vector<int> a6 = convert_base(this->a, basedigit, 6);
+		vector<int> b6 = convert_base(v.a, basedigit, 6);
+		vll a(a6.begin(), a6.end());
+		vll b(b6.begin(), b6.end());
+		while (a.size() < b.size()) a.push_back(0);
+		while (b.size() < a.size()) b.push_back(0);
+		while (a.size() & (a.size() - 1)) a.push_back(0), b.push_back(0);
+		vll c = karatsubaMultiply(a, b);
+		Bigint res;
+		res.sign = sign * v.sign;
+		for (int i = 0, carry = 0; i < (int) c.size(); i++) {
+			long long cur = c[i] + carry;
+			res.a.push_back((int) (cur % 117649));
+			carry = (int) (cur / 117649);
+		}
+		res.a = convert_base(res.a, 6, basedigit);
+		res.trim();
+		return res;
+	}
+	friend Bigint sqrt(const Bigint& a) {
+		Bigint x0 = a, x1 = (a + 1) / 2;
+		while (x1 < x0) {
+			x0 = x1;
+			x1 = (x1 + a / x1) / 2;
+		}
+		return x0;
+	}
+	void ELIMINATE() {
+		if (sz(a)) a.erase(a.begin());
+	}
+};
+ 
+const int maxn = 1000010;
+char s[1000010], t[10010];
+int L;
+Bigint T[7][10], _T[7][10];
+int pw[10], rp[7];
+ 
+int exp(int n, int k) {
+	int r = 1;
+	for (; k; k >>= 1) {
+		if (k & 1) r = r * n;
+		n = n * n;
+	}
+	return r;
+}
+ 
+void solve() {
+	pw[0] = 1; FOR(i, 1, 10) pw[i] = pw[i - 1] * 7;
+	FOR(i, 1, 7) rp[i] = exp(i, 5) % 7;
+	int test;
+	scanf("%d", &test);
+	while (test--) {
+		scanf("%s%s%d", s, t, &L);
+		int lens = strlen(s);
+		int lent = strlen(t);
+		while (t[lent - 1] == '0') {
+			s[lens - 1] = t[lent - 1] = 0;
+			lens--;
+			lent--;
+		}
+		reverse(s, s + lens);
+		reverse(t, t + lent);
+		s[L] = t[L] = 0;
+		lens = min(lens, L);
+		lent = min(lent, L);
+		reverse(s, s + lens);
+		reverse(t, t + lent); 
+		Bigint A(s), B(t);
+		vi ans;
+		L = min(L, lens);
+		s[0] = '1';
+		FOR(i, 1, L + 2) s[i] = '0';
+		s[L + 2] = 0;
+		Bigint D(s);
+		FOR(i, 0, 7) {
+			T[i][0] = B * i;
+			_T[i][0] = D - T[i][0];
+			FOR(j, 1, 10) {
+				T[i][j] = T[i][j - 1] * 7;
+				_T[i][j] = _T[i][j - 1] * 7;
+			}
+		}
+		int r = 0, d = rp[t[lent - 1] - '0'];
+		FOR(i, 0, L) {
+			int k = 0;
+			if (sz(A.a)) k = (A.a[0] / pw[r]) % 7 * d % 7;
+			ans.pb(k);
+			if (A >= T[k][r]) A -= T[k][r]; else A += _T[k][r];
+			r++;
+			if (r == 10) {
+				A.ELIMINATE(); r = 0;
+				while ((sz(A.a) - 1) * 10 >= L) A.a.pop_back();
+			}
+		}
+		while (sz(ans) > 1 && !ans.back()) ans.pop_back();
+		FORd(i, sz(ans), 0) printf("%d", ans[i]);
+		printf("\n");
+	}
+}
+ 
+int main() {
+	//ios_base::sync_with_stdio(0); cin.tie(NULL);
+#ifdef _LOCAL_
+	freopen("in.txt", "r", stdin); //freopen("out.txt", "w", stdout);
+#endif
+	solve();
+#ifdef _LOCAL_
+	//printf("\nTime elapsed: %dms", 1000 * clock() / CLOCKS_PER_SEC);
+#endif
+	return 0;
+}

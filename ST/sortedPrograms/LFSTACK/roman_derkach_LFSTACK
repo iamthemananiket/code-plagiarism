@@ -1,0 +1,81 @@
+#include<bits/stdc++.h>
+#define int long long
+#define pb push_back
+ using namespace std;
+
+ const int N = 1e4 + 10,M = 1e6 + 10;
+ vector<int> b[N];
+ int last[N],kol[N],flag,x,j,s,n,t,i;
+ int c[M],a[M];
+
+ void tt(int pos)
+ {
+     if(pos == s + 1)
+     {
+         cout<<"Yes\n";
+         flag = 1;
+         return;
+     }
+     for(int i=1;i<=n;++i)
+        if(last[i] < kol[i] && b[i][last[i]] == a[pos])
+     {
+         ++last[i];
+         tt(pos+1);
+         if(flag) return;
+         --last[i];
+     }
+ }
+
+ //int
+  main()
+ {
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    // freopen("O.in","r",stdin);freopen("O.out","w",stdout);
+
+    cin>>t;
+     while(t--)
+     {
+         cin>>n;
+         if(n==1)
+         {
+            cin>>n;
+            for(i=1;i<=n;++i) cin>>c[i];
+            for(i=1;i<=n;++i) cin>>a[i];
+            reverse(a+1,a+n+1);
+            flag = 1;
+            for(i=1;i<=n;++i)
+                if(a[i]!=c[i])
+            {
+                flag = 0;
+                break;
+            }
+            if(!flag) cout<<"No\n"; else cout<<"Yes\n";
+         } else{
+         s=0;
+          for(i=1;i<=n;++i)
+          {
+              cin>>kol[i];
+              s+=kol[i];
+              b[i].clear();
+              for(j=1;j<=kol[i];++j)
+              {
+                  cin>>x;
+
+                  b[i].pb(x);
+              }
+          }
+              for(i=1;i<=s;++i) cin>>a[i];
+              reverse(a+1,a+s+1);
+              for(i=1;i<=n;++i) last[i] = 0;
+              flag = 0;
+               tt(1);
+               if(!flag) cout<<"No\n";
+
+     }
+     }
+
+ }

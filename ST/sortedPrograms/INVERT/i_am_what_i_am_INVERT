@@ -1,0 +1,125 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<int> a,b;
+
+long long counter=0;
+
+void msort(vector<int> &a,vector<int> &b,int st,int end)
+  {if(st>=end)
+    return ;
+   // cout<<st<<" "<<end<<endl;
+   int mid=(st+end)/2;
+   msort(a,b,st,mid);
+   msort(a,b,mid+1,end);
+   int c=mid-st+1;
+   int i,j,p=st;
+   for(i=st,j=mid+1;i<=mid && j<=end;)
+     {if(a[i]<=a[j])
+        {
+        b[p++]=a[i];
+        i++;
+        c--;
+       }
+      else
+        {counter+=c;
+        b[p++]=a[j++];
+        }
+     }
+     for(;i<=mid;)
+       b[p++]=a[i++];
+    for(;j<=end;)
+       {b[p++]=a[j++];
+       }
+    for(i=st;i<=end;i++)
+      a[i]=b[i];
+  	
+  }
+
+
+int main()
+{
+		#ifndef ONLINE_JUDGE
+	freopen("in.txt","r",stdin);
+//	freopen("out.txt","w",stdout);
+	#endif
+	
+	
+	int n,q;
+	
+	cin>>n>>q;
+	a.resize(n+1);
+	a[0]=INT_MIN/10;
+	
+	for(int i=0;i<n;i++)
+	{
+		cin>>a[i+1];
+	}
+	int l,r,k;
+	int newSize=1;
+	b.resize(1);
+	b[0]=INT_MIN/10;
+	while(q--)
+	{
+		cin>>l>>r>>k;
+	//	cout<<l<<" "<<r<<" "<<k<<endl;
+		int extra=r-l+1;
+		newSize+=extra;
+		b.resize(newSize);
+		int pos=newSize-1;
+		
+	//	cout<<extra<<endl;
+		
+		
+		for(int moves=0; pos>k && pos-extra>=0;moves++)
+		 {
+		 	b[pos]=b[pos-extra];
+		 	pos--;
+		 }
+		/*
+		cout<<"B arr\n";
+		for(int i=0;i<b.size();i++)
+		 cout<<b[i]<<" ";
+		cout<<endl;
+		*/
+		int rPos=l;
+		pos=k;
+		for(int moves=0;moves<extra;moves++)
+		  {
+		  	b[pos]=a[rPos];
+		  	rPos++;
+		  	pos++;
+		  }
+		/*	
+		cout<<"B arr\n";
+		for(int i=0;i<b.size();i++)
+		 cout<<b[i]<<" ";
+		cout<<endl;
+		*/
+		
+		for(int i=l;i<a.size();i++)
+		 {
+		 	if(i+extra>=a.size()) break;
+		 	a[i]=a[i+extra];
+		 }
+		a.resize(a.size()-extra);
+		vector<int> c,d;
+		counter=0;
+		for(int temp=0;temp<b.size();temp++)
+		  c.push_back(b[temp]);
+		d.resize(c.size());
+		/*
+		cout<<"A ARR\n";
+		for(int i=1;i<a.size();i++)
+		  cout<<a[i]<<" ";
+		cout<<endl;
+		cout<<"B ARR\n";
+		for(int i=1;i<b.size();i++)
+		  cout<<b[i]<<" ";
+		cout<<endl;
+		*/
+		msort(c,d,0,c.size()-1);
+		cout<<counter<<endl;
+	}
+
+}

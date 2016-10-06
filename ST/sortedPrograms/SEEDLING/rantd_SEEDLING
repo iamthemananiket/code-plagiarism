@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define REPU(i, a, b) for (int i = (a); i < (b); ++i)
+#define REPD(i, a, b) for (int i = (a); i > (b); --i)
+#define MEM(a, x) memset(a, x, sizeof(a))
+#define ALL(a) a.begin(), a.end()
+#define UNIQUE(a) a.erase(unique(ALL(a)), a.end())
+
+typedef long long ll;
+const int MOD = 1000000007;
+
+template<class T> inline T tmin(T a, T b) { return (a < b) ? a : b; }
+template<class T> inline T tmax(T a, T b) { return (a > b) ? a : b; }
+template<class T> inline void amax(T &a, T b) { if (b > a) a = b; }
+template<class T> inline void amin(T &a, T b) { if (b < a) a = b; }
+template<class T> inline T tabs(T a) { return (a > 0) ? a : -a; }
+template<class T> T gcd(T a, T b) { while (b != 0) { T c = a; a = b; b = c % b; } return a; }
+
+const int N = 15, S = 15, M = 2005, B = 1001;
+int n, s, a[N], b[N], c[N];
+ll memo[N][S][M];
+
+ll rec(int id, int ts, int tc) {
+	if (memo[id][ts][B + tc]) return memo[id][ts][B + tc];
+	if (id == n) {
+		if (ts <= s && tc > 0) return 1;
+		return 0;
+	}
+	ll ret = 0;
+	REPU(i, 0, (s - ts) / a[id] + 1) {
+		ret += rec(id + 1, ts + i * a[id], tc + i * c[id]);
+	}
+	return (memo[id][ts][B + tc] = ret);
+}
+
+int main(int argc, char *argv[]) {
+	ios_base::sync_with_stdio(false);
+	
+	int ntest;
+
+	cin >> ntest;
+	while (ntest--) {
+		cin >> n >> s;
+		MEM(memo, 0);
+		REPU(i, 0, n) {
+			cin >> a[i] >> b[i] >> c[i];
+			c[i] -= b[i];
+		}
+		printf("%lld\n", rec(0, 0, 0));
+	}
+	
+	return 0;
+}

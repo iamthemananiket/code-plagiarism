@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int Max_n = 5005, mod = 1e9+7;
+
+int n, h;
+char str[Max_n];
+int sa[Max_n], ra[Max_n], temp[Max_n],c[Max_n][Max_n];
+long long ans[Max_n];
+
+int rank(int a) {
+	if(a<n) 
+		return ra[a];
+	else
+		return 0;
+}
+
+bool cmp(int a, int b) {
+	if(ra[a] == ra[b])
+		return (rank(a+h) < rank(b+h));
+	else
+		return ra[a] < ra[b];
+}
+
+void constructSA() {
+	for(int i = 0; i<n; i++) {
+		ra[i] = str[i] - '.';
+		sa[i] = i;
+	}
+	for(h = 1; h<=n; h <<= 1) {
+		sort(sa, sa+n, cmp);
+		int r = 1;
+		temp[sa[0]] = r;
+		for(int i = 1; i<n; i++) {
+			if((rank(sa[i]) != rank(sa[i-1])) || (rank(sa[i]+h) != rank(sa[i-1]+h)))
+				 ++r;
+			temp[sa[i]] = r;
+		}
+		for(int i = 0; i<n; i++) {
+			ra[i] = temp[i];
+		}
+		if(r == n-1)
+			break;
+	}
+}
+
+int main() {
+	int t, q, k;
+	for(int i = 0; i<Max_n; i++) {
+		c[i][i] = c[i][0] = 1;
+		for(int j = 1; j<i; j++) 
+			c[i][j] = (c[i-1][j-1] + c[i-1][j]) % mod;
+	}
+	scanf("%d", &t);
+	while(t--) {
+		scanf("%d%d", &n, &q);
+		scanf("%s", str);
+		constructSA();
+		for(int i = 0; i<n; i++) {
+			ans[i] = 0;
+			temp[i] = 0;
+		}
+		int lcp, tlcp;
+		for(int i = 0; i<n; i++) {
+			lcp = 0;
+			for(int j = n-1; j>i; j--) {
+				tlcp = lcp = max(lcp, temp[j]);
+				while(str[sa[i]+tlcp] == str[sa[j]+tlcp]) tlcp++;
+				ans[j-i] += tlcp - lcp;
+				temp[j] = lcp = tlcp;
+			}
+		}
+		ans[0] = n*(n+1)/2 % mod;
+		for(int i = 1; i<n; i++) {
+			for(int j = i+1; j<n; j++) {
+				ans[i] += ans[j]*(long long)c[j+1][i+1];
+				ans[i] %= mod;
+			}
+		}
+		while(q--) {
+			scanf("%d", &k);
+			printf("%lld\n", (k>n) ? 0 : ans[k-1]);
+		}
+	}
+	return 0;
+}

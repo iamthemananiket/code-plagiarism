@@ -1,0 +1,319 @@
+#include<stack>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<string>
+#include<cstring>
+using namespace std;
+
+typedef long long LL;
+typedef vector<int> VI;
+
+#define REP(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+#define EACH(i,c) for(__typeof((c).begin()) i=(c).begin(),i##_end=(c).end();i!=i##_end;++i)
+#define eprintf(s...) fprintf(stderr, s)
+
+template<class T> inline void amin(T &a, const T &b) { if (b<a) a=b; }
+template<class T> inline void amax(T &a, const T &b) { if (a<b) a=b; }
+
+template<class T, class U> struct AVLTreeSet {
+    typedef signed char Schar;
+    struct Node {
+	T val;
+	U u, sum;
+	Schar h;
+	int l, r, s;
+	Node(const T &v=T(), const U &u_=U()): val(v), u(u_) {
+	    sum = u;
+	    s = h = 1; l = r = 0;
+	}
+	inline int ch(bool R) const { return R? r: l; }
+    };
+    int root;
+    vector<Node> D;
+    AVLTreeSet(): root(0), D(1, Node()) { }
+    AVLTreeSet(const AVLTreeSet &a) { *this = a; }
+    AVLTreeSet& operator=(const AVLTreeSet &a) { 
+	root = 0; D.assign(1, Node());
+	stack<int> s, t;
+	if (a.root) { s.push(a.root); t.push(root = new_node(a.D[a.root].val)); }
+	while (!s.empty()) {
+	    int k = s.top(); s.pop();
+	    int x = t.top(), y; t.pop();
+	    D[x].h = a.D[k].h;
+	    D[x].s = a.D[k].s;
+	    if (a.D[k].l) { s.push(a.D[k].l); t.push(y = new_node(a.D[a.D[k].l].val)); D[x].l = y; }
+	    if (a.D[k].r) { s.push(a.D[k].r); t.push(y = new_node(a.D[a.D[k].r].val)); D[x].r = y; }
+	}
+	return *this;
+    }
+    inline int new_node(const T &v=T(), const U &u=U()) {
+	D.push_back(Node(v, u));
+	return D.size() - 1;
+    }
+    int size() { return size(root); }
+    inline int size(int x) const { return x? D[x].s: 0; }
+    inline void setch(int x, bool R, int c) {
+	(R? D[x].r: D[x].l) = c;
+	resize(x);
+    }
+    inline U getSum(int x) const { return x? D[x].sum: U(); }
+    inline void resize(int x) {
+	D[x].s = 1 + size(D[x].l) + size(D[x].r);
+	D[x].h = 1 + max(height(D[x].l), height(D[x].r));
+	D[x].sum = D[x].u + getSum(D[x].l) + getSum(D[x].r);
+    }
+    void clear() { *this = AVLTreeSet(); }
+    inline Schar height(int x) const { return x? D[x].h: 0; }
+    inline Schar diff(int x) { return x? height(D[x].l) - height(D[x].r): 0; }
+    int rot(int x, bool R) { // R = raise r?
+	int y = D[x].ch(R);
+	setch(x, R, D[y].ch(!R));
+	setch(y, !R, x);
+	return y;
+    }
+    int balance(int x) {
+	if (diff(x) > 1) {
+	    if (diff(D[x].l) < 0) { setch(x, 0, rot(D[x].l, 1)); }
+	    x = rot(x, 0);
+	} else if (diff(x) < -1) {
+	    if (diff(D[x].r) > 0) { setch(x, 1, rot(D[x].r, 0)); }
+	    x = rot(x, 1);
+	}
+	return x;
+    }
+    void insert(const T &v, const U &u) { root = insert(root, v, u); }
+    int insert(int x, const T &v, const U &u) {
+	if (!x) return new_node(v, u);
+	if (D[x].val < v) setch(x, 1, insert(D[x].r, v, u));
+	else if (v < D[x].val) setch(x, 0, insert(D[x].l, v, u));
+	else {
+	    D[x].u = u;
+	    resize(x);
+	    return x;
+	}
+	return balance(x);
+    }
+    int erase_first(int x, int &y) { 
+	if (!D[x].l) { y = x; return D[x].r; }
+	setch(x, 0, erase_first(D[x].l, y));
+	return balance(x);
+    }
+    void erase(const T &v) { root = erase(root, v); }
+    int erase(int x, const T &v) {
+	if (!x) return 0;
+	if (D[x].val < v) setch(x, 1, erase(D[x].r, v));
+	else if (v < D[x].val) setch(x, 0, erase(D[x].l, v));
+	else if (!D[x].r || !D[x].l) return D[x].l | D[x].r;
+	else {
+	    int l = D[x].l, r = erase_first(D[x].r, x); 
+	    setch(x, 0, l); setch(x, 1, r);
+	}
+	return balance(x);
+    }
+    const T* find(const T &v) const {
+	int x = root;
+	while (x) {
+	    if (D[x].val < v) x = D[x].r;
+	    else if (v < D[x].val) x = D[x].l;
+	    else return &D[x].val;
+	}
+	return NULL;
+    }
+    const U* get(const T &v) const {
+	int x = root;
+	while (x) {
+	    if (D[x].val < v) x = D[x].r;
+	    else if (v < D[x].val) x = D[x].l;
+	    else return &D[x].u;
+	}
+	return NULL;
+    }
+    const U& at(int n) const {
+	int x = root;
+	while (1) {
+	    if (size(D[x].l) == n) return D[x].u;
+	    if (size(D[x].l) > n) x = D[x].l;
+	    else { n -= size(D[x].l)+1; x = D[x].r; }
+	}
+    }
+    const T* lower(const T &v) const {
+	int x = root, ret = 0;
+	while (x) {
+	    if (D[x].val < v && (!ret || D[ret].val < D[x].val)) ret = x;
+	    x = D[x].ch(D[x].val < v);
+	}
+	return ret? &D[ret].val: NULL;
+    }
+    const T* higher(const T &v) const {
+	int x = root, ret = 0;
+	while (x) {
+	    if (v < D[x].val && (!ret || D[x].val < D[ret].val)) ret = x;
+	    x = D[x].ch(!(v < D[x].val));
+	}
+	return ret? &D[ret].val: NULL;
+    }
+    int count_lower(const T &v) const {
+	int x = root, ret = 0;
+	while (x) {
+	    if (D[x].val < v) {
+		ret += 1 + size(D[x].l);
+		x = D[x].r;
+	    } else {
+		x = D[x].l;
+	    }
+	}
+	return ret;
+    }
+    U sum_lower(const T &v) const {
+	int x = root;
+	U ret = U();
+	while (x) {
+	    if (D[x].val < v) {
+		ret += D[x].u + getSum(D[x].l);
+		x = D[x].r;
+	    } else {
+		x = D[x].l;
+	    }
+	}
+	return ret;
+    }
+    struct Walker: stack<int> {
+	const AVLTreeSet * const out;
+	Walker(const AVLTreeSet *o): stack<int>(), out(o) {}
+	Walker& operator++() {
+	    if (empty()) {
+		push(out->root);
+		while (out->D[top()].l) push(out->D[top()].l);
+	    } else if (out->D[top()].r) {
+		push(out->D[top()].r);
+		while (out->D[top()].l) push(out->D[top()].l);
+	    } else {
+		int x = top(); pop();
+		while (!empty() && x == out->D[top()].r) { x = top(); pop(); }
+	    }
+	    return *this;
+	}
+	Walker& operator--() {
+	    if (empty()) {
+		push(out->root);
+		while (out->D[top()].r) push(out->D[top()].r);
+	    } else if (out->D[top()].l) {
+		push(out->D[top()].l);
+		while (out->D[top()].r) push(out->D[top()].r);
+	    } else {
+		int x = top(); pop();
+		while (!empty() && x == out->D[top()].l) { x = top(); pop(); }
+	    }
+	    return *this;
+	}
+	const U& operator*() {
+	    return out->D[top()].u;
+	}
+    };
+    Walker begin() const {
+	Walker w(this);
+	w.push(root);
+	while (D[w.top()].l) w.push(D[w.top()].l);
+	return w;
+    }
+    Walker end() const {
+	return Walker(this);
+    }
+};
+
+template<int MOD>
+struct ModInt {
+    unsigned x;
+    void undef() { x = -1; }
+    bool isnan() const { return x == -1; }
+    inline int getInt() const { return (int)x; }
+    template<class T> T get() const { return (T)x; }
+    inline int mod() const { return MOD; }
+    ModInt(int y=0) { if (y<0 || MOD<=y) y %= MOD; if (y<0) y += MOD; x=y; }
+    ModInt(long long y) { if (y<0 || MOD<=y) y %= MOD; if (y<0) y += MOD; x=y; }
+    ModInt(unsigned long long y) { if (MOD<=y) x = y % MOD; else x = y; }
+    ModInt &operator+=(const ModInt &y) { if ((x += y.x) >= MOD) x -= MOD; return *this; }
+    ModInt &operator-=(const ModInt &y) { if ((x += MOD - y.x) >= MOD) x -= MOD; return *this; }
+    ModInt &operator*=(const ModInt &y) { x = (unsigned long long)x * y.x % MOD; return *this; }
+    ModInt &operator/=(const ModInt &y) { x = (unsigned long long)x * y.inv().x % MOD; return *this; }
+    ModInt operator-() const { return (x ? MOD-x: 0); }
+    ModInt inv() const {
+	int a = MOD, b = x, u = 0, v = 1;
+	while (b) {
+	    int t = a / b;
+	    a -= t * b; swap(a, b);
+	    u -= t * v; swap(u, v);
+	}
+	if (u < 0) u += MOD;
+	return ModInt(u);
+    }
+    ModInt pow(long long y) const {
+	ModInt b = *this, r = 1;
+	if (y < 0) { b = b.inv(); y = -y; }
+	for (; y; y>>=1) {
+	    if (y&1) r *= b;
+	    b *= b;
+	}
+	return r;
+    }
+};
+const LL MOD = 1000000007;
+typedef ModInt<MOD> Mint;
+Mint operator+(Mint x, const Mint &y) { if ((x.x += y.x) >= (unsigned)x.mod()) x.x -= x.mod(); return x; }
+Mint operator-(Mint x, const Mint &y) { if ((x.x += x.mod() - y.x) >= (unsigned)x.mod()) x.x -= x.mod(); return x; }
+Mint operator*(Mint x, const Mint &y) { x.x = (unsigned long long)x.x * y.x % x.mod(); return x; }
+Mint operator/(Mint x, const Mint &y) { x.x = (unsigned long long)x.x * y.inv().x % x.mod(); return x; }
+bool operator<(const Mint &x, const Mint &y) { return x.x < y.x; }
+bool operator==(const Mint &x, const Mint &y) { return x.x == y.x; }
+bool operator!=(const Mint &x, const Mint &y) { return x.x != y.x; }
+
+
+int N, A[100011];
+int INF, lis[100011], pos[100011];
+int L;
+
+AVLTreeSet<int, Mint> G[100011];
+
+void update(int p, int key) {
+    Mint s = G[p-1].sum_lower(key);
+    if (G[p].get(key)) {
+	s += *G[p].get(key);
+    }
+    G[p].insert(key, s);
+}
+
+void MAIN() {
+    scanf("%d", &N);
+    REP (i, N) scanf("%d", A+i);
+    memset(lis, 0x3f, sizeof lis);
+    REP (i, N) {
+	pos[i] = lower_bound(lis, lis+i, A[i]) - lis;
+	lis[pos[i]] = A[i];
+    }
+    L = lower_bound(lis, lis+N, INF) - lis;
+
+    REP (i, L+2) G[i].clear();
+
+    G[0].insert(-1, 1);
+    REP (i, N) {
+	update(pos[i]+1, A[i]);
+	if (pos[i]) update(pos[i], A[i]);
+    }
+
+    Mint ans = 0;
+    EACH (e, G[L-1]) {
+	ans += *e;
+    }
+    printf("%d\n", ans.getInt());
+    
+}
+
+int main() {
+    memset(&INF, 0x3f, sizeof INF);
+    int T;
+    scanf("%d", &T);
+    REP (i, T) MAIN();
+    return 0;
+}

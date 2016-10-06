@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll ;
+
+#define  sq(x)  ( (x) * (x) )
+
+int main()
+{
+        ios_base::sync_with_stdio(0);
+        cin.tie(0);
+
+        ll  n, i, j ;
+
+        cin >> n ;
+
+        if( n > 5000 )
+                return 0;
+
+        vector<ll>  p(n), a(n), h(n), ans(n,1LL<<62) ;
+
+        for( i=0; i<n; i++ )
+                cin >> p[i] ;
+
+        for( i=0; i<n; i++ )
+                cin >> a[i] ;
+
+        for( i=0; i<n; i++ )
+                cin >> h[i] ;
+
+        ans[0] = a[0] ;
+
+        for( i=1; i<n; i++ )
+        for( j=i-1; j>=0; j--)
+        if( p[i] > p[j] )
+        ans[i] = min( ans[i], ans[j] + sq(h[i]-h[j]) + a[i] );
+
+        cout << ans[n-1] ;
+
+        return 0;
+} 

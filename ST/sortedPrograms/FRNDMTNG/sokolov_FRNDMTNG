@@ -1,0 +1,58 @@
+#pragma comment(linker, "/STACK:500000000")
+#define _CRT_SECURE_NO_WARNINGS
+#include <algorithm>
+#include <bitset>
+#include <functional>
+#include <iostream>
+#include <list>
+#include <map>
+#include <math.h>
+#include <set>
+#include <stack>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <string.h>
+#include <time.h>
+#include <queue>
+#include <utility>
+#include <vector>
+using namespace std;
+
+#define y0 y0ChloeGraceMoretz
+#define y1 y1ChloeGraceMoretz
+#define ll long long
+int nextInt() { int n; scanf("%d", &n); return n; }
+ll nextLong() { ll n; scanf("%lld", &n); return n; }
+const double PI = acos(-1.0);
+const double EPS = 1e-9;
+const int INF = 2e9;
+
+
+int main() {
+    int T;
+    scanf("%d", &T);
+    while (T--) {
+        double T1, T2, t1, t2;
+        scanf("%lf %lf %lf %lf", &T1, &T2, &t2, &t1);
+        t1 = t1 < T1 ? t1 : T1;
+        t2 = t2 < T2 ? t2 : T2;
+ 
+        double A, B;
+        if (T2 - t2 > T1) {
+            A = T1 * T1 / 2 + (T2 - t2 - T1) * T1;
+        } else {
+            A = (T2 - t2) * (T2 - t2) / 2;
+        }
+        if (T1 - t1 > T2) {
+            B = T2 * T2 / 2 + (T1 - t1 - T2) * T2;
+        } else {
+            B = (T1 - t1) * (T1 - t1)  / 2;
+        }
+ 
+        double ans = (T1 * T2 - A - B) / T1 / T2;
+        printf("%.15lf\n", ans);
+    }
+ 
+    return 0;
+}

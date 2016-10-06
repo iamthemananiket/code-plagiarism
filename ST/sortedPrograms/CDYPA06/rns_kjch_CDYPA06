@@ -1,0 +1,23 @@
+#include <cstdio>
+ 
+#define N 5050
+ 
+int dp[N];
+ 
+main() {
+    int T, n, m;
+    for (scanf("%d", &T); T --; ) {
+        scanf("%d %d", &n, &m);
+        for (int i = 0; i <= m; i ++) dp[i] = 0;
+        for (int i = 1; i <= n; i ++) {
+            int x, y;
+            scanf("%d %d", &x, &y);
+            for (int j = m - x; j >= 0; j --) {
+                if (dp[j + x] < dp[j] + y) dp[j + x] = dp[j] + y;
+            }
+        }
+        int mx = -1, pos = 0;
+        for (int i = 0; i <= m; i ++) if (dp[i] > mx) mx = dp[i], pos = i;
+        printf("%d %d\n", pos, mx);
+    }
+} 

@@ -1,0 +1,14 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		long long n,m;
+		cin>>n>>m;
+		if((m+n/2)%n)
+		cout<<(m+n/2)%n<<"\n";
+		else
+		cout<<n<<"\n";
+	}
+}

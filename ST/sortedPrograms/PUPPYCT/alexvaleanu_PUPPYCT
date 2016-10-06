@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int T, N, K;
+
+int valid(int x, int y)
+{
+    return (1 <= x && x <= N) && (1 <= y && y <= N);
+}
+
+int numara(int x, int y, int dx, int dy)
+{
+    int c = 0;
+
+    while (valid(x, y))
+    {
+        c++;
+        x += dx;
+        y += dy;
+    }
+
+    return c;
+}
+
+int main()
+{
+//    ifstream cin("data.in");
+
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    cin >> T;
+
+    while (T--)
+    {
+        unordered_set<int> S1, S2;
+
+        cin >> N >> K;
+
+        if (K <= 1)
+        {
+            if (K == 0)
+                cout << 1LL * N * N << "\n";
+            else
+            {
+                int x, y;
+                cin >> x >> y;
+
+                int contor = numara(x, y, +1, +1) + numara(x, y, +1, -1) + numara(x, y, -1, +1) + numara(x, y, -1, -1) - 3;
+
+                cout << 1LL * N * N - 1LL * contor << "\n";
+            }
+
+            continue;
+        }
+
+        for (int i = 1; i <= K; ++i)
+        {
+            int x, y;
+            cin >> x >> y;
+
+            S1.insert(x + y);
+            S2.insert(x - y);
+        }
+
+        int contor = 0;
+
+        for (int i = 1; i <= N; ++i)
+            for (int j = 1; j <= N; ++j)
+            {
+                if (S1.count(i + j))
+                    contor++;
+
+                if (S2.count(i - j))
+                    contor++;
+            }
+
+        cout << N * N - contor / 2 << "\n";
+    }
+
+
+    return 0;
+}

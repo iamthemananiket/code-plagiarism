@@ -1,0 +1,105 @@
+#include <iostream>
+#include <vector>
+#include <cstring>
+using namespace std;
+
+inline void scanint(int* x)
+{
+	register char c = getchar_unlocked();
+	*x = 0;
+	for(; (c<48)||(c>57);c = getchar_unlocked());
+	for(; (c>47)&&(c<58);c = getchar_unlocked())
+		*x = (int)((((*x)<<1) + ((*x)<<3)) + c - 48);
+}
+
+
+int n,k,b,a,p;
+bool st;
+int dist[10005];
+vector<int> adj[10005];
+bool visited[10005];
+int F[10005];
+int minval[10005][105];
+void calcdist(int i,int d,int par)
+{
+	
+	dist[i]=d;
+	visited[i]=true;
+	minval[i][F[i]]=i;
+	
+	for(int j=0;j<adj[i].size();j++)
+	{
+		if(!visited[adj[i][j]])
+		{
+		calcdist(adj[i][j],d+1,i);
+		
+			for(int z=1;z<=k;z++)
+			{
+				minval[i][z]=min(minval[adj[i][j]][z],minval[i][z]);
+				
+			}
+			
+		
+		
+		}
+	}
+	
+	
+}
+
+void revisit(int pos,int par)
+{
+	for(int z=1;z<=k;z++)
+	{
+		if(minval[pos][z]==100000)minval[pos][z]=minval[par][z];
+	}
+	
+	for(int i=0;i<adj[pos].size();i++)
+	{
+		if(adj[pos][i]!=par)revisit(adj[pos][i],pos);
+	}
+	
+}
+
+
+int main() {
+	
+	
+	for(int i=0;i<=10000;i++)
+	{
+		for(int j=0;j<=100;j++)minval[i][j]=100000;
+	}
+	
+	
+	
+	scanint(&n);
+	scanint(&k);
+	scanint(&b);
+	
+	for(int i=0;i<n-1;i++)
+	{
+		int v1,v2;
+		scanint(&v1); scanint(&v2);
+		adj[v1].push_back(v2);
+		adj[v2].push_back(v1);
+	}
+	
+	for(int i=1;i<=n;i++)scanint(&F[i]);
+	
+	calcdist(b,0,0);
+	revisit(b,0);
+	//cout<<minval[1][1]<<" ";
+	
+   int q;
+   scanint(&q);
+   
+   while(q--)
+   {
+   	scanint(&a); scanint(&p);
+   
+   	 if(minval[a][p]==100000)printf("-1\n");
+   	 else printf("%d\n",minval[a][p]);
+   }
+	
+	return 0;
+}

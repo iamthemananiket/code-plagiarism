@@ -1,0 +1,193 @@
+#include <stdio.h>
+#include <queue>
+#include <vector>
+#include <memory.h>
+#include <algorithm>
+
+using namespace std;
+
+#define N 2001
+
+vector <int> con[N];
+bool inq[N], inpath[N], inblo[N];
+int n, Match[N];
+int start, finish, newbase;
+int father[N], base[N];
+queue <int> q;
+
+int lca(int u, int v) {
+	memset(inpath, 0, sizeof inpath);
+	while (1) {
+		u = base[u];
+		inpath[u] = 1;
+		if (u == start)break;
+		u = father[Match[u]];
+	}
+	while (1) {
+		v = base[v];
+		if (inpath[v]) break;
+		v = father[Match[v]];
+	}
+	return v;
+}
+
+void reset_trace(int u) {
+	while (base[u] != newbase) {
+		int v = Match[u];
+		inblo[base[u]] = inblo[base[v]] = 1;
+		u = father[v];
+		if (base[u] != newbase)father[u] = v;
+	}
+}
+
+void blossom_contract(int u, int v) {
+	newbase = lca(u,v);
+	memset(inblo, 0, sizeof inblo);
+	reset_trace(u);
+	reset_trace(v);
+	if (base[u] != newbase) father[u] = v;
+	if (base[v] != newbase) father[v] = u;
+	for (int i = 1; i <= n; i ++) if (inblo[base[i]]) {
+		base[i] = newbase;
+		if (!inq[i]) q.push(i);
+	}
+}
+
+void find_augmenting_path() {
+	memset(inq, 0, sizeof inq);
+	memset(father, 0, sizeof father);
+	for (int i = 1; i <= n; i ++) base[i] = i;
+	while (!q.empty()) q.pop();
+	q.push(start);
+	finish = 0;
+	while (!q.empty()) {
+		int x = q.front(); q.pop();
+		for (int j = 0; j < con[x].size(); j ++) {
+			int i = con[x][j];
+			if (base[i] != base[x] && Match[x] != i)
+				if (i == start || Match[i] > 0 && father[Match[i]] > 0) blossom_contract(x,i);
+				else if (!father[i]) {
+					father[i] = x;
+					if (Match[i] > 0) q.push(Match[i]);
+					else {
+						finish = i;
+						return;
+					}
+				}
+		}
+	}
+}
+
+void augment() {
+	int u = finish;
+	while (u > 0) {
+		int v = father[u], w = Match[v];
+		Match[v] = u;
+		Match[u] = v;
+		u = w;
+	}
+}
+
+int Edmonds() {
+	memset(Match, 0, sizeof Match);
+	for (int k = 1; k <= n; k ++) if (!Match[k]) {
+		start = k;
+		find_augmenting_path();
+		if (finish > 0) augment();
+	}
+	int k = 0;
+	for (int i = 1; i <= n; i ++) k += Match[i] > 0;
+	return k >> 1;
+}
+
+bool chk[N];
+int vis[N], V = 0;
+int cnt[N];
+
+void Add(int v, int p) {
+	for (int i = 0; i < con[v].size(); i ++) {
+		int u = con[v][i];
+		if (!chk[u] && u != p) {
+			con[p].push_back(u);
+			con[u].push_back(p);
+		}
+	}
+	con[v].clear();
+	chk[v] = 1;
+	cnt[p] += cnt[v];
+}
+
+int dis[N];
+int S[N], top;
+int rlt;
+
+bool DFS(int cur, int dp = 0) {
+	vis[cur] = V;
+	dis[cur] = dp;
+	S[++ top] = cur;
+	if (dp % 2 == 0) {
+		for (int i = 0; i < con[cur].size(); i ++) {
+			int u = con[cur][i];
+			if (chk[u]) continue;
+			if (vis[u] == V) {
+				if (dis[u] % 2 != dis[cur] % 2) continue;
+				while (top && S[top] != u) Add(S[top], u), top --;
+				return 1;
+			}
+			if (DFS(u, dp + 1)) return 1;
+		}
+	} else {
+		int u = Match[cur];
+		if (u && !chk[u] && vis[u] < V && DFS(u, dp + 1)) return 1;
+	}
+	top --;
+	return 0;
+}
+
+void calc(int cur, int dp = 0) {
+	vis[cur] = V;
+	if (dp % 2 == 0) {
+		rlt += cnt[cur];
+		for (int i = 0; i < con[cur].size(); i ++) {
+			int u = con[cur][i];
+			if (chk[u]) continue;
+			if (vis[u] < V) calc(u, dp + 1);
+		}
+	} else {
+		int u = Match[cur];
+		if (u && !chk[u] && vis[u] < V) calc(u, dp + 1);
+	}
+}
+
+main() {
+	int T, m;
+	for (scanf("%d", &T); T --; ) {
+		scanf("%d %d", &n, &m);
+		for (int i = 1; i <= n; i ++) {
+			chk[i] = 0, cnt[i] = 1;
+			con[i].clear();
+		}
+		for (int i = 1, j, k; i <= m; i ++) {
+			scanf("%d %d", &j, &k);
+			con[j].push_back(k);
+			con[k].push_back(j);
+		}
+
+		int p = Edmonds();
+		if (n == p * 2) {
+			puts("0");
+			continue;
+		}
+
+		int src = 0;
+		for (int i = 1; i <= n; i ++) if (!Match[i]) {
+			if (!src) src = i;
+			else Add(i, src);
+		}
+		top = 0, V ++;
+		while (DFS(src)) top = 0, V ++;
+		rlt = 0, V ++;
+		calc(src);
+		printf("%d\n", rlt);
+	}
+}

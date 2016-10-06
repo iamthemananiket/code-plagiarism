@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector<int> vi;
+typedef pair<int,int> pi;
+typedef priority_queue<int, vi, greater<int> > pq_t;
+#define ff first
+#define ss second
+#define pb push_back
+#define mp make_pair
+#define rep(i,a,b) for(i=(a);i<(b);i++)
+#define repb(i,a,b) for(i=(a)-1;i>=(b);i--)
+#define zero(x) memset((x),0,sizeof (x))
+inline void read(int &x)	{	scanf("%d",&x);		}
+inline void read(ll &x)		{	scanf("%lld",&x);	}
+
+int a[2000006];
+int main()
+{
+	int tt;
+	int n,d,i;
+	int ans,mul,mod=1000000007;
+	read(tt);
+	while(tt--)
+	{
+		ans=0;
+		mul=1;
+		read(n);read(d);
+		rep(i,0,n+1)
+			a[i]=a[n+n-i]=i*d*d;
+		repb(i,n+n,0)
+		{
+			if(a[i]>9)
+			{
+				a[i-1]+=(a[i]/10);
+				a[i]%=10;
+			}
+		}
+		for(i=0;!a[i];i++);
+		rep(i,i,n+n)
+		{
+			ans=(ans+mul*1ll*a[i])%mod;
+			mul=(mul*23ll)%mod;
+		}
+		printf("%d\n",ans);
+	}
+}

@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+
+#define REP(i, n)	for(int i=0;i<n;i++)
+#define REPN(i, n)	for(int i=1;i<=n;i++)
+#define SET(i, n)	memset(i, n, sizeof(i))
+
+#define MAX			250
+#define pb			push_back
+
+using namespace std;
+
+struct data{
+	int x, y;
+	bool operator < (const data &p) const{
+		if(y == p.y) return x < p.x;
+		return y < p.y;
+	}
+	data () {}
+	data (int a, int b){
+		x = a;
+		y = b;
+	}
+};
+
+int n, k, C[MAX];
+vector<data>vec;
+int M[MAX][MAX];
+
+int solve(){
+	REP(i, vec.size()){
+		int cnt = 0;
+		REP(j, n){
+			if(M[i][j] && !C[j]) cnt++;
+		}
+		if(cnt >= k){
+			cnt = cnt - k + 1;
+			for(int j=n-1;j>=0 && cnt;j--){
+				if(M[i][j] && !C[j]){
+					cnt--;
+					C[j] = 1;
+				}
+			}
+		}
+	}
+	int ret = 0;
+	REP(i, n){
+		ret += C[i];
+	}
+	return ret;
+}
+
+void init(){
+	vec.clear();
+	SET(C, 0);
+	SET(M, 0);
+}
+
+int main(){
+	int tc, x, y;
+	scanf("%d", &tc);
+	while(tc--){
+		init();
+		scanf("%d %d", &n, &k);
+		REP(i, n){
+			scanf("%d %d", &x, &y);
+			vec.pb(data(x, y));
+		}
+		sort(vec.begin(), vec.end());
+		REP(i, n) REP(j, n){
+			    x = vec[i].x, y = vec[i].y;
+			int X = vec[j].x, Y = vec[j].y;	
+			if(X <= y && Y >= y){
+				M[i][j] = 1;
+			}
+		}
+		int ret = solve();
+		printf("%d\n", ret);
+	}
+	return 0;
+}

@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define sd(mark) scanf("%d",&mark)
+#define ss(mark) scanf("%s",&mark)
+#define sl(mark) scanf("%lld",&mark)
+#define debug(mark) printf("check%d\n",mark)
+#define clr(mark) memset(mark,0,sizeof(mark))
+#define F first
+#define S second
+#define MP make_pair
+#define PB push_back
+#define ll long long
+#define N 1010
+int g[N][N];
+int mark[N];
+int color[N];
+bool ok;
+int n;
+void go(int cur,int f)
+{
+	color[cur]=f;
+	mark[cur]=1;
+	for(int i=1;i<=n;++i)
+		if(g[cur][i])
+		{
+			if(mark[i])
+			{
+				if(color[i]==color[cur])
+					ok=0;
+			}
+			else
+				go(i,1-f);
+		}
+}
+int main()
+{
+	int t,i,j,m;
+	sd(t);
+	while(t--)
+	{
+		sd(n);sd(m);
+		for(i=1;i<=n;++i)
+			for(j=1;j<=n;++j)
+				g[i][j]=1;
+		for(i=1;i<=n;++i)
+			g[i][i]=0;
+		clr(mark);
+		ok=1;
+		while(m--)
+		{
+			int x,y;
+			sd(x);sd(y);
+			g[x][y]=g[y][x]=0;
+		}
+		for(i=1;i<=n;++i)
+			if(!mark[i])
+				go(i,0);
+		if(ok)
+			printf("YES\n");
+		else
+			printf("NO\n");
+	}
+}

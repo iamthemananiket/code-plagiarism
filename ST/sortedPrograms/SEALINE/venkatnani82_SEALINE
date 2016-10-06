@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	int test;
+	scanf("%d", &test);
+	while (test--){
+		int n;
+		cin>>n;
+		int a[n];
+		for (int i = 0; i < n; i++) cin>>a[i], a[i]--;
+		int pos[n];
+		int ans = 0;
+		for (int i = 0; i < n; i++) pos[i] = 1e9;
+		pos[0] = 0;
+		for (int i = 1; i < n; i++) {
+			if(a[i] == -1) {
+				int mini = 1e9;
+				for (int j = 0; j < i; j++) mini = min(mini, pos[j]);
+				pos[i] = mini;
+				for (int j = 0; j < i; j++) pos[j]++;
+			}    	
+			else {
+				int cnt1 = 0, cnt2 = 0;
+				for (int j = 0; j < i; j++) {
+					if(pos[a[i]] < pos[j]) cnt1++;
+					else cnt2++;
+				}
+				if(cnt1 <= cnt2) {
+					ans += cnt1;
+					pos[i] = pos[a[i]] + 1;
+					for (int j = 0; j < i; j++) if(pos[a[i]] < pos[j]) pos[j]++;
+				}
+				else {
+					ans += cnt2;
+					pos[i] = pos[a[i]];
+					for (int j = 0; j < i; j++) if(pos[a[i]] >= pos[j]) pos[j]--;
+				}
+			}
+			// for (int j = 0; j <= i; j++) cout<<pos[j]<<" ";
+			// cout<<endl;
+		}    
+		cout<<ans<<endl;
+	}
+}

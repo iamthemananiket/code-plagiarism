@@ -1,0 +1,184 @@
+#include <cstdio>
+#include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <string>
+#include <cstring>
+#include <queue>
+
+using namespace std;
+
+#define rep(i,a,b) for(int i = a; i < b; i++)
+#define S(x) scanf("%d",&x)
+#define S2(x,y) scanf("%d%d",&x,&y)
+#define P(x) printf("%d\n",x)
+#define all(v) v.begin(),v.end()
+#define FF first
+#define SS second
+
+typedef long long int LL;
+typedef pair<int, int > pii;
+typedef vector<int > vi;
+
+const int N = 100005;
+const int mod = 1000000007;
+
+int A[N], dp[N];
+map<int, int > M;
+map<int, int >::iterator it;
+
+vector<pair<int, pii> > inp[N];
+int id[N][2];
+LL V[N][2];
+
+int ST[5*N];
+int query(int n, int b, int e, int x, int y) {
+  if(y < x) return 0;
+  if(b == x && e == y) {
+    return ST[n];
+  }
+
+  int m = (b + e) >> 1;
+
+  if(y <= m) {
+    return query(2*n, b, m, x, y);
+  } else if(x > m) {
+    return query(2*n+1, m+1, e, x, y);
+  }
+
+  return max(query(2*n, b, m, x, m), query(2*n+1, m+1, e, m+1, y));
+}
+
+void update(int n, int b, int e, int idx, int val) {
+  if(b == e) {
+    ST[n] = max(ST[n], val);
+    return;
+  }
+  int m = (b + e) >> 1;
+  if(idx <= m) {
+    update(2*n, b, m, idx, val);
+  } else {
+    update(2*n+1, m+1, e, idx, val);
+  }
+  ST[n] = max(ST[2*n], ST[2*n+1]);
+}
+
+LL *BIT[N];
+
+LL queryBit(int treeIdx, int qIdx) {
+  if(!treeIdx) return 1;
+  int lim = inp[treeIdx].size();
+  qIdx = min(qIdx, lim);
+  if(qIdx <= 0) return 0;
+  LL res = 0;
+  for(int i = qIdx; i > 0; i -=  i & -i) {
+    res += BIT[treeIdx][i];
+  }
+  return res % mod;
+}
+
+void updateBit(int treeIdx, int qIdx, LL val) {
+  if(!qIdx) return;
+  int lim = inp[treeIdx].size();
+  for(int i = qIdx; i <= lim; i += i & -i) {
+    BIT[treeIdx][i] += val;
+    if(BIT[treeIdx][i] >= mod) {
+      BIT[treeIdx][i] -= mod;
+    }
+  }
+}
+
+int findIndex(int idx, int val) {
+  int ans = -1;
+  int lo = 0, hi = (int)inp[idx].size() - 1;
+  while(lo <= hi) {
+    int mi = (lo + hi) >> 1;
+    if(inp[idx][mi].FF < val) {
+      ans = mi;
+      lo = mi + 1;
+    } else {
+      hi = mi - 1;
+    }
+  }
+  return ans + 1;
+}
+
+int main() {
+  int t;
+  S(t);
+  while(t--) {
+    int n;
+    S(n);
+
+    rep(i,0,5*n) ST[i] = 0;
+    rep(i,0,n+1) inp[i].clear();
+
+    M.clear();
+    rep(i,0,n) {
+      S(A[i]);
+      M[A[i]] = 0;
+    }
+
+    int cnt = 1;
+    for(it = M.begin(); it != M.end(); it++) {
+      it->SS = cnt++;
+    }
+    rep(i,0,n) {
+      A[i] = M[A[i]];
+      dp[i] = 1 + query(1, 1, n, 1, A[i]-1);
+      update(1, 1, n, A[i], dp[i]);
+    }
+
+    int mx = 0;
+    rep(i,0,n) {
+      mx = max(mx, dp[i]);
+      inp[dp[i]].push_back(make_pair(A[i], make_pair(1,i)));
+      if(dp[i] > 1) {
+        inp[dp[i]-1].push_back(make_pair(A[i], make_pair(0,i)));
+      }
+    }
+
+    rep(i,1,n+1) {
+      sort(all(inp[i]));
+      BIT[i] = new LL[inp[i].size()+5];
+      rep(j,0,inp[i].size()) {
+        id[inp[i][j].SS.SS][inp[i][j].SS.FF] = j+1;
+        BIT[i][j] = 0;
+        BIT[i][j+1] = 0;
+        BIT[i][j+2] = 0;
+        BIT[i][j+3] = 0;
+      }
+    }
+
+    rep(i,0,n) {
+      // P(i);
+      if(dp[i] > 1) {
+        V[i][0] = queryBit(dp[i]-2, findIndex(dp[i] - 2, A[i]));
+        updateBit(dp[i]-1, id[i][0], V[i][0]);
+        V[i][1] = queryBit(dp[i]-1, findIndex(dp[i] - 1, A[i]));
+        updateBit(dp[i], id[i][1], V[i][1]);
+        // printf("here pe %d %d\n",id[i][1], id[i][0]);
+      } else {
+        V[i][0] = 0;
+        V[i][1] = 1;
+        // printf("yahan pe %d\n",id[i][1]);
+        updateBit(dp[i], id[i][1], V[i][1]);
+      }
+      // printf("%d %lld %lld\n",i,V[i][0],V[i][1]);
+    }
+
+    int ans = 0;
+    rep(i,0,n) {
+      if(dp[i] == mx) ans += V[i][0];
+      else if(dp[i] == mx-1) ans += V[i][1];
+      if(ans >= mod) ans -= mod;
+    }
+    P(ans);
+
+  }
+  return 0;
+}

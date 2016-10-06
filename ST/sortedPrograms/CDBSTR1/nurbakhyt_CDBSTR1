@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+const int N = (int)1e5 + 123;
+const int inf = (int)1e9 + 123;
+
+using namespace std;
+
+int n, k;
+int a[N];
+
+bool check(int d) {
+	int res = 0;
+	for (int i = 1, last = -inf; i <= n; i++) {
+		if (a[i] - last >= d) {
+			res++;
+			last = a[i];
+		}
+	}
+	return (res >= k);
+}
+
+void solve() {
+	scanf("%d%d", &n, &k);
+	for (int i = 1; i <= n; i++)
+		scanf("%d", &a[i]);
+	sort(a + 1, a + n + 1);
+	int l = 0, r = inf, m = -1, ans = -1;
+	while(l <= r) {
+		m = (l + r) / 2;
+		if (check(m))
+			ans = m,
+			l = m + 1;
+		else
+			r = m - 1;
+	}
+	printf("%d\n", ans);
+}
+
+int t;
+
+int main() {
+	scanf("%d", &t);
+	while(t--)
+		solve();
+	return 0;
+}

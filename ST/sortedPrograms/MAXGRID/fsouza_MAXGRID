@@ -1,0 +1,125 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+typedef long long lint;
+
+struct segtree_t {
+  int n;
+  struct node_t {
+    lint maxv = 0LL;
+    lint lazy = 0LL;
+  };
+  vector<node_t> nodes;
+  segtree_t(int n): n(n), nodes(4*n) {}
+  void propag(int v, int l, int r) {
+    nodes[v].maxv += nodes[v].lazy;
+    if (l != r) {
+      int m = (l+r)/2;
+      nodes[2*v+1].lazy += nodes[v].lazy;
+      nodes[2*v+2].lazy += nodes[v].lazy;
+    }
+    nodes[v].lazy = 0;
+  }
+  void update(int a, int b, lint delta) { update(a, b, delta, 0, 0, n-1); }
+  void update(int a, int b, lint delta, int v, int l, int r) {
+    propag(v, l, r);
+    if (a > r || b < l) {
+    } else if (a <= l && r <= b) {
+      nodes[v].lazy += delta;
+      propag(v, l, r);
+    } else {
+      int m = (l+r)/2;
+      update(a, b, delta, 2*v+1, l, m);
+      update(a, b, delta, 2*v+2, m+1, r);
+      nodes[v].maxv = max(nodes[2*v+1].maxv, nodes[2*v+2].maxv);
+    }
+  }
+};
+
+struct place_t {
+  int x, y, value;
+};
+
+lint solve(const vector<place_t> &places, int len) {
+  struct event_t {
+    int y, x0, x1, delta;
+    bool operator < (const event_t &o) const {
+      return y < o.y;
+    }
+  };
+  vector<event_t> events;
+  events.reserve(2*places.size());
+  for (const place_t &place : places) {
+    events.push_back(event_t{place.y, place.x, place.x+len-1, place.value});
+    events.push_back(event_t{place.y+len, place.x, place.x+len-1, -place.value});
+  }
+  sort(events.begin(), events.end());
+
+  vector<int> xs;
+  for (const event_t &ev : events) {
+    xs.push_back(ev.x0);
+    xs.push_back(ev.x1);
+  }
+  sort(xs.begin(), xs.end());
+  xs.resize(unique(xs.begin(), xs.end())-xs.begin());
+  for (event_t &ev : events) {
+    ev.x0 = lower_bound(xs.begin(), xs.end(), ev.x0)-xs.begin();
+    ev.x1 = lower_bound(xs.begin(), xs.end(), ev.x1)-xs.begin();
+  }
+
+  segtree_t seg(xs.size());
+  lint result = 0;
+
+  for (int j = 0, i = j; i != (int)events.size(); i = j) {
+    while (j != (int)events.size() && !(events[i] < events[j])) ++j;
+    for (int k = i; k < j; ++k) {
+      event_t &ev = events[k];
+      seg.update(ev.x0, ev.x1, ev.delta);
+    }
+    result = max(result, seg.nodes[0].maxv);
+  }
+
+  return result;
+}
+
+int main() {
+  int n, maxlen;
+  scanf("%d %d", &n, &maxlen);
+  vector<place_t> places;
+  for (int i = 0; i < n; ++i) {
+    place_t place;
+    scanf("%d %d %d", &place.x, &place.y, &place.value);
+    places.push_back(move(place));
+  }
+
+  lint maxsum = solve(places, maxlen);
+  int l = 0, r = maxlen;
+  while (l < r) {
+    int m = l + (r-l)/2;
+    if (solve(places, m) >= maxsum) r = m;
+    else l = m+1;
+  }
+
+  printf("%lld %d\n", maxsum, l);
+
+  return 0;
+}

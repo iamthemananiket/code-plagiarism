@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+
+#define pb push_back
+#define f first
+#define s second
+#define mp make_pair
+#define fname "."
+#ifdef _WIN32
+#  define I64 "%I64d"
+#else
+#  define I64 "%lld"
+#endif
+#define pi pair < int, int >
+#define pp pop_back
+#define sz(a) (int)((a).size())
+#define pd pair < int, ull >
+
+typedef long long int ll;
+typedef long double ld;
+typedef unsigned long long ull;
+
+const int MAX_N = (int)2e5 + 123;
+const double eps = 1e-6;
+const int mod = (int)1e9 + 9;
+
+using namespace std;
+
+int n;
+int l[MAX_N], r[MAX_N], timer;
+int f[2][MAX_N];
+vector < int > g[MAX_N];
+int up[18][MAX_N], lvl[MAX_N];
+
+void dfs(int v, int pr = 1) {
+    up[0][v] = pr;
+    lvl[v] = lvl[pr] + 1;
+    for (int i = 1; i < 18; i++)
+        up[i][v] = up[i - 1][up[i - 1][v]];
+    l[v] = timer++;
+    for (auto to : g[v])
+        if (to != pr)
+            dfs(to, v);
+    r[v] = timer - 1;
+}
+
+void update(int type, int x, int val) {
+    for (int i = x; i < n; i |= (i + 1))
+        f[type][i] += val;
+}
+
+int get(int type, int x) {
+    int res = 0;
+    for (int i = x; i >= 0; i = (i & (i + 1)) - 1)
+        res += f[type][i];
+    return res;
+}
+
+int get_lca(int a, int b) {
+    if (lvl[a] > lvl[b])
+        swap(a, b);
+    for (int i = 17; i >= 0; i--)
+        if (lvl[up[i][b]] >= lvl[a])
+            b = up[i][b];
+    if (a == b)
+        return a;
+    for (int i = 17; i >= 0; i--)
+        if (up[i][a] != up[i][b])
+            a = up[i][a], b = up[i][b];
+    return up[0][a];
+}
+
+int cnt[MAX_N];
+
+int calc(int a, int b) {
+    int lca = get_lca(a, b);
+    int res = get(0, l[a]) + get(0, l[b]) - 2 * get(0, l[lca]) + cnt[lca];
+    res += get(1, r[lca]) - get(1, l[lca] - 1);
+    update(0, l[lca], 1), update(0, r[lca] + 1, -1);
+    update(1, l[a], 1), update(1, l[b], 1), update(1, l[lca], -2);
+    cnt[lca]++;
+    return res;
+}
+
+int main() {
+    #ifdef Nick
+    freopen(fname"in","r",stdin);
+	#endif
+	scanf("%d", &n);
+	for (int i = 1, u, v; i < n; i++) {
+        scanf("%d%d", &u, &v);
+        g[u].pb(v), g[v].pb(u);
+	}
+	dfs(1);
+	int query;
+	scanf("%d", &query);
+	for (int i = 1, u, v; i <= query; i++) {
+        scanf("%d%d", &u, &v);
+        printf("%d\n", calc(u, v));
+	}
+    return 0;
+}

@@ -1,0 +1,82 @@
+/*
+ *
+ * File: stuff.cpp
+ * Author: Andy Y.F. Huang (azneye)
+ * Created on Aug 23, 2014, 11:50:25 PM
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+namespace stuff {
+typedef long long ll;
+const int MOD = 1000000007;
+const int MAX = 1 << 17;
+int tree[2 * MAX];
+int PW;
+
+int gcd(int a, int b) {
+  if (a == 0)
+    return b;
+  if (b == 0)
+    return a;
+  return __gcd(a, b);
+}
+
+int query(int l, int r) {
+  int res = 0;
+  for (l += PW, r += PW + 1; l < r; l >>= 1, r >>= 1) {
+    if (l & 1)
+      res = gcd(res, tree[l++]);
+    if (r & 1)
+      res = gcd(res, tree[--r]);
+  }
+  return res;
+}
+
+void solve(int test_num) {
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> a(N);
+  for (int i = 0; i < N; i++)
+    cin >> a[i];
+  for (PW = 1; PW < N;)
+    PW <<= 1;
+  fill(tree, tree + 2 * PW, 0);
+  for (int i = 0; i < N; i++)
+    tree[i + PW] = a[i];
+  for (int i = PW - 1; i > 0; i--)
+    tree[i] = gcd(tree[i + i], tree[i + i + 1]);
+  while (Q-- > 0) {
+    int L, R;
+    cin >> L >> R;
+    L--, R--;
+    const int res = gcd(query(0, L - 1), query(R + 1, N - 1));
+    cout << res << endl;
+  }
+}
+
+void solve() {
+#ifdef AZN
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+//freopen("azn.txt", "w", stderr);
+  double start_t = clock();
+#endif
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+  int T = 1;
+  cin >> T;
+  for (int t = 1; t <= T; t++)
+    solve(t);
+#ifdef AZN
+  cerr << "Took: " << ((clock() - start_t) / CLOCKS_PER_SEC);
+#endif
+}
+}
+
+int main() {
+  stuff::solve();
+  return 0;
+}

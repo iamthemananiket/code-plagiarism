@@ -1,0 +1,119 @@
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cmath>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<set>
+#include<iomanip>
+#include<queue>
+#include<map>
+#include<list>
+#include<stack>
+#define fl(i,s,n) for(i=s;i<n;i++)
+#define flr(i,s,n) for(i=s;i>n;i--)
+#define ls(i,s) for(i=0;s[i]!='\0';i++)
+#define gi(x) x=scan_lli();
+#define pi(x) printf("%d",x)
+#define checkline(x) while(x!='\0' && x!='\n')
+#define pt(s) printf(s)
+#define PI acos(-1)
+#define f_in freopen("input.txt","r",stdin)
+#define f_out freopen("output.txt","w",stdout)
+#define in(i,j,k) ((j<=i) && (i<k))
+#define ull unsigned long long int
+#define lli  long long int
+#define ld long double
+#define sd(x) scanf("%d",&x)
+#define sd2(x,y) scanf("%d%d",&x,&y)
+#define sd3(x,y,z) scanf("%d%d%d",&x,&y,&z)
+#define fi first
+#define se second
+#define pb(x) push_back(x)
+#define mp(x,y) make_pair(x,y)
+#define r0 return 0
+#define mod 1000000007
+using namespace std;
+int scan_lli()    {int ip=getchar_unlocked(),flag=1;int ret=0;for(;ip<'0'||ip>'9';ip=getchar_unlocked())if(ip=='-'){flag=-1;ip=getchar_unlocked();break;}for(;ip>='0'&&ip<='9';ip=getchar_unlocked())ret=(ret<<3)+(ret<<1)+ip-'0';return flag*ret;}
+void println_lli(long long int n)     {int i=21;char output_buffer[22];output_buffer[21]='\n';do{output_buffer[--i]=(n%10)+'0';n/=10;}while(n);do{putchar_unlocked(output_buffer[i]);}while(++i<22);}
+lli exp(lli a, int p )
+{
+lli result = 1;
+while(p)
+{
+    if(p%2==1)
+        result *= a;
+    p >>=1;
+    a*=a;
+}
+return result;
+}
+int main()
+{
+    //f_in;
+    lli i,j,k, N,z,y1,t1,p;
+    long long int xy,a1,b1;
+    N=10000001;
+    int *hs=new int[5000];
+    int xyz[5000];
+    int *minPrime= new int[10000007];
+    int i1,j1,nop,x,y;
+    lli dp[4001][50];
+    x=50;
+    fl(i1,0,4001)
+        {
+            dp[i1][0]=1;
+            fl(j1,1,x)
+                dp[i1][j1]=dp[i1][j1-1]*i1;
+        }
+    for (i1 = 2; i1 * i1 <= N; ++i1) {
+    if (minPrime[i1] == 0) {
+        for (j1 = i1 * i1; j1 <= N; j1 += i1) {
+            minPrime[j1] = i1;
+        }
+            }
+        }
+        for (i1 = 2; i1 <= N; ++i1) {
+            if (minPrime[i1] == 0) {
+                minPrime[i1] = i1;
+                }
+        }
+    i=1;
+    gi(x);
+    while(x--)
+    {
+            gi(y);
+            xy=1;
+            b1=y;
+            nop=0;
+            while (y != 1)
+                {
+                    t1=minPrime[y];
+                    if(t1>=4000)
+                    {
+                        z=1;
+                        z-=t1;
+                        z+=(t1*t1);
+                        xy*=z;
+                    }
+                    else
+                        {
+                            if(hs[t1]==0)
+                                xyz[nop++]=t1;
+                            hs[t1]++;
+                        }
+                    y /= t1;
+                }
+            while(nop--)
+            {
+                    t1=xyz[nop];
+                    z=dp[t1][(hs[t1]*2) + 1]+1;
+                    z/=(t1+1);
+                    hs[t1]=0;
+                    xy*=z;
+            }
+            println_lli(xy);
+    }
+    return 0;
+}
